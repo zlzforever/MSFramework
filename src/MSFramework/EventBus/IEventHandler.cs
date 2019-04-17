@@ -7,7 +7,7 @@ namespace MSFramework.EventBus
     }
 
     public interface IEventHandler<in TEvent> : IEventHandler
-        where TEvent : Event
+        where TEvent : class, IEvent
     {
         Task Handle(TEvent @event);
     }

@@ -4,10 +4,10 @@ namespace MSFramework.EventBus
 {
     public interface IEventBus
     {
-        Task PublishAsync(Event @event);
+        Task PublishAsync(IEvent @event);
 
         void Subscribe<T, TH>()
-            where T : Event
+            where T : class, IEvent
             where TH : IEventHandler<T>;
 
         void Subscribe<TH>(string eventName)
@@ -17,7 +17,7 @@ namespace MSFramework.EventBus
             where TH : IDynamicEventHandler;
 
         void Unsubscribe<T, TH>()
-            where TH : IEventHandler<T>
-            where T : Event;
+            where T : class, IEvent
+            where TH : IEventHandler<T>;
     }
 }

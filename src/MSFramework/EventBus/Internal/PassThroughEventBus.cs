@@ -1,4 +1,3 @@
-using System;
 using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -20,7 +19,7 @@ namespace MSFramework.EventBus.Internal
             _scopeFactory = scopeFactory;
         }
 
-        public async Task PublishAsync(Event @event)
+        public async Task PublishAsync(IEvent @event)
         {
             var eventName = _store.GetEventKey(@event.GetType());
             if (_store.ContainSubscription(eventName))
@@ -43,6 +42,7 @@ namespace MSFramework.EventBus.Internal
                             if (handler == null) continue;
 
                             var concreteType = typeof(IEventHandler<>).MakeGenericType(@event.GetType());
+                            // ReSharper disable once PossibleNullReferenceException
                             await (Task) concreteType.GetMethod("Handle").Invoke(handler, new object[] {@event});
                         }
                     }
@@ -50,7 +50,7 @@ namespace MSFramework.EventBus.Internal
             }
         }
 
-        public void Subscribe<T, TH>() where T : Event where TH : IEventHandler<T>
+        public void Subscribe<T, TH>() where T : class, IEvent where TH : IEventHandler<T>
         {
             var eventName = _store.GetEventKey<T>();
 
@@ -72,7 +72,7 @@ namespace MSFramework.EventBus.Internal
             _store.RemoveSubscription<TH>(eventName);
         }
 
-        public void Unsubscribe<T, TH>() where T : Event where TH : IEventHandler<T>
+        public void Unsubscribe<T, TH>() where T : class, IEvent where TH : IEventHandler<T>
         {
             var eventName = _store.GetEventKey<T>();
 

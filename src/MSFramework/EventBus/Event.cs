@@ -2,7 +2,7 @@ using System;
 
 namespace MSFramework.EventBus
 {
-    public class Event
+    public abstract class Event : IEvent
     {
         public Event()
         {
@@ -11,7 +11,6 @@ namespace MSFramework.EventBus
         }
 
         public Guid Id { get; }
-
 
         public DateTime CreationTime { get; }
     }
