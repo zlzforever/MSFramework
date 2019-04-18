@@ -1,8 +1,6 @@
 using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using MSFramework.Core;
-using MSFramework.Reflection;
 
 namespace MSFramework.EventBus.Internal
 {
@@ -56,7 +54,7 @@ namespace MSFramework.EventBus.Internal
 			var eventName = _store.GetEventKey<T>();
 
 			_logger.LogInformation("Subscribing to event {EventName} with {EventHandler}", eventName,
-				typeof(TH).GetGenericTypeName());
+				typeof(TH).GetEventName());
 
 			_store.AddSubscription<T, TH>();
 		}
@@ -64,7 +62,7 @@ namespace MSFramework.EventBus.Internal
 		public void Subscribe<TH>(string eventName) where TH : IDynamicEventHandler
 		{
 			_logger.LogInformation("Subscribing to dynamic event {EventName} with {EventHandler}", eventName,
-				typeof(TH).GetGenericTypeName());
+				typeof(TH).GetEventName());
 			_store.AddSubscription<TH>(eventName);
 		}
 
