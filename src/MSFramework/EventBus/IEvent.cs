@@ -2,10 +2,10 @@ using System;
 
 namespace MSFramework.EventBus
 {
-    public interface IEvent
-    {
-        Guid Id { get; }
+	public interface IEvent
+	{
+		Guid Id { get; }
 
-        DateTime CreationTime { get; }
-    }
+		DateTime CreationTime { get; }
+	}
 }
