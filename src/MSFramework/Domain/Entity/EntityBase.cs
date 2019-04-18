@@ -1,7 +1,8 @@
-﻿using MSFramework.Domain.Event;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Reflection;
+using MediatR;
 
 namespace MSFramework.Domain.Entity
 {
@@ -9,17 +10,19 @@ namespace MSFramework.Domain.Entity
 	/// 实体类基类
 	/// </summary>
 	[Serializable]
-	public abstract class EntityBase<TKey> : IEntity<TKey>
+	public abstract class EntityBase<TKey> : IEntity<TKey> where TKey : IEquatable<TKey>
 	{
 		/// <inheritdoc/>
 		public virtual TKey Id { get; set; }
-		private ICollection<IDomainEvent> _domainEvents;
 
 		protected EntityBase()
 		{
-
 		}
 
+		protected EntityBase(TKey id)
+		{
+			Id = id;
+		}
 
 		/// <summary>
 		/// 判断两个实体是否是同一数据记录的实体
@@ -28,45 +31,38 @@ namespace MSFramework.Domain.Entity
 		/// <returns></returns>
 		public override bool Equals(object obj)
 		{
-			if (obj == null)
+			if (obj == null || !(obj is EntityBase<TKey>))
 			{
 				return false;
 			}
 
-			if (!(obj is EntityBase<TKey> entity))
-			{
-				return false;
-			}
-
-			return IsKeyEqual(entity.Id, Id);
-		}
-
-		/// <summary>
-		/// 实体ID是否相等
-		/// </summary>
-		public static bool IsKeyEqual(TKey id1, TKey id2)
-		{
-			if (id1 == null && id2 == null)
+			//Same instances must be considered as equal
+			if (ReferenceEquals(this, obj))
 			{
 				return true;
 			}
 
-			if (id1 == null || id2 == null)
+			//Transient objects are not considered as equal
+			var other = (EntityBase<TKey>) obj;
+			if (EntityHelper.HasDefaultId(this) && EntityHelper.HasDefaultId(other))
 			{
 				return false;
 			}
 
-			return Equals(id1, id2);
+			//Must have a IS-A relation of types or must be same type
+			var typeOfThis = GetType().GetTypeInfo();
+			var typeOfOther = other.GetType().GetTypeInfo();
+			if (!typeOfThis.IsAssignableFrom(typeOfOther) && !typeOfOther.IsAssignableFrom(typeOfThis))
+			{
+				return false;
+			}
+
+			return Id.Equals(other.Id);
 		}
 
 		public override int GetHashCode()
 		{
-			if (Id == null)
-			{
-				return 0;
-			}
-
-			return Id.GetHashCode();
+			return Id == null ? 0 : Id.GetHashCode();
 		}
 
 		public static bool operator ==(EntityBase<TKey> left, EntityBase<TKey> right)
@@ -86,36 +82,28 @@ namespace MSFramework.Domain.Entity
 
 		public virtual bool IsTransient()
 		{
-			return Id == default;
+			if (EqualityComparer<TKey>.Default.Equals(Id, default))
+			{
+				return true;
+			}
+
+			//Workaround for EF Core since it sets int/long to min value when attaching to dbcontext
+			if (typeof(TKey) == typeof(int))
+			{
+				return Convert.ToInt32(Id) <= 0;
+			}
+
+			if (typeof(TKey) == typeof(long))
+			{
+				return Convert.ToInt64(Id) <= 0;
+			}
+
+			return false;
 		}
 
 		public override string ToString()
 		{
 			return $"[ENTITY: {GetType().Name}] Id = {Id}";
-		}
-
-		protected virtual void AddDomainEvent(IDomainEvent eventItem)
-		{
-			_domainEvents = _domainEvents ?? new Collection<IDomainEvent>();
-			_domainEvents.Add(eventItem);
-		}
-
-		protected virtual void RemoveDomainEvent(IDomainEvent eventItem)
-		{
-			if (_domainEvents.Contains(eventItem))
-			{
-				_domainEvents.Remove(eventItem);
-			}
-		}
-
-		protected virtual void ClearDomainEvents()
-		{
-			_domainEvents.Clear();
-		}
-
-		public virtual IEnumerable<IDomainEvent> GetDomainEvents()
-		{
-			return _domainEvents;
 		}
 	}
 }

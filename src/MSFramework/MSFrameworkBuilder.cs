@@ -1,3 +1,4 @@
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace MSFramework
@@ -10,5 +11,7 @@ namespace MSFramework
 		}
 
 		public IServiceCollection Services { get; }
+		
+		public IConfiguration Configuration { get; set; } 
 	}
 }

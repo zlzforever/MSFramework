@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace MSFramework.Domain.Auditing
 {
@@ -9,7 +7,7 @@ namespace MSFramework.Domain.Auditing
 	/// </summary>
 	/// <typeparam name="TKey">Type of the primary key of the entity</typeparam>
 	[Serializable]
-	public abstract class AuditedEntity<TKey> : CreationAuditedEntity<TKey>, IAudited
+	public abstract class AuditedEntity<TKey> : CreationAuditedEntity<TKey>, IAudited where TKey : IEquatable<TKey>
 	{
 		public virtual DateTime? LastModificationTime { get; set; }
 

@@ -1,8 +1,11 @@
 using System;
+using MediatR;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
 using MSFramework.Core;
 using MSFramework.DependencyInjection;
 using MSFramework.Reflection;
+using MSFramework.Security;
 using MSFramework.Serialization;
 
 namespace MSFramework
@@ -38,6 +41,9 @@ namespace MSFramework
 				builder.Services.AddSingleton(Singleton<IJsonConvert>.Instance);
 			}
 
+			builder.Services.AddMediatR(Singleton<IAssemblyFinder>.Instance.GetAllAssemblyList().ToArray());
+			builder.Services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
+			builder.Services.AddSingleton<ICurrentUser, CurrentUser>();
 
 //            if (Singleton<IEntityTypeFinder>.Instance == null)
 //            {

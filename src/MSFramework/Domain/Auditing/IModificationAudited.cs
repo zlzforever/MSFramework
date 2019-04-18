@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace MSFramework.Domain.Auditing
+﻿namespace MSFramework.Domain.Auditing
 {
 	/// <summary>
 	/// This interface is implemented by entities that is wanted to store modification information (who and when modified lastly).

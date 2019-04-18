@@ -6,12 +6,12 @@ namespace MSFramework.EventBus.Internal
 {
 	public class PassThroughEventBus : IEventBus
 	{
-		private readonly IEventBusStore _store;
+		private readonly IEventBusSubscriptionStore _store;
 		private readonly ILogger _logger;
 		private readonly IServiceScopeFactory _scopeFactory;
 
 		public PassThroughEventBus(ILogger<PassThroughEventBus> logger, IServiceScopeFactory scopeFactory,
-			IEventBusStore store)
+			IEventBusSubscriptionStore store)
 		{
 			_store = store;
 			_logger = logger;

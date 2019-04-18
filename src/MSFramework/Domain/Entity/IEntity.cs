@@ -9,7 +9,9 @@
 		/// <summary>
 		/// Unique identifier for this entity.
 		/// </summary>
-		TKey Id { get; }
+		TKey Id { get; set; }
+		
+		bool IsTransient();
 	}
 
 	public interface IEntity : IEntity<int>

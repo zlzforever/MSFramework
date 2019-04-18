@@ -12,7 +12,7 @@ namespace MSFramework.EventBus
 			var builder = new EventBusBuilder(services);
 			builderAction?.Invoke(builder);
 
-			builder.Services.AddSingleton<IEventBusStore, InMemoryEventBusStore>();
+			builder.Services.AddSingleton<IEventBusSubscriptionStore, InMemoryEventBusSubscriptionStore>();
 			builder.Services.AddSingleton<IEventBus, PassThroughEventBus>();
 
 			return services;

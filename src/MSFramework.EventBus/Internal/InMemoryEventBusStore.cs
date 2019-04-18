@@ -4,12 +4,12 @@ using System.Linq;
 
 namespace MSFramework.EventBus.Internal
 {
-	public class InMemoryEventBusStore : IEventBusStore
+	public class InMemoryEventBusSubscriptionStore : IEventBusSubscriptionStore
 	{
 		private readonly Dictionary<string, List<SubscriptionInfo>> _handlers;
 		private readonly List<Type> _eventTypes;
 
-		public InMemoryEventBusStore()
+		public InMemoryEventBusSubscriptionStore()
 		{
 			_handlers = new Dictionary<string, List<SubscriptionInfo>>();
 			_eventTypes = new List<Type>();

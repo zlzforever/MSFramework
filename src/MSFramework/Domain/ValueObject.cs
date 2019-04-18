@@ -11,12 +11,13 @@ namespace MSFramework.Domain
 			{
 				return false;
 			}
+
 			return ReferenceEquals(left, null) || left.Equals(right);
 		}
 
 		protected static bool NotEqualOperator(ValueObject left, ValueObject right)
 		{
-			return !(EqualOperator(left, right));
+			return !EqualOperator(left, right);
 		}
 
 		protected abstract IEnumerable<object> GetAtomicValues();
@@ -28,24 +29,27 @@ namespace MSFramework.Domain
 				return false;
 			}
 
-			ValueObject other = (ValueObject)obj;
-			IEnumerator<object> thisValues = GetAtomicValues().GetEnumerator();
-			IEnumerator<object> otherValues = other.GetAtomicValues().GetEnumerator();
-			while (thisValues.MoveNext() && otherValues.MoveNext())
+			ValueObject other = (ValueObject) obj;
+			using (var thisValues = GetAtomicValues().GetEnumerator())
+			using (var otherValues = other.GetAtomicValues().GetEnumerator())
 			{
-				if (ReferenceEquals(thisValues.Current, null) ^
-					ReferenceEquals(otherValues.Current, null))
+				while (thisValues.MoveNext() && otherValues.MoveNext())
 				{
-					return false;
+					if (ReferenceEquals(thisValues.Current, null) ^
+					    ReferenceEquals(otherValues.Current, null))
+					{
+						return false;
+					}
+
+					if (thisValues.Current != null &&
+					    !thisValues.Current.Equals(otherValues.Current))
+					{
+						return false;
+					}
 				}
 
-				if (thisValues.Current != null &&
-					!thisValues.Current.Equals(otherValues.Current))
-				{
-					return false;
-				}
+				return !thisValues.MoveNext() && !otherValues.MoveNext();
 			}
-			return !thisValues.MoveNext() && !otherValues.MoveNext();
 		}
 
 		public override int GetHashCode()

@@ -18,7 +18,7 @@ namespace MSFramework.EventBus.RabbitMQ
 	{
 		private readonly RabbitMQConnection _connection;
 		private readonly ILogger<RabbitMQEventBus> _logger;
-		private readonly IEventBusStore _store;
+		private readonly IEventBusSubscriptionStore _store;
 		private readonly IServiceScopeFactory _serviceScopeFactory;
 		private readonly int _retryCount;
 		private readonly RabbitMQOptions _options;
@@ -28,12 +28,12 @@ namespace MSFramework.EventBus.RabbitMQ
 		public RabbitMQEventBus(RabbitMQConnection connection,
 			RabbitMQOptions options,
 			ILogger<RabbitMQEventBus> logger,
-			IServiceScopeFactory serviceScopeFactory, IEventBusStore subsManager, string queueName = null,
+			IServiceScopeFactory serviceScopeFactory, IEventBusSubscriptionStore subsManager, string queueName = null,
 			int retryCount = 5)
 		{
 			_connection = connection ?? throw new ArgumentNullException(nameof(connection));
 			_logger = logger ?? throw new ArgumentNullException(nameof(logger));
-			_store = subsManager ?? new InMemoryEventBusStore();
+			_store = subsManager ?? new InMemoryEventBusSubscriptionStore();
 			_queueName = queueName;
 			_consumerChannel = CreateConsumerChannel();
 			_serviceScopeFactory = serviceScopeFactory;
