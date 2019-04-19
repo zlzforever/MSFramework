@@ -14,6 +14,8 @@ namespace MSFramework.EntityFrameworkCore
 		private readonly IDictionary<Type, IEntityRegister[]> _entityRegistersDict
 			= new Dictionary<Type, IEntityRegister[]>();
 
+		private readonly IDictionary<Type, Type> _entityMapDbContextDict = new Dictionary<Type, Type>();
+
 		/// <summary>
 		/// 初始化
 		/// </summary>
@@ -64,6 +66,16 @@ namespace MSFramework.EntityFrameworkCore
 				//TODO: list.Add(new AuditOperationConfiguration());
 				dict[key] = list.ToArray();
 			}
+
+			foreach (var register in registers)
+			{
+				if (_entityMapDbContextDict.ContainsKey(register.EntityType))
+				{
+					continue;
+				}
+
+				_entityMapDbContextDict.Add(register.EntityType, register.DbContextType);
+			}
 		}
 
 		/// <summary>
@@ -85,23 +97,13 @@ namespace MSFramework.EntityFrameworkCore
 		/// <returns>数据上下文类型</returns>
 		public Type GetDbContextTypeForEntity(Type entityType)
 		{
-			var dict = _entityRegistersDict;
-			if (dict.Count == 0)
+			if (!_entityMapDbContextDict.ContainsKey(entityType))
 			{
 				throw new MSFrameworkException(
 					"未发现任何数据上下文实体映射配置，请通过对各个实体继承基类“EntityTypeConfigurationBase<TEntity, TKey>”以使实体加载到上下文中");
 			}
 
-			foreach (var item in _entityRegistersDict)
-			{
-				if (item.Value.Any(m => m.EntityType == entityType))
-				{
-					return item.Key;
-				}
-			}
-
-			throw new MSFrameworkException(
-				$"无法获取实体类“{entityType}”的所属上下文类型，请通过继承基类“EntityTypeConfigurationBase<TEntity, TKey>”配置实体加载到上下文中");
+			return _entityMapDbContextDict[entityType];
 		}
 	}
 }

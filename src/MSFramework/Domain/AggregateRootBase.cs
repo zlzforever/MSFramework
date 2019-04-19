@@ -42,7 +42,7 @@ namespace MSFramework.Domain
 			}
 		}
 
-		protected virtual void ClearDomainEvents()
+		public virtual void ClearDomainEvents()
 		{
 			_domainEvents.Clear();
 		}

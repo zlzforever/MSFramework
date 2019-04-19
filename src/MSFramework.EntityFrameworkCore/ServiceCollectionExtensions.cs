@@ -9,13 +9,15 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using MSFramework.Collections.Generic;
 using MSFramework.Core;
+using MSFramework.EntityFrameworkCore.Repository;
 using MSFramework.Serialization;
 
 namespace MSFramework.EntityFrameworkCore
 {
 	public static class ServiceCollectionExtensions
 	{
-		public static MSFrameworkBuilder UseEntityFramework(this MSFrameworkBuilder builder)
+		public static MSFrameworkBuilder UseEntityFramework(this MSFrameworkBuilder builder,
+			IDbContextOptionsBuilderCreator dbContextOptionsBuilderCreator)
 		{
 			builder.Configuration.NotNull(nameof(builder.Configuration));
 
@@ -43,8 +45,10 @@ namespace MSFramework.EntityFrameworkCore
 			}
 
 			builder.Services.AddScoped<DbContextFactory>();
-			builder.Services.AddSingleton<EntityFrameworkMigrateService>();
 
+			builder.Services.AddSingleton<EntityFrameworkMigrateService>();
+			builder.Services.AddSingleton(dbContextOptionsBuilderCreator);
+			builder.Services.AddScoped(typeof(IEfRepository<>), typeof(EfRepository<,>));
 			return builder;
 		}
 	}

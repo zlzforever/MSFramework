@@ -1,3 +1,4 @@
+using System.Threading;
 using System.Threading.Tasks;
 using MSFramework.Domain;
 
@@ -26,6 +27,18 @@ namespace MSFramework.EntityFrameworkCore
 			{
 				await dbContext.SaveChangesAsync();
 			}
+		}
+
+		public void BeginOrUseTransaction()
+		{
+			// TODO
+			throw new System.NotImplementedException();
+		}
+
+		public Task BeginOrUseTransactionAsync(CancellationToken cancellationToken = default)
+		{
+			// TODO
+			throw new System.NotImplementedException();
 		}
 	}
 }

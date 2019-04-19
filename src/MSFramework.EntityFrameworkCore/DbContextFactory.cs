@@ -3,9 +3,6 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Infrastructure;
-using Microsoft.EntityFrameworkCore.Metadata;
-using Microsoft.EntityFrameworkCore.Storage;
 using Microsoft.Extensions.DependencyInjection;
 using MSFramework.Domain.Entity;
 
@@ -13,8 +10,7 @@ namespace MSFramework.EntityFrameworkCore
 {
 	public class DbContextFactory
 	{
-		private static readonly ConcurrentDictionary<Type, IModel> ModelDict = new ConcurrentDictionary<Type, IModel>();
-		private readonly IServiceProvider _serviceProvider;
+		private readonly IServiceProvider _serviceProvider;		
 
 		private readonly ConcurrentDictionary<Type, DbContext> _dbContextDict =
 			new ConcurrentDictionary<Type, DbContext>();
@@ -39,19 +35,11 @@ namespace MSFramework.EntityFrameworkCore
 		/// 获取指定数据实体的上下文类型
 		/// </summary>
 		/// <returns>实体所属上下文实例</returns>
-		public DbContext GetDbContext<TEntity, TKey>() where TEntity : class, IEntity<TKey>
+		public DbContext GetDbContext<TEntity>() where TEntity : class, IEntity
 		{
 			var typeFinder = _serviceProvider.GetService<IEntityConfigurationTypeFinder>();
 			Type dbContextType = typeFinder.GetDbContextTypeForEntity(typeof(TEntity));
-
-			var dbContextOptions = GetDbContextOptions(dbContextType);
-			if (dbContextOptions == null)
-			{
-				throw new MSFrameworkException($"未找到数据上下文“{dbContextType}”对应的配置文件");
-			}
-
-			var dbContext = (DbContextBase) Create(dbContextOptions);
-			return dbContext;
+			return GetDbContext(dbContextType);
 		}
 
 		/// <summary>
@@ -89,11 +77,6 @@ namespace MSFramework.EntityFrameworkCore
 			}
 
 			DbContextOptionsBuilder optionsBuilder = builderCreator.Create(resolveOptions.ConnectionString);
-			 
-			if (ModelDict.ContainsKey(dbContextType))
-			{
-				optionsBuilder.UseModel(ModelDict[dbContextType]);
-			}
 
 			DbContextOptions options = optionsBuilder.Options;
 

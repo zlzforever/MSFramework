@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
 using MSFramework.Core;
 using MSFramework.DependencyInjection;
+using MSFramework.Domain.Repository;
 using MSFramework.Reflection;
 using MSFramework.Security;
 using MSFramework.Serialization;
@@ -44,20 +45,6 @@ namespace MSFramework
 			builder.Services.AddMediatR(Singleton<IAssemblyFinder>.Instance.GetAllAssemblyList().ToArray());
 			builder.Services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
 			builder.Services.AddSingleton<ICurrentUser, CurrentUser>();
-
-//            if (Singleton<IEntityTypeFinder>.Instance == null)
-//            {
-//                Singleton<IEntityTypeFinder>.Instance = new EntityTypeFinder();
-//                services.AddSingleton<IEntityTypeFinder, EntityTypeFinder>();
-//            }
-
-
-			// builder.Services.AddTransient(typeof(Lazy<>), typeof(Lazier<>));
-
-			// builder.Services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
-
-			// builder.Services.AddScoped(typeof(IRepository<,>), typeof(Repository<,>));
-
 
 			return services;
 		}

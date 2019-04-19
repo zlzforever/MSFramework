@@ -10,6 +10,11 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using MSFramework;
+using MSFramework.EntityFrameworkCore;
+using MSFramework.EntityFrameworkCore.SqlServer;
+using MSFramework.EventBus;
+using MSFramework.EventSource.EntityFrameworkCore;
 
 namespace Ordering.API
 {
@@ -26,6 +31,16 @@ namespace Ordering.API
 		public void ConfigureServices(IServiceCollection services)
 		{
 			services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
+			services.AddMSFramework(builder =>
+			{
+				// 使用 SqlServer
+				builder.UseEntityFramework(new DbContextOptionsBuilderCreator());
+			});
+			services.AddEventBus(builder =>
+			{
+				// 使用 SqlServer
+				builder.UseEfEventSource();
+			});
 		}
 
 		// This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

@@ -25,12 +25,12 @@ namespace MSFramework.EntityFrameworkCore
 		{
 			using (var scope = _serviceProvider.CreateScope())
 			{
-				var unitOfWork = scope.ServiceProvider.GetRequiredService<DbContextFactory>();
+				var dbContextFactory = scope.ServiceProvider.GetRequiredService<DbContextFactory>();
 				foreach (var kv in EntityFrameworkOptions.EntityFrameworkOptionDict)
 				{
 					if (kv.Value.AutoMigrationEnabled)
 					{
-						var dbContext = unitOfWork.Create(kv.Value);
+						var dbContext = dbContextFactory.Create(kv.Value);
 						if (dbContext == null)
 						{
 							continue;

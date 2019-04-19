@@ -2,12 +2,14 @@ using System;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using MediatR;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.Extensions.Logging;
+using MSFramework.Domain;
 using MSFramework.Domain.Auditing;
 using MSFramework.Domain.Entity;
 using MSFramework.Security;
@@ -19,6 +21,7 @@ namespace MSFramework.EntityFrameworkCore
 		private readonly ILogger _logger;
 		private readonly ILoggerFactory _loggerFactory;
 		private readonly IEntityConfigurationTypeFinder _typeFinder;
+		private readonly IMediator _mediator;
 
 		/// <summary>
 		/// 初始化一个<see cref="DbContextBase"/>类型的新实例
@@ -26,12 +29,14 @@ namespace MSFramework.EntityFrameworkCore
 		protected DbContextBase(
 			DbContextOptions options,
 			IEntityConfigurationTypeFinder typeFinder,
+			IMediator mediator,
 			ILoggerFactory loggerFactory)
 			: base(options)
 		{
 			_typeFinder = typeFinder;
 			_loggerFactory = loggerFactory;
 			_logger = loggerFactory?.CreateLogger(GetType());
+			_mediator = mediator;
 		}
 
 		/// <summary>
@@ -97,6 +102,8 @@ namespace MSFramework.EntityFrameworkCore
 			try
 			{
 				ApplyConcepts();
+
+
 				return base.SaveChanges();
 			}
 			catch (DbUpdateConcurrencyException ex)
@@ -250,12 +257,42 @@ namespace MSFramework.EntityFrameworkCore
 			try
 			{
 				ApplyConcepts();
+
+				// Dispatch Domain Events collection. 
+				// Choices:
+				// A) Right BEFORE committing data (EF SaveChanges) into the DB will make a single transaction including  
+				// side effects from the domain event handlers which are using the same DbContext with "InstancePerLifetimeScope" or "scoped" lifetime
+				// B) Right AFTER committing data (EF SaveChanges) into the DB will make multiple transactions. 
+				// You will need to handle eventual consistency and compensatory actions in case of failures in any of the Handlers. 
+				await DispatchDomainEventsAsync();
+
+				// After executing this line all the changes (from the Command Handler and Domain Event Handlers) 
+				// performed through the DbContext will be committed
+
 				return await base.SaveChangesAsync(cancellationToken);
 			}
 			catch (DbUpdateConcurrencyException ex)
 			{
 				throw new MSFrameworkException(ex.Message, ex);
 			}
+		}
+
+		protected virtual async Task DispatchDomainEventsAsync()
+		{
+			var aggregateRoots = ChangeTracker
+				.Entries<IAggregateRoot>()
+				.Where(x => x.Entity.GetDomainEvents() != null && x.Entity.GetDomainEvents().Any()).ToList();
+
+			var domainEvents = aggregateRoots
+				.SelectMany(x => x.Entity.GetDomainEvents())
+				.ToList();
+
+			aggregateRoots.ForEach(entity => entity.Entity.ClearDomainEvents());
+
+			var tasks = domainEvents
+				.Select(async domainEvent => { await _mediator.Publish(domainEvent); });
+
+			await Task.WhenAll(tasks);
 		}
 	}
 }

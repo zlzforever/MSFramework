@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk.Web">
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
 
     <PropertyGroup>
         <TargetFramework>netcoreapp2.2</TargetFramework>
@@ -6,8 +6,21 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="Microsoft.AspNetCore.App"/>
-        <PackageReference Include="Microsoft.AspNetCore.Razor.Design" Version="2.2.0" PrivateAssets="All"/>
+        <PackageReference Include="Microsoft.AspNetCore.App" />
+        <PackageReference Include="Microsoft.AspNetCore.Razor.Design" Version="2.2.0" PrivateAssets="All" />
+        <PackageReference Include="FluentValidation.AspNetCore" Version="7.5.0" />
+        <PackageReference Include="Serilog.AspNetCore" Version="2.1.1" />
+        <PackageReference Include="Serilog.Sinks.PeriodicBatching" Version="2.1.1" />
+        <PackageReference Include="Serilog.Sinks.Console" Version="3.1.1" />
+        <PackageReference Include="Serilog.Sinks.RollingFile" Version="3.3.0" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="..\MSFramework.EntityFrameworkCore.SqlServer\MSFramework.EntityFrameworkCore.SqlServer.csproj" />
+        <ProjectReference Include="..\MSFramework.EventBus\MSFramework.EventBus.csproj" />
+        <ProjectReference Include="..\MSFramework.EventSource.EntityFrameworkCore\MSFramework.EventSource.EntityFrameworkCore.csproj" />
+        <ProjectReference Include="..\Ordering.Domain\Ordering.Domain.csproj" />
+        <ProjectReference Include="..\Ordering.Infrastructure\Ordering.Infrastructure.csproj" />
     </ItemGroup>
 
 </Project>
