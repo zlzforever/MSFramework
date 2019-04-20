@@ -49,7 +49,7 @@ namespace Ordering.Domain.AggregateRoot.Order
 
 		public Order(string userId, string userName, Address address, int cardTypeId, string cardNumber,
 			string cardSecurityNumber,
-			string cardHolderName, DateTime cardExpiration, Guid? buyerId=null, int? paymentMethodId = null) : this()
+			string cardHolderName, DateTime cardExpiration, Guid? buyerId = null, int? paymentMethodId = null) : this()
 		{
 			BuyerId = buyerId;
 			_paymentMethodId = paymentMethodId;
@@ -108,7 +108,7 @@ namespace Ordering.Domain.AggregateRoot.Order
 		{
 			if (_orderStatusId == OrderStatus.Submitted.Id)
 			{
-				AddDomainEvent(new OrderStatusChangedToAwaitingValidationDomainEvent(Id, _orderItems));
+				AddEvent(new OrderStatusChangedToAwaitingValidationDomainEvent(_orderItems));
 				_orderStatusId = OrderStatus.AwaitingValidation.Id;
 			}
 		}
@@ -117,7 +117,7 @@ namespace Ordering.Domain.AggregateRoot.Order
 		{
 			if (_orderStatusId == OrderStatus.AwaitingValidation.Id)
 			{
-				AddDomainEvent(new OrderStatusChangedToStockConfirmedDomainEvent(Id));
+				AddEvent(new OrderStatusChangedToStockConfirmedDomainEvent());
 
 				_orderStatusId = OrderStatus.StockConfirmed.Id;
 				_description = "All the items were confirmed with available stock.";
@@ -128,7 +128,7 @@ namespace Ordering.Domain.AggregateRoot.Order
 		{
 			if (_orderStatusId == OrderStatus.StockConfirmed.Id)
 			{
-				AddDomainEvent(new OrderStatusChangedToPaidDomainEvent(Id, OrderItems));
+				AddEvent(new OrderStatusChangedToPaidDomainEvent(OrderItems));
 
 				_orderStatusId = OrderStatus.Paid.Id;
 				_description =
@@ -145,7 +145,7 @@ namespace Ordering.Domain.AggregateRoot.Order
 
 			_orderStatusId = OrderStatus.Shipped.Id;
 			_description = "The order was shipped.";
-			AddDomainEvent(new OrderShippedDomainEvent(this));
+			AddEvent(new OrderShippedDomainEvent(this));
 		}
 
 		public void SetCancelledStatus()
@@ -158,7 +158,7 @@ namespace Ordering.Domain.AggregateRoot.Order
 
 			_orderStatusId = OrderStatus.Cancelled.Id;
 			_description = $"The order was cancelled.";
-			AddDomainEvent(new OrderCancelledDomainEvent(this));
+			AddEvent(new OrderCancelledDomainEvent(this));
 		}
 
 		public void SetCancelledStatusWhenStockIsRejected(IEnumerable<int> orderStockRejectedItems)
@@ -183,7 +183,7 @@ namespace Ordering.Domain.AggregateRoot.Order
 				cardNumber, cardSecurityNumber,
 				cardHolderName, cardExpiration);
 
-			this.AddDomainEvent(orderStartedDomainEvent);
+			AddEvent(orderStartedDomainEvent);
 		}
 
 		private void StatusChangeException(OrderStatus orderStatusToChange)

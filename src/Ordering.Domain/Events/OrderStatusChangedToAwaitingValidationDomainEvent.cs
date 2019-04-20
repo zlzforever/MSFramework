@@ -1,25 +1,24 @@
 ﻿using System;
+using MSFramework.Domain;
 using Ordering.Domain.AggregateRoot.Order;
 
 namespace Ordering.Domain.Events
 {
-    using MediatR;
-    using System.Collections.Generic;
+	using MediatR;
+	using System.Collections.Generic;
 
-    /// <summary>
-    /// Event used when the grace period order is confirmed
-    /// </summary>
-    public class OrderStatusChangedToAwaitingValidationDomainEvent
-         : INotification
-    {
-        public Guid OrderId { get; }
-        public IEnumerable<OrderItem> OrderItems { get; }
+	/// <summary>
+	/// Event used when the grace period order is confirmed
+	/// </summary>
+	public class OrderStatusChangedToAwaitingValidationDomainEvent
+		: DomainEventBase<Guid>
+	{
+		public IEnumerable<OrderItem> OrderItems { get; }
 
-        public OrderStatusChangedToAwaitingValidationDomainEvent(Guid orderId,
-            IEnumerable<OrderItem> orderItems)
-        {
-            OrderId = orderId;
-            OrderItems = orderItems;
-        }
-    }
+		public OrderStatusChangedToAwaitingValidationDomainEvent(
+			IEnumerable<OrderItem> orderItems)
+		{
+			OrderItems = orderItems;
+		}
+	}
 }

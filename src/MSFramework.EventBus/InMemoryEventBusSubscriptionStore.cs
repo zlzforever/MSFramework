@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace MSFramework.EventBus.Internal
+namespace MSFramework.EventBus
 {
 	public class InMemoryEventBusSubscriptionStore : IEventBusSubscriptionStore
 	{

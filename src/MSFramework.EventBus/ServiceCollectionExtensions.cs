@@ -1,6 +1,5 @@
 using System;
 using Microsoft.Extensions.DependencyInjection;
-using MSFramework.EventBus.Internal;
 
 namespace MSFramework.EventBus
 {

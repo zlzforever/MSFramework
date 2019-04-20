@@ -1,50 +1,47 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Linq;
 using MediatR;
 using MSFramework.Core;
 using MSFramework.Domain.Entity;
+using MSFramework.EventBus;
 
 namespace MSFramework.Domain
 {
 	[Serializable]
-	public abstract class AggregateRootBase<TKey> : EntityBase<TKey>, IAggregateRoot, IHasConcurrencyStamp
-		where TKey : IEquatable<TKey>
+	public abstract class AggregateRootBase<TAggregateId> :
+		EntityBase<TAggregateId>,
+		IAggregateRoot<TAggregateId>
+		where TAggregateId : IEquatable<TAggregateId>
 	{
-		private ICollection<INotification> _domainEvents;
+		public const long NewAggregateVersion = -1;
 
-		public virtual string ConcurrencyStamp { get; set; } = CombGuid.NewGuid().ToString("N");
+		private readonly ICollection<IDomainEvent<TAggregateId>> _uncommittedEvents =
+			new LinkedList<IDomainEvent<TAggregateId>>();
 
-		public virtual IEnumerable<INotification> GetDomainEvents()
-		{
-			return _domainEvents;
-		}
+		private long _version = NewAggregateVersion;
 
 		protected AggregateRootBase()
 		{
 		}
 
-		protected AggregateRootBase(TKey id) : base(id)
+		protected AggregateRootBase(TAggregateId id) : base(id)
 		{
 		}
 
-		protected virtual void AddDomainEvent(INotification @event)
-		{
-			_domainEvents = _domainEvents ?? new Collection<INotification>();
-			_domainEvents.Add(@event);
-		}
+		public long Version => _version;
 
-		protected virtual void RemoveDomainEvent(INotification @event)
-		{
-			if (_domainEvents.Contains(@event))
-			{
-				_domainEvents.Remove(@event);
-			}
-		}
+		public void ClearUncommittedEvents()
+			=> _uncommittedEvents.Clear();
 
-		public virtual void ClearDomainEvents()
+		public IEnumerable<IDomainEvent> GetUncommittedEvents()
+			=> _uncommittedEvents.AsEnumerable();
+
+		public void AddEvent(IDomainEvent<TAggregateId> @event)
 		{
-			_domainEvents.Clear();
+			@event.SetAggregateIdAndVersion(Equals(Id, default(TAggregateId)) ? @event.AggregateId : Id, _version + 1);
+			_uncommittedEvents.Add(@event);
 		}
 	}
 }

@@ -36,14 +36,14 @@ namespace Ordering.Domain.AggregateRoot.Buyer
 			string securityNumber,
 			string cardHolderName,
 			DateTime expiration,
-			int orderId)
+			Guid orderId)
 		{
 			var existingPayment = _paymentMethods
 				.SingleOrDefault(p => p.IsEqual(cardTypeId, cardNumber, expiration));
 
 			if (existingPayment != null)
 			{
-				AddDomainEvent(new BuyerAndPaymentMethodVerifiedDomainEvent(this, existingPayment, orderId));
+				AddEvent(new BuyerAndPaymentMethodVerifiedDomainEvent(this, existingPayment, orderId));
 
 				return existingPayment;
 			}
@@ -52,7 +52,7 @@ namespace Ordering.Domain.AggregateRoot.Buyer
 
 			_paymentMethods.Add(payment);
 
-			AddDomainEvent(new BuyerAndPaymentMethodVerifiedDomainEvent(this, payment, orderId));
+			AddEvent(new BuyerAndPaymentMethodVerifiedDomainEvent(this, payment, orderId));
 
 			return payment;
 		}

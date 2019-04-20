@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
+using MSFramework.Domain;
 using Ordering.Domain.AggregateRoot.Order;
 
 namespace Ordering.Domain.Events
@@ -9,7 +10,7 @@ namespace Ordering.Domain.Events
     /// <summary>
     /// Event used when an order is created
     /// </summary>
-    public class OrderStartedDomainEvent : INotification
+    public class OrderStartedDomainEvent : DomainEventBase<Guid>
     {
         public string UserId { get; }
         public string UserName { get; }

@@ -12,6 +12,7 @@ using Microsoft.Extensions.Logging;
 using MSFramework.Domain;
 using MSFramework.Domain.Auditing;
 using MSFramework.Domain.Entity;
+using MSFramework.EventBus;
 using MSFramework.Security;
 
 namespace MSFramework.EntityFrameworkCore
@@ -21,7 +22,7 @@ namespace MSFramework.EntityFrameworkCore
 		private readonly ILogger _logger;
 		private readonly ILoggerFactory _loggerFactory;
 		private readonly IEntityConfigurationTypeFinder _typeFinder;
-		private readonly IMediator _mediator;
+		private readonly IEventBus _mediator;
 
 		/// <summary>
 		/// 初始化一个<see cref="DbContextBase"/>类型的新实例
@@ -29,7 +30,7 @@ namespace MSFramework.EntityFrameworkCore
 		protected DbContextBase(
 			DbContextOptions options,
 			IEntityConfigurationTypeFinder typeFinder,
-			IMediator mediator,
+			IEventBus mediator,
 			ILoggerFactory loggerFactory)
 			: base(options)
 		{
@@ -280,17 +281,17 @@ namespace MSFramework.EntityFrameworkCore
 		protected virtual async Task DispatchDomainEventsAsync()
 		{
 			var aggregateRoots = ChangeTracker
-				.Entries<IAggregateRoot>()
-				.Where(x => x.Entity.GetDomainEvents() != null && x.Entity.GetDomainEvents().Any()).ToList();
+				.Entries<IEventSourcingAggregate>()
+				.Where(x => x.Entity.GetUncommittedEvents() != null && x.Entity.GetUncommittedEvents().Any()).ToList();
 
 			var domainEvents = aggregateRoots
-				.SelectMany(x => x.Entity.GetDomainEvents())
+				.SelectMany(x => x.Entity.GetUncommittedEvents())
 				.ToList();
 
-			aggregateRoots.ForEach(entity => entity.Entity.ClearDomainEvents());
+			aggregateRoots.ForEach(entity => entity.Entity.ClearUncommittedEvents());
 
 			var tasks = domainEvents
-				.Select(async domainEvent => { await _mediator.Publish(domainEvent); });
+				.Select(async domainEvent => { await _mediator.PublishAsync(domainEvent); });
 
 			await Task.WhenAll(tasks);
 		}

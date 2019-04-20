@@ -3,6 +3,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Castle.Core.Logging;
 using MediatR;
+using MSFramework.EventBus;
 using MSFramework.EventSource;
 using Ordering.API.Application.Event;
 using Ordering.Domain.AggregateRoot.Order;
@@ -12,7 +13,7 @@ using Ordering.Domain.Repository;
 namespace Ordering.API.Application.DomainEventHandler
 {
 	public class OrderShippedDomainEventHandler
-		: INotificationHandler<OrderShippedDomainEvent>
+		: IEventHandler<OrderShippedDomainEvent>
 	{
 		private readonly IOrderingRepository _orderRepository;
 		private readonly IBuyerRepository _buyerRepository;
@@ -31,13 +32,14 @@ namespace Ordering.API.Application.DomainEventHandler
 			_eventSourceService = eventSourceService;
 		}
 
-		public async Task Handle(OrderShippedDomainEvent orderShippedDomainEvent, CancellationToken cancellationToken)
+
+		public async Task Handle(OrderShippedDomainEvent @event)
 		{
 //			_logger.CreateLogger<OrderShippedDomainEvent>()
 //				.LogTrace("Order with Id: {OrderId} has been successfully updated to status {Status} ({Id})",
 //					orderShippedDomainEvent.Order.Id, nameof(OrderStatus.Shipped), OrderStatus.Shipped.Id);
 
-			var order = await _orderRepository.GetAsync(orderShippedDomainEvent.Order.Id);
+			var order = await _orderRepository.GetAsync(@event.Order.Id);
 			var buyer = await _buyerRepository.GetAsync(order.BuyerId.Value);
 
 			var orderStatusChangedToShippedIntegrationEvent =

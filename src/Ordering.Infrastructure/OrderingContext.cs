@@ -2,6 +2,7 @@ using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using MSFramework.EntityFrameworkCore;
+using MSFramework.EventBus;
 
 namespace Ordering.Infrastructure
 {
@@ -9,7 +10,7 @@ namespace Ordering.Infrastructure
 	{
 		public const string DefaultSchema = "ordering";
 
-		public OrderingContext(DbContextOptions options, IEntityConfigurationTypeFinder typeFinder, IMediator mediator,
+		public OrderingContext(DbContextOptions options, IEntityConfigurationTypeFinder typeFinder, IEventBus mediator,
 			ILoggerFactory loggerFactory) : base(options, typeFinder, mediator, loggerFactory)
 		{
 		}

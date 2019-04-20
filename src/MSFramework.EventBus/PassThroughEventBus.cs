@@ -1,16 +1,17 @@
+using System;
 using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
-namespace MSFramework.EventBus.Internal
+namespace MSFramework.EventBus
 {
 	public class PassThroughEventBus : IEventBus
 	{
 		private readonly IEventBusSubscriptionStore _store;
 		private readonly ILogger _logger;
-		private readonly IServiceScopeFactory _scopeFactory;
+		private readonly IServiceProvider _scopeFactory;
 
-		public PassThroughEventBus(ILogger<PassThroughEventBus> logger, IServiceScopeFactory scopeFactory,
+		public PassThroughEventBus(ILogger<PassThroughEventBus> logger, IServiceProvider scopeFactory,
 			IEventBusSubscriptionStore store)
 		{
 			_store = store;
@@ -23,27 +24,24 @@ namespace MSFramework.EventBus.Internal
 			var eventName = _store.GetEventKey(@event.GetType());
 			if (_store.ContainSubscription(eventName))
 			{
-				using (var scope = _scopeFactory.CreateScope())
+				var subscriptions = _store.GetHandlers(eventName);
+				foreach (var subscription in subscriptions)
 				{
-					var subscriptions = _store.GetHandlers(eventName);
-					foreach (var subscription in subscriptions)
+					if (subscription.IsDynamic)
 					{
-						if (subscription.IsDynamic)
-						{
-							var handler =
-								scope.ServiceProvider.GetService(subscription.HandlerType) as IDynamicEventHandler;
-							if (handler == null) continue;
-							await handler.Handle(@event);
-						}
-						else
-						{
-							var handler = scope.ServiceProvider.GetService(subscription.HandlerType);
-							if (handler == null) continue;
+						var handler =
+							_scopeFactory.GetService(subscription.HandlerType) as IDynamicEventHandler;
+						if (handler == null) continue;
+						await handler.Handle(@event);
+					}
+					else
+					{
+						var handler = _scopeFactory.GetService(subscription.HandlerType);
+						if (handler == null) continue;
 
-							var concreteType = typeof(IEventHandler<>).MakeGenericType(@event.GetType());
-							// ReSharper disable once PossibleNullReferenceException
-							await (Task) concreteType.GetMethod("Handle").Invoke(handler, new object[] {@event});
-						}
+						var concreteType = typeof(IEventHandler<>).MakeGenericType(@event.GetType());
+						// ReSharper disable once PossibleNullReferenceException
+						await (Task) concreteType.GetMethod("Handle").Invoke(handler, new object[] {@event});
 					}
 				}
 			}

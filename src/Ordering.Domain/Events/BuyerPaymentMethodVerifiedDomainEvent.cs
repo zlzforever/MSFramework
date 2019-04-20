@@ -1,20 +1,24 @@
-﻿using MediatR;
+﻿using System;
+using MediatR;
+using MSFramework.Domain;
 using Ordering.Domain.AggregateRoot.Buyer;
 
 namespace Ordering.Domain.Events
 {
-    public class BuyerAndPaymentMethodVerifiedDomainEvent
-        : INotification
-    {
-        public Buyer Buyer { get; private set; }
-        public PaymentMethod Payment { get; private set; }
-        public int OrderId { get; private set; }
+	public class BuyerAndPaymentMethodVerifiedDomainEvent
+		: DomainEventBase<Guid>
+	{
+		public Buyer Buyer { get; private set; }
+		
+		public PaymentMethod Payment { get; private set; }
 
-        public BuyerAndPaymentMethodVerifiedDomainEvent(Buyer buyer, PaymentMethod payment, int orderId)
-        {
-            Buyer = buyer;
-            Payment = payment;
-            OrderId = orderId;
-        }
-    }
+		public Guid OrderId { get; }
+
+		public BuyerAndPaymentMethodVerifiedDomainEvent(Buyer buyer, PaymentMethod payment, Guid orderId)
+		{
+			Buyer = buyer;
+			Payment = payment;
+			OrderId = orderId;
+		}
+	}
 }

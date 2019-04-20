@@ -1,15 +1,17 @@
-﻿using MediatR;
+﻿using System;
+using MediatR;
+using MSFramework.Domain;
 using Ordering.Domain.AggregateRoot.Order;
 
 namespace Ordering.Domain.Events
 {
-    public class OrderShippedDomainEvent : INotification
-    {
-        public Order Order { get; }
+	public class OrderShippedDomainEvent : DomainEventBase<Guid>
+	{
+		public Order Order { get; }
 
-        public OrderShippedDomainEvent(Order order)
-        {
-            Order = order;           
-        }
-    }
+		public OrderShippedDomainEvent(Order order)
+		{
+			Order = order;
+		}
+	}
 }

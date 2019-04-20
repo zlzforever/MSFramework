@@ -4,7 +4,6 @@ using System.Text;
 using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using MSFramework.EventBus.Internal;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Polly;

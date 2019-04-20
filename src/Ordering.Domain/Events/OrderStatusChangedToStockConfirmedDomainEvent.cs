@@ -1,4 +1,5 @@
 ﻿using System;
+using MSFramework.Domain;
 
 namespace Ordering.Domain.Events
 {
@@ -8,11 +9,7 @@ namespace Ordering.Domain.Events
 	/// Event used when the order stock items are confirmed
 	/// </summary>
 	public class OrderStatusChangedToStockConfirmedDomainEvent
-		: INotification
+		: DomainEventBase<Guid>
 	{
-		public Guid OrderId { get; }
-
-		public OrderStatusChangedToStockConfirmedDomainEvent(Guid orderId)
-			=> OrderId = orderId;
 	}
 }

@@ -1,12 +1,12 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using MediatR;
 
 namespace MSFramework.Domain
 {
-	public interface IAggregateRoot
+	public interface IAggregateRoot<TAggregateId>
+		: IEventSourcingAggregate<TAggregateId> where TAggregateId : IEquatable<TAggregateId>
 	{
-		IEnumerable<INotification> GetDomainEvents();
-
-		void ClearDomainEvents();
+		TAggregateId Id { get; }
 	}
 }
