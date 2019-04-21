@@ -43,7 +43,7 @@ namespace Ordering.Domain.AggregateRoot.Buyer
 
 			if (existingPayment != null)
 			{
-				AddEvent(new BuyerAndPaymentMethodVerifiedDomainEvent(this, existingPayment, orderId));
+				AddDomainEvent(new BuyerAndPaymentMethodVerifiedDomainEvent(this, existingPayment, orderId));
 
 				return existingPayment;
 			}
@@ -52,7 +52,7 @@ namespace Ordering.Domain.AggregateRoot.Buyer
 
 			_paymentMethods.Add(payment);
 
-			AddEvent(new BuyerAndPaymentMethodVerifiedDomainEvent(this, payment, orderId));
+			AddDomainEvent(new BuyerAndPaymentMethodVerifiedDomainEvent(this, payment, orderId));
 
 			return payment;
 		}

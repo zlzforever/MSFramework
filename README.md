@@ -9,3 +9,17 @@ A micro service template
 a. 所有事件先保存到数据库
 b. 发送处理事件
 c. 处理实例通过聚合根ID取到所有事件并处理
+
+###
+
+1. CQRS Command: MeditaR
+
+
+###
+
+1. Query 查询的聚合根数据要保留 Id, Version
+2. UI 层发送 Command 修改聚合根，必须传递 Id, Version
+
+       + 从 ES 中查询聚合根事件 Get(id, from version)
+       + 如果没有事件说明前端数据和 ES数据一致，直接从数据库表中取得最新聚合根完整数据
+       + 如果有事件，说明数据库表中聚合根数据不一致，则有两种可能：1种完全重构数据并替换，2 如果ES刚相差1个版本，即可以接续，则从ES数据中还原聚合根，并更新

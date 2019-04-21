@@ -23,6 +23,7 @@ namespace MSFramework.EntityFrameworkCore
 		private readonly ILoggerFactory _loggerFactory;
 		private readonly IEntityConfigurationTypeFinder _typeFinder;
 		private readonly IEventBus _mediator;
+		private readonly IEventStore _eventStore;
 
 		/// <summary>
 		/// 初始化一个<see cref="DbContextBase"/>类型的新实例
@@ -31,6 +32,7 @@ namespace MSFramework.EntityFrameworkCore
 			DbContextOptions options,
 			IEntityConfigurationTypeFinder typeFinder,
 			IEventBus mediator,
+			IEventStore eventStore,
 			ILoggerFactory loggerFactory)
 			: base(options)
 		{
@@ -38,6 +40,7 @@ namespace MSFramework.EntityFrameworkCore
 			_loggerFactory = loggerFactory;
 			_logger = loggerFactory?.CreateLogger(GetType());
 			_mediator = mediator;
+			_eventStore = eventStore;
 		}
 
 		/// <summary>
@@ -281,7 +284,7 @@ namespace MSFramework.EntityFrameworkCore
 		protected virtual async Task DispatchDomainEventsAsync()
 		{
 			var aggregateRoots = ChangeTracker
-				.Entries<IEventSourcingAggregate>()
+				.Entries<IAggregateRoot>()
 				.Where(x => x.Entity.GetUncommittedEvents() != null && x.Entity.GetUncommittedEvents().Any()).ToList();
 
 			var domainEvents = aggregateRoots
@@ -289,9 +292,10 @@ namespace MSFramework.EntityFrameworkCore
 				.ToList();
 
 			aggregateRoots.ForEach(entity => entity.Entity.ClearUncommittedEvents());
-
-			var tasks = domainEvents
-				.Select(async domainEvent => { await _mediator.PublishAsync(domainEvent); });
+			var tasks = domainEvents.Select(async @event =>
+			{
+				await _mediator.PublishAsync(@event);
+			});
 
 			await Task.WhenAll(tasks);
 		}

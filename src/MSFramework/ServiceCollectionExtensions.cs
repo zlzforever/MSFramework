@@ -3,6 +3,7 @@ using MediatR;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
 using MSFramework.Core;
+using MSFramework.CQRS;
 using MSFramework.DependencyInjection;
 using MSFramework.Domain.Repository;
 using MSFramework.Reflection;
@@ -45,6 +46,8 @@ namespace MSFramework
 			builder.Services.AddMediatR(Singleton<IAssemblyFinder>.Instance.GetAllAssemblyList().ToArray());
 			builder.Services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
 			builder.Services.AddSingleton<ICurrentUser, CurrentUser>();
+
+			builder.Services.AddSingleton<ICommandBus, CommandBus>();
 
 			return services;
 		}

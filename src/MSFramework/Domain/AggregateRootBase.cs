@@ -9,6 +9,23 @@ using MSFramework.EventBus;
 
 namespace MSFramework.Domain
 {
+	public interface IES<TKey> where TKey : IEquatable<TKey>
+	{
+		Guid Id { get; }
+		TKey AggreeId { get; }
+		DateTime TimeStamp { get; }
+		long Version { get; set; }
+	}
+
+	//public class EventSourceEntry<TAggregateId> where TAggregateId : IEquatable<TAggregateId>
+	public interface IESHandler<TA, TES, TAggregateId>
+		where TA : IAggregateRoot<TAggregateId>
+		where TES : IES<TAggregateId>
+		where TAggregateId : IEquatable<TAggregateId>
+	{
+		void Handle(TES es);
+	}
+
 	[Serializable]
 	public abstract class AggregateRootBase<TAggregateId> :
 		EntityBase<TAggregateId>,
@@ -30,6 +47,7 @@ namespace MSFramework.Domain
 		{
 		}
 
+
 		public long Version => _version;
 
 		public void ClearUncommittedEvents()
@@ -38,10 +56,25 @@ namespace MSFramework.Domain
 		public IEnumerable<IDomainEvent> GetUncommittedEvents()
 			=> _uncommittedEvents.AsEnumerable();
 
-		public void AddEvent(IDomainEvent<TAggregateId> @event)
+		public void AddDomainEvent(IDomainEvent<TAggregateId> @event)
 		{
 			@event.SetAggregateIdAndVersion(Equals(Id, default(TAggregateId)) ? @event.AggregateId : Id, _version + 1);
 			_uncommittedEvents.Add(@event);
+		}
+
+		protected void ApplyEvent(IES<TAggregateId> e)
+		{
+			((dynamic) this).Handle(e);
+		}
+
+		public void LoadFromHistory(IEnumerable<IES<TAggregateId>> history)
+		{
+			foreach (var e in history)
+			{
+				if (e.Version != Version + 1)
+					throw new MSFrameworkException(e.Id.ToString());
+				((dynamic) this).Handle(this, e);
+			}
 		}
 	}
 }
