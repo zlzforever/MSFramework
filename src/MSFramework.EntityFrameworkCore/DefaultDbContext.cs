@@ -1,6 +1,7 @@
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using MSFramework.CQRS.EventSouring;
 using MSFramework.Domain;
 using MSFramework.EventBus;
 

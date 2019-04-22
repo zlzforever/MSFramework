@@ -1,8 +1,7 @@
-using System;
-using MSFramework.EventBus;
+using MSFramework.Domain;
 using Newtonsoft.Json;
 
-namespace MSFramework.Domain
+namespace MSFramework.CQRS.EventSouring
 {
 	public class EventSourceEntry
 	{

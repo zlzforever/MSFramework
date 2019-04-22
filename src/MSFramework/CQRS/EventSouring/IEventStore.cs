@@ -1,8 +1,9 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using MSFramework.Domain;
 using MSFramework.EventBus;
 
-namespace MSFramework.Domain
+namespace MSFramework.CQRS.EventSouring
 {
 	public interface IEventStore
 	{

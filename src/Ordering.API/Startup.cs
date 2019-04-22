@@ -36,6 +36,7 @@ namespace Ordering.API
 				// 使用 SqlServer
 				builder.UseEntityFramework(new DbContextOptionsBuilderCreator());
 			});
+			services.AddInMemoryEventStore();
 		}
 
 		// This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

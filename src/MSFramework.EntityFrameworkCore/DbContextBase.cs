@@ -10,6 +10,7 @@ using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.Extensions.Logging;
+using MSFramework.CQRS.EventSouring;
 using MSFramework.Domain;
 using MSFramework.Domain.Auditing;
 using MSFramework.Domain.Entity;

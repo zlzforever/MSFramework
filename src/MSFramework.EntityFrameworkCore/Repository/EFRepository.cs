@@ -7,6 +7,7 @@ using System.Linq.Expressions;
 using System.Threading.Tasks;
 using Castle.Core.Internal;
 using Microsoft.EntityFrameworkCore;
+using MSFramework.CQRS.EventSouring;
 using MSFramework.Domain;
 using MSFramework.Domain.Entity;
 using Z.EntityFramework.Plus;

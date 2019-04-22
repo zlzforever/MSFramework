@@ -1,4 +1,5 @@
 using System;
+using MSFramework.CQRS.EventSouring;
 using MSFramework.Domain;
 using MSFramework.EntityFrameworkCore;
 using MSFramework.EntityFrameworkCore.Repository;

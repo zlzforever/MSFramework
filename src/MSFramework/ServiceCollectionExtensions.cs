@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
 using MSFramework.Core;
 using MSFramework.CQRS;
+using MSFramework.CQRS.EventSouring;
 using MSFramework.DependencyInjection;
 using MSFramework.Domain.Repository;
 using MSFramework.EventBus;
@@ -15,6 +16,12 @@ namespace MSFramework
 {
 	public static class ServiceCollectionExtensions
 	{
+		public static IServiceCollection AddInMemoryEventStore(this IServiceCollection services)
+		{
+			services.AddSingleton<IEventStore, InMemoryEventStore>();
+			return services;
+		}
+
 		public static IServiceCollection AddMSFramework(this IServiceCollection services,
 			Action<MSFrameworkBuilder> builderAction = null)
 		{
