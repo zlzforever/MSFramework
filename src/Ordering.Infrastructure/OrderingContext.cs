@@ -11,9 +11,11 @@ namespace Ordering.Infrastructure
 	{
 		public const string DefaultSchema = "ordering";
 
-		public OrderingContext(DbContextOptions options, IEntityConfigurationTypeFinder typeFinder, IEventBus mediator,
+		public OrderingContext(DbContextOptions options, IEntityConfigurationTypeFinder typeFinder,
+			ILocalEventBus mediator, IDistributedEventBus distributedEventBus,
 			IEventStore eventStore,
-			ILoggerFactory loggerFactory) : base(options, typeFinder, mediator, eventStore, loggerFactory)
+			ILoggerFactory loggerFactory) : base(options, typeFinder, mediator, distributedEventBus, eventStore,
+			loggerFactory)
 		{
 		}
 	}

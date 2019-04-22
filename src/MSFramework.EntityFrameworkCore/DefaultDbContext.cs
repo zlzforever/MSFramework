@@ -15,18 +15,20 @@ namespace MSFramework.EntityFrameworkCore
 		/// 初始化一个<see cref="DefaultDbContext"/>类型的新实例
 		/// </summary>
 		public DefaultDbContext(DbContextOptions options,
-			IEntityConfigurationTypeFinder typeFinder, IEventBus mediator, IEventStore eventStore)
-			: base(options, typeFinder, mediator, eventStore, null)
+			IEntityConfigurationTypeFinder typeFinder,
+			ILocalEventBus mediator, IDistributedEventBus distributedEventBus, IEventStore eventStore)
+			: base(options, typeFinder, mediator, distributedEventBus, eventStore, null)
 		{
 		}
 
 		/// <summary>
 		/// 初始化一个<see cref="DefaultDbContext"/>类型的新实例
 		/// </summary>
-		public DefaultDbContext(DbContextOptions options, IEntityConfigurationTypeFinder typeFinder, IEventBus mediator,
+		public DefaultDbContext(DbContextOptions options, IEntityConfigurationTypeFinder typeFinder,
+			ILocalEventBus mediator, IDistributedEventBus distributedEventBus,
 			IEventStore eventStore,
 			ILoggerFactory loggerFactory)
-			: base(options, typeFinder, mediator, eventStore, loggerFactory)
+			: base(options, typeFinder, mediator, distributedEventBus, eventStore, loggerFactory)
 		{
 		}
 	}

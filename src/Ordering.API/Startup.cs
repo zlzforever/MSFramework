@@ -36,11 +36,6 @@ namespace Ordering.API
 				// 使用 SqlServer
 				builder.UseEntityFramework(new DbContextOptionsBuilderCreator());
 			});
-			services.AddEventBus(builder =>
-			{
-				// 使用 SqlServer
-				builder.UseEfEventSource();
-			});
 		}
 
 		// This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

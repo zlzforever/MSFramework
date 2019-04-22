@@ -9,23 +9,11 @@ using MSFramework.EventBus;
 
 namespace MSFramework.Domain
 {
-	public interface IES<TKey> where TKey : IEquatable<TKey>
-	{
-		Guid Id { get; }
-		TKey AggreeId { get; }
-		DateTime TimeStamp { get; }
-		long Version { get; set; }
-	}
-
-	//public class EventSourceEntry<TAggregateId> where TAggregateId : IEquatable<TAggregateId>
-	public interface IESHandler<TA, TES, TAggregateId>
-		where TA : IAggregateRoot<TAggregateId>
-		where TES : IES<TAggregateId>
-		where TAggregateId : IEquatable<TAggregateId>
-	{
-		void Handle(TES es);
-	}
-
+	/// <summary>
+	/// 本地领域事件: 聚合内部事件(用于更改数据，需要保存到 ES)直接调用，聚合互通事件(不需要保存到 ES)
+	/// 外部领域事件: 通过分布式 EventBus 发布到消息队列中, 在 DbContext 中处理
+	/// </summary>
+	/// <typeparam name="TAggregateId"></typeparam>
 	[Serializable]
 	public abstract class AggregateRootBase<TAggregateId> :
 		EntityBase<TAggregateId>,
@@ -34,10 +22,14 @@ namespace MSFramework.Domain
 	{
 		public const long NewAggregateVersion = -1;
 
-		private readonly ICollection<IDomainEvent<TAggregateId>> _uncommittedEvents =
-			new LinkedList<IDomainEvent<TAggregateId>>();
+		private readonly ICollection<IDomainEvent> _uncommittedDistributedEvents =
+			new LinkedList<IDomainEvent>();
 
-		private long _version = NewAggregateVersion;
+		private readonly ICollection<IDomainEvent> _uncommittedLocalEvents =
+			new LinkedList<IDomainEvent>();
+
+		private readonly ICollection<AggregateEvent<TAggregateId>> _aggregateEvents =
+			new LinkedList<AggregateEvent<TAggregateId>>();
 
 		protected AggregateRootBase()
 		{
@@ -47,33 +39,82 @@ namespace MSFramework.Domain
 		{
 		}
 
+		#region AggregateEvent
 
-		public long Version => _version;
+		public long Version { get; private set; } = NewAggregateVersion;
 
-		public void ClearUncommittedEvents()
-			=> _uncommittedEvents.Clear();
+		public IEnumerable<IAggregateEvent> GetAggregateEvents() =>
+			_aggregateEvents.AsEnumerable();
 
-		public IEnumerable<IDomainEvent> GetUncommittedEvents()
-			=> _uncommittedEvents.AsEnumerable();
 
-		public void AddDomainEvent(IDomainEvent<TAggregateId> @event)
+		public void ClearAggregateEvents()
 		{
-			@event.SetAggregateIdAndVersion(Equals(Id, default(TAggregateId)) ? @event.AggregateId : Id, _version + 1);
-			_uncommittedEvents.Add(@event);
+			_aggregateEvents.Clear();
 		}
 
-		protected void ApplyEvent(IES<TAggregateId> e)
+		public string IdAsString() => Id.ToString();
+
+		protected void ApplyAggregateEvent(AggregateEvent<TAggregateId> e)
 		{
-			((dynamic) this).Handle(e);
+			ApplyAggregateEvent(e, true);
 		}
 
-		public void LoadFromHistory(IEnumerable<IES<TAggregateId>> history)
+		private void ApplyAggregateEvent(AggregateEvent<TAggregateId> e, bool isNew)
+		{
+			lock (_aggregateEvents)
+			{
+				((dynamic) this).Apply(e);
+				if (isNew)
+				{
+					_aggregateEvents.Add(e);
+				}
+				else
+				{
+					Id = e.AggregateId;
+					Version++;
+				}
+			}
+		}
+
+		#endregion
+
+		#region  Distributred domain events
+
+		public void ClearDistributedDomainEvent()
+			=> _uncommittedDistributedEvents.Clear();
+
+		public IEnumerable<IDomainEvent> GetDistributedDomainEvent()
+			=> _uncommittedDistributedEvents.AsEnumerable();
+
+		public void RegisterDistributedDomainEvent(IDomainEvent @event)
+		{
+			_uncommittedDistributedEvents.Add(@event);
+		}
+
+		#endregion
+
+		#region  Local domain events
+
+		public void ClearLocalDomainEvent()
+			=> _uncommittedLocalEvents.Clear();
+
+		public IEnumerable<IDomainEvent> GetLocalDomainEvent()
+			=> _uncommittedLocalEvents.AsEnumerable();
+
+		public void RegisterLocalDomainEvent(IDomainEvent @event)
+		{
+			_uncommittedLocalEvents.Add(@event);
+		}
+
+		#endregion
+
+		public void LoadFromHistory(IEnumerable<AggregateEvent<TAggregateId>> history)
 		{
 			foreach (var e in history)
 			{
 				if (e.Version != Version + 1)
 					throw new MSFrameworkException(e.Id.ToString());
-				((dynamic) this).Handle(this, e);
+				ApplyAggregateEvent(e, true);
 			}
 		}
 	}

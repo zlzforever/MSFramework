@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -22,8 +23,9 @@ namespace MSFramework.EntityFrameworkCore
 		private readonly ILogger _logger;
 		private readonly ILoggerFactory _loggerFactory;
 		private readonly IEntityConfigurationTypeFinder _typeFinder;
-		private readonly IEventBus _mediator;
+		private readonly IEventBus _eventBusr;
 		private readonly IEventStore _eventStore;
+		private readonly IDistributedEventBus _distributedEventBus;
 
 		/// <summary>
 		/// 初始化一个<see cref="DbContextBase"/>类型的新实例
@@ -31,7 +33,8 @@ namespace MSFramework.EntityFrameworkCore
 		protected DbContextBase(
 			DbContextOptions options,
 			IEntityConfigurationTypeFinder typeFinder,
-			IEventBus mediator,
+			ILocalEventBus mediator,
+			IDistributedEventBus distributedEventBus,
 			IEventStore eventStore,
 			ILoggerFactory loggerFactory)
 			: base(options)
@@ -39,8 +42,9 @@ namespace MSFramework.EntityFrameworkCore
 			_typeFinder = typeFinder;
 			_loggerFactory = loggerFactory;
 			_logger = loggerFactory?.CreateLogger(GetType());
-			_mediator = mediator;
+			_eventBusr = mediator;
 			_eventStore = eventStore;
+			_distributedEventBus = distributedEventBus;
 		}
 
 		/// <summary>
@@ -270,6 +274,8 @@ namespace MSFramework.EntityFrameworkCore
 				// You will need to handle eventual consistency and compensatory actions in case of failures in any of the Handlers. 
 				await DispatchDomainEventsAsync();
 
+				await SaveEventSourceAsync();
+
 				// After executing this line all the changes (from the Command Handler and Domain Event Handlers) 
 				// performed through the DbContext will be committed
 
@@ -281,22 +287,48 @@ namespace MSFramework.EntityFrameworkCore
 			}
 		}
 
+		private async Task SaveEventSourceAsync()
+		{
+			var aggregateRoots = ChangeTracker
+				.Entries<IEventSourcingAggregate>()
+				.Where(x => x.Entity.GetAggregateEvents() != null && x.Entity.GetAggregateEvents().Any()).ToList();
+
+			foreach (var aggregateRoot in aggregateRoots)
+			{
+				foreach (var aggregateEvent in aggregateRoot.Entity.GetAggregateEvents())
+				{
+					await _eventStore.AddEventAsync(new EventSourceEntry(aggregateEvent));
+				}
+			}
+		}
+
 		protected virtual async Task DispatchDomainEventsAsync()
 		{
 			var aggregateRoots = ChangeTracker
 				.Entries<IAggregateRoot>()
-				.Where(x => x.Entity.GetUncommittedEvents() != null && x.Entity.GetUncommittedEvents().Any()).ToList();
+				.Where(x => x.Entity.GetLocalDomainEvents() != null && x.Entity.GetLocalDomainEvents().Any()).ToList();
 
-			var domainEvents = aggregateRoots
-				.SelectMany(x => x.Entity.GetUncommittedEvents())
-				.ToList();
-
-			aggregateRoots.ForEach(entity => entity.Entity.ClearUncommittedEvents());
-			var tasks = domainEvents.Select(async @event =>
+			var localDomainEvents = new List<IDomainEvent>();
+			var distributedDomainEvents = new List<IDomainEvent>();
+			foreach (var aggregateRoot in aggregateRoots)
 			{
-				await _mediator.PublishAsync(@event);
-			});
+				localDomainEvents.AddRange(aggregateRoot.Entity.GetLocalDomainEvents());
+				aggregateRoot.Entity.ClearLocalDomainEvents();
+				distributedDomainEvents.AddRange(aggregateRoot.Entity.GetDistributedDomainEvents());
+				aggregateRoot.Entity.ClearDistributedDomainEvents();
+			}
 
+			var tasks = new List<Task>();
+			tasks.AddRange(localDomainEvents.Select(async @event =>
+			{
+				// 通过 EventBus 发布出去
+				await _eventBusr.PublishAsync(@event);
+			}));
+			tasks.AddRange(distributedDomainEvents.Select(async @event =>
+			{
+				// 通过 Distributed EventBus 发布出去
+				await _distributedEventBus.PublishAsync(@event);
+			}));
 			await Task.WhenAll(tasks);
 		}
 	}

@@ -7,6 +7,7 @@ using System.Linq.Expressions;
 using System.Threading.Tasks;
 using Castle.Core.Internal;
 using Microsoft.EntityFrameworkCore;
+using MSFramework.Domain;
 using MSFramework.Domain.Entity;
 using Z.EntityFramework.Plus;
 
@@ -22,6 +23,7 @@ namespace MSFramework.EntityFrameworkCore.Repository
 		where TKey : IEquatable<TKey>
 	{
 		private readonly DbContext _dbContext;
+		private readonly IEventStore _eventStore;
 
 		public DbContext Context => _dbContext;
 
@@ -42,7 +44,7 @@ namespace MSFramework.EntityFrameworkCore.Repository
 
 		public DbSet<TEntity> Table { get; }
 
-		public EfRepository(DbContextFactory dbContextFactory)
+		public EfRepository(IEventStore eventStore, DbContextFactory dbContextFactory)
 		{
 			_dbContext = dbContextFactory.GetDbContext<TEntity>();
 			Table = _dbContext.Set<TEntity>();

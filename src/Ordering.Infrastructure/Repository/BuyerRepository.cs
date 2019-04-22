@@ -1,4 +1,5 @@
 using System;
+using MSFramework.Domain;
 using MSFramework.EntityFrameworkCore;
 using MSFramework.EntityFrameworkCore.Repository;
 using Ordering.Domain.AggregateRoot.Order;
@@ -8,7 +9,9 @@ namespace Ordering.Infrastructure.Repository
 {
 	public class BuyerRepository : EfRepository<Order, Guid>, IOrderingRepository
 	{
-		public BuyerRepository(DbContextFactory dbContextFactory) : base(dbContextFactory)
+		public BuyerRepository(DbContextFactory dbContextFactory, IEventStore eventStore) : base(eventStore,
+			dbContextFactory
+		)
 		{
 		}
 	}

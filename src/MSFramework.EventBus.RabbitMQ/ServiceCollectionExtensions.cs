@@ -6,10 +6,11 @@ namespace MSFramework.EventBus.RabbitMQ
 {
 	public static class ServiceCollectionExtensions
 	{
-		public static EventBusBuilder UseRabbitMQ(this EventBusBuilder builder)
+		public static IServiceCollection AddRabbitMQ(this IServiceCollection services)
 		{
-			builder.Services.AddScoped<RabbitMQOptions>();
-			builder.Services.AddSingleton(provider =>
+			
+			services.AddScoped<RabbitMQOptions>();
+			services.AddSingleton(provider =>
 			{
 				var options = provider.GetRequiredService<RabbitMQOptions>();
 
@@ -33,8 +34,8 @@ namespace MSFramework.EventBus.RabbitMQ
 					provider.GetRequiredService<ILogger<RabbitMQConnection>>(),
 					options.RetryCount);
 			});
-			builder.Services.AddSingleton<IEventBus, RabbitMQEventBus>();
-			return builder;
+			services.AddSingleton<IDistributedEventBus, RabbitMQEventBus>();
+			return services;
 		}
 	}
 }

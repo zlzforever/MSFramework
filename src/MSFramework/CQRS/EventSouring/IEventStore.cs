@@ -6,8 +6,8 @@ namespace MSFramework.Domain
 {
 	public interface IEventStore
 	{
-		Task<IEnumerable<Event>> ReadEventsAsync(object id);
+		Task<IEnumerable<Event>> GetEventsAsync(string aggregateId, long from);
 
-		Task<AppendResult> AppendEventAsync(IDomainEvent @event);
+		Task AddEventAsync(params EventSourceEntry[] @event);
 	}
 }

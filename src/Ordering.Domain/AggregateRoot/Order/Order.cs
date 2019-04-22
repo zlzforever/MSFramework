@@ -7,24 +7,9 @@ using MSFramework.EventBus;
 using Ordering.Domain.Events;
 
 namespace Ordering.Domain.AggregateRoot.Order
-{
-	public class AddOrderItemEvent : IES<Guid>
-	{
-		public Guid Id { get; }
+{ 
+	public class Order : AggregateRootBase<Guid>
 
-		public Guid AggreeId { get; }
-
-		public DateTime TimeStamp { get; }
-
-		public long Version { get; set; }
-
-
-		public int productId { get; }
-	}
-
-
-	public class Order : AggregateRootBase<Guid>,
-		IESHandler<Order, AddOrderItemEvent, Guid>
 	{
 		// DDD Patterns comment
 		// Using private fields, allowed since EF Core 1.1, is a much better encapsulation
@@ -110,10 +95,8 @@ namespace Ordering.Domain.AggregateRoot.Order
 				var orderItem = new OrderItem(productId, productName, unitPrice, discount, pictureUrl, units);
 				_orderItems.Add(orderItem);
 			}
-
-			var e = new AddOrderItemEvent();
-			ApplyEvent(e);
 		}
+ 
 
 		public void SetPaymentId(int id)
 		{
@@ -129,7 +112,7 @@ namespace Ordering.Domain.AggregateRoot.Order
 		{
 			if (_orderStatusId == OrderStatus.Submitted.Id)
 			{
-				AddDomainEvent(new OrderStatusChangedToAwaitingValidationDomainEvent(_orderItems));
+				RegisterDistributedDomainEvent(new OrderStatusChangedToAwaitingValidationDomainEvent(_orderItems));
 				_orderStatusId = OrderStatus.AwaitingValidation.Id;
 			}
 		}
@@ -138,7 +121,7 @@ namespace Ordering.Domain.AggregateRoot.Order
 		{
 			if (_orderStatusId == OrderStatus.AwaitingValidation.Id)
 			{
-				AddDomainEvent(new OrderStatusChangedToStockConfirmedDomainEvent());
+				RegisterDistributedDomainEvent(new OrderStatusChangedToStockConfirmedDomainEvent());
 
 				_orderStatusId = OrderStatus.StockConfirmed.Id;
 				_description = "All the items were confirmed with available stock.";
@@ -149,7 +132,7 @@ namespace Ordering.Domain.AggregateRoot.Order
 		{
 			if (_orderStatusId == OrderStatus.StockConfirmed.Id)
 			{
-				AddDomainEvent(new OrderStatusChangedToPaidDomainEvent(OrderItems));
+				RegisterDistributedDomainEvent(new OrderStatusChangedToPaidDomainEvent(OrderItems));
 
 				_orderStatusId = OrderStatus.Paid.Id;
 				_description =
@@ -166,7 +149,7 @@ namespace Ordering.Domain.AggregateRoot.Order
 
 			_orderStatusId = OrderStatus.Shipped.Id;
 			_description = "The order was shipped.";
-			AddDomainEvent(new OrderShippedDomainEvent(this));
+			RegisterLocalDomainEvent(new OrderShippedDomainEvent(this));
 		}
 
 		public void SetCancelledStatus()
@@ -179,7 +162,7 @@ namespace Ordering.Domain.AggregateRoot.Order
 
 			_orderStatusId = OrderStatus.Cancelled.Id;
 			_description = $"The order was cancelled.";
-			AddDomainEvent(new OrderCancelledDomainEvent(this));
+			RegisterDistributedDomainEvent(new OrderCancelledDomainEvent(this));
 		}
 
 		public void SetCancelledStatusWhenStockIsRejected(IEnumerable<int> orderStockRejectedItems)
@@ -204,7 +187,7 @@ namespace Ordering.Domain.AggregateRoot.Order
 				cardNumber, cardSecurityNumber,
 				cardHolderName, cardExpiration);
 
-			AddDomainEvent(orderStartedDomainEvent);
+			RegisterDistributedDomainEvent(orderStartedDomainEvent);
 		}
 
 		private void StatusChangeException(OrderStatus orderStatusToChange)
@@ -214,10 +197,5 @@ namespace Ordering.Domain.AggregateRoot.Order
 		}
 
 		public decimal Total => _orderItems.Sum(o => o.Units * o.UnitPrice);
-
-
-		void IESHandler<Order, AddOrderItemEvent, Guid>.Handle(AddOrderItemEvent es)
-		{
-		}
 	}
 }

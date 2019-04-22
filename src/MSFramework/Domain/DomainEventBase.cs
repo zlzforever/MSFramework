@@ -4,27 +4,17 @@ using MSFramework.Core;
 
 namespace MSFramework.Domain
 {
-	public abstract class DomainEventBase<TAggregateId> : IDomainEvent<TAggregateId>,
+	public abstract class DomainEventBase<TAggregateId> : IDomainEvent,
 		IEquatable<DomainEventBase<TAggregateId>>
 	{
 		public Guid Id { get; }
 
 		public DateTime CreationTime { get; }
 
-		public TAggregateId AggregateId { get; private set; }
-
-		public long AggregateVersion { get; private set; }
-
 		protected DomainEventBase()
 		{
 			Id = CombGuid.NewGuid();
 			CreationTime = DateTime.UtcNow;
-		}
-
-		public void SetAggregateIdAndVersion(TAggregateId aggregateId, long aggregateVersion)
-		{
-			AggregateId = aggregateId;
-			AggregateVersion = aggregateVersion;
 		}
 
 		public override bool Equals(object obj)

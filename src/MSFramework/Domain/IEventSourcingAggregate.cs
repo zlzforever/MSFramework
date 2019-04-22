@@ -9,13 +9,8 @@ namespace MSFramework.Domain
 	{
 		long Version { get; }
 
-		IEnumerable<IDomainEvent> GetUncommittedEvents();
+		IEnumerable<IAggregateEvent> GetAggregateEvents();
 
-		void ClearUncommittedEvents();
-	}
-
-	public interface IEventSourcingAggregate<TAggregateId> : IEventSourcingAggregate
-		where TAggregateId : IEquatable<TAggregateId>
-	{
+		void ClearAggregateEvents();
 	}
 }

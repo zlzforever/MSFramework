@@ -6,6 +6,7 @@ using MSFramework.Core;
 using MSFramework.CQRS;
 using MSFramework.DependencyInjection;
 using MSFramework.Domain.Repository;
+using MSFramework.EventBus;
 using MSFramework.Reflection;
 using MSFramework.Security;
 using MSFramework.Serialization;
@@ -46,8 +47,8 @@ namespace MSFramework
 			builder.Services.AddMediatR(Singleton<IAssemblyFinder>.Instance.GetAllAssemblyList().ToArray());
 			builder.Services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
 			builder.Services.AddSingleton<ICurrentUser, CurrentUser>();
-
 			builder.Services.AddSingleton<ICommandBus, CommandBus>();
+			builder.Services.AddLocalEventBus();
 
 			return services;
 		}

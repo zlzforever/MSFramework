@@ -4,18 +4,24 @@ using MediatR;
 
 namespace MSFramework.Domain
 {
-	public interface IAggregateRoot
+	public interface IAggregateRoot : IAggregateId
 	{
-		IEnumerable<IDomainEvent> GetUncommittedEvents();
+		void RegisterLocalDomainEvent(IDomainEvent @event);
 
-		void ClearUncommittedEvents();
+		IEnumerable<IDomainEvent> GetLocalDomainEvents();
+
+		void ClearLocalDomainEvents();
+
+		void RegisterDistributedDomainEvent(IDomainEvent @event);
+
+		IEnumerable<IDomainEvent> GetDistributedDomainEvents();
+
+		void ClearDistributedDomainEvents();
 	}
-	
-	public interface IAggregateRoot<TAggregateId>
-		: IEventSourcingAggregate<TAggregateId> where TAggregateId : IEquatable<TAggregateId>
+
+	public interface IAggregateRoot<out TAggregateId>
+		: IEventSourcingAggregate where TAggregateId : IEquatable<TAggregateId>
 	{
 		TAggregateId Id { get; }
-		
-		void AddDomainEvent(IDomainEvent<TAggregateId> @event);		
 	}
 }

@@ -49,6 +49,8 @@ namespace Ordering.API.Application.Command
 			var order = new Order(message.UserId, message.UserName, address, message.CardTypeId, message.CardNumber,
 				message.CardSecurityNumber, message.CardHolderName, message.CardExpiration);
 
+ 
+			
 			foreach (var item in message.OrderItems)
 			{
 				order.AddOrderItem(item.ProductId, item.ProductName, item.UnitPrice, item.Discount, item.PictureUrl,
