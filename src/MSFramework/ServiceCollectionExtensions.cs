@@ -16,10 +16,10 @@ namespace MSFramework
 {
 	public static class ServiceCollectionExtensions
 	{
-		public static IServiceCollection AddInMemoryEventStore(this IServiceCollection services)
+		public static MSFrameworkBuilder AddInMemoryEventStore(this MSFrameworkBuilder builder)
 		{
-			services.AddSingleton<IEventStore, InMemoryEventStore>();
-			return services;
+			builder.Services.AddSingleton<IEventStore, InMemoryEventStore>();
+			return builder;
 		}
 
 		public static IServiceCollection AddMSFramework(this IServiceCollection services,

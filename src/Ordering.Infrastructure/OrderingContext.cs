@@ -14,8 +14,8 @@ namespace Ordering.Infrastructure
 
 		public OrderingContext(DbContextOptions options, IEntityConfigurationTypeFinder typeFinder,
 			ILocalEventBus mediator, IDistributedEventBus distributedEventBus,
-			IEventStore eventStore,
-			ILoggerFactory loggerFactory) : base(options, typeFinder, mediator, distributedEventBus, eventStore,
+			IEventStore eventStore, EntityFrameworkOptions config,
+			ILoggerFactory loggerFactory) : base(options, typeFinder, mediator, distributedEventBus, eventStore, config,
 			loggerFactory)
 		{
 		}

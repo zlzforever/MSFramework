@@ -24,28 +24,31 @@ namespace MSFramework.EntityFrameworkCore
 		private readonly ILogger _logger;
 		private readonly ILoggerFactory _loggerFactory;
 		private readonly IEntityConfigurationTypeFinder _typeFinder;
-		private readonly IEventBus _eventBusr;
+		private readonly ILocalEventBus _eventBus;
 		private readonly IEventStore _eventStore;
 		private readonly IDistributedEventBus _distributedEventBus;
-
+		private readonly EntityFrameworkOptions _config;
+		
 		/// <summary>
 		/// 初始化一个<see cref="DbContextBase"/>类型的新实例
 		/// </summary>
 		protected DbContextBase(
 			DbContextOptions options,
 			IEntityConfigurationTypeFinder typeFinder,
-			ILocalEventBus mediator,
+			ILocalEventBus eventBus,
 			IDistributedEventBus distributedEventBus,
 			IEventStore eventStore,
+			EntityFrameworkOptions config,
 			ILoggerFactory loggerFactory)
 			: base(options)
 		{
 			_typeFinder = typeFinder;
 			_loggerFactory = loggerFactory;
 			_logger = loggerFactory?.CreateLogger(GetType());
-			_eventBusr = mediator;
+			_eventBus = eventBus;
 			_eventStore = eventStore;
 			_distributedEventBus = distributedEventBus;
+			_config = config;
 		}
 
 		/// <summary>
@@ -64,6 +67,11 @@ namespace MSFramework.EntityFrameworkCore
 			}
 
 			_logger?.LogInformation($"上下文“{contextType}”注册了{registers.Length}个实体类");
+
+			if (_config.EnableEventSouring)
+			{
+				new EventSourceEntryConfiguration().Configure(modelBuilder.Entity<EventSourceEntry>());
+			}			 
 		}
 
 		/// <summary>
@@ -323,7 +331,7 @@ namespace MSFramework.EntityFrameworkCore
 			tasks.AddRange(localDomainEvents.Select(async @event =>
 			{
 				// 通过 EventBus 发布出去
-				await _eventBusr.PublishAsync(@event);
+				await _eventBus.PublishAsync(@event);
 			}));
 			tasks.AddRange(distributedDomainEvents.Select(async @event =>
 			{
