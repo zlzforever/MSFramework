@@ -17,9 +17,9 @@ namespace MSFramework.Domain
 	public abstract class AggregateEvent<TAggregateId> : Event, IAggregateEvent
 		where TAggregateId : IEquatable<TAggregateId>
 	{
-		public long Version { get; }
+		public long Version { get; protected set; }
 
-		public TAggregateId AggregateId { get; }
+		public TAggregateId AggregateId { get; protected set; }
 
 		public string IdAsString() => AggregateId.ToString();
 

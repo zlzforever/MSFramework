@@ -41,7 +41,7 @@ namespace MSFramework.Domain
 
 		#region AggregateEvent
 
-		public long Version { get; private set; } = NewAggregateVersion;
+		public long Version { get; protected set; } = NewAggregateVersion;
 
 		public IEnumerable<IAggregateEvent> GetAggregateEvents() =>
 			_aggregateEvents.AsEnumerable();

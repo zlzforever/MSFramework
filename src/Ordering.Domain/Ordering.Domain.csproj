@@ -8,8 +8,4 @@
       <ProjectReference Include="..\MSFramework\MSFramework.csproj" />
     </ItemGroup>
 
-    <ItemGroup>
-      <Folder Include="Events" />
-    </ItemGroup>
-
 </Project>

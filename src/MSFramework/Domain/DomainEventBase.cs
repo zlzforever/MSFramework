@@ -7,7 +7,7 @@ namespace MSFramework.Domain
 	public abstract class DomainEventBase<TAggregateId> : IDomainEvent,
 		IEquatable<DomainEventBase<TAggregateId>>
 	{
-		public Guid Id { get; }
+		public Guid Id { get; protected set; }
 
 		public DateTime CreationTime { get; }
 
