@@ -1,5 +1,5 @@
 ﻿using System;
-using MSFramework.CQRS;
+using MSFramework.Command;
 
 
 namespace Ordering.API.Application.Command

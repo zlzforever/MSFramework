@@ -1,14 +1,8 @@
-﻿using MSFramework.CQRS.EventSouring;
-using MSFramework.Domain.Repository;
-using System;
-using MSFramework.Domain;
+﻿using System;
 using MSFramework.EntityFrameworkCore;
 using MSFramework.EntityFrameworkCore.Repository;
+using MSFramework.EventSouring;
 using Ordering.Domain.Aggregates;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace Ordering.Infrastructure.Repository
 {

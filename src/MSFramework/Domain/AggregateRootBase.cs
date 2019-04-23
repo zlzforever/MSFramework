@@ -89,7 +89,7 @@ namespace MSFramework.Domain
 
 		#endregion
 
-		public void LoadFromHistory(IEnumerable<AggregateEvent<IAggregateEvent>> histories)
+		public void LoadFromHistory(IEnumerable<IAggregateEvent> histories)
 		{
 			foreach (var @event in histories)
 			{

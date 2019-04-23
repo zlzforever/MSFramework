@@ -1,5 +1,4 @@
 ﻿using MSFramework;
-using MSFramework.CQRS;
 using Ordering.API.Application.Command;
 using Ordering.Domain.Aggregates;
 using Ordering.Infrastructure.Repository;
@@ -9,6 +8,7 @@ using System.Linq;
 using System.Net.NetworkInformation;
 using System.Text;
 using System.Threading.Tasks;
+using MSFramework.Command;
 
 namespace Ordering.API.Application.EventHandler
 {
@@ -23,9 +23,9 @@ namespace Ordering.API.Application.EventHandler
 			_repository = repository;
 		}
 
-		public void Handle(CreateOrderCommand command)
+		public async Task ExecuteAsync(CreateOrderCommand command)
 		{
-			var item = new Order(
+			var order = new Order(
 				command.Id,
 				command.ExpectedVersion,
 				command.Description,
@@ -37,24 +37,25 @@ namespace Ordering.API.Application.EventHandler
 					StoreItemId = x.StoreItemId,
 					StoreItemUrl = x.StoreItemUrl
 				}).ToList());
-			_repository.Insert(item);
-		}
-		
-		public void Handle(ChangeOrderAddressCommand command)
-		{
-			Order item = _repository.Get(command.Id);
-			item.ChangeAddress(command.NewAddress);
+			await _repository.InsertAsync(order);
 		}
 
-		public void Handle(DeleteOrderCommand command)
+		public Task ExecuteAsync(ChangeOrderAddressCommand command)
 		{
-			Order item = _repository.Get(command.Id);
+			var item = _repository.Get(command.Id);
+			item.ChangeAddress(command.NewAddress);
+			return Task.FromResult(0);
+		}
+
+		public Task ExecuteAsync(DeleteOrderCommand command)
+		{
+			var item = _repository.Get(command.Id);
 			if (item.Version != command.ExpectedVersion)
 			{
 				throw new MSFrameworkException("version validate failed");
 			}
 			item.Delete();
-			
+			return Task.FromResult(0);
 		}
 	}
 }

@@ -1,10 +1,9 @@
-﻿using MSFramework.CQRS.EventSouring;
-using MSFramework.Domain;
+﻿using MSFramework.Domain;
 using MSFramework.Domain.Repository;
 using System;
-using System.Collections.Generic;
-using System.Text;
+using System.Linq;
 using System.Threading.Tasks;
+using MSFramework.EventSouring;
 
 namespace MSFramework.EntityFrameworkCore.Repository
 {
@@ -25,7 +24,7 @@ namespace MSFramework.EntityFrameworkCore.Repository
 			if (aggregate != null)
 			{
 				var events = await _eventStore.GetEventsAsync(aggregate.IdAsString(), aggregate.Version);
-				aggregate.LoadFromHistory(events);
+				aggregate.LoadFromHistory(events.Select(a => a.ToAggregateEvent()));
 			}
 
 			return aggregate;
