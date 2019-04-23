@@ -2,12 +2,12 @@ using System;
 using MediatR;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
-using MSFramework.Core;
-using MSFramework.CQRS;
-using MSFramework.CQRS.EventSouring;
+using MSFramework.Command;
+using MSFramework.Common;
 using MSFramework.DependencyInjection;
 using MSFramework.Domain.Repository;
 using MSFramework.EventBus;
+using MSFramework.EventSouring;
 using MSFramework.Reflection;
 using MSFramework.Security;
 using MSFramework.Serialization;
@@ -16,10 +16,10 @@ namespace MSFramework
 {
 	public static class ServiceCollectionExtensions
 	{
-		public static IServiceCollection AddInMemoryEventStore(this IServiceCollection services)
+		public static MSFrameworkBuilder AddInMemoryEventStore(this MSFrameworkBuilder builder)
 		{
-			services.AddSingleton<IEventStore, InMemoryEventStore>();
-			return services;
+			builder.Services.AddSingleton<IEventStore, InMemoryEventStore>();
+			return builder;
 		}
 
 		public static IServiceCollection AddMSFramework(this IServiceCollection services,

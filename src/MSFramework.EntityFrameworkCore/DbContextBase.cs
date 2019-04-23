@@ -1,20 +1,17 @@
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using MediatR;
-using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.Extensions.Logging;
-using MSFramework.CQRS.EventSouring;
 using MSFramework.Domain;
 using MSFramework.Domain.Auditing;
 using MSFramework.Domain.Entity;
 using MSFramework.EventBus;
+using MSFramework.EventSouring;
 using MSFramework.Security;
 
 namespace MSFramework.EntityFrameworkCore
@@ -24,9 +21,9 @@ namespace MSFramework.EntityFrameworkCore
 		private readonly ILogger _logger;
 		private readonly ILoggerFactory _loggerFactory;
 		private readonly IEntityConfigurationTypeFinder _typeFinder;
-		private readonly IEventBus _eventBusr;
+		private readonly IEventBus _eventBus;
 		private readonly IEventStore _eventStore;
-		private readonly IDistributedEventBus _distributedEventBus;
+		private readonly EntityFrameworkOptions _config;
 
 		/// <summary>
 		/// 初始化一个<see cref="DbContextBase"/>类型的新实例
@@ -34,18 +31,18 @@ namespace MSFramework.EntityFrameworkCore
 		protected DbContextBase(
 			DbContextOptions options,
 			IEntityConfigurationTypeFinder typeFinder,
-			ILocalEventBus mediator,
-			IDistributedEventBus distributedEventBus,
+			IEventBus eventBus,
 			IEventStore eventStore,
+			EntityFrameworkOptions config,
 			ILoggerFactory loggerFactory)
 			: base(options)
 		{
 			_typeFinder = typeFinder;
 			_loggerFactory = loggerFactory;
 			_logger = loggerFactory?.CreateLogger(GetType());
-			_eventBusr = mediator;
+			_eventBus = eventBus;
 			_eventStore = eventStore;
-			_distributedEventBus = distributedEventBus;
+			_config = config;
 		}
 
 		/// <summary>
@@ -64,6 +61,8 @@ namespace MSFramework.EntityFrameworkCore
 			}
 
 			_logger?.LogInformation($"上下文“{contextType}”注册了{registers.Length}个实体类");
+
+			new EventSourceEntryConfiguration().Configure(modelBuilder.Entity<EventHistory>());
 		}
 
 		/// <summary>
@@ -275,7 +274,7 @@ namespace MSFramework.EntityFrameworkCore
 				// You will need to handle eventual consistency and compensatory actions in case of failures in any of the Handlers. 
 				await DispatchDomainEventsAsync();
 
-				await SaveEventSourceAsync();
+				await SaveEventSouringDomainEventsAsync();
 
 				// After executing this line all the changes (from the Command Handler and Domain Event Handlers) 
 				// performed through the DbContext will be committed
@@ -288,7 +287,7 @@ namespace MSFramework.EntityFrameworkCore
 			}
 		}
 
-		private async Task SaveEventSourceAsync()
+		private async Task SaveEventSouringDomainEventsAsync()
 		{
 			var aggregateRoots = ChangeTracker
 				.Entries<IEventSourcingAggregate>()
@@ -298,7 +297,7 @@ namespace MSFramework.EntityFrameworkCore
 			{
 				foreach (var aggregateEvent in aggregateRoot.Entity.GetAggregateEvents())
 				{
-					await _eventStore.AddEventAsync(new EventSourceEntry(aggregateEvent));
+					await _eventStore.AddEventAsync(new EventHistory(aggregateEvent));
 				}
 			}
 		}
@@ -307,29 +306,16 @@ namespace MSFramework.EntityFrameworkCore
 		{
 			var aggregateRoots = ChangeTracker
 				.Entries<IAggregateRoot>()
-				.Where(x => x.Entity.GetLocalDomainEvents() != null && x.Entity.GetLocalDomainEvents().Any()).ToList();
+				.Where(x => x.Entity.GetDomainEvents() != null && x.Entity.GetDomainEvents().Any()).ToList();
 
-			var localDomainEvents = new List<IDomainEvent>();
-			var distributedDomainEvents = new List<IDomainEvent>();
-			foreach (var aggregateRoot in aggregateRoots)
-			{
-				localDomainEvents.AddRange(aggregateRoot.Entity.GetLocalDomainEvents());
-				aggregateRoot.Entity.ClearLocalDomainEvents();
-				distributedDomainEvents.AddRange(aggregateRoot.Entity.GetDistributedDomainEvents());
-				aggregateRoot.Entity.ClearDistributedDomainEvents();
-			}
+			var domainEvents = aggregateRoots.SelectMany(x => x.Entity.GetDomainEvents());
 
-			var tasks = new List<Task>();
-			tasks.AddRange(localDomainEvents.Select(async @event =>
+			var tasks = domainEvents.Select(async @event =>
 			{
 				// 通过 EventBus 发布出去
-				await _eventBusr.PublishAsync(@event);
-			}));
-			tasks.AddRange(distributedDomainEvents.Select(async @event =>
-			{
-				// 通过 Distributed EventBus 发布出去
-				await _distributedEventBus.PublishAsync(@event);
-			}));
+				await _eventBus.PublishAsync(@event);
+			});
+
 			await Task.WhenAll(tasks);
 		}
 	}

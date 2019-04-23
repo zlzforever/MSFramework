@@ -18,7 +18,6 @@
     <ItemGroup>
         <ProjectReference Include="..\MSFramework.EntityFrameworkCore.SqlServer\MSFramework.EntityFrameworkCore.SqlServer.csproj" />
         <ProjectReference Include="..\MSFramework.EventBus\MSFramework.EventBus.csproj" />
-        <ProjectReference Include="..\MSFramework.EventSource.EntityFrameworkCore\MSFramework.EventSource.EntityFrameworkCore.csproj" />
         <ProjectReference Include="..\Ordering.Domain\Ordering.Domain.csproj" />
         <ProjectReference Include="..\Ordering.Infrastructure\Ordering.Infrastructure.csproj" />
     </ItemGroup>

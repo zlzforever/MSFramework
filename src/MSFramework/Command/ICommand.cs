@@ -1,7 +1,6 @@
 using System;
-using MSFramework.EventBus;
 
-namespace MSFramework.CQRS
+namespace MSFramework.Command
 {
 	public interface ICommand
 	{

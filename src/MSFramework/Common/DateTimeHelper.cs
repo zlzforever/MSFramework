@@ -1,6 +1,6 @@
 using System;
 
-namespace MSFramework.Core
+namespace MSFramework.Common
 {
 	/// <summary>
 	/// 时间的帮助类

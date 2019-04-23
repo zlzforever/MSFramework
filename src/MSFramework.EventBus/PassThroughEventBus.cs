@@ -9,14 +9,14 @@ namespace MSFramework.EventBus
 	{
 		private readonly IEventBusSubscriptionStore _store;
 		private readonly ILogger _logger;
-		private readonly IServiceProvider _scopeFactory;
+		private readonly IServiceProvider _serviceProvider;
 
-		public PassThroughEventBus(ILogger<PassThroughEventBus> logger, IServiceProvider scopeFactory,
+		public PassThroughEventBus(ILogger<PassThroughEventBus> logger, IServiceProvider serviceProvider,
 			IEventBusSubscriptionStore store)
 		{
 			_store = store;
 			_logger = logger;
-			_scopeFactory = scopeFactory;
+			_serviceProvider = serviceProvider;
 		}
 
 		public async Task PublishAsync(IEvent @event)
@@ -30,13 +30,13 @@ namespace MSFramework.EventBus
 					if (subscription.IsDynamic)
 					{
 						var handler =
-							_scopeFactory.GetService(subscription.HandlerType) as IDynamicEventHandler;
+							_serviceProvider.GetService(subscription.HandlerType) as IDynamicEventHandler;
 						if (handler == null) continue;
 						await handler.Handle(@event);
 					}
 					else
 					{
-						var handler = _scopeFactory.GetService(subscription.HandlerType);
+						var handler = _serviceProvider.GetService(subscription.HandlerType);
 						if (handler == null) continue;
 
 						var concreteType = typeof(IEventHandler<>).MakeGenericType(@event.GetType());

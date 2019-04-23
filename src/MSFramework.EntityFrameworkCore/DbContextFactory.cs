@@ -10,7 +10,7 @@ namespace MSFramework.EntityFrameworkCore
 {
 	public class DbContextFactory
 	{
-		private readonly IServiceProvider _serviceProvider;		
+		private readonly IServiceProvider _serviceProvider;
 
 		private readonly ConcurrentDictionary<Type, DbContext> _dbContextDict =
 			new ConcurrentDictionary<Type, DbContext>();
@@ -81,7 +81,8 @@ namespace MSFramework.EntityFrameworkCore
 			DbContextOptions options = optionsBuilder.Options;
 
 			//创建上下文实例
-			if (!(ActivatorUtilities.CreateInstance(_serviceProvider, dbContextType, options) is DbContext context))
+			if (!(ActivatorUtilities.CreateInstance(_serviceProvider, dbContextType, options, resolveOptions) is
+				DbContext context))
 			{
 				throw new MSFrameworkException($"实例化数据上下文“{dbContextType.AssemblyQualifiedName}”失败");
 			}

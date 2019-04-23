@@ -1,6 +1,6 @@
 using System;
 using System.Collections.Generic;
-using MSFramework.Core;
+using MSFramework.Common;
 
 namespace MSFramework.Domain
 {

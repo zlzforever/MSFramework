@@ -8,8 +8,10 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using MSFramework.Collections.Generic;
-using MSFramework.Core;
+using MSFramework.Common;
+using MSFramework.Domain.Repository;
 using MSFramework.EntityFrameworkCore.Repository;
+using MSFramework.EventSouring;
 using MSFramework.Serialization;
 
 namespace MSFramework.EntityFrameworkCore
@@ -49,6 +51,13 @@ namespace MSFramework.EntityFrameworkCore
 			builder.Services.AddSingleton<EntityFrameworkMigrateService>();
 			builder.Services.AddSingleton(dbContextOptionsBuilderCreator);
 			builder.Services.AddScoped(typeof(IEfRepository<>), typeof(EfRepository<,>));
+			builder.Services.AddScoped(typeof(IRepository<>), typeof(EfRepository<,>));
+			return builder;
+		}
+
+		public static MSFrameworkBuilder UseEntityFrameworkEventStore(this MSFrameworkBuilder builder)
+		{
+			builder.Services.AddSingleton<IEventStore, EfEventStore>();
 			return builder;
 		}
 	}

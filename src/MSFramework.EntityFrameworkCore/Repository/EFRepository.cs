@@ -7,7 +7,6 @@ using System.Linq.Expressions;
 using System.Threading.Tasks;
 using Castle.Core.Internal;
 using Microsoft.EntityFrameworkCore;
-using MSFramework.CQRS.EventSouring;
 using MSFramework.Domain;
 using MSFramework.Domain.Entity;
 using Z.EntityFramework.Plus;
@@ -125,7 +124,6 @@ namespace MSFramework.EntityFrameworkCore.Repository
 			AttachIfNot(entity);
 			_dbContext.Entry(entity).State = EntityState.Modified;
 			return entity;
-			;
 		}
 
 		public virtual Task<TEntity> UpdateAsync(TEntity entity)

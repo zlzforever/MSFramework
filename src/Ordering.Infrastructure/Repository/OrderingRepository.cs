@@ -1,5 +1,7 @@
 ﻿using MSFramework.CQRS.EventSouring;
 using MSFramework.Domain.Repository;
+using System;
+using MSFramework.Domain;
 using MSFramework.EntityFrameworkCore;
 using MSFramework.EntityFrameworkCore.Repository;
 using Ordering.Domain.Aggregates;
