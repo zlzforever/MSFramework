@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.Extensions.DependencyInjection;
-using MSFramework.Core;
+using MSFramework.Common;
 using MSFramework.Reflection;
 
 namespace MSFramework.DependencyInjection

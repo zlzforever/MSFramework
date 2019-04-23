@@ -40,8 +40,6 @@ namespace MSFramework.EntityFrameworkCore
 		/// </summary>
 		public bool LazyLoadingProxiesEnabled { get; set; }
 
-		public bool EnableEventSouring { get; set; } = true;
-
 		/// <summary>
 		/// 获取或设置 是否自动迁移
 		/// </summary>

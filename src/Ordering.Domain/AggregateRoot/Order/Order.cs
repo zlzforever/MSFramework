@@ -112,7 +112,7 @@ namespace Ordering.Domain.AggregateRoot.Order
 		{
 			if (_orderStatusId == OrderStatus.Submitted.Id)
 			{
-				RegisterDistributedDomainEvent(new OrderStatusChangedToAwaitingValidationDomainEvent(_orderItems));
+				RegisterDomainEvent(new OrderStatusChangedToAwaitingValidationDomainEvent(_orderItems));
 				_orderStatusId = OrderStatus.AwaitingValidation.Id;
 			}
 		}
@@ -121,7 +121,7 @@ namespace Ordering.Domain.AggregateRoot.Order
 		{
 			if (_orderStatusId == OrderStatus.AwaitingValidation.Id)
 			{
-				RegisterDistributedDomainEvent(new OrderStatusChangedToStockConfirmedDomainEvent());
+				RegisterDomainEvent(new OrderStatusChangedToStockConfirmedDomainEvent());
 
 				_orderStatusId = OrderStatus.StockConfirmed.Id;
 				_description = "All the items were confirmed with available stock.";
@@ -132,7 +132,7 @@ namespace Ordering.Domain.AggregateRoot.Order
 		{
 			if (_orderStatusId == OrderStatus.StockConfirmed.Id)
 			{
-				RegisterDistributedDomainEvent(new OrderStatusChangedToPaidDomainEvent(OrderItems));
+				RegisterDomainEvent(new OrderStatusChangedToPaidDomainEvent(OrderItems));
 
 				_orderStatusId = OrderStatus.Paid.Id;
 				_description =
@@ -149,7 +149,7 @@ namespace Ordering.Domain.AggregateRoot.Order
 
 			_orderStatusId = OrderStatus.Shipped.Id;
 			_description = "The order was shipped.";
-			RegisterLocalDomainEvent(new OrderShippedDomainEvent(this));
+			RegisterDomainEvent(new OrderShippedDomainEvent(this));
 		}
 
 		public void SetCancelledStatus()
@@ -162,7 +162,7 @@ namespace Ordering.Domain.AggregateRoot.Order
 
 			_orderStatusId = OrderStatus.Cancelled.Id;
 			_description = $"The order was cancelled.";
-			RegisterDistributedDomainEvent(new OrderCancelledDomainEvent(this));
+			RegisterDomainEvent(new OrderCancelledDomainEvent(this));
 		}
 
 		public void SetCancelledStatusWhenStockIsRejected(IEnumerable<int> orderStockRejectedItems)
@@ -187,7 +187,7 @@ namespace Ordering.Domain.AggregateRoot.Order
 				cardNumber, cardSecurityNumber,
 				cardHolderName, cardExpiration);
 
-			RegisterDistributedDomainEvent(orderStartedDomainEvent);
+			RegisterDomainEvent(orderStartedDomainEvent);
 		}
 
 		private void StatusChangeException(OrderStatus orderStatusToChange)

@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using MSFramework.Core;
+using MSFramework.Common;
 using MSFramework.Reflection;
 
 namespace MSFramework.EntityFrameworkCore

@@ -35,7 +35,7 @@ namespace Ordering.API
 			{
 				// 使用 SqlServer
 				builder.UseEntityFramework(new DbContextOptionsBuilderCreator());
-				builder.UseEntityFrameworkEventSouring();
+				builder.UseEntityFrameworkEventStore();
 			});
 		}
 

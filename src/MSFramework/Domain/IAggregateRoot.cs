@@ -6,17 +6,11 @@ namespace MSFramework.Domain
 {
 	public interface IAggregateRoot : IAggregateId
 	{
-		void RegisterLocalDomainEvent(IDomainEvent @event);
+		void RegisterDomainEvent(IDomainEvent @event);
 
-		IEnumerable<IDomainEvent> GetLocalDomainEvents();
+		IEnumerable<IDomainEvent> GetDomainEvents();
 
-		void ClearLocalDomainEvents();
-
-		void RegisterDistributedDomainEvent(IDomainEvent @event);
-
-		IEnumerable<IDomainEvent> GetDistributedDomainEvents();
-
-		void ClearDistributedDomainEvents();
+		void ClearDomainEvents();
 	}
 
 	public interface IAggregateRoot<out TAggregateId>

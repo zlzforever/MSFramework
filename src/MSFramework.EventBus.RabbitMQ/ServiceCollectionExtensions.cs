@@ -34,7 +34,7 @@ namespace MSFramework.EventBus.RabbitMQ
 					provider.GetRequiredService<ILogger<RabbitMQConnection>>(),
 					options.RetryCount);
 			});
-			services.AddSingleton<IDistributedEventBus, RabbitMQEventBus>();
+			services.AddSingleton<IEventBus, RabbitMQEventBus>();
 			return services;
 		}
 	}

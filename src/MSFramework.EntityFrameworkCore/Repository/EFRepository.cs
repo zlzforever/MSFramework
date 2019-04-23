@@ -7,7 +7,6 @@ using System.Linq.Expressions;
 using System.Threading.Tasks;
 using Castle.Core.Internal;
 using Microsoft.EntityFrameworkCore;
-using MSFramework.CQRS.EventSouring;
 using MSFramework.Domain;
 using MSFramework.Domain.Entity;
 using Z.EntityFramework.Plus;
@@ -24,7 +23,6 @@ namespace MSFramework.EntityFrameworkCore.Repository
 		where TKey : IEquatable<TKey>
 	{
 		private readonly DbContext _dbContext;
-		private readonly IEventStore _eventStore;
 
 		public DbContext Context => _dbContext;
 
@@ -45,7 +43,7 @@ namespace MSFramework.EntityFrameworkCore.Repository
 
 		public DbSet<TEntity> Table { get; }
 
-		public EfRepository(IEventStore eventStore, DbContextFactory dbContextFactory)
+		public EfRepository(DbContextFactory dbContextFactory)
 		{
 			_dbContext = dbContextFactory.GetDbContext<TEntity>();
 			Table = _dbContext.Set<TEntity>();
@@ -126,7 +124,6 @@ namespace MSFramework.EntityFrameworkCore.Repository
 			AttachIfNot(entity);
 			_dbContext.Entry(entity).State = EntityState.Modified;
 			return entity;
-			;
 		}
 
 		public Task<TEntity> UpdateAsync(TEntity entity)

@@ -1,10 +1,10 @@
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
-using MSFramework.CQRS.EventSouring;
 using MSFramework.Domain;
 using MSFramework.EntityFrameworkCore;
 using MSFramework.EventBus;
+using MSFramework.EventSouring;
 
 namespace Ordering.Infrastructure
 {
@@ -13,9 +13,9 @@ namespace Ordering.Infrastructure
 		public const string DefaultSchema = "ordering";
 
 		public OrderingContext(DbContextOptions options, IEntityConfigurationTypeFinder typeFinder,
-			ILocalEventBus mediator, IDistributedEventBus distributedEventBus,
+			IEventBus eventBus,
 			IEventStore eventStore, EntityFrameworkOptions config,
-			ILoggerFactory loggerFactory) : base(options, typeFinder, mediator, distributedEventBus, eventStore, config,
+			ILoggerFactory loggerFactory) : base(options, typeFinder, eventBus, eventStore, config,
 			loggerFactory)
 		{
 		}

@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using MediatR;
-using MSFramework.Core;
 using MSFramework.Domain.Entity;
 using MSFramework.EventBus;
 
@@ -22,10 +21,7 @@ namespace MSFramework.Domain
 	{
 		public const long NewAggregateVersion = -1;
 
-		private readonly ICollection<IDomainEvent> _uncommittedDistributedEvents =
-			new LinkedList<IDomainEvent>();
-
-		private readonly ICollection<IDomainEvent> _uncommittedLocalEvents =
+		private readonly ICollection<IDomainEvent> _uncommittedEvents =
 			new LinkedList<IDomainEvent>();
 
 		private readonly ICollection<AggregateEvent<TAggregateId>> _aggregateEvents =
@@ -78,43 +74,28 @@ namespace MSFramework.Domain
 
 		#endregion
 
-		#region  Distributred domain events
+		#region  domain events
 
-		public void ClearDistributedDomainEvent()
-			=> _uncommittedDistributedEvents.Clear();
+		public void ClearDomainEvents()
+			=> _uncommittedEvents.Clear();
 
-		public IEnumerable<IDomainEvent> GetDistributedDomainEvent()
-			=> _uncommittedDistributedEvents.AsEnumerable();
+		public IEnumerable<IDomainEvent> GetDomainEvents()
+			=> _uncommittedEvents.AsEnumerable();
 
-		public void RegisterDistributedDomainEvent(IDomainEvent @event)
+		public void RegisterDomainEvent(IDomainEvent @event)
 		{
-			_uncommittedDistributedEvents.Add(@event);
+			_uncommittedEvents.Add(@event);
 		}
 
 		#endregion
 
-		#region  Local domain events
-
-		public void ClearLocalDomainEvent()
-			=> _uncommittedLocalEvents.Clear();
-
-		public IEnumerable<IDomainEvent> GetLocalDomainEvent()
-			=> _uncommittedLocalEvents.AsEnumerable();
-
-		public void RegisterLocalDomainEvent(IDomainEvent @event)
+		public void LoadFromHistory(IEnumerable<AggregateEvent<TAggregateId>> histories)
 		{
-			_uncommittedLocalEvents.Add(@event);
-		}
-
-		#endregion
-
-		public void LoadFromHistory(IEnumerable<AggregateEvent<TAggregateId>> history)
-		{
-			foreach (var e in history)
+			foreach (var @event in histories)
 			{
-				if (e.Version != Version + 1)
-					throw new MSFrameworkException(e.Id.ToString());
-				ApplyAggregateEvent(e, true);
+				if (@event.Version != Version + 1)
+					throw new MSFrameworkException(@event.Id.ToString());
+				ApplyAggregateEvent(@event, true);
 			}
 		}
 	}

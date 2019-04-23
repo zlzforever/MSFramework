@@ -8,10 +8,10 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using MSFramework.Collections.Generic;
-using MSFramework.Core;
-using MSFramework.CQRS.EventSouring;
+using MSFramework.Common;
 using MSFramework.Domain.Repository;
 using MSFramework.EntityFrameworkCore.Repository;
+using MSFramework.EventSouring;
 using MSFramework.Serialization;
 
 namespace MSFramework.EntityFrameworkCore
@@ -55,7 +55,7 @@ namespace MSFramework.EntityFrameworkCore
 			return builder;
 		}
 
-		public static MSFrameworkBuilder UseEntityFrameworkEventSouring(this MSFrameworkBuilder builder)
+		public static MSFrameworkBuilder UseEntityFrameworkEventStore(this MSFrameworkBuilder builder)
 		{
 			builder.Services.AddSingleton<IEventStore, EfEventStore>();
 			return builder;

@@ -1,13 +1,13 @@
 using System;
 using System.ComponentModel.DataAnnotations;
-using System.Security.Cryptography.X509Certificates;
+using MSFramework.Common;
 using MSFramework.Domain;
 using MSFramework.Domain.Entity;
-using Newtonsoft.Json;
+using MSFramework.Serialization;
 
-namespace MSFramework.CQRS.EventSouring
+namespace MSFramework.EventSouring
 {
-	public class EventSourceEntry : EntityBase<long>
+	public class EventHistory : EntityBase<long>
 	{
 		/// <summary>
 		/// 
@@ -41,13 +41,18 @@ namespace MSFramework.CQRS.EventSouring
 		[Required]
 		public DateTime CreationTime { get; }
 
-		public EventSourceEntry(IAggregateEvent @event)
+		public EventHistory(IAggregateEvent @event)
 		{
 			EventType = @event.GetType().Name;
 			Version = @event.Version;
-			Event = JsonConvert.SerializeObject(@event);
+			Event = Singleton<IJsonConvert>.Instance.SerializeObject(@event);
 			AggregateId = @event.IdAsString();
 			CreationTime = DateTime.UtcNow;
+		}
+
+		public IAggregateEvent ToAggregateEvent()
+		{
+			return (IAggregateEvent) Singleton<IJsonConvert>.Instance.DeserializeObject(Event, Type.GetType(EventType));
 		}
 	}
 }

@@ -1,5 +1,4 @@
 using System;
-using MSFramework.CQRS.EventSouring;
 using MSFramework.Domain;
 using MSFramework.EntityFrameworkCore;
 using MSFramework.EntityFrameworkCore.Repository;
@@ -10,7 +9,7 @@ namespace Ordering.Infrastructure.Repository
 {
 	public class OrderingRepository : EfRepository<Order, Guid>, IOrderingRepository
 	{
-		public OrderingRepository(DbContextFactory dbContextFactory, IEventStore eventStore) : base(eventStore,
+		public OrderingRepository(DbContextFactory dbContextFactory) : base(
 			dbContextFactory
 		)
 		{

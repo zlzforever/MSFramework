@@ -13,7 +13,7 @@ using RabbitMQ.Client.Exceptions;
 
 namespace MSFramework.EventBus.RabbitMQ
 {
-	public class RabbitMQEventBus : IDistributedEventBus, IDisposable
+	public class RabbitMQEventBus : IEventBus, IDisposable
 	{
 		private readonly RabbitMQConnection _connection;
 		private readonly ILogger<RabbitMQEventBus> _logger;
