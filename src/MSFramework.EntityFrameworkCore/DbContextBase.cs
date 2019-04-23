@@ -1,11 +1,10 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.EntityFrameworkCore.Infrastructure;
-using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.Extensions.Logging;
 using MSFramework.Domain;
 using MSFramework.EventBus;
@@ -99,7 +98,6 @@ namespace MSFramework.EntityFrameworkCore
 		{
 			try
 			{
-				SaveEventSouringDomainEventsAsync();
 				Task.WaitAll(DispatchDomainEventsAsync());
 				return base.SaveChanges();
 			}
@@ -148,8 +146,6 @@ namespace MSFramework.EntityFrameworkCore
 				// You will need to handle eventual consistency and compensatory actions in case of failures in any of the Handlers. 
 				await DispatchDomainEventsAsync();
 
-				SaveEventSouringDomainEventsAsync();
-
 				// After executing this line all the changes (from the Command Handler and Domain Event Handlers) 
 				// performed through the DbContext will be committed
 
@@ -161,19 +157,14 @@ namespace MSFramework.EntityFrameworkCore
 			}
 		}
 
-		private void SaveEventSouringDomainEventsAsync()
+		internal EventHistory[] GetEventSouringDomainEventsAsync()
 		{
 			var aggregateRoots = ChangeTracker
 				.Entries<IEventSourcingAggregate>()
 				.Where(x => x.Entity.GetAggregateEvents() != null && x.Entity.GetAggregateEvents().Any()).ToList();
 
-			foreach (var aggregateRoot in aggregateRoots)
-			{
-				foreach (var aggregateEvent in aggregateRoot.Entity.GetAggregateEvents())
-				{
-					Set<EventHistory>().Add(new EventHistory(aggregateEvent));
-				}
-			}
+			return aggregateRoots.SelectMany(x => x.Entity.GetAggregateEvents().Select(y => new EventHistory(y)))
+				.ToArray();
 		}
 
 		protected virtual async Task DispatchDomainEventsAsync()

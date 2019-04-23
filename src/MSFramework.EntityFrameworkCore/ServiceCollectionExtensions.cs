@@ -1,28 +1,25 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Infrastructure;
 using MSFramework.Data;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
-using MSFramework.Collections.Generic;
 using MSFramework.Common;
 using MSFramework.Domain;
 using MSFramework.Domain.Repository;
 using MSFramework.EntityFrameworkCore.Repository;
-using MSFramework.EventSouring;
-using MSFramework.Serialization;
 
 namespace MSFramework.EntityFrameworkCore
 {
 	public static class ServiceCollectionExtensions
 	{
 		public static MSFrameworkBuilder UseEntityFramework(this MSFrameworkBuilder builder,
-			IDbContextOptionsBuilderCreator dbContextOptionsBuilderCreator)
+			Action<EntityFrameworkBuilder> configure = null)
 		{
 			builder.Configuration.NotNull(nameof(builder.Configuration));
+
+			EntityFrameworkBuilder eBuilder = new EntityFrameworkBuilder(builder.Services);
+			configure?.Invoke(eBuilder);
 
 			var section = builder.Configuration.GetSection("DbContexts");
 			EntityFrameworkOptions.EntityFrameworkOptionDict =
@@ -50,16 +47,9 @@ namespace MSFramework.EntityFrameworkCore
 			builder.Services.AddScoped<DbContextFactory>();
 
 			builder.Services.AddSingleton<IInitializer, EntityFrameworkInitializer>();
-			builder.Services.AddSingleton(dbContextOptionsBuilderCreator);
 			builder.Services.AddScoped(typeof(IEfRepository<,>), typeof(EfRepository<,>));
 			builder.Services.AddScoped(typeof(IRepository<,>), typeof(EfRepository<,>));
 			builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
-			return builder;
-		}
-
-		public static MSFrameworkBuilder UseEntityFrameworkEventStore(this MSFrameworkBuilder builder)
-		{
-			builder.Services.AddScoped<IEventStore, EfEventStore>();
 			return builder;
 		}
 	}

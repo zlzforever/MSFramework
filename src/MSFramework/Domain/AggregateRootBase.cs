@@ -1,10 +1,8 @@
 using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.Linq;
 using MSFramework.Common;
 using MSFramework.Domain.Event;
-using MSFramework.EventBus;
 
 namespace MSFramework.Domain
 {

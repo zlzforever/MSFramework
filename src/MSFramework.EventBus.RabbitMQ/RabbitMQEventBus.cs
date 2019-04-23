@@ -4,6 +4,8 @@ using System.Text;
 using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using MSFramework.Common;
+using MSFramework.Serialization;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Polly;
@@ -66,7 +68,7 @@ namespace MSFramework.EventBus.RabbitMQ
 				channel.ExchangeDeclare(exchange: _options.BrokerName,
 					type: "direct");
 
-				var message = JsonConvert.SerializeObject(@event);
+				var message = Singleton<IJsonConvert>.Instance.SerializeObject(@event);
 				var body = Encoding.UTF8.GetBytes(message);
 
 				policy.Execute(() =>
@@ -218,7 +220,7 @@ namespace MSFramework.EventBus.RabbitMQ
 							var handler = scope.ServiceProvider.GetService(subscription.HandlerType);
 							if (handler == null) continue;
 							var eventType = _store.GetEventType(eventName);
-							var integrationEvent = JsonConvert.DeserializeObject(message, eventType);
+							var integrationEvent = Singleton<IJsonConvert>.Instance.DeserializeObject(message, eventType);
 							var concreteType = typeof(IEventHandler<>).MakeGenericType(eventType);
 							// ReSharper disable once PossibleNullReferenceException
 							await (Task) concreteType.GetMethod("Handle").Invoke(handler, new[] {integrationEvent});

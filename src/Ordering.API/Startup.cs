@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Builder;
+﻿using System;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
@@ -8,6 +9,8 @@ using MSFramework.Command;
 using MSFramework.EntityFrameworkCore;
 using MSFramework.EntityFrameworkCore.SqlServer;
 using MSFramework.EventBus;
+using MSFramework.EventSouring;
+using MSFramework.EventSouring.EntityFrameworkCore;
 using Ordering.API.Application.Command;
 using Ordering.API.Application.EventHandler;
 
@@ -26,11 +29,12 @@ namespace Ordering.API
 		public void ConfigureServices(IServiceCollection services)
 		{
 			services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
+			
 			services.AddMSFramework(builder =>
 			{
 				builder.Configuration = Configuration;
-				builder.UseEntityFramework(new DbContextOptionsBuilderCreator());
-				builder.UseEntityFrameworkEventStore();
+				builder.UseEntityFramework(ef => { ef.AddSqlServerDbContextOptionsBuilderCreator(); });
+				builder.UseEntityFrameworkEventSouring();
 
 				builder.AddCommandHandlers<OrderCommandHandlers>(
 					typeof(ICommandHandler<CreateOrderCommand>),
@@ -41,15 +45,15 @@ namespace Ordering.API
 					typeof(ValidatorInterceptor<>));
 
 				builder.AddLocalEventBus();
-				
+
 				builder.AddEventHandlers(typeof(UserCheckoutAcceptedEventHandler));
 			});
-
 		}
 
 		// This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
 		public void Configure(IApplicationBuilder app, IHostingEnvironment env)
 		{
+			var es = app.ApplicationServices.CreateScope().ServiceProvider.GetRequiredService<IEventStore>();
 			if (env.IsDevelopment())
 			{
 				app.UseDeveloperExceptionPage();

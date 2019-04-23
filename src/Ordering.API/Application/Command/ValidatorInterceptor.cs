@@ -4,7 +4,6 @@ using System.Threading.Tasks;
 using FluentValidation;
 using Microsoft.Extensions.Logging;
 using MSFramework.Command;
-using MSFramework.Domain;
 using MSFramework.Reflection;
 using Ordering.Domain;
 

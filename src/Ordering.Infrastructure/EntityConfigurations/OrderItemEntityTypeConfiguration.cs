@@ -1,5 +1,4 @@
 using System;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using MSFramework.EntityFrameworkCore;
 using Ordering.Domain.AggregateRoot;

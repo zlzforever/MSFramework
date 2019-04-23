@@ -21,7 +21,7 @@ namespace Ordering.Domain.AggregateRoot
 		// aligned with DDD Aggregates and Domain Entities (Instead of properties and property collections)
 		private DateTime _creationTime;
 
-		public OrderStatus OrderStatus { get; private set; }
+		public int OrderStatus { get; private set; }
 
 		// Address is a Value Object pattern example persisted as EF Core 2.0 owned entity
 		public Address Address { get; private set; }
@@ -56,7 +56,7 @@ namespace Ordering.Domain.AggregateRoot
 			_description = e.Description;
 			_orderItems = e.OrderItems;
 			_creationTime = e.CreationTime;
-			OrderStatus= OrderStatus.Submitted;
+			OrderStatus= 0;
 		}
 
 		private void Apply(OrderAddressChangedEvent e)

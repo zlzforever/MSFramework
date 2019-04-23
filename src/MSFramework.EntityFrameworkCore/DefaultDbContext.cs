@@ -1,7 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using MSFramework.EventBus;
-using MSFramework.EventSouring;
 
 namespace MSFramework.EntityFrameworkCore
 {

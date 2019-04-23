@@ -1,9 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
-using MSFramework.Domain;
 using MSFramework.EntityFrameworkCore;
 using MSFramework.EventBus;
-using MSFramework.EventSouring;
 
 namespace Ordering.Infrastructure
 {

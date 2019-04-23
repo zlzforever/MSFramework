@@ -1,5 +1,4 @@
 using System;
-using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using MSFramework.EntityFrameworkCore;
@@ -29,11 +28,6 @@ namespace Ordering.Infrastructure.EntityConfigurations
 			// DDD Patterns comment:
 			//Set as field (New since EF 1.1) to access the OrderItem collection property through its field
 			navigation.SetPropertyAccessMode(PropertyAccessMode.Field);
-
- 
-			orderConfiguration.HasOne(o => o.OrderStatus)
-				.WithMany()
-				.HasForeignKey("OrderStatusId");
 		}
 	}
 }

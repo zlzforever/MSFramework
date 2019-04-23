@@ -50,8 +50,6 @@ namespace MSFramework.EntityFrameworkCore
 				{
 					list = group.ToList();
 				}
-
-				list.Add(new EventSourceEntryConfiguration());
 				if (list.Count > 0)
 				{
 					dict[key] = list.ToArray();

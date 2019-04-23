@@ -1,8 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using MSFramework.Command;
 using Ordering.API.Application.DTO;
-using Ordering.Domain.AggregateRoot;
 
 
 namespace Ordering.API.Application.Command

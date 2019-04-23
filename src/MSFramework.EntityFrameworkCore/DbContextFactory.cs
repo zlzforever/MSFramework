@@ -5,6 +5,7 @@ using System.Linq;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using MSFramework.Domain;
+using MSFramework.EventSouring;
 
 namespace MSFramework.EntityFrameworkCore
 {
@@ -12,8 +13,8 @@ namespace MSFramework.EntityFrameworkCore
 	{
 		private readonly IServiceProvider _serviceProvider;
 
-		private readonly ConcurrentDictionary<Type, DbContext> _dbContextDict =
-			new ConcurrentDictionary<Type, DbContext>();
+		private readonly ConcurrentDictionary<Type, DbContextBase> _dbContextDict =
+			new ConcurrentDictionary<Type, DbContextBase>();
 
 		public DbContextFactory(IServiceProvider serviceProvider)
 		{
@@ -55,11 +56,11 @@ namespace MSFramework.EntityFrameworkCore
 				throw new MSFrameworkException($"未找到数据上下文“{dbContextType}”对应的配置文件");
 			}
 
-			var dbContext = (DbContextBase) Create(dbContextOptions);
+			var dbContext = Create(dbContextOptions);
 			return dbContext;
 		}
 
-		public DbContext Create(EntityFrameworkOptions resolveOptions)
+		public DbContextBase Create(EntityFrameworkOptions resolveOptions)
 		{
 			var dbContextType = resolveOptions.DbContextType;
 			//已存在上下文对象，直接返回
@@ -82,16 +83,20 @@ namespace MSFramework.EntityFrameworkCore
 
 			//创建上下文实例
 			if (!(ActivatorUtilities.CreateInstance(_serviceProvider, dbContextType, options) is
-				DbContext context))
+				DbContextBase context))
 			{
 				throw new MSFrameworkException($"实例化数据上下文“{dbContextType.AssemblyQualifiedName}”失败");
 			}
-
 			_dbContextDict.TryAdd(dbContextType, context);
 			return context;
 		}
 
-		public IEnumerable<DbContext> GetAllDbContexts()
+		public IEventStore GetEventStore()
+		{
+			return _serviceProvider.GetRequiredService<IEventStore>();
+		}
+
+		public IEnumerable<DbContextBase> GetAllDbContexts()
 		{
 			return _dbContextDict.Values;
 		}

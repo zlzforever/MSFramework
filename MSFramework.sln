@@ -36,6 +36,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MSFramework.EntityFramework
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MSFramework.EntityFrameworkCore.SqlServer", "src\MSFramework.EntityFrameworkCore.SqlServer\MSFramework.EntityFrameworkCore.SqlServer.csproj", "{68023604-C776-413B-8AC1-ECEA09391BA2}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MSFramework.EntityFrameworkCore.MySql", "src\MSFramework.EntityFrameworkCore.MySql\MSFramework.EntityFrameworkCore.MySql.csproj", "{EC4910EA-309B-4AFF-BE1A-33149A8BCF78}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MSFramework.EventSouring.EntityFrameworkCore", "src\MSFramework.EventSouring.EntityFrameworkCore\MSFramework.EventSouring.EntityFrameworkCore.csproj", "{DA65E128-8BB2-488B-ACE2-F31ADE708EBB}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -74,6 +78,14 @@ Global
 		{68023604-C776-413B-8AC1-ECEA09391BA2}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{68023604-C776-413B-8AC1-ECEA09391BA2}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{68023604-C776-413B-8AC1-ECEA09391BA2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{EC4910EA-309B-4AFF-BE1A-33149A8BCF78}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EC4910EA-309B-4AFF-BE1A-33149A8BCF78}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EC4910EA-309B-4AFF-BE1A-33149A8BCF78}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EC4910EA-309B-4AFF-BE1A-33149A8BCF78}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DA65E128-8BB2-488B-ACE2-F31ADE708EBB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DA65E128-8BB2-488B-ACE2-F31ADE708EBB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DA65E128-8BB2-488B-ACE2-F31ADE708EBB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DA65E128-8BB2-488B-ACE2-F31ADE708EBB}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{078A8534-7C83-4095-B756-6EBA700DBB12} = {0CEB99EE-969C-4A1D-841F-D22E4ADCC5F1}
@@ -89,5 +101,7 @@ Global
 		{08D3B5A7-23B5-4CBB-9401-5CEFB120D913} = {47747049-F28E-4474-B09F-E98147F91C83}
 		{00BD8E83-A45F-4310-B492-AE40D19CA043} = {AFD16F00-F810-4A3C-BA74-59BBFBC2469D}
 		{68023604-C776-413B-8AC1-ECEA09391BA2} = {AFD16F00-F810-4A3C-BA74-59BBFBC2469D}
+		{EC4910EA-309B-4AFF-BE1A-33149A8BCF78} = {AFD16F00-F810-4A3C-BA74-59BBFBC2469D}
+		{DA65E128-8BB2-488B-ACE2-F31ADE708EBB} = {AFD16F00-F810-4A3C-BA74-59BBFBC2469D}
 	EndGlobalSection
 EndGlobal
