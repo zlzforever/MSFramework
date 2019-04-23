@@ -1,60 +1,84 @@
-﻿using MSFramework.Domain;
-using Ordering.Domain.Events;
-using System;
+﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using MSFramework.Domain;
 
-namespace Ordering.Domain.Aggregates
+namespace Ordering.Domain.AggregateRoot
 {
 	public class Order : AggregateRootBase<Guid>
 	{
-		private string description;
-		private string address;
-		private bool isDeleted;
-		private List<OrderItem> orderItems;
+		private string _description;
+		private bool _isDeleted;
+		private string _userId;
 
-		private Order() { }
+		// DDD Patterns comment
+		// Using a private collection field, better for DDD Aggregate's encapsulation
+		// so OrderItems cannot be added from "outside the AggregateRoot" directly to the collection,
+		// but only through the method OrderAggrergateRoot.AddOrderItem() which includes behaviour.
+		private List<OrderItem> _orderItems;
+
+		// DDD Patterns comment
+		// Using private fields, allowed since EF Core 1.1, is a much better encapsulation
+		// aligned with DDD Aggregates and Domain Entities (Instead of properties and property collections)
+		private DateTime _creationTime;
+
+		public OrderStatus OrderStatus { get; private set; }
+
+		// Address is a Value Object pattern example persisted as EF Core 2.0 owned entity
+		public Address Address { get; private set; }
+
+		public IReadOnlyCollection<OrderItem> OrderItems => _orderItems;
+
+		protected Order()
+		{
+			_orderItems = new List<OrderItem>();
+		}
 
 		public Order(
-			Guid id,
-			int version,
+			string userId,
+			Address address,
 			string description,
-			string address,
 			List<OrderItem> orderItems
-			)
+		)
 		{
-			Id = id;
-			ApplyAggregateEvent(new OrderCreatedEvent(id, description, address, orderItems, version));
+			ApplyAggregateEvent(new OrderCreatedEvent(userId,
+				address,
+				description,
+				orderItems));
 		}
 
 		private void Apply(OrderCreatedEvent e)
 		{
 			Version = e.Version;
-			description = e.Description;
-			address = e.Address;
-			isDeleted = false;
-			orderItems = e.OrderItems;
+
+			Id = e.AggregateId;
+			Address = e.Address;
+			_userId = e.UserId;
+			_description = e.Description;
+			_orderItems = e.OrderItems;
+			_creationTime = e.CreationTime;
+			OrderStatus= OrderStatus.Submitted;
 		}
 
 		private void Apply(OrderAddressChangedEvent e)
 		{
 			Version = e.Version;
-			address = e.NewOrderAddress;
+			Address = e.NewOrderAddress;
 		}
 
 		private void Apply(OrderDeletedEvent e)
 		{
 			Version = e.Version;
-			isDeleted = true;
+			_isDeleted = true;
 		}
 
-		public void ChangeAddress(string newAddress)
+		public void ChangeAddress(Address newAddress)
 		{
-			if (string.IsNullOrEmpty(newAddress))
-				throw new ArgumentException("newAddress");
-			ApplyAggregateEvent(new OrderAddressChangedEvent(Id, newAddress, Version));
+			if (newAddress == null)
+			{
+				throw new ArgumentException(nameof(newAddress));
+			}
+
+			ApplyAggregateEvent(new OrderAddressChangedEvent(Id, Version, newAddress));
 		}
 
 		public void Delete()

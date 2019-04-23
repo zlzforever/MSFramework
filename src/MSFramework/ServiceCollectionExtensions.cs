@@ -1,5 +1,6 @@
 using System;
-using MediatR;
+using System.Linq;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
 using MSFramework.Command;
@@ -16,6 +17,25 @@ namespace MSFramework
 {
 	public static class ServiceCollectionExtensions
 	{
+		public static MSFrameworkBuilder AddEventHandlers(this MSFrameworkBuilder builder,
+			params Type[] types)
+		{
+			var handlerType = typeof(IEventHandler);
+			foreach (var type in types)
+			{
+				if (handlerType.IsAssignableFrom(type))
+				{
+					builder.Services.AddScoped(type, type);
+				}
+				else
+				{
+					throw new Exception("AddCommandHandler");
+				}
+			}
+
+			return builder;
+		}
+
 		public static MSFrameworkBuilder AddInMemoryEventStore(this MSFrameworkBuilder builder)
 		{
 			builder.Services.AddSingleton<IEventStore, InMemoryEventStore>();
@@ -51,13 +71,23 @@ namespace MSFramework
 				builder.Services.AddSingleton(Singleton<IJsonConvert>.Instance);
 			}
 
-			builder.Services.AddMediatR(Singleton<IAssemblyFinder>.Instance.GetAllAssemblyList().ToArray());
 			builder.Services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
 			builder.Services.AddSingleton<ICurrentUser, CurrentUser>();
-			builder.Services.AddSingleton<ICommandBus, CommandBus>();
-			builder.Services.AddLocalEventBus();
+			builder.Services.AddScoped<ICommandBus, CommandBus>();
+			builder.AddLocalEventBus();
 
 			return services;
+		}
+
+		public static IApplicationBuilder UseMSFramework(this IApplicationBuilder builder)
+		{
+			var initializers = builder.ApplicationServices.GetServices<IInitializer>().ToList();
+			foreach (var initializer in initializers)
+			{
+				initializer.Initialize();
+			}
+
+			return builder;
 		}
 	}
 }

@@ -1,6 +1,5 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using MSFramework.Domain.Entity;
 
 namespace MSFramework.Domain.Repository
 {

@@ -1,4 +1,4 @@
-using MSFramework.Domain.Entity;
+using MSFramework.Domain;
 
 namespace MSFramework.EntityFrameworkCore.Repository
 {

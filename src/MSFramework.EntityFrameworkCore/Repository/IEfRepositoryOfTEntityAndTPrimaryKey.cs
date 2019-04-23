@@ -5,7 +5,7 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
-using MSFramework.Domain.Entity;
+using MSFramework.Domain;
 using MSFramework.Domain.Repository;
 
 namespace MSFramework.EntityFrameworkCore.Repository

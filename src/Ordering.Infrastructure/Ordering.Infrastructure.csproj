@@ -13,9 +13,9 @@
         <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="2.2.0" />
 
     </ItemGroup>
+
     <ItemGroup>
-        <Folder Include="EntityConfigurations" />
-        <Folder Include="EntityConfigurations\" />
+      <Folder Include="Repository" />
     </ItemGroup>
 
 </Project>

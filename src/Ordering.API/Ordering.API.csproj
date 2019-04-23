@@ -17,13 +17,13 @@
 
     <ItemGroup>
         <ProjectReference Include="..\MSFramework.EntityFrameworkCore.SqlServer\MSFramework.EntityFrameworkCore.SqlServer.csproj" />
-        <ProjectReference Include="..\MSFramework.EventBus\MSFramework.EventBus.csproj" />
+        <ProjectReference Include="..\MSFramework\MSFramework.csproj" />
         <ProjectReference Include="..\Ordering.Domain\Ordering.Domain.csproj" />
         <ProjectReference Include="..\Ordering.Infrastructure\Ordering.Infrastructure.csproj" />
     </ItemGroup>
 
     <ItemGroup>
-      <Folder Include="Application\Dto\" />
+      <Folder Include="Application\DTO\" />
       <Folder Include="Application\EventHandler\" />
     </ItemGroup>
 

@@ -4,8 +4,12 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using MSFramework;
+using MSFramework.Command;
 using MSFramework.EntityFrameworkCore;
 using MSFramework.EntityFrameworkCore.SqlServer;
+using MSFramework.EventBus;
+using Ordering.API.Application.Command;
+using Ordering.API.Application.EventHandler;
 
 namespace Ordering.API
 {
@@ -24,10 +28,23 @@ namespace Ordering.API
 			services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
 			services.AddMSFramework(builder =>
 			{
-				// 使用 SqlServer
+				builder.Configuration = Configuration;
 				builder.UseEntityFramework(new DbContextOptionsBuilderCreator());
 				builder.UseEntityFrameworkEventStore();
+
+				builder.AddCommandHandlers<OrderCommandHandlers>(
+					typeof(ICommandHandler<CreateOrderCommand>),
+					typeof(ICommandHandler<ChangeOrderAddressCommand>),
+					typeof(ICommandHandler<DeleteOrderCommand>));
+
+				builder.AddCommandInterceptor(typeof(LogInterceptor<>), typeof(TransactionInterceptor<>),
+					typeof(ValidatorInterceptor<>));
+
+				builder.AddLocalEventBus();
+				
+				builder.AddEventHandlers(typeof(UserCheckoutAcceptedEventHandler));
 			});
+
 		}
 
 		// This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -43,6 +60,7 @@ namespace Ordering.API
 				app.UseHsts();
 			}
 
+			app.UseMSFramework();
 			app.UseHttpsRedirection();
 			app.UseMvc();
 		}

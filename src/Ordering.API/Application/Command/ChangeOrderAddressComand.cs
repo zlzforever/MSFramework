@@ -1,15 +1,16 @@
 ﻿using System;
 using MSFramework.Command;
+using Ordering.Domain.AggregateRoot;
 
 
 namespace Ordering.API.Application.Command
 {
 	public class ChangeOrderAddressCommand : ICommand
     {
-		public Guid Id { get; set; }
+		public long Version { get; set; }
 
-		public int ExpectedVersion { get; set; }
-
-		public string NewAddress { get; set; }
+		public Address NewAddress { get; set; }
+		
+		public Guid OrderId { get; set; }
     }
 }

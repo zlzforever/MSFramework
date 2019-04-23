@@ -1,22 +1,42 @@
 ﻿using System;
 using System.Collections.Generic;
 using MSFramework.Command;
-using Ordering.Domain.Aggregates;
+using Ordering.API.Application.DTO;
+using Ordering.Domain.AggregateRoot;
 
 
 namespace Ordering.API.Application.Command
 {
+	public class CreateOrderCommand : ICommand
+	{
+		public string UserId { get; }
 
-    public class CreateOrderCommand : ICommand
-    {
-        public string Description { get; set; }
+		public string City { get; }
 
-        public string Address { get; set; }
+		public string Street { get; }
 
-        public List<OrderItem> OrderItems { get; set; }
+		public string State { get; }
 
-		public Guid Id { get; set; }
+		public string Country { get; }
 
-		public int ExpectedVersion { get; set; }
+		public string ZipCode { get; }
+
+		public string Description { get; }
+
+		public List<OrderItemDTO> OrderItems { get; }
+
+		public CreateOrderCommand(List<OrderItemDTO> basketItems, string userId, string city,
+			string street, string state, string country, string zipcode, string description)
+		{
+			OrderItems = basketItems;
+			UserId = userId;
+
+			City = city;
+			Street = street;
+			State = state;
+			Country = country;
+			ZipCode = zipcode;
+			Description = description;
+		}	
 	}
 }

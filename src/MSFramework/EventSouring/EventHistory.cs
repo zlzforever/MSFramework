@@ -2,7 +2,7 @@ using System;
 using System.ComponentModel.DataAnnotations;
 using MSFramework.Common;
 using MSFramework.Domain;
-using MSFramework.Domain.Entity;
+using MSFramework.Domain.Event;
 using MSFramework.Serialization;
 
 namespace MSFramework.EventSouring
@@ -14,32 +14,36 @@ namespace MSFramework.EventSouring
 		/// </summary>
 		[Required]
 		[StringLength(255)]
-		public string EventType { get; }
+		public string EventType { get; set; }
 
 		/// <summary>
 		/// 
 		/// </summary>
 		[Required]
-		public string Event { get; }
+		public string Event { get; set; }
 
 		/// <summary>
 		/// 
 		/// </summary>
 		[StringLength(255)]
 		[Required]
-		public string AggregateId { get; }
+		public string AggregateId { get; set; }
 
 		/// <summary>
 		/// 
 		/// </summary>
 		[Required]
-		public long Version { get; }
+		public long Version { get; set; }
 
 		/// <summary>
 		/// 
 		/// </summary>
 		[Required]
-		public DateTime CreationTime { get; }
+		public DateTime CreationTime { get; set; }
+
+		public EventHistory()
+		{
+		}
 
 		public EventHistory(IAggregateEvent @event)
 		{

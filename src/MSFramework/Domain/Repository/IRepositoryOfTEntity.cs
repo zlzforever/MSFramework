@@ -1,5 +1,3 @@
-using MSFramework.Domain.Entity;
-
 namespace MSFramework.Domain.Repository
 {
 	/// <summary>

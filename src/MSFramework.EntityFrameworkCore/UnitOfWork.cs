@@ -32,13 +32,13 @@ namespace MSFramework.EntityFrameworkCore
 		public void BeginOrUseTransaction()
 		{
 			// TODO
-			throw new System.NotImplementedException();
+			 
 		}
 
 		public Task BeginOrUseTransactionAsync(CancellationToken cancellationToken = default)
 		{
 			// TODO
-			throw new System.NotImplementedException();
+			return Task.CompletedTask;
 		}
 	}
 }

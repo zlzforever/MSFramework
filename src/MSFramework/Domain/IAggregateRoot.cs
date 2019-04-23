@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using MediatR;
-using MSFramework.Domain.Entity;
+using MSFramework.Domain.Event;
 
 namespace MSFramework.Domain
 {

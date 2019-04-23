@@ -8,8 +8,6 @@ using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.Extensions.Logging;
 using MSFramework.Domain;
-using MSFramework.Domain.Auditing;
-using MSFramework.Domain.Entity;
 using MSFramework.EventBus;
 using MSFramework.EventSouring;
 using MSFramework.Security;
@@ -22,8 +20,6 @@ namespace MSFramework.EntityFrameworkCore
 		private readonly ILoggerFactory _loggerFactory;
 		private readonly IEntityConfigurationTypeFinder _typeFinder;
 		private readonly IEventBus _eventBus;
-		private readonly IEventStore _eventStore;
-		private readonly EntityFrameworkOptions _config;
 
 		/// <summary>
 		/// 初始化一个<see cref="DbContextBase"/>类型的新实例
@@ -32,8 +28,6 @@ namespace MSFramework.EntityFrameworkCore
 			DbContextOptions options,
 			IEntityConfigurationTypeFinder typeFinder,
 			IEventBus eventBus,
-			IEventStore eventStore,
-			EntityFrameworkOptions config,
 			ILoggerFactory loggerFactory)
 			: base(options)
 		{
@@ -41,8 +35,6 @@ namespace MSFramework.EntityFrameworkCore
 			_loggerFactory = loggerFactory;
 			_logger = loggerFactory?.CreateLogger(GetType());
 			_eventBus = eventBus;
-			_eventStore = eventStore;
-			_config = config;
 		}
 
 		/// <summary>
@@ -61,8 +53,6 @@ namespace MSFramework.EntityFrameworkCore
 			}
 
 			_logger?.LogInformation($"上下文“{contextType}”注册了{registers.Length}个实体类");
-
-			new EventSourceEntryConfiguration().Configure(modelBuilder.Entity<EventHistory>());
 		}
 
 		/// <summary>
@@ -109,9 +99,8 @@ namespace MSFramework.EntityFrameworkCore
 		{
 			try
 			{
-				ApplyConcepts();
-
-
+				SaveEventSouringDomainEventsAsync();
+				Task.WaitAll(DispatchDomainEventsAsync());
 				return base.SaveChanges();
 			}
 			catch (DbUpdateConcurrencyException ex)
@@ -121,119 +110,6 @@ namespace MSFramework.EntityFrameworkCore
 		}
 
 		protected string UserId => this.GetService<ICurrentUser>().UserId;
-
-		protected virtual void ApplyConcepts()
-		{
-			foreach (var entry in ChangeTracker.Entries())
-			{
-				ApplyConcepts(entry, UserId);
-			}
-		}
-
-		protected virtual void SetConcurrencyStampIfNull(EntityEntry entry)
-		{
-			var entity = entry.Entity as IHasConcurrencyStamp;
-			if (entity == null)
-			{
-				return;
-			}
-
-			if (entity.ConcurrencyStamp != null)
-			{
-				return;
-			}
-
-			entity.ConcurrencyStamp = Guid.NewGuid().ToString("N");
-		}
-
-		protected virtual void ApplyConcepts(EntityEntry entry, string userId)
-		{
-			switch (entry.State)
-			{
-				case EntityState.Added:
-					ApplyConceptsForAddedEntity(entry, userId);
-					break;
-				case EntityState.Modified:
-					ApplyConceptsForModifiedEntity(entry, userId);
-					break;
-				case EntityState.Deleted:
-					ApplyConceptsForDeletedEntity(entry, userId);
-					break;
-			}
-		}
-
-		protected virtual void ApplyConceptsForAddedEntity(EntityEntry entry, string userId)
-		{
-			CheckAndSetId(entry);
-			SetConcurrencyStampIfNull(entry);
-			EntityAuditingHelper.SetCreationAuditProperties(entry.Entity, userId);
-		}
-
-		protected virtual void ApplyConceptsForModifiedEntity(EntityEntry entry, string userId)
-		{
-			EntityAuditingHelper.SetModificationAuditProperties(entry.Entity, userId);
-			if (entry.Entity is ISoftDelete e && e.IsDeleted)
-			{
-				SetDeletionAuditProperties(entry.Entity, userId);
-			}
-		}
-
-		protected virtual void SetDeletionAuditProperties(object entityAsObj, string userId)
-		{
-			if (entityAsObj is IHasDeletionTime entity1)
-			{
-				if (entity1.DeletionTime == null)
-				{
-					entity1.DeletionTime = DateTime.Now;
-				}
-			}
-
-			if (entityAsObj is IDeletionAudited e)
-			{
-				if (e.DeleterUserId != null)
-				{
-					return;
-				}
-
-				e.DeleterUserId = userId;
-			}
-		}
-
-		protected virtual void ApplyConceptsForDeletedEntity(EntityEntry entry, string userId)
-		{
-			// todo
-			// if (IsHardDeleteEntity(entry))
-			// {
-			//    return;
-			//}
-
-			CancelDeletionForSoftDelete(entry);
-			SetDeletionAuditProperties(entry.Entity, userId);
-		}
-
-		protected virtual void CancelDeletionForSoftDelete(EntityEntry entry)
-		{
-			if (entry.Entity is ISoftDelete e)
-			{
-				entry.Reload();
-				entry.State = EntityState.Modified;
-				e.IsDeleted = true;
-			}
-		}
-
-		protected virtual void CheckAndSetId(EntityEntry entry)
-		{
-			//Set GUID Ids
-			if (entry.Entity is IEntity<Guid> entity && entity.Id == Guid.Empty)
-			{
-				var idPropertyEntry = entry.Property("Id");
-
-				if (idPropertyEntry != null && idPropertyEntry.Metadata.ValueGenerated == ValueGenerated.Never)
-				{
-					entity.Id = Guid.NewGuid();
-				}
-			}
-		}
 
 		/// <summary>
 		///     异步地将此上下文中的所有更改保存到数据库中，同时自动开启事务或使用现有同连接事务
@@ -264,8 +140,6 @@ namespace MSFramework.EntityFrameworkCore
 		{
 			try
 			{
-				ApplyConcepts();
-
 				// Dispatch Domain Events collection. 
 				// Choices:
 				// A) Right BEFORE committing data (EF SaveChanges) into the DB will make a single transaction including  
@@ -274,7 +148,7 @@ namespace MSFramework.EntityFrameworkCore
 				// You will need to handle eventual consistency and compensatory actions in case of failures in any of the Handlers. 
 				await DispatchDomainEventsAsync();
 
-				await SaveEventSouringDomainEventsAsync();
+				SaveEventSouringDomainEventsAsync();
 
 				// After executing this line all the changes (from the Command Handler and Domain Event Handlers) 
 				// performed through the DbContext will be committed
@@ -287,7 +161,7 @@ namespace MSFramework.EntityFrameworkCore
 			}
 		}
 
-		private async Task SaveEventSouringDomainEventsAsync()
+		private void SaveEventSouringDomainEventsAsync()
 		{
 			var aggregateRoots = ChangeTracker
 				.Entries<IEventSourcingAggregate>()
@@ -297,7 +171,7 @@ namespace MSFramework.EntityFrameworkCore
 			{
 				foreach (var aggregateEvent in aggregateRoot.Entity.GetAggregateEvents())
 				{
-					await _eventStore.AddEventAsync(new EventHistory(aggregateEvent));
+					Set<EventHistory>().Add(new EventHistory(aggregateEvent));
 				}
 			}
 		}
@@ -315,7 +189,7 @@ namespace MSFramework.EntityFrameworkCore
 				// 通过 EventBus 发布出去
 				await _eventBus.PublishAsync(@event);
 			});
-
+			aggregateRoots.ForEach(x => x.Entity.ClearDomainEvents());
 			await Task.WhenAll(tasks);
 		}
 	}

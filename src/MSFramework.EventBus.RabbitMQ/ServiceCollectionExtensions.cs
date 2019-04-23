@@ -6,9 +6,8 @@ namespace MSFramework.EventBus.RabbitMQ
 {
 	public static class ServiceCollectionExtensions
 	{
-		public static IServiceCollection AddRabbitMQ(this IServiceCollection services)
-		{
-			
+		public static IServiceCollection AddRabbitMQEventBus(this IServiceCollection services)
+		{			
 			services.AddScoped<RabbitMQOptions>();
 			services.AddSingleton(provider =>
 			{

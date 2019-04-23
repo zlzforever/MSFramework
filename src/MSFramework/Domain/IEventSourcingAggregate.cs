@@ -1,6 +1,6 @@
 using System;
 using System.Collections.Generic;
-using MediatR;
+using MSFramework.Domain.Event;
 using MSFramework.EventBus;
 
 namespace MSFramework.Domain

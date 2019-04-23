@@ -1,7 +1,5 @@
-using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
-using MSFramework.Domain;
 using MSFramework.EventBus;
 using MSFramework.EventSouring;
 
@@ -17,12 +15,8 @@ namespace MSFramework.EntityFrameworkCore
 		/// </summary>
 		public DefaultDbContext(DbContextOptions options,
 			IEntityConfigurationTypeFinder typeFinder,
-			IEventBus eventBus, IEventStore eventStore,
-			EntityFrameworkOptions config)
-			: base(options,
-				typeFinder,
-				eventBus,
-				eventStore, config, null)
+			IEventBus eventBus)
+			: base(options, typeFinder, eventBus, null)
 		{
 		}
 
@@ -31,9 +25,8 @@ namespace MSFramework.EntityFrameworkCore
 		/// </summary>
 		public DefaultDbContext(DbContextOptions options, IEntityConfigurationTypeFinder typeFinder,
 			IEventBus eventBus,
-			IEventStore eventStore, EntityFrameworkOptions config,
 			ILoggerFactory loggerFactory)
-			: base(options, typeFinder, eventBus, eventStore, config, loggerFactory)
+			: base(options, typeFinder, eventBus, loggerFactory)
 		{
 		}
 	}

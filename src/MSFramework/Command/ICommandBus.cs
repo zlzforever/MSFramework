@@ -4,6 +4,6 @@ namespace MSFramework.Command
 {
 	public interface ICommandBus
 	{
-		Task Send<TCommand>(TCommand command) where TCommand : class, ICommand;
+		Task<bool> SendAsync<TCommand>(TCommand command) where TCommand : class, ICommand;
 	}
 }

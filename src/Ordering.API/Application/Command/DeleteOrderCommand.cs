@@ -5,7 +5,7 @@ namespace Ordering.API.Application.Command
 {
 	public class DeleteOrderCommand : ICommand
 	{
-		public Guid Id { get; set; }
-		public int ExpectedVersion { get; set; }
+		public Guid OrderId { get; set; }
+		public long Version { get; set; }
 	}
 }

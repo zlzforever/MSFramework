@@ -1,8 +1,8 @@
-﻿using Ordering.Domain.Aggregates;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Ordering.Domain.AggregateRoot;
 
 namespace Ordering.API.Application.Query
 {

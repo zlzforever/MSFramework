@@ -11,7 +11,7 @@
         <PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="2.2.0" />
     </ItemGroup>
     <ItemGroup>
-        <ProjectReference Include="..\MSFramework.EventBus\MSFramework.EventBus.csproj" />
+        <ProjectReference Include="..\MSFramework\MSFramework.csproj" />
     </ItemGroup>
 
 </Project>

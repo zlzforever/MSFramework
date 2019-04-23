@@ -25,11 +25,11 @@ namespace MSFramework.EntityFrameworkCore
 			dict.Clear();
 			var assemblyFinder = Singleton<IAssemblyFinder>.Instance ?? new AssemblyFinder();
 			var assemblies = assemblyFinder.GetAllAssemblyList();
-			var types = assemblies.SelectMany(assembly => assembly.GetTypes())
-				.Where(type => type.IsClass && !type.IsAbstract && type.IsAssignableFrom(typeof(IEntityRegister)))
+			var types = assemblies.SelectMany(assembly => assembly.GetTypes()).Where(type =>
+					type.IsClass && !type.IsAbstract && typeof(IEntityRegister).IsAssignableFrom(type))
 				.Distinct()
-				.ToArray();
-			if (types.Length == 0)
+				.ToList();
+			if (types.Count == 0)
 			{
 				return;
 			}
@@ -51,6 +51,7 @@ namespace MSFramework.EntityFrameworkCore
 					list = group.ToList();
 				}
 
+				list.Add(new EventSourceEntryConfiguration());
 				if (list.Count > 0)
 				{
 					dict[key] = list.ToArray();

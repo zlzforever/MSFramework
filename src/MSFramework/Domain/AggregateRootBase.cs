@@ -2,8 +2,8 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
-using MediatR;
-using MSFramework.Domain.Entity;
+using MSFramework.Common;
+using MSFramework.Domain.Event;
 using MSFramework.EventBus;
 
 namespace MSFramework.Domain
@@ -24,8 +24,8 @@ namespace MSFramework.Domain
 		private readonly ICollection<IDomainEvent> _uncommittedEvents =
 			new LinkedList<IDomainEvent>();
 
-		private readonly ICollection<AggregateEvent<TAggregateId>> _aggregateEvents =
-			new LinkedList<AggregateEvent<TAggregateId>>();
+		private readonly ICollection<AggregateEventBase<TAggregateId>> _aggregateEvents =
+			new LinkedList<AggregateEventBase<TAggregateId>>();
 
 		protected AggregateRootBase()
 		{
@@ -45,21 +45,22 @@ namespace MSFramework.Domain
 
 		public void ClearAggregateEvents()
 		{
+			Version = Version + _aggregateEvents.Count;
 			_aggregateEvents.Clear();
 		}
 
 		public string IdAsString() => Id.ToString();
 
-		protected void ApplyAggregateEvent(AggregateEvent<TAggregateId> e)
+		protected void ApplyAggregateEvent(AggregateEventBase<TAggregateId> e)
 		{
 			ApplyAggregateEvent(e, true);
 		}
 
-		private void ApplyAggregateEvent(AggregateEvent<TAggregateId> e, bool isNew)
+		private void ApplyAggregateEvent(AggregateEventBase<TAggregateId> e, bool isNew)
 		{
 			lock (_aggregateEvents)
 			{
-				((dynamic) this).Apply(e);
+				PrivateReflectionDynamicObject.WrapObjectIfNeeded(this).Apply(e);
 				if (isNew)
 				{
 					_aggregateEvents.Add(e);
@@ -67,14 +68,14 @@ namespace MSFramework.Domain
 				else
 				{
 					Id = e.AggregateId;
-					Version++;
+					Version++;					
 				}
 			}
 		}
 
 		#endregion
 
-		#region  domain events
+		#region  Domain events
 
 		public void ClearDomainEvents()
 			=> _uncommittedEvents.Clear();
@@ -95,7 +96,7 @@ namespace MSFramework.Domain
 			{
 				if (@event.Version != Version + 1)
 					throw new MSFrameworkException(@event.Id.ToString());
-				ApplyAggregateEvent(@event as AggregateEvent<TAggregateId>, true);
+				ApplyAggregateEvent(@event as AggregateEventBase<TAggregateId>, true);
 			}
 		}
 	}

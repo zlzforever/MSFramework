@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
-using MSFramework.Domain.Entity;
+using MSFramework.Domain;
 
 namespace MSFramework.EntityFrameworkCore
 {
@@ -81,7 +81,7 @@ namespace MSFramework.EntityFrameworkCore
 			DbContextOptions options = optionsBuilder.Options;
 
 			//创建上下文实例
-			if (!(ActivatorUtilities.CreateInstance(_serviceProvider, dbContextType, options, resolveOptions) is
+			if (!(ActivatorUtilities.CreateInstance(_serviceProvider, dbContextType, options) is
 				DbContext context))
 			{
 				throw new MSFrameworkException($"实例化数据上下文“{dbContextType.AssemblyQualifiedName}”失败");

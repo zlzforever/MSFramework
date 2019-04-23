@@ -2,12 +2,13 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using MSFramework.DependencyInjection;
 using MSFramework.Domain.Repository;
-using Ordering.Domain.Aggregates;
+using Ordering.Domain.AggregateRoot;
 
 namespace Ordering.API.Application.Query
 {
-	public class OrderService : IOrderService
+	public class OrderService : IOrderService, IScopeDependency
 	{
 		private readonly IRepository<Order, Guid> _repository;
 
@@ -16,17 +17,16 @@ namespace Ordering.API.Application.Query
 			_repository = repository;
 		}
 
-		public async System.Threading.Tasks.Task<List<Order>> GetAllOrdersAsync()
+		public async Task<List<Order>> GetAllOrdersAsync()
 		{
 			var orders = await _repository.GetAllListAsync();
 			return orders;
 		}
 
-		public async System.Threading.Tasks.Task<Order> GetOrderAsync(Guid orderId)
+		public async Task<Order> GetOrderAsync(Guid orderId)
 		{
 			var order = await _repository.GetAsync(orderId);
 			return order;
 		}
 	}
-	
 }

@@ -28,14 +28,14 @@ namespace MSFramework.EntityFrameworkCore
 			builder.HasIndex(x => x.CreationTime);
 		}
 	}
-	
+
 	public class EfEventStore : IEventStore
 	{
 		private readonly IEfRepository<EventHistory, long> _repository;
 
-		public EfEventStore(IEfRepository<EventHistory, long> repository)
+		public EfEventStore(DbContextFactory dbContextFactory)
 		{
-			_repository = repository;
+			_repository = new EfRepository<EventHistory, long>(dbContextFactory);
 		}
 
 		public async Task<IEnumerable<EventHistory>> GetEventsAsync(string aggregateId, long @from)
