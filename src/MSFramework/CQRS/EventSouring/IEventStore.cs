@@ -7,7 +7,7 @@ namespace MSFramework.CQRS.EventSouring
 {
 	public interface IEventStore
 	{
-		Task<IEnumerable<Event>> GetEventsAsync(string aggregateId, long from);
+		Task<IEnumerable<IAggregateEvent>> GetEventsAsync(string aggregateId, long from);
 
 		Task AddEventAsync(params EventSourceEntry[] @event);
 	}

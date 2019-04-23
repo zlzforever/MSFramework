@@ -16,7 +16,8 @@ namespace Ordering.Domain.Events
 		{
 		}
 
-		public OrderAddressChangedEvent(Guid id, string newOrderAddress, int version)
+		public OrderAddressChangedEvent(Guid id, string newOrderAddress, long version)
+			: base(id, version)
 		{
 			Id = id;
 			NewOrderAddress = newOrderAddress;

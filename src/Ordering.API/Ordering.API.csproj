@@ -23,4 +23,9 @@
         <ProjectReference Include="..\Ordering.Infrastructure\Ordering.Infrastructure.csproj" />
     </ItemGroup>
 
+    <ItemGroup>
+      <Folder Include="Application\Dto\" />
+      <Folder Include="Application\EventHandler\" />
+    </ItemGroup>
+
 </Project>

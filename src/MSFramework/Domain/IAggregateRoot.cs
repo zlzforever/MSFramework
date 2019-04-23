@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using MediatR;
+using MSFramework.Domain.Entity;
 
 namespace MSFramework.Domain
 {

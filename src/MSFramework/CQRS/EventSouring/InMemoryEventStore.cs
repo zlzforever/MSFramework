@@ -14,14 +14,14 @@ namespace MSFramework.CQRS.EventSouring
 			new Dictionary<string, List<EventSourceEntry>>();
 
 
-		public Task<IEnumerable<Event>> GetEventsAsync(string aggregateId, long from)
+		public Task<IEnumerable<IAggregateEvent>> GetEventsAsync(string aggregateId, long from)
 		{
 			_inMemoryDb.TryGetValue(aggregateId, out var events);
 			var entries = events != null
 				? events.Where(x => x.Version > from).ToList()
 				: new List<EventSourceEntry>();
 			return Task.FromResult(
-				entries.Select(x => (Event) JsonConvert.DeserializeObject(x.Event, Type.GetType(x.EventType)))
+				entries.Select(x => (IAggregateEvent) JsonConvert.DeserializeObject(x.Event, Type.GetType(x.EventType)))
 			);
 		}
 

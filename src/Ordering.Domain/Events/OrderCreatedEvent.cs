@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using MSFramework.Domain;
-using SachaBarber.CQRS.Demo.Orders.Domain.Aggregates;
+using Ordering.Domain.Aggregates;
 
 namespace Ordering.Domain.Events
 {

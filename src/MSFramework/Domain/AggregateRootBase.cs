@@ -108,13 +108,13 @@ namespace MSFramework.Domain
 
 		#endregion
 
-		public void LoadFromHistory(IEnumerable<AggregateEvent<TAggregateId>> history)
+		public void LoadFromHistory(IEnumerable<IAggregateEvent> history)
 		{
 			foreach (var e in history)
 			{
 				if (e.Version != Version + 1)
 					throw new MSFrameworkException(e.Id.ToString());
-				ApplyAggregateEvent(e, true);
+				ApplyAggregateEvent(e as AggregateEvent<TAggregateId>, true);
 			}
 		}
 	}

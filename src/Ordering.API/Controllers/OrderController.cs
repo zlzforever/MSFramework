@@ -6,10 +6,8 @@ using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using MSFramework.Security;
-using Ordering.API.Application.Dto.Order;
 using Ordering.API.Application.Query;
-using Ordering.Domain.AggregateRoot.Buyer;
-using Ordering.Domain.AggregateRoot.Order;
+using Ordering.Domain.Aggregates;
 
 namespace Ordering.API.Controllers
 {
@@ -18,36 +16,26 @@ namespace Ordering.API.Controllers
 	[ApiController]
 	public class OrderController : ControllerBase
 	{
-		private readonly IMediator _mediator;
 		private readonly ILogger _logger;
 		private readonly ICurrentUser _currentUser;
+		private readonly IOrderService _orderService;
 
-		public OrderController(IMediator mediator, ICurrentUser currentUser, ILogger<OrderController> logger)
+		public OrderController(IOrderService orderService, ICurrentUser currentUser, ILogger<OrderController> logger)
 		{
-			_mediator = mediator;
+			_orderService = orderService;
 			_logger = logger;
 			_currentUser = currentUser;
 		}
 
 		#region QUERY
 
-		[Route("{orderId:int}")]
+		[Route("{orderId}")]
 		[HttpGet]
-		[ProducesResponseType(typeof(Order), (int) HttpStatusCode.OK)]
-		[ProducesResponseType((int) HttpStatusCode.NotFound)]
 		public async Task<ActionResult> GetOrderAsync(Guid orderId)
 		{
-			try
-			{
-				var order = await _mediator.Send(new GetOrderByIdQuery(orderId));
-				return Ok(order);
-			}
-			catch
-			{
-				return NotFound();
-			}
+			var order = await _orderService.GetOrderAsync(orderId);
+			return Ok(order);
 		}
- 
 
 		#endregion
 	}
