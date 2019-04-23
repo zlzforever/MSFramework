@@ -1,17 +1,14 @@
-using System;
-using MSFramework.Domain;
+﻿using System;
 using MSFramework.EntityFrameworkCore;
 using MSFramework.EntityFrameworkCore.Repository;
-using Ordering.Domain.AggregateRoot.Order;
-using Ordering.Domain.Repository;
+using MSFramework.EventSouring;
+using Ordering.Domain.Aggregates;
 
 namespace Ordering.Infrastructure.Repository
 {
-	public class OrderingRepository : EfRepository<Order, Guid>, IOrderingRepository
+	public class OrderingRepository : EFAggrateRepository<Order, Guid>, IOrdingRepository
 	{
-		public OrderingRepository(DbContextFactory dbContextFactory) : base(
-			dbContextFactory
-		)
+		public OrderingRepository(DbContextFactory dbFactory, IEventStore eventStore) : base(dbFactory, eventStore)
 		{
 		}
 	}

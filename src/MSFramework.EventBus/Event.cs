@@ -10,7 +10,7 @@ namespace MSFramework.EventBus
 			CreationTime = DateTime.UtcNow;
 		}
 
-		public Guid Id { get; }
+		public Guid Id { get; protected set; }
 
 		public DateTime CreationTime { get; }
 	}

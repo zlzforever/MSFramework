@@ -19,7 +19,7 @@ namespace MSFramework.EntityFrameworkCore.Repository
 	/// <typeparam name="TEntity">实体类型</typeparam>
 	/// <typeparam name="TKey">实体主键类型</typeparam>
 	public class EfRepository<TEntity, TKey> : IEfRepository<TEntity, TKey>
-		where TEntity : class, IEntity<TKey>
+		where TEntity : EntityBase<TKey>
 		where TKey : IEquatable<TKey>
 	{
 		private readonly DbContext _dbContext;
@@ -104,7 +104,7 @@ namespace MSFramework.EntityFrameworkCore.Repository
 			return GetAll().FirstOrDefault(i => i.Id.Equals(id));
 		}
 
-		public async Task<TEntity> GetAsync(TKey id)
+		public async virtual Task<TEntity> GetAsync(TKey id)
 		{
 			return await GetAll().FirstOrDefaultAsync(i => i.Id.Equals(id));
 		}
@@ -114,7 +114,7 @@ namespace MSFramework.EntityFrameworkCore.Repository
 			return Table.Add(entity).Entity;
 		}
 
-		public async Task<TEntity> InsertAsync(TEntity entity)
+		public async virtual Task<TEntity> InsertAsync(TEntity entity)
 		{
 			return (await Table.AddAsync(entity)).Entity;
 		}
@@ -126,7 +126,7 @@ namespace MSFramework.EntityFrameworkCore.Repository
 			return entity;
 		}
 
-		public Task<TEntity> UpdateAsync(TEntity entity)
+		public virtual Task<TEntity> UpdateAsync(TEntity entity)
 		{
 			entity = Update(entity);
 			return Task.FromResult(entity);
@@ -138,7 +138,7 @@ namespace MSFramework.EntityFrameworkCore.Repository
 			Table.Remove(entity);
 		}
 
-		public Task DeleteAsync(TEntity entity)
+		public virtual Task DeleteAsync(TEntity entity)
 		{
 			Delete(entity);
 			return Task.FromResult(0);
@@ -162,7 +162,7 @@ namespace MSFramework.EntityFrameworkCore.Repository
 			//Could not found the entity, do nothing.
 		}
 
-		public Task DeleteAsync(TKey id)
+		public virtual Task DeleteAsync(TKey id)
 		{
 			Delete(id);
 			return Task.FromResult(0);

@@ -37,7 +37,7 @@ namespace MSFramework.Domain
 
 		#region AggregateEvent
 
-		public long Version { get; private set; } = NewAggregateVersion;
+		public long Version { get; protected set; } = NewAggregateVersion;
 
 		public IEnumerable<IAggregateEvent> GetAggregateEvents() =>
 			_aggregateEvents.AsEnumerable();
@@ -89,13 +89,13 @@ namespace MSFramework.Domain
 
 		#endregion
 
-		public void LoadFromHistory(IEnumerable<AggregateEvent<TAggregateId>> histories)
+		public void LoadFromHistory(IEnumerable<IAggregateEvent> histories)
 		{
 			foreach (var @event in histories)
 			{
 				if (@event.Version != Version + 1)
 					throw new MSFrameworkException(@event.Id.ToString());
-				ApplyAggregateEvent(@event, true);
+				ApplyAggregateEvent(@event as AggregateEvent<TAggregateId>, true);
 			}
 		}
 	}

@@ -8,12 +8,12 @@ using MSFramework.EventBus;
 
 namespace MSFramework.EventSource.EntityFrameworkCore
 {
-	public class EventSourceDbContext : DbContextBase
-	{
-		public EventSourceDbContext(DbContextOptions options, IEntityConfigurationTypeFinder typeFinder,
-			IEventBus mediator, IEventStore eventStore,
-			ILoggerFactory loggerFactory) : base(options, typeFinder, mediator, eventStore, loggerFactory)
-		{
-		}
-	}
+	//public class EventSourceDbContext : DbContextBase
+	//{
+	//	public EventSourceDbContext(DbContextOptions options, IEntityConfigurationTypeFinder typeFinder,
+	//		IEventBus mediator, IEventStore eventStore,
+	//		ILoggerFactory loggerFactory) : base(options, typeFinder, mediator, eventStore, loggerFactory)
+	//	{
+	//	}
+	//}
 }

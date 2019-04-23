@@ -14,14 +14,27 @@ namespace MSFramework.Domain
 	/// <summary>
 	/// 聚合内部事件，通过内部消息总线发布
 	/// </summary>
-	public abstract class AggregateEvent<TAggregateId> : Event, IAggregateEvent
+	public interface IAggregateEvent<TAggregateId> : IAggregateEvent
 		where TAggregateId : IEquatable<TAggregateId>
 	{
-		public long Version { get; }
 
-		public TAggregateId AggregateId { get; }
+	}
+
+	/// <summary>
+	/// 聚合内部事件，通过内部消息总线发布
+	/// </summary>
+	public abstract class AggregateEvent<TAggregateId> : Event, IAggregateEvent<TAggregateId>
+		where TAggregateId : IEquatable<TAggregateId>
+	{
+		public long Version { get; protected set; }
+
+		public TAggregateId AggregateId { get; protected set; }
 
 		public string IdAsString() => AggregateId.ToString();
+
+		protected AggregateEvent()
+		{
+		}
 
 		protected AggregateEvent(TAggregateId aggregateId, long version = -1)
 		{
