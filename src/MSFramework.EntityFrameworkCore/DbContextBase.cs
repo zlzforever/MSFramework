@@ -99,11 +99,18 @@ namespace MSFramework.EntityFrameworkCore
 		{
 			try
 			{
+				if (Database.CurrentTransaction == null)
+				{
+					Database.BeginTransaction();
+				}
 				Task.WaitAll(DispatchDomainEventsAsync());
-				return base.SaveChanges();
+				var effectCount = base.SaveChanges();
+				Database.CommitTransaction();
+				return effectCount;
 			}
 			catch (DbUpdateConcurrencyException ex)
 			{
+				Database.RollbackTransaction();
 				throw new MSFrameworkException(ex.Message, ex);
 			}
 		}
@@ -137,11 +144,13 @@ namespace MSFramework.EntityFrameworkCore
 		/// </exception>
 		public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = new CancellationToken())
 		{
-			int effectedCount;
 			try
 			{
-				await Database.BeginTransactionAsync(cancellationToken);
-
+				if (Database.CurrentTransaction == null)
+				{
+					await Database.BeginTransactionAsync(cancellationToken);
+				}
+				
 				// Dispatch Domain Events collection. 
 				// Choices:
 				// A) Right BEFORE committing data (EF SaveChanges) into the DB will make a single transaction including  
@@ -153,17 +162,17 @@ namespace MSFramework.EntityFrameworkCore
 				// After executing this line all the changes (from the Command Handler and Domain Event Handlers) 
 				// performed through the DbContext will be committed
 
-				effectedCount = await base.SaveChangesAsync(cancellationToken);
+				var effectedCount = await base.SaveChangesAsync(cancellationToken);
 
 				Database.CommitTransaction();
+
+				return effectedCount;
 			}
 			catch (DbUpdateConcurrencyException ex)
 			{
 				Database.RollbackTransaction();
 				throw new MSFrameworkException(ex.Message, ex);
 			}
-
-			return effectedCount;
 		}
 
 		internal EventHistory[] GetEventSouringDomainEventsAsync()
