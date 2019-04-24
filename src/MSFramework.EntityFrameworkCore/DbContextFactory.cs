@@ -98,9 +98,9 @@ namespace MSFramework.EntityFrameworkCore
 			return _serviceProvider.GetRequiredService<IEventStore>();
 		}
 
-		public IEnumerable<DbContextBase> GetAllDbContexts()
+		public DbContextBase[] GetAllDbContexts()
 		{
-			return _dbContextDict.Values;
+			return _dbContextDict.Values.ToArray();
 		}
 	}
 }

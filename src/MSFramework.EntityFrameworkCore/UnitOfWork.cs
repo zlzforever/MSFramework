@@ -15,7 +15,8 @@ namespace MSFramework.EntityFrameworkCore
 
 		public void Commit()
 		{
-			var events = _dbContextProvider.GetAllDbContexts().SelectMany(x => x.GetEventSouringDomainEventsAsync())
+			var dbContexts = _dbContextProvider.GetAllDbContexts();
+			var events = dbContexts.SelectMany(x => x.GetEventSouringDomainEventsAsync())
 				.ToArray();
 			if (events.Length > 0)
 			{
@@ -23,7 +24,7 @@ namespace MSFramework.EntityFrameworkCore
 				_dbContextProvider.GetEventStore().AddEventAsync(events).GetAwaiter().GetResult();
 			}
 
-			foreach (var dbContext in _dbContextProvider.GetAllDbContexts())
+			foreach (var dbContext in dbContexts)
 			{
 				dbContext.SaveChanges();
 			}
@@ -31,14 +32,15 @@ namespace MSFramework.EntityFrameworkCore
 
 		public async Task CommitAsync()
 		{
-			var events = _dbContextProvider.GetAllDbContexts().SelectMany(x => x.GetEventSouringDomainEventsAsync())
+			var dbContexts = _dbContextProvider.GetAllDbContexts();
+			var events = dbContexts.SelectMany(x => x.GetEventSouringDomainEventsAsync())
 				.ToArray();
 			if (events.Length > 0)
 			{
 				await _dbContextProvider.GetEventStore().AddEventAsync(events);
 			}
 
-			foreach (var dbContext in _dbContextProvider.GetAllDbContexts())
+			foreach (var dbContext in dbContexts)
 			{
 				await dbContext.SaveChangesAsync();
 			}

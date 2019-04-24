@@ -108,7 +108,7 @@ namespace MSFramework.EntityFrameworkCore
 				Database.CommitTransaction();
 				return effectCount;
 			}
-			catch (DbUpdateConcurrencyException ex)
+			catch (Exception ex)
 			{
 				Database.RollbackTransaction();
 				throw new MSFrameworkException(ex.Message, ex);
@@ -168,7 +168,7 @@ namespace MSFramework.EntityFrameworkCore
 
 				return effectedCount;
 			}
-			catch (DbUpdateConcurrencyException ex)
+			catch (Exception ex)
 			{
 				Database.RollbackTransaction();
 				throw new MSFrameworkException(ex.Message, ex);

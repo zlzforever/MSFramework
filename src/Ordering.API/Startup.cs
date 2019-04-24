@@ -42,7 +42,7 @@ namespace Ordering.API
 					typeof(ICommandHandler<DeleteOrderCommand>));
 
 				builder.AddCommandInterceptor(
-					typeof(LogInterceptor<>),
+					typeof(UoWInterceptor<>),
 					typeof(ValidatorInterceptor<>));
 
 				builder.AddLocalEventBus();
