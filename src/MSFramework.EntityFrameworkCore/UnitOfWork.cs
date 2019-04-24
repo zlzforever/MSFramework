@@ -1,8 +1,6 @@
 using System.Linq;
-using System.Threading;
 using System.Threading.Tasks;
 using MSFramework.Domain;
-using MSFramework.EventSouring;
 
 namespace MSFramework.EntityFrameworkCore
 {
@@ -44,17 +42,6 @@ namespace MSFramework.EntityFrameworkCore
 			{
 				await dbContext.SaveChangesAsync();
 			}
-		}
-
-		public void BeginOrUseTransaction()
-		{
-			// TODO
-		}
-
-		public Task BeginOrUseTransactionAsync(CancellationToken cancellationToken = default)
-		{
-			// TODO
-			return Task.CompletedTask;
 		}
 	}
 }

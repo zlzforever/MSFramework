@@ -41,7 +41,8 @@ namespace Ordering.API
 					typeof(ICommandHandler<ChangeOrderAddressCommand>),
 					typeof(ICommandHandler<DeleteOrderCommand>));
 
-				builder.AddCommandInterceptor(typeof(LogInterceptor<>), typeof(TransactionInterceptor<>),
+				builder.AddCommandInterceptor(
+					typeof(LogInterceptor<>),
 					typeof(ValidatorInterceptor<>));
 
 				builder.AddLocalEventBus();
