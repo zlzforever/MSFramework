@@ -11,17 +11,5 @@ namespace MSFramework.Domain
 		void Commit();
 
 		Task CommitAsync();
-		
-		/// <summary>
-		/// 对数据库连接开启事务
-		/// </summary>
-		void BeginOrUseTransaction();
-
-		/// <summary>
-		/// 对数据库连接开启事务
-		/// </summary>
-		/// <param name="cancellationToken">异步取消标记</param>
-		/// <returns></returns>
-		Task BeginOrUseTransactionAsync(CancellationToken cancellationToken = default);
 	}
 }
