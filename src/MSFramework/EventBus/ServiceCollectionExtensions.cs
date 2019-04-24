@@ -10,10 +10,18 @@ namespace MSFramework.EventBus
 		{
 			EventBusBuilder eBuilder = new EventBusBuilder(builder.Services);
 			configure?.Invoke(eBuilder);
-			builder.Services.AddSingleton<IEventBusSubscriptionStore, InMemoryEventBusSubscriptionStore>();
-			builder.Services.AddSingleton<IEventBus, PassThroughEventBus>();
+
+			builder.Services.AddLocalEventBus();
 
 			return builder;
+		}
+
+		public static IServiceCollection AddLocalEventBus(this IServiceCollection services)
+		{
+			services.AddSingleton<IEventBusSubscriptionStore, InMemoryEventBusSubscriptionStore>();
+			services.AddSingleton<IEventBus, PassThroughEventBus>();
+
+			return services;
 		}
 	}
 }

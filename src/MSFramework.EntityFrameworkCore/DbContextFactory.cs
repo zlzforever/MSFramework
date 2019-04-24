@@ -77,7 +77,8 @@ namespace MSFramework.EntityFrameworkCore
 					$"无法解析类型为“{resolveOptions.DatabaseType}”的 {typeof(IDbContextOptionsBuilderCreator).FullName} 实例");
 			}
 
-			DbContextOptionsBuilder optionsBuilder = builderCreator.Create(resolveOptions.ConnectionString);
+			DbContextOptionsBuilder optionsBuilder =
+				builderCreator.Create(dbContextType, resolveOptions.ConnectionString);
 
 			DbContextOptions options = optionsBuilder.Options;
 
@@ -87,6 +88,7 @@ namespace MSFramework.EntityFrameworkCore
 			{
 				throw new MSFrameworkException($"实例化数据上下文“{dbContextType.AssemblyQualifiedName}”失败");
 			}
+
 			_dbContextDict.TryAdd(dbContextType, context);
 			return context;
 		}

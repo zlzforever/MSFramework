@@ -1,3 +1,4 @@
+using System;
 using System.Reflection;
 using Microsoft.EntityFrameworkCore;
 
@@ -7,10 +8,10 @@ namespace MSFramework.EntityFrameworkCore.SqlServer
 	{
 		public string Type => "SqlServer";
 
-		public DbContextOptionsBuilder Create(string connectionString)
+		public DbContextOptionsBuilder Create(Type dbContextType, string connectionString)
 		{
 			DbContextOptionsBuilder optionsBuilder = new DbContextOptionsBuilder();
-			string entryAssemblyName = Assembly.GetEntryAssembly().GetName().Name;
+			string entryAssemblyName = dbContextType.Assembly.GetName().Name;
 			return optionsBuilder.UseSqlServer(connectionString, builder =>
 			{
 				builder.UseRowNumberForPaging();

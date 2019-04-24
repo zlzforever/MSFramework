@@ -7,8 +7,15 @@ namespace MSFramework.EntityFrameworkCore.MySql
 		public static EntityFrameworkBuilder AddMySqlDbContextOptionsBuilderCreator(
 			this EntityFrameworkBuilder builder)
 		{
-			builder.Services.AddSingleton<IDbContextOptionsBuilderCreator, DbContextOptionsBuilderCreator>();
+			builder.Services.AddMySqlDbContextOptionsBuilderCreator();
 			return builder;
+		}
+
+		public static IServiceCollection AddMySqlDbContextOptionsBuilderCreator(
+			this IServiceCollection service)
+		{
+			service.AddSingleton<IDbContextOptionsBuilderCreator, DbContextOptionsBuilderCreator>();
+			return service;
 		}
 	}
 }

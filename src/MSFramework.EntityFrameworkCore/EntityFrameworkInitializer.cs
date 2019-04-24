@@ -35,7 +35,6 @@ namespace MSFramework.EntityFrameworkCore
 
 						if (dbContext.Database.ProviderName == "Microsoft.EntityFrameworkCore.InMemory") continue;
 
-						dbContext.Database.EnsureCreated();
 						string[] migrations = dbContext.Database.GetPendingMigrations().ToArray();
 						if (migrations.Length > 0)
 						{

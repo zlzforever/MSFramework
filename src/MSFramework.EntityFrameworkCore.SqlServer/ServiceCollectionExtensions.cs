@@ -7,8 +7,15 @@ namespace MSFramework.EntityFrameworkCore.SqlServer
 		public static EntityFrameworkBuilder AddSqlServerDbContextOptionsBuilderCreator(
 			this EntityFrameworkBuilder builder)
 		{
-			builder.Services.AddSingleton<IDbContextOptionsBuilderCreator, DbContextOptionsBuilderCreator>();
+			builder.Services.AddSqlServerDbContextOptionsBuilderCreator();
 			return builder;
+		}
+
+		public static IServiceCollection AddSqlServerDbContextOptionsBuilderCreator(
+			this IServiceCollection service)
+		{
+			service.AddSingleton<IDbContextOptionsBuilderCreator, DbContextOptionsBuilderCreator>();
+			return service;
 		}
 	}
 }
