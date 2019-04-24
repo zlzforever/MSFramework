@@ -10,6 +10,9 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 ProjectSection(SolutionItems) = preProject
 	README.md = README.md
 	.editorconfig = .editorconfig
+	LICENSE = LICENSE
+	publish_nuget_packages.sh = publish_nuget_packages.sh
+	.gitignore = .gitignore
 EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{BC00DC54-17AB-455D-AE75-FDF74923FC13}"
