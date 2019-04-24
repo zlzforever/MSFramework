@@ -25,9 +25,8 @@ namespace MSFramework.EventSouring
 		/// <summary>
 		/// 
 		/// </summary>
-		[StringLength(255)]
 		[Required]
-		public string AggregateId { get; set; }
+		public Guid AggregateId { get; set; }
 
 		/// <summary>
 		/// 
@@ -50,7 +49,7 @@ namespace MSFramework.EventSouring
 			EventType = @event.GetType().Name;
 			Version = @event.Version;
 			Event = Singleton<IJsonConvert>.Instance.SerializeObject(@event);
-			AggregateId = @event.IdAsString();
+			AggregateId = @event.AggregateId;
 			CreationTime = DateTime.UtcNow;
 		}
 

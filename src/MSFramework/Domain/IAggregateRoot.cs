@@ -4,18 +4,14 @@ using MSFramework.Domain.Event;
 
 namespace MSFramework.Domain
 {
-	public interface IAggregateRoot : IAggregateId
+	public interface IAggregateRoot : IEventSourcingAggregate
 	{
+		Guid Id { get; }
+
 		void RegisterDomainEvent(IDomainEvent @event);
 
 		IEnumerable<IDomainEvent> GetDomainEvents();
 
 		void ClearDomainEvents();
-	}
-
-	public interface IAggregateRoot<out TAggregateId>
-		: IEventSourcingAggregate where TAggregateId : IEquatable<TAggregateId>
-	{
-		TAggregateId Id { get; }
 	}
 }

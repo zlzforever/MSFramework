@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -18,7 +19,7 @@ namespace MSFramework.EventSouring.EntityFrameworkCore
 			_table = _dbContext.Set<EventHistory>();
 		}
 
-		public async Task<IEnumerable<EventHistory>> GetEventsAsync(string aggregateId, long @from)
+		public async Task<IEnumerable<EventHistory>> GetEventsAsync(Guid aggregateId, long @from)
 		{
 			return await _table.Where(x => x.Version > from && x.AggregateId == aggregateId).ToListAsync();
 		}

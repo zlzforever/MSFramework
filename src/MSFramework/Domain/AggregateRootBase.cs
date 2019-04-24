@@ -10,26 +10,24 @@ namespace MSFramework.Domain
 	/// 本地领域事件: 聚合内部事件(用于更改数据，需要保存到 ES)直接调用，聚合互通事件(不需要保存到 ES)
 	/// 外部领域事件: 通过分布式 EventBus 发布到消息队列中, 在 DbContext 中处理
 	/// </summary>
-	/// <typeparam name="TAggregateId"></typeparam>
 	[Serializable]
-	public abstract class AggregateRootBase<TAggregateId> :
-		EntityBase<TAggregateId>,
-		IAggregateRoot<TAggregateId>
-		where TAggregateId : IEquatable<TAggregateId>
+	public abstract class AggregateRootBase :
+		EntityBase<Guid>,
+		IAggregateRoot
 	{
 		public const long NewAggregateVersion = -1;
 
 		private readonly ICollection<IDomainEvent> _uncommittedEvents =
 			new LinkedList<IDomainEvent>();
 
-		private readonly ICollection<AggregateEventBase<TAggregateId>> _aggregateEvents =
-			new LinkedList<AggregateEventBase<TAggregateId>>();
+		private readonly ICollection<AggregateEventBase> _aggregateEvents =
+			new LinkedList<AggregateEventBase>();
 
-		protected AggregateRootBase()
+		protected AggregateRootBase() : base(CombGuid.NewGuid())
 		{
 		}
 
-		protected AggregateRootBase(TAggregateId id) : base(id)
+		protected AggregateRootBase(Guid id) : base(id)
 		{
 		}
 
@@ -43,32 +41,17 @@ namespace MSFramework.Domain
 
 		public void ClearAggregateEvents()
 		{
-			Version = Version + _aggregateEvents.Count;
 			_aggregateEvents.Clear();
 		}
 
-		public string IdAsString() => Id.ToString();
-
-		protected void ApplyAggregateEvent(AggregateEventBase<TAggregateId> e)
+		protected void ApplyAggregateEvent(AggregateEventBase aggregateEvent)
 		{
-			ApplyAggregateEvent(e, true);
-		}
+			Version++;
 
-		private void ApplyAggregateEvent(AggregateEventBase<TAggregateId> e, bool isNew)
-		{
-			lock (_aggregateEvents)
-			{
-				PrivateReflectionDynamicObject.WrapObjectIfNeeded(this).Apply(e);
-				if (isNew)
-				{
-					_aggregateEvents.Add(e);
-				}
-				else
-				{
-					Id = e.AggregateId;
-					Version++;					
-				}
-			}
+			// TODO: 是否需要 lock?
+			aggregateEvent.SetAggregateIdAndVersion(Id, Version);
+			PrivateReflectionDynamicObject.WrapObjectIfNeeded(this).Apply(aggregateEvent);
+			_aggregateEvents.Add(aggregateEvent);
 		}
 
 		#endregion
@@ -93,8 +76,14 @@ namespace MSFramework.Domain
 			foreach (var @event in histories)
 			{
 				if (@event.Version != Version + 1)
+				{
 					throw new MSFrameworkException(@event.Id.ToString());
-				ApplyAggregateEvent(@event as AggregateEventBase<TAggregateId>, true);
+				}
+
+				var aggregateEvent = (AggregateEventBase) @event;
+				Id = aggregateEvent.AggregateId;
+				Version = aggregateEvent.Version;
+				PrivateReflectionDynamicObject.WrapObjectIfNeeded(this).Apply(aggregateEvent);
 			}
 		}
 	}

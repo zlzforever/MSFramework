@@ -5,39 +5,26 @@ namespace MSFramework.Domain.Event
 	/// <summary>
 	/// 聚合内部事件，通过内部消息总线发布
 	/// </summary>
-	public interface IAggregateEvent : IDomainEvent, IAggregateId
+	public interface IAggregateEvent : IDomainEvent
 	{
 		long Version { get; }
+
+		Guid AggregateId { get; }
 	}
 
 	/// <summary>
 	/// 聚合内部事件，通过内部消息总线发布
 	/// </summary>
-	public interface IAggregateEvent<TAggregateId> : IAggregateEvent
-		where TAggregateId : IEquatable<TAggregateId>
+	public abstract class AggregateEventBase : EventBus.Event, IAggregateEvent
 	{
-	}
+		public long Version { get; private set; }
 
-	/// <summary>
-	/// 聚合内部事件，通过内部消息总线发布
-	/// </summary>
-	public abstract class AggregateEventBase<TAggregateId> : EventBus.Event, IAggregateEvent<TAggregateId>
-		where TAggregateId : IEquatable<TAggregateId>
-	{
-		public long Version { get; protected set; }
+		public Guid AggregateId { get; private set; }
 
-		public TAggregateId AggregateId { get; protected set; }
-
-		public string IdAsString() => AggregateId.ToString();
-
-		protected AggregateEventBase()
+		internal void SetAggregateIdAndVersion(Guid aggregateId, long version)
 		{
-		}
-
-		protected AggregateEventBase(TAggregateId aggregateId, long version = -1)
-		{
-			Version = version;
 			AggregateId = aggregateId;
+			Version = version;
 		}
 	}
 }

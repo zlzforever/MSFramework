@@ -3,12 +3,11 @@ using System.Threading.Tasks;
 
 namespace MSFramework.Domain.Repository
 {
-	public interface IAggregateRepository<TAggregate, in TPrimaryKey> : IRepository where TAggregate : IAggregateRoot<TPrimaryKey>
-		where TPrimaryKey :IEquatable<TPrimaryKey>
+	public interface IAggregateRepository<TAggregate> : IRepository where TAggregate : IAggregateRoot
 	{
-		TAggregate Get(TPrimaryKey id);
+		TAggregate Get(Guid id);
 
-		Task<TAggregate> GetAsync(TPrimaryKey id);
+		Task<TAggregate> GetAsync(Guid id);
 
 		TAggregate Insert(TAggregate aggregate);
 
@@ -18,6 +17,6 @@ namespace MSFramework.Domain.Repository
 
 		Task DeleteAsync(TAggregate aggregate);
 
-		Task DeleteAsync(TPrimaryKey id);
+		Task DeleteAsync(Guid id);
 	}
 }

@@ -4,7 +4,7 @@ using MSFramework.Domain;
 
 namespace Ordering.Domain.AggregateRoot
 {
-	public class Order : AggregateRootBase<Guid>
+	public class Order : AggregateRootBase
 	{
 		private string _description;
 		private bool _isDeleted;
@@ -56,7 +56,7 @@ namespace Ordering.Domain.AggregateRoot
 			_description = e.Description;
 			_orderItems = e.OrderItems;
 			_creationTime = e.CreationTime;
-			OrderStatus= 0;
+			OrderStatus = 0;
 		}
 
 		private void Apply(OrderAddressChangedEvent e)
@@ -78,12 +78,12 @@ namespace Ordering.Domain.AggregateRoot
 				throw new ArgumentException(nameof(newAddress));
 			}
 
-			ApplyAggregateEvent(new OrderAddressChangedEvent(Id, Version, newAddress));
+			ApplyAggregateEvent(new OrderAddressChangedEvent(newAddress));
 		}
 
 		public void Delete()
 		{
-			ApplyAggregateEvent(new OrderDeletedEvent(Id, Version));
+			ApplyAggregateEvent(new OrderDeletedEvent());
 		}
 	}
 }

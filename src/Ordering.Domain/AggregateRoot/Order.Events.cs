@@ -5,15 +5,11 @@ using MSFramework.Domain.Event;
 
 namespace Ordering.Domain.AggregateRoot
 {
-	public class OrderDeletedEvent : AggregateEventBase<Guid>
+	public class OrderDeletedEvent : AggregateEventBase
 	{
-		public OrderDeletedEvent(Guid aggregateId, long version)
-			:base(aggregateId, version)
-		{
-		}
 	}
 	
-	public class OrderCreatedEvent : AggregateEventBase<Guid>
+	public class OrderCreatedEvent : AggregateEventBase
 	{
 		public string Description { get; }
 
@@ -28,7 +24,7 @@ namespace Ordering.Domain.AggregateRoot
 			Address address,
 			string description,
 			List<OrderItem> orderItems
-		) : base(CombGuid.NewGuid(), 0)
+		) 
 		{
 			Description = description;
 			Address = address;
@@ -37,16 +33,13 @@ namespace Ordering.Domain.AggregateRoot
 		}
 	}
 	
-	public class OrderAddressChangedEvent : AggregateEventBase<Guid>
+	public class OrderAddressChangedEvent : AggregateEventBase
 	{
 		public Address NewOrderAddress { get; }
 
-		public OrderAddressChangedEvent(Guid aggregateId, long version, Address newOrderAddress)
-			: base(aggregateId, version)
+		public OrderAddressChangedEvent(Address newOrderAddress)
 		{
-			AggregateId = aggregateId;
 			NewOrderAddress = newOrderAddress;
-			Version = version;
 		}
 	}
 }

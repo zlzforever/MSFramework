@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -6,11 +7,11 @@ namespace MSFramework.EventSouring
 {
 	public class InMemoryEventStore : IEventStore
 	{
-		private readonly Dictionary<string, List<EventHistory>> _inMemoryDb =
-			new Dictionary<string, List<EventHistory>>();
+		private readonly Dictionary<Guid, List<EventHistory>> _inMemoryDb =
+			new Dictionary<Guid, List<EventHistory>>();
 
 
-		public Task<IEnumerable<EventHistory>> GetEventsAsync(string aggregateId, long from)
+		public Task<IEnumerable<EventHistory>> GetEventsAsync(Guid aggregateId, long from)
 		{
 			_inMemoryDb.TryGetValue(aggregateId, out var events);
 			var entries = events != null ? events.Where(x => x.Version > from) : Enumerable.Empty<EventHistory>();
