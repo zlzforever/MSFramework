@@ -34,4 +34,11 @@
       </Content>
     </ItemGroup>
 
+    <ItemGroup>
+      <_ContentIncludedByDefault Remove="output\appsettings.json" />
+      <_ContentIncludedByDefault Remove="output\Ordering.API.deps.json" />
+      <_ContentIncludedByDefault Remove="output\Ordering.API.runtimeconfig.dev.json" />
+      <_ContentIncludedByDefault Remove="output\Ordering.API.runtimeconfig.json" />
+    </ItemGroup>
+
 </Project>

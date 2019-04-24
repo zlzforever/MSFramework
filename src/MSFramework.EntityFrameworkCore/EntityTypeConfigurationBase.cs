@@ -20,7 +20,7 @@ namespace MSFramework.EntityFrameworkCore
 		/// <summary>
 		/// 获取 所属的上下文类型，如为null，将使用默认上下文， 否则使用指定类型的上下文类型
 		/// </summary>
-		public virtual Type DbContextType => null;
+		public virtual Type DbContextType => typeof(DefaultDbContext);
 
 		/// <summary>
 		/// 获取 相应的实体类型

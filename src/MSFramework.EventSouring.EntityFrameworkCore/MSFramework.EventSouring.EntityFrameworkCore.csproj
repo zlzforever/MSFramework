@@ -16,11 +16,11 @@
         <PackageLicenseFile>LICENSE</PackageLicenseFile>
     </PropertyGroup>
     <ItemGroup>
-        <None Include="..\..\LICENSE" Pack="true" PackagePath=""/>
+        <None Include="..\..\LICENSE" Pack="true" PackagePath="" />
     </ItemGroup>
     <ItemGroup>
-        <ProjectReference Include="..\MSFramework.EntityFrameworkCore\MSFramework.EntityFrameworkCore.csproj"/>
-        <ProjectReference Include="..\MSFramework\MSFramework.csproj"/>
+        <ProjectReference Include="..\MSFramework.EntityFrameworkCore\MSFramework.EntityFrameworkCore.csproj" />
+        <ProjectReference Include="..\MSFramework\MSFramework.csproj" />
     </ItemGroup>
 
 </Project>
