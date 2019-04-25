@@ -1,0 +1,19 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>netcoreapp2.2</TargetFramework>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\MSFramework.EntityFrameworkCore\MSFramework.EntityFrameworkCore.csproj" />
+      <ProjectReference Include="..\MSFramework.EventSouring.EntityFrameworkCore\MSFramework.EventSouring.EntityFrameworkCore.csproj" />
+      <ProjectReference Include="..\MSFramework\MSFramework.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Compile Update="AggregateRoot\Client.Events.cs">
+        <DependentUpon>Client.cs</DependentUpon>
+      </Compile>
+    </ItemGroup>
+
+</Project>
