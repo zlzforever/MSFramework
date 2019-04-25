@@ -1,13 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using MSFramework.Domain;
+using MSFramework.Domain.Repository;
 
 namespace Ordering.Domain.AggregateRoot
 {
-	public class Order : AggregateRootBase
+	public class Order : AggregateRootBase<Order, Guid>
 	{
 		private string _description;
-		private bool _isDeleted;
 		private string _userId;
 
 		// DDD Patterns comment
@@ -20,8 +20,6 @@ namespace Ordering.Domain.AggregateRoot
 		// Using private fields, allowed since EF Core 1.1, is a much better encapsulation
 		// aligned with DDD Aggregates and Domain Entities (Instead of properties and property collections)
 		private DateTime _creationTime;
-
-		public int OrderStatus { get; private set; }
 
 		// Address is a Value Object pattern example persisted as EF Core 2.0 owned entity
 		public Address Address { get; private set; }
@@ -56,7 +54,6 @@ namespace Ordering.Domain.AggregateRoot
 			_description = e.Description;
 			_orderItems = e.OrderItems;
 			_creationTime = e.CreationTime;
-			OrderStatus = 0;
 		}
 
 		private void Apply(OrderAddressChangedEvent e)
@@ -68,7 +65,6 @@ namespace Ordering.Domain.AggregateRoot
 		private void Apply(OrderDeletedEvent e)
 		{
 			Version = e.Version;
-			_isDeleted = true;
 		}
 
 		public void ChangeAddress(Address newAddress)

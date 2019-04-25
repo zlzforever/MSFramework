@@ -13,7 +13,6 @@ namespace Ordering.Infrastructure.Migrations
                 {
                     Id = table.Column<Guid>(nullable: false),
                     Version = table.Column<long>(nullable: false),
-                    OrderStatus = table.Column<int>(nullable: false),
                     Address_Street = table.Column<string>(nullable: true),
                     Address_City = table.Column<string>(nullable: true),
                     Address_State = table.Column<string>(nullable: true),
@@ -22,7 +21,6 @@ namespace Ordering.Infrastructure.Migrations
                     CreationTime = table.Column<DateTime>(nullable: false),
                     Description = table.Column<string>(nullable: true),
                     IsDeleted = table.Column<bool>(nullable: false),
-                    OrderStatusId = table.Column<int>(nullable: false),
                     UserId = table.Column<string>(nullable: false)
                 },
                 constraints: table =>

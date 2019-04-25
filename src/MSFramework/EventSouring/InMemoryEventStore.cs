@@ -7,16 +7,16 @@ namespace MSFramework.EventSouring
 {
 	public class InMemoryEventStore : IEventStore
 	{
-		private readonly Dictionary<Guid, List<EventHistory>> _inMemoryDb =
-			new Dictionary<Guid, List<EventHistory>>();
+		private readonly Dictionary<string, List<EventHistory>> _inMemoryDb =
+			new Dictionary<string, List<EventHistory>>();
 
 
-		public Task<EventHistory[]> GetEventsAsync(Guid aggregateId, long from)
+		public Task<EventHistory[]> GetEventsAsync(string aggregateId, long from)
 		{
 			return Task.FromResult(GetEvents(aggregateId, from));
 		}
 
-		public EventHistory[] GetEvents(Guid aggregateId, long @from)
+		public EventHistory[] GetEvents(string aggregateId, long @from)
 		{
 			_inMemoryDb.TryGetValue(aggregateId, out var events);
 			var entries = events != null ? events.Where(x => x.Version > from).ToArray() : new EventHistory[0];
@@ -44,12 +44,12 @@ namespace MSFramework.EventSouring
 			}
 		}
 
-		public Task<EventHistory> GetLastEventAsync(Guid aggregateId)
+		public Task<EventHistory> GetLastEventAsync(string aggregateId)
 		{
 			return Task.FromResult(GetLastEvent(aggregateId));
 		}
 
-		public EventHistory GetLastEvent(Guid aggregateId)
+		public EventHistory GetLastEvent(string aggregateId)
 		{
 			_inMemoryDb.TryGetValue(aggregateId, out var events);
 			var @event = events?.LastOrDefault();

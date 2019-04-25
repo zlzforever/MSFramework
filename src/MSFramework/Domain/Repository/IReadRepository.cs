@@ -4,8 +4,9 @@ using System.Threading.Tasks;
 
 namespace MSFramework.Domain.Repository
 {
-	public interface IReadRepository<TAggregateRoot> : IRepository
-		where TAggregateRoot : AggregateRootBase
+	public interface IReadRepository<TAggregateRoot, in TAggregateRootId> : IRepository
+		where TAggregateRoot : AggregateRootBase<TAggregateRoot,TAggregateRootId>
+		where TAggregateRootId : IEquatable<TAggregateRootId>
 	{
 		/// <summary>
 		/// Used to get all entities.
@@ -24,14 +25,14 @@ namespace MSFramework.Domain.Repository
 		/// </summary>
 		/// <param name="id">Primary key of the entity to get</param>
 		/// <returns>Entity</returns>
-		TAggregateRoot Get(Guid id);
+		TAggregateRoot Get(TAggregateRootId id);
 
 		/// <summary>
 		/// Gets an entity with given primary key.
 		/// </summary>
 		/// <param name="id">Primary key of the entity to get</param>
 		/// <returns>Entity</returns>
-		Task<TAggregateRoot> GetAsync(Guid id);
+		Task<TAggregateRoot> GetAsync(TAggregateRootId id);
 
 		/// <summary>
 		/// Gets count of all entities in this repository.

@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using MSFramework.Domain;
 using MSFramework.Domain.Event;
+using MSFramework.Domain.Repository;
 
 namespace MSFramework.EntityFrameworkCore.Repository
 {
@@ -11,9 +12,11 @@ namespace MSFramework.EntityFrameworkCore.Repository
 	/// 实体数据存储操作类
 	/// </summary>
 	/// <typeparam name="TAggregateRoot">实体类型</typeparam>
-	public abstract class EfWriteRepository<TAggregateRoot> :
-		IEfWriteRepository<TAggregateRoot>
-		where TAggregateRoot : AggregateRootBase
+	/// <typeparam name="TAggregateRootId"></typeparam>
+	public abstract class EfWriteRepository<TAggregateRoot, TAggregateRootId> :
+		IWriteRepository<TAggregateRoot, TAggregateRootId>
+		where TAggregateRoot : AggregateRootBase<TAggregateRoot, TAggregateRootId>
+		where TAggregateRootId : IEquatable<TAggregateRootId>
 	{
 		protected DbContextFactory DbContextFactory { get; }
 
@@ -62,7 +65,7 @@ namespace MSFramework.EntityFrameworkCore.Repository
 			return Task.CompletedTask;
 		}
 
-		public virtual void Delete(Guid id)
+		public virtual void Delete(TAggregateRootId id)
 		{
 			var entity = GetFromChangeTrackerOrNull(id);
 			if (entity != null)
@@ -71,36 +74,37 @@ namespace MSFramework.EntityFrameworkCore.Repository
 				return;
 			}
 
-			entity = Aggregates.FirstOrDefault(x => x.Id == id);
+			entity = Aggregates.FirstOrDefault(x => x.Id.Equals(id));
 			if (entity != null)
 			{
 				Delete(entity);
 			}
 		}
 
-		public virtual Task DeleteAsync(Guid id)
+		public virtual Task DeleteAsync(TAggregateRootId id)
 		{
 			Delete(id);
 			return Task.FromResult(0);
 		}
 
-		public virtual TAggregateRoot Get(Guid id)
+		public virtual TAggregateRoot Get(TAggregateRootId id)
 		{
-			var aggregate = Aggregates.FirstOrDefault(x => x.Id == id);
-			if (aggregate == null)
+			var eventStore = DbContextFactory.GetEventStore();
+			var aggregate = Aggregates.FirstOrDefault(x => x.Id.Equals(id));
+			if (eventStore == null)
 			{
-				var eventStore = DbContextFactory.GetEventStore();
-				if (eventStore == null)
+				return aggregate;
+			}
+			else
+			{
+				var idAsString = id.ToString();
+				if (aggregate == null)
 				{
-					return null;
-				}
-				else
-				{
-					var @event = eventStore.GetLastEvent(id);
-					if (@event.EventType != DeletedEvent.Type.FullName)
+					var @event = eventStore.GetLastEvent(idAsString);
+					if (@event.EventType != typeof(DeletedEvent<TAggregateRoot, TAggregateRootId>).FullName)
 					{
 						aggregate = AggregateRootFactory.CreateAggregate<TAggregateRoot>();
-						var events = eventStore.GetEvents(id, 0);
+						var events = eventStore.GetEvents(idAsString, 0);
 						aggregate.LoadFromHistory(events.Select(e => e.ToAggregateEvent()).ToArray());
 						Aggregates.Add(aggregate);
 						return aggregate;
@@ -110,17 +114,9 @@ namespace MSFramework.EntityFrameworkCore.Repository
 						return null;
 					}
 				}
-			}
-			else
-			{
-				var eventStore = DbContextFactory.GetEventStore();
-				if (eventStore == null)
-				{
-					return aggregate;
-				}
 				else
 				{
-					var events = eventStore.GetEvents(aggregate.Id, aggregate.Version);
+					var events = eventStore.GetEvents(idAsString, aggregate.Version);
 					if (events.Any() && events.First().Version != aggregate.Version + 1)
 					{
 						// TODO: data is dirty
@@ -136,23 +132,24 @@ namespace MSFramework.EntityFrameworkCore.Repository
 			}
 		}
 
-		public virtual async Task<TAggregateRoot> GetAsync(Guid id)
+		public virtual async Task<TAggregateRoot> GetAsync(TAggregateRootId id)
 		{
-			var aggregate = Aggregates.FirstOrDefault(x => x.Id == id);
-			if (aggregate == null)
+			var eventStore = DbContextFactory.GetEventStore();
+			var aggregate = Aggregates.FirstOrDefault(x => x.Id.Equals(id));
+			if (eventStore == null)
 			{
-				var eventStore = DbContextFactory.GetEventStore();
-				if (eventStore == null)
+				return aggregate;
+			}
+			else
+			{
+				var idAsString = id.ToString();
+				if (aggregate == null)
 				{
-					return null;
-				}
-				else
-				{
-					var @event = await eventStore.GetLastEventAsync(id);
-					if (@event.EventType != DeletedEvent.Type.FullName)
+					var @event = await eventStore.GetLastEventAsync(idAsString);
+					if (@event.EventType != typeof(DeletedEvent<TAggregateRoot, TAggregateRootId>).FullName)
 					{
 						aggregate = AggregateRootFactory.CreateAggregate<TAggregateRoot>();
-						var events = await eventStore.GetEventsAsync(id, 0);
+						var events = await eventStore.GetEventsAsync(idAsString, 0);
 						aggregate.LoadFromHistory(events.Select(e => e.ToAggregateEvent()).ToArray());
 						await Aggregates.AddAsync(aggregate);
 						return aggregate;
@@ -162,17 +159,9 @@ namespace MSFramework.EntityFrameworkCore.Repository
 						return null;
 					}
 				}
-			}
-			else
-			{
-				var eventStore = DbContextFactory.GetEventStore();
-				if (eventStore == null)
-				{
-					return aggregate;
-				}
 				else
 				{
-					var events = await eventStore.GetEventsAsync(aggregate.Id, aggregate.Version);
+					var events = await eventStore.GetEventsAsync(idAsString, aggregate.Version);
 					if (events.Any() && events.First().Version != aggregate.Version + 1)
 					{
 						// TODO: data is dirty
@@ -188,10 +177,10 @@ namespace MSFramework.EntityFrameworkCore.Repository
 			}
 		}
 
-		private TAggregateRoot GetFromChangeTrackerOrNull(Guid id)
+		private TAggregateRoot GetFromChangeTrackerOrNull(TAggregateRootId id)
 		{
 			var entry = DbContext.ChangeTracker.Entries()
-				.FirstOrDefault(ent => ent.Entity is TAggregateRoot aggregate && aggregate.Id == id);
+				.FirstOrDefault(ent => ent.Entity is TAggregateRoot aggregate && aggregate.Id.Equals(id));
 
 			return entry?.Entity as TAggregateRoot;
 		}

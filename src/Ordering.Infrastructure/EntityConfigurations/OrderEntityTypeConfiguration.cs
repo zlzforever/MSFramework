@@ -20,7 +20,6 @@ namespace Ordering.Infrastructure.EntityConfigurations
 			orderConfiguration.Property<DateTime>("CreationTime").IsRequired();
 			orderConfiguration.Property<bool>("IsDeleted").IsRequired();
 			orderConfiguration.Property<string>("UserId").IsRequired();
-			orderConfiguration.Property<int>("OrderStatusId").IsRequired();
 			orderConfiguration.Property<string>("Description").IsRequired(false);
 
 			var navigation = orderConfiguration.Metadata.FindNavigation(nameof(Order.OrderItems));

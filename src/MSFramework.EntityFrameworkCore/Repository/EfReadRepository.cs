@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using MSFramework.Domain;
+using MSFramework.Domain.Repository;
 
 namespace MSFramework.EntityFrameworkCore.Repository
 {
@@ -11,9 +12,12 @@ namespace MSFramework.EntityFrameworkCore.Repository
 	/// Read 仓储必须严格保证不会有写操作
 	/// </summary>
 	/// <typeparam name="TAggregateRoot"></typeparam>
-	public abstract class EfReadRepository<TAggregateRoot> :
-		IEfReadRepository<TAggregateRoot>
-		where TAggregateRoot : AggregateRootBase
+	/// <typeparam name="TAggregateRootId"></typeparam>
+	public abstract class EfReadRepository<TAggregateRoot, TAggregateRootId> :
+		IReadRepository<TAggregateRoot, TAggregateRootId>
+		where TAggregateRoot : AggregateRootBase<TAggregateRoot, TAggregateRootId>
+		where TAggregateRootId : IEquatable<TAggregateRootId>
+
 	{
 		protected DbContext DbContext { get; }
 
@@ -35,14 +39,14 @@ namespace MSFramework.EntityFrameworkCore.Repository
 			return await Aggregates.ToListAsync();
 		}
 
-		public virtual TAggregateRoot Get(Guid id)
+		public virtual TAggregateRoot Get(TAggregateRootId id)
 		{
-			return Aggregates.FirstOrDefault(x => x.Id == id);
+			return Aggregates.FirstOrDefault(x => x.Id.Equals(id));
 		}
 
-		public virtual async Task<TAggregateRoot> GetAsync(Guid id)
+		public virtual async Task<TAggregateRoot> GetAsync(TAggregateRootId id)
 		{
-			return await Aggregates.FirstOrDefaultAsync(x => x.Id == id);
+			return await Aggregates.FirstOrDefaultAsync(x => x.Id.Equals(id));
 		}
 
 		public int Count()

@@ -17,12 +17,12 @@ namespace MSFramework.EventSouring.EntityFrameworkCore
 			_table = _dbContext.Set<EventHistory>();
 		}
 
-		public async Task<EventHistory[]> GetEventsAsync(Guid aggregateId, long from)
+		public async Task<EventHistory[]> GetEventsAsync(string aggregateId, long from)
 		{
 			return await _table.Where(x => x.Version > from && x.AggregateId == aggregateId).ToArrayAsync();
 		}
 
-		public EventHistory[] GetEvents(Guid aggregateId, long from)
+		public EventHistory[] GetEvents(string aggregateId, long from)
 		{
 			return _table.Where(x => x.Version > from && x.AggregateId == aggregateId).ToArray();
 		}
@@ -47,13 +47,13 @@ namespace MSFramework.EventSouring.EntityFrameworkCore
 			_dbContext.SaveChanges();
 		}
 
-		public async Task<EventHistory> GetLastEventAsync(Guid aggregateId)
+		public async Task<EventHistory> GetLastEventAsync(string aggregateId)
 		{
 			return await _table.Where(x => x.AggregateId == aggregateId).OrderByDescending(x => x.Version)
 				.FirstOrDefaultAsync();
 		}
 
-		public EventHistory GetLastEvent(Guid aggregateId)
+		public EventHistory GetLastEvent(string aggregateId)
 		{
 			return _table.Where(x => x.AggregateId == aggregateId).OrderByDescending(x => x.Version)
 				.FirstOrDefault();

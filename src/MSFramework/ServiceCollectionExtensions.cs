@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using MSFramework.Common;
+using MSFramework.Data;
 using MSFramework.DependencyInjection;
 using MSFramework.Domain;
 using MSFramework.EventBus;
@@ -74,6 +75,8 @@ namespace MSFramework
 			builder.Services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
 			builder.Services.AddScoped<IMSFrameworkSession, MSFrameworkSession>();
 			builder.AddLocalEventBus();
+
+			Singleton<IIdGenerator>.Instance = new IdGenerator();
 
 			return services.BuildAspectInjectorProvider();
 		}
