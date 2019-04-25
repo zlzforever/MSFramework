@@ -6,8 +6,10 @@ namespace MSFramework.EventSouring
 {
 	public interface IEventStore
 	{
-		Task<IEnumerable<EventHistory>> GetEventsAsync(Guid aggregateId, long from);
+		Task<EventHistory[]> GetEventsAsync(Guid aggregateId, long from);
 
 		Task AddEventAsync(params EventHistory[] events);
+
+		Task<EventHistory> GetLastEventAsync(Guid aggregateId);
 	}
 }

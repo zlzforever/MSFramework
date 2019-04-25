@@ -3,15 +3,16 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using MSFramework.DependencyInjection;
 using MSFramework.Domain.Repository;
+using Ordering.Domain;
 using Ordering.Domain.AggregateRoot;
 
 namespace Ordering.API.Application.Query
 {
 	public class OrderService : IOrderService, IScopeDependency
 	{
-		private readonly IRepository<Order, Guid> _repository;
+		private readonly IOrderReadRepository _repository;
 
-		public OrderService(IRepository<Order, Guid> repository)
+		public OrderService(IOrderReadRepository repository)
 		{
 			_repository = repository;
 		}

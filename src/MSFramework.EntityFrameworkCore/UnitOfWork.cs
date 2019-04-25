@@ -21,7 +21,8 @@ namespace MSFramework.EntityFrameworkCore
 			if (events.Length > 0)
 			{
 				// 保存直接提交，如果提交失败，则数据落库也失败
-				_dbContextProvider.GetEventStore().AddEventAsync(events).GetAwaiter().GetResult();
+				var eventStore = _dbContextProvider.GetEventStore();
+				eventStore?.AddEventAsync(events).GetAwaiter().GetResult();
 			}
 
 			foreach (var dbContext in dbContexts)
@@ -37,7 +38,11 @@ namespace MSFramework.EntityFrameworkCore
 				.ToArray();
 			if (events.Length > 0)
 			{
-				await _dbContextProvider.GetEventStore().AddEventAsync(events);
+				var eventStore = _dbContextProvider.GetEventStore();
+				if (eventStore != null)
+				{
+					await eventStore.AddEventAsync(events);
+				}
 			}
 
 			foreach (var dbContext in dbContexts)

@@ -13,5 +13,7 @@ namespace MSFramework.Domain
 		IEnumerable<IDomainEvent> GetDomainEvents();
 
 		void ClearDomainEvents();
+
+		void LoadFromHistory(params IAggregateEvent[] histories);
 	}
 }

@@ -6,6 +6,7 @@ using MSFramework.Command;
 using MSFramework.Domain.Repository;
 using MSFramework.Security;
 using Ordering.API.Application.Event;
+using Ordering.Domain;
 using Ordering.Domain.AggregateRoot;
 
 namespace Ordering.API.Application.Command
@@ -14,10 +15,10 @@ namespace Ordering.API.Application.Command
 		ICommandHandler<ChangeOrderAddressCommand>,
 		ICommandHandler<DeleteOrderCommand>
 	{
-		private readonly IRepository<Order, Guid> _repository;
+		private readonly IOrderWriteRepository _repository;
 		private readonly ICurrentUser _currentUser;
 
-		public OrderCommandHandlers(IRepository<Order, Guid> repository, ICurrentUser currentUser)
+		public OrderCommandHandlers(IOrderWriteRepository repository, ICurrentUser currentUser)
 		{
 			_repository = repository;
 			_currentUser = currentUser;

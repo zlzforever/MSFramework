@@ -11,10 +11,10 @@ namespace MSFramework.EventSouring
 			new Dictionary<Guid, List<EventHistory>>();
 
 
-		public Task<IEnumerable<EventHistory>> GetEventsAsync(Guid aggregateId, long from)
+		public Task<EventHistory[]> GetEventsAsync(Guid aggregateId, long from)
 		{
 			_inMemoryDb.TryGetValue(aggregateId, out var events);
-			var entries = events != null ? events.Where(x => x.Version > from) : Enumerable.Empty<EventHistory>();
+			var entries = events != null ? events.Where(x => x.Version > from).ToArray() : new EventHistory[0];
 			return Task.FromResult(entries);
 		}
 
@@ -33,6 +33,13 @@ namespace MSFramework.EventSouring
 			}
 
 			return Task.CompletedTask;
+		}
+
+		public Task<EventHistory> GetLastEventAsync(Guid aggregateId)
+		{
+			_inMemoryDb.TryGetValue(aggregateId, out var events);
+			var @event = events?.LastOrDefault();
+			return Task.FromResult(@event);
 		}
 	}
 }
