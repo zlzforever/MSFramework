@@ -1,18 +1,17 @@
-﻿using System;
-using Microsoft.AspNetCore.Builder;
+﻿using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using MSFramework;
-using MSFramework.Command;
 using MSFramework.EntityFrameworkCore;
 using MSFramework.EntityFrameworkCore.SqlServer;
 using MSFramework.EventBus;
 using MSFramework.EventSouring;
 using MSFramework.EventSouring.EntityFrameworkCore;
-using Ordering.API.Application.Command;
 using Ordering.API.Application.EventHandler;
+using Ordering.Domain;
+using Ordering.Infrastructure;
 
 namespace Ordering.API
 {
@@ -35,16 +34,7 @@ namespace Ordering.API
 				builder.Configuration = Configuration;
 				builder.UseEntityFramework(ef => { ef.AddSqlServerDbContextOptionsBuilderCreator(); });
 				builder.UseEntityFrameworkEventSouring();
-
-				builder.AddCommandHandlers<OrderCommandHandlers>(
-					typeof(ICommandHandler<CreateOrderCommand>),
-					typeof(ICommandHandler<ChangeOrderAddressCommand>),
-					typeof(ICommandHandler<DeleteOrderCommand>));
-
-				builder.AddCommandInterceptor(
-					typeof(UoWInterceptor<>),
-					typeof(ValidatorInterceptor<>));
-
+  
 				builder.AddLocalEventBus();
 
 				builder.AddEventHandlers(typeof(UserCheckoutAcceptedEventHandler));

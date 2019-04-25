@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Concurrent;
-using System.Collections.Generic;
 using System.Linq;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
@@ -95,7 +94,7 @@ namespace MSFramework.EntityFrameworkCore
 
 		public IEventStore GetEventStore()
 		{
-			return _serviceProvider.GetRequiredService<IEventStore>();
+			return _serviceProvider.GetService<IEventStore>();
 		}
 
 		public DbContextBase[] GetAllDbContexts()

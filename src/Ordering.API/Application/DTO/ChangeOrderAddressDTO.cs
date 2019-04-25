@@ -1,11 +1,9 @@
 ﻿using System;
-using MSFramework.Command;
 using Ordering.Domain.AggregateRoot;
 
-
-namespace Ordering.API.Application.Command
+namespace Ordering.API.Application.DTO
 {
-	public class ChangeOrderAddressCommand : ICommand
+	public class ChangeOrderAddressDTO
     {
 		public long Version { get; set; }
 

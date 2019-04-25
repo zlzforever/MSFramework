@@ -3,15 +3,13 @@ using System.Linq;
 using AspectCore.Extensions.DependencyInjection;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using MSFramework.Command;
 using MSFramework.Common;
 using MSFramework.DependencyInjection;
+using MSFramework.Domain;
 using MSFramework.EventBus;
 using MSFramework.EventSouring;
 using MSFramework.Reflection;
-using MSFramework.Security;
 using MSFramework.Serialization;
 
 namespace MSFramework
@@ -47,7 +45,7 @@ namespace MSFramework
 			Action<MSFrameworkBuilder> builderAction = null)
 		{
 			var builder = new MSFrameworkBuilder(services);
-			builderAction?.Invoke(builder);			
+			builderAction?.Invoke(builder);
 
 			//初始化所有程序集查找器，如需更改程序集查找逻辑，请事先赋予自定义查找器的实例
 			if (Singleton<IAssemblyFinder>.Instance == null)
@@ -73,13 +71,12 @@ namespace MSFramework
 			}
 
 			builder.Services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
-			builder.Services.AddSingleton<ICurrentUser, CurrentUser>();
-			builder.Services.AddScoped<ICommandBus, CommandBus>();
+			builder.Services.AddScoped<IMSFrameworkSession, MSFrameworkSession>();
 			builder.AddLocalEventBus();
 
 			return services.BuildAspectInjectorProvider();
 		}
-		
+
 		public static IApplicationBuilder UseMSFramework(this IApplicationBuilder builder)
 		{
 			var initializers = builder.ApplicationServices.GetServices<IInitializer>().ToList();
