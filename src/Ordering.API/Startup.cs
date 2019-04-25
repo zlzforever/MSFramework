@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.OpenApi.Models;
 using MSFramework;
 using MSFramework.AspNetCore;
 using MSFramework.EntityFrameworkCore;
@@ -31,6 +32,11 @@ namespace Ordering.API
 		{
 			services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
 
+			services.AddSwaggerGen(c =>
+			{
+				c.SwaggerDoc("v1.0", new OpenApiInfo {Version = "v1.0", Description = "Ordering API V1.0"});
+			});
+			
 			services.AddMSFramework(builder =>
 			{
 				builder.UseEntityFramework(ef =>
@@ -62,6 +68,10 @@ namespace Ordering.API
 			app.UseMSFramework();
 			app.UseHttpsRedirection();
 			app.UseMvc();
+			//启用中间件服务生成Swagger作为JSON终结点
+			app.UseSwagger();
+			//启用中间件服务对swagger-ui，指定Swagger JSON终结点
+			app.UseSwaggerUI(c => { c.SwaggerEndpoint("/swagger/v1.0/swagger.json", "Ordering API V1.0"); });
 		}
 	}
 }
