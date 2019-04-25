@@ -43,6 +43,10 @@ namespace MSFramework.EntityFrameworkCore
 								.CreateLogger("Slug.Entity.DbContextExtensions");
 							logger.LogInformation($"已提交{migrations.Length}条挂起的迁移记录：{migrations.ExpandAndToString()}");
 						}
+						else
+						{
+							dbContext.Database.EnsureCreated();
+						}
 					}
 				}
 			}

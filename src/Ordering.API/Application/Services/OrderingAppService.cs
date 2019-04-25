@@ -29,11 +29,6 @@ namespace Ordering.API.Application.Services
 		public async Task DeleteOrder(DeleteOrderDto dto)
 		{
 			var item = await _writeRepository.GetAsync(dto.OrderId);
-			if (item.Version != dto.Version)
-			{
-				throw new MSFrameworkException("version validate failed");
-			}
-
 			item.Delete();
 		}
 
