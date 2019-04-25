@@ -1,16 +1,9 @@
 using System;
-using System.Collections.Generic;
-using System.Data;
-using System.Data.Common;
 using System.Linq;
-using System.Linq.Expressions;
 using System.Threading.Tasks;
-using Castle.Core.Internal;
 using Microsoft.EntityFrameworkCore;
 using MSFramework.Domain;
 using MSFramework.Domain.Event;
-using MSFramework.Domain.Repository;
-using Z.EntityFramework.Plus;
 
 namespace MSFramework.EntityFrameworkCore.Repository
 {
@@ -26,30 +19,30 @@ namespace MSFramework.EntityFrameworkCore.Repository
 
 		protected DbContext DbContext { get; }
 
-		protected DbSet<TAggregateRoot> Table { get; }
+		protected DbSet<TAggregateRoot> Aggregates { get; }
 
 		public EfWriteRepository(DbContextFactory dbContextFactory)
 		{
 			DbContextFactory = dbContextFactory;
 			DbContext = dbContextFactory.GetDbContext<TAggregateRoot>();
-			Table = DbContext.Set<TAggregateRoot>();
+			Aggregates = DbContext.Set<TAggregateRoot>();
 		}
 
 		public virtual TAggregateRoot Insert(TAggregateRoot entity)
 		{
-			Table.Add(entity);
+			Aggregates.Add(entity);
 			return entity;
 		}
 
 		public virtual async Task<TAggregateRoot> InsertAsync(TAggregateRoot entity)
 		{
-			await Table.AddAsync(entity);
+			await Aggregates.AddAsync(entity);
 			return entity;
 		}
 
 		public virtual TAggregateRoot Update(TAggregateRoot entity)
 		{
-			Table.Update(entity);
+			Aggregates.Update(entity);
 			return entity;
 		}
 
@@ -60,7 +53,7 @@ namespace MSFramework.EntityFrameworkCore.Repository
 
 		public virtual void Delete(TAggregateRoot entity)
 		{
-			Table.Remove(entity);
+			Aggregates.Remove(entity);
 		}
 
 		public virtual Task DeleteAsync(TAggregateRoot entity)
@@ -78,7 +71,7 @@ namespace MSFramework.EntityFrameworkCore.Repository
 				return;
 			}
 
-			entity = Table.FirstOrDefault(x => x.Id == id);
+			entity = Aggregates.FirstOrDefault(x => x.Id == id);
 			if (entity != null)
 			{
 				Delete(entity);
@@ -93,7 +86,7 @@ namespace MSFramework.EntityFrameworkCore.Repository
 
 		public virtual TAggregateRoot Get(Guid id)
 		{
-			var aggregate = Table.FirstOrDefault(x => x.Id == id);
+			var aggregate = Aggregates.FirstOrDefault(x => x.Id == id);
 			if (aggregate == null)
 			{
 				var eventStore = DbContextFactory.GetEventStore();
@@ -103,12 +96,14 @@ namespace MSFramework.EntityFrameworkCore.Repository
 				}
 				else
 				{
-					var @event = eventStore.GetLastEventAsync(id).Result;
+					var @event = eventStore.GetLastEvent(id);
 					if (@event.EventType != DeletedEvent.Type.FullName)
 					{
-						// TODO: should rebuild
-						throw new MSFrameworkException(
-							$"Entity {typeof(TAggregateRoot)} Id {id} is not exits, but the last aggregate event in event store is not DeletedEvent");
+						aggregate = AggregateRootFactory.CreateAggregate<TAggregateRoot>();
+						var events = eventStore.GetEvents(id, 0);
+						aggregate.LoadFromHistory(events.Select(e => e.ToAggregateEvent()).ToArray());
+						Aggregates.Add(aggregate);
+						return aggregate;
 					}
 					else
 					{
@@ -125,7 +120,7 @@ namespace MSFramework.EntityFrameworkCore.Repository
 				}
 				else
 				{
-					var events = eventStore.GetEventsAsync(aggregate.Id, aggregate.Version).Result;
+					var events = eventStore.GetEvents(aggregate.Id, aggregate.Version);
 					if (events.Any() && events.First().Version != aggregate.Version + 1)
 					{
 						// TODO: data is dirty
@@ -143,7 +138,7 @@ namespace MSFramework.EntityFrameworkCore.Repository
 
 		public virtual async Task<TAggregateRoot> GetAsync(Guid id)
 		{
-			var aggregate = Table.FirstOrDefault(x => x.Id == id);
+			var aggregate = Aggregates.FirstOrDefault(x => x.Id == id);
 			if (aggregate == null)
 			{
 				var eventStore = DbContextFactory.GetEventStore();
@@ -156,9 +151,11 @@ namespace MSFramework.EntityFrameworkCore.Repository
 					var @event = await eventStore.GetLastEventAsync(id);
 					if (@event.EventType != DeletedEvent.Type.FullName)
 					{
-						// TODO: should rebuild
-						throw new MSFrameworkException(
-							$"Entity {typeof(TAggregateRoot)} Id {id} is not exits, but the last aggregate event in event store is not DeletedEvent");
+						aggregate = AggregateRootFactory.CreateAggregate<TAggregateRoot>();
+						var events = await eventStore.GetEventsAsync(id, 0);
+						aggregate.LoadFromHistory(events.Select(e => e.ToAggregateEvent()).ToArray());
+						await Aggregates.AddAsync(aggregate);
+						return aggregate;
 					}
 					else
 					{

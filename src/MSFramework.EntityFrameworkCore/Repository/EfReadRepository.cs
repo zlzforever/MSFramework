@@ -17,54 +17,52 @@ namespace MSFramework.EntityFrameworkCore.Repository
 	{
 		protected DbContext DbContext { get; }
 
-		protected DbSet<TAggregateRoot> Table { get; }
+		protected IQueryable<TAggregateRoot> Aggregates { get; }
 
 		public EfReadRepository(DbContextFactory dbContextFactory)
 		{
 			DbContext = dbContextFactory.GetDbContext<TAggregateRoot>();
-			Table = DbContext.Set<TAggregateRoot>();
+			Aggregates = DbContext.Set<TAggregateRoot>().AsNoTracking();
 		}
 
 		public virtual List<TAggregateRoot> GetAllList()
 		{
-			return Table.AsNoTracking().ToList();
+			return Aggregates.ToList();
 		}
 
 		public virtual async Task<List<TAggregateRoot>> GetAllListAsync()
 		{
-			return await Table.AsNoTracking().ToListAsync();
+			return await Aggregates.ToListAsync();
 		}
 
 		public virtual TAggregateRoot Get(Guid id)
 		{
-			return Table.AsNoTracking().FirstOrDefault(x => x.Id == id);
+			return Aggregates.FirstOrDefault(x => x.Id == id);
 		}
 
 		public virtual async Task<TAggregateRoot> GetAsync(Guid id)
 		{
-			return await Table.AsNoTracking().FirstOrDefaultAsync(x => x.Id == id);
+			return await Aggregates.FirstOrDefaultAsync(x => x.Id == id);
 		}
 
 		public int Count()
 		{
-			return Table.AsNoTracking().Count();
+			return Aggregates.Count();
 		}
 
 		public async Task<int> CountAsync()
 		{
-			return await Table.AsNoTracking().CountAsync();
+			return await Aggregates.CountAsync();
 		}
 
 		public long LongCount()
 		{
-			return Table.AsNoTracking().LongCount();
+			return Aggregates.LongCount();
 		}
 
 		public async Task<long> LongCountAsync()
 		{
-			return await Table.AsNoTracking().LongCountAsync();
+			return await Aggregates.LongCountAsync();
 		}
-
-		public IQueryable<TAggregateRoot> Aggregates => Table.AsNoTracking();
 	}
 }

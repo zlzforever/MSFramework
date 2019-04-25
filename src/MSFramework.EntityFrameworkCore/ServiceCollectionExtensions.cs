@@ -6,8 +6,6 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using MSFramework.Common;
 using MSFramework.Domain;
-using MSFramework.Domain.Repository;
-using MSFramework.EntityFrameworkCore.Repository;
 
 namespace MSFramework.EntityFrameworkCore
 {

@@ -3,32 +3,27 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
-using MSFramework.Command;
-using MSFramework.Security;
-using Ordering.API.Application.Command;
+using MSFramework.Domain;
 using Ordering.API.Application.DTO;
-using Ordering.API.Application.Query;
+using Ordering.API.Application.Services;
 
 namespace Ordering.API.Controllers
 {
 	[Route("api/v1/[controller]")]
 	//[Authorize]
 	[ApiController]
-	public class OrderController : ControllerBase
+	public class OrderController : MSFrameworkControllerBase
 	{
 		private readonly ILogger _logger;
-		private readonly ICurrentUser _currentUser;
-		private readonly IOrderService _orderService;
-		private readonly ICommandBus _commandBus;
+		private readonly IOrderingAppService _orderingAppService;
 
-		public OrderController(IOrderService orderService,
-			ICommandBus commandBus,
-			ICurrentUser currentUser, ILogger<OrderController> logger)
+		public OrderController( 
+			IOrderingAppService orderingAppService,
+			IMSFrameworkSession session, ILogger<OrderController> logger) : base(session)
 		{
-			_orderService = orderService;
 			_logger = logger;
-			_currentUser = currentUser;
-			_commandBus = commandBus;
+		 
+			_orderingAppService = orderingAppService;
 		}
 
 		[HttpPost("")]
@@ -50,28 +45,31 @@ namespace Ordering.API.Controllers
 				});
 			}
 
-			// FOR TEST
-			return Ok(await _commandBus.SendAsync(new CreateOrderCommand(items,
+			await _orderingAppService.CreateOrder(new CreateOrderDTO(items,
 				"HELLO",
-				"上海", "张扬路500号", "上海", "中国", "200000", "what?")));
+				"上海", "张扬路500号", "上海", "中国", "200000", "what?"));
+			// FOR TEST
+			return Ok();
 		}
 
 		[HttpDelete("{orderId}")]
 		public async Task<IActionResult> DeleteOrderAsync(Guid orderId, [FromQuery] long version)
 		{
-			return Ok(await _commandBus.SendAsync(new DeleteOrderCommand
+			await _orderingAppService.DeleteOrder(new DeleteOrderDto
 			{
 				OrderId = orderId,
 				Version = version
-			}));
+			});
+			return Ok();
 		}
 
 		[HttpPut("{orderId}/address")]
 		public async Task<IActionResult> ChangeOrderAddressAsync(Guid orderId,
-			[FromBody] ChangeOrderAddressCommand command)
+			[FromBody] ChangeOrderAddressDTO command)
 		{
 			command.OrderId = orderId;
-			return Ok(await _commandBus.SendAsync(command));
+			await _orderingAppService.ChangeOrderAddress(command);
+			return Ok();
 		}
 
 		#region QUERY
@@ -79,7 +77,7 @@ namespace Ordering.API.Controllers
 		[HttpGet("{orderId}")]
 		public async Task<ActionResult> GetOrderAsync(string orderId)
 		{
-			var order = await _orderService.GetOrderAsync(Guid.NewGuid());
+			var order = await _orderingAppService.GetOrderAsync(Guid.NewGuid());
 			return Ok(order);
 		}
 

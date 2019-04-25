@@ -6,7 +6,6 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using MSFramework.Common;
 using MSFramework.Serialization;
-using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Polly;
 using RabbitMQ.Client;

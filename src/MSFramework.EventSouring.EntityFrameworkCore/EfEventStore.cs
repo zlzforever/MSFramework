@@ -1,10 +1,8 @@
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using MSFramework.EntityFrameworkCore;
-using MSFramework.EntityFrameworkCore.Repository;
 
 namespace MSFramework.EventSouring.EntityFrameworkCore
 {
@@ -19,9 +17,14 @@ namespace MSFramework.EventSouring.EntityFrameworkCore
 			_table = _dbContext.Set<EventHistory>();
 		}
 
-		public async Task<EventHistory[]> GetEventsAsync(Guid aggregateId, long @from)
+		public async Task<EventHistory[]> GetEventsAsync(Guid aggregateId, long from)
 		{
 			return await _table.Where(x => x.Version > from && x.AggregateId == aggregateId).ToArrayAsync();
+		}
+
+		public EventHistory[] GetEvents(Guid aggregateId, long from)
+		{
+			return _table.Where(x => x.Version > from && x.AggregateId == aggregateId).ToArray();
 		}
 
 		public async Task AddEventAsync(params EventHistory[] events)
@@ -38,6 +41,12 @@ namespace MSFramework.EventSouring.EntityFrameworkCore
 		{
 			return await _table.Where(x => x.AggregateId == aggregateId).OrderByDescending(x => x.Version)
 				.FirstOrDefaultAsync();
+		}
+
+		public EventHistory GetLastEvent(Guid aggregateId)
+		{
+			return _table.Where(x => x.AggregateId == aggregateId).OrderByDescending(x => x.Version)
+				.FirstOrDefault();
 		}
 	}
 }

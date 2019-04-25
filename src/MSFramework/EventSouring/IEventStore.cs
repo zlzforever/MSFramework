@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace MSFramework.EventSouring
@@ -8,8 +7,12 @@ namespace MSFramework.EventSouring
 	{
 		Task<EventHistory[]> GetEventsAsync(Guid aggregateId, long from);
 
+		EventHistory[] GetEvents(Guid aggregateId, long from);
+
 		Task AddEventAsync(params EventHistory[] events);
 
 		Task<EventHistory> GetLastEventAsync(Guid aggregateId);
+		
+		EventHistory GetLastEvent(Guid aggregateId);
 	}
 }
