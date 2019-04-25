@@ -43,6 +43,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MSFramework.EntityFramework
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MSFramework.EventSouring.EntityFrameworkCore", "src\MSFramework.EventSouring.EntityFrameworkCore\MSFramework.EventSouring.EntityFrameworkCore.csproj", "{DA65E128-8BB2-488B-ACE2-F31ADE708EBB}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MSFramework.AspNetCore", "src\MSFramework.AspNetCore\MSFramework.AspNetCore.csproj", "{48BC499D-18FA-48A6-A37E-A24ED465A11B}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -89,6 +91,10 @@ Global
 		{DA65E128-8BB2-488B-ACE2-F31ADE708EBB}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{DA65E128-8BB2-488B-ACE2-F31ADE708EBB}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{DA65E128-8BB2-488B-ACE2-F31ADE708EBB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{48BC499D-18FA-48A6-A37E-A24ED465A11B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{48BC499D-18FA-48A6-A37E-A24ED465A11B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{48BC499D-18FA-48A6-A37E-A24ED465A11B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{48BC499D-18FA-48A6-A37E-A24ED465A11B}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{078A8534-7C83-4095-B756-6EBA700DBB12} = {0CEB99EE-969C-4A1D-841F-D22E4ADCC5F1}
@@ -106,5 +112,6 @@ Global
 		{68023604-C776-413B-8AC1-ECEA09391BA2} = {AFD16F00-F810-4A3C-BA74-59BBFBC2469D}
 		{EC4910EA-309B-4AFF-BE1A-33149A8BCF78} = {AFD16F00-F810-4A3C-BA74-59BBFBC2469D}
 		{DA65E128-8BB2-488B-ACE2-F31ADE708EBB} = {AFD16F00-F810-4A3C-BA74-59BBFBC2469D}
+		{48BC499D-18FA-48A6-A37E-A24ED465A11B} = {AFD16F00-F810-4A3C-BA74-59BBFBC2469D}
 	EndGlobalSection
 EndGlobal

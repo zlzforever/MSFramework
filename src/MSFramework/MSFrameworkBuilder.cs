@@ -11,7 +11,5 @@ namespace MSFramework
 		}
 
 		public IServiceCollection Services { get; }
-		
-		public IConfiguration Configuration { get; set; } 
 	}
 }

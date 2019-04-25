@@ -10,6 +10,7 @@ using Ordering.API.Application.DTO;
 using Ordering.API.Application.Event;
 using Ordering.Domain;
 using Ordering.Domain.AggregateRoot;
+using Ordering.Domain.Repository;
 
 namespace Ordering.API.Application.Services
 {
@@ -30,12 +31,13 @@ namespace Ordering.API.Application.Services
 		{
 			var item = await _writeRepository.GetAsync(dto.OrderId);
 			item.Delete();
+			Logger.LogInformation($"DELETED ORDER: {dto.OrderId}");
 		}
 
 		public async Task ChangeOrderAddress(ChangeOrderAddressDTO dto)
 		{
 			var item = await _writeRepository.GetAsync(dto.OrderId);
-			item.ChangeAddress(dto.NewAddress);
+			item.ChangeAddress(dto.NewAddress);			
 		}
 
 		public async Task CreateOrder(CreateOrderDTO dto)

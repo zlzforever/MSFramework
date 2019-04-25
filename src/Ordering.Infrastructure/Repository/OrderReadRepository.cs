@@ -1,9 +1,9 @@
 using MSFramework.EntityFrameworkCore;
 using MSFramework.EntityFrameworkCore.Repository;
-using Ordering.Domain;
 using Ordering.Domain.AggregateRoot;
+using Ordering.Domain.Repository;
 
-namespace Ordering.Infrastructure
+namespace Ordering.Infrastructure.Repository
 {
 	public class OrderReadRepository : EfReadRepository<Order>,IOrderReadRepository
 	{

@@ -25,6 +25,12 @@ namespace MSFramework.EventSouring
 
 		public Task AddEventAsync(params EventHistory[] events)
 		{
+			AddEvents(events);
+			return Task.CompletedTask;
+		}
+
+		public void AddEvents(params EventHistory[] events)
+		{
 			foreach (var @event in events)
 			{
 				_inMemoryDb.TryGetValue(@event.AggregateId, out var list);
@@ -36,8 +42,6 @@ namespace MSFramework.EventSouring
 
 				list.Add(@event);
 			}
-
-			return Task.CompletedTask;
 		}
 
 		public Task<EventHistory> GetLastEventAsync(Guid aggregateId)

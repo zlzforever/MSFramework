@@ -10,6 +10,8 @@ namespace MSFramework.EventSouring
 		EventHistory[] GetEvents(Guid aggregateId, long from);
 
 		Task AddEventAsync(params EventHistory[] events);
+		
+		void AddEvents(params EventHistory[] events);
 
 		Task<EventHistory> GetLastEventAsync(Guid aggregateId);
 		

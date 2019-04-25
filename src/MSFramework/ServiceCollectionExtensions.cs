@@ -3,6 +3,7 @@ using System.Linq;
 using AspectCore.Extensions.DependencyInjection;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using MSFramework.Common;
 using MSFramework.DependencyInjection;

@@ -1,9 +1,11 @@
-﻿using Microsoft.AspNetCore.Builder;
+﻿using System;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using MSFramework;
+using MSFramework.AspNetCore;
 using MSFramework.EntityFrameworkCore;
 using MSFramework.EntityFrameworkCore.SqlServer;
 using MSFramework.EventBus;
@@ -28,13 +30,16 @@ namespace Ordering.API
 		public void ConfigureServices(IServiceCollection services)
 		{
 			services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
-			
+
 			services.AddMSFramework(builder =>
 			{
-				builder.Configuration = Configuration;
-				builder.UseEntityFramework(ef => { ef.AddSqlServerDbContextOptionsBuilderCreator(); });
+				builder.UseEntityFramework(ef =>
+				{
+					// 添加 SqlServer 支持
+					ef.AddSqlServerDbContextOptionsBuilderCreator();
+				}, Configuration);
 				builder.UseEntityFrameworkEventSouring();
-  
+
 				builder.AddLocalEventBus();
 
 				builder.AddEventHandlers(typeof(UserCheckoutAcceptedEventHandler));
@@ -44,7 +49,6 @@ namespace Ordering.API
 		// This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
 		public void Configure(IApplicationBuilder app, IHostingEnvironment env)
 		{
-			var es = app.ApplicationServices.CreateScope().ServiceProvider.GetRequiredService<IEventStore>();
 			if (env.IsDevelopment())
 			{
 				app.UseDeveloperExceptionPage();

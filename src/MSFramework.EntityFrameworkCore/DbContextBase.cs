@@ -112,8 +112,6 @@ namespace MSFramework.EntityFrameworkCore
 			}
 		}
 
-		protected string UserId => this.GetService<IMSFrameworkSession>().UserId;
-
 		/// <summary>
 		///     异步地将此上下文中的所有更改保存到数据库中，同时自动开启事务或使用现有同连接事务
 		/// </summary>

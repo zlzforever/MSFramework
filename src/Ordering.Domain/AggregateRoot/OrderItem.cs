@@ -54,12 +54,12 @@ namespace Ordering.Domain.AggregateRoot
 		{
 			if (units <= 0)
 			{
-				throw new OrderingException("Invalid number of units");
+				throw new OrderingDomainException("Invalid number of units");
 			}
 
 			if ((unitPrice * units) < discount)
 			{
-				throw new OrderingException("The total of order item is lower than applied discount");
+				throw new OrderingDomainException("The total of order item is lower than applied discount");
 			}
 
 			_productId = productId;
@@ -80,7 +80,7 @@ namespace Ordering.Domain.AggregateRoot
 		{
 			if (discount < 0)
 			{
-				throw new OrderingException("Discount is not valid");
+				throw new OrderingDomainException("Discount is not valid");
 			}
 
 			_discount = discount;
@@ -90,7 +90,7 @@ namespace Ordering.Domain.AggregateRoot
 		{
 			if (units < 0)
 			{
-				throw new OrderingException("Invalid units");
+				throw new OrderingDomainException("Invalid units");
 			}
 
 			_units += units;

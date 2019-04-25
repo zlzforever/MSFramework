@@ -16,6 +16,7 @@
     </ItemGroup>
 
     <ItemGroup>
+        <ProjectReference Include="..\MSFramework.AspNetCore\MSFramework.AspNetCore.csproj" />
         <ProjectReference Include="..\MSFramework.EventSouring.EntityFrameworkCore\MSFramework.EventSouring.EntityFrameworkCore.csproj" />
         <ProjectReference Include="..\MSFramework\MSFramework.csproj" />
         <ProjectReference Include="..\Ordering.Domain\Ordering.Domain.csproj" />
@@ -31,6 +32,9 @@
       <Content Update="appsettings.json">
         <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
         <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </Content>
+      <Content Update="appsettings.Development.json">
+        <DependentUpon>appsettings.json</DependentUpon>
       </Content>
     </ItemGroup>
 

@@ -37,6 +37,16 @@ namespace MSFramework.EventSouring.EntityFrameworkCore
 			await _dbContext.SaveChangesAsync();
 		}
 
+		public void AddEvents(params EventHistory[] events)
+		{
+			foreach (var @event in events)
+			{
+				_table.Add(@event);
+			}
+
+			_dbContext.SaveChanges();
+		}
+
 		public async Task<EventHistory> GetLastEventAsync(Guid aggregateId)
 		{
 			return await _table.Where(x => x.AggregateId == aggregateId).OrderByDescending(x => x.Version)

@@ -1,23 +1,25 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
+using Microsoft.Extensions.Logging;
 using MSFramework.Domain;
 
-namespace Ordering.API.Controllers
+namespace MSFramework.AspNetCore
 {
 	public class MSFrameworkControllerBase : Controller
 	{
 		protected IMSFrameworkSession Session { get; }
 
-		protected MSFrameworkControllerBase(IMSFrameworkSession session)
+		protected ILogger Logger { get; }
+
+		protected MSFrameworkControllerBase(IMSFrameworkSession session, ILogger logger)
 		{
 			Session = session;
+			Logger = logger;
 		}
-
+		
 		public override void OnActionExecuted(ActionExecutedContext context)
 		{
-			base.OnActionExecuted(context);
-
-			Session.CommitAsync().ConfigureAwait(false);
+			Session.Commit();
 		}
 	}
 }
