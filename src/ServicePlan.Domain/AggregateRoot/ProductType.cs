@@ -12,17 +12,17 @@ namespace ServicePlan.Domain.AggregateRoot
 		/// <summary>
 		/// 调研
 		/// </summary>
-		public static ProductType Survey = new ProductType(1, nameof(Survey).ToLowerInvariant());
+		public static ProductType Survey = new ProductType(2, nameof(Survey).ToLowerInvariant());
 		
 		/// <summary>
 		/// 电话
 		/// </summary>
-		public static ProductType Tel = new ProductType(1, nameof(Tel).ToLowerInvariant());
+		public static ProductType Tel = new ProductType(3, nameof(Tel).ToLowerInvariant());
 		
 		/// <summary>
 		/// 会议
 		/// </summary>
-		public static ProductType Conference = new ProductType(1, nameof(Conference).ToLowerInvariant());
+		public static ProductType Conference = new ProductType(4, nameof(Conference).ToLowerInvariant());
 		
 		public ProductType(int id, string name) : base(id, name)
 		{
