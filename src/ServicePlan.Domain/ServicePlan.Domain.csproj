@@ -1,0 +1,29 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\MSFramework\MSFramework.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Update="AggregateRoot\SubmitState.cs">
+      <DependentUpon>ServicePlan.cs</DependentUpon>
+    </Compile>
+    <Compile Update="AggregateRoot\ValidationState.cs">
+      <DependentUpon>ServicePlan.cs</DependentUpon>
+    </Compile>
+    <Compile Update="AggregateRoot\RoadShowWeekScheduler.Events.cs">
+      <DependentUpon>RoadShowWeekScheduler.cs</DependentUpon>
+    </Compile>
+    <Compile Update="AggregateRoot\ProcessState.cs">
+      <DependentUpon>ServicePlan.cs</DependentUpon>
+    </Compile>
+    <Compile Update="AggregateRoot\ProductType.cs">
+      <DependentUpon>Product.cs</DependentUpon>
+    </Compile>
+  </ItemGroup>
+
+</Project>
