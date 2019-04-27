@@ -38,33 +38,28 @@ namespace Ordering.Domain.AggregateRoot
 			List<OrderItem> orderItems
 		)
 		{
-			ApplyAggregateEvent(new OrderCreatedEvent(userId,
+			ApplyEvent(new OrderCreatedEvent(userId,
 				address,
 				description,
 				orderItems));
 		}
 
-		private void Apply(OrderCreatedEvent e)
+		private void Apply(OrderCreatedEvent @event)
 		{
-			Version = e.Version;
-
-			Id = e.AggregateId;
-			Address = e.Address;
-			_userId = e.UserId;
-			_description = e.Description;
-			_orderItems = e.OrderItems;
-			_creationTime = e.CreationTime;
+			Address = @event.Address;
+			_userId = @event.UserId;
+			_description = @event.Description;
+			_orderItems = @event.OrderItems;
+			_creationTime = @event.Timestamp;
 		}
 
-		private void Apply(OrderAddressChangedEvent e)
+		private void Apply(OrderAddressChangedEvent @event)
 		{
-			Version = e.Version;
-			Address = e.NewOrderAddress;
+			Address = @event.NewOrderAddress;
 		}
 
-		private void Apply(OrderDeletedEvent e)
+		private void Apply(OrderDeletedEvent @event)
 		{
-			Version = e.Version;
 		}
 
 		public void ChangeAddress(Address newAddress)
@@ -74,12 +69,12 @@ namespace Ordering.Domain.AggregateRoot
 				throw new ArgumentException(nameof(newAddress));
 			}
 
-			ApplyAggregateEvent(new OrderAddressChangedEvent(newAddress));
+			ApplyEvent(new OrderAddressChangedEvent(newAddress));
 		}
 
 		public void Delete()
 		{
-			ApplyAggregateEvent(new OrderDeletedEvent());
+			ApplyEvent(new OrderDeletedEvent());
 		}
 	}
 }

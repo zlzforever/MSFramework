@@ -9,8 +9,10 @@ namespace MSFramework.Domain
 	[Serializable]
 	public abstract class EntityBase<TKey> : IEntity<TKey> where TKey : IEquatable<TKey>
 	{
+		protected TKey _id;
+
 		/// <inheritdoc/>
-		public virtual TKey Id { get; set; }
+		public virtual TKey Id => _id;
 
 		protected EntityBase()
 		{
@@ -18,7 +20,7 @@ namespace MSFramework.Domain
 
 		protected EntityBase(TKey id)
 		{
-			Id = id;
+			_id = id;
 		}
 
 		/// <summary>
@@ -28,7 +30,7 @@ namespace MSFramework.Domain
 		/// <returns></returns>
 		public override bool Equals(object obj)
 		{
-			if (obj == null || !(obj is EntityBase<TKey>))
+			if (!(obj is EntityBase<TKey>))
 			{
 				return false;
 			}

@@ -6,6 +6,7 @@ using Microsoft.Extensions.Logging;
 using MSFramework;
 using MSFramework.Application;
 using MSFramework.Domain;
+using MSFramework.IntegrateService;
 using Ordering.API.Application.DTO;
 using Ordering.API.Application.Event;
 using Ordering.Domain;
@@ -18,13 +19,16 @@ namespace Ordering.API.Application.Services
 	{
 		private readonly IOrderReadRepository _readRepository;
 		private readonly IOrderWriteRepository _writeRepository;
+		private readonly IIntegrateService _integrateService;
 
-		public OrderingAppService(IMSFrameworkSession session, IOrderReadRepository readRepository,
+		public OrderingAppService(IMSFrameworkSession session, IIntegrateService integrateService,
+			IOrderReadRepository readRepository,
 			IOrderWriteRepository writeRepository,
 			ILogger<OrderingAppService> logger) : base(session, logger)
 		{
 			_readRepository = readRepository;
 			_writeRepository = writeRepository;
+			_integrateService = integrateService;
 		}
 
 		public async Task DeleteOrder(DeleteOrderDto dto)
@@ -37,7 +41,7 @@ namespace Ordering.API.Application.Services
 		public async Task ChangeOrderAddress(ChangeOrderAddressDTO dto)
 		{
 			var item = await _writeRepository.GetAsync(dto.OrderId);
-			item.ChangeAddress(dto.NewAddress);			
+			item.ChangeAddress(dto.NewAddress);
 		}
 
 		public async Task CreateOrder(CreateOrderDTO dto)
@@ -47,7 +51,7 @@ namespace Ordering.API.Application.Services
 				new Address(dto.Street, dto.City, dto.State, dto.Country, dto.ZipCode),
 				dto.Description,
 				dto.OrderItems.Select(x => x.ToOrderItem()).ToList());
-			order.RegisterDomainEvent(new OrderStartedEvent(Session.UserId, order.Id));
+			await _integrateService.PublishIntegrateEventAsync(new OrderStartedEvent(Session.UserId, order.Id));
 			await _writeRepository.InsertAsync(order);
 		}
 

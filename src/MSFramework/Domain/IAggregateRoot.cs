@@ -4,22 +4,23 @@ using MSFramework.Domain.Event;
 
 namespace MSFramework.Domain
 {
+	/// <summary>
+	/// Represents an aggregate root.
+	/// </summary>
 	public interface IAggregateRoot
 	{
-		void RegisterDomainEvent(IDomainEvent @event);
-
-		IEnumerable<IDomainEvent> GetDomainEvents();
-
-		void ClearDomainEvents();
-
+		/// <summary>
+		/// the id as string of the aggregate root.
+		/// </summary>
+		/// <returns></returns>
+		string GetId();
 		
-	}
+		int Version { get; }		
 
-	public interface IAggregateRoot<out TAggregateRootId> : IEventSourcingAggregate, IAggregateRoot
-		where TAggregateRootId : IEquatable<TAggregateRootId>
-	{
-		TAggregateRootId Id { get; }
+		IEnumerable<IDomainEvent> GetChanges();
 		
-		void LoadFromHistory(params IAggregateEvent[] histories);
+		void ClearChanges();	
+		
+		void LoadFromHistory(params IDomainEvent[] histories);
 	}
 }

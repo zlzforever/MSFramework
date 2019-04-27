@@ -1,11 +1,13 @@
 using System;
 using System.Collections.Generic;
 using MSFramework.Domain.Event;
+using MSFramework.EventBus;
+using MSFramework.IntegrateService;
 using Ordering.API.Application.DTO;
 
 namespace Ordering.API.Application.Event
 {
-	public class UserCheckoutAcceptedEvent : DomainEventBase<Guid>
+	public class UserCheckoutAcceptedEvent : IntegrationEvent
 	{
 		public string UserId { get; }
 

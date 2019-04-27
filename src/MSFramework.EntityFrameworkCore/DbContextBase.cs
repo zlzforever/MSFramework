@@ -184,16 +184,16 @@ namespace MSFramework.EntityFrameworkCore
 		{
 			var aggregateRoots = ChangeTracker
 				.Entries<IAggregateRoot>()
-				.Where(x => x.Entity.GetDomainEvents() != null && x.Entity.GetDomainEvents().Any()).ToList();
+				.Where(x => x.Entity.GetChanges() != null && x.Entity.GetChanges().Any()).ToList();
 
-			var domainEvents = aggregateRoots.SelectMany(x => x.Entity.GetDomainEvents());
+			var domainEvents = aggregateRoots.SelectMany(x => x.Entity.GetChanges());
 
 			var tasks = domainEvents.Select(async @event =>
 			{
 				// 通过 EventBus 发布出去
 				await _eventBus.PublishAsync(@event);
 			});
-			aggregateRoots.ForEach(x => x.Entity.ClearDomainEvents());
+			aggregateRoots.ForEach(x => x.Entity.ClearChanges());
 			await Task.WhenAll(tasks);
 		}
 	}

@@ -12,6 +12,7 @@ using MSFramework.EntityFrameworkCore.SqlServer;
 using MSFramework.EventBus;
 using MSFramework.EventSouring;
 using MSFramework.EventSouring.EntityFrameworkCore;
+using MSFramework.IntegrateService;
 using Ordering.API.Application.EventHandler;
 using Ordering.Domain;
 using Ordering.Infrastructure;
@@ -39,6 +40,8 @@ namespace Ordering.API
 			
 			services.AddMSFramework(builder =>
 			{
+				builder.UseIntegrateService();
+				builder.UseAspNetCoreSession();
 				builder.UseEntityFramework(ef =>
 				{
 					// 添加 SqlServer 支持
@@ -46,7 +49,7 @@ namespace Ordering.API
 				}, Configuration);
 				builder.UseEntityFrameworkEventSouring();
 
-				builder.AddLocalEventBus();
+				builder.UseLocalEventBus();
 
 				builder.AddEventHandlers(typeof(UserCheckoutAcceptedEventHandler));
 			});

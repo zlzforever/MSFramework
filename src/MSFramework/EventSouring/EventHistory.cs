@@ -10,53 +10,56 @@ namespace MSFramework.EventSouring
 	public class EventHistory : EntityBase<long>
 	{
 		/// <summary>
-		/// 
+		/// 领域事件类型
 		/// </summary>
 		[Required]
 		[StringLength(255)]
-		public string EventType { get; set; }
+		public string EventType { get; }
 
 		/// <summary>
-		/// 
+		/// 序列化的领域事件
 		/// </summary>
 		[Required]
-		public string Event { get; set; }
+		public string Event { get; }
 
 		/// <summary>
-		/// 
+		/// 聚合根标识
 		/// </summary>
 		[Required]
 		[StringLength(255)]
-		public string AggregateId { get; set; }
+		public string AggregateRootId { get; }
+
+		/// <summary>
+		/// 版本号
+		/// </summary>
+		[Required]
+		public int Version { get; }
+
+		/// <summary>
+		/// 创建者
+		/// </summary>
+		[StringLength(255)] 
+		public string Creator { get; }
 
 		/// <summary>
 		/// 
 		/// </summary>
 		[Required]
-		public long Version { get; set; }
+		public DateTime Timestamp { get; }
 
-		/// <summary>
-		/// 
-		/// </summary>
-		[Required]
-		public DateTime CreationTime { get; set; }
-
-		public EventHistory()
+		public EventHistory(IDomainEvent @event)
 		{
-		}
-
-		public EventHistory(IAggregateEvent @event)
-		{
-			EventType = @event.GetType().FullName;
+			EventType = @event.GetType().AssemblyQualifiedName;
 			Version = @event.Version;
 			Event = Singleton<IJsonConvert>.Instance.SerializeObject(@event);
-			AggregateId = @event.IdAsString;
-			CreationTime = DateTime.UtcNow;
+			AggregateRootId = @event.GetAggregateRootId();
+			Timestamp = DateTime.UtcNow;
+			Creator = @event.Creator;
 		}
 
-		public IAggregateEvent ToAggregateEvent()
+		public IDomainEvent ToDomainEvent()
 		{
-			return (IAggregateEvent) Singleton<IJsonConvert>.Instance.DeserializeObject(Event, Type.GetType(EventType));
+			return (IDomainEvent) Singleton<IJsonConvert>.Instance.DeserializeObject(Event, Type.GetType(EventType));
 		}
 	}
 }

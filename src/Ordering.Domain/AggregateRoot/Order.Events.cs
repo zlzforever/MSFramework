@@ -4,11 +4,11 @@ using MSFramework.Domain.Event;
 
 namespace Ordering.Domain.AggregateRoot
 {
-	public class OrderDeletedEvent : AggregateEventBase<Order, Guid>
+	public class OrderDeletedEvent : DomainEvent<Order, Guid>
 	{
 	}
 
-	public class OrderCreatedEvent : AggregateEventBase<Order, Guid>
+	public class OrderCreatedEvent : DomainEvent<Order, Guid>
 	{
 		public string Description { get; }
 
@@ -32,7 +32,7 @@ namespace Ordering.Domain.AggregateRoot
 		}
 	}
 
-	public class OrderAddressChangedEvent : AggregateEventBase<Order, Guid>
+	public class OrderAddressChangedEvent : DomainEvent<Order, Guid>
 	{
 		public Address NewOrderAddress { get; }
 

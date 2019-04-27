@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 
 namespace MSFramework.Domain.Repository
 {
-	public interface IReadRepository<TAggregateRoot, in TAggregateRootId> : IRepository
+	public interface IReadRepository<TAggregateRoot, in TAggregateRootId> : IRepository<TAggregateRoot, TAggregateRootId>
 		where TAggregateRoot : AggregateRootBase<TAggregateRoot,TAggregateRootId>
 		where TAggregateRootId : IEquatable<TAggregateRootId>
 	{

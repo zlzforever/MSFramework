@@ -12,14 +12,15 @@ namespace MSFramework.EventSouring.EntityFrameworkCore
 		public override void Configure(EntityTypeBuilder<EventHistory> builder)
 		{
 			builder.ToTable("EventHistory");
-			builder.Property("EventType");
-			builder.Property("Event");
-			builder.Property("AggregateId");
-			builder.Property("Version");
-			builder.Property("CreationTime");
+			builder.Property(x => x.EventType);
+			builder.Property(x => x.Event);
+			builder.Property(x => x.AggregateRootId);
+			builder.Property(x => x.Version);
+			builder.Property(x => x.Creator);
+			builder.Property(x => x.Timestamp);
 			builder.HasKey(x => x.Id);
-			builder.HasIndex(x => new {x.AggregateId, x.Version}).IsUnique();
-			builder.HasIndex(x => x.CreationTime);
+			builder.HasIndex(x => new {AggregateId = x.AggregateRootId, x.Version}).IsUnique();
+			builder.HasIndex(x => x.Timestamp);
 		}
 	}
 }

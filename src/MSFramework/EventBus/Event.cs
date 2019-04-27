@@ -1,17 +1,27 @@
 using System;
+using MSFramework.Common;
 
 namespace MSFramework.EventBus
 {
 	public abstract class Event : IEvent
 	{
-		public Event()
+		private string _creator;
+
+		protected Event()
 		{
-			Id = Guid.NewGuid();
-			CreationTime = DateTime.UtcNow;
+			Id = CombGuid.NewGuid();
+			Timestamp = DateTime.UtcNow;
 		}
 
-		public Guid Id { get; protected set; }
+		public Guid Id { get; }
 
-		public DateTime CreationTime { get; set; }
+		public DateTime Timestamp { get; }
+
+		public string Creator => _creator;
+
+		public void SetCreator(string creator)
+		{
+			_creator = creator;
+		}
 	}
 }

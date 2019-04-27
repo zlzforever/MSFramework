@@ -6,6 +6,10 @@ namespace MSFramework.EventBus
 	{
 		Guid Id { get; }
 
-		DateTime CreationTime { get; }
+		DateTime Timestamp { get; }
+		
+		string Creator { get; }
+		
+		void SetCreator(string creator);
 	}
 }

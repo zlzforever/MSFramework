@@ -6,11 +6,11 @@ namespace MSFramework.Serialization
 	/// <summary>
 	/// TODO: implement Options
 	/// </summary>
-	public class DefaultJsonConvert : IJsonConvert
+	public class NewtonsoftJsonConvert : IJsonConvert
 	{
 		private readonly JsonConvertOptions _options;
 
-		public DefaultJsonConvert(JsonConvertOptions options)
+		public NewtonsoftJsonConvert(JsonConvertOptions options)
 		{
 			_options = options;
 		}

@@ -33,11 +33,11 @@ namespace MSFramework.EventSouring
 		{
 			foreach (var @event in events)
 			{
-				_inMemoryDb.TryGetValue(@event.AggregateId, out var list);
+				_inMemoryDb.TryGetValue(@event.AggregateRootId, out var list);
 				if (list == null)
 				{
 					list = new List<EventHistory>();
-					_inMemoryDb.Add(@event.AggregateId, list);
+					_inMemoryDb.Add(@event.AggregateRootId, list);
 				}
 
 				list.Add(@event);

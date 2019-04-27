@@ -3,7 +3,8 @@ using System.Threading.Tasks;
 
 namespace MSFramework.Domain.Repository
 {
-	public interface IWriteRepository<TAggregateRoot, in TAggregateRootId> : IRepository
+	public interface
+		IWriteRepository<TAggregateRoot, in TAggregateRootId> : IRepository<TAggregateRoot, TAggregateRootId>
 		where TAggregateRoot : AggregateRootBase<TAggregateRoot, TAggregateRootId>
 		where TAggregateRootId : IEquatable<TAggregateRootId>
 	{

@@ -1,3 +1,5 @@
+using System;
+
 namespace MSFramework.Domain.Repository
 {
 	/// <summary>
@@ -5,6 +7,12 @@ namespace MSFramework.Domain.Repository
 	/// Implement generic version instead of this one.
 	/// </summary>
 	public interface IRepository
-	{        
+	{
+	}
+
+	public interface IRepository<TAggregateRoot, in TAggregateRootId> : IRepository
+		where TAggregateRoot : AggregateRootBase<TAggregateRoot, TAggregateRootId>
+		where TAggregateRootId : IEquatable<TAggregateRootId>
+	{
 	}
 }

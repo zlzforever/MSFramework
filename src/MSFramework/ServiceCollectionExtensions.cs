@@ -37,9 +37,16 @@ namespace MSFramework
 			return builder;
 		}
 
-		public static MSFrameworkBuilder AddInMemoryEventStore(this MSFrameworkBuilder builder)
+		public static MSFrameworkBuilder UseInMemoryEventStore(this MSFrameworkBuilder builder)
 		{
 			builder.Services.AddSingleton<IEventStore, InMemoryEventStore>();
+			return builder;
+		}
+
+		public static MSFrameworkBuilder UseNewtonsoftJsonConvert(this MSFrameworkBuilder builder)
+		{
+			Singleton<IJsonConvert>.Instance = new NewtonsoftJsonConvert(new JsonConvertOptions());
+			builder.Services.AddSingleton(Singleton<IJsonConvert>.Instance);
 			return builder;
 		}
 
@@ -68,15 +75,15 @@ namespace MSFramework
 
 			if (Singleton<IJsonConvert>.Instance == null)
 			{
-				Singleton<IJsonConvert>.Instance = new DefaultJsonConvert(new JsonConvertOptions());
-				builder.Services.AddSingleton(Singleton<IJsonConvert>.Instance);
+				builder.UseNewtonsoftJsonConvert();
 			}
 
-			builder.Services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
-			builder.Services.AddScoped<IMSFrameworkSession, MSFrameworkSession>();
-			builder.AddLocalEventBus();
+			if (Singleton<IIdGenerator>.Instance == null)
+			{
+				Singleton<IIdGenerator>.Instance = new IdGenerator();
+			}
 
-			Singleton<IIdGenerator>.Instance = new IdGenerator();
+			builder.UseLocalEventBus();
 
 			return services.BuildAspectInjectorProvider();
 		}
