@@ -100,6 +100,7 @@ namespace MSFramework.EntityFrameworkCore
 				{
 					Database.BeginTransaction();
 				}
+
 				Task.WaitAll(DispatchDomainEventsAsync());
 				var effectCount = base.SaveChanges();
 				Database.CommitTransaction();
@@ -145,7 +146,7 @@ namespace MSFramework.EntityFrameworkCore
 				{
 					await Database.BeginTransactionAsync(cancellationToken);
 				}
-				
+
 				// Dispatch Domain Events collection. 
 				// Choices:
 				// A) Right BEFORE committing data (EF SaveChanges) into the DB will make a single transaction including  
@@ -170,13 +171,13 @@ namespace MSFramework.EntityFrameworkCore
 			}
 		}
 
-		internal EventHistory[] GetEventSouringDomainEventsAsync()
+		internal EventHistory[] GetEventSouringEventsAsync()
 		{
 			var aggregateRoots = ChangeTracker
-				.Entries<IEventSourcingAggregate>()
-				.Where(x => x.Entity.GetAggregateEvents() != null && x.Entity.GetAggregateEvents().Any()).ToList();
+				.Entries<IAggregateRoot>()
+				.Where(x => x.Entity.GetChanges() != null && x.Entity.GetChanges().Any()).ToList();
 
-			return aggregateRoots.SelectMany(x => x.Entity.GetAggregateEvents().Select(y => new EventHistory(y)))
+			return aggregateRoots.SelectMany(x => x.Entity.GetChanges().Select(y => new EventHistory(y)))
 				.ToArray();
 		}
 
@@ -184,17 +185,23 @@ namespace MSFramework.EntityFrameworkCore
 		{
 			var aggregateRoots = ChangeTracker
 				.Entries<IAggregateRoot>()
-				.Where(x => x.Entity.GetChanges() != null && x.Entity.GetChanges().Any()).ToList();
+				.Where(x => x.Entity.DomainEvents != null && x.Entity.DomainEvents.Any()).ToList();
 
-			var domainEvents = aggregateRoots.SelectMany(x => x.Entity.GetChanges());
+			var domainEvents = aggregateRoots.SelectMany(x => x.Entity.DomainEvents).ToList();
 
-			var tasks = domainEvents.Select(async @event =>
+			var localDomainEvents = domainEvents.Where(x => x is LocalDomainEvent).ToList();
+			var distributedDomainEvents = domainEvents.Where(x => x is DistributedDomainEvent).ToList();
+			foreach (var @event in localDomainEvents)
 			{
-				// 通过 EventBus 发布出去
-				await _eventBus.PublishAsync(@event);
-			});
+				await this.GetService<IPassThroughEventBus>().PublishAsync(@event);
+			}
+
+			foreach (var @event in distributedDomainEvents)
+			{
+				await this.GetService<IEventBus>().PublishAsync(@event);
+			}
+
 			aggregateRoots.ForEach(x => x.Entity.ClearChanges());
-			await Task.WhenAll(tasks);
 		}
 	}
 }

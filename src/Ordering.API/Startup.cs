@@ -1,5 +1,4 @@
-﻿using System;
-using Microsoft.AspNetCore.Builder;
+﻿using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
@@ -10,12 +9,8 @@ using MSFramework.AspNetCore;
 using MSFramework.EntityFrameworkCore;
 using MSFramework.EntityFrameworkCore.SqlServer;
 using MSFramework.EventBus;
-using MSFramework.EventSouring;
 using MSFramework.EventSouring.EntityFrameworkCore;
-using MSFramework.IntegrateService;
 using Ordering.API.Application.EventHandler;
-using Ordering.Domain;
-using Ordering.Infrastructure;
 
 namespace Ordering.API
 {
@@ -40,7 +35,6 @@ namespace Ordering.API
 			
 			services.AddMSFramework(builder =>
 			{
-				builder.UseIntegrateService();
 				builder.UseAspNetCoreSession();
 				builder.UseEntityFramework(ef =>
 				{

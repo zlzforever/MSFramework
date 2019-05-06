@@ -17,10 +17,8 @@ namespace MSFramework.EventBus
 		}
 
 		public static IServiceCollection AddLocalEventBus(this IServiceCollection services)
-		{
-			services.AddSingleton<IEventBusSubscriptionStore, InMemoryEventBusSubscriptionStore>();
+		{			
 			services.AddSingleton<IEventBus, PassThroughEventBus>();
-
 			return services;
 		}
 	}

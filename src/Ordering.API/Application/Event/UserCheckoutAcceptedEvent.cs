@@ -1,13 +1,10 @@
-using System;
 using System.Collections.Generic;
-using MSFramework.Domain.Event;
-using MSFramework.EventBus;
-using MSFramework.IntegrateService;
+using MSFramework.Domain;
 using Ordering.API.Application.DTO;
 
 namespace Ordering.API.Application.Event
 {
-	public class UserCheckoutAcceptedEvent : IntegrationEvent
+	public class UserCheckoutAcceptedEvent : DistributedDomainEvent
 	{
 		public string UserId { get; }
 

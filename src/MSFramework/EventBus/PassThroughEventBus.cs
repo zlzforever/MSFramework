@@ -4,16 +4,15 @@ using Microsoft.Extensions.Logging;
 
 namespace MSFramework.EventBus
 {
-	public class PassThroughEventBus : IEventBus
+	public class PassThroughEventBus : IPassThroughEventBus
 	{
 		private readonly IEventBusSubscriptionStore _store;
 		private readonly ILogger _logger;
 		private readonly IServiceProvider _serviceProvider;
 
-		public PassThroughEventBus(ILogger<PassThroughEventBus> logger, IServiceProvider serviceProvider,
-			IEventBusSubscriptionStore store)
+		public PassThroughEventBus(ILogger<PassThroughEventBus> logger, IServiceProvider serviceProvider)
 		{
-			_store = store;
+			_store = new InMemoryEventBusSubscriptionStore();
 			_logger = logger;
 			_serviceProvider = serviceProvider;
 		}

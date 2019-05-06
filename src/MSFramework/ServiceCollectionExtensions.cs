@@ -2,13 +2,10 @@ using System;
 using System.Linq;
 using AspectCore.Extensions.DependencyInjection;
 using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Http;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using MSFramework.Common;
 using MSFramework.Data;
 using MSFramework.DependencyInjection;
-using MSFramework.Domain;
 using MSFramework.EventBus;
 using MSFramework.EventSouring;
 using MSFramework.Reflection;
@@ -82,6 +79,9 @@ namespace MSFramework
 			{
 				Singleton<IIdGenerator>.Instance = new IdGenerator();
 			}
+
+			builder.Services.AddSingleton<IEventBusSubscriptionStore, InMemoryEventBusSubscriptionStore>();
+			builder.Services.AddSingleton<IPassThroughEventBus, PassThroughEventBus>();
 
 			builder.UseLocalEventBus();
 

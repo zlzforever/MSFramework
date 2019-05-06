@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using MSFramework.Domain;
-using MSFramework.Domain.Repository;
 
 namespace Ordering.Domain.AggregateRoot
 {
@@ -38,7 +37,7 @@ namespace Ordering.Domain.AggregateRoot
 			List<OrderItem> orderItems
 		)
 		{
-			ApplyEvent(new OrderCreatedEvent(userId,
+			ApplyChangedEvent(new OrderCreatedEvent(userId,
 				address,
 				description,
 				orderItems));
@@ -69,12 +68,12 @@ namespace Ordering.Domain.AggregateRoot
 				throw new ArgumentException(nameof(newAddress));
 			}
 
-			ApplyEvent(new OrderAddressChangedEvent(newAddress));
+			ApplyChangedEvent(new OrderAddressChangedEvent(newAddress));
 		}
 
 		public void Delete()
 		{
-			ApplyEvent(new OrderDeletedEvent());
+			ApplyChangedEvent(new OrderDeletedEvent());
 		}
 	}
 }

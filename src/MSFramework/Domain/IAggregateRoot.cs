@@ -1,6 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using MSFramework.Domain.Event;
+﻿using System.Collections.Generic;
+using MSFramework.EventBus;
 
 namespace MSFramework.Domain
 {
@@ -14,13 +13,17 @@ namespace MSFramework.Domain
 		/// </summary>
 		/// <returns></returns>
 		string GetId();
-		
-		int Version { get; }		
 
-		IEnumerable<IDomainEvent> GetChanges();
+		int Version { get; }
+
+		IEnumerable<IAggregateRootChangedEvent> GetChanges();
+
+		void ClearChanges();
 		
-		void ClearChanges();	
+		IReadOnlyCollection<IEvent> DomainEvents { get; }
 		
-		void LoadFromHistory(params IDomainEvent[] histories);
+		void ClearDomainEvents();
+
+		void LoadFromHistory(params IAggregateRootChangedEvent[] histories);
 	}
 }

@@ -2,7 +2,6 @@ using System;
 using System.ComponentModel.DataAnnotations;
 using MSFramework.Common;
 using MSFramework.Domain;
-using MSFramework.Domain.Event;
 using MSFramework.Serialization;
 
 namespace MSFramework.EventSouring
@@ -47,7 +46,7 @@ namespace MSFramework.EventSouring
 		[Required]
 		public DateTime Timestamp { get; }
 
-		public EventHistory(IDomainEvent @event)
+		public EventHistory(IAggregateRootChangedEvent @event)
 		{
 			EventType = @event.GetType().AssemblyQualifiedName;
 			Version = @event.Version;
@@ -57,9 +56,9 @@ namespace MSFramework.EventSouring
 			Creator = @event.Creator;
 		}
 
-		public IDomainEvent ToDomainEvent()
+		public IAggregateRootChangedEvent ToDomainEvent()
 		{
-			return (IDomainEvent) Singleton<IJsonConvert>.Instance.DeserializeObject(Event, Type.GetType(EventType));
+			return (IAggregateRootChangedEvent) Singleton<IJsonConvert>.Instance.DeserializeObject(Event, Type.GetType(EventType));
 		}
 	}
 }

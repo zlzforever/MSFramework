@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using MSFramework.Common;
 using MSFramework.Data;
-using MSFramework.Domain.Event;
+using MSFramework.EventBus;
 
 namespace MSFramework.Domain
 {
@@ -15,8 +15,12 @@ namespace MSFramework.Domain
 	{
 		private const int NewAggregateVersion = -1;
 
-		private readonly ICollection<IDomainEvent<TAggregateRoot, TAggregateRootId>> _uncommittedEvents =
-			new LinkedList<IDomainEvent<TAggregateRoot, TAggregateRootId>>();
+		private readonly ICollection<IAggregateRootChangedEvent<TAggregateRoot, TAggregateRootId>>
+			_aggregateRootChangedEventEvents =
+				new LinkedList<IAggregateRootChangedEvent<TAggregateRoot, TAggregateRootId>>();
+
+		private readonly List<IDomainEvent> _domainEvents =
+			new List<IDomainEvent>();
 
 		private int _version = NewAggregateVersion;
 
@@ -28,7 +32,12 @@ namespace MSFramework.Domain
 		{
 		}
 
-		protected void ApplyEvent(IDomainEvent<TAggregateRoot, TAggregateRootId> @event)
+		public void AddDomainEvent(IDomainEvent @event)
+		{
+			_domainEvents.Add(@event);
+		}
+
+		protected void ApplyChangedEvent(IAggregateRootChangedEvent<TAggregateRoot, TAggregateRootId> @event)
 		{
 			@event.NotNull(nameof(@event));
 			if (Equals(Id, default(TAggregateRootId)))
@@ -39,10 +48,11 @@ namespace MSFramework.Domain
 			_version++;
 			@event.SetAggregateRootIdAndVersion(_id, _version);
 			PrivateReflectionDynamicObject.WrapObjectIfNeeded(this).Apply(@event);
-			_uncommittedEvents.Add(@event);
+			_aggregateRootChangedEventEvents.Add(@event);
 		}
 
-		protected void ApplyEvents(IEnumerable<IDomainEvent<TAggregateRoot, TAggregateRootId>> events)
+		protected void ApplyChangedEvent(
+			IEnumerable<IAggregateRootChangedEvent<TAggregateRoot, TAggregateRootId>> events)
 		{
 			if (events == null)
 			{
@@ -51,7 +61,7 @@ namespace MSFramework.Domain
 
 			foreach (var @event in events)
 			{
-				ApplyEvent(@event);
+				ApplyChangedEvent(@event);
 			}
 		}
 
@@ -63,16 +73,20 @@ namespace MSFramework.Domain
 		int IAggregateRoot.Version => _version;
 
 		void IAggregateRoot.ClearChanges()
-			=> _uncommittedEvents.Clear();
+			=> _aggregateRootChangedEventEvents.Clear();
 
-		IEnumerable<IDomainEvent> IAggregateRoot.GetChanges()
-			=> _uncommittedEvents;
+		IEnumerable<IAggregateRootChangedEvent> IAggregateRoot.GetChanges()
+			=> _aggregateRootChangedEventEvents;
 
-		void IAggregateRoot.LoadFromHistory(params IDomainEvent[] histories)
+		IReadOnlyCollection<IEvent> IAggregateRoot.DomainEvents => _domainEvents.AsReadOnly();
+
+		void IAggregateRoot.ClearDomainEvents() => _domainEvents.Clear();
+
+		void IAggregateRoot.LoadFromHistory(params IAggregateRootChangedEvent[] histories)
 		{
 			foreach (var @event in histories)
 			{
-				var aggregateEvent = (DomainEvent<TAggregateRoot, TAggregateRootId>) @event;
+				var aggregateEvent = (IAggregateRootChangedEvent<TAggregateRoot, TAggregateRootId>) @event;
 				if (aggregateEvent.Version != _version + 1)
 				{
 					throw new MSFrameworkException(aggregateEvent.Id.ToString());
