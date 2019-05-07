@@ -6,27 +6,31 @@ namespace ServicePlan.Domain.AggregateRoot
 {
 	public class Product : ValueObject
 	{
-		private Guid Id { get; }
+		public Guid Id { get; }
 
-		private string Name { get;}
+		public string Name { get;}
 
-		private ProductType Type { get; set; }
+		public ProductType Type { get; }
 
-		private string KeyIdeaAndTopic { get; }
+		/// <summary>
+		/// 订阅者
+		/// </summary>
+		public List<ClientUser> Subscriber { get; }
 
-		public Product(Guid id, string name, string keyIdeaAndTopic)
+		public Product(Guid id, string name, ProductType productType, List<ClientUser> subscriber)
 		{
 			Id = id;
 			Name = name;
-			KeyIdeaAndTopic = keyIdeaAndTopic;
+			Type = productType;
+			Subscriber = subscriber;
 		}
 
 		protected override IEnumerable<object> GetAtomicValues()
 		{
 			yield return Id;
 			yield return Name;
-			yield return KeyIdeaAndTopic;
 			yield return Type;
+			yield return Subscriber;
 		}
 	}
 }

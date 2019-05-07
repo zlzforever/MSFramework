@@ -13,7 +13,7 @@ namespace ServicePlan.Domain.AggregateRoot
 		/// <summary>
 		/// 是否预定
 		/// </summary>
-		private bool _isBooked;
+		private bool _booked;
 		
 		private DateTime _beginTime;
 		
@@ -22,14 +22,14 @@ namespace ServicePlan.Domain.AggregateRoot
 		private DateTime _bookTime;
 
 		/// <summary>
+		/// 可路演地点
+		/// </summary>
+		private string _location;
+
+		/// <summary>
 		/// 地址
 		/// </summary>
 		private string _address;
-		
-		/// <summary>
-		/// 客户
-		/// </summary>
-		private Client _client;
 
 		/// <summary>
 		/// 客户联系人
@@ -39,36 +39,36 @@ namespace ServicePlan.Domain.AggregateRoot
 		/// <summary>
 		/// 销售
 		/// </summary>
-		private Sale _sale;
+		private User _sale;
 		
 		/// <summary>
 		/// 描述
 		/// </summary>
 		private string _description;
 
-		public bool IsBooked => _isBooked;
+		public bool Booked => _booked;
 
-		public Appointment(DateTime beginTime, DateTime endTime)
+		public Appointment(string location, DateTime beginTime, DateTime endTime)
 		{
+			_location = location;
 			_bookTime = beginTime;
 			_endTime = endTime;
-			_isBooked = false;
+			_booked = false;
 		}
 
-		public void MakeAppointWithClient(string address, Client client, List<ClientUser> clientUsers, Sale sale, string description, DateTime bookTime)
+		public void MakeAppointWithClient(string address, List<ClientUser> clientUsers, User sale, string description, DateTime bookTime)
 		{
-			if (_isBooked)
+			if (_booked)
 			{
 				throw new ServicePlanException("该时间段已被预约");
 			}
 			
 			_address = address;
-			_client = client;
 			_clientUsers = clientUsers;
 			_sale = sale;
 			_bookTime = bookTime;
 			_description = description;
-			_isBooked = true;
+			_booked = true;
 		}
 	}
 }

@@ -12,16 +12,13 @@ namespace ServicePlan.Domain.AggregateRoot
 	{
 		public User User { get; }
 
-		public Product Product { get; }
-
 		public DateTime BeginTime { get; }
 
 		public DateTime EndTime { get; }
 
-		public CreateWeekSchedulerEvent(User user, Product product, DateTime beginTime, DateTime endTime)
+		public CreateWeekSchedulerEvent(User user, DateTime beginTime, DateTime endTime)
 		{
 			User = user;
-			Product = product;
 			BeginTime = beginTime;
 			EndTime = endTime;
 		}
@@ -56,7 +53,7 @@ namespace ServicePlan.Domain.AggregateRoot
 
 		public List<ClientUser> ClientUsers { get; }
 
-		public Sale Sale { get; }
+		public User Sale { get; }
 
 		/// <summary>
 		/// 预定时间
@@ -65,13 +62,13 @@ namespace ServicePlan.Domain.AggregateRoot
 
 		public string Description { get; }
 
-		public MakeAppointWithClientEvent(Guid id, string address, Client client, List<ClientUser> clientUsers, Sale sale, string description, DateTime bookTime)
+		public MakeAppointWithClientEvent(Guid appointmentId, string address, Client client, List<ClientUser> clientUsers, User sale, string description, DateTime bookTime)
 		{
 			Address = address;
 			Client = client;
 			ClientUsers = clientUsers;
 			Sale = sale;
-			AppointmentId = id;
+			AppointmentId = appointmentId;
 			BookTime = bookTime;
 			Description = description;
 		}
@@ -110,12 +107,9 @@ namespace ServicePlan.Domain.AggregateRoot
 	{
 		public Product Product { get; }
 
-		public string KeyIdeaAndTopic { get; }
-
-		public BindKeyIdeaAndTopicEvent(Product product, string keyIdeaAndTopic)
+		public BindKeyIdeaAndTopicEvent(Product product)
 		{
 			Product = product;
-			KeyIdeaAndTopic = keyIdeaAndTopic;
 		}
 	}
 }

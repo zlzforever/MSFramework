@@ -24,14 +24,14 @@ namespace ServicePlan.Domain.AggregateRoot
 		private User _user;
 
 		/// <summary>
-		/// 关联产品
-		/// </summary>
-		private Product _product;
-
-		/// <summary>
 		/// 开始时间
 		/// </summary>
 		private DateTime _beginTime;
+
+		/// <summary>
+		/// 产品信息
+		/// </summary>
+		private Product _product;
 
 		/// <summary>
 		/// 结束时间
@@ -48,43 +48,54 @@ namespace ServicePlan.Domain.AggregateRoot
 		/// </summary>
 		public IReadOnlyCollection<Appointment> Appointments => _appointments;
 
-		public RoadShowWeekScheduler(User user, Product product, DateTime beginTime, DateTime endTime)
+		/// <summary>
+		/// 路演计划
+		/// </summary>
+		/// <param name="user">用户</param>
+		/// <param name="beginTime">开始时间</param>
+		/// <param name="endTime">结束时间</param>
+		public RoadShowWeekScheduler(User user, DateTime beginTime, DateTime endTime)
 		{
-			ApplyAggregateEvent(new CreateWeekSchedulerEvent(user, product, beginTime, endTime));
+			ApplyAggregateEvent(new CreateWeekSchedulerEvent(user, beginTime, endTime));
 		}
 
-		public void BindKeyIdeaAndTopic(Product product, string keyIdeaAndTopic)
+		/// <summary>
+		/// 绑定路演关联的产品
+		/// </summary>
+		/// <param name="product">产品</param>
+		public void BindProducts(Product product)
 		{
 			Check.NotNull(product, nameof(product));
 			
 			if (_product != null)
 			{
-				throw new ServicePlanException("已关联产品，无法更改");
+				throw new ServicePlanException("已关联路演产品，无法更改");
 			}
 			
-			ApplyAggregateEvent(new BindKeyIdeaAndTopicEvent(product, keyIdeaAndTopic));
+			ApplyAggregateEvent(new BindKeyIdeaAndTopicEvent(product));
 		}
 
 		/// <summary>
 		/// 添加可路演时间
 		/// </summary>
+		/// <param name="location">可路演地点</param>
 		/// <param name="beginTime">开始时间</param>
 		/// <param name="endTime">结束时间</param>
-		public void AddIdleDateTime(DateTime beginTime, DateTime endTime)
+		public void AddAppointment(string location, DateTime beginTime, DateTime endTime)
 		{
-			if (_product == null || string.IsNullOrWhiteSpace(_keyIdeaAndTopic))
+			if (_product == null)
 			{
-				throw new ServicePlanException("未设置产品或核心观点与主题");
+				throw new ServicePlanException("未设置路演产品");
 			}
 
-			ApplyAggregateEvent(new AddIdleDateTimeEvent(new Appointment(beginTime, endTime)));
+			ApplyAggregateEvent(new AddIdleDateTimeEvent(new Appointment(location, beginTime, endTime)));
 		}
 
 		/// <summary>
-		/// 移除可路演时间
+		/// 删除可路演时间
 		/// </summary>
 		/// <param name="appointmentId">预约标识</param>
-		public void RemoveIdleDateTime(Guid appointmentId)
+		public void DeleteAppointment(Guid appointmentId)
 		{
 			ApplyAggregateEvent(new RemoveIdleDateTimeEvent(appointmentId));
 		}
@@ -92,33 +103,39 @@ namespace ServicePlan.Domain.AggregateRoot
 		/// <summary>
 		/// 销售预约客户路演
 		/// </summary>
-		/// <param name="id">预约id</param>
+		/// <param name="appointmentId">预约id</param>
 		/// <param name="address">路演地址</param>
 		/// <param name="client">客户信息</param>
 		/// <param name="clientUsers">客户联系人</param>
 		/// <param name="sale">销售信息</param>
 		/// <param name="description">描述</param>
-		public void MakeAppointWithClient(Guid id, string address, Client client, List<ClientUser> clientUsers, Sale sale, string description)
+		public void MakeAppointWithClient(Guid appointmentId, string address, Client client,
+			List<ClientUser> clientUsers, User sale, string description)
 		{
 			Check.NotNull(address, nameof(address));
 			Check.NotNull(client, nameof(client));
 			Check.NotNull(clientUsers, nameof(clientUsers));
 			Check.NotNull(sale, nameof(sale));
-			
-			ApplyAggregateEvent(new MakeAppointWithClientEvent(id, address, client, clientUsers, sale, description, DateTime.Now));
-			
-			// TODO 发送添加服务计划的事件
+
+			ApplyAggregateEvent(new MakeAppointWithClientEvent(appointmentId, address, client, clientUsers, sale,
+				description, DateTime.Now));
+
+			// 发送添加服务计划的事件
+			RegisterDomainEvent(
+				new CreateRoadShowServicePlanEvent(client, clientUsers, address, _user, sale, _beginTime, _endTime,
+					appointmentId));
 		}
 
 		/// <summary>
 		/// 销售撤销预约
 		/// </summary>
 		/// <param name="appointmentId">预约标识</param>
-		public void CancelAppoint(Guid appointmentId)
+		public void CancelAppointWithClient(Guid appointmentId)
 		{
 			ApplyAggregateEvent(new CancelAppointEvent(appointmentId));
 			
-			// TODO 发送删除服务计划的事件
+			// 发送删除服务计划的事件
+			RegisterDomainEvent(new CancelRoadShowServicePlanEvent(appointmentId));
 		}
 
 		#region ApplyMethods
@@ -126,13 +143,11 @@ namespace ServicePlan.Domain.AggregateRoot
 		private void Apply(BindKeyIdeaAndTopicEvent @event)
 		{
 			_product = @event.Product;
-			_keyIdeaAndTopic = @event.KeyIdeaAndTopic;
 		}
 
 		private void Apply(CreateWeekSchedulerEvent @event)
 		{
 			_user = @event.User;
-			_product = @event.Product;
 			_beginTime = @event.BeginTime;
 			_endTime = @event.EndTime;
 		}
@@ -146,7 +161,7 @@ namespace ServicePlan.Domain.AggregateRoot
 		{
 			var appointment = _appointments.FirstOrDefault(a => a.Id == @event.AppointmentId);
 			Check.NotNull(appointment, nameof(appointment));
-			appointment.MakeAppointWithClient(@event.Address, @event.Client, @event.ClientUsers, @event.Sale,
+			appointment.MakeAppointWithClient(@event.Address, @event.ClientUsers, @event.Sale,
 				@event.Description, @event.BookTime);
 		}
 
@@ -163,7 +178,7 @@ namespace ServicePlan.Domain.AggregateRoot
 			var appointment = _appointments.FirstOrDefault(a => a.Id == @event.AppointmentId);
 			Check.NotNull(appointment, nameof(appointment));
 			
-			if (appointment.IsBooked)
+			if (appointment.Booked)
 			{
 				throw new ServicePlanException("已预约,无法删除");
 			}
