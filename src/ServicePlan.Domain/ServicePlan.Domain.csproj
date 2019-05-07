@@ -1,0 +1,59 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\MSFramework\MSFramework.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Update="AggregateRoot\ServicePlanState.cs">
+      <DependentUpon>ServicePlan.cs</DependentUpon>
+    </Compile>
+    <Compile Update="AggregateRoot\ValidationState.cs">
+      <DependentUpon>ServicePlan.cs</DependentUpon>
+    </Compile>
+    <Compile Update="AggregateRoot\RoadShowWeekScheduler.Events.cs">
+      <DependentUpon>RoadShowWeekScheduler.cs</DependentUpon>
+    </Compile>
+    <Compile Update="AggregateRoot\ProductType.cs">
+      <DependentUpon>Product.cs</DependentUpon>
+    </Compile>
+    <Compile Update="AggregateRoot\AttachmentType.cs">
+      <DependentUpon>Attachment.cs</DependentUpon>
+    </Compile>
+    <Compile Update="AggregateRoot\ServicePlan.Events.cs">
+      <DependentUpon>ServicePlan.cs</DependentUpon>
+    </Compile>
+    <Compile Update="AggregateRoot\ServicePlanType.cs">
+      <DependentUpon>ServicePlan.cs</DependentUpon>
+    </Compile>
+    <Compile Update="AggregateRoot\AuditState.cs">
+      <DependentUpon>ServicePlan.cs</DependentUpon>
+    </Compile>
+    <Compile Update="AggregateRoot\CreateRoadShowServicePlanEvent.cs">
+      <DependentUpon>RoadShowWeekScheduler.cs</DependentUpon>
+    </Compile>
+    <Compile Update="AggregateRoot\CancelRoadShowServicePlanEvent.cs">
+      <DependentUpon>RoadShowWeekScheduler.cs</DependentUpon>
+    </Compile>
+    <Compile Update="AggregateRoot\RoadShow.cs">
+      <DependentUpon>ServicePlan.cs</DependentUpon>
+    </Compile>
+    <Compile Update="AggregateRoot\DataReport.cs">
+      <DependentUpon>ServicePlan.cs</DependentUpon>
+    </Compile>
+    <Compile Update="AggregateRoot\AuditHistory.cs">
+      <DependentUpon>ServicePlan.cs</DependentUpon>
+    </Compile>
+    <Compile Update="AggregateRoot\ServiceRecord.cs">
+      <DependentUpon>ServicePlan.cs</DependentUpon>
+    </Compile>
+    <Compile Update="AggregateRoot\EmailRecord.cs">
+      <DependentUpon>ServicePlan.cs</DependentUpon>
+    </Compile>
+  </ItemGroup>
+
+</Project>
