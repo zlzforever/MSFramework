@@ -13,52 +13,60 @@ namespace MSFramework.EventSouring
 		/// </summary>
 		[Required]
 		[StringLength(255)]
-		public string EventType { get; }
+		public string EventType { get; set; }
 
 		/// <summary>
 		/// 序列化的领域事件
 		/// </summary>
 		[Required]
-		public string Event { get; }
+		public string Event { get; set; }
 
 		/// <summary>
 		/// 聚合根标识
 		/// </summary>
 		[Required]
 		[StringLength(255)]
-		public string AggregateRootId { get; }
+		public string AggregateRootId { get; set; }
 
 		/// <summary>
 		/// 版本号
 		/// </summary>
 		[Required]
-		public int Version { get; }
+		public int Version { get; set; }
 
 		/// <summary>
 		/// 创建者
 		/// </summary>
-		[StringLength(255)] 
-		public string Creator { get; }
+		[StringLength(255)]
+		public string Creator { get; set; }
+		
+		[StringLength(255)]
+		public string CreatorId { get; set; }
 
 		/// <summary>
 		/// 
 		/// </summary>
 		[Required]
-		public DateTime Timestamp { get; }
+		public DateTime Timestamp { get; set; }
 
-		public EventHistory(IAggregateRootChangedEvent @event)
+		public EventHistory()
+		{
+			Timestamp = DateTime.UtcNow;
+		}
+
+		public EventHistory(IAggregateRootChangedEvent @event) : this()
 		{
 			EventType = @event.GetType().AssemblyQualifiedName;
 			Version = @event.Version;
 			Event = Singleton<IJsonConvert>.Instance.SerializeObject(@event);
 			AggregateRootId = @event.GetAggregateRootId();
-			Timestamp = DateTime.UtcNow;
 			Creator = @event.Creator;
 		}
 
 		public IAggregateRootChangedEvent ToDomainEvent()
 		{
-			return (IAggregateRootChangedEvent) Singleton<IJsonConvert>.Instance.DeserializeObject(Event, Type.GetType(EventType));
+			return (IAggregateRootChangedEvent) Singleton<IJsonConvert>.Instance.DeserializeObject(Event,
+				Type.GetType(EventType));
 		}
 	}
 }

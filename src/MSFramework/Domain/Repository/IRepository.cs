@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using MSFramework.DependencyInjection;
 
 namespace MSFramework.Domain.Repository
 {
@@ -8,7 +9,7 @@ namespace MSFramework.Domain.Repository
 	/// This interface must be implemented by all repositories to identify them by convention.
 	/// Implement generic version instead of this one.
 	/// </summary>
-	public interface IRepository
+	public interface IRepository : IScopeDependency
 	{
 	}
 

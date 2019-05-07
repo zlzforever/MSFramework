@@ -22,7 +22,7 @@ namespace MSFramework.EventSouring
 			return entries;
 		}
 
-		public Task AddEventAsync(params EventHistory[] events)
+		public Task AddEventsAsync(params EventHistory[] events)
 		{
 			AddEvents(events);
 			return Task.CompletedTask;

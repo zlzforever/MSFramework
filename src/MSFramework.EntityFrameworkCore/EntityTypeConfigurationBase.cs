@@ -40,6 +40,9 @@ namespace MSFramework.EntityFrameworkCore
 		/// 重写以实现实体类型各个属性的数据库配置
 		/// </summary>
 		/// <param name="builder">实体类型创建器</param>
-		public abstract void Configure(EntityTypeBuilder<TEntity> builder);
+		public virtual void Configure(EntityTypeBuilder<TEntity> builder)
+		{
+			builder.Property<int>("Version");
+		}
 	}
 }

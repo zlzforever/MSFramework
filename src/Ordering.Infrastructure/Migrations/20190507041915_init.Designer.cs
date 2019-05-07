@@ -10,7 +10,7 @@ using Ordering.Infrastructure;
 namespace Ordering.Infrastructure.Migrations
 {
     [DbContext(typeof(OrderingContext))]
-    [Migration("20190425163318_init")]
+    [Migration("20190507041915_init")]
     partial class init
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -35,7 +35,7 @@ namespace Ordering.Infrastructure.Migrations
                     b.Property<string>("UserId")
                         .IsRequired();
 
-                    b.Property<long>("Version");
+                    b.Property<int>("Version");
 
                     b.HasKey("Id");
 

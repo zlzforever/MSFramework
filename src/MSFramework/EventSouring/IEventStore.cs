@@ -8,7 +8,7 @@ namespace MSFramework.EventSouring
 
 		EventHistory[] GetEvents(string aggregateId, long from);
 
-		Task AddEventAsync(params EventHistory[] events);
+		Task AddEventsAsync(params EventHistory[] events);
 		
 		void AddEvents(params EventHistory[] events);
 

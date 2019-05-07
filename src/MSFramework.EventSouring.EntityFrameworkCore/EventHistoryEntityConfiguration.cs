@@ -17,6 +17,7 @@ namespace MSFramework.EventSouring.EntityFrameworkCore
 			builder.Property(x => x.AggregateRootId);
 			builder.Property(x => x.Version);
 			builder.Property(x => x.Creator);
+			builder.Property(x => x.CreatorId);
 			builder.Property(x => x.Timestamp);
 			builder.HasKey(x => x.Id);
 			builder.HasIndex(x => new {AggregateId = x.AggregateRootId, x.Version}).IsUnique();

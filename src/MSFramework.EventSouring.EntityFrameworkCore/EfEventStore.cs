@@ -26,7 +26,7 @@ namespace MSFramework.EventSouring.EntityFrameworkCore
 			return _table.Where(x => x.Version > from && x.AggregateRootId == aggregateId).ToArray();
 		}
 
-		public async Task AddEventAsync(params EventHistory[] events)
+		public async Task AddEventsAsync(params EventHistory[] events)
 		{
 			foreach (var @event in events)
 			{

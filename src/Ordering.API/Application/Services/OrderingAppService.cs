@@ -2,27 +2,29 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using MSFramework.Application;
 using MSFramework.Domain;
+using MSFramework.Domain.Repository;
+using MSFramework.EntityFrameworkCore.Repository;
 using MSFramework.EventBus;
 using Ordering.API.Application.DTO;
 using Ordering.API.Application.Event;
 using Ordering.Domain.AggregateRoot;
-using Ordering.Domain.Repository;
 
 namespace Ordering.API.Application.Services
 {
 	public class OrderingAppService : ApplicationServiceBase, IOrderingAppService
 	{
-		private readonly IOrderRepository _repository;
+		private readonly EfRepository<Order, Guid> _repository;
 		private readonly IEventBus _eventBus;
 
 		public OrderingAppService(IMSFrameworkSession session, IEventBus eventBus,
-			IOrderRepository readRepository,
+			EfRepository<Order, Guid> repository,
 			ILogger<OrderingAppService> logger) : base(session, logger)
 		{
-			_repository = readRepository;
+			_repository = repository;
 			_eventBus = eventBus;
 		}
 
@@ -30,6 +32,7 @@ namespace Ordering.API.Application.Services
 		{
 			var item = await _repository.GetAsync(dto.OrderId);
 			item.Delete();
+			await _repository.DeleteAsync(item);
 			Logger.LogInformation($"DELETED ORDER: {dto.OrderId}");
 		}
 
@@ -52,13 +55,13 @@ namespace Ordering.API.Application.Services
 
 		public async Task<List<Order>> GetAllOrdersAsync()
 		{
-			var orders = await _repository.GetAllListAsync();
+			var orders = await _repository.AggregateRoots.AsNoTracking().ToListAsync();
 			return orders;
 		}
 
 		public async Task<Order> GetOrderAsync(Guid orderId)
 		{
-			var order = await _repository.GetAsync(orderId);
+			var order = await _repository.AggregateRoots.AsNoTracking().FirstOrDefaultAsync(x => x.Id == orderId);
 			return order;
 		}
 	}

@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using MSFramework.Common;
 using MSFramework.Data;
 using MSFramework.EventBus;
@@ -32,6 +33,12 @@ namespace MSFramework.Domain
 		{
 		}
 
+		public int Version
+		{
+			get => _version;
+			protected set => _version = value;
+		}
+
 		public void AddDomainEvent(IDomainEvent @event)
 		{
 			_domainEvents.Add(@event);
@@ -47,7 +54,7 @@ namespace MSFramework.Domain
 
 			_version++;
 			@event.SetAggregateRootIdAndVersion(_id, _version);
-			PrivateReflectionDynamicObject.WrapObjectIfNeeded(this).Apply(@event);
+			this.ToDynamic().Apply(@event);
 			_aggregateRootChangedEventEvents.Add(@event);
 		}
 
@@ -69,8 +76,6 @@ namespace MSFramework.Domain
 		{
 			return Id.ToString();
 		}
-
-		int IAggregateRoot.Version => _version;
 
 		void IAggregateRoot.ClearChanges()
 			=> _aggregateRootChangedEventEvents.Clear();
@@ -94,7 +99,7 @@ namespace MSFramework.Domain
 
 				_id = (TAggregateRootId) Convert.ChangeType(aggregateEvent.AggregateRootId, typeof(TAggregateRootId));
 				_version = aggregateEvent.Version;
-				PrivateReflectionDynamicObject.WrapObjectIfNeeded(this).Apply(aggregateEvent);
+				this.ToDynamic().Apply(aggregateEvent);
 			}
 		}
 	}

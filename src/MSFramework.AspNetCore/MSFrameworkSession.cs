@@ -9,8 +9,6 @@ namespace MSFramework.AspNetCore
 		private readonly IHttpContextAccessor _accessor;
 		private readonly IUnitOfWork _unitOfWork;
 
-		 
-
 		public MSFrameworkSession(IHttpContextAccessor accessor, IUnitOfWork unitOfWork)
 		{
 			_accessor = accessor;
@@ -18,6 +16,8 @@ namespace MSFramework.AspNetCore
 		}
 
 		public string UserId => _accessor.HttpContext.User.FindFirst("sub")?.Value;
+
+		public string UserName => _accessor.HttpContext.User.FindFirst("name")?.Value;
 
 		public async Task CommitAsync()
 		{
