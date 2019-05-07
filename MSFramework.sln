@@ -1,19 +1,22 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.28803.202
+MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{0CEB99EE-969C-4A1D-841F-D22E4ADCC5F1}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MSFramework", "src\MSFramework\MSFramework.csproj", "{1E790E6F-3E16-4221-B646-6BB1C252698F}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MSFramework", "src\MSFramework\MSFramework.csproj", "{1E790E6F-3E16-4221-B646-6BB1C252698F}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MSFramework.Tests", "tests\MSFramework.Tests\MSFramework.Tests.csproj", "{078A8534-7C83-4095-B756-6EBA700DBB12}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MSFramework.Tests", "tests\MSFramework.Tests\MSFramework.Tests.csproj", "{078A8534-7C83-4095-B756-6EBA700DBB12}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{BC443640-DE89-431B-AD8F-061AA22C8654}"
-ProjectSection(SolutionItems) = preProject
-	README.md = README.md
-	.editorconfig = .editorconfig
-	LICENSE = LICENSE
-	publish_nuget_packages.sh = publish_nuget_packages.sh
-	.gitignore = .gitignore
-EndProjectSection
+	ProjectSection(SolutionItems) = preProject
+		.editorconfig = .editorconfig
+		.gitignore = .gitignore
+		LICENSE = LICENSE
+		publish_nuget_packages.sh = publish_nuget_packages.sh
+		README.md = README.md
+	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{BC00DC54-17AB-455D-AE75-FDF74923FC13}"
 EndProject
@@ -25,25 +28,25 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "03 - Presentations", "03 - 
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "04 - ApiGateways", "04 - ApiGateways", "{BF9F54D8-F05A-47F6-AC79-A2577DF16F73}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MSFramework.EventBus.RabbitMQ", "src\MSFramework.EventBus.RabbitMQ\MSFramework.EventBus.RabbitMQ.csproj", "{1B602FD8-0670-47CB-B626-3238292A279E}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MSFramework.EventBus.RabbitMQ", "src\MSFramework.EventBus.RabbitMQ\MSFramework.EventBus.RabbitMQ.csproj", "{1B602FD8-0670-47CB-B626-3238292A279E}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Ordering", "Ordering", "{47747049-F28E-4474-B09F-E98147F91C83}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Ordering.Infrastructure", "src\Ordering.Infrastructure\Ordering.Infrastructure.csproj", "{3EAF5009-6B3E-4158-A79B-21DBDD780159}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Ordering.Infrastructure", "src\Ordering.Infrastructure\Ordering.Infrastructure.csproj", "{3EAF5009-6B3E-4158-A79B-21DBDD780159}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Ordering.Domain", "src\Ordering.Domain\Ordering.Domain.csproj", "{1BE72CB2-082D-499B-BA03-3170DDD45657}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Ordering.Domain", "src\Ordering.Domain\Ordering.Domain.csproj", "{1BE72CB2-082D-499B-BA03-3170DDD45657}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Ordering.API", "src\Ordering.API\Ordering.API.csproj", "{08D3B5A7-23B5-4CBB-9401-5CEFB120D913}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Ordering.API", "src\Ordering.API\Ordering.API.csproj", "{08D3B5A7-23B5-4CBB-9401-5CEFB120D913}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MSFramework.EntityFrameworkCore", "src\MSFramework.EntityFrameworkCore\MSFramework.EntityFrameworkCore.csproj", "{00BD8E83-A45F-4310-B492-AE40D19CA043}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MSFramework.EntityFrameworkCore", "src\MSFramework.EntityFrameworkCore\MSFramework.EntityFrameworkCore.csproj", "{00BD8E83-A45F-4310-B492-AE40D19CA043}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MSFramework.EntityFrameworkCore.SqlServer", "src\MSFramework.EntityFrameworkCore.SqlServer\MSFramework.EntityFrameworkCore.SqlServer.csproj", "{68023604-C776-413B-8AC1-ECEA09391BA2}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MSFramework.EntityFrameworkCore.SqlServer", "src\MSFramework.EntityFrameworkCore.SqlServer\MSFramework.EntityFrameworkCore.SqlServer.csproj", "{68023604-C776-413B-8AC1-ECEA09391BA2}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MSFramework.EntityFrameworkCore.MySql", "src\MSFramework.EntityFrameworkCore.MySql\MSFramework.EntityFrameworkCore.MySql.csproj", "{EC4910EA-309B-4AFF-BE1A-33149A8BCF78}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MSFramework.EntityFrameworkCore.MySql", "src\MSFramework.EntityFrameworkCore.MySql\MSFramework.EntityFrameworkCore.MySql.csproj", "{EC4910EA-309B-4AFF-BE1A-33149A8BCF78}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MSFramework.EventSouring.EntityFrameworkCore", "src\MSFramework.EventSouring.EntityFrameworkCore\MSFramework.EventSouring.EntityFrameworkCore.csproj", "{DA65E128-8BB2-488B-ACE2-F31ADE708EBB}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MSFramework.EventSouring.EntityFrameworkCore", "src\MSFramework.EventSouring.EntityFrameworkCore\MSFramework.EventSouring.EntityFrameworkCore.csproj", "{DA65E128-8BB2-488B-ACE2-F31ADE708EBB}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MSFramework.AspNetCore", "src\MSFramework.AspNetCore\MSFramework.AspNetCore.csproj", "{48BC499D-18FA-48A6-A37E-A24ED465A11B}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MSFramework.AspNetCore", "src\MSFramework.AspNetCore\MSFramework.AspNetCore.csproj", "{48BC499D-18FA-48A6-A37E-A24ED465A11B}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -96,10 +99,13 @@ Global
 		{48BC499D-18FA-48A6-A37E-A24ED465A11B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{48BC499D-18FA-48A6-A37E-A24ED465A11B}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
+		{1E790E6F-3E16-4221-B646-6BB1C252698F} = {AFD16F00-F810-4A3C-BA74-59BBFBC2469D}
 		{078A8534-7C83-4095-B756-6EBA700DBB12} = {0CEB99EE-969C-4A1D-841F-D22E4ADCC5F1}
 		{AFD16F00-F810-4A3C-BA74-59BBFBC2469D} = {BC00DC54-17AB-455D-AE75-FDF74923FC13}
-		{1E790E6F-3E16-4221-B646-6BB1C252698F} = {AFD16F00-F810-4A3C-BA74-59BBFBC2469D}
 		{6B2B536E-98CD-49AB-953C-A77611C06C9B} = {BC00DC54-17AB-455D-AE75-FDF74923FC13}
 		{09937860-AC15-416E-B9E1-2BC7041E4A39} = {BC00DC54-17AB-455D-AE75-FDF74923FC13}
 		{BF9F54D8-F05A-47F6-AC79-A2577DF16F73} = {BC00DC54-17AB-455D-AE75-FDF74923FC13}
@@ -112,6 +118,8 @@ Global
 		{68023604-C776-413B-8AC1-ECEA09391BA2} = {AFD16F00-F810-4A3C-BA74-59BBFBC2469D}
 		{EC4910EA-309B-4AFF-BE1A-33149A8BCF78} = {AFD16F00-F810-4A3C-BA74-59BBFBC2469D}
 		{DA65E128-8BB2-488B-ACE2-F31ADE708EBB} = {AFD16F00-F810-4A3C-BA74-59BBFBC2469D}
-		{48BC499D-18FA-48A6-A37E-A24ED465A11B} = {AFD16F00-F810-4A3C-BA74-59BBFBC2469D}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {BE296FC5-5695-4FE5-9BAE-7168B9BACB47}
 	EndGlobalSection
 EndGlobal
