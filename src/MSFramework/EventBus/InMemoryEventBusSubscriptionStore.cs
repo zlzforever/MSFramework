@@ -21,41 +21,41 @@ namespace MSFramework.EventBus
 
 		public event EventHandler<string> OnEventRemoved;
 
-		public void AddSubscription<TH>(string eventName) where TH : IDynamicEventHandler
+		public void AddSubscription<TEventHandler>(string eventName) where TEventHandler : IDynamicEventHandler
 		{
-			AddSubscription(typeof(TH), eventName, isDynamic: true);
+			AddSubscription(typeof(TEventHandler), eventName, isDynamic: true);
 		}
 
-		public void AddSubscription<T, TH>() where T : class, IEvent
-			where TH : IEventHandler<T>
+		public void AddSubscription<TEvent, TEventHandler>() where TEvent : class, IEvent
+			where TEventHandler : IEventHandler<TEvent>
 		{
-			var eventName = GetEventKey<T>();
+			var eventName = GetEventKey<TEvent>();
 
-			AddSubscription(typeof(TH), eventName, isDynamic: false);
+			AddSubscription(typeof(TEventHandler), eventName, isDynamic: false);
 
-			if (!_eventTypes.Contains(typeof(T)))
+			if (!_eventTypes.Contains(typeof(TEvent)))
 			{
-				_eventTypes.Add(typeof(T));
+				_eventTypes.Add(typeof(TEvent));
 			}
 		}
 
-		public void RemoveSubscription<T, TH>() where T : class, IEvent
-			where TH : IEventHandler<T>
+		public void RemoveSubscription<TEvent, TEventHandler>() where TEvent : class, IEvent
+			where TEventHandler : IEventHandler<TEvent>
 		{
-			var handlerToRemove = FindSubscription<T, TH>();
-			var eventName = GetEventKey<T>();
+			var handlerToRemove = FindSubscription<TEvent, TEventHandler>();
+			var eventName = GetEventKey<TEvent>();
 			RemoveHandler(eventName, handlerToRemove);
 		}
 
-		public void RemoveSubscription<TH>(string eventName) where TH : IDynamicEventHandler
+		public void RemoveSubscription<TEventHandler>(string eventName) where TEventHandler : IDynamicEventHandler
 		{
-			var handlerToRemove = FindSubscription<TH>(eventName);
+			var handlerToRemove = FindSubscription<TEventHandler>(eventName);
 			RemoveHandler(eventName, handlerToRemove);
 		}
 
-		public bool ContainSubscription<T>() where T : class, IEvent
+		public bool ContainSubscription<TEvent>() where TEvent : class, IEvent
 		{
-			var key = GetEventKey<T>();
+			var key = GetEventKey<TEvent>();
 			return ContainSubscription(key);
 		}
 
@@ -63,17 +63,17 @@ namespace MSFramework.EventBus
 
 		public Type GetEventType(string eventName) => _eventTypes.SingleOrDefault(t => t.Name == eventName);
 
-		public IEnumerable<SubscriptionInfo> GetHandlers<T>() where T : class, IEvent
+		public IEnumerable<SubscriptionInfo> GetHandlers<TEvent>() where TEvent : class, IEvent
 		{
-			var key = GetEventKey<T>();
+			var key = GetEventKey<TEvent>();
 			return GetHandlers(key);
 		}
 
 		public IEnumerable<SubscriptionInfo> GetHandlers(string eventName) => _handlers[eventName];
 
-		public string GetEventKey<T>() where T : class, IEvent
+		public string GetEventKey<TEvent>() where TEvent : class, IEvent
 		{
-			return GetEventKey(typeof(T));
+			return GetEventKey(typeof(TEvent));
 		}
 
 		public string GetEventKey(Type eventType)
@@ -90,8 +90,7 @@ namespace MSFramework.EventBus
 
 			if (_handlers[eventName].Any(s => s.HandlerType == handlerType))
 			{
-				throw new ArgumentException(
-					$"Handler Type {handlerType.Name} already registered for '{eventName}'", nameof(handlerType));
+				return;
 			}
 
 			_handlers[eventName].Add(isDynamic
@@ -99,18 +98,18 @@ namespace MSFramework.EventBus
 				: SubscriptionInfo.CreateTyped(handlerType));
 		}
 
-		private SubscriptionInfo FindSubscription<TH>(string eventName)
-			where TH : IDynamicEventHandler
+		private SubscriptionInfo FindSubscription<TEventHandler>(string eventName)
+			where TEventHandler : IDynamicEventHandler
 		{
-			return FindSubscription(eventName, typeof(TH));
+			return FindSubscription(eventName, typeof(TEventHandler));
 		}
 
-		private SubscriptionInfo FindSubscription<T, TH>()
-			where T : class, IEvent
-			where TH : IEventHandler<T>
+		private SubscriptionInfo FindSubscription<TEvent, TEventHandler>()
+			where TEvent : class, IEvent
+			where TEventHandler : IEventHandler<TEvent>
 		{
-			var eventName = GetEventKey<T>();
-			return FindSubscription(eventName, typeof(TH));
+			var eventName = GetEventKey<TEvent>();
+			return FindSubscription(eventName, typeof(TEventHandler));
 		}
 
 		private SubscriptionInfo FindSubscription(string eventName, Type handlerType)

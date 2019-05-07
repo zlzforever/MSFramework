@@ -9,21 +9,21 @@ namespace MSFramework.EventBus
 
         event EventHandler<string> OnEventRemoved;
 
-        void AddSubscription<TH>(string eventName)
-            where TH : IDynamicEventHandler;
+        void AddSubscription<TEventHandler>(string eventName)
+            where TEventHandler : IDynamicEventHandler;
 
-        void AddSubscription<T, TH>()
-            where T : class, IEvent
-            where TH : IEventHandler<T>;
+        void AddSubscription<TEvent, TEventHandler>()
+            where TEvent : class, IEvent
+            where TEventHandler : IEventHandler<TEvent>;
 
-        void RemoveSubscription<T, TH>()
-            where T : class, IEvent
-            where TH : IEventHandler<T>;
+        void RemoveSubscription<TEvent, TEventHandler>()
+            where TEvent : class, IEvent
+            where TEventHandler : IEventHandler<TEvent>;
 
-        void RemoveSubscription<TH>(string eventName)
-            where TH : IDynamicEventHandler;
+        void RemoveSubscription<TEventHandler>(string eventName)
+            where TEventHandler : IDynamicEventHandler;
 
-        bool ContainSubscription<T>() where T : class, IEvent;
+        bool ContainSubscription<TEvent>() where TEvent : class, IEvent;
 
         bool ContainSubscription(string eventName);
 
@@ -31,11 +31,11 @@ namespace MSFramework.EventBus
 
         void Clear();
 
-        IEnumerable<SubscriptionInfo> GetHandlers<T>() where T : class, IEvent;
+        IEnumerable<SubscriptionInfo> GetHandlers<TEvent>() where TEvent : class, IEvent;
 
         IEnumerable<SubscriptionInfo> GetHandlers(string eventName);
 
-        string GetEventKey<T>() where T : class, IEvent;
+        string GetEventKey<TEvent>() where TEvent : class, IEvent;
 
         string GetEventKey(Type eventType);
     }

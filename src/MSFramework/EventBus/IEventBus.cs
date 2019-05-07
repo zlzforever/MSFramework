@@ -1,3 +1,4 @@
+using System;
 using System.Threading.Tasks;
 
 namespace MSFramework.EventBus
@@ -5,19 +6,19 @@ namespace MSFramework.EventBus
     public interface IEventBus
     {
         Task PublishAsync(IEvent @event);
+        
+        void Subscribe<TEvent, TEventHandler>()
+            where TEvent : class, IEvent
+            where TEventHandler : IEventHandler<TEvent>;
 
-        void Subscribe<T, TH>()
-            where T : class, IEvent
-            where TH : IEventHandler<T>;
+        void Subscribe<TEventHandler>(string eventName)
+            where TEventHandler : IDynamicEventHandler;
 
-        void Subscribe<TH>(string eventName)
-            where TH : IDynamicEventHandler;
+        void Unsubscribe<TEventHandler>(string eventName)
+            where TEventHandler : IDynamicEventHandler;
 
-        void Unsubscribe<TH>(string eventName)
-            where TH : IDynamicEventHandler;
-
-        void Unsubscribe<T, TH>()
-            where T : class, IEvent
-            where TH : IEventHandler<T>;
+        void Unsubscribe<TEvent, TEventHandler>()
+            where TEvent : class, IEvent
+            where TEventHandler : IEventHandler<TEvent>;
     }
 }

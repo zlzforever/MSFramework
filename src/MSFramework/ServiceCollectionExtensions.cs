@@ -1,5 +1,7 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using AspectCore.Extensions.DependencyInjection;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
@@ -15,21 +17,30 @@ namespace MSFramework
 {
 	public static class ServiceCollectionExtensions
 	{
-		public static MSFrameworkBuilder AddEventHandlers(this MSFrameworkBuilder builder,
-			params Type[] types)
+		private static ICollection<Tuple<Type, Type>> _eventHandlers = new List<Tuple<Type, Type>>();
+		private static ICollection<Tuple<string, Type>> _dynamicEventHandlers = new List<Tuple<string, Type>>();
+
+		public static MSFrameworkBuilder AddEventHandler<TEvent, TEventHandler>(this MSFrameworkBuilder builder)
+			where TEvent : class, IEvent
+			where TEventHandler : IEventHandler<TEvent>
 		{
-			var handlerType = typeof(IEventHandler);
-			foreach (var type in types)
+			var type = typeof(TEventHandler);
+			builder.Services.AddScoped(type);
+			_eventHandlers.Add(new Tuple<Type, Type>(typeof(TEvent), type));
+			return builder;
+		}
+
+		public static MSFrameworkBuilder AddEventHandler<TEventHandler>(this MSFrameworkBuilder builder, string name)
+			where TEventHandler : IDynamicEventHandler
+		{
+			if (string.IsNullOrWhiteSpace(name))
 			{
-				if (handlerType.IsAssignableFrom(type))
-				{
-					builder.Services.AddScoped(type, type);
-				}
-				else
-				{
-					throw new Exception("AddCommandHandler");
-				}
+				throw new MSFrameworkException("Subscribe name should not be empty/null");
 			}
+
+			var type = typeof(TEventHandler);
+			builder.Services.AddScoped(type);
+			_dynamicEventHandlers.Add(new Tuple<string, Type>(name, type));
 
 			return builder;
 		}
@@ -90,6 +101,44 @@ namespace MSFramework
 
 		public static IApplicationBuilder UseMSFramework(this IApplicationBuilder builder)
 		{
+			var eventBus = builder.ApplicationServices.GetService<IEventBus>();
+			var passEventBus = builder.ApplicationServices.GetRequiredService<IPassThroughEventBus>();
+
+			var subscribeMethod = typeof(IEventBus).GetMethod("Subscribe", new Type[0]);
+			if (subscribeMethod != null)
+			{
+				var noneParameters = new object[0];
+
+				foreach (var handler in _eventHandlers)
+				{
+					var method = subscribeMethod.MakeGenericMethod(handler.Item1, handler.Item2);
+					if (eventBus != null)
+					{
+						method.Invoke(eventBus, noneParameters);
+					}
+
+					method.Invoke(passEventBus, noneParameters);
+				}
+			}
+
+			var subscribeDynamicMethod = typeof(IEventBus).GetMethod("Subscribe", new[] {typeof(string)});
+			if (subscribeDynamicMethod != null)
+			{
+				foreach (var handler in _dynamicEventHandlers)
+				{
+					var typeParameters = new object[] {handler.Item1};
+					if (eventBus != null)
+					{
+						subscribeDynamicMethod.Invoke(eventBus, typeParameters);
+					}
+
+					subscribeDynamicMethod.Invoke(passEventBus, typeParameters);
+				}
+			}
+
+			_eventHandlers = new List<Tuple<Type, Type>>();
+			_dynamicEventHandlers = new List<Tuple<string, Type>>();
+
 			var initializers = builder.ApplicationServices.GetServices<IInitializer>().ToList();
 			foreach (var initializer in initializers)
 			{
