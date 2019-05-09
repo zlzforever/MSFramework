@@ -1,14 +1,18 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Http;
+using System.Net.Http.Headers;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using MSFramework.Application;
+using MSFramework.Common;
 using MSFramework.Domain;
 using MSFramework.Domain.Repository;
 using MSFramework.EntityFrameworkCore.Repository;
 using MSFramework.EventBus;
+using MSFramework.Serialization;
 using Ordering.API.Application.DTO;
 using Ordering.API.Application.Event;
 using Ordering.Domain.AggregateRoot;
@@ -19,21 +23,30 @@ namespace Ordering.API.Application.Services
 	{
 		private readonly EfRepository<Order, Guid> _repository;
 		private readonly IEventBus _eventBus;
+		private readonly IHttpClientFactory _httpClientFactory;
 
 		public OrderingAppService(IMSFrameworkSession session, IEventBus eventBus,
 			EfRepository<Order, Guid> repository,
+			IHttpClientFactory httpClientFactory,
 			ILogger<OrderingAppService> logger) : base(session, logger)
 		{
 			_repository = repository;
 			_eventBus = eventBus;
+			_httpClientFactory = httpClientFactory;
 		}
 
-		public async Task DeleteOrder(DeleteOrderDto dto)
+		public async Task DeleteOrder(Guid orderId)
 		{
-			var item = await _repository.GetAsync(dto.OrderId);
+// 			内部接口相互调用的例子			
+//			var client = _httpClientFactory.CreateClient();
+//			await SetBearer(client);
+//			var json = await client.GetStringAsync("http://www.baidu.com");
+//			var objects = Singleton<IJsonConvert>.Instance.DeserializeObject<Order>(json);
+
+			var item = await _repository.GetAsync(orderId);
 			item.Delete();
 			await _repository.DeleteAsync(item);
-			Logger.LogInformation($"DELETED ORDER: {dto.OrderId}");
+			Logger.LogInformation($"DELETED ORDER: {orderId}");
 		}
 
 		public async Task ChangeOrderAddress(ChangeOrderAddressDTO dto)

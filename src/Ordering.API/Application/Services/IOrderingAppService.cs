@@ -9,7 +9,7 @@ namespace Ordering.API.Application.Services
 {
 	public interface IOrderingAppService : IApplicationService
 	{
-		Task DeleteOrder(DeleteOrderDto dto);
+		Task DeleteOrder(Guid orderId);
 
 		Task ChangeOrderAddress(ChangeOrderAddressDTO dto);
 

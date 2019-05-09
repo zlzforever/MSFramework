@@ -58,10 +58,7 @@ namespace Ordering.API.Controllers
 		[HttpDelete("{orderId}")]
 		public async Task<IActionResult> DeleteOrderAsync(Guid orderId)
 		{
-			await _orderingAppService.DeleteOrder(new DeleteOrderDto
-			{
-				OrderId = orderId
-			});
+			await _orderingAppService.DeleteOrder(orderId);
 			return Ok(true);
 		}
 

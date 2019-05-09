@@ -93,7 +93,7 @@ namespace MSFramework
 
 			builder.Services.AddSingleton<IEventBusSubscriptionStore, InMemoryEventBusSubscriptionStore>();
 			builder.Services.AddSingleton<IPassThroughEventBus, PassThroughEventBus>();
-
+			builder.Services.AddHttpClient();
 			builder.UseLocalEventBus();
 
 			return services.BuildAspectInjectorProvider();

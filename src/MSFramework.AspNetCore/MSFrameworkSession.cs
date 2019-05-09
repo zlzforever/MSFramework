@@ -1,4 +1,5 @@
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Http;
 using MSFramework.Domain;
 
@@ -15,9 +16,11 @@ namespace MSFramework.AspNetCore
 			_unitOfWork = unitOfWork;
 		}
 
-		public string UserId => _accessor.HttpContext.User.FindFirst("sub")?.Value;
+		public string UserId => HttpContext?.User?.FindFirst("sub")?.Value;
 
-		public string UserName => _accessor.HttpContext.User.FindFirst("name")?.Value;
+		public string UserName => HttpContext?.User?.FindFirst("name")?.Value;
+
+		public HttpContext HttpContext => _accessor.HttpContext;
 
 		public async Task CommitAsync()
 		{
@@ -27,6 +30,11 @@ namespace MSFramework.AspNetCore
 		public void Commit()
 		{
 			_unitOfWork.Commit();
+		}
+
+		public Task<string> GetTokenAsync(string tokenName = "access_token")
+		{
+			return HttpContext.GetTokenAsync(tokenName);
 		}
 	}
 }
