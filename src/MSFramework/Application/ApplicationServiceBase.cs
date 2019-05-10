@@ -6,7 +6,7 @@ using MSFramework.Domain;
 
 namespace MSFramework.Application
 {
-	public class ApplicationServiceBase : IApplicationService
+	public abstract class ApplicationServiceBase : IApplicationService
 	{
 		protected IMSFrameworkSession Session { get; }
 

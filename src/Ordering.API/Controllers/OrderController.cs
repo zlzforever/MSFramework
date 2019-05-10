@@ -10,17 +10,19 @@ using Ordering.API.Application.Services;
 
 namespace Ordering.API.Controllers
 {
-	[Route("api/v1/[controller]")]
+	[Route("api/v1.0/[controller]")]
 	[ApiController]
 	public class OrderController : MSFrameworkControllerBase
 	{
 		private readonly IOrderingAppService _orderingAppService;
+		private readonly ITestService _testService;
 
 		public OrderController(
-			IOrderingAppService orderingAppService,
+			IOrderingAppService orderingAppService, ITestService testService,
 			IMSFrameworkSession session, ILogger<OrderController> logger) : base(session, logger)
 		{
-			_orderingAppService = orderingAppService;			 
+			_orderingAppService = orderingAppService;
+			_testService = testService;
 		}
 
 		#region  Command
@@ -32,7 +34,6 @@ namespace Ordering.API.Controllers
 		[HttpPost]
 		public async Task<IActionResult> CreateOrderAsync()
 		{
-			
 			var random = new Random();
 			var items = new List<OrderItemDTO>();
 			var count = random.Next(2, 5);
@@ -88,7 +89,7 @@ namespace Ordering.API.Controllers
 			var order = await _orderingAppService.GetAllOrdersAsync();
 			return Ok(order);
 		}
-		
+
 		#endregion
 	}
 }

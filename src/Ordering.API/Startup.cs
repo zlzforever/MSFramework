@@ -1,7 +1,9 @@
 ﻿using System;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.OpenApi.Models;
@@ -34,7 +36,7 @@ namespace Ordering.API
 			{
 				c.SwaggerDoc("v1.0", new OpenApiInfo {Version = "v1.0", Description = "Ordering API V1.0"});
 			});
-			// services.AddHealthChecks().AddCheck("self", () => HealthCheckResult.Healthy());
+			services.AddHealthChecks();
 			return services.AddMSFramework(builder =>
 			{
 				builder.UseAspNetCoreSession();
@@ -68,9 +70,22 @@ namespace Ordering.API
 				app.UseHsts();
 			}
 
+			app.UseHealthChecks("/healthcheck");
 			app.UseMSFramework();
 			app.UseHttpsRedirection();
-			app.UseMvc();
+			app.UseMvcWithDefaultRoute();
+			app.Use(async (context, next) =>
+			{
+				if (context.Request.Path == "/")
+				{
+					context.Response.Redirect("swagger");
+				}
+				else
+				{
+					await next();
+				}
+			});
+
 			//启用中间件服务生成Swagger作为JSON终结点
 			app.UseSwagger();
 			//启用中间件服务对swagger-ui，指定Swagger JSON终结点

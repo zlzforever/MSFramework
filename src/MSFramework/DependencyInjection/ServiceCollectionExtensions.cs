@@ -1,6 +1,9 @@
 using System;
+using System.Linq;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
+using MSFramework.Application;
+using MSFramework.Domain;
 using MSFramework.Reflection;
 
 namespace MSFramework.DependencyInjection
@@ -25,9 +28,10 @@ namespace MSFramework.DependencyInjection
 					continue;
 				}
 
-
+				var excludeTypes = new[] {typeof(IApplicationService), typeof(IDomainService)};
 				Type[] interfaceTypes = implementationType.GetImplementedInterfaces(typeof(IDisposable),
-					typeof(ITransientDependency), typeof(ISingletonDependency), typeof(IScopeDependency));
+						typeof(ITransientDependency), typeof(ISingletonDependency), typeof(IScopeDependency))
+					.Where(x => !excludeTypes.Contains(x)).ToArray();
 				if (interfaceTypes.Length == 0)
 				{
 					services.TryAdd(new ServiceDescriptor(implementationType, implementationType, lifetime));
