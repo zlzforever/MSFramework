@@ -21,13 +21,9 @@
         <ProjectReference Include="..\MSFramework.AspNetCore\MSFramework.AspNetCore.csproj" />
         <ProjectReference Include="..\MSFramework.EventSouring.EntityFrameworkCore\MSFramework.EventSouring.EntityFrameworkCore.csproj" />
         <ProjectReference Include="..\MSFramework\MSFramework.csproj" />
+        <ProjectReference Include="..\Ordering.Application\Ordering.Application.csproj" />
         <ProjectReference Include="..\Ordering.Domain\Ordering.Domain.csproj" />
         <ProjectReference Include="..\Ordering.Infrastructure\Ordering.Infrastructure.csproj" />
-    </ItemGroup>
-
-    <ItemGroup>
-      <Folder Include="Application\DTO\" />
-      <Folder Include="Application\EventHandler\" />
     </ItemGroup>
 
     <ItemGroup>

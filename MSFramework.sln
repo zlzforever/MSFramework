@@ -48,6 +48,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MSFramework.EventSouring.En
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MSFramework.AspNetCore", "src\MSFramework.AspNetCore\MSFramework.AspNetCore.csproj", "{48BC499D-18FA-48A6-A37E-A24ED465A11B}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Ordering.Application", "src\Ordering.Application\Ordering.Application.csproj", "{5C995DEB-C67C-4414-ADE2-4EA96601698D}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -98,6 +100,10 @@ Global
 		{48BC499D-18FA-48A6-A37E-A24ED465A11B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{48BC499D-18FA-48A6-A37E-A24ED465A11B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{48BC499D-18FA-48A6-A37E-A24ED465A11B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5C995DEB-C67C-4414-ADE2-4EA96601698D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5C995DEB-C67C-4414-ADE2-4EA96601698D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5C995DEB-C67C-4414-ADE2-4EA96601698D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5C995DEB-C67C-4414-ADE2-4EA96601698D}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -119,6 +125,7 @@ Global
 		{EC4910EA-309B-4AFF-BE1A-33149A8BCF78} = {AFD16F00-F810-4A3C-BA74-59BBFBC2469D}
 		{DA65E128-8BB2-488B-ACE2-F31ADE708EBB} = {AFD16F00-F810-4A3C-BA74-59BBFBC2469D}
 		{48BC499D-18FA-48A6-A37E-A24ED465A11B} = {AFD16F00-F810-4A3C-BA74-59BBFBC2469D}
+		{5C995DEB-C67C-4414-ADE2-4EA96601698D} = {47747049-F28E-4474-B09F-E98147F91C83}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {BE296FC5-5695-4FE5-9BAE-7168B9BACB47}

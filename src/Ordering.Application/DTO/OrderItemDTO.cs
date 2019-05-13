@@ -1,7 +1,7 @@
 using System;
 using Ordering.Domain.AggregateRoot;
 
-namespace Ordering.API.Application.DTO
+namespace Ordering.Application.DTO
 {
 	public class OrderItemDTO
 	{

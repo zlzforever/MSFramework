@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 
-namespace Ordering.API.Application.DTO
+namespace Ordering.Application.DTO
 {
 	public class CreateOrderDTO
 	{

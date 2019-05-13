@@ -1,7 +1,7 @@
 using System;
 using MSFramework.Domain;
 
-namespace Ordering.API.Application.Event
+namespace Ordering.Application.Event
 {
 	/// <summary>
 	/// 发送到外部的领域事件

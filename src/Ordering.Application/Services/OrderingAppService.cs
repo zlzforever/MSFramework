@@ -2,31 +2,29 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
-using System.Net.Http.Headers;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using MSFramework.Application;
-using MSFramework.Common;
 using MSFramework.Domain;
-using MSFramework.Domain.Repository;
 using MSFramework.EntityFrameworkCore.Repository;
 using MSFramework.EventBus;
-using MSFramework.Serialization;
-using Ordering.API.Application.DTO;
-using Ordering.API.Application.Event;
+using Ordering.Application.DTO;
+using Ordering.Application.Event;
+using Ordering.Application.Query;
 using Ordering.Domain.AggregateRoot;
+using Ordering.Domain.Repository;
 
-namespace Ordering.API.Application.Services
+namespace Ordering.Application.Services
 {
 	public class OrderingAppService : ApplicationServiceBase, IOrderingAppService
 	{
-		private readonly EfRepository<Order, Guid> _repository;
+		private readonly IOrderingRepository _repository;
 		private readonly IEventBus _eventBus;
 		private readonly IHttpClientFactory _httpClientFactory;
 
 		public OrderingAppService(IMSFrameworkSession session, IEventBus eventBus,
-			EfRepository<Order, Guid> repository,
+			IOrderingRepository repository,
 			IHttpClientFactory httpClientFactory,
 			ILogger<OrderingAppService> logger) : base(session, logger)
 		{
@@ -64,18 +62,6 @@ namespace Ordering.API.Application.Services
 				dto.OrderItems.Select(x => x.ToOrderItem()).ToList());
 			await _eventBus.PublishAsync(new OrderStartedEvent(Session.UserId, order.Id));
 			await _repository.InsertAsync(order);
-		}
-
-		public async Task<List<Order>> GetAllOrdersAsync()
-		{
-			var orders = await _repository.AggregateRoots.AsNoTracking().ToListAsync();
-			return orders;
-		}
-
-		public async Task<Order> GetOrderAsync(Guid orderId)
-		{
-			var order = await _repository.AggregateRoots.AsNoTracking().FirstOrDefaultAsync(x => x.Id == orderId);
-			return order;
 		}
 	}
 }

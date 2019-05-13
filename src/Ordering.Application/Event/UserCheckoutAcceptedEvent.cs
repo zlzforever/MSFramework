@@ -1,8 +1,8 @@
 using System.Collections.Generic;
 using MSFramework.Domain;
-using Ordering.API.Application.DTO;
+using Ordering.Application.DTO;
 
-namespace Ordering.API.Application.Event
+namespace Ordering.Application.Event
 {
 	public class UserCheckoutAcceptedEvent : DistributedDomainEvent
 	{

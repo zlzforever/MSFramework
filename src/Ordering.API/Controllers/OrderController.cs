@@ -5,8 +5,9 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using MSFramework.AspNetCore;
 using MSFramework.Domain;
-using Ordering.API.Application.DTO;
-using Ordering.API.Application.Services;
+using Ordering.Application.DTO;
+using Ordering.Application.Query;
+using Ordering.Application.Services;
 
 namespace Ordering.API.Controllers
 {
@@ -15,14 +16,14 @@ namespace Ordering.API.Controllers
 	public class OrderController : MSFrameworkControllerBase
 	{
 		private readonly IOrderingAppService _orderingAppService;
-		private readonly ITestService _testService;
-
+		private readonly IOrderingQuery _orderingQuery;
 		public OrderController(
-			IOrderingAppService orderingAppService, ITestService testService,
+			IOrderingAppService orderingAppService,
+			IOrderingQuery orderingQuery,
 			IMSFrameworkSession session, ILogger<OrderController> logger) : base(session, logger)
 		{
 			_orderingAppService = orderingAppService;
-			_testService = testService;
+			_orderingQuery = orderingQuery;
 		}
 
 		#region  Command
@@ -79,14 +80,14 @@ namespace Ordering.API.Controllers
 		[HttpGet("{orderId}")]
 		public async Task<ActionResult> GetOrderAsync(Guid orderId)
 		{
-			var order = await _orderingAppService.GetOrderAsync(orderId);
+			var order = await _orderingQuery.GetOrderAsync(orderId);
 			return Ok(order);
 		}
 
 		[HttpGet()]
 		public async Task<ActionResult> GetOrdersAsync()
 		{
-			var order = await _orderingAppService.GetAllOrdersAsync();
+			var order = await _orderingQuery.GetAllOrdersAsync();
 			return Ok(order);
 		}
 

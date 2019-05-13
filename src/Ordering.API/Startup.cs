@@ -13,8 +13,8 @@ using MSFramework.EntityFrameworkCore;
 using MSFramework.EntityFrameworkCore.SqlServer;
 using MSFramework.EventBus;
 using MSFramework.EventSouring.EntityFrameworkCore;
-using Ordering.API.Application.Event;
-using Ordering.API.Application.EventHandler;
+using Ordering.Application.Event;
+using Ordering.Application.EventHandler;
 
 namespace Ordering.API
 {
@@ -47,7 +47,7 @@ namespace Ordering.API
 				}, Configuration);
 
 				// 使用 Ef EventStore, 初版不考虑回溯功能，仅仅把事件存起来当成审计来用，需要研究事件逻辑变化和已经存储的事件不匹配的解决方案
-				builder.UseEntityFrameworkEventSouring();
+				// builder.UseEntityFrameworkEventSouring();
 
 				// 开发环境可以使用本地消息总线，生产环境应该换成分布式消息队列
 				builder.UseLocalEventBus();

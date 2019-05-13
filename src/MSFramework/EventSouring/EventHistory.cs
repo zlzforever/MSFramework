@@ -13,38 +13,41 @@ namespace MSFramework.EventSouring
 		/// </summary>
 		[Required]
 		[StringLength(255)]
-		public string EventType { get; set; }
+		public string EventType { get; private set; }
 
 		/// <summary>
 		/// 序列化的领域事件
 		/// </summary>
 		[Required]
-		public string Event { get; set; }
+		public string Event { get; private set; }
 
 		/// <summary>
 		/// 聚合根标识
 		/// </summary>
 		[Required]
 		[StringLength(255)]
-		public string AggregateRootId { get; set; }
+		public string AggregateRootId { get; private set; }
 
 		/// <summary>
 		/// 版本号
 		/// </summary>
 		[Required]
-		public int Version { get; set; }
+		public int Version { get; private set; }
 
 		/// <summary>
 		/// 创建者
 		/// </summary>
 		[StringLength(255)]
 		public string Creator { get; set; }
-		
+
+		/// <summary>
+		/// 创建者标识
+		/// </summary>
 		[StringLength(255)]
 		public string CreatorId { get; set; }
 
 		/// <summary>
-		/// 
+		/// 时间戳
 		/// </summary>
 		[Required]
 		public DateTime Timestamp { get; set; }

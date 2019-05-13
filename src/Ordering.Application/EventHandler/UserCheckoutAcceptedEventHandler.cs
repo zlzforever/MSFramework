@@ -1,11 +1,11 @@
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using MSFramework.EventBus;
-using Ordering.API.Application.DTO;
-using Ordering.API.Application.Event;
-using Ordering.API.Application.Services;
+using Ordering.Application.DTO;
+using Ordering.Application.Event;
+using Ordering.Application.Services;
 
-namespace Ordering.API.Application.EventHandler
+namespace Ordering.Application.EventHandler
 {
 	public class UserCheckoutAcceptedEventHandler : IEventHandler<UserCheckoutAcceptedEvent>
 	{
