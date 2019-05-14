@@ -5,6 +5,7 @@ using System.Reflection;
 using AspectCore.Extensions.DependencyInjection;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyModel;
 using MSFramework.Common;
 using MSFramework.Data;
 using MSFramework.DependencyInjection;
@@ -64,6 +65,7 @@ namespace MSFramework
 			var builder = new MSFrameworkBuilder(services);
 			builderAction?.Invoke(builder);
 
+			LoadBizAssemblies();
 			//初始化所有程序集查找器，如需更改程序集查找逻辑，请事先赋予自定义查找器的实例
 			if (Singleton<IAssemblyFinder>.Instance == null)
 			{
@@ -146,6 +148,20 @@ namespace MSFramework
 			}
 
 			return builder;
+		}
+		
+		/// <summary>
+		/// 引用的项目如果未使用具体类型，此程序集不会加载到当前应用程序域中，因此把业务项目的程序集全加载。
+		/// </summary>
+		private static void LoadBizAssemblies()
+		{
+			DependencyContext context = DependencyContext.Default;
+			var assemblyNames = context.RuntimeLibraries.Where(x => x.Type == "project")
+				.SelectMany(x => x.GetDefaultAssemblyNames(DependencyContext.Default)).ToList();
+			foreach (var assemblyName in assemblyNames)
+			{
+				Assembly.Load(assemblyName);
+			}
 		}
 	}
 }

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -6,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyModel;
 using Microsoft.OpenApi.Models;
 using MSFramework;
 using MSFramework.AspNetCore;
@@ -37,7 +39,7 @@ namespace Ordering.API
 				c.SwaggerDoc("v1.0", new OpenApiInfo {Version = "v1.0", Description = "Ordering API V1.0"});
 			});
 			services.AddHealthChecks();
-			return services.AddMSFramework(builder =>
+			var provider= services.AddMSFramework(builder =>
 			{
 				builder.UseAspNetCoreSession();
 				builder.UseEntityFramework(ef =>
@@ -55,6 +57,7 @@ namespace Ordering.API
 				// 注册事件处理，即可以是当前领域应用内的事件处理，也可以是跨领域事件的处理
 				builder.AddEventHandler<UserCheckoutAcceptedEvent, UserCheckoutAcceptedEventHandler>();
 			});
+			return provider;
 		}
 
 		// This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

@@ -11,20 +11,16 @@ namespace MSFramework.Reflection
 	/// </summary>
 	public class AssemblyFinder : IAssemblyFinder
 	{
-		private List<Assembly> _assemblies;
-
 		public List<Assembly> GetAllAssemblyList()
 		{
-			if (_assemblies == null)
-			{
-				DependencyContext context = DependencyContext.Default;
-				var assemblyNames = context.RuntimeLibraries.Where(x => x.Type == "project").Select(x => x.Name)
-					.ToList();
-				_assemblies = AppDomain.CurrentDomain.GetAssemblies()
-					.Where(x => assemblyNames.Contains(x.GetName().Name)).ToList();
-			}
+			DependencyContext context = DependencyContext.Default;
+			var assemblyNames = context.RuntimeLibraries.Where(x => x.Type == "project").Select(x => x.Name)
+				.ToList();
+			// 应用程序域中的程序集是动态变化的
+			var assemblies = AppDomain.CurrentDomain.GetAssemblies()
+				.Where(x => assemblyNames.Contains(x.GetName().Name)).ToList();
 
-			return _assemblies;
+			return assemblies;
 		}
 	}
 }
