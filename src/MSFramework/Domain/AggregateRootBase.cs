@@ -8,28 +8,22 @@ using MSFramework.EventBus;
 namespace MSFramework.Domain
 {
 	[Serializable]
-	public abstract class AggregateRootBase<TAggregateRoot, TAggregateRootId> :
-		EntityBase<TAggregateRootId>,
+	public abstract class AggregateRootBase :
+		EntityBase<Guid>,
 		IAggregateRoot
-		where TAggregateRoot : AggregateRootBase<TAggregateRoot, TAggregateRootId>
-		where TAggregateRootId : IEquatable<TAggregateRootId>
 	{
 		private const int NewAggregateVersion = -1;
 
-		private readonly ICollection<IAggregateRootChangedEvent<TAggregateRoot, TAggregateRootId>>
-			_aggregateRootChangedEventEvents =
-				new LinkedList<IAggregateRootChangedEvent<TAggregateRoot, TAggregateRootId>>();
-
-		private readonly List<IDomainEvent> _domainEvents =
-			new List<IDomainEvent>();
+		private readonly List<Event> _changes =
+			new List<Event>();
 
 		private int _version = NewAggregateVersion;
 
-		protected AggregateRootBase() : base(Singleton<IIdGenerator>.Instance.GetNewId<TAggregateRootId>())
+		protected AggregateRootBase() : base(Singleton<IIdGenerator>.Instance.GetNewId<Guid>())
 		{
 		}
 
-		protected AggregateRootBase(TAggregateRootId id) : base(id)
+		protected AggregateRootBase(Guid id) : base(id)
 		{
 		}
 
@@ -39,27 +33,24 @@ namespace MSFramework.Domain
 			protected set => _version = value;
 		}
 
-		public void AddDomainEvent(IDomainEvent @event)
-		{
-			_domainEvents.Add(@event);
-		}
-
-		protected void ApplyChangedEvent(IAggregateRootChangedEvent<TAggregateRoot, TAggregateRootId> @event)
+		protected void ApplyChangedEvent(Event @event)
 		{
 			@event.NotNull(nameof(@event));
-			if (Equals(Id, default(TAggregateRootId)))
+			if (Equals(Id, default(Guid)))
 			{
-				throw new Exception("Aggregate root id cannot be null.");
+				throw new System.Exception("Aggregate root id cannot be null.");
 			}
 
 			_version++;
-			@event.SetAggregateRootIdAndVersion(_id, _version);
+			@event.Id = Id;
+			@event.Version = _version;
+
 			this.ToDynamic().Apply(@event);
-			_aggregateRootChangedEventEvents.Add(@event);
+			_changes.Add(@event);
 		}
 
-		protected void ApplyChangedEvent(
-			IEnumerable<IAggregateRootChangedEvent<TAggregateRoot, TAggregateRootId>> events)
+		protected void ApplyChangedEvents(
+			IEnumerable<Event> events)
 		{
 			if (events == null)
 			{
@@ -72,34 +63,22 @@ namespace MSFramework.Domain
 			}
 		}
 
-		string IAggregateRoot.GetId()
-		{
-			return Id.ToString();
-		}
+		public IReadOnlyCollection<Event> GetUncommittedChanges() => _changes.AsReadOnly();
 
-		void IAggregateRoot.ClearChanges()
-			=> _aggregateRootChangedEventEvents.Clear();
+		public void ClearChanges() => _changes.Clear();
 
-		IEnumerable<IAggregateRootChangedEvent> IAggregateRoot.GetChanges()
-			=> _aggregateRootChangedEventEvents;
-
-		IReadOnlyCollection<IEvent> IAggregateRoot.DomainEvents => _domainEvents.AsReadOnly();
-
-		void IAggregateRoot.ClearDomainEvents() => _domainEvents.Clear();
-
-		void IAggregateRoot.LoadFromHistory(params IAggregateRootChangedEvent[] histories)
+		public void LoadFromHistory(params Event[] histories)
 		{
 			foreach (var @event in histories)
 			{
-				var aggregateEvent = (IAggregateRootChangedEvent<TAggregateRoot, TAggregateRootId>) @event;
-				if (aggregateEvent.Version != _version + 1)
+				if (@event.Version != _version + 1)
 				{
-					throw new MSFrameworkException(aggregateEvent.Id.ToString());
+					throw new MSFrameworkException(@event.Id.ToString());
 				}
 
-				_id = (TAggregateRootId) Convert.ChangeType(aggregateEvent.AggregateRootId, typeof(TAggregateRootId));
-				_version = aggregateEvent.Version;
-				this.ToDynamic().Apply(aggregateEvent);
+				_id = (Guid) Convert.ChangeType(@event.Id, typeof(Guid));
+				_version = @event.Version;
+				this.ToDynamic().Apply(@event);
 			}
 		}
 	}

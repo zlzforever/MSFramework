@@ -4,7 +4,7 @@ using MSFramework.Domain;
 
 namespace Ordering.Domain.AggregateRoot
 {
-	public class Order : AggregateRootBase<Order, Guid>
+	public class Order : AggregateRootBase
 	{
 		private string _description;
 		private string _userId;
@@ -18,7 +18,7 @@ namespace Ordering.Domain.AggregateRoot
 		// DDD Patterns comment
 		// Using private fields, allowed since EF Core 1.1, is a much better encapsulation
 		// aligned with DDD Aggregates and Domain Entities (Instead of properties and property collections)
-		private DateTime _creationTime;
+		private DateTimeOffset _creationTime;
 
 		// Address is a Value Object pattern example persisted as EF Core 2.0 owned entity
 		public Address Address { get; private set; }

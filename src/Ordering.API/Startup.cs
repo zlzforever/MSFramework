@@ -39,9 +39,18 @@ namespace Ordering.API
 				c.SwaggerDoc("v1.0", new OpenApiInfo {Version = "v1.0", Description = "Ordering API V1.0"});
 			});
 			services.AddHealthChecks();
-			var provider= services.AddMSFramework(builder =>
+			var provider = services.AddMSFramework(builder =>
 			{
+				// 使用命令总线
+				builder.UseCommandBus();
+				
+				// 开发环境可以使用本地消息总线，生产环境应该换成分布式消息队列
+				builder.UseLocalEventBus();
+
 				builder.UseAspNetCoreSession();
+
+				builder.UseEventStoreRepository();
+
 				builder.UseEntityFramework(ef =>
 				{
 					// 添加 SqlServer 支持
@@ -49,13 +58,7 @@ namespace Ordering.API
 				}, Configuration);
 
 				// 使用 Ef EventStore, 初版不考虑回溯功能，仅仅把事件存起来当成审计来用，需要研究事件逻辑变化和已经存储的事件不匹配的解决方案
-				// builder.UseEntityFrameworkEventSouring();
-
-				// 开发环境可以使用本地消息总线，生产环境应该换成分布式消息队列
-				builder.UseLocalEventBus();
-
-				// 注册事件处理，即可以是当前领域应用内的事件处理，也可以是跨领域事件的处理
-				builder.AddEventHandler<UserCheckoutAcceptedEvent, UserCheckoutAcceptedEventHandler>();
+				builder.UseEntityFrameworkEventSouring();
 			});
 			return provider;
 		}

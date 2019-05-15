@@ -4,7 +4,7 @@ using Microsoft.Extensions.Logging;
 
 namespace MSFramework.EventBus
 {
-	public class PassThroughEventBus : IPassThroughEventBus
+	public class PassThroughEventBus : IEventBus
 	{
 		private readonly IEventBusSubscriptionStore _store;
 		private readonly ILogger _logger;

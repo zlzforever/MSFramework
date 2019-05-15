@@ -6,7 +6,7 @@ namespace Ordering.Application.Event
 	/// <summary>
 	/// 发送到外部的领域事件
 	/// </summary>
-	public class OrderStartedEvent : DistributedDomainEvent
+	public class OrderStartedEvent : MSFramework.EventBus.Event
 	{
 		public string UserId { get; }
 		

@@ -6,9 +6,11 @@ using AspectCore.Extensions.DependencyInjection;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyModel;
+using MSFramework.Command;
 using MSFramework.Common;
 using MSFramework.Data;
 using MSFramework.DependencyInjection;
+using MSFramework.Domain.Repository;
 using MSFramework.EventBus;
 using MSFramework.EventSouring;
 using MSFramework.Reflection;
@@ -52,6 +54,12 @@ namespace MSFramework
 			return builder;
 		}
 
+		public static MSFrameworkBuilder UseEventStoreRepository(this MSFrameworkBuilder builder)
+		{
+			builder.Services.AddScoped<IRepository, EventStoreRepository>();
+			return builder;
+		}
+
 		public static MSFrameworkBuilder UseNewtonsoftJsonConvert(this MSFrameworkBuilder builder)
 		{
 			Singleton<IJsonConvert>.Instance = new NewtonsoftJsonConvert(new JsonConvertOptions());
@@ -59,6 +67,15 @@ namespace MSFramework
 			return builder;
 		}
 
+		public static MSFrameworkBuilder UseCommandBus(this MSFrameworkBuilder builder)
+		{
+			Singleton<ICommandHandlerFactory>.Instance = new DefaultCommandHandlerFactory();
+			builder.Services.AddSingleton(Singleton<ICommandHandlerFactory>.Instance);
+			builder.Services.AddSingleton<ICommandBus, CommandBus>();
+			return builder;
+		}
+ 
+		
 		public static IServiceProvider AddMSFramework(this IServiceCollection services,
 			Action<MSFrameworkBuilder> builderAction = null)
 		{
@@ -93,10 +110,12 @@ namespace MSFramework
 				Singleton<IIdGenerator>.Instance = new IdGenerator();
 			}
 
+			builder.UseCommandBus();
+			
 			builder.Services.AddSingleton<IEventBusSubscriptionStore, InMemoryEventBusSubscriptionStore>();
-			builder.Services.AddSingleton<IPassThroughEventBus, PassThroughEventBus>();
-			builder.Services.AddHttpClient();
 			builder.UseLocalEventBus();
+			
+			builder.Services.AddHttpClient();
 
 			return services.BuildAspectInjectorProvider();
 		}
@@ -104,7 +123,6 @@ namespace MSFramework
 		public static IApplicationBuilder UseMSFramework(this IApplicationBuilder builder)
 		{
 			var eventBus = builder.ApplicationServices.GetService<IEventBus>();
-			var passEventBus = builder.ApplicationServices.GetRequiredService<IPassThroughEventBus>();
 
 			var subscribeMethod = typeof(IEventBus).GetMethod("Subscribe", new Type[0]);
 			if (subscribeMethod != null)
@@ -118,8 +136,6 @@ namespace MSFramework
 					{
 						method.Invoke(eventBus, noneParameters);
 					}
-
-					method.Invoke(passEventBus, noneParameters);
 				}
 			}
 
@@ -133,8 +149,6 @@ namespace MSFramework
 					{
 						subscribeDynamicMethod.Invoke(eventBus, typeParameters);
 					}
-
-					subscribeDynamicMethod.Invoke(passEventBus, typeParameters);
 				}
 			}
 
@@ -149,7 +163,7 @@ namespace MSFramework
 
 			return builder;
 		}
-		
+
 		/// <summary>
 		/// 引用的项目如果未使用具体类型，此程序集不会加载到当前应用程序域中，因此把业务项目的程序集全加载。
 		/// </summary>

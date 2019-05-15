@@ -8,7 +8,7 @@ namespace MSFramework.EventSouring.EntityFrameworkCore
 	public class EventSouringDbContext : DbContextBase
 	{
 		public EventSouringDbContext(DbContextOptions options, IEntityConfigurationTypeFinder typeFinder,
-			IEventBus eventBus, ILoggerFactory loggerFactory) : base(options, typeFinder, eventBus, loggerFactory)
+			ILoggerFactory loggerFactory) : base(options, typeFinder, loggerFactory)
 		{
 		}
 	}

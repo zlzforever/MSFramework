@@ -2,37 +2,27 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Http;
 using MSFramework.Domain;
+using MSFramework.Domain.Repository;
 
 namespace MSFramework.AspNetCore
 {
-	public class MSFrameworkSession : IMSFrameworkSession
+	public class MSFrameworkSession : MSFrameworkSessionBase
 	{
 		private readonly IHttpContextAccessor _accessor;
-		private readonly IUnitOfWork _unitOfWork;
 
-		public MSFrameworkSession(IHttpContextAccessor accessor, IUnitOfWork unitOfWork)
+		public MSFrameworkSession(IHttpContextAccessor accessor, IRepository repository) :
+			base(repository)
 		{
 			_accessor = accessor;
-			_unitOfWork = unitOfWork;
 		}
 
-		public string UserId => HttpContext?.User?.FindFirst("sub")?.Value;
+		public override string UserId => HttpContext?.User?.FindFirst("sub")?.Value;
 
-		public string UserName => HttpContext?.User?.FindFirst("name")?.Value;
+		public override string UserName => HttpContext?.User?.FindFirst("name")?.Value;
 
 		public HttpContext HttpContext => _accessor.HttpContext;
 
-		public async Task CommitAsync()
-		{
-			await _unitOfWork.CommitAsync();
-		}
-
-		public void Commit()
-		{
-			_unitOfWork.Commit();
-		}
-
-		public Task<string> GetTokenAsync(string tokenName = "access_token")
+		public override Task<string> GetTokenAsync(string tokenName = "access_token")
 		{
 			return HttpContext.GetTokenAsync(tokenName);
 		}

@@ -5,9 +5,6 @@ using MSFramework.Data;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using MSFramework.Common;
-using MSFramework.Domain;
-using MSFramework.Domain.Repository;
-using MSFramework.EntityFrameworkCore.Repository;
 
 namespace MSFramework.EntityFrameworkCore
 {
@@ -47,9 +44,9 @@ namespace MSFramework.EntityFrameworkCore
 			builder.Services.AddScoped<DbContextFactory>();
 
 			builder.Services.AddSingleton<IInitializer, EntityFrameworkInitializer>();
-			builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
-			builder.Services.AddScoped(typeof(IRepository<,>), typeof(EfRepository<,>));
-			builder.Services.AddScoped(typeof(EfRepository<,>), typeof(EfRepository<,>));
+			// builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
+			//builder.Services.AddScoped(typeof(IRepository<,>), typeof(EfRepository<,>));
+			//builder.Services.AddScoped(typeof(EfRepository<,>), typeof(EfRepository<,>));
 			return builder;
 		}
 	}

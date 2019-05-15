@@ -7,28 +7,25 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using MSFramework.Application;
 using MSFramework.Domain;
-using MSFramework.EntityFrameworkCore.Repository;
+using MSFramework.Domain.Repository;
 using MSFramework.EventBus;
 using Ordering.Application.DTO;
 using Ordering.Application.Event;
 using Ordering.Application.Query;
 using Ordering.Domain.AggregateRoot;
-using Ordering.Domain.Repository;
+
 
 namespace Ordering.Application.Services
 {
 	public class OrderingAppService : ApplicationServiceBase, IOrderingAppService
 	{
-		private readonly IOrderingRepository _repository;
 		private readonly IEventBus _eventBus;
 		private readonly IHttpClientFactory _httpClientFactory;
 
 		public OrderingAppService(IMSFrameworkSession session, IEventBus eventBus,
-			IOrderingRepository repository,
 			IHttpClientFactory httpClientFactory,
 			ILogger<OrderingAppService> logger) : base(session, logger)
 		{
-			_repository = repository;
 			_eventBus = eventBus;
 			_httpClientFactory = httpClientFactory;
 		}
@@ -41,15 +38,14 @@ namespace Ordering.Application.Services
 //			var json = await client.GetStringAsync("http://www.baidu.com");
 //			var objects = Singleton<IJsonConvert>.Instance.DeserializeObject<Order>(json);
 
-			var item = await _repository.GetAsync(orderId);
+			var item = await Session.GetAsync<Order>(orderId);
 			item.Delete();
-			await _repository.DeleteAsync(item);
 			Logger.LogInformation($"DELETED ORDER: {orderId}");
 		}
 
 		public async Task ChangeOrderAddress(ChangeOrderAddressDTO dto)
 		{
-			var item = await _repository.GetAsync(dto.OrderId);
+			var item = await Session.GetAsync<Order>(dto.OrderId);
 			item.ChangeAddress(dto.NewAddress);
 		}
 
@@ -61,7 +57,7 @@ namespace Ordering.Application.Services
 				dto.Description,
 				dto.OrderItems.Select(x => x.ToOrderItem()).ToList());
 			await _eventBus.PublishAsync(new OrderStartedEvent(Session.UserId, order.Id));
-			await _repository.InsertAsync(order);
+			await Session.TrackAsync(order);
 		}
 	}
 }

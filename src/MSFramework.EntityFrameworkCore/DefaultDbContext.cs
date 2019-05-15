@@ -13,9 +13,8 @@ namespace MSFramework.EntityFrameworkCore
 		/// 初始化一个<see cref="DefaultDbContext"/>类型的新实例
 		/// </summary>
 		public DefaultDbContext(DbContextOptions options,
-			IEntityConfigurationTypeFinder typeFinder,
-			IEventBus eventBus)
-			: base(options, typeFinder, eventBus, null)
+			IEntityConfigurationTypeFinder typeFinder)
+			: base(options, typeFinder, null)
 		{
 		}
 
@@ -23,9 +22,8 @@ namespace MSFramework.EntityFrameworkCore
 		/// 初始化一个<see cref="DefaultDbContext"/>类型的新实例
 		/// </summary>
 		public DefaultDbContext(DbContextOptions options, IEntityConfigurationTypeFinder typeFinder,
-			IEventBus eventBus,
 			ILoggerFactory loggerFactory)
-			: base(options, typeFinder, eventBus, loggerFactory)
+			: base(options, typeFinder, loggerFactory)
 		{
 		}
 	}

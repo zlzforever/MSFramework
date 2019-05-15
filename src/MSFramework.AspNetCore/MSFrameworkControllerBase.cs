@@ -16,10 +16,10 @@ namespace MSFramework.AspNetCore
 			Session = session;
 			Logger = logger;
 		}
-		
+
 		public override void OnActionExecuted(ActionExecutedContext context)
 		{
-			Session.Commit();
+			Session.CommitAsync().ConfigureAwait(false).GetAwaiter();
 		}
 	}
 }

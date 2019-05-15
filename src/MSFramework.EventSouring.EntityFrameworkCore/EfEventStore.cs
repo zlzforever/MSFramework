@@ -1,3 +1,4 @@
+using System;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
@@ -7,26 +8,26 @@ namespace MSFramework.EventSouring.EntityFrameworkCore
 {
 	public class EfEventStore : IEventStore
 	{
-		private readonly DbSet<EventHistory> _table;
+		private readonly DbSet<StoredEvent> _table;
 		private readonly DbContext _dbContext;
 
 		public EfEventStore(DbContextFactory factory)
 		{
-			_dbContext = factory.GetDbContext<EventHistory>();
-			_table = _dbContext.Set<EventHistory>();
+			_dbContext = factory.GetDbContext<StoredEvent>();
+			_table = _dbContext.Set<StoredEvent>();
 		}
 
-		public async Task<EventHistory[]> GetEventsAsync(string aggregateId, long from)
+		public async Task<StoredEvent[]> GetEventsAsync(Guid aggregateRootId, long from)
 		{
-			return await _table.Where(x => x.Version > from && x.AggregateRootId == aggregateId).ToArrayAsync();
+			return await _table.Where(x => x.Version > from && x.AggregateRootId == aggregateRootId).ToArrayAsync();
 		}
 
-		public EventHistory[] GetEvents(string aggregateId, long from)
+		public StoredEvent[] GetEvents(Guid aggregateRootId, long from)
 		{
-			return _table.Where(x => x.Version > from && x.AggregateRootId == aggregateId).ToArray();
+			return _table.Where(x => x.Version > from && x.AggregateRootId == aggregateRootId).ToArray();
 		}
 
-		public async Task AddEventsAsync(params EventHistory[] events)
+		public async Task AddEventsAsync(params StoredEvent[] events)
 		{
 			foreach (var @event in events)
 			{
@@ -36,7 +37,7 @@ namespace MSFramework.EventSouring.EntityFrameworkCore
 			await _dbContext.SaveChangesAsync();
 		}
 
-		public void AddEvents(params EventHistory[] events)
+		public void AddEvents(params StoredEvent[] events)
 		{
 			foreach (var @event in events)
 			{
@@ -46,15 +47,15 @@ namespace MSFramework.EventSouring.EntityFrameworkCore
 			_dbContext.SaveChanges();
 		}
 
-		public async Task<EventHistory> GetLastEventAsync(string aggregateId)
+		public async Task<StoredEvent> GetLastEventAsync(Guid aggregateRootId)
 		{
-			return await _table.Where(x => x.AggregateRootId == aggregateId).OrderByDescending(x => x.Version)
+			return await _table.Where(x => x.AggregateRootId == aggregateRootId).OrderByDescending(x => x.Version)
 				.FirstOrDefaultAsync();
 		}
 
-		public EventHistory GetLastEvent(string aggregateId)
+		public StoredEvent GetLastEvent(Guid aggregateRootId)
 		{
-			return _table.Where(x => x.AggregateRootId == aggregateId).OrderByDescending(x => x.Version)
+			return _table.Where(x => x.AggregateRootId == aggregateRootId).OrderByDescending(x => x.Version)
 				.FirstOrDefault();
 		}
 	}

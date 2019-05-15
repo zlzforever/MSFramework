@@ -9,7 +9,7 @@ namespace Ordering.Infrastructure
 	{
 		public OrderingContext(DbContextOptions options, IEntityConfigurationTypeFinder typeFinder,
 			IEventBus eventBus,
-			ILoggerFactory loggerFactory) : base(options, typeFinder, eventBus,
+			ILoggerFactory loggerFactory) : base(options, typeFinder,
 			loggerFactory)
 		{
 		}

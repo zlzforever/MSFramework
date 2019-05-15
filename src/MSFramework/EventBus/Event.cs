@@ -5,23 +5,20 @@ namespace MSFramework.EventBus
 {
 	public abstract class Event : IEvent
 	{
-		private string _creator;
-
 		protected Event()
 		{
 			Id = CombGuid.NewGuid();
 			Timestamp = DateTime.UtcNow;
 		}
 
-		public Guid Id { get; }
+		public Guid Id { get; set; }
 
-		public DateTime Timestamp { get; }
+		public int Version { get; set; }
 
-		public string Creator => _creator;
+		public DateTimeOffset Timestamp { get; set; }
 
-		public void SetCreator(string creator)
-		{
-			_creator = creator;
-		}
+		public string Creator { get; set; }
+
+		public string CreatorId { get; set; }
 	}
 }

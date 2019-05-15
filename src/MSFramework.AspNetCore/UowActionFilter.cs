@@ -9,7 +9,7 @@ namespace MSFramework.AspNetCore
 		{
 			var session =
 				context.HttpContext.RequestServices.GetService(typeof(IMSFrameworkSession)) as IMSFrameworkSession;
-			session?.Commit();
+			session?.CommitAsync().ConfigureAwait(false).GetAwaiter();
 		}
 	}
 }

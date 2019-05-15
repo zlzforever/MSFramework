@@ -16,7 +16,6 @@ namespace MSFramework.EntityFrameworkCore
 		private readonly ILogger _logger;
 		private readonly ILoggerFactory _loggerFactory;
 		private readonly IEntityConfigurationTypeFinder _typeFinder;
-		private readonly IEventBus _eventBus;
 
 		/// <summary>
 		/// 初始化一个<see cref="DbContextBase"/>类型的新实例
@@ -24,14 +23,12 @@ namespace MSFramework.EntityFrameworkCore
 		protected DbContextBase(
 			DbContextOptions options,
 			IEntityConfigurationTypeFinder typeFinder,
-			IEventBus eventBus,
 			ILoggerFactory loggerFactory)
 			: base(options)
 		{
 			_typeFinder = typeFinder;
 			_loggerFactory = loggerFactory;
 			_logger = loggerFactory?.CreateLogger(GetType());
-			_eventBus = eventBus;
 		}
 
 		/// <summary>
@@ -100,8 +97,6 @@ namespace MSFramework.EntityFrameworkCore
 				{
 					Database.BeginTransaction();
 				}
-
-				Task.WaitAll(DispatchDomainEventsAsync());
 				var effectCount = base.SaveChanges();
 				Database.CommitTransaction();
 				return effectCount;
@@ -146,15 +141,7 @@ namespace MSFramework.EntityFrameworkCore
 				{
 					await Database.BeginTransactionAsync(cancellationToken);
 				}
-
-				// Dispatch Domain Events collection. 
-				// Choices:
-				// A) Right BEFORE committing data (EF SaveChanges) into the DB will make a single transaction including  
-				// side effects from the domain event handlers which are using the same DbContext with "InstancePerLifetimeScope" or "scoped" lifetime
-				// B) Right AFTER committing data (EF SaveChanges) into the DB will make multiple transactions. 
-				// You will need to handle eventual consistency and compensatory actions in case of failures in any of the Handlers. 
-				await DispatchDomainEventsAsync();
-
+				
 				// After executing this line all the changes (from the Command Handler and Domain Event Handlers) 
 				// performed through the DbContext will be committed
 
@@ -169,39 +156,6 @@ namespace MSFramework.EntityFrameworkCore
 				Database.RollbackTransaction();
 				throw new MSFrameworkException(ex.Message, ex);
 			}
-		}
-
-		internal EventHistory[] GetEventSouringEventsAsync()
-		{
-			var aggregateRoots = ChangeTracker
-				.Entries<IAggregateRoot>()
-				.Where(x => x.Entity.GetChanges() != null && x.Entity.GetChanges().Any()).ToList();
-
-			return aggregateRoots.SelectMany(x => x.Entity.GetChanges().Select(y => new EventHistory(y)))
-				.ToArray();
-		}
-
-		protected virtual async Task DispatchDomainEventsAsync()
-		{
-			var aggregateRoots = ChangeTracker
-				.Entries<IAggregateRoot>()
-				.Where(x => x.Entity.DomainEvents != null && x.Entity.DomainEvents.Any()).ToList();
-
-			var domainEvents = aggregateRoots.SelectMany(x => x.Entity.DomainEvents).ToList();
-
-			var localDomainEvents = domainEvents.Where(x => x is LocalDomainEvent).ToList();
-			var distributedDomainEvents = domainEvents.Where(x => x is DistributedDomainEvent).ToList();
-			foreach (var @event in localDomainEvents)
-			{
-				await this.GetService<IPassThroughEventBus>().PublishAsync(@event);
-			}
-
-			foreach (var @event in distributedDomainEvents)
-			{
-				await this.GetService<IEventBus>().PublishAsync(@event);
-			}
-
-			aggregateRoots.ForEach(x => x.Entity.ClearChanges());
 		}
 	}
 }

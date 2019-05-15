@@ -2,11 +2,12 @@ using System;
 using System.ComponentModel.DataAnnotations;
 using MSFramework.Common;
 using MSFramework.Domain;
+using MSFramework.EventBus;
 using MSFramework.Serialization;
 
 namespace MSFramework.EventSouring
 {
-	public class EventHistory : EntityBase<long>
+	public class StoredEvent : EntityBase<long>
 	{
 		/// <summary>
 		/// 领域事件类型
@@ -25,8 +26,7 @@ namespace MSFramework.EventSouring
 		/// 聚合根标识
 		/// </summary>
 		[Required]
-		[StringLength(255)]
-		public string AggregateRootId { get; private set; }
+		public Guid AggregateRootId { get; private set; }
 
 		/// <summary>
 		/// 版本号
@@ -52,23 +52,23 @@ namespace MSFramework.EventSouring
 		[Required]
 		public DateTime Timestamp { get; set; }
 
-		public EventHistory()
+		public StoredEvent()
 		{
 			Timestamp = DateTime.UtcNow;
 		}
 
-		public EventHistory(IAggregateRootChangedEvent @event) : this()
+		public StoredEvent(Event @event) : this()
 		{
 			EventType = @event.GetType().AssemblyQualifiedName;
 			Version = @event.Version;
 			Event = Singleton<IJsonConvert>.Instance.SerializeObject(@event);
-			AggregateRootId = @event.GetAggregateRootId();
+			AggregateRootId = @event.Id;
 			Creator = @event.Creator;
 		}
 
-		public IAggregateRootChangedEvent ToDomainEvent()
+		public Event ToEvent()
 		{
-			return (IAggregateRootChangedEvent) Singleton<IJsonConvert>.Instance.DeserializeObject(Event,
+			return (Event) Singleton<IJsonConvert>.Instance.DeserializeObject(Event,
 				Type.GetType(EventType));
 		}
 	}

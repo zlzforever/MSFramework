@@ -4,7 +4,7 @@ using Ordering.Application.DTO;
 
 namespace Ordering.Application.Event
 {
-	public class UserCheckoutAcceptedEvent : DistributedDomainEvent
+	public class UserCheckoutAcceptedEvent : MSFramework.EventBus.Event
 	{
 		public string UserId { get; }
 

@@ -5,11 +5,11 @@ using MSFramework.EntityFrameworkCore;
 
 namespace MSFramework.EventSouring.EntityFrameworkCore
 {
-	public class EventHistoryEntityConfiguration : EntityTypeConfigurationBase<EventHistory>
+	public class EventHistoryEntityConfiguration : EntityTypeConfigurationBase<StoredEvent>
 	{
 		public override Type DbContextType => typeof(EventSouringDbContext);
 
-		public override void Configure(EntityTypeBuilder<EventHistory> builder)
+		public override void Configure(EntityTypeBuilder<StoredEvent> builder)
 		{
 			builder.ToTable("EventHistory");
 			builder.Property(x => x.EventType);
