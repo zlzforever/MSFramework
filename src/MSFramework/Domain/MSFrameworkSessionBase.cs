@@ -23,11 +23,11 @@ namespace MSFramework.Domain
 
 		public virtual async Task CommitAsync()
 		{
-			await _repository.SetAsync(_trackedAggregateRoots.Values);
+			await _repository.AppendAsync(_trackedAggregateRoots.Values);
 			_trackedAggregateRoots.Clear();
 		}
 
-		public virtual Task TrackAsync<TAggregateRoot>(TAggregateRoot aggregateRoot)
+		public virtual Task AddAsync<TAggregateRoot>(TAggregateRoot aggregateRoot)
 			where TAggregateRoot : AggregateRootBase
 		{
 			if (!_trackedAggregateRoots.ContainsKey(aggregateRoot.Id))
@@ -63,7 +63,7 @@ namespace MSFramework.Domain
 				throw new ConcurrencyException(aggregateRootId);
 			}
 
-			await TrackAsync(aggregateRoot);
+			await AddAsync(aggregateRoot);
 
 			return aggregateRoot;
 		}

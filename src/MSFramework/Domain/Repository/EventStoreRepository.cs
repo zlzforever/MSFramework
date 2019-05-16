@@ -19,14 +19,14 @@ namespace MSFramework.Domain.Repository
 			_eventBus = eventBus;
 		}
 
-		public virtual async Task SetAsync<TAggregateRoot>(IEnumerable<TAggregateRoot> aggregateRoots)
+		public virtual async Task AppendAsync<TAggregateRoot>(IEnumerable<TAggregateRoot> aggregateRoots)
 			where TAggregateRoot : AggregateRootBase
 		{
 			var events = new List<Event>();
-			foreach (var aggregateRoot in aggregateRoots)
+			var aggregateRootArray = aggregateRoots as TAggregateRoot[] ?? aggregateRoots.ToArray();
+			foreach (var aggregateRoot in aggregateRootArray)
 			{
 				events.AddRange(aggregateRoot.GetUncommittedChanges());
-				aggregateRoot.ClearChanges();
 			}
 
 			// 启用事务，保证在一个生命周期内所有的事件的提交是原子性的
@@ -35,6 +35,11 @@ namespace MSFramework.Domain.Repository
 			foreach (var @event in events)
 			{
 				await _eventBus.PublishAsync(@event);
+			}
+
+			foreach (var aggregateRoot in aggregateRootArray)
+			{
+				aggregateRoot.ClearChanges();
 			}
 		}
 

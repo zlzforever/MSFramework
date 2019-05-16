@@ -11,7 +11,7 @@ namespace MSFramework.Domain.Repository
 	/// </summary>
 	public interface IRepository : IScopeDependency
 	{
-		Task SetAsync<TAggregateRoot>(IEnumerable<TAggregateRoot> aggregateRoots)
+		Task AppendAsync<TAggregateRoot>(IEnumerable<TAggregateRoot> aggregateRoots)
 			where TAggregateRoot : AggregateRootBase;
 
 		Task<TAggregateRoot> GetAsync<TAggregateRoot>(Guid aggregateRootId, int? expectedVersion = null)

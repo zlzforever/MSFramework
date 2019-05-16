@@ -11,7 +11,7 @@ namespace MSFramework.Domain
 
 		Task CommitAsync();
 
-		Task TrackAsync<TAggregateRoot>(TAggregateRoot aggregateRoot) where TAggregateRoot : AggregateRootBase;
+		Task AddAsync<TAggregateRoot>(TAggregateRoot aggregateRoot) where TAggregateRoot : AggregateRootBase;
 
 		Task<TAggregateRoot> GetAsync<TAggregateRoot>(Guid aggregateRootId, int? expectedVersion = null)
 			where TAggregateRoot : AggregateRootBase;

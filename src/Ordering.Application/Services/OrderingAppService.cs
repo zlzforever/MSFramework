@@ -57,7 +57,7 @@ namespace Ordering.Application.Services
 				dto.Description,
 				dto.OrderItems.Select(x => x.ToOrderItem()).ToList());
 			await _eventBus.PublishAsync(new OrderStartedEvent(Session.UserId, order.Id));
-			await Session.TrackAsync(order);
+			await Session.AddAsync(order);
 		}
 	}
 }
