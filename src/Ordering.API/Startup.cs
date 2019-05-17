@@ -15,6 +15,7 @@ using MSFramework.EntityFrameworkCore;
 using MSFramework.EntityFrameworkCore.SqlServer;
 using MSFramework.EventBus;
 using MSFramework.EventSouring.EntityFrameworkCore;
+using Ordering.API.Controllers;
 using Ordering.Application.Event;
 using Ordering.Application.EventHandler;
 
@@ -39,6 +40,8 @@ namespace Ordering.API
 				c.SwaggerDoc("v1.0", new OpenApiInfo {Version = "v1.0", Description = "Ordering API V1.0"});
 			});
 			services.AddHealthChecks();
+			services.AddScoped<MyClass>();
+			
 			var provider = services.AddMSFramework(builder =>
 			{
 				// 使用命令总线

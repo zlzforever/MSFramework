@@ -5,7 +5,7 @@ namespace MSFramework.Command
 {
 	public interface ICommandHandlerFactory
 	{
-		ICommandHandler<T> GetHandler<T>() where T : ICommand;
+		object GetHandler(Type commandType);
 
 		Dictionary<Type, Type> GetHandlers();
 	}

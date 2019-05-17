@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using MSFramework.AspNetCore;
 using MSFramework.Domain;
@@ -11,19 +12,38 @@ using Ordering.Application.Services;
 
 namespace Ordering.API.Controllers
 {
+	class MyClass
+	{
+		private int _count = 0;
+
+		public void Print()
+		{
+			_count++;
+			Console.WriteLine(_count);
+		}
+	}
+
 	[Route("api/v1.0/[controller]")]
 	[ApiController]
 	public class OrderController : MSFrameworkControllerBase
 	{
 		private readonly IOrderingAppService _orderingAppService;
 		private readonly IOrderingQuery _orderingQuery;
-		public OrderController(
+
+		public OrderController(IServiceProvider serviceProvider,
 			IOrderingAppService orderingAppService,
 			IOrderingQuery orderingQuery,
 			IMSFrameworkSession session, ILogger<OrderController> logger) : base(session, logger)
 		{
 			_orderingAppService = orderingAppService;
 			_orderingQuery = orderingQuery;
+			var scope1 = serviceProvider.CreateScope();
+			var myClass = scope1.ServiceProvider.GetRequiredService<MyClass>();
+			myClass.Print();
+
+			var scope2 = serviceProvider.CreateScope();
+			myClass = scope2.ServiceProvider.GetRequiredService<MyClass>();
+			myClass.Print();
 		}
 
 		#region  Command

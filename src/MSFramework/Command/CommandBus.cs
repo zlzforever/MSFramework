@@ -1,3 +1,4 @@
+using System.Reflection;
 using System.Threading.Tasks;
 
 namespace MSFramework.Command
@@ -11,12 +12,17 @@ namespace MSFramework.Command
 			_commandHandlerFactory = commandHandlerFactory;
 		}
 
-		public async Task SendAsync<TCommand>(TCommand command) where TCommand : ICommand
+		public Task<TResponse> SendAsync<TResponse>(ICommand<TResponse> command)
 		{
-			var handler = _commandHandlerFactory.GetHandler<TCommand>();
+			var handler = _commandHandlerFactory.GetHandler(command.GetType());
 			if (handler != null)
 			{
-				await handler.HandleAsync(command);
+				var method = handler.GetType().GetMethod("HandleAsync", BindingFlags.Public);
+				if (method != null)
+				{
+					var response = (TResponse) method.Invoke(handler, new object[] {command});
+					return Task.FromResult(response);
+				}
 			}
 			else
 			{

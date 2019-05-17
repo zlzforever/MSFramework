@@ -2,8 +2,11 @@ using System;
 
 namespace MSFramework.Command
 {
-	public interface ICommand
+	public interface ICommand<TResponse>
 	{
-		Guid Id { get; set; }
+	}
+
+	public interface ICommand : ICommand<bool>
+	{
 	}
 }
