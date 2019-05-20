@@ -12,12 +12,12 @@ namespace Ordering.Infrastructure.Migrations
                 columns: table => new
                 {
                     Id = table.Column<Guid>(nullable: false),
-                    Version = table.Column<int>(nullable: false),
                     Address_Street = table.Column<string>(nullable: true),
                     Address_City = table.Column<string>(nullable: true),
                     Address_State = table.Column<string>(nullable: true),
                     Address_Country = table.Column<string>(nullable: true),
                     Address_ZipCode = table.Column<string>(nullable: true),
+                    OrderStatus = table.Column<int>(nullable: false),
                     CreationTime = table.Column<DateTime>(nullable: false),
                     Description = table.Column<string>(nullable: true),
                     IsDeleted = table.Column<bool>(nullable: false),
@@ -33,10 +33,10 @@ namespace Ordering.Infrastructure.Migrations
                 columns: table => new
                 {
                     Id = table.Column<Guid>(nullable: false),
+                    ProductId = table.Column<Guid>(nullable: false),
                     Discount = table.Column<decimal>(nullable: false),
                     OrderId = table.Column<Guid>(nullable: true),
                     PictureUrl = table.Column<string>(nullable: true),
-                    ProductId = table.Column<int>(nullable: false),
                     ProductName = table.Column<string>(nullable: false),
                     UnitPrice = table.Column<decimal>(nullable: false),
                     Units = table.Column<int>(nullable: false)

@@ -5,7 +5,7 @@
         <LangVersion>latest</LangVersion>
         <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
         <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
-        <Version>0.9.4</Version>
+        <Version>0.9.6</Version>
         <Authors>zlzforever@163.com;</Authors>
         <Copyright>Copyright 2019 Lewis Zou</Copyright>
         <PackageId>MSFramework.EntityFrameworkCore</PackageId>
@@ -29,6 +29,5 @@
         <PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" Version="2.2.0" />
         <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="2.2.4" />
         <PackageReference Include="Microsoft.EntityFrameworkCore.Proxies" Version="2.2.4" />
-        <PackageReference Include="Z.EntityFramework.Plus.EFCore" Version="1.8.25" />
     </ItemGroup>
 </Project>

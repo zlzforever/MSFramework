@@ -1,49 +1,34 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using MediatR;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using MSFramework.AspNetCore;
 using MSFramework.Domain;
-using Ordering.Application.DTO;
+using MSFramework.EventBus;
+using Ordering.Application.Command;
+using Ordering.Application.Event;
 using Ordering.Application.Query;
-using Ordering.Application.Services;
+
 
 namespace Ordering.API.Controllers
 {
-	class MyClass
-	{
-		private int _count = 0;
-
-		public void Print()
-		{
-			_count++;
-			Console.WriteLine(_count);
-		}
-	}
-
 	[Route("api/v1.0/[controller]")]
 	[ApiController]
 	public class OrderController : MSFrameworkControllerBase
 	{
-		private readonly IOrderingAppService _orderingAppService;
 		private readonly IOrderingQuery _orderingQuery;
+		private readonly IEventBus _eventBus;
+		private readonly IMediator _mediator;
 
-		public OrderController(IServiceProvider serviceProvider,
-			IOrderingAppService orderingAppService,
+		public OrderController(IMediator mediator, IEventBus eventBus,
 			IOrderingQuery orderingQuery,
 			IMSFrameworkSession session, ILogger<OrderController> logger) : base(session, logger)
 		{
-			_orderingAppService = orderingAppService;
 			_orderingQuery = orderingQuery;
-			var scope1 = serviceProvider.CreateScope();
-			var myClass = scope1.ServiceProvider.GetRequiredService<MyClass>();
-			myClass.Print();
-
-			var scope2 = serviceProvider.CreateScope();
-			myClass = scope2.ServiceProvider.GetRequiredService<MyClass>();
-			myClass.Print();
+			_eventBus = eventBus;
+			_mediator = mediator;
 		}
 
 		#region  Command
@@ -56,12 +41,12 @@ namespace Ordering.API.Controllers
 		public async Task<IActionResult> CreateOrderAsync()
 		{
 			var random = new Random();
-			var items = new List<OrderItemDTO>();
+			var items = new List<CreateOrderCommand.OrderItemDTO>();
 			var count = random.Next(2, 5);
 			for (int i = 0; i < count; ++i)
 			{
 				var product = Guid.NewGuid();
-				items.Add(new OrderItemDTO
+				items.Add(new CreateOrderCommand.OrderItemDTO
 				{
 					ProductName = "product" + product.ToString("N"),
 					ProductId = product,
@@ -71,26 +56,42 @@ namespace Ordering.API.Controllers
 				});
 			}
 
-			await _orderingAppService.CreateOrder(new CreateOrderDTO(items,
-				"HELLO",
+			bool commandResult = await _mediator.Send(new CreateOrderCommand(items, "HELLO",
 				"上海", "张扬路500号", "上海", "中国", "200000", "what?"));
+
+			if (!commandResult)
+			{
+				return BadRequest();
+			}
+
 			return Ok(true);
 		}
 
 		[HttpDelete("{orderId}")]
 		public async Task<IActionResult> DeleteOrderAsync(Guid orderId)
 		{
-			await _orderingAppService.DeleteOrder(orderId);
-			return Ok(true);
+			bool commandResult = await _mediator.Send(new DeleteOrderCommand(orderId));
+
+			if (!commandResult)
+			{
+				return BadRequest();
+			}
+
+			return Ok();
 		}
 
 		[HttpPut("{orderId}/address")]
 		public async Task<IActionResult> ChangeOrderAddressAsync(Guid orderId,
-			[FromBody] ChangeOrderAddressDTO dto)
+			[FromBody] ChangeOrderAddressCommand command)
 		{
-			dto.OrderId = orderId;
-			await _orderingAppService.ChangeOrderAddress(dto);
-			return Ok(true);
+			command.OrderId = orderId;
+			bool commandResult = await _mediator.Send(command);
+			if (!commandResult)
+			{
+				return BadRequest();
+			}
+
+			return Ok();
 		}
 
 		#endregion

@@ -1,5 +1,4 @@
 using System;
-using MSFramework.Domain;
 
 namespace Ordering.Application.Event
 {

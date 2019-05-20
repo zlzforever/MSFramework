@@ -2,7 +2,6 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Http;
 using MSFramework.Domain;
-using MSFramework.Domain.Repository;
 
 namespace MSFramework.AspNetCore
 {
@@ -10,8 +9,7 @@ namespace MSFramework.AspNetCore
 	{
 		private readonly IHttpContextAccessor _accessor;
 
-		public MSFrameworkSession(IHttpContextAccessor accessor, IRepository repository) :
-			base(repository)
+		public MSFrameworkSession(IHttpContextAccessor accessor) 
 		{
 			_accessor = accessor;
 		}

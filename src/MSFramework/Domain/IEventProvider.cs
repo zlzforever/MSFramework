@@ -1,14 +1,14 @@
 using System.Collections.Generic;
-using MSFramework.EventBus;
+using MediatR;
 
 namespace MSFramework.Domain
 {
 	public interface IEventProvider
 	{
-		IReadOnlyCollection<Event> GetUncommittedChanges();
+		IReadOnlyCollection<INotification> DomainEvents { get; }
 
-		void LoadFromHistory(params Event[] histories);
-		
-		void ClearChanges();
+		void AddDomainEvent(INotification @event);
+
+		void ClearDomainEvents();
 	}
 }

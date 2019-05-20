@@ -8,10 +8,4 @@
       <ProjectReference Include="..\MSFramework\MSFramework.csproj" />
     </ItemGroup>
 
-    <ItemGroup>
-      <Compile Update="AggregateRoot\Order.Events.cs">
-        <DependentUpon>Order.cs</DependentUpon>
-      </Compile>
-    </ItemGroup>
-
 </Project>

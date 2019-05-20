@@ -1,10 +1,10 @@
 using System;
 using System.Collections.Concurrent;
 using System.Linq;
+using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using MSFramework.Domain;
-using MSFramework.EventSouring;
 
 namespace MSFramework.EntityFrameworkCore
 {
@@ -35,7 +35,7 @@ namespace MSFramework.EntityFrameworkCore
 		/// 获取指定数据实体的上下文类型
 		/// </summary>
 		/// <returns>实体所属上下文实例</returns>
-		public DbContext GetDbContext<TEntity>() where TEntity : class, IEntity
+		public DbContextBase GetDbContext<TEntity>() where TEntity : class, IEntity
 		{
 			var typeFinder = _serviceProvider.GetService<IEntityConfigurationTypeFinder>();
 			Type dbContextType = typeFinder.GetDbContextTypeForEntity(typeof(TEntity));
@@ -47,7 +47,7 @@ namespace MSFramework.EntityFrameworkCore
 		/// </summary>
 		/// <param name="dbContextType">数据上下文类型</param>
 		/// <returns>数据上下文</returns>
-		public DbContext GetDbContext(Type dbContextType)
+		public DbContextBase GetDbContext(Type dbContextType)
 		{
 			var dbContextOptions = GetDbContextOptions(dbContextType);
 			if (dbContextOptions == null)
@@ -57,6 +57,11 @@ namespace MSFramework.EntityFrameworkCore
 
 			var dbContext = Create(dbContextOptions);
 			return dbContext;
+		}
+
+		public DbSet<TEntity> GetDbSet<TEntity>() where TEntity : class, IEntity
+		{
+			return GetDbContext<TEntity>().Set<TEntity>();
 		}
 
 		public DbContextBase Create(EntityFrameworkOptions resolveOptions)
@@ -80,7 +85,8 @@ namespace MSFramework.EntityFrameworkCore
 				builderCreator.Create(dbContextType, resolveOptions.ConnectionString);
 
 			DbContextOptions options = optionsBuilder.Options;
-
+			var a = _serviceProvider.CreateScope().ServiceProvider.GetRequiredService<IMediator>();
+			Console.WriteLine("get mediator");
 			//创建上下文实例
 			if (!(ActivatorUtilities.CreateInstance(_serviceProvider, dbContextType, options) is
 				DbContextBase context))
@@ -90,11 +96,6 @@ namespace MSFramework.EntityFrameworkCore
 
 			_dbContextDict.TryAdd(dbContextType, context);
 			return context;
-		}
-
-		public IEventStore GetEventStore()
-		{
-			return _serviceProvider.GetService<IEventStore>();
 		}
 
 		public DbContextBase[] GetAllDbContexts()

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using AspectCore.Extensions.DependencyInjection;
+using MediatR;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyModel;
@@ -10,7 +11,6 @@ using MSFramework.Command;
 using MSFramework.Common;
 using MSFramework.Data;
 using MSFramework.DependencyInjection;
-using MSFramework.Domain.Repository;
 using MSFramework.EventBus;
 using MSFramework.EventSouring;
 using MSFramework.Reflection;
@@ -54,11 +54,35 @@ namespace MSFramework
 			return builder;
 		}
 
-		public static MSFrameworkBuilder UseEventStoreRepository(this MSFrameworkBuilder builder)
+		public static MSFrameworkBuilder UseMediator(this MSFrameworkBuilder builder, params Type[] types)
 		{
-			builder.Services.AddScoped<IRepository, EventStoreRepository>();
+			builder.Services.AddMediatR(types);
+//			builder.Services.Scan(scan => scan
+//				.FromAssembliesOf(types)
+//				.AddClasses()
+//				.AsImplementedInterfaces());
+			Console.WriteLine("Register mediatR");
+//			var typeList = new List<Type>();
+//			if (types.Contains(typeof(IMediator)))
+//			{
+//				typeList.Add(typeof(IMediator));
+//			}
+//			 
+//			typeList.AddRange(types);
+//			builder.Services.AddScoped<ServiceFactory>(p => p.GetService);
+//			builder.Services.Scan(scan => scan
+//				.FromAssembliesOf(typeList)
+//				.AddClasses()
+//				.AsImplementedInterfaces());
+//			return builder;
 			return builder;
 		}
+
+//		public static MSFrameworkBuilder UseEventStoreRepository(this MSFrameworkBuilder builder)
+//		{
+//			builder.Services.AddScoped<IRepository, EventStoreRepository>();
+//			return builder;
+//		}
 
 		public static MSFrameworkBuilder UseNewtonsoftJsonConvert(this MSFrameworkBuilder builder)
 		{
@@ -74,8 +98,8 @@ namespace MSFramework
 			builder.Services.AddSingleton<ICommandBus, CommandBus>();
 			return builder;
 		}
- 
-		
+
+
 		public static IServiceProvider AddMSFramework(this IServiceCollection services,
 			Action<MSFrameworkBuilder> builderAction = null)
 		{
@@ -111,10 +135,10 @@ namespace MSFramework
 			}
 
 			builder.UseCommandBus();
-			
+
 			builder.Services.AddSingleton<IEventBusSubscriptionStore, InMemoryEventBusSubscriptionStore>();
 			builder.UseLocalEventBus();
-			
+
 			builder.Services.AddHttpClient();
 
 			return services.BuildAspectInjectorProvider();

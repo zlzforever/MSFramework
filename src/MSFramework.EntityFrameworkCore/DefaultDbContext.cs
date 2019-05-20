@@ -1,6 +1,6 @@
+using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
-using MSFramework.EventBus;
 
 namespace MSFramework.EntityFrameworkCore
 {
@@ -12,18 +12,18 @@ namespace MSFramework.EntityFrameworkCore
 		/// <summary>
 		/// 初始化一个<see cref="DefaultDbContext"/>类型的新实例
 		/// </summary>
-		public DefaultDbContext(DbContextOptions options,
+		public DefaultDbContext(DbContextOptions options, IMediator mediator,
 			IEntityConfigurationTypeFinder typeFinder)
-			: base(options, typeFinder, null)
+			: base(options, mediator, typeFinder, null)
 		{
 		}
 
 		/// <summary>
 		/// 初始化一个<see cref="DefaultDbContext"/>类型的新实例
 		/// </summary>
-		public DefaultDbContext(DbContextOptions options, IEntityConfigurationTypeFinder typeFinder,
+		public DefaultDbContext(DbContextOptions options, IMediator mediator, IEntityConfigurationTypeFinder typeFinder,
 			ILoggerFactory loggerFactory)
-			: base(options, typeFinder, loggerFactory)
+			: base(options, mediator, typeFinder, loggerFactory)
 		{
 		}
 	}

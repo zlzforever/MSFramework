@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
 using Microsoft.Extensions.Configuration;
@@ -22,14 +23,15 @@ namespace MSFramework.EntityFrameworkCore
 		{
 			var services = new ServiceCollection();
 			Configure(services);
-			
+
 			var entityConfigurationTypeFinder = new EntityConfigurationTypeFinder();
 			entityConfigurationTypeFinder.Initialize();
 
 			services.AddSingleton<IEntityConfigurationTypeFinder>(entityConfigurationTypeFinder);
 			services.AddLocalEventBus();
+			services.AddMediatR();
 			services.AddLogging();
-			
+
 			var section = GetConfiguration().GetSection("DbContexts");
 			EntityFrameworkOptions.EntityFrameworkOptionDict =
 				section.Get<Dictionary<string, EntityFrameworkOptions>>();
@@ -41,7 +43,7 @@ namespace MSFramework.EntityFrameworkCore
 
 			var provider = services.BuildServiceProvider();
 			var factory = new DbContextFactory(provider);
-			return (TDbContext) factory.GetDbContext(typeof(TDbContext));
+			return factory.GetDbContext(typeof(TDbContext)) as TDbContext;
 		}
 
 		protected abstract IConfiguration GetConfiguration();

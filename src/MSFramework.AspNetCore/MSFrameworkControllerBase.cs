@@ -1,5 +1,4 @@
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.Extensions.Logging;
 using MSFramework.Domain;
 
@@ -15,11 +14,6 @@ namespace MSFramework.AspNetCore
 		{
 			Session = session;
 			Logger = logger;
-		}
-
-		public override void OnActionExecuted(ActionExecutedContext context)
-		{
-			Session.CommitAsync().ConfigureAwait(false).GetAwaiter();
 		}
 	}
 }
