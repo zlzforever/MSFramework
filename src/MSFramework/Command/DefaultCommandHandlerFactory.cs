@@ -6,7 +6,7 @@ namespace MSFramework.Command
 {
 	public class DefaultCommandHandlerFactory : ICommandHandlerFactory
 	{
-		public 
+		  
 		public object GetHandler(Type commandType)
 		{
 			throw new NotImplementedException();

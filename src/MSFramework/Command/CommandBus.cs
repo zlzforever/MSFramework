@@ -28,6 +28,8 @@ namespace MSFramework.Command
 			{
 				throw new MSFrameworkException("no handler registered");
 			}
+
+			return null;
 		}
 	}
 }
