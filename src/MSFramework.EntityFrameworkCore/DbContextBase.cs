@@ -177,10 +177,10 @@ namespace MSFramework.EntityFrameworkCore
 			domainEntities
 				.ForEach(entity => entity.Entity.ClearDomainEvents());
 
-			var tasks = domainEvents
-				.Select(async (domainEvent) => { await _mediator.Publish(domainEvent); });
-
-			await Task.WhenAll(tasks);
+			foreach (var @event in domainEvents)
+			{
+				await _mediator.Publish(@event);
+			}
 
 			// After executing this line all the changes (from the Command Handler and Domain Event Handlers) 
 			// performed through the DbContext will be committed

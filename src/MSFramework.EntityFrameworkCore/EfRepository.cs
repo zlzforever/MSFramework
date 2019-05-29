@@ -12,19 +12,19 @@ namespace MSFramework.EntityFrameworkCore
 {
 	public abstract class EfRepository<TEntity> : IRepository<TEntity> where TEntity : class, IAggregateRoot, IEntity
 	{
-		private readonly DbContextBase _dbContext;
-
 		protected EfRepository(DbContextFactory dbContextFactory)
 		{
-			_dbContext = dbContextFactory.GetDbContext<TEntity>();
-			Table = _dbContext.Set<TEntity>();
+			DbContext = dbContextFactory.GetDbContext<TEntity>();
+			Table = DbContext.Set<TEntity>();
 		}
+
+		protected DbContextBase DbContext { get; }
 
 		public virtual DbConnection Connection
 		{
 			get
 			{
-				var connection = _dbContext.Database.GetDbConnection();
+				var connection = DbContext.Database.GetDbConnection();
 
 				if (connection.State != ConnectionState.Open)
 				{
@@ -37,7 +37,7 @@ namespace MSFramework.EntityFrameworkCore
 
 		public DbSet<TEntity> Table { get; }
 
-		public IUnitOfWork UnitOfWork => _dbContext;
+		public IUnitOfWork UnitOfWork => DbContext;
 
 		public List<TEntity> GetAllList()
 		{

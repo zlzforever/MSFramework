@@ -7,12 +7,10 @@ using MediatR;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyModel;
-using MSFramework.Command;
 using MSFramework.Common;
 using MSFramework.Data;
 using MSFramework.DependencyInjection;
 using MSFramework.EventBus;
-using MSFramework.EventSouring;
 using MSFramework.Reflection;
 using MSFramework.Serialization;
 
@@ -48,58 +46,12 @@ namespace MSFramework
 			return builder;
 		}
 
-		public static MSFrameworkBuilder UseInMemoryEventStore(this MSFrameworkBuilder builder)
-		{
-			builder.Services.AddSingleton<IEventStore, InMemoryEventStore>();
-			return builder;
-		}
-
 		public static MSFrameworkBuilder UseMediator(this MSFrameworkBuilder builder, params Type[] types)
 		{
 			builder.Services.AddMediatR(types);
-//			builder.Services.Scan(scan => scan
-//				.FromAssembliesOf(types)
-//				.AddClasses()
-//				.AsImplementedInterfaces());
-			Console.WriteLine("Register mediatR");
-//			var typeList = new List<Type>();
-//			if (types.Contains(typeof(IMediator)))
-//			{
-//				typeList.Add(typeof(IMediator));
-//			}
-//			 
-//			typeList.AddRange(types);
-//			builder.Services.AddScoped<ServiceFactory>(p => p.GetService);
-//			builder.Services.Scan(scan => scan
-//				.FromAssembliesOf(typeList)
-//				.AddClasses()
-//				.AsImplementedInterfaces());
-//			return builder;
 			return builder;
 		}
-
-//		public static MSFrameworkBuilder UseEventStoreRepository(this MSFrameworkBuilder builder)
-//		{
-//			builder.Services.AddScoped<IRepository, EventStoreRepository>();
-//			return builder;
-//		}
-
-		public static MSFrameworkBuilder UseNewtonsoftJsonConvert(this MSFrameworkBuilder builder)
-		{
-			Singleton<IJsonConvert>.Instance = new NewtonsoftJsonConvert(new JsonConvertOptions());
-			builder.Services.AddSingleton(Singleton<IJsonConvert>.Instance);
-			return builder;
-		}
-
-		public static MSFrameworkBuilder UseCommandBus(this MSFrameworkBuilder builder)
-		{
-			Singleton<ICommandHandlerFactory>.Instance = new DefaultCommandHandlerFactory();
-			builder.Services.AddSingleton(Singleton<ICommandHandlerFactory>.Instance);
-			builder.Services.AddSingleton<ICommandBus, CommandBus>();
-			return builder;
-		}
-
-
+		
 		public static IServiceProvider AddMSFramework(this IServiceCollection services,
 			Action<MSFrameworkBuilder> builderAction = null)
 		{
@@ -126,16 +78,15 @@ namespace MSFramework
 
 			if (Singleton<IJsonConvert>.Instance == null)
 			{
-				builder.UseNewtonsoftJsonConvert();
+				Singleton<IJsonConvert>.Instance = new NewtonsoftJsonConvert(new JsonConvertOptions());
+				builder.Services.AddSingleton(Singleton<IJsonConvert>.Instance);
 			}
 
 			if (Singleton<IIdGenerator>.Instance == null)
 			{
 				Singleton<IIdGenerator>.Instance = new IdGenerator();
 			}
-
-			builder.UseCommandBus();
-
+			
 			builder.Services.AddSingleton<IEventBusSubscriptionStore, InMemoryEventBusSubscriptionStore>();
 			builder.UseLocalEventBus();
 
