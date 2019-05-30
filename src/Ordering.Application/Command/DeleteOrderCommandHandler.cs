@@ -1,11 +1,12 @@
 using System.Threading;
 using System.Threading.Tasks;
 using MediatR;
+using Microsoft.AspNetCore.Mvc;
 using Ordering.Domain.Repository;
 
 namespace Ordering.Application.Command
 {
-	public class DeleteOrderCommandHandler : IRequestHandler<DeleteOrderCommand, bool>
+	public class DeleteOrderCommandHandler : IRequestHandler<DeleteOrderCommand, IActionResult>
 	{
 		private readonly IOrderingRepository _orderRepository;
 
@@ -20,16 +21,17 @@ namespace Ordering.Application.Command
 		/// </summary>
 		/// <param name="command"></param>
 		/// <returns></returns>
-		public async Task<bool> Handle(DeleteOrderCommand command, CancellationToken cancellationToken)
+		public async Task<IActionResult> Handle(DeleteOrderCommand command, CancellationToken cancellationToken)
 		{
-			var orderToUpdate = await _orderRepository.GetAsync(command.OrderId);
-			if (orderToUpdate == null)
+			var order = await _orderRepository.GetAsync(command.OrderId);
+			if (order == null)
 			{
-				return false;
+				return new BadRequestResult();
 			}
 
-			await _orderRepository.DeleteAsync(orderToUpdate);
-			return await _orderRepository.UnitOfWork.CommitAsync();
+			await _orderRepository.DeleteAsync(order);
+			await _orderRepository.UnitOfWork.CommitAsync();
+			return new OkResult();
 		}
 	}
 }

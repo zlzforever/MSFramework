@@ -1,11 +1,12 @@
 using System;
 using System.Collections.Generic;
 using MediatR;
+using Microsoft.AspNetCore.Mvc;
 using Ordering.Domain.AggregateRoot;
 
 namespace Ordering.Application.Command
 {
-	public class CreateOrderCommand: IRequest<bool>
+	public class CreateOrderCommand: IRequest<IActionResult>
 	{
 		public string UserId { get; set; }
 

@@ -1,11 +1,12 @@
 using System.Threading;
 using System.Threading.Tasks;
 using MediatR;
+using Microsoft.AspNetCore.Mvc;
 using Ordering.Domain.Repository;
 
 namespace Ordering.Application.Command
 {
-	public class CancelOrderCommandHandler : IRequestHandler<CancelOrderCommand, bool>
+	public class CancelOrderCommandHandler : IRequestHandler<CancelOrderCommand, IActionResult>
 	{
 		private readonly IOrderingRepository _orderRepository;
 
@@ -20,16 +21,13 @@ namespace Ordering.Application.Command
 		/// </summary>
 		/// <param name="command"></param>
 		/// <returns></returns>
-		public async Task<bool> Handle(CancelOrderCommand command, CancellationToken cancellationToken)
+		public async Task<IActionResult> Handle(CancelOrderCommand command, CancellationToken cancellationToken)
 		{
 			var orderToUpdate = await _orderRepository.GetAsync(command.OrderId);
-			if(orderToUpdate == null)
-			{
-				return false;
-			}
 
 			orderToUpdate.SetCancelledStatus();
-			return await _orderRepository.UnitOfWork.CommitAsync();
+			await _orderRepository.UnitOfWork.CommitAsync();
+			return new OkResult();
 		}
 	}
 }

@@ -2,12 +2,13 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using MediatR;
+using Microsoft.AspNetCore.Mvc;
 using Ordering.Domain.AggregateRoot;
 using Ordering.Domain.Repository;
 
 namespace Ordering.Application.Command
 {
-	public class CreateOrderCommandHandler : IRequestHandler<CreateOrderCommand, bool>
+	public class CreateOrderCommandHandler : IRequestHandler<CreateOrderCommand, IActionResult>
 	{
 		private readonly IOrderingRepository _orderRepository;
 
@@ -22,7 +23,7 @@ namespace Ordering.Application.Command
 		/// </summary>
 		/// <param name="command"></param>
 		/// <returns></returns>
-		public async Task<bool> Handle(CreateOrderCommand command, CancellationToken cancellationToken)
+		public async Task<IActionResult> Handle(CreateOrderCommand command, CancellationToken cancellationToken)
 		{
 			var order = new Order(
 				command.UserId,
@@ -31,7 +32,7 @@ namespace Ordering.Application.Command
 				command.OrderItems.Select(x => x.ToOrderItem()).ToList());
 			await _orderRepository.InsertAsync(order);
 			await _orderRepository.UnitOfWork.CommitAsync();
-			return true;
+			return new OkResult();
 		}
 	}
 }

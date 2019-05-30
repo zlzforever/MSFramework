@@ -55,28 +55,14 @@ namespace Ordering.API.Controllers
 				});
 			}
 
-			bool commandResult = await _mediator.Send(new CreateOrderCommand(items, "HELLO",
+			return await _mediator.Send(new CreateOrderCommand(items, "HELLO",
 				"上海", "张扬路500号", "上海", "中国", "200000", "what?"));
-
-			if (!commandResult)
-			{
-				return BadRequest();
-			}
-
-			return Ok(true);
 		}
 
 		[HttpDelete("{orderId}")]
 		public async Task<IActionResult> DeleteOrderAsync(Guid orderId)
 		{
-			bool commandResult = await _mediator.Send(new DeleteOrderCommand(orderId));
-
-			if (!commandResult)
-			{
-				return BadRequest();
-			}
-
-			return Ok();
+			return await _mediator.Send(new DeleteOrderCommand(orderId));
 		}
 
 		[HttpPut("{orderId}/address")]
@@ -84,13 +70,7 @@ namespace Ordering.API.Controllers
 			[FromBody] ChangeOrderAddressCommand command)
 		{
 			command.OrderId = orderId;
-			bool commandResult = await _mediator.Send(command);
-			if (!commandResult)
-			{
-				return BadRequest();
-			}
-
-			return Ok();
+			return await _mediator.Send(command);
 		}
 
 		#endregion
