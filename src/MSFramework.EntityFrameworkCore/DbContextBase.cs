@@ -2,26 +2,24 @@ using System;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using MediatR;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.Extensions.Logging;
 using MSFramework.Domain;
-using MSFramework.EventBus;
-using MSFramework.EventSouring;
 
 namespace MSFramework.EntityFrameworkCore
 {
-	public abstract class DbContextBase : DbContext
+	public abstract class DbContextBase : DbContext, IUnitOfWork
 	{
 		private readonly ILogger _logger;
 		private readonly ILoggerFactory _loggerFactory;
 		private readonly IEntityConfigurationTypeFinder _typeFinder;
+		private readonly IMediator _mediator;
 
 		/// <summary>
 		/// 初始化一个<see cref="DbContextBase"/>类型的新实例
 		/// </summary>
-		protected DbContextBase(
-			DbContextOptions options,
+		protected DbContextBase(DbContextOptions options, IMediator mediator,
 			IEntityConfigurationTypeFinder typeFinder,
 			ILoggerFactory loggerFactory)
 			: base(options)
@@ -29,6 +27,7 @@ namespace MSFramework.EntityFrameworkCore
 			_typeFinder = typeFinder;
 			_loggerFactory = loggerFactory;
 			_logger = loggerFactory?.CreateLogger(GetType());
+			_mediator = mediator;
 		}
 
 		/// <summary>
@@ -97,6 +96,7 @@ namespace MSFramework.EntityFrameworkCore
 				{
 					Database.BeginTransaction();
 				}
+
 				var effectCount = base.SaveChanges();
 				Database.CommitTransaction();
 				return effectCount;
@@ -141,7 +141,7 @@ namespace MSFramework.EntityFrameworkCore
 				{
 					await Database.BeginTransactionAsync(cancellationToken);
 				}
-				
+
 				// After executing this line all the changes (from the Command Handler and Domain Event Handlers) 
 				// performed through the DbContext will be committed
 
@@ -156,6 +156,36 @@ namespace MSFramework.EntityFrameworkCore
 				Database.RollbackTransaction();
 				throw new MSFrameworkException(ex.Message, ex);
 			}
+		}
+
+		public async Task<bool> CommitAsync()
+		{
+			// Dispatch Domain Events collection. 
+			// Choices:
+			// A) Right BEFORE committing data (EF SaveChanges) into the DB will make a single transaction including  
+			// side effects from the domain event handlers which are using the same DbContext with "InstancePerLifetimeScope" or "scoped" lifetime
+			// B) Right AFTER committing data (EF SaveChanges) into the DB will make multiple transactions. 
+			// You will need to handle eventual consistency and compensatory actions in case of failures in any of the Handlers. 
+			var domainEntities = ChangeTracker
+				.Entries<IEventProvider>()
+				.Where(x => x.Entity.DomainEvents != null && x.Entity.DomainEvents.Any()).ToList();
+
+			var domainEvents = domainEntities
+				.SelectMany(x => x.Entity.DomainEvents)
+				.ToList();
+
+			domainEntities
+				.ForEach(entity => entity.Entity.ClearDomainEvents());
+
+			foreach (var @event in domainEvents)
+			{
+				await _mediator.Publish(@event);
+			}
+
+			// After executing this line all the changes (from the Command Handler and Domain Event Handlers) 
+			// performed through the DbContext will be committed
+			await base.SaveChangesAsync();
+			return true;
 		}
 	}
 }

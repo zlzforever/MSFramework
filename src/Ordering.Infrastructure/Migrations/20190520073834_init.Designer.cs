@@ -10,7 +10,7 @@ using Ordering.Infrastructure;
 namespace Ordering.Infrastructure.Migrations
 {
     [DbContext(typeof(OrderingContext))]
-    [Migration("20190507041915_init")]
+    [Migration("20190520073834_init")]
     partial class init
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -32,10 +32,10 @@ namespace Ordering.Infrastructure.Migrations
 
                     b.Property<bool>("IsDeleted");
 
+                    b.Property<int>("OrderStatus");
+
                     b.Property<string>("UserId")
                         .IsRequired();
-
-                    b.Property<int>("Version");
 
                     b.HasKey("Id");
 
@@ -53,7 +53,7 @@ namespace Ordering.Infrastructure.Migrations
 
                     b.Property<string>("PictureUrl");
 
-                    b.Property<int>("ProductId");
+                    b.Property<Guid>("ProductId");
 
                     b.Property<string>("ProductName")
                         .IsRequired();

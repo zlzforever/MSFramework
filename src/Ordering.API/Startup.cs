@@ -1,23 +1,18 @@
 ﻿using System;
-using System.Linq;
-using System.Threading.Tasks;
+using MediatR;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.DependencyModel;
 using Microsoft.OpenApi.Models;
 using MSFramework;
 using MSFramework.AspNetCore;
 using MSFramework.EntityFrameworkCore;
 using MSFramework.EntityFrameworkCore.SqlServer;
 using MSFramework.EventBus;
-using MSFramework.EventSouring.EntityFrameworkCore;
-using Ordering.API.Controllers;
+using Ordering.Application.Command;
 using Ordering.Application.Event;
-using Ordering.Application.EventHandler;
 
 namespace Ordering.API
 {
@@ -31,7 +26,7 @@ namespace Ordering.API
 		public IConfiguration Configuration { get; }
 
 		// This method gets called by the runtime. Use this method to add services to the container.
-		public IServiceProvider ConfigureServices(IServiceCollection services)
+		public void ConfigureServices(IServiceCollection services)
 		{
 			services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
 
@@ -40,35 +35,28 @@ namespace Ordering.API
 				c.SwaggerDoc("v1.0", new OpenApiInfo {Version = "v1.0", Description = "Ordering API V1.0"});
 			});
 			services.AddHealthChecks();
-			services.AddScoped<MyClass>();
-			
-			var provider = services.AddMSFramework(builder =>
+			services.AddMSFramework(builder =>
 			{
-				// 使用命令总线
-				builder.UseCommandBus();
-				
+				builder.AddEventHandler(typeof(UserCheckoutAcceptedEvent));
+				builder.UseMediator(typeof(CancelOrderCommand));
 				// 开发环境可以使用本地消息总线，生产环境应该换成分布式消息队列
 				builder.UseLocalEventBus();
 
 				builder.UseAspNetCoreSession();
-
-				builder.UseEventStoreRepository();
 
 				builder.UseEntityFramework(ef =>
 				{
 					// 添加 SqlServer 支持
 					ef.AddSqlServerDbContextOptionsBuilderCreator();
 				}, Configuration);
-
-				// 使用 Ef EventStore, 初版不考虑回溯功能，仅仅把事件存起来当成审计来用，需要研究事件逻辑变化和已经存储的事件不匹配的解决方案
-				builder.UseEntityFrameworkEventSouring();
 			});
-			return provider;
 		}
 
 		// This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
 		public void Configure(IApplicationBuilder app, IHostingEnvironment env)
 		{
+			var a = app.ApplicationServices.CreateScope().ServiceProvider.GetRequiredService<IMediator>();
+			Console.WriteLine("get mediator");
 			if (env.IsDevelopment())
 			{
 				app.UseDeveloperExceptionPage();

@@ -16,7 +16,7 @@ namespace Ordering.Infrastructure.EntityConfigurations
 			orderItemConfiguration.Property<decimal>("Discount")
 				.IsRequired();
 
-			orderItemConfiguration.Property<int>("ProductId")
+			orderItemConfiguration.Property<Guid>("ProductId")
 				.IsRequired();
 
 			orderItemConfiguration.Property<string>("ProductName")

@@ -1,10 +1,11 @@
 ﻿using System;
+using MediatR;
 using Ordering.Domain.AggregateRoot;
 
-namespace Ordering.Application.DTO
+namespace Ordering.Application.Command
 {
-	public class ChangeOrderAddressDTO
-    {
+	public class ChangeOrderAddressCommand : IRequest<bool>
+	{
 		public Address NewAddress { get; set; }
 		
 		public Guid OrderId { get; set; }

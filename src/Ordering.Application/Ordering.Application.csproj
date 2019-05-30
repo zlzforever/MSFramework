@@ -9,4 +9,8 @@
       <ProjectReference Include="..\Ordering.Infrastructure\Ordering.Infrastructure.csproj" />
     </ItemGroup>
 
+    <ItemGroup>
+        <PackageReference Include="MediatR" Version="5.1.0" />
+        <PackageReference Include="MediatR.Extensions.Microsoft.DependencyInjection" Version="5.1.0" />
+    </ItemGroup>
 </Project>

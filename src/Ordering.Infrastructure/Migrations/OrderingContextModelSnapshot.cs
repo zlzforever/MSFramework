@@ -3,8 +3,6 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
-using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
-using Ordering.Infrastructure;
 
 namespace Ordering.Infrastructure.Migrations
 {
@@ -30,10 +28,10 @@ namespace Ordering.Infrastructure.Migrations
 
                     b.Property<bool>("IsDeleted");
 
+                    b.Property<int>("OrderStatus");
+
                     b.Property<string>("UserId")
                         .IsRequired();
-
-                    b.Property<int>("Version");
 
                     b.HasKey("Id");
 
@@ -51,7 +49,7 @@ namespace Ordering.Infrastructure.Migrations
 
                     b.Property<string>("PictureUrl");
 
-                    b.Property<int>("ProductId");
+                    b.Property<Guid>("ProductId");
 
                     b.Property<string>("ProductName")
                         .IsRequired();

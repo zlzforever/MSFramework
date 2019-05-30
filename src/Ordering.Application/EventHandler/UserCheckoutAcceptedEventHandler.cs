@@ -1,30 +1,42 @@
+using System.Linq;
 using System.Threading.Tasks;
+using MediatR;
 using Microsoft.Extensions.Logging;
+using MSFramework.Domain;
 using MSFramework.EventBus;
-using Ordering.Application.DTO;
+using Ordering.Application.Command;
 using Ordering.Application.Event;
-using Ordering.Application.Services;
 
 namespace Ordering.Application.EventHandler
 {
 	public class UserCheckoutAcceptedEventHandler : IEventHandler<UserCheckoutAcceptedEvent>
 	{
-		private readonly IOrderingAppService _orderingAppService;
 		private readonly ILogger _logger;
+		private readonly IMediator _mediator;
+		private readonly IMSFrameworkSession _session;
 
-		public UserCheckoutAcceptedEventHandler(IOrderingAppService orderingAppService,
+		public UserCheckoutAcceptedEventHandler(IMSFrameworkSession session,
+			IMediator mediator,
 			ILogger<UserCheckoutAcceptedEventHandler> logger)
 		{
-			_orderingAppService = orderingAppService;
 			_logger = logger;
+			_mediator = mediator;
+			_session = session;
 		}
 
 		public async Task Handle(UserCheckoutAcceptedEvent @event)
 		{
-			var dto = new CreateOrderDTO(@event.OrderItems, @event.UserId, @event.City, @event.Street,
-				@event.State, @event.Country, @event.ZipCode, @event.Description);
-			// IdentifiedCommand<> 必须保证只执行一次
-			await _orderingAppService.CreateOrder(dto);
+			await _mediator.Send(new CreateOrderCommand(@event.OrderItems.Select(x =>
+					new CreateOrderCommand.OrderItemDTO
+					{
+						Discount = x.Discount,
+						ProductId = x.ProductId,
+						PictureUrl = x.PictureUrl,
+						ProductName = x.ProductName,
+						Units = x.Units,
+						UnitPrice = x.UnitPrice
+					}).ToList(), @event.UserId, @event.City, @event.Street,
+				@event.State, @event.Country, @event.ZipCode, @event.Description));
 		}
 	}
 }

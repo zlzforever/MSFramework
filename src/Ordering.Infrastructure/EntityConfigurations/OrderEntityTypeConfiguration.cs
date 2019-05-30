@@ -21,7 +21,8 @@ namespace Ordering.Infrastructure.EntityConfigurations
 			orderConfiguration.Property<bool>("IsDeleted").IsRequired();
 			orderConfiguration.Property<string>("UserId").IsRequired();
 			orderConfiguration.Property<string>("Description").IsRequired(false);			
-
+			orderConfiguration.Property<OrderStatus>("OrderStatus").IsRequired();
+			
 			var navigation = orderConfiguration.Metadata.FindNavigation(nameof(Order.OrderItems));
             
 			// DDD Patterns comment:

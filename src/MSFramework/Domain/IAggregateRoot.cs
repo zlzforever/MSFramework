@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using MSFramework.EventBus;
 
 namespace MSFramework.Domain
 {
@@ -15,6 +13,6 @@ namespace MSFramework.Domain
 		/// <returns></returns>
 		Guid Id { get; }
 
-		int Version { get; }
+		bool IsTransient();
 	}
 }
