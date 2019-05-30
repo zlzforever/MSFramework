@@ -1,12 +1,12 @@
 using System.Threading;
 using System.Threading.Tasks;
 using MediatR;
-using Microsoft.AspNetCore.Mvc;
+using MSFramework.AspNetCore;
 using Ordering.Domain.Repository;
 
 namespace Ordering.Application.Command
 {
-	public class ChangeOrderAddressCommandHandler : IRequestHandler<ChangeOrderAddressCommand, IActionResult>
+	public class ChangeOrderAddressCommandHandler : IRequestHandler<ChangeOrderAddressCommand, ApiResult>
 	{
 		private readonly IOrderingRepository _orderRepository;
 
@@ -21,17 +21,17 @@ namespace Ordering.Application.Command
 		/// </summary>
 		/// <param name="command"></param>
 		/// <returns></returns>
-		public async Task<IActionResult> Handle(ChangeOrderAddressCommand command, CancellationToken cancellationToken)
+		public async Task<ApiResult> Handle(ChangeOrderAddressCommand command, CancellationToken cancellationToken)
 		{
 			var order = await _orderRepository.GetAsync(command.OrderId);
 			if (order == null)
 			{
-				return new BadRequestResult();
+				return new FailedApiResult("无效的订单号");
 			}
 
 			order.ChangeAddress(command.NewAddress);
 			await _orderRepository.UnitOfWork.CommitAsync();
-			return new OkResult();
+			return new ApiResult();
 		}
 	}
 }

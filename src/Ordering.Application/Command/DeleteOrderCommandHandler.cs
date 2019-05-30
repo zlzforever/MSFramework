@@ -2,11 +2,12 @@ using System.Threading;
 using System.Threading.Tasks;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using MSFramework.AspNetCore;
 using Ordering.Domain.Repository;
 
 namespace Ordering.Application.Command
 {
-	public class DeleteOrderCommandHandler : IRequestHandler<DeleteOrderCommand, IActionResult>
+	public class DeleteOrderCommandHandler : IRequestHandler<DeleteOrderCommand, ApiResult>
 	{
 		private readonly IOrderingRepository _orderRepository;
 
@@ -21,17 +22,17 @@ namespace Ordering.Application.Command
 		/// </summary>
 		/// <param name="command"></param>
 		/// <returns></returns>
-		public async Task<IActionResult> Handle(DeleteOrderCommand command, CancellationToken cancellationToken)
+		public async Task<ApiResult> Handle(DeleteOrderCommand command, CancellationToken cancellationToken)
 		{
 			var order = await _orderRepository.GetAsync(command.OrderId);
 			if (order == null)
 			{
-				return new BadRequestResult();
+				return new FailedApiResult("无效的订单号");
 			}
 
 			await _orderRepository.DeleteAsync(order);
 			await _orderRepository.UnitOfWork.CommitAsync();
-			return new OkResult();
+			return new ApiResult();
 		}
 	}
 }

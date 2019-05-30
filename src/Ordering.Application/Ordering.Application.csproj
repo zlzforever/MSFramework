@@ -5,6 +5,7 @@
     </PropertyGroup>
 
     <ItemGroup>
+      <ProjectReference Include="..\MSFramework.AspNetCore\MSFramework.AspNetCore.csproj" />
       <ProjectReference Include="..\Ordering.Domain\Ordering.Domain.csproj" />
       <ProjectReference Include="..\Ordering.Infrastructure\Ordering.Infrastructure.csproj" />
     </ItemGroup>
@@ -12,6 +13,5 @@
     <ItemGroup>
         <PackageReference Include="MediatR" Version="5.1.0" />
         <PackageReference Include="MediatR.Extensions.Microsoft.DependencyInjection" Version="5.1.0" />
-        <PackageReference Include="Microsoft.AspNetCore.Mvc.Core" Version="2.2.0"/>
     </ItemGroup>
 </Project>

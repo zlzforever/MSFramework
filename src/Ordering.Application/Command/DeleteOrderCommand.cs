@@ -1,10 +1,10 @@
 using System;
 using MediatR;
-using Microsoft.AspNetCore.Mvc;
+using MSFramework.AspNetCore;
 
 namespace Ordering.Application.Command
 {
-	public class DeleteOrderCommand : IRequest<IActionResult>
+	public class DeleteOrderCommand : IRequest<ApiResult>
 	{
 		public Guid OrderId { get; private set; }
 
