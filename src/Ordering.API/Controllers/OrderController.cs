@@ -8,7 +8,6 @@ using MSFramework.AspNetCore;
 using MSFramework.Domain;
 using MSFramework.EventBus;
 using Ordering.Application.Command;
-using Ordering.Application.Event;
 using Ordering.Application.Query;
 
 

@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using AspectCore.Extensions.DependencyInjection;
@@ -18,31 +17,11 @@ namespace MSFramework
 {
 	public static class ServiceCollectionExtensions
 	{
-		private static ICollection<Tuple<Type, Type>> _eventHandlers = new List<Tuple<Type, Type>>();
-		private static ICollection<Tuple<string, Type>> _dynamicEventHandlers = new List<Tuple<string, Type>>();
+		private static Type[] _types;
 
-		public static MSFrameworkBuilder AddEventHandler<TEvent, TEventHandler>(this MSFrameworkBuilder builder)
-			where TEvent : class, IEvent
-			where TEventHandler : IEventHandler<TEvent>
+		public static MSFrameworkBuilder AddEventHandler(this MSFrameworkBuilder builder, params Type[] types)
 		{
-			var type = typeof(TEventHandler);
-			builder.Services.AddScoped(type);
-			_eventHandlers.Add(new Tuple<Type, Type>(typeof(TEvent), type));
-			return builder;
-		}
-
-		public static MSFrameworkBuilder AddEventHandler<TEventHandler>(this MSFrameworkBuilder builder, string name)
-			where TEventHandler : IDynamicEventHandler
-		{
-			if (string.IsNullOrWhiteSpace(name))
-			{
-				throw new MSFrameworkException("Subscribe name should not be empty/null");
-			}
-
-			var type = typeof(TEventHandler);
-			builder.Services.AddScoped(type);
-			_dynamicEventHandlers.Add(new Tuple<string, Type>(name, type));
-
+			_types = types;
 			return builder;
 		}
 
@@ -51,7 +30,7 @@ namespace MSFramework
 			builder.Services.AddMediatR(types);
 			return builder;
 		}
-		
+
 		public static IServiceProvider AddMSFramework(this IServiceCollection services,
 			Action<MSFrameworkBuilder> builderAction = null)
 		{
@@ -86,7 +65,7 @@ namespace MSFramework
 			{
 				Singleton<IIdGenerator>.Instance = new IdGenerator();
 			}
-			
+
 			builder.Services.AddSingleton<IEventBusSubscriptionStore, InMemoryEventBusSubscriptionStore>();
 			builder.UseLocalEventBus();
 
@@ -97,46 +76,64 @@ namespace MSFramework
 
 		public static IApplicationBuilder UseMSFramework(this IApplicationBuilder builder)
 		{
+			SubscribeEventHandler(builder);
+			Initialize(builder);
+			return builder;
+		}
+
+		private static void SubscribeEventHandler(IApplicationBuilder builder)
+		{
 			var eventBus = builder.ApplicationServices.GetService<IEventBus>();
-
-			var subscribeMethod = typeof(IEventBus).GetMethod("Subscribe", new Type[0]);
-			if (subscribeMethod != null)
+			if (_types != null && _types.Length > 0 && eventBus != null)
 			{
-				var noneParameters = new object[0];
-
-				foreach (var handler in _eventHandlers)
+				var subscribeHandlerMethod = typeof(IEventBus).GetMethod("Subscribe", new Type[0]);
+				if (subscribeHandlerMethod == null)
 				{
-					var method = subscribeMethod.MakeGenericMethod(handler.Item1, handler.Item2);
-					if (eventBus != null)
+					return;
+				}
+
+				var subscribeDynamicHandlerMethod = typeof(IEventBus).GetMethod("Subscribe", new[] {typeof(string)});
+				if (subscribeDynamicHandlerMethod == null)
+				{
+					return;
+				}
+
+				var types = _types.SelectMany(x => x.Assembly.GetTypes()).ToList();
+				var baseEventType = typeof(Event);
+				var dynamicHandler = typeof(IDynamicEventHandler);
+
+				foreach (var handlerType in types)
+				{
+					if (dynamicHandler.IsAssignableFrom(handlerType))
 					{
-						method.Invoke(eventBus, noneParameters);
+						var subscribeName = handlerType.GetCustomAttribute<SubscribeName>();
+						if (subscribeName != null)
+						{
+							subscribeDynamicHandlerMethod.MakeGenericMethod(handlerType).Invoke(eventBus,
+								new object[] {subscribeName.Name});
+						}
+					}
+					else
+					{
+						var eventType = handlerType.GetInterface("IEventHandler`1")?.GenericTypeArguments
+							.SingleOrDefault();
+						if (eventType != null && baseEventType.IsAssignableFrom(baseEventType))
+						{
+							var method = subscribeHandlerMethod.MakeGenericMethod(eventType, handlerType);
+							method.Invoke(eventBus, new object[0]);
+						}
 					}
 				}
 			}
+		}
 
-			var subscribeDynamicMethod = typeof(IEventBus).GetMethod("Subscribe", new[] {typeof(string)});
-			if (subscribeDynamicMethod != null)
-			{
-				foreach (var handler in _dynamicEventHandlers)
-				{
-					var typeParameters = new object[] {handler.Item1};
-					if (eventBus != null)
-					{
-						subscribeDynamicMethod.Invoke(eventBus, typeParameters);
-					}
-				}
-			}
-
-			_eventHandlers = new List<Tuple<Type, Type>>();
-			_dynamicEventHandlers = new List<Tuple<string, Type>>();
-
+		private static void Initialize(IApplicationBuilder builder)
+		{
 			var initializers = builder.ApplicationServices.GetServices<IInitializer>().ToList();
 			foreach (var initializer in initializers)
 			{
 				initializer.Initialize();
 			}
-
-			return builder;
 		}
 
 		/// <summary>

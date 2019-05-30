@@ -6,7 +6,6 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using MSFramework.Common;
 using MSFramework.Serialization;
-using Newtonsoft.Json.Linq;
 using Polly;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
@@ -86,36 +85,36 @@ namespace MSFramework.EventBus.RabbitMQ
 			return Task.CompletedTask;
 		}
 
-		public void Subscribe<T, TH>() where T : class, IEvent where TH : IEventHandler<T>
+		public void Subscribe<TEvent, TEventHandler>() where TEvent : class, IEvent where TEventHandler : IEventHandler<TEvent>
 		{
-			var eventName = _store.GetEventKey<T>();
+			var eventName = _store.GetEventKey<TEvent>();
 			Subscribe(eventName);
 
 			_logger.LogInformation("Subscribing to event {EventName} with {EventHandler}", eventName,
-				typeof(TH).GetEventName());
+				typeof(TEventHandler).GetEventName());
 
-			_store.AddSubscription<T, TH>();
+			_store.AddSubscription<TEvent, TEventHandler>();
 			StartBasicConsume();
 		}
 
-		public void Subscribe<TH>(string eventName) where TH : IDynamicEventHandler
+		public void Subscribe<TEventHandler>(string eventName) where TEventHandler : IDynamicEventHandler
 		{
 			_logger.LogInformation("Subscribing to dynamic event {EventName} with {EventHandler}", eventName,
-				typeof(TH).GetEventName());
+				typeof(TEventHandler).GetEventName());
 
 			Subscribe(eventName);
-			_store.AddSubscription<TH>(eventName);
+			_store.AddSubscription<TEventHandler>(eventName);
 			StartBasicConsume();
 		}
 
-		public void Unsubscribe<TH>(string eventName) where TH : IDynamicEventHandler
+		public void Unsubscribe<TEventHandler>(string eventName) where TEventHandler : IDynamicEventHandler
 		{
-			_store.RemoveSubscription<TH>(eventName);
+			_store.RemoveSubscription<TEventHandler>(eventName);
 		}
 
-		public void Unsubscribe<T, TH>() where T : class, IEvent where TH : IEventHandler<T>
+		public void Unsubscribe<TEvent, TEventHandler>() where TEvent : class, IEvent where TEventHandler : IEventHandler<TEvent>
 		{
-			_store.RemoveSubscription<T, TH>();
+			_store.RemoveSubscription<TEvent, TEventHandler>();
 		}
 
 		public void Dispose()
@@ -211,8 +210,7 @@ namespace MSFramework.EventBus.RabbitMQ
 							IDynamicEventHandler handler =
 								scope.ServiceProvider.GetService(subscription.HandlerType) as IDynamicEventHandler;
 							if (handler == null) continue;
-							dynamic eventData = JObject.Parse(message);
-							await handler.Handle(eventData);
+							await handler.Handle(message);
 						}
 						else
 						{

@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using Ordering.Domain.AggregateRoot;
 
 namespace Ordering.Application.Event
 {

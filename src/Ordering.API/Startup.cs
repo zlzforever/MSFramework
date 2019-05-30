@@ -12,6 +12,7 @@ using MSFramework.EntityFrameworkCore;
 using MSFramework.EntityFrameworkCore.SqlServer;
 using MSFramework.EventBus;
 using Ordering.Application.Command;
+using Ordering.Application.Event;
 
 namespace Ordering.API
 {
@@ -36,6 +37,7 @@ namespace Ordering.API
 			services.AddHealthChecks();
 			services.AddMSFramework(builder =>
 			{
+				builder.AddEventHandler(typeof(UserCheckoutAcceptedEvent));
 				builder.UseMediator(typeof(CancelOrderCommand));
 				// 开发环境可以使用本地消息总线，生产环境应该换成分布式消息队列
 				builder.UseLocalEventBus();
