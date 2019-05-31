@@ -27,18 +27,18 @@ namespace MSFramework.EventBus.RabbitMQ
 		public RabbitMQEventBus(RabbitMQConnection connection,
 			RabbitMQOptions options,
 			ILogger<RabbitMQEventBus> logger,
-			IServiceScopeFactory serviceScopeFactory, IEventBusSubscriptionStore subsManager, string queueName = null,
+			IServiceScopeFactory serviceScopeFactory, IEventBusSubscriptionStore subsManager, string queueName = "RabbitMQEventBus",
 			int retryCount = 5)
 		{
 			_connection = connection ?? throw new ArgumentNullException(nameof(connection));
 			_logger = logger ?? throw new ArgumentNullException(nameof(logger));
 			_store = subsManager ?? new InMemoryEventBusSubscriptionStore();
 			_queueName = queueName;
-			_consumerChannel = CreateConsumerChannel();
+			_options = options;
 			_serviceScopeFactory = serviceScopeFactory;
 			_retryCount = retryCount;
 			_store.OnEventRemoved += EventBusStore_OnEventRemoved;
-			_options = options;
+			_consumerChannel = CreateConsumerChannel();
 		}
 
 		public Task PublishAsync(IEvent @event)

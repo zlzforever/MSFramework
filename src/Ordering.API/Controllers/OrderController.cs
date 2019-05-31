@@ -8,6 +8,7 @@ using MSFramework.AspNetCore;
 using MSFramework.Domain;
 using MSFramework.EventBus;
 using Ordering.Application.Command;
+using Ordering.Application.Event;
 using Ordering.Application.Query;
 
 
@@ -28,6 +29,13 @@ namespace Ordering.API.Controllers
 			_orderingQuery = orderingQuery;
 			_eventBus = eventBus;
 			_mediator = mediator;
+		}
+		[HttpGet("rabbitmq")]
+		public async Task<IActionResult> Test()
+		{
+			await _eventBus.PublishAsync(new UserCheckoutAcceptedEvent(new List<UserCheckoutAcceptedEvent.OrderItemDTO>() { }
+			, "aaa", "bbb", "ccc", "ddd", "eee", "fff", "xxx"));
+			return Ok();
 		}
 
 		#region  Command

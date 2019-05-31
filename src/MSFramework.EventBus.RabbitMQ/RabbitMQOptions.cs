@@ -15,7 +15,9 @@ namespace MSFramework.EventBus.RabbitMQ
 			? "EventBus"
 			: _configuration["RabbitMQ:BrokerName"];
 
-		public string ConnectionString => _configuration["RabbitMQ:Connection"];
+		public string HostName => _configuration["RabbitMQ:HostName"];
+
+		public int Port => int.Parse(_configuration["RabbitMQ:Port"]);
 
 		public string UserName => _configuration["RabbitMQ:UserName"];
 

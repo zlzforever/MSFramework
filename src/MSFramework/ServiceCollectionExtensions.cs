@@ -19,9 +19,37 @@ namespace MSFramework
 	{
 		private static Type[] _types;
 
-		public static MSFrameworkBuilder UseEventHandler(this MSFrameworkBuilder builder, params Type[] types)
+		public static MSFrameworkBuilder UseEventHandler(this MSFrameworkBuilder builder, params Type[] evnetTypes)
 		{
-			_types = types;
+			_types = evnetTypes;
+
+			if (_types != null && _types.Length > 0)
+			{
+				var types = _types.SelectMany(x => x.Assembly.GetTypes()).ToList();
+				var baseEventType = typeof(Event);
+				var dynamicHandler = typeof(IDynamicEventHandler);
+
+				foreach (var handlerType in types)
+				{
+					if (dynamicHandler.IsAssignableFrom(handlerType))
+					{
+						var subscribeName = handlerType.GetCustomAttribute<SubscribeName>();
+						if (subscribeName != null)
+						{
+							builder.Services.AddTransient(handlerType);
+						}
+					}
+					else
+					{
+						var eventType = handlerType.GetInterface("IEventHandler`1")?.GenericTypeArguments
+							.SingleOrDefault();
+						if (eventType != null && baseEventType.IsAssignableFrom(baseEventType))
+						{
+							builder.Services.AddTransient(handlerType);
+						}
+					}
+				}
+			}
 			return builder;
 		}
 
@@ -67,7 +95,6 @@ namespace MSFramework
 			}
 
 			builder.Services.AddSingleton<IEventBusSubscriptionStore, InMemoryEventBusSubscriptionStore>();
-			builder.UseLocalEventBus();
 
 			builder.Services.AddHttpClient();
 
@@ -92,7 +119,7 @@ namespace MSFramework
 					return;
 				}
 
-				var subscribeDynamicHandlerMethod = typeof(IEventBus).GetMethod("Subscribe", new[] {typeof(string)});
+				var subscribeDynamicHandlerMethod = typeof(IEventBus).GetMethod("Subscribe", new[] { typeof(string) });
 				if (subscribeDynamicHandlerMethod == null)
 				{
 					return;
@@ -110,7 +137,7 @@ namespace MSFramework
 						if (subscribeName != null)
 						{
 							subscribeDynamicHandlerMethod.MakeGenericMethod(handlerType).Invoke(eventBus,
-								new object[] {subscribeName.Name});
+								new object[] { subscribeName.Name });
 						}
 					}
 					else
