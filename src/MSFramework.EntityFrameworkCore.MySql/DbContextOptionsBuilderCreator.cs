@@ -5,7 +5,7 @@ namespace MSFramework.EntityFrameworkCore.MySql
 {
 	public class DbContextOptionsBuilderCreator : IDbContextOptionsBuilderCreator
 	{
-		public string Type => "SqlServer";
+		public string Type => "MySql";
 
 		public DbContextOptionsBuilder Create(Type dbContextType, string connectionString)
 		{

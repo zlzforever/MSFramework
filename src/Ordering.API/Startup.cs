@@ -9,6 +9,7 @@ using Microsoft.OpenApi.Models;
 using MSFramework;
 using MSFramework.AspNetCore;
 using MSFramework.EntityFrameworkCore;
+using MSFramework.EntityFrameworkCore.MySql;
 using MSFramework.EntityFrameworkCore.SqlServer;
 using MSFramework.EventBus;
 using MSFramework.EventBus.RabbitMQ;
@@ -49,6 +50,7 @@ namespace Ordering.API
 				{
 					// 添加 SqlServer 支持
 					ef.AddSqlServerDbContextOptionsBuilderCreator();
+					ef.AddMySqlDbContextOptionsBuilderCreator();
 				}, Configuration);
 			});
 		}
