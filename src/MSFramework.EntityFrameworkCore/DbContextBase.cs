@@ -4,6 +4,8 @@ using System.Threading;
 using System.Threading.Tasks;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
+using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.Extensions.Logging;
 using MSFramework.Domain;
 
@@ -92,6 +94,7 @@ namespace MSFramework.EntityFrameworkCore
 		{
 			try
 			{
+				ApplyConcepts();
 				if (Database.CurrentTransaction == null)
 				{
 					Database.BeginTransaction();
@@ -137,6 +140,8 @@ namespace MSFramework.EntityFrameworkCore
 		{
 			try
 			{
+				ApplyConcepts();
+
 				if (Database.CurrentTransaction == null)
 				{
 					await Database.BeginTransactionAsync(cancellationToken);
@@ -184,8 +189,93 @@ namespace MSFramework.EntityFrameworkCore
 
 			// After executing this line all the changes (from the Command Handler and Domain Event Handlers) 
 			// performed through the DbContext will be committed
-			await base.SaveChangesAsync();
+			await SaveChangesAsync();
 			return true;
+		}
+
+		protected virtual void ApplyConcepts()
+		{
+			var userId = GetUserId();
+			foreach (var entry in ChangeTracker.Entries())
+			{
+				ApplyConcepts(entry, userId);
+			}
+		}
+
+		private string GetUserId()
+		{
+			return this.GetService<IMSFrameworkSession>().UserId;
+		}
+
+		protected virtual void ApplyConcepts(EntityEntry entry, string userId)
+		{
+			switch (entry.State)
+			{
+				case EntityState.Added:
+					ApplyConceptsForAddedEntity(entry, userId);
+					break;
+				case EntityState.Modified:
+					ApplyConceptsForModifiedEntity(entry, userId);
+					break;
+				case EntityState.Deleted:
+					ApplyConceptsForDeletedEntity(entry, userId);
+					break;
+			}
+		}
+
+		protected virtual void ApplyConceptsForAddedEntity(EntityEntry entry, string userId)
+		{
+			if (entry.Entity is ICreationAudited creationAudited)
+			{
+				if (creationAudited.CreationTime == default)
+				{
+					creationAudited.CreationTime = DateTime.Now;
+				}
+
+				if (!string.IsNullOrWhiteSpace(userId) && string.IsNullOrWhiteSpace(creationAudited.CreationUserId))
+				{
+					creationAudited.CreationUserId = userId;
+				}
+			}
+		}
+
+		protected virtual void ApplyConceptsForModifiedEntity(EntityEntry entry, string userId)
+		{
+			if (entry.Entity is IModificationAudited creationAudited)
+			{
+				if (creationAudited.LastModificationTime == default)
+				{
+					creationAudited.LastModificationTime = DateTime.Now;
+				}
+
+				if (!string.IsNullOrWhiteSpace(userId) && string.IsNullOrWhiteSpace(creationAudited.LastModifierUserId))
+				{
+					creationAudited.LastModifierUserId = userId;
+				}
+			}
+		}
+
+		protected virtual void ApplyConceptsForDeletedEntity(EntityEntry entry, string userId)
+		{
+			var deleteEntity = entry.Entity as ISoftDelete;
+			if (deleteEntity == null)
+			{
+				return;
+			}
+
+			entry.Reload();
+			entry.State = EntityState.Modified;
+			deleteEntity.IsDeleted = true;
+
+			if (deleteEntity.DeletionTime == default)
+			{
+				deleteEntity.DeletionTime = DateTime.Now;
+			}
+
+			if (!string.IsNullOrWhiteSpace(userId) && string.IsNullOrWhiteSpace(deleteEntity.DeleteUserId))
+			{
+				deleteEntity.DeleteUserId = userId;
+			}
 		}
 	}
 }
