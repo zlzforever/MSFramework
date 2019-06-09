@@ -3,6 +3,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using MediatR;
+using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.EntityFrameworkCore.Infrastructure;
@@ -17,6 +18,8 @@ namespace MSFramework.EntityFrameworkCore
 		private readonly ILoggerFactory _loggerFactory;
 		private readonly IEntityConfigurationTypeFinder _typeFinder;
 		private readonly IMediator _mediator;
+		
+		public IMSFrameworkSession Session { get; internal set; }
 
 		/// <summary>
 		/// 初始化一个<see cref="DbContextBase"/>类型的新实例
@@ -94,20 +97,22 @@ namespace MSFramework.EntityFrameworkCore
 		{
 			try
 			{
-				ApplyConcepts();
-				if (Database.CurrentTransaction == null)
+				var changed = ChangeTracker.Entries().Any();
+				if (!changed)
 				{
-					Database.BeginTransaction();
+					return 0;
 				}
 
+				ApplyConcepts();
+
 				var effectCount = base.SaveChanges();
-				Database.CommitTransaction();
+				Database.CurrentTransaction?.Commit();
 				return effectCount;
 			}
-			catch (Exception ex)
+			catch
 			{
-				Database.RollbackTransaction();
-				throw new MSFrameworkException(ex.Message, ex);
+				Database.CurrentTransaction?.Rollback();
+				throw;
 			}
 		}
 
@@ -140,26 +145,27 @@ namespace MSFramework.EntityFrameworkCore
 		{
 			try
 			{
-				ApplyConcepts();
-
-				if (Database.CurrentTransaction == null)
+				var changed = ChangeTracker.Entries().Any();
+				if (!changed)
 				{
-					await Database.BeginTransactionAsync(cancellationToken);
+					return 0;
 				}
+
+				ApplyConcepts();
 
 				// After executing this line all the changes (from the Command Handler and Domain Event Handlers) 
 				// performed through the DbContext will be committed
 
 				var effectedCount = await base.SaveChangesAsync(cancellationToken);
 
-				Database.CommitTransaction();
+				Database.CurrentTransaction?.Commit();
 
 				return effectedCount;
 			}
-			catch (Exception ex)
+			catch
 			{
-				Database.RollbackTransaction();
-				throw new MSFrameworkException(ex.Message, ex);
+				Database.CurrentTransaction?.Rollback();
+				throw;
 			}
 		}
 
@@ -195,16 +201,10 @@ namespace MSFramework.EntityFrameworkCore
 
 		protected virtual void ApplyConcepts()
 		{
-			var userId = GetUserId();
 			foreach (var entry in ChangeTracker.Entries())
 			{
-				ApplyConcepts(entry, userId);
+				ApplyConcepts(entry, Session.UserId);
 			}
-		}
-
-		private string GetUserId()
-		{
-			return this.GetService<IMSFrameworkSession>().UserId;
 		}
 
 		protected virtual void ApplyConcepts(EntityEntry entry, string userId)

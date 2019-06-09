@@ -35,6 +35,11 @@ namespace MSFramework.EntityFrameworkCore
 		public string DatabaseType { get; set; }
 
 		/// <summary>
+		/// 启用事务
+		/// </summary>
+		public bool UseTransaction { get; set; }
+
+		/// <summary>
 		/// 获取或设置 是否启用延迟加载代理
 		/// </summary>
 		public bool LazyLoadingProxiesEnabled { get; set; }

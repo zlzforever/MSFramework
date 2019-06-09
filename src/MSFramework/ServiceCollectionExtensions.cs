@@ -94,6 +94,8 @@ namespace MSFramework
 				Singleton<IIdGenerator>.Instance = new IdGenerator();
 			}
 
+			builder.Services.AddMediatR();
+
 			builder.Services.AddSingleton<IEventBusSubscriptionStore, InMemoryEventBusSubscriptionStore>();
 
 			builder.Services.AddHttpClient();

@@ -10,9 +10,9 @@ using MSFramework.Domain.Repository;
 
 namespace MSFramework.EntityFrameworkCore
 {
-	public abstract class EfRepository<TEntity> : IRepository<TEntity> where TEntity : class, IAggregateRoot, IEntity
+	public class EfRepository<TEntity> : IRepository<TEntity> where TEntity : class, IAggregateRoot, IEntity
 	{
-		protected EfRepository(DbContextFactory dbContextFactory)
+		public EfRepository(DbContextFactory dbContextFactory)
 		{
 			DbContext = dbContextFactory.GetDbContext<TEntity>();
 			Table = DbContext.Set<TEntity>();

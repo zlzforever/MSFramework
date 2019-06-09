@@ -15,6 +15,7 @@ using MSFramework.EventBus;
 using MSFramework.EventBus.RabbitMQ;
 using Ordering.Application.Command;
 using Ordering.Application.Event;
+using Ordering.Domain.AggregateRoot;
 
 namespace Ordering.API
 {
@@ -58,8 +59,6 @@ namespace Ordering.API
 		// This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
 		public void Configure(IApplicationBuilder app, IHostingEnvironment env)
 		{
-			var a = app.ApplicationServices.CreateScope().ServiceProvider.GetRequiredService<IMediator>();
-			Console.WriteLine("get mediator");
 			if (env.IsDevelopment())
 			{
 				app.UseDeveloperExceptionPage();

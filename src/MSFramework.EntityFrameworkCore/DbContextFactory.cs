@@ -85,13 +85,18 @@ namespace MSFramework.EntityFrameworkCore
 				builderCreator.Create(dbContextType, resolveOptions.ConnectionString);
 
 			DbContextOptions options = optionsBuilder.Options;
-			var a = _serviceProvider.CreateScope().ServiceProvider.GetRequiredService<IMediator>();
-			Console.WriteLine("get mediator");
 			//创建上下文实例
 			if (!(ActivatorUtilities.CreateInstance(_serviceProvider, dbContextType, options) is
 				DbContextBase context))
 			{
 				throw new MSFrameworkException($"实例化数据上下文“{dbContextType.AssemblyQualifiedName}”失败");
+			}
+
+			context.Session = _serviceProvider.GetRequiredService<IMSFrameworkSession>();
+			
+			if (resolveOptions.UseTransaction && context.Database.CurrentTransaction == null)
+			{
+				context.Database.BeginTransaction();
 			}
 
 			_dbContextDict.TryAdd(dbContextType, context);
