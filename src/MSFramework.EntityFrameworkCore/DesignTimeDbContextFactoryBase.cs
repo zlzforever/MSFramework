@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using MSFramework.Domain;
 using MSFramework.EventBus;
 
 namespace MSFramework.EntityFrameworkCore

@@ -203,7 +203,7 @@ namespace MSFramework.EntityFrameworkCore
 		{
 			foreach (var entry in ChangeTracker.Entries())
 			{
-				ApplyConcepts(entry, Session.UserId);
+				ApplyConcepts(entry, Session?.UserId);
 			}
 		}
 

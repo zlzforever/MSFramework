@@ -1,5 +1,6 @@
 ﻿using System;
 using Microsoft.EntityFrameworkCore;
+using Pomelo.EntityFrameworkCore.MySql.Infrastructure;
 
 namespace MSFramework.EntityFrameworkCore.MySql
 {
@@ -12,7 +13,11 @@ namespace MSFramework.EntityFrameworkCore.MySql
 			DbContextOptionsBuilder optionsBuilder = new DbContextOptionsBuilder();
 			string entryAssemblyName = dbContextType.Assembly.GetName().Name;
 			return optionsBuilder.UseMySql(connectionString,
-				builder => { builder.MigrationsAssembly(entryAssemblyName); });
+				builder =>
+				{
+					builder.MigrationsAssembly(entryAssemblyName);
+					builder.UnicodeCharSet(CharSet.Utf8mb4);
+				});
 		}
 	}
 }

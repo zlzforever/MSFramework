@@ -92,7 +92,7 @@ namespace MSFramework.EntityFrameworkCore
 				throw new MSFrameworkException($"实例化数据上下文“{dbContextType.AssemblyQualifiedName}”失败");
 			}
 
-			context.Session = _serviceProvider.GetRequiredService<IMSFrameworkSession>();
+			context.Session = _serviceProvider.GetService<IMSFrameworkSession>();
 			
 			if (resolveOptions.UseTransaction && context.Database.CurrentTransaction == null)
 			{
