@@ -229,7 +229,7 @@ namespace MSFramework.EntityFrameworkCore
 			{
 				if (creationAudited.CreationTime == default)
 				{
-					creationAudited.CreationTime = DateTime.Now;
+					creationAudited.CreationTime = DateTimeOffset.Now;
 				}
 
 				if (!string.IsNullOrWhiteSpace(userId) && string.IsNullOrWhiteSpace(creationAudited.CreationUserId))
@@ -245,7 +245,7 @@ namespace MSFramework.EntityFrameworkCore
 			{
 				if (creationAudited.LastModificationTime == default)
 				{
-					creationAudited.LastModificationTime = DateTime.Now;
+					creationAudited.LastModificationTime =  DateTimeOffset.Now;
 				}
 
 				if (!string.IsNullOrWhiteSpace(userId) && string.IsNullOrWhiteSpace(creationAudited.LastModifierUserId))
@@ -269,7 +269,7 @@ namespace MSFramework.EntityFrameworkCore
 
 			if (deleteEntity.DeletionTime == default)
 			{
-				deleteEntity.DeletionTime = DateTime.Now;
+				deleteEntity.DeletionTime = DateTimeOffset.Now;
 			}
 
 			if (!string.IsNullOrWhiteSpace(userId) && string.IsNullOrWhiteSpace(deleteEntity.DeleteUserId))

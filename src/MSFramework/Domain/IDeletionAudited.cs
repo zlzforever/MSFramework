@@ -1,4 +1,5 @@
 using System;
+using System.ComponentModel.DataAnnotations;
 
 namespace MSFramework.Domain
 {
@@ -12,6 +13,6 @@ namespace MSFramework.Domain
 		/// <summary>
 		/// Deletion time of this entity.
 		/// </summary>
-		DateTime? DeletionTime { get; set; }
+		DateTimeOffset? DeletionTime { get; set; }
 	}
 }

@@ -8,7 +8,7 @@ namespace MSFramework.EventBus
 		protected Event()
 		{
 			Id = CombGuid.NewGuid();
-			Timestamp = DateTime.UtcNow;
+			Timestamp = DateTimeOffset.UtcNow;
 		}
 
 		public Guid Id { get; set; }

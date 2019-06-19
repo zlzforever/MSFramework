@@ -50,11 +50,11 @@ namespace MSFramework.EventSouring
 		/// 时间戳
 		/// </summary>
 		[Required]
-		public DateTime Timestamp { get; set; }
+		public DateTimeOffset Timestamp { get; set; }
 
 		public StoredEvent()
 		{
-			Timestamp = DateTime.UtcNow;
+			Timestamp = DateTimeOffset.UtcNow;
 		}
 
 		public StoredEvent(Event @event) : this()

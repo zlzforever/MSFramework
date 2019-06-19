@@ -4,7 +4,7 @@ namespace MSFramework.Domain
 {
 	public interface ISoftDelete
 	{
-		bool? IsDeleted { get; set; }
+		bool IsDeleted { get; set; }
 		
 		/// <summary>
 		/// Last modifier user for this entity.
@@ -14,6 +14,6 @@ namespace MSFramework.Domain
 		/// <summary>
 		/// Deletion time of this entity.
 		/// </summary>
-		DateTime? DeletionTime { get; set; }
+		DateTimeOffset? DeletionTime { get; set; }
 	}
 }
