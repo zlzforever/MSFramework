@@ -2,13 +2,11 @@ using System;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using MediatR;
-using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
-using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.Extensions.Logging;
 using MSFramework.Domain;
+using MSFramework.EventBus;
 
 namespace MSFramework.EntityFrameworkCore
 {
@@ -17,22 +15,22 @@ namespace MSFramework.EntityFrameworkCore
 		private readonly ILogger _logger;
 		private readonly ILoggerFactory _loggerFactory;
 		private readonly IEntityConfigurationTypeFinder _typeFinder;
-		private readonly IMediator _mediator;
-		
+		private readonly IEventBus _eventBus;
+
 		public IMSFrameworkSession Session { get; internal set; }
 
 		/// <summary>
 		/// 初始化一个<see cref="DbContextBase"/>类型的新实例
 		/// </summary>
-		protected DbContextBase(DbContextOptions options, IMediator mediator,
+		protected DbContextBase(DbContextOptions options, IEventBus eventBus,
 			IEntityConfigurationTypeFinder typeFinder,
 			ILoggerFactory loggerFactory)
 			: base(options)
 		{
 			_typeFinder = typeFinder;
+			_eventBus = eventBus;
 			_loggerFactory = loggerFactory;
 			_logger = loggerFactory?.CreateLogger(GetType());
-			_mediator = mediator;
 		}
 
 		/// <summary>
@@ -190,7 +188,7 @@ namespace MSFramework.EntityFrameworkCore
 
 			foreach (var @event in domainEvents)
 			{
-				await _mediator.Publish(@event);
+				await _eventBus.PublishAsync(@event);
 			}
 
 			// After executing this line all the changes (from the Command Handler and Domain Event Handlers) 
@@ -203,78 +201,50 @@ namespace MSFramework.EntityFrameworkCore
 		{
 			foreach (var entry in ChangeTracker.Entries())
 			{
-				ApplyConcepts(entry, Session?.UserId);
+				ApplyConcepts(entry, Session?.UserId, Session?.UserName);
 			}
 		}
 
-		protected virtual void ApplyConcepts(EntityEntry entry, string userId)
+		protected virtual void ApplyConcepts(EntityEntry entry, string userId, string userName)
 		{
 			switch (entry.State)
 			{
 				case EntityState.Added:
-					ApplyConceptsForAddedEntity(entry, userId);
+					ApplyConceptsForAddedEntity(entry, userId, userName);
 					break;
 				case EntityState.Modified:
-					ApplyConceptsForModifiedEntity(entry, userId);
+					ApplyConceptsForModifiedEntity(entry, userId, userName);
 					break;
 				case EntityState.Deleted:
-					ApplyConceptsForDeletedEntity(entry, userId);
+					ApplyConceptsForDeletedEntity(entry, userId, userName);
 					break;
 			}
 		}
 
-		protected virtual void ApplyConceptsForAddedEntity(EntityEntry entry, string userId)
+		protected virtual void ApplyConceptsForAddedEntity(EntityEntry entry, string userId, string userName)
 		{
 			if (entry.Entity is ICreationAudited creationAudited)
 			{
-				if (creationAudited.CreationTime == default)
-				{
-					creationAudited.CreationTime = DateTimeOffset.Now;
-				}
-
-				if (!string.IsNullOrWhiteSpace(userId) && string.IsNullOrWhiteSpace(creationAudited.CreationUserId))
-				{
-					creationAudited.CreationUserId = userId;
-				}
+				creationAudited.SetCreationAudited(userId, userName);
 			}
 		}
 
-		protected virtual void ApplyConceptsForModifiedEntity(EntityEntry entry, string userId)
+		protected virtual void ApplyConceptsForModifiedEntity(EntityEntry entry, string userId, string userName)
 		{
 			if (entry.Entity is IModificationAudited creationAudited)
 			{
-				if (creationAudited.LastModificationTime == default)
-				{
-					creationAudited.LastModificationTime =  DateTimeOffset.Now;
-				}
-
-				if (!string.IsNullOrWhiteSpace(userId) && string.IsNullOrWhiteSpace(creationAudited.LastModifierUserId))
-				{
-					creationAudited.LastModifierUserId = userId;
-				}
+				creationAudited.SetModificationAudited(userId, userName);
 			}
 		}
 
-		protected virtual void ApplyConceptsForDeletedEntity(EntityEntry entry, string userId)
+		protected virtual void ApplyConceptsForDeletedEntity(EntityEntry entry, string userId, string userName)
 		{
-			var deleteEntity = entry.Entity as ISoftDelete;
-			if (deleteEntity == null)
+			if (entry.Entity is IDeletionAudited deletionAudited)
 			{
-				return;
-			}
+				entry.Reload();
+				entry.State = EntityState.Modified;
 
-			entry.Reload();
-			entry.State = EntityState.Modified;
-			deleteEntity.IsDeleted = true;
-
-			if (deleteEntity.DeletionTime == default)
-			{
-				deleteEntity.DeletionTime = DateTimeOffset.Now;
-			}
-
-			if (!string.IsNullOrWhiteSpace(userId) && string.IsNullOrWhiteSpace(deleteEntity.DeleteUserId))
-			{
-				deleteEntity.DeleteUserId = userId;
+				deletionAudited.Delete(userId, userName);
 			}
 		}
 	}

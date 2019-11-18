@@ -1,13 +1,13 @@
 using System.Collections.Generic;
-using MediatR;
+using MSFramework.EventBus;
 
 namespace MSFramework.Domain
 {
 	public interface IEventProvider
 	{
-		IReadOnlyCollection<INotification> DomainEvents { get; }
+		IReadOnlyCollection<IEvent> DomainEvents { get; }
 
-		void AddDomainEvent(INotification @event);
+		void AddDomainEvent(IEvent @event);
 
 		void ClearDomainEvents();
 	}

@@ -1,10 +1,8 @@
 using System.Collections.Generic;
-using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using MSFramework.Domain;
 using MSFramework.EventBus;
 
 namespace MSFramework.EntityFrameworkCore
@@ -29,8 +27,7 @@ namespace MSFramework.EntityFrameworkCore
 			entityConfigurationTypeFinder.Initialize();
 
 			services.AddSingleton<IEntityConfigurationTypeFinder>(entityConfigurationTypeFinder);
-			services.AddLocalEventBus();
-			services.AddMediatR();
+			services.AddPassThroughEventBus();
 			services.AddLogging();
 
 			var section = GetConfiguration().GetSection("DbContexts");

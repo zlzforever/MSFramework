@@ -1,6 +1,4 @@
-﻿using System;
-using MediatR;
-using Microsoft.AspNetCore.Builder;
+﻿using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
@@ -8,12 +6,11 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.OpenApi.Models;
 using MSFramework;
 using MSFramework.AspNetCore;
+using MSFramework.Domain.Repository;
 using MSFramework.EntityFrameworkCore;
 using MSFramework.EntityFrameworkCore.MySql;
 using MSFramework.EntityFrameworkCore.SqlServer;
 using MSFramework.EventBus;
-using MSFramework.EventBus.RabbitMQ;
-using Ordering.Application.Command;
 using Ordering.Application.Event;
 using Ordering.Domain.AggregateRoot;
 
@@ -41,9 +38,8 @@ namespace Ordering.API
 			services.AddMSFramework(builder =>
 			{
 				builder.UseEventHandler(typeof(UserCheckoutAcceptedEvent));
-				builder.UseMediator(typeof(CancelOrderCommand));
 				// 开发环境可以使用本地消息总线，生产环境应该换成分布式消息队列
-				builder.UseLocalEventBus();
+				builder.UsePassThroughEventBus();
 				//builder.UseRabbitMQEventBus();
 				builder.UseAspNetCoreSession();
 
@@ -84,7 +80,7 @@ namespace Ordering.API
 					await next();
 				}
 			});
-
+			var rep = app.ApplicationServices.GetRequiredService<IRepository<Order>>();
 			//启用中间件服务生成Swagger作为JSON终结点
 			app.UseSwagger();
 			//启用中间件服务对swagger-ui，指定Swagger JSON终结点

@@ -7,11 +7,18 @@ namespace MSFramework.Domain
 		/// <summary>
 		/// 创建时间
 		/// </summary>
-		DateTimeOffset CreationTime { get; set; }
+		DateTimeOffset CreationTime { get; }
 
 		/// <summary>
 		/// 创建用户标识
 		/// </summary>
-		string CreationUserId { get; set; }
+		string CreationUserId { get; }
+
+		/// <summary>
+		/// 创建用户名称
+		/// </summary>
+		string CreationUserName { get; }
+
+		void SetCreationAudited(string userId, string userName);
 	}
 }

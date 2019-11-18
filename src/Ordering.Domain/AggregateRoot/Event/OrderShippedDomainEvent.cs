@@ -1,8 +1,6 @@
-using MediatR;
-
 namespace Ordering.Domain.AggregateRoot.Event
 {
-	public class OrderShippedDomainEvent : INotification
+	public class OrderShippedDomainEvent : MSFramework.EventBus.Event
 	{
 		public Order Order { get; }
 

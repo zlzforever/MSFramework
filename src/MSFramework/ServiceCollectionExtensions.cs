@@ -1,8 +1,6 @@
 using System;
 using System.Linq;
 using System.Reflection;
-using AspectCore.Extensions.DependencyInjection;
-using MediatR;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyModel;
@@ -19,9 +17,9 @@ namespace MSFramework
 	{
 		private static Type[] _types;
 
-		public static MSFrameworkBuilder UseEventHandler(this MSFrameworkBuilder builder, params Type[] evnetTypes)
+		public static MSFrameworkBuilder UseEventHandler(this MSFrameworkBuilder builder, params Type[] eventTypes)
 		{
-			_types = evnetTypes;
+			_types = eventTypes;
 
 			if (_types != null && _types.Length > 0)
 			{
@@ -53,13 +51,7 @@ namespace MSFramework
 			return builder;
 		}
 
-		public static MSFrameworkBuilder UseMediator(this MSFrameworkBuilder builder, params Type[] types)
-		{
-			builder.Services.AddMediatR(types);
-			return builder;
-		}
-
-		public static IServiceProvider AddMSFramework(this IServiceCollection services,
+		public static void AddMSFramework(this IServiceCollection services,
 			Action<MSFrameworkBuilder> builderAction = null)
 		{
 			var builder = new MSFrameworkBuilder(services);
@@ -94,13 +86,9 @@ namespace MSFramework
 				Singleton<IIdGenerator>.Instance = new IdGenerator();
 			}
 
-			builder.Services.AddMediatR();
-
 			builder.Services.AddSingleton<IEventBusSubscriptionStore, InMemoryEventBusSubscriptionStore>();
 
 			builder.Services.AddHttpClient();
-
-			return services.BuildAspectInjectorProvider();
 		}
 
 		public static IApplicationBuilder UseMSFramework(this IApplicationBuilder builder)

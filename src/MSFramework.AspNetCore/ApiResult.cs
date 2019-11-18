@@ -4,35 +4,36 @@ namespace MSFramework.AspNetCore
 {
 	public class ApiResult : JsonResult
 	{
+		protected ApiResult(object value) : base(value)
+		{
+		}
+		
 		public ApiResult() : base(new
 		{
 			success = true,
-			code = 100,
+			code = 10000,
 			msg = string.Empty,
-			data = string.Empty
+			data = default(object)
 		})
 		{
 		}
 
-		public ApiResult(object value, string msg = "") : base(new
+		public ApiResult(string msg = "", int code = 10000) : base(new
 		{
 			success = true,
-			code = 100,
+			code,
 			msg,
-			data = value
+			data = default(object)
 		})
 		{
 		}
-	}
 
-	public class FailedApiResult : ApiResult
-	{
-		public FailedApiResult(string msg) : base(new
+		public ApiResult(dynamic value, string msg = "", int code = 10000) : base(new
 		{
-			success = false,
-			code = 400,
+			success = true,
+			code,
 			msg,
-			data = string.Empty
+			data = value
 		})
 		{
 		}

@@ -15,7 +15,7 @@ namespace MSFramework.EntityFrameworkCore
 		public EfRepository(DbContextFactory dbContextFactory)
 		{
 			DbContext = dbContextFactory.GetDbContext<TEntity>();
-			Table = DbContext.Set<TEntity>();
+			DbSet = DbContext.Set<TEntity>();
 		}
 
 		protected DbContextBase DbContext { get; }
@@ -35,43 +35,43 @@ namespace MSFramework.EntityFrameworkCore
 			}
 		}
 
-		public DbSet<TEntity> Table { get; }
+		public DbSet<TEntity> DbSet { get; }
 
 		public IUnitOfWork UnitOfWork => DbContext;
 
 		public List<TEntity> GetAllList()
 		{
-			return Table.ToList();
+			return DbSet.ToList();
 		}
 
 		public Task<List<TEntity>> GetAllListAsync()
 		{
-			return Table.ToListAsync();
+			return DbSet.ToListAsync();
 		}
 
 		public TEntity Get(Guid id)
 		{
-			return Table.Find(id);
+			return DbSet.Find(id);
 		}
 
 		public Task<TEntity> GetAsync(Guid id)
 		{
-			return Table.FindAsync(id);
+			return DbSet.FindAsync(id);
 		}
 
 		public TEntity Insert(TEntity entity)
 		{
-			return Table.Add(entity).Entity;
+			return DbSet.Add(entity).Entity;
 		}
 
 		public async Task<TEntity> InsertAsync(TEntity entity)
 		{
-			return (await Table.AddAsync(entity)).Entity;
+			return (await DbSet.AddAsync(entity)).Entity;
 		}
 
 		public TEntity Update(TEntity entity)
 		{
-			return Table.Update(entity).Entity;
+			return DbSet.Update(entity).Entity;
 		}
 
 		public Task<TEntity> UpdateAsync(TEntity entity)
@@ -81,12 +81,12 @@ namespace MSFramework.EntityFrameworkCore
 
 		public void Delete(TEntity entity)
 		{
-			Table.Remove(entity);
+			DbSet.Remove(entity);
 		}
 
 		public Task DeleteAsync(TEntity entity)
 		{
-			Table.Remove(entity);
+			DbSet.Remove(entity);
 			return Task.CompletedTask;
 		}
 
@@ -95,7 +95,7 @@ namespace MSFramework.EntityFrameworkCore
 			var entity = Get(id);
 			if (entity != null)
 			{
-				Table.Remove(entity);
+				DbSet.Remove(entity);
 			}
 		}
 
@@ -104,7 +104,7 @@ namespace MSFramework.EntityFrameworkCore
 			var entity = await GetAsync(id);
 			if (entity != null)
 			{
-				Table.Remove(entity);
+				DbSet.Remove(entity);
 			}
 		}
 	}

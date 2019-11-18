@@ -1,8 +1,8 @@
 using System;
 using System.Collections.Generic;
-using MediatR;
 using MSFramework.Common;
 using MSFramework.Data;
+using MSFramework.EventBus;
 
 namespace MSFramework.Domain
 {
@@ -11,8 +11,8 @@ namespace MSFramework.Domain
 		EntityBase<Guid>,
 		IAggregateRoot
 	{
-		private readonly List<INotification> _domainEvents =
-			new List<INotification>();
+		private readonly List<IEvent> _domainEvents =
+			new List<IEvent>();
 
 		protected AggregateRootBase() : base(Singleton<IIdGenerator>.Instance.GetNewId<Guid>())
 		{
@@ -23,7 +23,7 @@ namespace MSFramework.Domain
 		}
 
 
-		public void AddDomainEvent(INotification @event)
+		public void AddDomainEvent(IEvent @event)
 		{
 			_domainEvents.Add(@event);
 		}
@@ -33,7 +33,7 @@ namespace MSFramework.Domain
 			return Id == default;
 		}
 
-		public IReadOnlyCollection<INotification> DomainEvents => _domainEvents.AsReadOnly();
+		public IReadOnlyCollection<IEvent> DomainEvents => _domainEvents.AsReadOnly();
 
 		public void ClearDomainEvents() => _domainEvents.Clear();
 	}

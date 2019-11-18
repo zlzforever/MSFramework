@@ -20,34 +20,32 @@ namespace MSFramework.EntityFrameworkCore
 
 		public void Initialize()
 		{
-			using (var scope = _serviceProvider.CreateScope())
+			using var scope = _serviceProvider.CreateScope();
+			var dbContextFactory = scope.ServiceProvider.GetRequiredService<DbContextFactory>();
+			foreach (var kv in EntityFrameworkOptions.EntityFrameworkOptionDict)
 			{
-				var dbContextFactory = scope.ServiceProvider.GetRequiredService<DbContextFactory>();
-				foreach (var kv in EntityFrameworkOptions.EntityFrameworkOptionDict)
+				var useTrans = kv.Value.UseTransaction;
+				if (kv.Value.AutoMigrationEnabled)
 				{
-					if (kv.Value.AutoMigrationEnabled)
+					kv.Value.UseTransaction = false;
+					var dbContext = dbContextFactory.Create(kv.Value);
+					if (dbContext == null)
 					{
-						var dbContext = dbContextFactory.Create(kv.Value);
-						if (dbContext == null)
-						{
-							continue;
-						}
-
-						if (dbContext.Database.ProviderName == "Microsoft.EntityFrameworkCore.InMemory") continue;
-
-						string[] migrations = dbContext.Database.GetPendingMigrations().ToArray();
-						if (migrations.Length > 0)
-						{
-							dbContext.Database.Migrate();
-							ILogger logger = dbContext.GetService<ILoggerFactory>()
-								.CreateLogger("Slug.Entity.DbContextExtensions");
-							logger.LogInformation($"已提交{migrations.Length}条挂起的迁移记录：{migrations.ExpandAndToString()}");
-						}
-						else
-						{
-							dbContext.Database.EnsureCreated();
-						}
+						continue;
 					}
+
+					if (dbContext.Database.ProviderName == "Microsoft.EntityFrameworkCore.InMemory") continue;
+					
+					var migrations = dbContext.Database.GetPendingMigrations().ToArray();
+					if (migrations.Length > 0)
+					{
+						dbContext.Database.Migrate();
+						ILogger logger = dbContext.GetService<ILoggerFactory>()
+							.CreateLogger<EntityFrameworkInitializer>();
+						logger.LogInformation($"已提交{migrations.Length}条挂起的迁移记录：{migrations.ExpandAndToString()}");
+					}
+
+					kv.Value.UseTransaction = useTrans;
 				}
 			}
 		}

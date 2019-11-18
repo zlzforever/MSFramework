@@ -7,11 +7,18 @@ namespace MSFramework.Domain
 		/// <summary>
 		/// Last modifier user for this entity.
 		/// </summary>
-		string LastModifierUserId { get; set; }
-		
+		string LastModificationUserId { get; }
+
+		/// <summary>
+		/// Last modifier user for this entity.
+		/// </summary>
+		string LastModificationUserName { get; }
+
 		/// <summary>
 		/// The last modified time for this entity.
 		/// </summary>
-		DateTimeOffset? LastModificationTime { get; set; }
+		DateTimeOffset? LastModificationTime { get; }
+
+		void SetModificationAudited(string userId, string userName);
 	}
 }

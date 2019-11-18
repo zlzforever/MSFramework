@@ -1,8 +1,6 @@
-using MediatR;
-
 namespace Ordering.Domain.AggregateRoot.Event
 {
-	public class OrderStartedDomainEvent : INotification
+	public class OrderStartedDomainEvent : MSFramework.EventBus.Event
 	{
 		public string UserId { get; }
 

@@ -5,18 +5,18 @@ namespace MSFramework.EventBus
 {
 	public static class ServiceCollectionExtensions
 	{
-		public static MSFrameworkBuilder UseLocalEventBus(this MSFrameworkBuilder builder,
+		public static MSFrameworkBuilder UsePassThroughEventBus(this MSFrameworkBuilder builder,
 			Action<EventBusBuilder> configure = null)
 		{
 			EventBusBuilder eBuilder = new EventBusBuilder(builder.Services);
 			configure?.Invoke(eBuilder);
 
-			builder.Services.AddLocalEventBus();
+			builder.Services.AddPassThroughEventBus();
 
 			return builder;
 		}
 
-		public static IServiceCollection AddLocalEventBus(this IServiceCollection services)
+		public static IServiceCollection AddPassThroughEventBus(this IServiceCollection services)
 		{			
 			services.AddSingleton<IEventBus, PassThroughEventBus>();
 			return services;

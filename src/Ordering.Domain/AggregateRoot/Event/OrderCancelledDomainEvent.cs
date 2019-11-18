@@ -1,8 +1,8 @@
-using MediatR;
+using MSFramework.EventBus;
 
 namespace Ordering.Domain.AggregateRoot.Event
 {
-	public class OrderCancelledDomainEvent : INotification
+	public class OrderCancelledDomainEvent : MSFramework.EventBus.Event
 	{
 		public Order Order { get; }
 

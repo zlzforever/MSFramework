@@ -1,10 +1,9 @@
 using System;
-using MediatR;
 
 namespace Ordering.Domain.AggregateRoot.Event
 {
 	public class OrderStatusChangedToStockConfirmedDomainEvent
-		: INotification
+		: MSFramework.EventBus.Event
 	{
 		public Guid OrderId { get; }
 

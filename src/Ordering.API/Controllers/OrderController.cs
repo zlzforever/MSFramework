@@ -86,14 +86,14 @@ namespace Ordering.API.Controllers
 		#region QUERY
 
 		[HttpGet("{orderId}")]
-		public async Task<ActionResult> GetOrderAsync(Guid orderId)
+		public async Task<IActionResult> GetOrderAsync(Guid orderId)
 		{
 			var order = await _orderingQuery.GetOrderAsync(orderId);
 			return Ok(order);
 		}
 
 		[HttpGet()]
-		public async Task<ActionResult> GetOrdersAsync()
+		public async Task<IActionResult> GetOrdersAsync()
 		{
 			var order = await _orderingQuery.GetAllOrdersAsync();
 			return Ok(order);

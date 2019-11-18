@@ -2,11 +2,12 @@ using System.Threading;
 using System.Threading.Tasks;
 using MediatR;
 using MSFramework.EntityFrameworkCore;
+using MSFramework.EventBus;
 using Ordering.Domain.AggregateRoot.Event;
 
 namespace Ordering.Application.DomainEventHandler
 {
-	public class OrderShippedDomainEventHandler : INotificationHandler<OrderShippedDomainEvent>
+	public class OrderShippedDomainEventHandler : IEventHandler<OrderShippedDomainEvent>
 	{
 		private readonly DbContextFactory _dbContextFactory;
 
@@ -15,7 +16,7 @@ namespace Ordering.Application.DomainEventHandler
 			_dbContextFactory = dbContextFactory;
 		}
 
-		public Task Handle(OrderShippedDomainEvent notification, CancellationToken cancellationToken)
+		public Task Handle(OrderShippedDomainEvent @event)
 		{
 			// todo
 			return Task.CompletedTask;

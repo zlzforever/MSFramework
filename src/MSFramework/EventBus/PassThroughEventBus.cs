@@ -71,7 +71,7 @@ namespace MSFramework.EventBus
 		{
 			var eventName = _store.GetEventKey<TEvent>();
 
-			_logger.LogInformation("Unsubscribing from event {EventName}", eventName);
+			_logger.LogInformation("Un-subscribing from event {EventName}", eventName);
 
 			_store.RemoveSubscription<TEvent, TEventHandler>();
 		}

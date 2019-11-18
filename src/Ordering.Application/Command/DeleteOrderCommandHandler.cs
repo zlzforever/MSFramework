@@ -1,7 +1,6 @@
 using System.Threading;
 using System.Threading.Tasks;
 using MediatR;
-using Microsoft.AspNetCore.Mvc;
 using MSFramework.AspNetCore;
 using Ordering.Domain.Repository;
 
