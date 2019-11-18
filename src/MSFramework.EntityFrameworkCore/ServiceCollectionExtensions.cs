@@ -44,7 +44,7 @@ namespace MSFramework.EntityFrameworkCore
 
 			builder.Services.AddScoped<DbContextFactory>();
 
-			builder.Services.AddSingleton<IInitializer, EntityFrameworkInitializer>();
+			builder.Services.AddSingleton<Initializer, EntityFrameworkInitializer>();
 			builder.Services.AddScoped(typeof(IRepository<>), typeof(EfRepository<>));
 			builder.Services.AddScoped(typeof(EfRepository<>), typeof(EfRepository<>));
 			return builder;

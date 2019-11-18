@@ -9,19 +9,15 @@ using MSFramework.Common;
 
 namespace MSFramework.EntityFrameworkCore
 {
-	public class EntityFrameworkInitializer : IInitializer
+	public class EntityFrameworkInitializer : Initializer
 	{
-		private readonly IServiceProvider _serviceProvider;
-
-		public EntityFrameworkInitializer(IServiceProvider serviceProvider)
+		public EntityFrameworkInitializer(IServiceProvider serviceProvider) : base(serviceProvider)
 		{
-			_serviceProvider = serviceProvider;
 		}
 
-		public void Initialize()
+		public override void Initialize()
 		{
-			using var scope = _serviceProvider.CreateScope();
-			var dbContextFactory = scope.ServiceProvider.GetRequiredService<DbContextFactory>();
+			var dbContextFactory = Services.GetRequiredService<DbContextFactory>();
 			foreach (var kv in EntityFrameworkOptions.EntityFrameworkOptionDict)
 			{
 				var useTrans = kv.Value.UseTransaction;
@@ -35,7 +31,7 @@ namespace MSFramework.EntityFrameworkCore
 					}
 
 					if (dbContext.Database.ProviderName == "Microsoft.EntityFrameworkCore.InMemory") continue;
-					
+
 					var migrations = dbContext.Database.GetPendingMigrations().ToArray();
 					if (migrations.Length > 0)
 					{

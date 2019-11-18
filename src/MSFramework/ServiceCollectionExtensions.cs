@@ -146,7 +146,7 @@ namespace MSFramework
 
 		private static void Initialize(IApplicationBuilder builder)
 		{
-			var initializers = builder.ApplicationServices.GetServices<IInitializer>().ToList();
+			var initializers = builder.ApplicationServices.GetServices<Initializer>().ToList();
 			foreach (var initializer in initializers)
 			{
 				initializer.Initialize();

@@ -1,6 +1,4 @@
-using System.Threading;
 using System.Threading.Tasks;
-using MediatR;
 using MSFramework.EntityFrameworkCore;
 using MSFramework.EventBus;
 using Ordering.Domain.AggregateRoot.Event;

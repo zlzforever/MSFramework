@@ -1,5 +1,3 @@
-using MSFramework.EventBus;
-
 namespace Ordering.Domain.AggregateRoot.Event
 {
 	public class OrderCancelledDomainEvent : MSFramework.EventBus.Event

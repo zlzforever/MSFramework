@@ -69,7 +69,10 @@ namespace MSFramework.EntityFrameworkCore
 				optionsBuilder.UseLoggerFactory(_loggerFactory);
 			}
 
-			optionsBuilder.EnableSensitiveDataLogging();
+			if ("Development" == Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT"))
+			{
+				optionsBuilder.EnableSensitiveDataLogging();
+			}
 		}
 
 		/// <summary>

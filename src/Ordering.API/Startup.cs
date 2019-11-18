@@ -6,13 +6,11 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.OpenApi.Models;
 using MSFramework;
 using MSFramework.AspNetCore;
-using MSFramework.Domain.Repository;
 using MSFramework.EntityFrameworkCore;
 using MSFramework.EntityFrameworkCore.MySql;
 using MSFramework.EntityFrameworkCore.SqlServer;
 using MSFramework.EventBus;
 using Ordering.Application.Event;
-using Ordering.Domain.AggregateRoot;
 
 namespace Ordering.API
 {
@@ -80,7 +78,6 @@ namespace Ordering.API
 					await next();
 				}
 			});
-			var rep = app.ApplicationServices.GetRequiredService<IRepository<Order>>();
 			//启用中间件服务生成Swagger作为JSON终结点
 			app.UseSwagger();
 			//启用中间件服务对swagger-ui，指定Swagger JSON终结点
