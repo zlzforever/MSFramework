@@ -6,23 +6,27 @@ namespace MSFramework.EventBus
 {
 	public class PassThroughEventBus : IEventBus
 	{
-		private readonly IEventBusSubscriptionStore _store;
+		private static readonly IEventBusSubscriptionStore Store;
 		private readonly ILogger _logger;
 		private readonly IServiceProvider _serviceProvider;
 
+		static PassThroughEventBus()
+		{
+			Store = new InMemoryEventBusSubscriptionStore();
+		}
+		
 		public PassThroughEventBus(ILogger<PassThroughEventBus> logger, IServiceProvider serviceProvider)
 		{
-			_store = new InMemoryEventBusSubscriptionStore();
 			_logger = logger;
 			_serviceProvider = serviceProvider;
 		}
 
 		public async Task PublishAsync(IEvent @event)
 		{
-			var eventName = _store.GetEventKey(@event.GetType());
-			if (_store.ContainSubscription(eventName))
+			var eventName = Store.GetEventKey(@event.GetType());
+			if (Store.ContainSubscription(eventName))
 			{
-				var subscriptions = _store.GetHandlers(eventName);
+				var subscriptions = Store.GetHandlers(eventName);
 				foreach (var subscription in subscriptions)
 				{
 					if (subscription.IsDynamic)
@@ -47,33 +51,33 @@ namespace MSFramework.EventBus
 		
 		public void Subscribe<TEvent, TEventHandler>() where TEvent : class, IEvent where TEventHandler : IEventHandler<TEvent>
 		{
-			var eventName = _store.GetEventKey<TEvent>();
+			var eventName = Store.GetEventKey<TEvent>();
 
 			_logger.LogInformation("Subscribing to event {EventName} with {EventHandler}", eventName,
 				typeof(TEventHandler).GetEventName());
 
-			_store.AddSubscription<TEvent, TEventHandler>();
+			Store.AddSubscription<TEvent, TEventHandler>();
 		}
 
 		public void Subscribe<TEventHandler>(string eventName) where TEventHandler : IDynamicEventHandler
 		{
 			_logger.LogInformation("Subscribing to dynamic event {EventName} with {EventHandler}", eventName,
 				typeof(TEventHandler).GetEventName());
-			_store.AddSubscription<TEventHandler>(eventName);
+			Store.AddSubscription<TEventHandler>(eventName);
 		}
 
 		public void Unsubscribe<TEventHandler>(string eventName) where TEventHandler : IDynamicEventHandler
 		{
-			_store.RemoveSubscription<TEventHandler>(eventName);
+			Store.RemoveSubscription<TEventHandler>(eventName);
 		}
 
 		public void Unsubscribe<TEvent, TEventHandler>() where TEvent : class, IEvent where TEventHandler : IEventHandler<TEvent>
 		{
-			var eventName = _store.GetEventKey<TEvent>();
+			var eventName = Store.GetEventKey<TEvent>();
 
 			_logger.LogInformation("Un-subscribing from event {EventName}", eventName);
 
-			_store.RemoveSubscription<TEvent, TEventHandler>();
+			Store.RemoveSubscription<TEvent, TEventHandler>();
 		}
 	}
 }

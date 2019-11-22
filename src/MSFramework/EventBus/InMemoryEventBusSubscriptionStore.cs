@@ -1,17 +1,18 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Collections.Concurrent;
 
 namespace MSFramework.EventBus
 {
 	public class InMemoryEventBusSubscriptionStore : IEventBusSubscriptionStore
 	{
-		private readonly Dictionary<string, List<SubscriptionInfo>> _handlers;
+		private readonly ConcurrentDictionary<string, List<SubscriptionInfo>> _handlers;
 		private readonly List<Type> _eventTypes;
 
 		public InMemoryEventBusSubscriptionStore()
 		{
-			_handlers = new Dictionary<string, List<SubscriptionInfo>>();
+			_handlers = new ConcurrentDictionary<string, List<SubscriptionInfo>>();
 			_eventTypes = new List<Type>();
 		}
 
@@ -85,7 +86,7 @@ namespace MSFramework.EventBus
 		{
 			if (!ContainSubscription(eventName))
 			{
-				_handlers.Add(eventName, new List<SubscriptionInfo>());
+				_handlers.TryAdd(eventName, new List<SubscriptionInfo>());
 			}
 
 			if (_handlers[eventName].Any(s => s.HandlerType == handlerType))
@@ -129,7 +130,7 @@ namespace MSFramework.EventBus
 				_handlers[eventName].Remove(subscription);
 				if (!_handlers[eventName].Any())
 				{
-					_handlers.Remove(eventName);
+					_handlers.TryRemove(eventName, out _);
 					var eventType = _eventTypes.SingleOrDefault(e => e.Name == eventName);
 					if (eventType != null)
 					{

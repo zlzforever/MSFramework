@@ -18,7 +18,7 @@ namespace MSFramework.EventBus
 
 		public static IServiceCollection AddPassThroughEventBus(this IServiceCollection services)
 		{			
-			services.AddSingleton<IEventBus, PassThroughEventBus>();
+			services.AddScoped<IEventBus, PassThroughEventBus>();
 			return services;
 		}
 	}

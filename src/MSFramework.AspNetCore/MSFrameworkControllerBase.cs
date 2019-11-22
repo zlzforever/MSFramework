@@ -1,10 +1,16 @@
+using System;
+using System.Linq;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Filters;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using MSFramework.Domain;
 
 namespace MSFramework.AspNetCore
 {
-	public class MSFrameworkControllerBase : ControllerBase
+	public class MSFrameworkControllerBase : ControllerBase, IActionFilter, IAsyncActionFilter,
+		IDisposable
 	{
 		protected IMSFrameworkSession Session { get; }
 
@@ -37,6 +43,65 @@ namespace MSFramework.AspNetCore
 			{
 				StatusCode = 500
 			};
+		}
+
+		[NonAction]
+		public virtual async Task OnActionExecutionAsync(ActionExecutingContext context, ActionExecutionDelegate next)
+		{
+			if (context == null)
+			{
+				throw new ArgumentNullException(nameof(context));
+			}
+
+			if (next == null)
+			{
+				throw new ArgumentNullException(nameof(next));
+			}
+
+			if (!ModelState.IsValid)
+			{
+				context.Result = new JsonResult(new
+				{
+					success = false,
+					code = 20000,
+					msg = "数据校验失败"
+				});
+			}
+
+			OnActionExecuting(context);
+
+			if (context.Result != null)
+			{
+				return;
+			}
+
+			OnActionExecuted(await next());
+		}
+
+
+		[NonAction]
+		public virtual void OnActionExecuting(ActionExecutingContext context)
+		{
+		}
+
+		[NonAction]
+		public virtual void OnActionExecuted(ActionExecutedContext context)
+		{
+		}
+
+		/// <inheritdoc />
+		public void Dispose()
+		{
+			Dispose(true);
+		}
+
+		/// <summary>
+		/// Releases all resources currently used by this <see cref="T:Microsoft.AspNetCore.Mvc.Controller" /> instance.
+		/// </summary>
+		/// <param name="disposing"><c>true</c> if this method is being invoked by the <see cref="M:Microsoft.AspNetCore.Mvc.Controller.Dispose" /> method,
+		/// otherwise <c>false</c>.</param>
+		protected virtual void Dispose(bool disposing)
+		{
 		}
 	}
 }

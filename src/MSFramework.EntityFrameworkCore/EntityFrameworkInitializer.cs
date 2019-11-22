@@ -1,5 +1,6 @@
 using System;
 using System.Linq;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.Extensions.DependencyInjection;
@@ -11,13 +12,13 @@ namespace MSFramework.EntityFrameworkCore
 {
 	public class EntityFrameworkInitializer : Initializer
 	{
-		public EntityFrameworkInitializer(IServiceProvider serviceProvider) : base(serviceProvider)
-		{
-		}
+		public override int Order => int.MinValue;
 
-		public override void Initialize()
+		public override void Initialize(IApplicationBuilder builder)
 		{
-			var dbContextFactory = Services.GetRequiredService<DbContextFactory>();
+			builder.UseMiddleware<AutoCommitMiddleware>();
+			using var scope = builder.ApplicationServices.CreateScope();
+			var dbContextFactory = scope.ServiceProvider.GetRequiredService<DbContextFactory>();
 			foreach (var kv in EntityFrameworkOptions.EntityFrameworkOptionDict)
 			{
 				var useTrans = kv.Value.UseTransaction;

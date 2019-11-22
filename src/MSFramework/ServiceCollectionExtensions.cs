@@ -48,6 +48,7 @@ namespace MSFramework
 					}
 				}
 			}
+
 			return builder;
 		}
 
@@ -93,6 +94,7 @@ namespace MSFramework
 
 		public static IApplicationBuilder UseMSFramework(this IApplicationBuilder builder)
 		{
+			Singleton<IServiceProvider>.Instance = builder.ApplicationServices;
 			SubscribeEventHandler(builder);
 			Initialize(builder);
 			return builder;
@@ -100,7 +102,8 @@ namespace MSFramework
 
 		private static void SubscribeEventHandler(IApplicationBuilder builder)
 		{
-			var eventBus = builder.ApplicationServices.GetService<IEventBus>();
+			using var scope = builder.ApplicationServices.CreateScope();
+			var eventBus = scope.ServiceProvider.GetService<IEventBus>();
 			if (_types != null && _types.Length > 0 && eventBus != null)
 			{
 				var subscribeHandlerMethod = typeof(IEventBus).GetMethod("Subscribe", new Type[0]);
@@ -109,7 +112,7 @@ namespace MSFramework
 					return;
 				}
 
-				var subscribeDynamicHandlerMethod = typeof(IEventBus).GetMethod("Subscribe", new[] { typeof(string) });
+				var subscribeDynamicHandlerMethod = typeof(IEventBus).GetMethod("Subscribe", new[] {typeof(string)});
 				if (subscribeDynamicHandlerMethod == null)
 				{
 					return;
@@ -127,7 +130,7 @@ namespace MSFramework
 						if (subscribeName != null)
 						{
 							subscribeDynamicHandlerMethod.MakeGenericMethod(handlerType).Invoke(eventBus,
-								new object[] { subscribeName.Name });
+								new object[] {subscribeName.Name});
 						}
 					}
 					else
@@ -147,9 +150,10 @@ namespace MSFramework
 		private static void Initialize(IApplicationBuilder builder)
 		{
 			var initializers = builder.ApplicationServices.GetServices<Initializer>().ToList();
+			initializers.Sort((x, y) => x.Order < y.Order ? 0 : 1);
 			foreach (var initializer in initializers)
 			{
-				initializer.Initialize();
+				initializer.Initialize(builder);
 			}
 		}
 

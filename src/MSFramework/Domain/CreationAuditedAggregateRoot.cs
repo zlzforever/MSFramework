@@ -1,4 +1,5 @@
 using System;
+using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 
 namespace MSFramework.Domain
@@ -9,6 +10,7 @@ namespace MSFramework.Domain
 		/// 创建时间
 		/// </summary>
 		[Required]
+		[Description("创建时间")]
 		public DateTimeOffset CreationTime { get; private set; }
 
 		/// <summary>
@@ -16,6 +18,7 @@ namespace MSFramework.Domain
 		/// </summary>
 		[Required]
 		[StringLength(255)]
+		[Description("创建用户标识")]
 		public string CreationUserId { get; private set; }
 
 		/// <summary>
@@ -23,6 +26,7 @@ namespace MSFramework.Domain
 		/// </summary>
 		[Required]
 		[StringLength(255)]
+		[Description("创建用户名称")]
 		public string CreationUserName { get; private set; }
 
 		public virtual void SetCreationAudited(string userId, string userName)
