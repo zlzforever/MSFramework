@@ -16,7 +16,6 @@ namespace MSFramework.EntityFrameworkCore
 
 		public override void Initialize(IApplicationBuilder builder)
 		{
-			builder.UseMiddleware<AutoCommitMiddleware>();
 			using var scope = builder.ApplicationServices.CreateScope();
 			var dbContextFactory = scope.ServiceProvider.GetRequiredService<DbContextFactory>();
 			foreach (var kv in EntityFrameworkOptions.EntityFrameworkOptionDict)

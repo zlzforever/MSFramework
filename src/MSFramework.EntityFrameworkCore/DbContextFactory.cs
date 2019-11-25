@@ -1,8 +1,11 @@
 using System;
 using System.Collections.Concurrent;
 using System.Linq;
+using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 using MSFramework.Domain;
 
 namespace MSFramework.EntityFrameworkCore
@@ -92,7 +95,7 @@ namespace MSFramework.EntityFrameworkCore
 			}
 
 			context.Session = _serviceProvider.GetService<IMSFrameworkSession>();
-			
+
 			if (resolveOptions.UseTransaction && context.Database.CurrentTransaction == null)
 			{
 				context.Database.BeginTransaction();

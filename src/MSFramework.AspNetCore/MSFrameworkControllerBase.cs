@@ -1,6 +1,6 @@
 using System;
-using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.Extensions.DependencyInjection;
@@ -75,7 +75,15 @@ namespace MSFramework.AspNetCore
 				return;
 			}
 
-			OnActionExecuted(await next());
+			var nextContext = await next();
+			
+			OnActionExecuted(nextContext);
+			
+			var uowManager = context.HttpContext.RequestServices.GetService<IUnitOfWorkManager>();
+			if (uowManager != null)
+			{
+				await uowManager.CommitAsync();
+			}
 		}
 
 
