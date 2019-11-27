@@ -14,7 +14,24 @@ namespace MSFramework.AspNetCore
 			_accessor = accessor;
 		}
 
-		public override string UserId => HttpContext?.User?.FindFirst("sub")?.Value;
+		public override string UserId
+		{
+			get
+			{
+				if (HttpContext?.User == null)
+				{
+					return null;
+				}
+
+				var userId = HttpContext.User.FindFirst("sub")?.Value;
+				if (string.IsNullOrWhiteSpace(userId))
+				{
+					userId = HttpContext.User.FindFirst("sid")?.Value;
+				}
+
+				return userId;
+			}
+		}
 
 		public override string UserName => HttpContext?.User?.FindFirst("name")?.Value;
 

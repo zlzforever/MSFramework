@@ -60,7 +60,7 @@ namespace MSFramework.AspNetCore
 
 			if (!ModelState.IsValid)
 			{
-				context.Result = new JsonResult(new
+				context.Result = new ApiResult(new
 				{
 					success = false,
 					code = 20000,

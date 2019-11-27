@@ -6,7 +6,7 @@ namespace MSFramework.AspNetCore
 	{
 		public static int SuccessCode = 0;
 
-		protected ApiResult(object value) : base(value)
+		public ApiResult(object value) : base(value)
 		{
 		}
 
