@@ -9,7 +9,7 @@ namespace MSFramework.AspNetCore
 	{
 		private readonly IHttpContextAccessor _accessor;
 
-		public MSFrameworkSession(IHttpContextAccessor accessor) 
+		public MSFrameworkSession(IHttpContextAccessor accessor)
 		{
 			_accessor = accessor;
 		}
@@ -35,7 +35,7 @@ namespace MSFramework.AspNetCore
 
 		public override string UserName => HttpContext?.User?.FindFirst("name")?.Value;
 
-		public HttpContext HttpContext => _accessor.HttpContext;
+		public override HttpContext HttpContext => _accessor.HttpContext;
 
 		public override Task<string> GetTokenAsync(string tokenName = "access_token")
 		{
