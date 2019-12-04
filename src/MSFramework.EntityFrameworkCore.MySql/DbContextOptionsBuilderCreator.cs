@@ -1,6 +1,7 @@
 ﻿using System;
 using Microsoft.EntityFrameworkCore;
 using Pomelo.EntityFrameworkCore.MySql.Infrastructure;
+using Pomelo.EntityFrameworkCore.MySql.Storage;
 
 namespace MSFramework.EntityFrameworkCore.MySql
 {
@@ -16,7 +17,7 @@ namespace MSFramework.EntityFrameworkCore.MySql
 				builder =>
 				{
 					builder.MigrationsAssembly(entryAssemblyName);
-					builder.UnicodeCharSet(CharSet.Utf8mb4);
+					builder.CharSet(CharSet.Utf8Mb4);
 				});
 		}
 	}

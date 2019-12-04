@@ -24,6 +24,6 @@ namespace MSFramework.Domain
 		/// </summary>
 		DateTimeOffset? DeletionTime { get; set; }
 
-		void Delete(string userId, string userName);
+		void Delete(string userId, string userName, DateTimeOffset deletionTime = default);
 	}
 }

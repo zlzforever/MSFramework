@@ -29,11 +29,11 @@ namespace MSFramework.Domain
 		[Description("创建用户名称")]
 		public string CreationUserName { get; private set; }
 
-		public virtual void SetCreationAudited(string userId, string userName)
+		public virtual void SetCreationAudited(string userId, string userName, DateTimeOffset creationTime = default)
 		{
 			if (CreationTime == default)
 			{
-				CreationTime = DateTimeOffset.Now;
+				CreationTime = creationTime == default ? DateTimeOffset.Now : creationTime;
 			}
 
 			if (!string.IsNullOrWhiteSpace(userId) && string.IsNullOrWhiteSpace(CreationUserId))

@@ -21,7 +21,7 @@ namespace MSFramework.EntityFrameworkCore
 		public async Task CommitAsync()
 		{
 			ILogger logger = null;
-			if (!_serviceProvider.GetRequiredService<IHostingEnvironment>().IsProduction())
+			if (!_serviceProvider.GetRequiredService<IHostEnvironment>().IsProduction())
 			{
 				logger = _serviceProvider.GetRequiredService<ILogger<DbContextFactory>>();
 			}

@@ -26,11 +26,12 @@ namespace MSFramework.Domain
 		[Description("最后修改时间")]
 		public DateTimeOffset? LastModificationTime { get; private set; }
 
-		public virtual void SetModificationAudited(string userId, string userName)
+		public virtual void SetModificationAudited(string userId, string userName,
+			DateTimeOffset lastModificationTime = default)
 		{
 			if (LastModificationTime == default)
 			{
-				LastModificationTime = DateTimeOffset.Now;
+				LastModificationTime = lastModificationTime == default ? DateTimeOffset.Now : lastModificationTime;
 			}
 
 			if (!string.IsNullOrWhiteSpace(userId) &&

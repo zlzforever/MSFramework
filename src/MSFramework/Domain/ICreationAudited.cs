@@ -19,6 +19,6 @@ namespace MSFramework.Domain
 		/// </summary>
 		string CreationUserName { get; }
 
-		void SetCreationAudited(string userId, string userName);
+		void SetCreationAudited(string userId, string userName, DateTimeOffset creationTime = default);
 	}
 }

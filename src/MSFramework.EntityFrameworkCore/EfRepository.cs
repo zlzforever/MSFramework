@@ -12,10 +12,15 @@ namespace MSFramework.EntityFrameworkCore
 {
 	public class EfRepository<TEntity> : IRepository<TEntity> where TEntity : class, IAggregateRoot, IEntity
 	{
+		protected bool IsDeletionAuditedEntity { get; }
+
 		public EfRepository(DbContextFactory dbContextFactory)
 		{
 			DbContext = dbContextFactory.GetDbContext<TEntity>();
-			DbSet = DbContext.Set<TEntity>();
+			IsDeletionAuditedEntity = typeof(IDeletionAudited).IsAssignableFrom(typeof(TEntity));
+			Entities = IsDeletionAuditedEntity
+				? DbContext.Set<TEntity>().Where(x => !((IDeletionAudited) x).IsDeleted)
+				: DbContext.Set<TEntity>();
 		}
 
 		protected DbContextBase DbContext { get; }
@@ -35,43 +40,43 @@ namespace MSFramework.EntityFrameworkCore
 			}
 		}
 
-		public DbSet<TEntity> DbSet { get; }
+		public IQueryable<TEntity> Entities { get; }
 
 		public IUnitOfWork UnitOfWork => DbContext;
 
 		public virtual List<TEntity> GetAllList()
 		{
-			return DbSet.ToList();
+			return Entities.ToList();
 		}
 
 		public virtual Task<List<TEntity>> GetAllListAsync()
 		{
-			return DbSet.ToListAsync();
+			return Entities.ToListAsync();
 		}
 
 		public virtual TEntity Get(Guid id)
 		{
-			return DbSet.Find(id);
+			return Entities.FirstOrDefault(x => x.Id == id);
 		}
 
-		public virtual Task<TEntity> GetAsync(Guid id)
+		public virtual async Task<TEntity> GetAsync(Guid id)
 		{
-			return DbSet.FindAsync(id);
+			return await Entities.FirstOrDefaultAsync(x => x.Id == id);
 		}
 
 		public virtual TEntity Insert(TEntity entity)
 		{
-			return DbSet.Add(entity).Entity;
+			return DbContext.Set<TEntity>().Add(entity).Entity;
 		}
 
 		public virtual async Task<TEntity> InsertAsync(TEntity entity)
 		{
-			return (await DbSet.AddAsync(entity)).Entity;
+			return (await DbContext.Set<TEntity>().AddAsync(entity)).Entity;
 		}
 
 		public virtual TEntity Update(TEntity entity)
 		{
-			return DbSet.Update(entity).Entity;
+			return DbContext.Set<TEntity>().Update(entity).Entity;
 		}
 
 		public virtual Task<TEntity> UpdateAsync(TEntity entity)
@@ -81,12 +86,12 @@ namespace MSFramework.EntityFrameworkCore
 
 		public virtual void Delete(TEntity entity)
 		{
-			DbSet.Remove(entity);
+			DbContext.Set<TEntity>().Remove(entity);
 		}
 
 		public virtual Task DeleteAsync(TEntity entity)
 		{
-			DbSet.Remove(entity);
+			DbContext.Set<TEntity>().Remove(entity);
 			return Task.CompletedTask;
 		}
 
@@ -95,7 +100,7 @@ namespace MSFramework.EntityFrameworkCore
 			var entity = Get(id);
 			if (entity != null)
 			{
-				DbSet.Remove(entity);
+				DbContext.Set<TEntity>().Remove(entity);
 			}
 		}
 
@@ -104,7 +109,7 @@ namespace MSFramework.EntityFrameworkCore
 			var entity = await GetAsync(id);
 			if (entity != null)
 			{
-				DbSet.Remove(entity);
+				DbContext.Set<TEntity>().Remove(entity);
 			}
 		}
 	}

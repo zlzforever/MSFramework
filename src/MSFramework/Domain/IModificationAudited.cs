@@ -19,6 +19,6 @@ namespace MSFramework.Domain
 		/// </summary>
 		DateTimeOffset? LastModificationTime { get; }
 
-		void SetModificationAudited(string userId, string userName);
+		void SetModificationAudited(string userId, string userName, DateTimeOffset lastModificationTime = default);
 	}
 }

@@ -13,7 +13,6 @@ namespace MSFramework.EntityFrameworkCore.SqlServer
 			string entryAssemblyName = dbContextType.Assembly.GetName().Name;
 			return optionsBuilder.UseSqlServer(connectionString, builder =>
 			{
-				builder.UseRowNumberForPaging();
 				builder.MigrationsAssembly(entryAssemblyName);
 			});
 		}

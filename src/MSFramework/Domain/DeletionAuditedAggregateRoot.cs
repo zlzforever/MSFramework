@@ -33,7 +33,7 @@ namespace MSFramework.Domain
 		[Description("删除时间")]
 		public DateTimeOffset? DeletionTime { get; set; }
 
-		public void Delete(string userId, string userName)
+		public void Delete(string userId, string userName, DateTimeOffset deletionTime = default)
 		{
 			if (!IsDeleted)
 			{
@@ -41,7 +41,7 @@ namespace MSFramework.Domain
 
 				if (DeletionTime == default)
 				{
-					DeletionTime = DateTimeOffset.Now;
+					DeletionTime = deletionTime == default ? DateTimeOffset.Now : deletionTime;
 				}
 
 				if (!string.IsNullOrWhiteSpace(userId) && string.IsNullOrWhiteSpace(DeleterId))

@@ -1,9 +1,14 @@
 #!/bin/bash
-rm -rf output
-dotnet build MSFramework.sln -c Release -o ../../output
-files=$(ls output | grep nupkg)
-for filename in $files
-do
- nuget push output/$filename -Source https://www.nuget.org/api/v2/package
-done
-rm -rf output
+rm -rf src/MSFramework/bin/Release
+rm -rf src/MSFramework.AspNetCore/bin/Release
+rm -rf src/MSFramework.EntityFrameworkCore/bin/Release
+rm -rf src/MSFramework.EntityFrameworkCore.MySql/bin/Release
+rm -rf src/MSFramework.EntityFrameworkCore.SqlServer/bin/Release
+rm -rf src/MSFramework.EventBus.RabbitMQ/bin/Release
+dotnet publish MSFramework.sln -c Release
+nuget push src/MSFramework/bin/Release/*.nupkg -Source https://api.nuget.org/v3/index.json
+nuget push src/MSFramework.AspNetCore/bin/Release/*.nupkg  -Source https://api.nuget.org/v3/index.json
+nuget push src/MSFramework.EntityFrameworkCore/bin/Release/*.nupkg  -Source https://api.nuget.org/v3/index.json
+nuget push src/MSFramework.EntityFrameworkCore.MySql/bin/Release/*.nupkg  -Source https://api.nuget.org/v3/index.json
+nuget push src/MSFramework.EntityFrameworkCore.SqlServer/bin/Release/*.nupkg  -Source https://api.nuget.org/v3/index.json
+nuget push src/MSFramework.EventBus.RabbitMQ/bin/Release/*.nupkg  -Source https://api.nuget.org/v3/index.json
