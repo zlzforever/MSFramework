@@ -1,11 +1,9 @@
 ﻿using System;
 using System.Net.Sockets;
-using System.Text;
 using System.Threading.Tasks;
+using MessagePack;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using MSFramework.Common;
-using MSFramework.Serialization;
 using Polly;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
@@ -27,7 +25,8 @@ namespace MSFramework.EventBus.RabbitMQ
 		public RabbitMQEventBus(RabbitMQConnection connection,
 			RabbitMQOptions options,
 			ILogger<RabbitMQEventBus> logger,
-			IServiceScopeFactory serviceScopeFactory, IEventBusSubscriptionStore subsManager, string queueName = "RabbitMQEventBus",
+			IServiceScopeFactory serviceScopeFactory, IEventBusSubscriptionStore subsManager,
+			string queueName = "RabbitMQEventBus",
 			int retryCount = 5)
 		{
 			_connection = connection ?? throw new ArgumentNullException(nameof(connection));
@@ -66,8 +65,7 @@ namespace MSFramework.EventBus.RabbitMQ
 				channel.ExchangeDeclare(exchange: _options.BrokerName,
 					type: "direct");
 
-				var message = Singleton<IJsonConvert>.Instance.SerializeObject(@event);
-				var body = Encoding.UTF8.GetBytes(message);
+				var body = LZ4MessagePackSerializer.Serialize(@event);
 
 				policy.Execute(() =>
 				{
@@ -85,7 +83,8 @@ namespace MSFramework.EventBus.RabbitMQ
 			return Task.CompletedTask;
 		}
 
-		public void Subscribe<TEvent, TEventHandler>() where TEvent : class, IEvent where TEventHandler : IEventHandler<TEvent>
+		public void Subscribe<TEvent, TEventHandler>() where TEvent : class, IEvent
+			where TEventHandler : IEventHandler<TEvent>
 		{
 			var eventName = _store.GetEventKey<TEvent>();
 			Subscribe(eventName);
@@ -112,7 +111,8 @@ namespace MSFramework.EventBus.RabbitMQ
 			_store.RemoveSubscription<TEventHandler>(eventName);
 		}
 
-		public void Unsubscribe<TEvent, TEventHandler>() where TEvent : class, IEvent where TEventHandler : IEventHandler<TEvent>
+		public void Unsubscribe<TEvent, TEventHandler>() where TEvent : class, IEvent
+			where TEventHandler : IEventHandler<TEvent>
 		{
 			_store.RemoveSubscription<TEvent, TEventHandler>();
 		}
@@ -174,21 +174,9 @@ namespace MSFramework.EventBus.RabbitMQ
 		private async Task Consumer_Received(object sender, BasicDeliverEventArgs eventArgs)
 		{
 			var eventName = eventArgs.RoutingKey;
-			var message = Encoding.UTF8.GetString(eventArgs.Body);
-
-			try
-			{
-				if (message.ToLowerInvariant().Contains("throw-fake-exception"))
-				{
-					throw new InvalidOperationException($"Fake exception requested: \"{message}\"");
-				}
-
-				await ProcessEvent(eventName, message);
-			}
-			catch (Exception ex)
-			{
-				_logger.LogWarning(ex, "----- ERROR Processing message \"{Message}\"", message);
-			}
+			var @event =
+				LZ4MessagePackSerializer.Typeless.Deserialize(eventArgs.Body);
+			await ProcessEvent(eventName, @event);
 
 			// Even on exception we take the message off the queue.
 			// in a REAL WORLD app this should be handled with a Dead Letter Exchange (DLX). 
@@ -196,7 +184,7 @@ namespace MSFramework.EventBus.RabbitMQ
 			_consumerChannel.BasicAck(eventArgs.DeliveryTag, multiple: false);
 		}
 
-		private async Task ProcessEvent(string eventName, string message)
+		private async Task ProcessEvent(string eventName, object @event)
 		{
 			if (_store.ContainSubscription(eventName))
 			{
@@ -210,17 +198,16 @@ namespace MSFramework.EventBus.RabbitMQ
 							IDynamicEventHandler handler =
 								scope.ServiceProvider.GetService(subscription.HandlerType) as IDynamicEventHandler;
 							if (handler == null) continue;
-							await handler.Handle(message);
+							await handler.Handle(@event);
 						}
 						else
 						{
 							var handler = scope.ServiceProvider.GetService(subscription.HandlerType);
 							if (handler == null) continue;
 							var eventType = _store.GetEventType(eventName);
-							var integrationEvent = Singleton<IJsonConvert>.Instance.DeserializeObject(message, eventType);
 							var concreteType = typeof(IEventHandler<>).MakeGenericType(eventType);
 							// ReSharper disable once PossibleNullReferenceException
-							await (Task) concreteType.GetMethod("Handle").Invoke(handler, new[] {integrationEvent});
+							await (Task) concreteType.GetMethod("Handle").Invoke(handler, new[] {@event});
 						}
 					}
 				}

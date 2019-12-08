@@ -2,7 +2,7 @@ using System.Runtime.Serialization;
 
 namespace MSFramework.Domain
 {
-	public class DomainException : System.Exception
+	public class DomainException : MSFrameworkException
 	{
 		/// <summary>Initializes a new instance of the <see cref="T:System.ApplicationException"></see> class.</summary>
 		public DomainException()

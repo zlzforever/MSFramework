@@ -4,7 +4,7 @@ using System.Runtime.Serialization;
 namespace MSFramework.Application
 {
 	/// <summary>Serves as the base class for application-defined exceptions.</summary>
-	public class ApplicationException : Exception
+	public class ApplicationException : MSFrameworkException
 	{
 		/// <summary>Initializes a new instance of the <see cref="T:System.ApplicationException"></see> class.</summary>
 		public ApplicationException()

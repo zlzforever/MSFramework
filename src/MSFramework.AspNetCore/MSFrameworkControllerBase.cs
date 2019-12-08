@@ -1,7 +1,11 @@
 using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
+using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using MSFramework.Domain;
@@ -59,11 +63,19 @@ namespace MSFramework.AspNetCore
 
 			if (!ModelState.IsValid)
 			{
+				var errors = ModelState.Where(x => x.Value.ValidationState == ModelValidationState.Invalid).Select(x =>
+					new
+					{
+						name = x.Key,
+						error = x.Value.Errors.FirstOrDefault()?.ErrorMessage
+					});
+
 				context.Result = new ApiResult(new
 				{
 					success = false,
 					code = 20000,
-					msg = "数据校验失败"
+					msg = "数据校验不通过",
+					errors
 				});
 			}
 
@@ -75,16 +87,15 @@ namespace MSFramework.AspNetCore
 			}
 
 			var nextContext = await next();
-			
+
 			OnActionExecuted(nextContext);
-			
+
 			var uowManager = context.HttpContext.RequestServices.GetService<IUnitOfWorkManager>();
 			if (uowManager != null)
 			{
 				await uowManager.CommitAsync();
 			}
 		}
-
 
 		[NonAction]
 		public virtual void OnActionExecuting(ActionExecutingContext context)

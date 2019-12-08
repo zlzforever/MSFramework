@@ -9,7 +9,6 @@ using MSFramework.Data;
 using MSFramework.DependencyInjection;
 using MSFramework.EventBus;
 using MSFramework.Reflection;
-using MSFramework.Serialization;
 
 namespace MSFramework
 {
@@ -74,12 +73,6 @@ namespace MSFramework
 				{
 					builder.Services.Add(kv.Value, kv.Key);
 				}
-			}
-
-			if (Singleton<IJsonConvert>.Instance == null)
-			{
-				Singleton<IJsonConvert>.Instance = new NewtonsoftJsonConvert(new JsonConvertOptions());
-				builder.Services.AddSingleton(Singleton<IJsonConvert>.Instance);
 			}
 
 			if (Singleton<IIdGenerator>.Instance == null)
