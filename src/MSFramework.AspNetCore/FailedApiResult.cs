@@ -10,11 +10,6 @@ namespace MSFramework.AspNetCore
 			data = default(object)
 		})
 		{
-			if (code < 10000)
-			{
-				throw new MSFrameworkException("Failed code should be greater than 10000");
-			}
-
 			StatusCode = 500;
 		}
 	}
