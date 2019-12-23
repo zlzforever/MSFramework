@@ -1,5 +1,5 @@
 using System.Threading.Tasks;
-using MSFramework.EntityFrameworkCore;
+using MSFramework.Ef;
 using MSFramework.EventBus;
 using Ordering.Domain.AggregateRoot.Event;
 

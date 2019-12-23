@@ -1,4 +1,4 @@
-using MSFramework.EntityFrameworkCore;
+using MSFramework.Ef;
 using Ordering.Domain.AggregateRoot;
 using Ordering.Domain.Repository;
 

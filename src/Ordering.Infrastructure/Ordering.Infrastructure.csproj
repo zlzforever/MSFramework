@@ -5,9 +5,9 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\MSFramework.EntityFrameworkCore.MySql\MSFramework.EntityFrameworkCore.MySql.csproj" />
-        <ProjectReference Include="..\MSFramework.EntityFrameworkCore.SqlServer\MSFramework.EntityFrameworkCore.SqlServer.csproj" />
-        <ProjectReference Include="..\MSFramework.EntityFrameworkCore\MSFramework.EntityFrameworkCore.csproj" />
+        <ProjectReference Include="..\MSFramework.Ef.MySql\MSFramework.Ef.MySql.csproj" />
+        <ProjectReference Include="..\MSFramework.Ef.SqlServer\MSFramework.Ef.SqlServer.csproj" />
+        <ProjectReference Include="..\MSFramework.Ef\MSFramework.Ef.csproj" />
         <ProjectReference Include="..\Ordering.Domain\Ordering.Domain.csproj" />
     </ItemGroup>
 

@@ -1,5 +1,6 @@
 using System;
 using Microsoft.AspNetCore.Mvc.Filters;
+using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.Logging;
 
 namespace MSFramework.AspNetCore
@@ -15,7 +16,7 @@ namespace MSFramework.AspNetCore
 
 		public void OnException(ExceptionContext context)
 		{
-			context.HttpContext.Response.StatusCode = 201;
+			context.HttpContext.Response.StatusCode = 500;
 			_logger.LogError(context.Exception.ToString());
 			context.Result = new ApiResult(GetInnerMessage(context.Exception), 10201);
 		}

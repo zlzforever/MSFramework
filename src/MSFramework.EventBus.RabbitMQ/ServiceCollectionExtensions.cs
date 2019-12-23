@@ -6,7 +6,7 @@ namespace MSFramework.EventBus.RabbitMQ
 {
 	public static class ServiceCollectionExtensions
 	{
-		public static MSFrameworkBuilder UseRabbitMQEventBus(this MSFrameworkBuilder builder)
+		public static MSFrameworkBuilder AddRabbitMQEventBus(this MSFrameworkBuilder builder)
 		{
 			builder.Services.AddRabbitMQEventBus();
 			return builder;

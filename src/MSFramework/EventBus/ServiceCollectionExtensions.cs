@@ -5,7 +5,7 @@ namespace MSFramework.EventBus
 {
 	public static class ServiceCollectionExtensions
 	{
-		public static MSFrameworkBuilder UsePassThroughEventBus(this MSFrameworkBuilder builder,
+		public static MSFrameworkBuilder AddPassThroughEventBus(this MSFrameworkBuilder builder,
 			Action<EventBusBuilder> configure = null)
 		{
 			EventBusBuilder eBuilder = new EventBusBuilder(builder.Services);

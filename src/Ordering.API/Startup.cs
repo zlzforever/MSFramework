@@ -7,14 +7,23 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.OpenApi.Models;
 using MSFramework;
 using MSFramework.AspNetCore;
-using MSFramework.EntityFrameworkCore;
-using MSFramework.EntityFrameworkCore.MySql;
-using MSFramework.EntityFrameworkCore.SqlServer;
+using MSFramework.Common;
+using MSFramework.Ef;
+using MSFramework.Ef.MySql;
+using MSFramework.Ef.SqlServer;
 using MSFramework.EventBus;
+using MSFramework.Permission;
 using Ordering.Application.Event;
 
 namespace Ordering.API
 {
+	class MyInitializer : Initializer
+	{
+		public override void Initialize(IApplicationBuilder builder)
+		{
+		}
+	}
+
 	public class Startup
 	{
 		public Startup(IConfiguration configuration)
@@ -34,19 +43,21 @@ namespace Ordering.API
 				c.SwaggerDoc("v1.0", new OpenApiInfo {Version = "v1.0", Description = "Ordering API V1.0"});
 			});
 			services.AddHealthChecks();
+
 			services.AddMSFramework(builder =>
 			{
-				builder.UseEventHandler(typeof(UserCheckoutAcceptedEvent));
+				builder.AddEventHandler(typeof(UserCheckoutAcceptedEvent));
 				// 开发环境可以使用本地消息总线，生产环境应该换成分布式消息队列
-				builder.UsePassThroughEventBus();
-				//builder.UseRabbitMQEventBus();
-				builder.UseAspNetCoreSession();
-
-				builder.UseEntityFramework(ef =>
+				builder.AddPassThroughEventBus();
+				builder.AddAspNetCoreSession();
+				builder.AddInitializer<MyInitializer>();
+				builder.AddPermission();
+				builder.AddEntityFramework(x =>
 				{
 					// 添加 SqlServer 支持
-					ef.AddSqlServerDbContextOptionsBuilderCreator();
-					ef.AddMySqlDbContextOptionsBuilderCreator();
+					x.AddSqlServerDbContextOptionsBuilderCreator();
+					// 添加 MySql 支持
+					x.AddMySqlDbContextOptionsBuilderCreator();
 				}, Configuration);
 			});
 		}
@@ -75,7 +86,7 @@ namespace Ordering.API
 					name: "default",
 					pattern: "{controller=Home}/{action=Index}/{id?}");
 			});
-			
+
 			app.Use(async (context, next) =>
 			{
 				if (context.Request.Path == "/")

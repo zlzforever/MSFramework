@@ -6,7 +6,7 @@ namespace MSFramework.AspNetCore
 {
 	public static class ServiceCollectionExtensions
 	{
-		public static MSFrameworkBuilder UseAspNetCoreSession(this MSFrameworkBuilder builder)
+		public static MSFrameworkBuilder AddAspNetCoreSession(this MSFrameworkBuilder builder)
 		{
 			builder.Services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
 			builder.Services.AddScoped<IMSFrameworkSession, MSFrameworkSession>();

@@ -3,6 +3,9 @@ using MSFramework.Common;
 
 namespace MSFramework.Data
 {
+	/// <summary>
+	/// 为后期支持可排序 GUID 做准备
+	/// </summary>
 	public interface IIdGenerator
 	{
 		T GetNewId<T>();

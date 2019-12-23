@@ -16,6 +16,7 @@
     </ItemGroup>
 
     <ItemGroup>
+        <ProjectReference Include="..\MSFramework.AspNetCore.Permission\MSFramework.AspNetCore.Permission.csproj" />
         <ProjectReference Include="..\MSFramework.AspNetCore\MSFramework.AspNetCore.csproj" />
         <ProjectReference Include="..\MSFramework\MSFramework.csproj" />
         <ProjectReference Include="..\Ordering.Application\Ordering.Application.csproj" />

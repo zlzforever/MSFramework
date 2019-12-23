@@ -16,7 +16,7 @@ namespace MSFramework
 	{
 		private static Type[] _types;
 
-		public static MSFrameworkBuilder UseEventHandler(this MSFrameworkBuilder builder, params Type[] eventTypes)
+		public static MSFrameworkBuilder AddEventHandler(this MSFrameworkBuilder builder, params Type[] eventTypes)
 		{
 			_types = eventTypes;
 

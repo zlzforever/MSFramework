@@ -5,6 +5,7 @@ using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using MSFramework.AspNetCore;
+using MSFramework.AspNetCore.Permission;
 using MSFramework.Domain;
 using MSFramework.EventBus;
 using Ordering.Application.Command;
@@ -16,7 +17,8 @@ namespace Ordering.API.Controllers
 {
 	[Route("api/v1.0/[controller]")]
 	[ApiController]
-	public class OrderController : MSFrameworkControllerBase
+	[Permission( Name = "order")]
+	public class OrderController : MSFrameworkApiControllerBase
 	{
 		private readonly IOrderingQuery _orderingQuery;
 		private readonly IEventBus _eventBus;

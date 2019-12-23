@@ -2,7 +2,7 @@ namespace MSFramework.AspNetCore
 {
 	public class FailedApiResult : ApiResult
 	{
-		public FailedApiResult(string msg = "Internal Error", int code = 1000) : base(new
+		public FailedApiResult(string msg = "Internal Error", int code = 110, int? statusCode = 500) : base(new
 		{
 			success = false,
 			code,
@@ -10,7 +10,7 @@ namespace MSFramework.AspNetCore
 			data = default(object)
 		})
 		{
-			StatusCode = 500;
+			StatusCode = statusCode;
 		}
 	}
 }

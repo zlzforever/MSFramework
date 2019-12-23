@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
-using MSFramework.EntityFrameworkCore;
+using MSFramework.Ef;
 using Ordering.Domain.AggregateRoot;
 
 namespace Ordering.Application.Query

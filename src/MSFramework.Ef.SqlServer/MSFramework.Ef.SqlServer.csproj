@@ -1,0 +1,12 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+    <PropertyGroup>
+        <PackageId>MSFramework.EntityFrameworkCore.SqlServer</PackageId>
+    </PropertyGroup>
+    <Import Project="../../package.props" />
+    <ItemGroup>
+        <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="3.1.0" />
+    </ItemGroup>
+    <ItemGroup>
+      <ProjectReference Include="..\MSFramework.Ef\MSFramework.Ef.csproj" />
+    </ItemGroup>
+</Project>

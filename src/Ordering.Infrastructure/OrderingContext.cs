@@ -1,6 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
-using MSFramework.EntityFrameworkCore;
+using MSFramework.Ef;
 using MSFramework.EventBus;
 
 namespace Ordering.Infrastructure
