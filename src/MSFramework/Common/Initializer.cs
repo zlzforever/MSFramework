@@ -1,4 +1,4 @@
-using Microsoft.AspNetCore.Builder;
+using System;
 
 namespace MSFramework.Common
 {
@@ -6,6 +6,6 @@ namespace MSFramework.Common
 	{
 		public virtual int Order => 0;
 
-		public abstract void Initialize(IApplicationBuilder builder);
+		public abstract void Initialize(IServiceProvider builder);
 	}
 }

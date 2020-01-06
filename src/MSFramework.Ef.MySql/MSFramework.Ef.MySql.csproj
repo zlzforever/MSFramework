@@ -1,10 +1,10 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
     <PropertyGroup>
-        <PackageId>MSFramework.EntityFrameworkCore.MySql</PackageId>
+        <PackageId>MSFramework.Ef.MySql</PackageId>
     </PropertyGroup>
     <Import Project="../../package.props" />
     <ItemGroup>
-        <PackageReference Include="Pomelo.EntityFrameworkCore.MySql" Version="3.0.1" />
+        <PackageReference Include="Pomelo.EntityFrameworkCore.MySql" Version="3.1.0" />
     </ItemGroup>
     <ItemGroup>
       <ProjectReference Include="..\MSFramework.Ef\MSFramework.Ef.csproj" />

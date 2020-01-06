@@ -1,7 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk">
-
     <PropertyGroup>
-        <TargetFramework>netcoreapp3.1</TargetFramework>
+        <PackageId>MSFramework.AutoMapper</PackageId>
     </PropertyGroup>
     <Import Project="../../package.props" />
     <ItemGroup>

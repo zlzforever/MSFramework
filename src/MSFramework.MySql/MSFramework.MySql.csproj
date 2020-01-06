@@ -1,0 +1,15 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <PackageId>MSFramework.MySql</PackageId>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\MSFramework\MSFramework.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <PackageReference Include="MySqlConnector" Version="0.61.0" />
+    </ItemGroup>
+    <Import Project="../../package.props" />
+</Project>
