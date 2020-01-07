@@ -35,6 +35,7 @@ namespace MSFramework.Domain
 
 		public void Delete(string userId, string userName, DateTimeOffset deletionTime = default)
 		{
+			// 删除只能一次操作，因此如果已经有值，不能再做设置
 			if (!IsDeleted)
 			{
 				IsDeleted = true;

@@ -31,6 +31,7 @@ namespace MSFramework.Domain
 
 		public virtual void SetCreationAudited(string userId, string userName, DateTimeOffset creationTime = default)
 		{
+			// 创建只能一次操作，因此如果已经有值，不能再做设置
 			if (CreationTime == default)
 			{
 				CreationTime = creationTime == default ? DateTimeOffset.Now : creationTime;

@@ -29,19 +29,14 @@ namespace MSFramework.Domain
 		public virtual void SetModificationAudited(string userId, string userName,
 			DateTimeOffset lastModificationTime = default)
 		{
-			if (LastModificationTime == default)
-			{
-				LastModificationTime = lastModificationTime == default ? DateTimeOffset.Now : lastModificationTime;
-			}
+			LastModificationTime = lastModificationTime == default ? DateTimeOffset.Now : lastModificationTime;
 
-			if (!string.IsNullOrWhiteSpace(userId) &&
-			    string.IsNullOrWhiteSpace(LastModificationUserId))
+			if (!string.IsNullOrWhiteSpace(userId))
 			{
 				LastModificationUserId = userId;
 			}
 
-			if (!string.IsNullOrWhiteSpace(userName) &&
-			    string.IsNullOrWhiteSpace(LastModificationUserName))
+			if (!string.IsNullOrWhiteSpace(userName))
 			{
 				LastModificationUserName = userName;
 			}
