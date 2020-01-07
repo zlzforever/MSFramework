@@ -18,7 +18,7 @@ namespace MSFramework.Data
 		protected virtual string MigrationsHistoryTable => "__migrations_history";
 
 		protected virtual string MigrationsHistorySql => $@"
-create table if not exists {MigrationsHistoryTable}
+create table {MigrationsHistoryTable}
 (
     migration_id    varchar(100) not null
         primary key,
@@ -67,7 +67,18 @@ create table if not exists {MigrationsHistoryTable}
 			_logger.LogInformation($"Prepare database success");
 
 			var conn = CreateConnection(connectionString);
-			conn.Execute(MigrationsHistorySql);
+			try
+			{
+				conn.Execute(MigrationsHistorySql);
+			}
+			catch (Exception e)
+			{
+				if (!e.Message.Contains("already exists"))
+				{
+					throw;
+				}
+			}
+
 			var migrations = conn.Query<string>($"SELECT migration_id FROM {MigrationsHistoryTable}").ToList();
 			if (conn.State == ConnectionState.Closed)
 			{

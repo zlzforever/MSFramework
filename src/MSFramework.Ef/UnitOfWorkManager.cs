@@ -10,27 +10,22 @@ namespace MSFramework.Ef
 	public class UnitOfWorkManager : IUnitOfWorkManager
 	{
 		private readonly DbContextFactory _dbContextFactory;
-		private readonly IServiceProvider _serviceProvider;
+		private readonly ILogger _logger;
 
-		public UnitOfWorkManager(DbContextFactory dbContextFactory, IServiceProvider serviceProvider)
+		public UnitOfWorkManager(DbContextFactory dbContextFactory, ILogger<UnitOfWorkManager> logger)
 		{
 			_dbContextFactory = dbContextFactory;
-			_serviceProvider = serviceProvider;
+			_logger = logger;
 		}
 
 		public async Task CommitAsync()
 		{
-			ILogger logger = null;
-			if (!_serviceProvider.GetRequiredService<IHostEnvironment>().IsProduction())
-			{
-				logger = _serviceProvider.GetRequiredService<ILogger<DbContextFactory>>();
-			}
-
 			foreach (var dbContext in _dbContextFactory.GetAllDbContexts())
 			{
 				await dbContext.CommitAsync();
-				logger?.LogInformation("DbContexts autoCommitted");
 			}
+
+			_logger.LogInformation("DbContexts committed");
 		}
 	}
 }

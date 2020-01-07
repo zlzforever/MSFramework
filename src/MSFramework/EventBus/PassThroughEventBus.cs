@@ -14,7 +14,7 @@ namespace MSFramework.EventBus
 		{
 			Store = new InMemoryEventBusSubscriptionStore();
 		}
-		
+
 		public PassThroughEventBus(ILogger<PassThroughEventBus> logger, IServiceProvider serviceProvider)
 		{
 			_logger = logger;
@@ -33,13 +33,20 @@ namespace MSFramework.EventBus
 					{
 						var handler =
 							_serviceProvider.GetService(subscription.HandlerType) as IDynamicEventHandler;
-						if (handler == null) continue;
+						if (handler == null)
+						{
+							continue;
+						}
+
 						await handler.Handle(@event);
 					}
 					else
 					{
 						var handler = _serviceProvider.GetService(subscription.HandlerType);
-						if (handler == null) continue;
+						if (handler == null)
+						{
+							continue;
+						}
 
 						var concreteType = typeof(IEventHandler<>).MakeGenericType(@event.GetType());
 						// ReSharper disable once PossibleNullReferenceException
@@ -48,8 +55,9 @@ namespace MSFramework.EventBus
 				}
 			}
 		}
-		
-		public void Subscribe<TEvent, TEventHandler>() where TEvent : class, IEvent where TEventHandler : IEventHandler<TEvent>
+
+		public void Subscribe<TEvent, TEventHandler>() where TEvent : class, IEvent
+			where TEventHandler : IEventHandler<TEvent>
 		{
 			var eventName = Store.GetEventKey<TEvent>();
 
@@ -71,7 +79,8 @@ namespace MSFramework.EventBus
 			Store.RemoveSubscription<TEventHandler>(eventName);
 		}
 
-		public void Unsubscribe<TEvent, TEventHandler>() where TEvent : class, IEvent where TEventHandler : IEventHandler<TEvent>
+		public void Unsubscribe<TEvent, TEventHandler>() where TEvent : class, IEvent
+			where TEventHandler : IEventHandler<TEvent>
 		{
 			var eventName = Store.GetEventKey<TEvent>();
 

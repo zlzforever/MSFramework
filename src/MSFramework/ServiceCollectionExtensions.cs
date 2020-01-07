@@ -61,7 +61,6 @@ namespace MSFramework
 			if (Singleton<IAssemblyFinder>.Instance == null)
 			{
 				Singleton<IAssemblyFinder>.Instance = new AssemblyFinder();
-				builder.Services.AddSingleton(Singleton<IAssemblyFinder>.Instance);
 			}
 
 			if (Singleton<IDependencyTypeFinder>.Instance == null)

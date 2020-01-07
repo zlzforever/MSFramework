@@ -35,7 +35,8 @@ namespace MSFramework.DependencyInjection
 				               !type.IsInterface).ToArray();
 			var dict = new Dictionary<ServiceLifetime, Type[]>
 			{
-				{ServiceLifetime.Scoped, scopeTypes}, {ServiceLifetime.Singleton, singletonTypes},
+				{ServiceLifetime.Scoped, scopeTypes},
+				{ServiceLifetime.Singleton, singletonTypes},
 				{ServiceLifetime.Transient, transientTypes}
 			};
 			return dict;

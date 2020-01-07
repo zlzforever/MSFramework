@@ -7,18 +7,18 @@ namespace MSFramework.EventBus
 	{
 		protected Event()
 		{
-			Id = CombGuid.NewGuid();
+			EventId = CombGuid.NewGuid();
 			Timestamp = DateTimeOffset.UtcNow;
 		}
 
-		public Guid Id { get; set; }
+		public Guid EventId { get; set; }
 
 		public int Version { get; set; }
 
 		public DateTimeOffset Timestamp { get; set; }
 
-		public string Creator { get; set; }
+		public string CreationUserName { get; set; }
 
-		public string CreatorId { get; set; }
+		public string CreationUserId { get; set; }
 	}
 }

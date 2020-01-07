@@ -53,7 +53,7 @@ namespace MSFramework.EventBus.RabbitMQ
 					(ex, time) =>
 					{
 						_logger.LogWarning(ex,
-							"Could not publish event: {EventId} after {Timeout}s ({ExceptionMessage})", @event.Id,
+							"Could not publish event: {EventId} after {Timeout}s ({ExceptionMessage})", @event.EventId,
 							$"{time.TotalSeconds:n1}", ex.Message);
 					});
 

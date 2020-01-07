@@ -7,7 +7,7 @@ namespace MSFramework.EventBus
 		/// <summary>
 		/// 事件源标识
 		/// </summary>
-		Guid Id { get; set; }
+		Guid EventId { get; set; }
 
 		/// <summary>
 		/// 事件版本
@@ -22,11 +22,11 @@ namespace MSFramework.EventBus
 		/// <summary>
 		/// 事件触发人员
 		/// </summary>
-		string Creator { get; set; }
+		string CreationUserName { get; set; }
 
 		/// <summary>
 		/// 事件触发人员标识
 		/// </summary>
-		string CreatorId { get; set; }
+		string CreationUserId { get; set; }
 	}
 }

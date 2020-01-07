@@ -146,6 +146,28 @@ namespace MSFramework.Ef
 		{
 			try
 			{
+				// Dispatch Domain Events collection. 
+				// Choices:
+				// A) Right BEFORE committing data (EF SaveChanges) into the DB will make a single transaction including  
+				// side effects from the domain event handlers which are using the same DbContext with "InstancePerLifetimeScope" or "scoped" lifetime
+				// B) Right AFTER committing data (EF SaveChanges) into the DB will make multiple transactions. 
+				// You will need to handle eventual consistency and compensatory actions in case of failures in any of the Handlers. 
+				var domainEntities = ChangeTracker
+					.Entries<IEventProvider>()
+					.Where(x => x.Entity.DomainEvents != null && x.Entity.DomainEvents.Any()).ToList();
+
+				var domainEvents = domainEntities
+					.SelectMany(x => x.Entity.DomainEvents)
+					.ToList();
+
+				domainEntities
+					.ForEach(entity => entity.Entity.ClearDomainEvents());
+
+				foreach (var @event in domainEvents)
+				{
+					await _eventBus.PublishAsync(@event);
+				}
+
 				var changed = ChangeTracker.Entries().Any();
 				if (!changed)
 				{
@@ -154,13 +176,8 @@ namespace MSFramework.Ef
 
 				ApplyConcepts();
 
-				// After executing this line all the changes (from the Command Handler and Domain Event Handlers) 
-				// performed through the DbContext will be committed
-
 				var effectedCount = await base.SaveChangesAsync(cancellationToken);
-
 				Database.CurrentTransaction?.Commit();
-
 				return effectedCount;
 			}
 			catch
@@ -170,34 +187,9 @@ namespace MSFramework.Ef
 			}
 		}
 
-		public async Task<bool> CommitAsync()
+		public async Task CommitAsync()
 		{
-			// Dispatch Domain Events collection. 
-			// Choices:
-			// A) Right BEFORE committing data (EF SaveChanges) into the DB will make a single transaction including  
-			// side effects from the domain event handlers which are using the same DbContext with "InstancePerLifetimeScope" or "scoped" lifetime
-			// B) Right AFTER committing data (EF SaveChanges) into the DB will make multiple transactions. 
-			// You will need to handle eventual consistency and compensatory actions in case of failures in any of the Handlers. 
-			var domainEntities = ChangeTracker
-				.Entries<IEventProvider>()
-				.Where(x => x.Entity.DomainEvents != null && x.Entity.DomainEvents.Any()).ToList();
-
-			var domainEvents = domainEntities
-				.SelectMany(x => x.Entity.DomainEvents)
-				.ToList();
-
-			domainEntities
-				.ForEach(entity => entity.Entity.ClearDomainEvents());
-
-			foreach (var @event in domainEvents)
-			{
-				await _eventBus.PublishAsync(@event);
-			}
-
-			// After executing this line all the changes (from the Command Handler and Domain Event Handlers) 
-			// performed through the DbContext will be committed
 			await SaveChangesAsync();
-			return true;
 		}
 
 		protected virtual void ApplyConcepts()

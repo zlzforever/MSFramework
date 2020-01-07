@@ -43,12 +43,7 @@ namespace MSFramework.AspNetCore
 		{
 			get
 			{
-				if (HttpContext?.User == null)
-				{
-					return null;
-				}
-
-				var userName = HttpContext.User.FindFirst("name")?.Value;
+				var userName = HttpContext?.User?.FindFirst("name")?.Value;
 				return userName;
 			}
 		}
