@@ -65,7 +65,7 @@ namespace MSFramework.EventBus.RabbitMQ
 				channel.ExchangeDeclare(exchange: _options.BrokerName,
 					type: "direct");
 
-				var body = LZ4MessagePackSerializer.Serialize(@event);
+				var body = MessagePackSerializer.Typeless.Serialize(@event);
 
 				policy.Execute(() =>
 				{
@@ -175,7 +175,7 @@ namespace MSFramework.EventBus.RabbitMQ
 		{
 			var eventName = eventArgs.RoutingKey;
 			var @event =
-				LZ4MessagePackSerializer.Typeless.Deserialize(eventArgs.Body);
+				MessagePackSerializer.Typeless.Deserialize(eventArgs.Body);
 			await ProcessEvent(eventName, @event);
 
 			// Even on exception we take the message off the queue.

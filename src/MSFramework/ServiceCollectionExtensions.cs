@@ -1,7 +1,6 @@
 using System;
 using System.Linq;
 using System.Reflection;
-using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyModel;
 using MSFramework.Common;
@@ -85,17 +84,20 @@ namespace MSFramework
 			builder.Services.AddHttpClient();
 		}
 
-		public static IApplicationBuilder UseMSFramework(this IApplicationBuilder builder)
+		public static IMSFrameworkApplicationBuilder UseMSFramework(this IServiceProvider applicationServices,
+			Action<IMSFrameworkApplicationBuilder> configure)
 		{
-			Singleton<IServiceProvider>.Instance = builder.ApplicationServices;
-			SubscribeEventHandler(builder);
-			Initialize(builder);
+			Singleton<IServiceProvider>.Instance = applicationServices;
+			SubscribeEventHandler(applicationServices);
+			Initialize(applicationServices);
+			var builder = new MSFrameworkApplicationBuilder(applicationServices);
+			configure?.Invoke(builder);
 			return builder;
 		}
 
-		private static void SubscribeEventHandler(IApplicationBuilder builder)
+		private static void SubscribeEventHandler(IServiceProvider applicationServices)
 		{
-			using var scope = builder.ApplicationServices.CreateScope();
+			using var scope = applicationServices.CreateScope();
 			var eventBus = scope.ServiceProvider.GetService<IEventBus>();
 			if (_types != null && _types.Length > 0 && eventBus != null)
 			{
@@ -140,13 +142,13 @@ namespace MSFramework
 			}
 		}
 
-		private static void Initialize(IApplicationBuilder builder)
+		private static void Initialize(IServiceProvider applicationServices)
 		{
-			var initializers = builder.ApplicationServices.GetServices<Initializer>().ToList();
+			var initializers = applicationServices.GetServices<Initializer>().ToList();
 			initializers.Sort((x, y) => x.Order < y.Order ? 0 : 1);
 			foreach (var initializer in initializers)
 			{
-				initializer.Initialize(builder);
+				initializer.Initialize(applicationServices);
 			}
 		}
 

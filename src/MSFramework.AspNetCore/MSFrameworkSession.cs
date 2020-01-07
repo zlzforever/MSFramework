@@ -1,3 +1,4 @@
+using System.Security.Claims;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Http;
@@ -29,15 +30,32 @@ namespace MSFramework.AspNetCore
 					userId = HttpContext.User.FindFirst("sid")?.Value;
 				}
 
+				if (string.IsNullOrWhiteSpace(userId))
+				{
+					userId = HttpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+				}
+
 				return userId;
 			}
 		}
 
-		public override string UserName => HttpContext?.User?.FindFirst("name")?.Value;
+		public override string UserName
+		{
+			get
+			{
+				if (HttpContext?.User == null)
+				{
+					return null;
+				}
 
-		public override HttpContext HttpContext => _accessor.HttpContext;
+				var userName = HttpContext.User.FindFirst("name")?.Value;
+				return userName;
+			}
+		}
 
-		public override Task<string> GetTokenAsync(string tokenName = "access_token")
+		public HttpContext HttpContext => _accessor.HttpContext;
+
+		public Task<string> GetTokenAsync(string tokenName = "access_token")
 		{
 			return HttpContext.GetTokenAsync(tokenName);
 		}

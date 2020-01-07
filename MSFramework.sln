@@ -61,6 +61,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MSFramework.Permissoin.Ef.M
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MSFramework.AspNetCore.Permission", "src\MSFramework.AspNetCore.Permission\MSFramework.AspNetCore.Permission.csproj", "{E722344D-C9D8-4720-B847-81B7B016B197}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MSFramework.MySql", "src\MSFramework.MySql\MSFramework.MySql.csproj", "{8E81158C-04B8-4021-AD66-6F8551146950}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -131,6 +133,10 @@ Global
 		{E722344D-C9D8-4720-B847-81B7B016B197}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{E722344D-C9D8-4720-B847-81B7B016B197}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{E722344D-C9D8-4720-B847-81B7B016B197}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8E81158C-04B8-4021-AD66-6F8551146950}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8E81158C-04B8-4021-AD66-6F8551146950}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8E81158C-04B8-4021-AD66-6F8551146950}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8E81158C-04B8-4021-AD66-6F8551146950}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -157,6 +163,7 @@ Global
 		{54790659-18D8-4C26-9436-B5C36725AFAE} = {AFD16F00-F810-4A3C-BA74-59BBFBC2469D}
 		{ED3F12EE-15C7-49A4-B3AE-504D666D60FB} = {AFD16F00-F810-4A3C-BA74-59BBFBC2469D}
 		{E722344D-C9D8-4720-B847-81B7B016B197} = {AFD16F00-F810-4A3C-BA74-59BBFBC2469D}
+		{8E81158C-04B8-4021-AD66-6F8551146950} = {AFD16F00-F810-4A3C-BA74-59BBFBC2469D}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {BE296FC5-5695-4FE5-9BAE-7168B9BACB47}

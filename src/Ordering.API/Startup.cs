@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Builder;
+﻿using System;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
@@ -12,6 +13,7 @@ using MSFramework.Ef;
 using MSFramework.Ef.MySql;
 using MSFramework.Ef.SqlServer;
 using MSFramework.EventBus;
+using MSFramework.MySql;
 using MSFramework.Permission;
 using Ordering.Application.Event;
 
@@ -19,7 +21,7 @@ namespace Ordering.API
 {
 	class MyInitializer : Initializer
 	{
-		public override void Initialize(IApplicationBuilder builder)
+		public override void Initialize(IServiceProvider builder)
 		{
 		}
 	}
@@ -77,7 +79,7 @@ namespace Ordering.API
 
 			app.UseRouting();
 			app.UseHealthChecks("/healthcheck");
-			app.UseMSFramework();
+			app.ApplicationServices.UseMSFramework(x => { x.UseMySqlMigrator(typeof(Startup), ""); });
 			app.UseHttpsRedirection();
 			app.UseAuthorization();
 			app.UseEndpoints(endpoints =>

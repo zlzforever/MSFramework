@@ -18,6 +18,7 @@
     <ItemGroup>
         <ProjectReference Include="..\MSFramework.AspNetCore.Permission\MSFramework.AspNetCore.Permission.csproj" />
         <ProjectReference Include="..\MSFramework.AspNetCore\MSFramework.AspNetCore.csproj" />
+        <ProjectReference Include="..\MSFramework.MySql\MSFramework.MySql.csproj" />
         <ProjectReference Include="..\MSFramework\MSFramework.csproj" />
         <ProjectReference Include="..\Ordering.Application\Ordering.Application.csproj" />
         <ProjectReference Include="..\Ordering.Domain\Ordering.Domain.csproj" />
