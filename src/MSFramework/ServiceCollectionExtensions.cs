@@ -85,7 +85,7 @@ namespace MSFramework
 		}
 
 		public static IMSFrameworkApplicationBuilder UseMSFramework(this IServiceProvider applicationServices,
-			Action<IMSFrameworkApplicationBuilder> configure)
+			Action<IMSFrameworkApplicationBuilder> configure = null)
 		{
 			Singleton<IServiceProvider>.Instance = applicationServices;
 			SubscribeEventHandler(applicationServices);
