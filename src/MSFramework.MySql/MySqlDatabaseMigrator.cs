@@ -21,7 +21,7 @@ namespace MSFramework.MySql
 			return new MySqlConnection(connectionString);
 		}
 
-		protected override IDbConnection PrepareDatabase(string connectionString)
+		protected override void PrepareDatabase(string connectionString)
 		{
 			var mySqlConnectionStringBuilder = new MySqlConnectionStringBuilder(connectionString);
 			var database = mySqlConnectionStringBuilder.Database;
@@ -29,8 +29,6 @@ namespace MSFramework.MySql
 			using var conn = new MySqlConnection(mySqlConnectionStringBuilder.ToString());
 			conn.Open();
 			conn.Execute($"CREATE DATABASE IF NOT EXISTS {database};");
-			conn.ChangeDatabase(database);
-			return conn;
 		}
 	}
 }

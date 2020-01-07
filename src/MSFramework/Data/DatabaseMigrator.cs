@@ -23,10 +23,10 @@ create table if not exists {MigrationsHistoryTable}
     migration_id    varchar(100) not null
         primary key,
     creation_time   datetime not null
-";
+)";
 
 		protected virtual string InsertMigrationsHistorySql =>
-			$"INSERT INTO __migrations_history (migration_id, creation_time) VALUES (@MigrationId, @CreationTime);";
+			$"INSERT INTO {MigrationsHistoryTable} (migration_id, creation_time) VALUES (@MigrationId, @CreationTime);";
 
 		protected abstract DbConnection CreateConnection(string connectionString);
 
@@ -63,11 +63,12 @@ create table if not exists {MigrationsHistoryTable}
 			numbers.Sort();
 			_logger.LogInformation($"Find sql scripts: {string.Join(",", numbers.Select(y => $"{y}.sql"))}");
 
-			var conn = PrepareDatabase(connectionString);
+			PrepareDatabase(connectionString);
 			_logger.LogInformation($"Prepare database success");
 
+			var conn = CreateConnection(connectionString);
 			conn.Execute(MigrationsHistorySql);
-			var migrations = conn.Query<string>($"SELECT migration_id FROM __migrations_history").ToList();
+			var migrations = conn.Query<string>($"SELECT migration_id FROM {MigrationsHistoryTable}").ToList();
 			if (conn.State == ConnectionState.Closed)
 			{
 				conn.Open();
@@ -93,6 +94,6 @@ create table if not exists {MigrationsHistoryTable}
 			transaction.Commit();
 		}
 
-		protected abstract IDbConnection PrepareDatabase(string connectionString);
+		protected abstract void PrepareDatabase(string connectionString);
 	}
 }
