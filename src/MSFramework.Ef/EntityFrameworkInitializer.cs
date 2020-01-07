@@ -1,5 +1,5 @@
+using System;
 using System.Linq;
-using Microsoft.AspNetCore.Builder;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.Extensions.DependencyInjection;
@@ -13,9 +13,9 @@ namespace MSFramework.Ef
 	{
 		public override int Order => int.MinValue;
 
-		public override void Initialize(IApplicationBuilder builder)
+		public override void Initialize(IServiceProvider applicationServices)
 		{
-			using var scope = builder.ApplicationServices.CreateScope();
+			using var scope = applicationServices.CreateScope();
 			var dbContextFactory = scope.ServiceProvider.GetRequiredService<DbContextFactory>();
 			foreach (var kv in EntityFrameworkOptions.EntityFrameworkOptionDict)
 			{
