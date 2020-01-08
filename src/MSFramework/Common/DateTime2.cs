@@ -1,14 +1,14 @@
 using System;
+using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 
 namespace MSFramework.Common
 {
-	/// <summary>
-	/// 时间的帮助类
-	/// </summary>
-	public static class DateTimeHelper
+	[Serializable]
+	[StructLayout(LayoutKind.Auto)]
+	public readonly struct DateTime2
 	{
-		private static readonly DateTimeOffset Epoch = new DateTimeOffset(1970, 1, 1, 0, 0, 0, TimeSpan.Zero);
-		private const long TicksPerMicrosecond = 10;
+		public static readonly DateTime Epoch = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
 
 		/// <summary>
 		/// 当前月份的第一天
@@ -89,44 +89,15 @@ namespace MSFramework.Common
 		public static DateTime Sunday => Monday.AddDays(6);
 
 		/// <summary>
-		/// 把时间转换成Unix时间: 1515133023012
-		/// </summary>
-		/// <param name="time">时间</param>
-		/// <returns>Unix时间</returns>
-		public static string ConvertDateTimeToUnix(DateTime time)
-		{
-			return time.ToUniversalTime().Subtract(new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc))
-				.TotalMilliseconds
-				.ToString("f0");
-		}
-
-		/// <summary>
-		/// 把Unix时间转换成DateTime
-		/// </summary>
-		/// <param name="unixTime">Unix时间</param>
-		/// <returns>DateTime</returns>
-		public static DateTime ToDateTimeOffset(long unixTime)
-		{
-			return Epoch.AddTicks(unixTime * TicksPerMicrosecond).DateTime;
-		}
-
-		/// <summary>
 		/// 获取当前Unix时间
 		/// </summary>
 		/// <returns>Unix时间</returns>
-		public static string GetCurrentUnixTimeString()
-		{
-			return ConvertDateTimeToUnix(DateTime.UtcNow);
-		}
-
-		/// <summary>
-		/// 获取当前Unix时间
-		/// </summary>
-		/// <returns>Unix时间</returns>
-		public static double GetCurrentUnixTimeNumber()
-		{
-			return DateTime.Now.ToUniversalTime().Subtract(new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc))
+		public static double UnixTimestamp =>
+			DateTime.Now.ToUniversalTime().Subtract(Epoch)
 				.TotalMilliseconds;
-		}
+
+		public static double UnixSecondTimestamp =>
+			DateTime.Now.ToUniversalTime().Subtract(Epoch)
+				.TotalSeconds;
 	}
 }

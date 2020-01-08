@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using MSFramework.Data;
 
-namespace MSFramework.Collections.Generic
+namespace MSFramework.Extensions
 {
 	/// <summary>
 	/// Enumerable集合扩展方法

@@ -34,11 +34,13 @@ namespace MSFramework.Permission.AggregateRoot
 		/// <summary>
 		/// API 权限的路径
 		/// </summary>
+		[StringLength(500)]
 		public string Path { get; private set; }
 
 		/// <summary>
 		/// 权限描述
 		/// </summary>
+		[StringLength(500)]
 		public string Description { get; private set; }
 
 		private Permission()

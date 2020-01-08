@@ -3,6 +3,7 @@ using System.Linq.Expressions;
 using System.Threading.Tasks;
 using MSFramework.Data;
 using MSFramework.Domain;
+using MSFramework.Extensions;
 
 namespace MSFramework.Ef
 {

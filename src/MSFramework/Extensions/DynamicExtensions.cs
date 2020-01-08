@@ -2,7 +2,7 @@ using System;
 using System.Dynamic;
 using System.Reflection;
 
-namespace MSFramework.Common
+namespace MSFramework.Extensions
 {
 	public static class DynamicExtensions
 	{

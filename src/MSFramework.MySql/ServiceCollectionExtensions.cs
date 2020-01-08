@@ -6,17 +6,17 @@ namespace MSFramework.MySql
 {
 	public static class ServiceCollectionExtensions
 	{
-		public static MSFrameworkBuilder AddMySqlMigrator(this MSFrameworkBuilder builder)
+		public static MSFrameworkBuilder AddMySqlDatabaseMigration(this MSFrameworkBuilder builder)
 		{
-			builder.Services.AddTransient<IDatabaseMigrator, MySqlDatabaseMigrator>();
+			builder.Services.AddTransient<IDatabaseMigration, MySqlDatabaseMigration>();
 			return builder;
 		}
 
-		public static IMSFrameworkApplicationBuilder UseMySqlMigrator(this IMSFrameworkApplicationBuilder builder,
+		public static IMSFrameworkApplicationBuilder UseMySqlDatabaseMigration(this IMSFrameworkApplicationBuilder builder,
 			Type type, string connectionString)
 		{
 			(builder.ApplicationServices
-				.GetRequiredService<IDatabaseMigrator>() as MySqlDatabaseMigrator)?.Migrate(type, connectionString);
+				.GetRequiredService<IDatabaseMigration>() as MySqlDatabaseMigration)?.Migrate(type, connectionString);
 			return builder;
 		}
 	}

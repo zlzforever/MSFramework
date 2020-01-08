@@ -1,7 +1,7 @@
 using System;
 using System.Linq;
 
-namespace MSFramework.Reflection
+namespace MSFramework.Extensions
 {
 	public static class TypeExtensions
 	{

@@ -8,9 +8,9 @@ using MySql.Data.MySqlClient;
 
 namespace MSFramework.MySql
 {
-	public class MySqlDatabaseMigrator : DatabaseMigrator
+	public class MySqlDatabaseMigration : DatabaseMigration
 	{
-		public MySqlDatabaseMigrator(ILogger<DatabaseMigrator> logger) : base(logger)
+		public MySqlDatabaseMigration(ILogger<DatabaseMigration> logger) : base(logger)
 		{
 		}
 

@@ -9,7 +9,7 @@ using Microsoft.Extensions.Logging;
 
 namespace MSFramework.Data
 {
-	public abstract class DatabaseMigrator : IDatabaseMigrator
+	public abstract class DatabaseMigration : IDatabaseMigration
 	{
 		private readonly ILogger _logger;
 
@@ -30,7 +30,7 @@ create table {MigrationsHistoryTable}
 
 		protected abstract DbConnection CreateConnection(string connectionString);
 
-		protected DatabaseMigrator(ILogger<DatabaseMigrator> logger)
+		protected DatabaseMigration(ILogger<DatabaseMigration> logger)
 		{
 			_logger = logger;
 		}

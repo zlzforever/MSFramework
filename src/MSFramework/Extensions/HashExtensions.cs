@@ -2,7 +2,7 @@ using System.Security.Cryptography;
 using System.Text;
 using MSFramework.Data;
 
-namespace MSFramework.Security
+namespace MSFramework.Extensions
 {
 	/// <summary>
 	/// 字符串Hash操作类

@@ -30,7 +30,6 @@ namespace MSFramework.Collections.Generic
 			return new CommonEqualityComparer<TV>(keySelector, comparer);
 		}
 
-
 		private class CommonEqualityComparer<TV> : IEqualityComparer<T>
 		{
 			private readonly IEqualityComparer<TV> _comparer;
@@ -44,7 +43,8 @@ namespace MSFramework.Collections.Generic
 
 			public CommonEqualityComparer(Func<T, TV> keySelector)
 				: this(keySelector, EqualityComparer<TV>.Default)
-			{ }
+			{
+			}
 
 			public bool Equals(T x, T y)
 			{

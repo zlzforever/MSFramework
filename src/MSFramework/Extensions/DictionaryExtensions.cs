@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 
-namespace MSFramework.Collections.Generic
+namespace MSFramework.Extensions
 {
 	/// <summary>
 	/// 字典辅助扩展方法

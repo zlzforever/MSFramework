@@ -4,6 +4,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using MSFramework.Application;
 using MSFramework.Domain;
+using MSFramework.Extensions;
 using MSFramework.Reflection;
 
 namespace MSFramework.DependencyInjection

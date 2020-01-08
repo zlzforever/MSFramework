@@ -19,6 +19,20 @@ namespace MSFramework.Data
 		}
 
 		/// <summary>
+		/// 检查参数不能为空引用，否则抛出<see cref="ArgumentNullException"/>异常。
+		/// </summary>
+		/// <param name="value"></param>
+		/// <param name="paramName">参数名称</param>
+		/// <exception cref="ArgumentNullException"></exception>
+		public static void NotNullOrWhiteSpace(this string value, string paramName)
+		{
+			if (string.IsNullOrWhiteSpace(value))
+			{
+				throw new ArgumentException($"{paramName} is null or white space");
+			}
+		}
+
+		/// <summary>
 		/// 验证指定值的断言<paramref name="assertion"/>是否为真，如果不为真，抛出指定消息<paramref name="message"/>的指定类型<typeparamref name="TException"/>异常
 		/// </summary>
 		/// <typeparam name="TException">异常类型</typeparam>

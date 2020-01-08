@@ -2,7 +2,7 @@ using System;
 
 namespace MSFramework.Data
 {
-	public interface IDatabaseMigrator
+	public interface IDatabaseMigration
 	{
 		void Migrate(Type type, string connectionString);
 	}

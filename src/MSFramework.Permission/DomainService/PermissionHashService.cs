@@ -1,5 +1,5 @@
 using System.Threading.Tasks;
-using MSFramework.Security;
+using MSFramework.Extensions;
 
 namespace MSFramework.Permission.DomainService
 {
