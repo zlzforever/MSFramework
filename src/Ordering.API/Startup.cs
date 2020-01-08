@@ -23,6 +23,7 @@ namespace Ordering.API
 	{
 		public override void Initialize(IServiceProvider builder)
 		{
+			Console.WriteLine("HI, I'm a initializer");
 		}
 	}
 
@@ -52,7 +53,6 @@ namespace Ordering.API
 				// 开发环境可以使用本地消息总线，生产环境应该换成分布式消息队列
 				builder.AddPassThroughEventBus();
 				builder.AddAspNetCoreSession();
-				builder.AddInitializer<MyInitializer>();
 				builder.AddPermission();
 				builder.AddEntityFramework(x =>
 				{
@@ -79,7 +79,7 @@ namespace Ordering.API
 
 			app.UseRouting();
 			app.UseHealthChecks("/healthcheck");
-			app.ApplicationServices.UseMSFramework(x => { x.UseMySqlMigrator(typeof(Startup), ""); });
+			app.UseMSFramework();
 			app.UseHttpsRedirection();
 			app.UseAuthorization();
 			app.UseEndpoints(endpoints =>
