@@ -1,4 +1,5 @@
 ﻿using System;
+using System.ComponentModel.DataAnnotations;
 using System.Reflection;
 
 namespace MSFramework.Domain
@@ -13,6 +14,7 @@ namespace MSFramework.Domain
 
 		/// <inheritdoc/>
 		public virtual TKey Id => _id;
+
 
 		protected EntityBase()
 		{
@@ -83,5 +85,11 @@ namespace MSFramework.Domain
 		{
 			return $"[ENTITY: {GetType().Name}] Id = {Id}";
 		}
+
+		/// <summary>
+		/// 
+		/// </summary>
+		[StringLength(40)]
+		public string ConcurrencyStamp { get; set; } = Guid.NewGuid().ToString();
 	}
 }

@@ -92,6 +92,7 @@ namespace MSFramework
 			Initialize(applicationServices);
 			var builder = new MSFrameworkApplicationBuilder(applicationServices);
 			configure?.Invoke(builder);
+
 			return builder;
 		}
 

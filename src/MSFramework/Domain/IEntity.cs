@@ -12,7 +12,7 @@
 		TKey Id { get; }
 	}
 
-	public interface IEntity
+	public interface IEntity : IVersion
 	{
 	}
 }

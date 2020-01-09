@@ -19,6 +19,7 @@ namespace MSFramework.AspNetCore
 			Action<IMSFrameworkApplicationBuilder> configure = null)
 		{
 			builder.ApplicationServices.UseMSFramework(configure);
+			
 			return builder;
 		}
 	}

@@ -1,6 +1,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using MSFramework.Domain;
 
 namespace MSFramework.Ef
 {
@@ -27,12 +28,26 @@ namespace MSFramework.Ef
 		/// </summary>
 		public Type EntityType { get; }
 
+		protected virtual bool UseConcurrencyStamp => false;
+
 		/// <summary>
 		/// 将当前实体类映射对象注册到数据上下文模型构建器中
 		/// </summary>
 		/// <param name="modelBuilder">上下文模型构建器</param>
 		public void RegisterTo(ModelBuilder modelBuilder)
 		{
+			if (typeof(IVersion).IsAssignableFrom(typeof(TEntity)))
+			{
+				if (UseConcurrencyStamp)
+				{
+					modelBuilder.Entity<TEntity>().Property("ConcurrencyStamp").IsConcurrencyToken();
+				}
+				else
+				{
+					modelBuilder.Entity<TEntity>().Ignore("ConcurrencyStamp");
+				}
+			}
+
 			modelBuilder.ApplyConfiguration(this);
 		}
 
@@ -42,7 +57,6 @@ namespace MSFramework.Ef
 		/// <param name="builder">实体类型创建器</param>
 		public virtual void Configure(EntityTypeBuilder<TEntity> builder)
 		{
-			builder.Property<int>("Version");
 		}
 	}
 }

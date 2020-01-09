@@ -42,7 +42,7 @@ namespace MSFramework.AspNetCore
 			};
 			return PagedResult(output);
 		}
-		
+
 		protected IActionResult Ok(dynamic value, string msg = "")
 		{
 			return new ApiResult(value, msg);
@@ -90,6 +90,7 @@ namespace MSFramework.AspNetCore
 					msg = "数据校验不通过",
 					errors
 				});
+				return;
 			}
 
 			OnActionExecuting(context);
