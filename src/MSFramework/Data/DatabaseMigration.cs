@@ -91,7 +91,11 @@ create table {MigrationsHistoryTable}
 				if (!migrations.Contains(number.ToString()))
 				{
 					var sql = dict[number];
-					conn.Execute(sql, null, transaction);
+					if (!string.IsNullOrWhiteSpace(sql))
+					{
+						conn.Execute(sql, null, transaction);
+					}
+
 					_logger.LogInformation($"Migrate {number}.sql success");
 					conn.Execute(InsertMigrationsHistorySql,
 						new

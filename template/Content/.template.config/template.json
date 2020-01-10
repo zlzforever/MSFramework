@@ -1,0 +1,15 @@
+{
+  "$schema": "http://json.schemastore.org/template",
+  "author": "Lewis Zou",
+  "classifications": [ "web" ],
+  "name": "MSFramework AspNetCore",
+  "identity": "MSFramework AspNetCore", 
+  "groupIdentity": "MSFramework Console", 
+  "shortName": "msframework-aspnetcore",
+  "tags": {
+    "language": "C#", 
+    "type": "project" 
+  },
+  "sourceName": "Template",
+  "preferNameDirectory": true
+}

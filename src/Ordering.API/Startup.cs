@@ -1,7 +1,5 @@
 ﻿using System;
 using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -13,8 +11,8 @@ using MSFramework.Ef;
 using MSFramework.Ef.MySql;
 using MSFramework.Ef.SqlServer;
 using MSFramework.EventBus;
-using MSFramework.MySql;
 using MSFramework.Permission;
+using MSFramework.Reflection;
 using Ordering.Application.Event;
 
 namespace Ordering.API
@@ -39,6 +37,7 @@ namespace Ordering.API
 		// This method gets called by the runtime. Use this method to add services to the container.
 		public void ConfigureServices(IServiceCollection services)
 		{
+			var ass= new AssemblyFinder().GetAllAssemblyList();
 			services.AddControllersWithViews();
 
 			services.AddSwaggerGen(c =>

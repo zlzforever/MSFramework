@@ -1,6 +1,4 @@
-﻿using System;
-using System.Data;
-using System.Data.Common;
+﻿using System.Data.Common;
 using Dapper;
 using Microsoft.Extensions.Logging;
 using MSFramework.Data;
@@ -28,7 +26,7 @@ namespace MSFramework.MySql
 			mySqlConnectionStringBuilder.Database = "mysql";
 			using var conn = new MySqlConnection(mySqlConnectionStringBuilder.ToString());
 			conn.Open();
-			conn.Execute($"CREATE DATABASE IF NOT EXISTS {database};");
+			conn.Execute($"CREATE DATABASE IF NOT EXISTS `{database}`;");
 		}
 	}
 }

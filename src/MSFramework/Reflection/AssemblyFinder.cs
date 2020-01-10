@@ -1,7 +1,9 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
+using System.Text.RegularExpressions;
 using Microsoft.Extensions.DependencyModel;
 
 namespace MSFramework.Reflection
@@ -13,7 +15,7 @@ namespace MSFramework.Reflection
 	{
 		private List<Assembly> _assemblies;
 
-		public static string[] StartsWithAssemblyNames = new[]
+		public static readonly HashSet<string> AssemblyNamePatterns = new HashSet<string>
 		{
 			"MSFramework"
 		};
@@ -25,29 +27,29 @@ namespace MSFramework.Reflection
 				DependencyContext context = DependencyContext.Default;
 				var totalAssemblyNames = context.GetDefaultAssemblyNames().Select(x => x.Name).ToList();
 
-				var startsWithAssemblyNameList = new HashSet<string>(StartsWithAssemblyNames);
-				if (!startsWithAssemblyNameList.Contains("MSFramework"))
-				{
-					startsWithAssemblyNameList.Add("MSFramework");
-				}
+				AssemblyNamePatterns.Add("MSFramework");
+				AssemblyNamePatterns.Add(".+\\.Domain$");
+				AssemblyNamePatterns.Add(".+\\.Infrastructure$");
+				AssemblyNamePatterns.Add(".+\\.Application$");
+				AssemblyNamePatterns.Add(".+\\.API$");
 
 				var entryAssembly = Assembly.GetEntryAssembly();
 				if (entryAssembly != null)
 				{
 					var entryAssemblyName = entryAssembly.GetName().Name;
 					var startsWith = entryAssemblyName.Split('.').First();
-					if (!startsWithAssemblyNameList.Contains(startsWith))
+					if (!AssemblyNamePatterns.Contains(startsWith))
 					{
-						startsWithAssemblyNameList.Add(startsWith);
+						AssemblyNamePatterns.Add(startsWith);
 					}
 				}
 
 				var assemblyNames = new List<string>();
 				foreach (var assemblyName in totalAssemblyNames)
 				{
-					foreach (var startsWithAssemblyName in startsWithAssemblyNameList)
+					foreach (var pattern in AssemblyNamePatterns)
 					{
-						if (assemblyName.StartsWith(startsWithAssemblyName))
+						if (Regex.IsMatch(assemblyName, pattern))
 						{
 							assemblyNames.Add(assemblyName);
 							break;
@@ -69,6 +71,8 @@ namespace MSFramework.Reflection
 						_assemblies.Add(dict[assemblyName]);
 					}
 				}
+
+				Console.WriteLine($"Find assemblies: {string.Join(", ", _assemblies.Select(x => x.GetName().Name))}");
 			}
 
 			return _assemblies;

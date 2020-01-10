@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace MSFramework.Permissoin.Ef.MySql
+﻿namespace MSFramework.Permissoin.Ef.MySql
 {
 	public class Class1
 	{

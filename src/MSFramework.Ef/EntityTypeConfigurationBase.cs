@@ -57,6 +57,7 @@ namespace MSFramework.Ef
 		/// <param name="builder">实体类型创建器</param>
 		public virtual void Configure(EntityTypeBuilder<TEntity> builder)
 		{
+			builder.HasKey("Id");
 		}
 	}
 }

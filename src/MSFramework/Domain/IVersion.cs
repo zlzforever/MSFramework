@@ -1,5 +1,3 @@
-using System;
-
 namespace MSFramework.Domain
 {
 	public interface IVersion

@@ -1,0 +1,15 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>netstandard2.1</TargetFramework>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <PackageReference Include="MSFramework" Version="0.10.56" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <None Remove="DDL\2020011001.sql" />
+      <EmbeddedResource Include="DDL\2020011001.sql" />
+    </ItemGroup>
+</Project>

@@ -15,7 +15,10 @@ namespace MSFramework.Extensions
 			Console.WriteLine("Configuration: ");
 			foreach (var kv in configuration.GetChildren())
 			{
-				Console.WriteLine($"{kv.Key} = {kv.Value}");
+				if (!string.IsNullOrWhiteSpace(kv.Key))
+				{
+					Console.WriteLine($"{kv.Key} = {kv.Value}");
+				}
 			}
 		}
 	}

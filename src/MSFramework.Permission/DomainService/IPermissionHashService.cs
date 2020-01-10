@@ -1,4 +1,3 @@
-using System.Threading.Tasks;
 using MSFramework.Domain;
 
 namespace MSFramework.Permission.DomainService

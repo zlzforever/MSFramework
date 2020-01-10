@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using MSFramework.Common;
 using MSFramework.Reflection;
@@ -31,6 +32,7 @@ namespace MSFramework.Ef
 				.ToList();
 			if (types.Count == 0)
 			{
+				Console.WriteLine("There is no any entity register");
 				return;
 			}
 

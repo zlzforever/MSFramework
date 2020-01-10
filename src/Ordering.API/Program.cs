@@ -1,11 +1,5 @@
-﻿using System;
-using System.Linq;
-using Dapper;
-using Microsoft.AspNetCore;
+﻿using Microsoft.AspNetCore;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.Extensions.DependencyModel;
-using MSFramework.Reflection;
-using MySql.Data.MySqlClient;
 using Serilog;
 using Serilog.Events;
 

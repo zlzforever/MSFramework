@@ -1,5 +1,3 @@
-using System.Threading.Tasks;
-
 namespace MSFramework.Domain
 {
 	public abstract class MSFrameworkSessionBase : IMSFrameworkSession

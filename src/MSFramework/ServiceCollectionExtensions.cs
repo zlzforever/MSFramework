@@ -2,7 +2,6 @@ using System;
 using System.Linq;
 using System.Reflection;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.DependencyModel;
 using MSFramework.Common;
 using MSFramework.Data;
 using MSFramework.DependencyInjection;

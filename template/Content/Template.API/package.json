@@ -1,0 +1,8 @@
+{
+  "name": "template.api",
+  "version": "1.0.0",
+  "dependencies": {
+    "bootstrap": "^4.3.1",
+    "jquery": "^3.4.1"
+  }
+}

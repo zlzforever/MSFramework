@@ -1,0 +1,17 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>netstandard2.1</TargetFramework>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <PackageReference Include="MSFramework.AutoMapper" Version="0.10.56" />
+        <PackageReference Include="MSFramework.AspNetCore" Version="0.10.56" />
+        <PackageReference Include="Dapper" Version="2.0.30" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\Template.Infrastructure\Template.Infrastructure.csproj" />
+    </ItemGroup>
+
+</Project>
