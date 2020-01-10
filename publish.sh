@@ -8,7 +8,8 @@ rm -rf src/MSFramework.Ef.SqlServer/bin/Release
 rm -rf src/MSFramework.EventBus.RabbitMQ/bin/Release
 rm -rf src/MSFramework.AutoMapper/bin/Release
 rm -rf src/MSFramework.MySql/bin/Release
-dotnet publish MSFramework.sln -c Release
+dotnet build -c Release
+dotnet pack -c Release
 nuget push src/MSFramework/bin/Release/*.nupkg -Source $NUGET_SERVER
 nuget push src/MSFramework.AspNetCore/bin/Release/*.nupkg  -Source $NUGET_SERVER
 nuget push src/MSFramework.Ef/bin/Release/*.nupkg  -Source $NUGET_SERVER
