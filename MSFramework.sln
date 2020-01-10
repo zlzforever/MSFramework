@@ -71,13 +71,13 @@ ProjectSection(SolutionItems) = preProject
 	template\template.json = template\Content\.template.config\template.json
 EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Template.Domain", "template\Content\Template.Domain\Template.Domain.csproj", "{4CF97ABD-952E-4B0C-A50D-93F47BE6BE95}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Template.Domain", "template\Content\src\Template.Domain\Template.Domain.csproj", "{4CF97ABD-952E-4B0C-A50D-93F47BE6BE95}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Template.Application", "template\Content\Template.Application\Template.Application.csproj", "{D9F7479C-7AAB-4BDB-B57E-FC75B27FC5CF}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Template.Application", "template\Content\src\Template.Application\Template.Application.csproj", "{D9F7479C-7AAB-4BDB-B57E-FC75B27FC5CF}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Template.Infrastructure", "template\Content\Template.Infrastructure\Template.Infrastructure.csproj", "{61A087CD-A395-4F04-A8E9-26A059F39DA1}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Template.Infrastructure", "template\Content\src\Template.Infrastructure\Template.Infrastructure.csproj", "{61A087CD-A395-4F04-A8E9-26A059F39DA1}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Template.API", "template\Content\Template.API\Template.API.csproj", "{1A99C8F8-1235-45E3-AF0C-6626D67AE4A5}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Template.API", "template\Content\src\Template.API\Template.API.csproj", "{1A99C8F8-1235-45E3-AF0C-6626D67AE4A5}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
