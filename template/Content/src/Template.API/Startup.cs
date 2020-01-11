@@ -37,7 +37,16 @@ namespace Template.API
 		{
 			Configuration.Print();
 
-			services.AddControllersWithViews(x => { x.Filters.Add<HttpGlobalExceptionFilter>(); })
+			services.Configure<ApiBehaviorOptions>(x =>
+			{
+				// x.InvalidModelStateResponseFactory = InvalidModelStateResponseFactory.Instance;
+			});
+			
+			services.AddControllersWithViews(x =>
+				{
+					// x.Filters.Add<UnitOfWork>();
+					x.Filters.Add<HttpGlobalExceptionFilter>();
+				})
 				.SetCompatibilityVersion(CompatibilityVersion.Version_3_0)
 				.AddNewtonsoftJson()
 				.AddRazorRuntimeCompilation();
