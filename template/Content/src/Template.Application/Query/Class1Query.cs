@@ -5,7 +5,6 @@ using Microsoft.EntityFrameworkCore;
 using MSFramework.Data;
 using MSFramework.Ef;
 using Template.Application.DTO;
-using Template.Domain;
 using Template.Domain.AggregateRoot;
 
 namespace Template.Application.Query

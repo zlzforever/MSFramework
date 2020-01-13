@@ -10,14 +10,15 @@ namespace MSFramework.AspNetCore
 	{
 		public async Task OnResultExecutionAsync(ResultExecutingContext context, ResultExecutionDelegate next)
 		{
-			await next();
-
+			// FunctionFilter 必须在 uow 之后
 			var uowManager =
 				context.HttpContext.RequestServices.GetService(typeof(IUnitOfWorkManager));
 			if (uowManager != null)
 			{
 				await ((IUnitOfWorkManager) uowManager).CommitAsync();
 			}
+
+			await next();
 		}
 
 		public int Order => 30000;

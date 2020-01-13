@@ -1,5 +1,4 @@
 using MSFramework.Ef;
-using Template.Domain;
 using Template.Domain.AggregateRoot;
 using Template.Domain.Repository;
 

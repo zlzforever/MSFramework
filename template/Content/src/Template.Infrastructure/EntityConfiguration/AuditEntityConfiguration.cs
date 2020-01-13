@@ -14,6 +14,7 @@ namespace Template.Infrastructure.EntityConfiguration
 			base.Configure(builder);
 			
 			builder.HasIndex(m => m.OperationId);
+			builder.HasIndex(m => m.EntityKey);
 			builder.HasOne(m => m.Operation)
 				.WithMany(n => n.Entities)
 				.HasForeignKey(m => m.OperationId);

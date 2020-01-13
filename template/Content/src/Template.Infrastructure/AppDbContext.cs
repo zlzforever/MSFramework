@@ -1,7 +1,5 @@
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging;
 using MSFramework.Ef;
-using MSFramework.EventBus;
 
 namespace Template.Infrastructure
 {

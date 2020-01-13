@@ -1,7 +1,6 @@
 ﻿using System;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using MSFramework.Ef;
-using Template.Domain;
 using Template.Domain.AggregateRoot;
 
 namespace Template.Infrastructure.EntityConfiguration

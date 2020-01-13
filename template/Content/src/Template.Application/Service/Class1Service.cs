@@ -36,7 +36,7 @@ namespace Template.Application.Service
 		{
 			input.NotNull(nameof(input));
 			var class1 = _mapper.Map<Class1>(input);
-			class1.SetCreationAudited(_session.UserId, _session.UserName);
+			class1.SetCreationAudited(_session.UserId ?? "unknown", _session.UserName ?? "unknown");
 			var result = await _class1Repository.InsertAsync(class1);
 			_logger.LogInformation($"Create class1 {class1.Name} success");
 			return _mapper.Map<CreatClass1Out>(result);

@@ -1,5 +1,4 @@
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using MSFramework.AspNetCore;
@@ -10,14 +9,12 @@ using Template.API.ViewObject;
 using Template.Application.DTO;
 using Template.Application.Query;
 using Template.Application.Service;
-using Template.Domain;
-using Template.Domain.AggregateRoot;
 
 namespace Template.API.Controllers
 {
 	[Route("api/v1.0/class1")]
 	[ApiController]
-	[Authorize]
+	// [Authorize]
 	public class Class1ApiController : MSFrameworkApiControllerBase
 	{
 		private readonly IClass1Query _class1Query;
@@ -28,7 +25,7 @@ namespace Template.API.Controllers
 			IClass1Query class1Query,
 			IClass1Service class1Service,
 			IMapper mapper,
-			IMSFrameworkSession session, ILogger logger) : base(session, logger)
+			IMSFrameworkSession session, ILogger<Class1ApiController> logger) : base(session, logger)
 		{
 			_class1Query = class1Query;
 			_class1Service = class1Service;

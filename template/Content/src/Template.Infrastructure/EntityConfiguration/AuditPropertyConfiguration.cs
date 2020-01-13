@@ -9,7 +9,7 @@ namespace Template.Infrastructure.EntityConfiguration
 		: EntityTypeConfigurationBase<AuditProperty>
 	{
 		public override Type DbContextType => typeof(AppDbContext);
-		
+
 		/// <summary>
 		/// 重写以实现实体类型各个属性的数据库配置
 		/// </summary>
@@ -17,11 +17,13 @@ namespace Template.Infrastructure.EntityConfiguration
 		public override void Configure(EntityTypeBuilder<AuditProperty> builder)
 		{
 			base.Configure(builder);
-			
+
 			builder.HasIndex(m => m.AuditEntityId);
 			builder.HasOne(m => m.AuditEntity)
 				.WithMany(n => n.Properties)
 				.HasForeignKey(m => m.AuditEntityId);
+
+			builder.HasIndex(m => m.EntityKey);
 		}
 	}
 }

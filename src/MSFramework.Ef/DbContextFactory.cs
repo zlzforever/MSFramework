@@ -91,7 +91,7 @@ namespace MSFramework.Ef
 
 			DbContextOptionsBuilder optionsBuilder =
 				builderCreator.Create(dbContextType, resolveOptions.ConnectionString);
-			optionsBuilder = optionsBuilder.UseApplicationServiceProvider(_serviceProvider);
+
 			DbContextOptions options = optionsBuilder.Options;
 			//创建上下文实例
 			if (!(ActivatorUtilities.CreateInstance(_serviceProvider, dbContextType, options) is
@@ -100,6 +100,7 @@ namespace MSFramework.Ef
 				throw new MSFrameworkException($"实例化数据上下文“{dbContextType.AssemblyQualifiedName}”失败");
 			}
 
+			context.ServiceProvider = _serviceProvider;
 
 			if (!_designTimeDbContext && resolveOptions.UseTransaction && context.Database.CurrentTransaction == null)
 			{

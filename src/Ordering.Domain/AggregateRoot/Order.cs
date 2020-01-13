@@ -1,11 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using MSFramework.Domain;
 using Ordering.Domain.AggregateRoot.Event;
 
 namespace Ordering.Domain.AggregateRoot
 {
+	[DisplayName("订单")]
 	public class Order : AggregateRootBase
 	{
 		// DDD Patterns comment
@@ -20,9 +22,9 @@ namespace Ordering.Domain.AggregateRoot
 		public DateTimeOffset CreationTime { get; private set; }
 
 		// Address is a Value Object pattern example persisted as EF Core 2.0 owned entity
-		public Address Address { get; private set; }
+		[DisplayName("地址")] public Address Address { get; private set; }
 
-		public OrderStatus OrderStatus { get; private set; }
+		[DisplayName("状态")] public OrderStatus OrderStatus { get; private set; }
 
 		public string UserId { get; private set; }
 

@@ -22,6 +22,12 @@ namespace MSFramework.Audit
 		public virtual AuditEntity AuditEntity { get; set; }
 
 		/// <summary>
+		/// 获取或设置 数据编号
+		/// </summary>
+		[StringLength(64)]
+		public string EntityKey { get; set; }
+		
+		/// <summary>
 		/// 获取或设置 名称
 		/// </summary>
 		[StringLength(255)]

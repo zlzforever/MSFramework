@@ -1,5 +1,4 @@
 using AutoMapper;
-using Template.Domain;
 using Template.Domain.AggregateRoot;
 
 namespace Template.Application.DTO
@@ -10,6 +9,7 @@ namespace Template.Application.DTO
 		{
 			CreateMap<Class1, Class1Out>();
 			CreateMap<Class1, CreatClass1Out>();
+			CreateMap<CreateClass1In, Class1>();
 		}
 	}
 }

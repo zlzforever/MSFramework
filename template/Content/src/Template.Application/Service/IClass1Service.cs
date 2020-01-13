@@ -1,8 +1,6 @@
 using System.Threading.Tasks;
 using MSFramework.DependencyInjection;
 using Template.Application.DTO;
-using Template.Domain;
-using Template.Domain.AggregateRoot;
 
 namespace Template.Application.Service
 {

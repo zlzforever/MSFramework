@@ -1,4 +1,5 @@
 ﻿using System;
+using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.Reflection;
 
@@ -12,6 +13,7 @@ namespace MSFramework.Domain
 	{
 		protected TKey _id;
 
+		[Description("唯一标识")]
 		/// <inheritdoc/>
 		public virtual TKey Id => _id;
 

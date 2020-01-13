@@ -1,11 +1,7 @@
 using System;
-using System.IO;
-using System.Reflection;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using MSFramework.Ef;
 using MSFramework.Ef.MySql;
-using MSFramework.Reflection;
 using Template.Infrastructure;
 
 namespace Template.API

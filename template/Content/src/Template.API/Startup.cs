@@ -9,15 +9,12 @@ using Microsoft.OpenApi.Models;
 using MSFramework;
 using MSFramework.AspNetCore;
 using MSFramework.AutoMapper;
-using MSFramework.Common;
 using MSFramework.Ef;
 using MSFramework.Ef.Function;
 using MSFramework.Ef.MySql;
 using MSFramework.EventBus;
 using MSFramework.Extensions;
 using MSFramework.MySql;
-using MSFramework.Reflection;
-using Template.API.Services;
 using Template.API.ViewObject;
 using Template.Application;
 using Template.Domain.AggregateRoot;
@@ -137,17 +134,18 @@ namespace Template.API
 			app.UseAuthentication();
 			app.UseAuthorization();
 
+			app.UseSwagger();
+			//启用中间件服务对swagger-ui，指定Swagger JSON终结点
+			app.UseSwaggerUI(c => { c.SwaggerEndpoint("/swagger/v1.0/swagger.json", "TangbulaWorkbench API V1.0"); });
+
 			app.UseEndpoints(endpoints =>
 			{
-				endpoints.MapGrpcService<GreeterService>();
+				// endpoints.MapGrpcService<GreeterService>();
 				endpoints.MapControllerRoute(
 					name: "default",
 					pattern: "{controller=Home}/{action=Index}/{id?}");
 			});
 
-			app.UseSwagger();
-			//启用中间件服务对swagger-ui，指定Swagger JSON终结点
-			app.UseSwaggerUI(c => { c.SwaggerEndpoint("/swagger/v1.0/swagger.json", "TangbulaWorkbench API V1.0"); });
 			app.UseResponseCompression();
 			app.UseResponseCaching();
 		}

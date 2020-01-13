@@ -28,6 +28,12 @@ namespace MSFramework.Audit
 		public string Name { get; set; }
 
 		/// <summary>
+		/// 
+		/// </summary>
+		[StringLength(255)]
+		public string DisplayName { get; set; }
+
+		/// <summary>
 		/// 获取或设置 类型名称
 		/// </summary>
 		[StringLength(255)]

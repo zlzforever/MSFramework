@@ -1,5 +1,7 @@
 using System;
+using System.ComponentModel;
 using System.Linq;
+using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
@@ -14,6 +16,7 @@ using MSFramework.Collections.Generic;
 using MSFramework.Common;
 using MSFramework.Domain;
 using MSFramework.EventBus;
+using MSFramework.Extensions;
 using MSFramework.Function;
 
 namespace MSFramework.Ef
@@ -23,7 +26,8 @@ namespace MSFramework.Ef
 		private ILogger _logger;
 		private IEventBus _eventBus;
 		private IMSFrameworkSession _session;
-		private IServiceProvider _serviceProvider;
+
+		public IServiceProvider ServiceProvider { get; internal set; }
 
 		/// <summary>
 		/// 初始化一个<see cref="DbContextBase"/>类型的新实例
@@ -70,12 +74,14 @@ namespace MSFramework.Ef
 				optionsBuilder.EnableSensitiveDataLogging();
 			}
 
-			_serviceProvider = optionsBuilder.Options.GetExtension<CoreOptionsExtension>().ApplicationServiceProvider;
-			var loggerFactory = _serviceProvider.GetRequiredService<ILoggerFactory>();
-			_logger = loggerFactory.CreateLogger(GetType());
-			_session = _serviceProvider.GetService<IMSFrameworkSession>();
-			_eventBus = _serviceProvider.GetService<IEventBus>();
-			optionsBuilder.UseLoggerFactory(loggerFactory);
+			if (ServiceProvider != null)
+			{
+				var loggerFactory = ServiceProvider.GetRequiredService<ILoggerFactory>();
+				_logger = loggerFactory.CreateLogger(GetType());
+				_session = ServiceProvider.GetService<IMSFrameworkSession>();
+				_eventBus = ServiceProvider.GetService<IEventBus>();
+				optionsBuilder.UseLoggerFactory(loggerFactory);
+			}
 		}
 
 		/// <summary>
@@ -210,8 +216,12 @@ namespace MSFramework.Ef
 
 		protected virtual void ApplyConcepts()
 		{
-			var scopedDict = _serviceProvider.GetService<ScopedDictionary>();
-			var audit = _eventBus != null && scopedDict?.AuditOperation != null;
+			var scopedDict = ServiceProvider.GetService<ScopedDictionary>();
+			var audit = false;
+			if (_eventBus != null && scopedDict?.AuditOperation != null && scopedDict.Function != null)
+			{
+				audit = scopedDict.Function.AuditEntityEnabled;
+			}
 
 			var userId = _session?.UserId;
 			var userName = _session?.UserName;
@@ -261,12 +271,14 @@ namespace MSFramework.Ef
 		protected virtual AuditEntity GetAuditEntity(EntityEntry entry, OperateType operateType)
 		{
 			var type = entry.Entity.GetType();
-
+			var entityDisplayNameAttribute =
+				(DisplayNameAttribute) type.GetCustomAttribute(typeof(DisplayNameAttribute));
 			var audit = new AuditEntity
 			{
 				Name = type.Name,
 				TypeName = type.FullName,
-				OperateType = operateType,
+				DisplayName = entityDisplayNameAttribute?.DisplayName,
+				OperateType = operateType
 			};
 
 			foreach (IProperty property in entry.CurrentValues.Properties)
@@ -277,34 +289,41 @@ namespace MSFramework.Ef
 				}
 
 				string name = property.Name;
+				var propertyEntry = entry.Property(property.Name);
 				if (property.IsPrimaryKey())
 				{
 					audit.EntityKey = entry.State == EntityState.Deleted
-						? entry.Property(property.Name).OriginalValue?.ToString()
-						: entry.Property(property.Name).CurrentValue?.ToString();
+						? propertyEntry.OriginalValue?.ToString()
+						: propertyEntry.CurrentValue?.ToString();
 				}
 
-				var auditProperty = new AuditProperty()
+				var propertyDisplayName = default(string);
+				if (propertyEntry.Metadata.PropertyInfo != null)
+				{
+					propertyDisplayName =
+						((DisplayNameAttribute) propertyEntry.Metadata.PropertyInfo.GetCustomAttribute(
+							typeof(DisplayNameAttribute)))?.DisplayName;
+				}
+
+
+				var auditProperty = new AuditProperty
 				{
 					FieldName = name,
-					// todo: get value from Description attribute
-					DisplayName = "",
+					DisplayName = propertyDisplayName,
 					DataType = property.ClrType.ToString()
 				};
 				if (entry.State == EntityState.Added)
 				{
-					auditProperty.NewValue = entry.Property(property.Name).CurrentValue?.ToString();
-					audit.Properties.Add(auditProperty);
+					auditProperty.NewValue = propertyEntry.CurrentValue?.ToString();
 				}
 				else if (entry.State == EntityState.Deleted)
 				{
-					auditProperty.OriginalValue = entry.Property(property.Name).OriginalValue?.ToString();
-					audit.Properties.Add(auditProperty);
+					auditProperty.OriginalValue = propertyEntry.OriginalValue?.ToString();
 				}
 				else if (entry.State == EntityState.Modified)
 				{
-					string currentValue = entry.Property(property.Name).CurrentValue?.ToString();
-					string originalValue = entry.Property(property.Name).OriginalValue?.ToString();
+					string currentValue = propertyEntry.CurrentValue?.ToString();
+					string originalValue = propertyEntry.OriginalValue?.ToString();
 					if (currentValue == originalValue)
 					{
 						continue;
@@ -312,8 +331,30 @@ namespace MSFramework.Ef
 
 					auditProperty.NewValue = currentValue;
 					auditProperty.OriginalValue = originalValue;
-					audit.Properties.Add(auditProperty);
 				}
+
+				if (string.IsNullOrWhiteSpace(auditProperty.OriginalValue))
+				{
+					// 原值为空，新值不为空则记录
+					if (!auditProperty.NewValue.IsNullOrWhiteSpace())
+					{
+						audit.Properties.Add(auditProperty);
+					}
+				}
+				else
+				{
+					if (!auditProperty.OriginalValue.Equals(auditProperty.NewValue))
+					{
+						audit.Properties.Add(auditProperty);
+					}
+				}
+			}
+
+			foreach (var auditProperty in audit.Properties)
+			{
+				auditProperty.AuditEntityId = audit.Id;
+				auditProperty.AuditEntity = audit;
+				auditProperty.EntityKey = audit.EntityKey;
 			}
 
 			return audit;

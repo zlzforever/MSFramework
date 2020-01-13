@@ -18,7 +18,7 @@ namespace MSFramework.AspNetCore
 	{
 		public FunctionFilter()
 		{
-			Order = 20000;
+			Order = 40000;
 		}
 
 		public override void OnActionExecuting(ActionExecutingContext context)
@@ -88,6 +88,7 @@ namespace MSFramework.AspNetCore
 			dict.AuditOperation.Elapsed =
 				(int) (dict.AuditOperation.EndedTime - dict.AuditOperation.CreatedTime)
 				.TotalMilliseconds;
+			
 			eventBus.PublishAsync(new AuditOperationEvent(dict.AuditOperation)).GetAwaiter();
 		}
 	}
