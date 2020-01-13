@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Http;
 using System.Reflection;
 using Microsoft.Extensions.DependencyInjection;
 using MSFramework.Audit;
@@ -9,6 +10,7 @@ using MSFramework.Common;
 using MSFramework.Data;
 using MSFramework.DependencyInjection;
 using MSFramework.EventBus;
+using MSFramework.Http;
 using MSFramework.Reflection;
 
 namespace MSFramework
@@ -88,6 +90,8 @@ namespace MSFramework
 
 			builder.Services.AddSingleton<IEventBusSubscriptionStore, InMemoryEventBusSubscriptionStore>();
 			builder.Services.AddScoped<ScopedDictionary>();
+			builder.Services.AddScoped<IBearProvider, DefaultBearProvider>();
+			builder.Services.AddScoped<ApiClient>();
 			builder.Services.AddHttpClient();
 		}
 

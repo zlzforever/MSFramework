@@ -1,41 +1,33 @@
 using Microsoft.AspNetCore.Mvc;
+using MSFramework.Http;
 
 namespace MSFramework.AspNetCore
 {
 	public class ApiResult : JsonResult
 	{
-		public static int SuccessCode = 0;
+		private const int SuccessCode = 0;
 
 		public ApiResult(object value) : base(value)
 		{
 		}
 
-		public ApiResult() : base(new
+		public ApiResult() : base(new ApiResponse())
 		{
-			success = true,
-			code = SuccessCode,
-			msg = string.Empty,
-			data = default(object)
+		}
+
+		public ApiResult(string msg = "", int code = SuccessCode) : base(new ApiResponse
+		{
+			Code = code == default ? SuccessCode : code,
+			Msg = msg
 		})
 		{
 		}
 
-		public ApiResult(string msg = "", int code = default) : base(new
+		public ApiResult(dynamic value, string msg = "", int code = SuccessCode) : base(new ApiResponse
 		{
-			success = true,
-			code = code == default ? SuccessCode : code,
-			msg,
-			data = default(object)
-		})
-		{
-		}
-
-		public ApiResult(dynamic value, string msg = "", int code = default) : base(new
-		{
-			success = true,
-			code = code == default ? SuccessCode : code,
-			msg,
-			data = value
+			Code = code == default ? SuccessCode : code,
+			Msg = msg,
+			Data = value
 		})
 		{
 		}

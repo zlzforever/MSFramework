@@ -1,12 +1,5 @@
-using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Filters;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using MSFramework.AspNetCore.Extensions;
-using MSFramework.Data;
 using MSFramework.Domain;
 
 namespace MSFramework.AspNetCore
