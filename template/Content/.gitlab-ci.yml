@@ -1,0 +1,39 @@
+image: zlzforever/docker:18.09
+variables:
+  # When using dind, it's wise to use the overlayfs driver for
+  # improved performance.
+  DOCKER_DRIVER: overlay2
+before_script:
+  - docker login -u pamirs -p wV7khLrohoGfDATmnEBazGYq registry-docker.pamirs.com
+  - docker pull registry-docker.pamirs.com/dotnetsdk-yarn:latest
+  - app = xxx
+stages:
+  - Build
+  - Staging
+  - Production
+build:
+  stage: Build
+  script:
+    - docker build .
+stagging:
+  only:
+    - staging
+  stage: Staging
+  script:
+    - docker build -t $app .
+    - tag=$(date +%Y%m%d)
+    - docker tag $app registry-docker.pamirs.com/$app:$tag
+    - docker push registry-docker.pamirs.com/$app:$tag
+    - curl -X POST -F token=a7617dce0e0b27bb5abf224add3009 -F ref=$app http://c.pamirs.com/api/v4/projects/12/trigger/pipeline
+production:
+  only:
+    - master
+  stage: Production
+  script:
+    - docker build -t $app .
+    - tag=$(date +%Y%m%d)
+    - docker tag $app registry-docker.pamirs.com/$app:latest
+    - docker tag $app registry-docker.pamirs.com/$app:$tag
+    - docker push registry-docker.pamirs.com/$app:latest
+    - docker push registry-docker.pamirs.com/$app:$tag
+    - curl -X POST -F token=fffefb3edc3365ff9910f472377a44 -F ref=$app http://c.pamirs.com/api/v4/projects/42/trigger/pipeline
