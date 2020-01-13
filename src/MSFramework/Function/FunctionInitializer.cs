@@ -22,15 +22,29 @@ namespace MSFramework.Function
 				return;
 			}
 
-			var functionInApp = functionFinder.GetAllList().ToDictionary(x => x.Path, x => x);
+			var functionsInApp = functionFinder.GetAllList();
+
+			var functionsInAppDict = new Dictionary<string, Function>();
+			foreach (var function in functionsInApp)
+			{
+				if (!functionsInAppDict.ContainsKey(function.Path))
+				{
+					functionsInAppDict.Add(function.Path, function);
+				}
+				else
+				{
+					throw new MSFrameworkException($"There are same route apis: {function.Path}");
+				}
+			}
+
 			var store = scope.ServiceProvider.GetService<IFunctionStore>();
-			var functionsInDatabase = store.GetAllList().ToDictionary(x => x.Path, x => x);
+			var functionsInDatabaseDict = store.GetAllList().ToDictionary(x => x.Path, x => x);
 
 			// 添加新功能
-			foreach (var kv in functionInApp)
+			foreach (var kv in functionsInAppDict)
 			{
 				var function = kv.Value;
-				if (!functionsInDatabase.ContainsKey(function.Path))
+				if (!functionsInDatabaseDict.ContainsKey(function.Path))
 				{
 					function.SetCreationAudited("System", "System");
 					store.Add(function);
@@ -47,10 +61,10 @@ namespace MSFramework.Function
 			}
 
 			// 标记功能过期
-			foreach (var kv in functionsInDatabase)
+			foreach (var kv in functionsInDatabaseDict)
 			{
 				var function = kv.Value;
-				if (!functionInApp.ContainsKey(kv.Key))
+				if (!functionsInAppDict.ContainsKey(kv.Key))
 				{
 					function.Expire();
 					function.SetModificationAudited("System", "System");

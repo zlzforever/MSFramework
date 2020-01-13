@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore;
 using Microsoft.AspNetCore.Hosting;
+using MSFramework.Extensions;
 using Serilog;
 using Serilog.Events;
 
@@ -13,7 +14,7 @@ namespace Ordering.API
 #if DEBUG
 				.MinimumLevel.Verbose()
 #else
-            				.MinimumLevel.Information()
+            	.MinimumLevel.Information()
 #endif
 				.MinimumLevel.Override("Microsoft", LogEventLevel.Warning)
 				.Enrich.FromLogContext()
