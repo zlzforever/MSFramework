@@ -5,7 +5,7 @@ namespace MSFramework.Extensions
 {
 	public static class MapperExtensions
 	{
-		public static PagedQueryResult<DTO> ToDTO<DTO>(this IMapper mapper, IPagedQueryResult result)
+		public static PagedQueryResult<DTO> ToPagedQueryResultDTO<DTO>(this IMapper mapper, IPagedQueryResult result)
 		{
 			mapper.NotNull(nameof(mapper));
 			result.NotNull(nameof(result));
