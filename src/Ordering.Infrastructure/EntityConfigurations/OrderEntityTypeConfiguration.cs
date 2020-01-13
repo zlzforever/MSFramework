@@ -17,7 +17,7 @@ namespace Ordering.Infrastructure.EntityConfigurations
 			//Address value object persisted as owned entity type supported since EF Core 2.0
 			orderConfiguration.OwnsOne(o => o.Address);
 
-			orderConfiguration.Property<DateTime>("CreationTime").IsRequired();
+			orderConfiguration.Property<DateTimeOffset>("CreationTime").IsRequired();
 			orderConfiguration.Property<bool>("IsDeleted").IsRequired();
 			orderConfiguration.Property<string>("UserId").IsRequired();
 			orderConfiguration.Property<string>("Description").IsRequired(false);			

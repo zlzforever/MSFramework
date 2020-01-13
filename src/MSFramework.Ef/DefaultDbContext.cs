@@ -12,18 +12,17 @@ namespace MSFramework.Ef
 		/// <summary>
 		/// 初始化一个<see cref="DefaultDbContext"/>类型的新实例
 		/// </summary>
-		public DefaultDbContext(DbContextOptions options, IEventBus eventBus,
-			IEntityConfigurationTypeFinder typeFinder)
-			: base(options, eventBus, typeFinder, null)
+		public DefaultDbContext(DbContextOptions options)
+			: base(options)
 		{
 		}
 
 		/// <summary>
 		/// 初始化一个<see cref="DefaultDbContext"/>类型的新实例
 		/// </summary>
-		public DefaultDbContext(DbContextOptions options, IEventBus eventBus, IEntityConfigurationTypeFinder typeFinder,
+		public DefaultDbContext(DbContextOptions options, IEventBus eventBus,
 			ILoggerFactory loggerFactory)
-			: base(options, eventBus, typeFinder, loggerFactory)
+			: base(options)
 		{
 		}
 	}

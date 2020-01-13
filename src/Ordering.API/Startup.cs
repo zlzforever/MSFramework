@@ -2,6 +2,7 @@
 using System.Linq;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -11,8 +12,8 @@ using MSFramework;
 using MSFramework.AspNetCore;
 using MSFramework.Common;
 using MSFramework.Ef;
+using MSFramework.Ef.Function;
 using MSFramework.Ef.MySql;
-using MSFramework.Ef.SqlServer;
 using MSFramework.EventBus;
 using MSFramework.Permission;
 using MSFramework.Reflection;
@@ -41,10 +42,11 @@ namespace Ordering.API
 		public void ConfigureServices(IServiceCollection services)
 		{
 			services.AddScoped<TestService>();
-			
+
 			services.AddControllersWithViews(x =>
 			{
 				// x.Filters.Add<UnitOfWork>();
+				x.Filters.Add<FunctionFilter>();
 			}).ConfigureApiBehaviorOptions(x =>
 			{
 				x.InvalidModelStateResponseFactory = InvalidModelStateResponseFactory.Instance;
@@ -55,18 +57,18 @@ namespace Ordering.API
 				c.SwaggerDoc("v1.0", new OpenApiInfo {Version = "v1.0", Description = "Ordering API V1.0"});
 			});
 			services.AddHealthChecks();
-
+ 
 			services.AddMSFramework(builder =>
 			{
 				builder.AddEventHandler(typeof(UserCheckoutAcceptedEvent));
 				// 开发环境可以使用本地消息总线，生产环境应该换成分布式消息队列
 				builder.AddPassThroughEventBus();
 				builder.AddAspNetCoreSession();
+				builder.AddAspNetCoreFunction<EfFunctionStore>();
+				builder.AddEfAuditStore();
 				builder.AddPermission();
 				builder.AddEntityFramework(x =>
 				{
-					// 添加 SqlServer 支持
-					x.AddSqlServerDbContextOptionsBuilderCreator();
 					// 添加 MySql 支持
 					x.AddMySqlDbContextOptionsBuilderCreator();
 				}, Configuration);
@@ -96,19 +98,10 @@ namespace Ordering.API
 				endpoints.MapControllerRoute(
 					name: "default",
 					pattern: "{controller=Home}/{action=Index}/{id?}");
+				endpoints.MapAreaControllerRoute("aa", "admin",
+					"{area:exists}/{controller=Home}/{action=Index}/{id?}");
 			});
 
-			app.Use(async (context, next) =>
-			{
-				if (context.Request.Path == "/")
-				{
-					context.Response.Redirect("swagger");
-				}
-				else
-				{
-					await next();
-				}
-			});
 			//启用中间件服务生成Swagger作为JSON终结点
 			app.UseSwagger();
 			//启用中间件服务对swagger-ui，指定Swagger JSON终结点

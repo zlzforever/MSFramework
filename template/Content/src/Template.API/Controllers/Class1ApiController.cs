@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using MSFramework.AspNetCore;
+using MSFramework.AspNetCore.Extensions;
 using MSFramework.Data;
 using MSFramework.Domain;
 using Template.API.ViewObject;
@@ -38,7 +39,7 @@ namespace Template.API.Controllers
 		public async Task<IActionResult> PagedQueryAsync(string keyword, int page, int limit)
 		{
 			var result = await _class1Query.PagedQueryAsync(keyword, page, limit);
-			return PagedResult(result);
+			return result.ToPagedActionResult();
 		}
 
 		[HttpPost]

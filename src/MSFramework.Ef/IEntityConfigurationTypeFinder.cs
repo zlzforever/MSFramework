@@ -22,5 +22,7 @@ namespace MSFramework.Ef
 		/// <param name="entityType">实体类型</param>
 		/// <returns>数据上下文类型</returns>
 		Type GetDbContextTypeForEntity(Type entityType);
+
+		bool ExistDbContextTypeForEntity(Type entityType);
 	}
 }

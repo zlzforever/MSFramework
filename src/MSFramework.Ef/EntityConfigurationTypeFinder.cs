@@ -52,6 +52,7 @@ namespace MSFramework.Ef
 				{
 					list = group.ToList();
 				}
+
 				if (list.Count > 0)
 				{
 					dict[key] = list.ToArray();
@@ -105,6 +106,11 @@ namespace MSFramework.Ef
 			}
 
 			return _entityMapDbContextDict[entityType];
+		}
+
+		public bool ExistDbContextTypeForEntity(Type entityType)
+		{
+			return _entityMapDbContextDict.ContainsKey(entityType);
 		}
 	}
 }

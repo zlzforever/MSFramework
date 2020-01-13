@@ -5,6 +5,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using MSFramework.Common;
 using MSFramework.EventBus;
 
 namespace MSFramework.Ef
@@ -28,8 +29,8 @@ namespace MSFramework.Ef
 			var entityConfigurationTypeFinder = new EntityConfigurationTypeFinder();
 			entityConfigurationTypeFinder.Initialize();
 
-			services.AddSingleton<IEntityConfigurationTypeFinder>(entityConfigurationTypeFinder);
-			services.AddPassThroughEventBus();
+			Singleton<IEntityConfigurationTypeFinder>.Instance = entityConfigurationTypeFinder;
+
 			services.AddLogging();
 
 			var section = GetConfiguration().GetSection("DbContexts");
@@ -43,6 +44,7 @@ namespace MSFramework.Ef
 
 			var provider = services.BuildServiceProvider();
 			var factory = new DbContextFactory(provider);
+			factory.SetDesignTimeDbContext();
 			return factory.GetDbContext(typeof(TDbContext)) as TDbContext;
 		}
 

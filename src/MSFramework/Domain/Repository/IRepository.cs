@@ -64,24 +64,24 @@ namespace MSFramework.Domain.Repository
 		/// Deletes an entity.
 		/// </summary>
 		/// <param name="entity">Entity to be deleted</param>
-		void Delete(TEntity entity);
+		TEntity Delete(TEntity entity);
 
 		/// <summary>
 		/// Deletes an entity.
 		/// </summary>
 		/// <param name="entity">Entity to be deleted</param>
-		Task DeleteAsync(TEntity entity);
+		Task<TEntity> DeleteAsync(TEntity entity);
 
 		/// <summary>
 		/// Deletes an entity by primary key.
 		/// </summary>
 		/// <param name="id">Primary key of the entity</param>
-		void Delete(Guid id);
+		TEntity Delete(Guid id);
 
 		/// <summary>
 		/// Deletes an entity by primary key.
 		/// </summary>
 		/// <param name="id">Primary key of the entity</param>
-		Task DeleteAsync(Guid id);
+		Task<TEntity> DeleteAsync(Guid id);
 	}
 }

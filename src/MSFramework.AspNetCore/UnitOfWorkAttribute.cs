@@ -6,20 +6,20 @@ using MSFramework.Domain;
 namespace MSFramework.AspNetCore
 {
 	[AttributeUsage(AttributeTargets.Class | AttributeTargets.Method)]
-	public class UnitOfWork : System.Attribute, IAsyncResultFilter, IOrderedFilter
+	public class UnitOfWork : Attribute, IAsyncResultFilter
 	{
 		public async Task OnResultExecutionAsync(ResultExecutingContext context, ResultExecutionDelegate next)
 		{
+			await next();
+
 			var uowManager =
 				context.HttpContext.RequestServices.GetService(typeof(IUnitOfWorkManager));
 			if (uowManager != null)
 			{
 				await ((IUnitOfWorkManager) uowManager).CommitAsync();
 			}
-
-			await next();
 		}
 
-		public int Order => int.MinValue;
+		public int Order => 30000;
 	}
 }

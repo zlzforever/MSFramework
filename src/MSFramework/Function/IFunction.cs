@@ -5,6 +5,9 @@ namespace MSFramework.Function
 {
 	public interface IFunction : IEntity<Guid>, IModificationAudited
 	{
+		/// <summary>
+		/// 是否启用
+		/// </summary>
 		bool Enabled { get; }
 
 		/// <summary>
@@ -16,6 +19,16 @@ namespace MSFramework.Function
 		/// 功能路径，唯一
 		/// </summary>
 		string Path { get; }
+
+		/// <summary>
+		/// 功能描述
+		/// </summary>
+		string Description { get; }
+
+		/// <summary>
+		/// 是否过期
+		/// </summary>
+		bool Expired { get; }
 
 		/// <summary>
 		/// 获取或设置 是否启用操作审计

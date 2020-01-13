@@ -5,9 +5,10 @@ using MSFramework.EventBus;
 
 namespace MSFramework.Permission.Ef
 {
-	public class PermissionDbContext: DbContextBase
+	public class PermissionDbContext : DbContextBase
 	{
-		public PermissionDbContext(DbContextOptions options, IEventBus eventBus, IEntityConfigurationTypeFinder typeFinder, ILoggerFactory loggerFactory) : base(options, eventBus, typeFinder, loggerFactory)
+		public PermissionDbContext(DbContextOptions options)
+			: base(options)
 		{
 		}
 	}

@@ -2,7 +2,10 @@ using System;
 using System.Collections.Concurrent;
 using System.Linq;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
+using MSFramework.Common;
 using MSFramework.Domain;
 
 namespace MSFramework.Ef
@@ -10,6 +13,7 @@ namespace MSFramework.Ef
 	public class DbContextFactory
 	{
 		private readonly IServiceProvider _serviceProvider;
+		private bool _designTimeDbContext = false;
 
 		private readonly ConcurrentDictionary<Type, DbContextBase> _dbContextDict =
 			new ConcurrentDictionary<Type, DbContextBase>();
@@ -17,6 +21,11 @@ namespace MSFramework.Ef
 		public DbContextFactory(IServiceProvider serviceProvider)
 		{
 			_serviceProvider = serviceProvider;
+		}
+
+		public void SetDesignTimeDbContext()
+		{
+			_designTimeDbContext = true;
 		}
 
 		/// <summary>
@@ -36,8 +45,8 @@ namespace MSFramework.Ef
 		/// <returns>实体所属上下文实例</returns>
 		public DbContextBase GetDbContext<TEntity>() where TEntity : class, IEntity
 		{
-			var typeFinder = _serviceProvider.GetService<IEntityConfigurationTypeFinder>();
-			Type dbContextType = typeFinder.GetDbContextTypeForEntity(typeof(TEntity));
+			Type dbContextType =
+				Singleton<IEntityConfigurationTypeFinder>.Instance.GetDbContextTypeForEntity(typeof(TEntity));
 			return GetDbContext(dbContextType);
 		}
 
@@ -82,7 +91,7 @@ namespace MSFramework.Ef
 
 			DbContextOptionsBuilder optionsBuilder =
 				builderCreator.Create(dbContextType, resolveOptions.ConnectionString);
-
+			optionsBuilder = optionsBuilder.UseApplicationServiceProvider(_serviceProvider);
 			DbContextOptions options = optionsBuilder.Options;
 			//创建上下文实例
 			if (!(ActivatorUtilities.CreateInstance(_serviceProvider, dbContextType, options) is
@@ -91,9 +100,8 @@ namespace MSFramework.Ef
 				throw new MSFrameworkException($"实例化数据上下文“{dbContextType.AssemblyQualifiedName}”失败");
 			}
 
-			context.Session = _serviceProvider.GetService<IMSFrameworkSession>();
 
-			if (resolveOptions.UseTransaction && context.Database.CurrentTransaction == null)
+			if (!_designTimeDbContext && resolveOptions.UseTransaction && context.Database.CurrentTransaction == null)
 			{
 				context.Database.BeginTransaction();
 			}

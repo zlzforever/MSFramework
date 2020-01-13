@@ -1,7 +1,10 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using Microsoft.Extensions.DependencyInjection;
+using MSFramework.Audit;
+using MSFramework.Collections.Generic;
 using MSFramework.Common;
 using MSFramework.Data;
 using MSFramework.DependencyInjection;
@@ -12,13 +15,18 @@ namespace MSFramework
 {
 	public static class ServiceCollectionExtensions
 	{
-		private static Type[] _types;
+		private static HashSet<Type> _types = new HashSet<Type>();
 
 		public static MSFrameworkBuilder AddEventHandler(this MSFrameworkBuilder builder, params Type[] eventTypes)
 		{
-			_types = eventTypes;
+			foreach (var type in eventTypes)
+			{
+				_types.Add(type);
+			}
 
-			if (_types != null && _types.Length > 0)
+			_types.Add(typeof(AuditOperationEvent));
+
+			if (_types != null && _types.Count > 0)
 			{
 				var types = _types.SelectMany(x => x.Assembly.GetTypes()).ToList();
 				var baseEventType = typeof(Event);
@@ -77,9 +85,9 @@ namespace MSFramework
 			}
 
 			builder.AddInitializer();
-			
-			builder.Services.AddSingleton<IEventBusSubscriptionStore, InMemoryEventBusSubscriptionStore>();
 
+			builder.Services.AddSingleton<IEventBusSubscriptionStore, InMemoryEventBusSubscriptionStore>();
+			builder.Services.AddScoped<ScopedDictionary>();
 			builder.Services.AddHttpClient();
 		}
 
@@ -99,7 +107,7 @@ namespace MSFramework
 		{
 			using var scope = applicationServices.CreateScope();
 			var eventBus = scope.ServiceProvider.GetService<IEventBus>();
-			if (_types != null && _types.Length > 0 && eventBus != null)
+			if (_types != null && _types.Count > 0 && eventBus != null)
 			{
 				var subscribeHandlerMethod = typeof(IEventBus).GetMethod("Subscribe", new Type[0]);
 				if (subscribeHandlerMethod == null)

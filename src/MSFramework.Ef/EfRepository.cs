@@ -10,7 +10,7 @@ using MSFramework.Domain.Repository;
 
 namespace MSFramework.Ef
 {
-	public class EfRepository<TEntity> : IRepository<TEntity> where TEntity : class, IAggregateRoot, IEntity
+	public class EfRepository<TEntity> : IRepository<TEntity> where TEntity : class, IEntity, IAggregateRoot
 	{
 		protected bool IsDeletionAuditedEntity { get; }
 
@@ -84,33 +84,38 @@ namespace MSFramework.Ef
 			return Task.FromResult(Update(entity));
 		}
 
-		public virtual void Delete(TEntity entity)
+		public virtual TEntity Delete(TEntity entity)
 		{
 			DbContext.Set<TEntity>().Remove(entity);
+			return entity;
 		}
 
-		public virtual Task DeleteAsync(TEntity entity)
+		public virtual Task<TEntity> DeleteAsync(TEntity entity)
 		{
 			DbContext.Set<TEntity>().Remove(entity);
-			return Task.CompletedTask;
+			return Task.FromResult(entity);
 		}
 
-		public virtual void Delete(Guid id)
+		public virtual TEntity Delete(Guid id)
 		{
 			var entity = Get(id);
 			if (entity != null)
 			{
 				DbContext.Set<TEntity>().Remove(entity);
 			}
+
+			return entity;
 		}
 
-		public virtual async Task DeleteAsync(Guid id)
+		public virtual async Task<TEntity> DeleteAsync(Guid id)
 		{
 			var entity = await GetAsync(id);
 			if (entity != null)
 			{
 				DbContext.Set<TEntity>().Remove(entity);
 			}
+
+			return entity;
 		}
 	}
 }

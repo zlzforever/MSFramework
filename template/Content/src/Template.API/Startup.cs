@@ -11,6 +11,7 @@ using MSFramework.AspNetCore;
 using MSFramework.AutoMapper;
 using MSFramework.Common;
 using MSFramework.Ef;
+using MSFramework.Ef.Function;
 using MSFramework.Ef.MySql;
 using MSFramework.EventBus;
 using MSFramework.Extensions;
@@ -37,19 +38,19 @@ namespace Template.API
 		{
 			Configuration.Print();
 
-			services.Configure<ApiBehaviorOptions>(x =>
-			{
-				// x.InvalidModelStateResponseFactory = InvalidModelStateResponseFactory.Instance;
-			});
-			
 			services.AddControllersWithViews(x =>
 				{
-					// x.Filters.Add<UnitOfWork>();
+					x.Filters.Add<UnitOfWork>();
+					x.Filters.Add<FunctionFilter>();
 					x.Filters.Add<HttpGlobalExceptionFilter>();
 				})
 				.SetCompatibilityVersion(CompatibilityVersion.Version_3_0)
 				.AddNewtonsoftJson()
-				.AddRazorRuntimeCompilation();
+				.AddRazorRuntimeCompilation()
+				.ConfigureApiBehaviorOptions(x =>
+				{
+					x.InvalidModelStateResponseFactory = InvalidModelStateResponseFactory.Instance;
+				});
 
 			services.AddHealthChecks();
 			services.AddSwaggerGen(c =>
@@ -88,6 +89,8 @@ namespace Template.API
 				builder.AddEventHandler(typeof(AppOptions));
 				builder.AddPassThroughEventBus();
 				builder.AddAspNetCoreSession();
+				builder.AddAspNetCoreFunction<EfFunctionStore>();
+				builder.AddEfAuditStore();
 				builder.AddAutoMapper(typeof(AppOptions), typeof(AutoMapperProfile));
 				builder.AddMySqlDatabaseMigration();
 				builder.AddEntityFramework(ef =>

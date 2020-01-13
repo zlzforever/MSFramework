@@ -12,19 +12,17 @@ namespace Ordering.API.Controllers
 		[Required] [StringLength(4)] public string Name { get; set; }
 	}
 
-	[Microsoft.AspNetCore.Components.Route("api/v1.0/[controller]")]
-	[ApiController]
-	public class ValueController : MSFrameworkApiControllerBase
+	public class ValueController : Controller
 	{
 		private TestService _testService;
 
-		public ValueController(TestService testService, IMSFrameworkSession session, ILogger<ValueController> logger) :
-			base(session, logger)
+		public ValueController(TestService testService, IMSFrameworkSession session, ILogger<ValueController> logger)
 		{
 			_testService = testService;
 		}
 
-		[HttpGet("get")]
+		[UnitOfWork]
+		[HttpGet]
 		public IActionResult GetAsync(string name)
 		{
 			return Ok(new
@@ -33,7 +31,7 @@ namespace Ordering.API.Controllers
 			});
 		}
 
-		[HttpPost("create")]
+		[HttpPost]
 		public IActionResult CreateAsync(CreateViewObject vo)
 		{
 			return Ok(new

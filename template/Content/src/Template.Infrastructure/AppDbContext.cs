@@ -7,9 +7,7 @@ namespace Template.Infrastructure
 {
 	public class AppDbContext : DbContextBase
 	{
-		public AppDbContext(DbContextOptions options, IEventBus eventBus,
-			IEntityConfigurationTypeFinder typeFinder, ILoggerFactory loggerFactory) : base(options, eventBus,
-			typeFinder, loggerFactory)
+		public AppDbContext(DbContextOptions options) : base(options)
 		{
 		}
 	}

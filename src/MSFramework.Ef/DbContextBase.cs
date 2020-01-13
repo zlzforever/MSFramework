@@ -4,33 +4,33 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
+using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.Extensions.Caching.Memory;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using MSFramework.Audit;
+using MSFramework.Collections.Generic;
+using MSFramework.Common;
 using MSFramework.Domain;
 using MSFramework.EventBus;
+using MSFramework.Function;
 
 namespace MSFramework.Ef
 {
 	public abstract class DbContextBase : DbContext, IUnitOfWork
 	{
-		private readonly ILogger _logger;
-		private readonly ILoggerFactory _loggerFactory;
-		private readonly IEntityConfigurationTypeFinder _typeFinder;
-		private readonly IEventBus _eventBus;
-
-		public IMSFrameworkSession Session { get; internal set; }
+		private ILogger _logger;
+		private IEventBus _eventBus;
+		private IMSFrameworkSession _session;
+		private IServiceProvider _serviceProvider;
 
 		/// <summary>
 		/// 初始化一个<see cref="DbContextBase"/>类型的新实例
 		/// </summary>
-		protected DbContextBase(DbContextOptions options, IEventBus eventBus,
-			IEntityConfigurationTypeFinder typeFinder,
-			ILoggerFactory loggerFactory)
+		protected DbContextBase(DbContextOptions options)
 			: base(options)
 		{
-			_typeFinder = typeFinder;
-			_eventBus = eventBus;
-			_loggerFactory = loggerFactory;
-			_logger = loggerFactory?.CreateLogger(GetType());
 		}
 
 		/// <summary>
@@ -41,7 +41,8 @@ namespace MSFramework.Ef
 		{
 			//通过实体配置信息将实体注册到当前上下文
 			Type contextType = GetType();
-			IEntityRegister[] registers = _typeFinder.GetEntityRegisters(contextType);
+			IEntityRegister[] registers =
+				Singleton<IEntityConfigurationTypeFinder>.Instance.GetEntityRegisters(contextType);
 			foreach (IEntityRegister register in registers)
 			{
 				register.RegisterTo(modelBuilder);
@@ -64,15 +65,17 @@ namespace MSFramework.Ef
 				optionsBuilder.UseLazyLoadingProxies();
 			}
 
-			if (_loggerFactory != null)
-			{
-				optionsBuilder.UseLoggerFactory(_loggerFactory);
-			}
-
 			if ("Development" == Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT"))
 			{
 				optionsBuilder.EnableSensitiveDataLogging();
 			}
+
+			_serviceProvider = optionsBuilder.Options.GetExtension<CoreOptionsExtension>().ApplicationServiceProvider;
+			var loggerFactory = _serviceProvider.GetRequiredService<ILoggerFactory>();
+			_logger = loggerFactory.CreateLogger(GetType());
+			_session = _serviceProvider.GetService<IMSFrameworkSession>();
+			_eventBus = _serviceProvider.GetService<IEventBus>();
+			optionsBuilder.UseLoggerFactory(loggerFactory);
 		}
 
 		/// <summary>
@@ -98,9 +101,6 @@ namespace MSFramework.Ef
 		{
 			try
 			{
-				// todo: 同步异步混用是否会死锁
-				HandleDomainEventsAsync().GetAwaiter().GetResult();
-
 				var changed = ChangeTracker.Entries().Any();
 				if (!changed)
 				{
@@ -108,6 +108,9 @@ namespace MSFramework.Ef
 				}
 
 				ApplyConcepts();
+
+				// todo: 同步异步混用是否会死锁
+				HandleDomainEventsAsync().GetAwaiter().GetResult();
 
 				var effectCount = base.SaveChanges();
 				Database.CurrentTransaction?.Commit();
@@ -149,7 +152,6 @@ namespace MSFramework.Ef
 		{
 			try
 			{
-				await HandleDomainEventsAsync();
 				var changed = ChangeTracker.Entries().Any();
 				if (!changed)
 				{
@@ -157,6 +159,8 @@ namespace MSFramework.Ef
 				}
 
 				ApplyConcepts();
+
+				await HandleDomainEventsAsync();
 
 				var effectedCount = await base.SaveChangesAsync(cancellationToken);
 				Database.CurrentTransaction?.Commit();
@@ -171,6 +175,11 @@ namespace MSFramework.Ef
 
 		private async Task HandleDomainEventsAsync()
 		{
+			if (_eventBus == null)
+			{
+				return;
+			}
+
 			// Dispatch Domain Events collection. 
 			// Choices:
 			// A) Right BEFORE committing data (EF SaveChanges) into the DB will make a single transaction including  
@@ -201,26 +210,113 @@ namespace MSFramework.Ef
 
 		protected virtual void ApplyConcepts()
 		{
+			var scopedDict = _serviceProvider.GetService<ScopedDictionary>();
+			var audit = _eventBus != null && scopedDict?.AuditOperation != null;
+
+			var userId = _session?.UserId;
+			var userName = _session?.UserName;
+
 			foreach (var entry in ChangeTracker.Entries())
 			{
-				ApplyConcepts(entry, Session?.UserId, Session?.UserName);
+				switch (entry.State)
+				{
+					case EntityState.Added:
+						if (audit)
+						{
+							var auditEntity = GetAuditEntity(entry, OperateType.Insert);
+							auditEntity.OperationId = scopedDict.AuditOperation.Id;
+							auditEntity.Operation = scopedDict.AuditOperation;
+							scopedDict.AuditOperation.Entities.Add(auditEntity);
+						}
+
+						ApplyConceptsForAddedEntity(entry, userId, userName);
+						break;
+					case EntityState.Modified:
+						if (audit)
+						{
+							var auditEntity = GetAuditEntity(entry, OperateType.Update);
+							auditEntity.OperationId = scopedDict.AuditOperation.Id;
+							auditEntity.Operation = scopedDict.AuditOperation;
+							scopedDict.AuditOperation.Entities.Add(auditEntity);
+						}
+
+						ApplyConceptsForModifiedEntity(entry, userId, userName);
+						break;
+					case EntityState.Deleted:
+						if (audit)
+						{
+							var auditEntity = GetAuditEntity(entry, OperateType.Delete);
+							auditEntity.OperationId = scopedDict.AuditOperation.Id;
+							auditEntity.Operation = scopedDict.AuditOperation;
+							scopedDict.AuditOperation.Entities.Add(auditEntity);
+						}
+
+						ApplyConceptsForDeletedEntity(entry, userId, userName);
+						break;
+				}
 			}
 		}
 
-		protected virtual void ApplyConcepts(EntityEntry entry, string userId, string userName)
+
+		protected virtual AuditEntity GetAuditEntity(EntityEntry entry, OperateType operateType)
 		{
-			switch (entry.State)
+			var type = entry.Entity.GetType();
+
+			var audit = new AuditEntity
 			{
-				case EntityState.Added:
-					ApplyConceptsForAddedEntity(entry, userId, userName);
-					break;
-				case EntityState.Modified:
-					ApplyConceptsForModifiedEntity(entry, userId, userName);
-					break;
-				case EntityState.Deleted:
-					ApplyConceptsForDeletedEntity(entry, userId, userName);
-					break;
+				Name = type.Name,
+				TypeName = type.FullName,
+				OperateType = operateType,
+			};
+
+			foreach (IProperty property in entry.CurrentValues.Properties)
+			{
+				if (property.IsConcurrencyToken)
+				{
+					continue;
+				}
+
+				string name = property.Name;
+				if (property.IsPrimaryKey())
+				{
+					audit.EntityKey = entry.State == EntityState.Deleted
+						? entry.Property(property.Name).OriginalValue?.ToString()
+						: entry.Property(property.Name).CurrentValue?.ToString();
+				}
+
+				var auditProperty = new AuditProperty()
+				{
+					FieldName = name,
+					// todo: get value from Description attribute
+					DisplayName = "",
+					DataType = property.ClrType.ToString()
+				};
+				if (entry.State == EntityState.Added)
+				{
+					auditProperty.NewValue = entry.Property(property.Name).CurrentValue?.ToString();
+					audit.Properties.Add(auditProperty);
+				}
+				else if (entry.State == EntityState.Deleted)
+				{
+					auditProperty.OriginalValue = entry.Property(property.Name).OriginalValue?.ToString();
+					audit.Properties.Add(auditProperty);
+				}
+				else if (entry.State == EntityState.Modified)
+				{
+					string currentValue = entry.Property(property.Name).CurrentValue?.ToString();
+					string originalValue = entry.Property(property.Name).OriginalValue?.ToString();
+					if (currentValue == originalValue)
+					{
+						continue;
+					}
+
+					auditProperty.NewValue = currentValue;
+					auditProperty.OriginalValue = originalValue;
+					audit.Properties.Add(auditProperty);
+				}
 			}
+
+			return audit;
 		}
 
 		protected virtual void ApplyConceptsForAddedEntity(EntityEntry entry, string userId, string userName)

@@ -3,7 +3,7 @@ using System.IO;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using MSFramework.Ef;
-using MSFramework.Ef.SqlServer;
+using MSFramework.Ef.MySql;
 
 namespace Ordering.Infrastructure
 {
@@ -20,7 +20,7 @@ namespace Ordering.Infrastructure
 
 		protected override void Configure(IServiceCollection services)
 		{
-			services.AddSqlServerDbContextOptionsBuilderCreator();
+			services.AddMySqlDbContextOptionsBuilderCreator();
 		}
 	}
 }

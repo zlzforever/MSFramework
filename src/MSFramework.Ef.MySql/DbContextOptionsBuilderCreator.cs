@@ -1,5 +1,7 @@
 ﻿using System;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using Pomelo.EntityFrameworkCore.MySql.Storage;
 
 namespace MSFramework.Ef.MySql
@@ -8,7 +10,8 @@ namespace MSFramework.Ef.MySql
 	{
 		public string Type => "MySql";
 
-		public DbContextOptionsBuilder Create(Type dbContextType, string connectionString)
+		public DbContextOptionsBuilder Create(Type dbContextType,
+			string connectionString)
 		{
 			DbContextOptionsBuilder optionsBuilder = new DbContextOptionsBuilder();
 			string entryAssemblyName = dbContextType.Assembly.GetName().Name;

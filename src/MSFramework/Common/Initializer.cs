@@ -6,6 +6,6 @@ namespace MSFramework.Common
 	{
 		public virtual int Order => 0;
 
-		public abstract void Initialize(IServiceProvider builder);
+		public abstract void Initialize(IServiceProvider serviceProvider);
 	}
 }

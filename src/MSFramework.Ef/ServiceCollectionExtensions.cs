@@ -4,14 +4,22 @@ using System.Linq;
 using MSFramework.Data;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using MSFramework.Audit;
 using MSFramework.Common;
 using MSFramework.Domain;
 using MSFramework.Domain.Repository;
+using MSFramework.Ef.Audit;
 
 namespace MSFramework.Ef
 {
 	public static class ServiceCollectionExtensions
 	{
+		public static MSFrameworkBuilder AddEfAuditStore(this MSFrameworkBuilder builder)
+		{
+			builder.Services.AddScoped<IAuditStore, EfAuditStore>();
+			return builder;
+		}
+
 		public static MSFrameworkBuilder AddEntityFramework(this MSFrameworkBuilder builder,
 			Action<EntityFrameworkBuilder> configure, IConfiguration configuration)
 		{
@@ -39,13 +47,11 @@ namespace MSFramework.Ef
 			if (Singleton<IEntityConfigurationTypeFinder>.Instance == null)
 			{
 				Singleton<IEntityConfigurationTypeFinder>.Instance = new EntityConfigurationTypeFinder();
-				Singleton<IEntityConfigurationTypeFinder>.Instance.Initialize();
-				builder.Services.AddSingleton(Singleton<IEntityConfigurationTypeFinder>.Instance);
 			}
 
-			builder.Services.AddScoped<DbContextFactory>();
+			Singleton<IEntityConfigurationTypeFinder>.Instance.Initialize();
 
-			builder.Services.AddSingleton<Initializer, EntityFrameworkInitializer>();
+			builder.Services.AddScoped<DbContextFactory>();
 			builder.Services.AddScoped<IUnitOfWorkManager, UnitOfWorkManager>();
 			builder.Services.AddScoped(typeof(IRepository<>), typeof(EfRepository<>));
 			builder.Services.AddScoped(typeof(EfRepository<>), typeof(EfRepository<>));

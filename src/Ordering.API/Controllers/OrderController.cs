@@ -17,7 +17,7 @@ namespace Ordering.API.Controllers
 {
 	[Route("api/v1.0/[controller]")]
 	[ApiController]
-	[Permission( Name = "order")]
+	[Permission(Name = "order")]
 	public class OrderController : MSFrameworkApiControllerBase
 	{
 		private readonly IOrderingQuery _orderingQuery;
@@ -32,15 +32,23 @@ namespace Ordering.API.Controllers
 			_eventBus = eventBus;
 			_mediator = mediator;
 		}
-		[HttpGet("rabbitmq")]
-		public async Task<IActionResult> Test()
+
+		[HttpGet("test")]
+		public IActionResult Get()
 		{
-			await _eventBus.PublishAsync(new UserCheckoutAcceptedEvent(new List<UserCheckoutAcceptedEvent.OrderItemDTO>() { }
-			, "aaa", "bbb", "ccc", "ddd", "eee", "fff", "xxx"));
 			return Ok();
 		}
 
-		#region  Command
+		[HttpPost("test")]
+		public async Task<IActionResult> Publish()
+		{
+			await _eventBus.PublishAsync(new UserCheckoutAcceptedEvent(
+				new List<UserCheckoutAcceptedEvent.OrderItemDTO>() { }
+				, "aaa", "bbb", "ccc", "ddd", "eee", "fff", "xxx"));
+			return Ok();
+		}
+
+		#region Command
 
 		/// <summary>
 		/// FOR TEST Method
