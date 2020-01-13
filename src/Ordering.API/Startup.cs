@@ -47,7 +47,7 @@ namespace Ordering.API
 			{
 				// x.Filters.Add<UnitOfWork>();
 				x.Filters.Add<FunctionFilter>();
-			}).ConfigureApiBehaviorOptions(x =>
+			}).AddNewtonsoftJson().ConfigureApiBehaviorOptions(x =>
 			{
 				x.InvalidModelStateResponseFactory = InvalidModelStateResponseFactory.Instance;
 			});
