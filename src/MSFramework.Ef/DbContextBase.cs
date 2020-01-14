@@ -6,9 +6,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
-using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
-using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using MSFramework.Audit;
@@ -17,7 +15,6 @@ using MSFramework.Common;
 using MSFramework.Domain;
 using MSFramework.EventBus;
 using MSFramework.Extensions;
-using MSFramework.Function;
 
 namespace MSFramework.Ef
 {
@@ -207,6 +204,11 @@ namespace MSFramework.Ef
 			{
 				await _eventBus.PublishAsync(@event);
 			}
+		}
+
+		public void Commit()
+		{
+			SaveChanges();
 		}
 
 		public async Task CommitAsync()

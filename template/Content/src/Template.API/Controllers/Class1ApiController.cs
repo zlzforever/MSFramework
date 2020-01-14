@@ -36,7 +36,7 @@ namespace Template.API.Controllers
 		public async Task<IActionResult> PagedQueryAsync(string keyword, int page, int limit)
 		{
 			var result = await _class1Query.PagedQueryAsync(keyword, page, limit);
-			return result.ToPagedActionResult();
+			return result.ToPagedApiResult();
 		}
 
 		[HttpPost]

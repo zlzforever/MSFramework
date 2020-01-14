@@ -1,20 +1,19 @@
 ﻿using System;
 using System.ComponentModel;
+using MSFramework.Domain.Entity;
 
 namespace MSFramework.Domain
 {
 	/// <summary>
 	/// Represents an aggregate root.
 	/// </summary>
-	public interface IAggregateRoot : IEventProvider
+	public interface IAggregateRoot<out TKey> :
+		IEventProvider, IAggregateRoot, IEntity<TKey>
+		where TKey : IEquatable<TKey>
 	{
-		/// <summary>
-		/// the id as string of the aggregate root.
-		/// </summary>
-		/// <returns></returns>
-		[DisplayName("唯一标识")]
-		Guid Id { get; }
+	}
 
-		bool IsTransient();
+	public interface IAggregateRoot : IEntity
+	{
 	}
 }

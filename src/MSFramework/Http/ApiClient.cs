@@ -23,41 +23,67 @@ namespace MSFramework.Http
 			_bearProvider = serviceProvider1.GetRequiredService<IBearProvider>();
 		}
 
-		public async Task<ApiResponse<T>> GetAsync<T>(string url) where T : class
+		public async Task<TResponse> GetAsync<TResponse, TDataEntity>(string url)
+			where TResponse : ApiResponse<TDataEntity>
+			where TDataEntity : class
 		{
 			var httpClient = await GetHttpClient(url);
 			var content = await httpClient.GetStringAsync(url);
-			var response = JsonConvert.DeserializeObject<ApiResponse<T>>(content);
+			var response = JsonConvert.DeserializeObject<TResponse>(content);
 			return response;
 		}
 
-		public async Task<ApiResponse<T>> PostAsync<T>(string url, dynamic data) where T : class
+		public async Task<TResponse> PostAsync<TResponse, TDataEntity>(string url, dynamic data)
+			where TResponse : ApiResponse<TDataEntity>
+			where TDataEntity : class
 		{
 			var httpClient = await GetHttpClient(url);
 			var content = await httpClient.PostAsync(url,
 				new StringContent(JsonConvert.SerializeObject(data), Encoding.UTF8, "application/json"));
 			var result = await content.Content.ReadAsStringAsync();
-			var response = JsonConvert.DeserializeObject<ApiResponse<T>>(result);
+			var response = JsonConvert.DeserializeObject<TResponse>(result);
 			return response;
 		}
 
-		public async Task<ApiResponse<T>> PutAsync<T>(string url, dynamic data) where T : class
+		public async Task<bool> PostAsync(string url, dynamic data)
+		{
+			ApiResponse result = await PostAsync<ApiResponse, object>(url, data);
+			return result.Success;
+		}
+
+		public async Task<TResponse> PutAsync<TResponse, TDataEntity>(string url, dynamic data)
+			where TResponse : ApiResponse<TDataEntity>
+			where TDataEntity : class
 		{
 			var httpClient = await GetHttpClient(url);
 			var content = await httpClient.PutAsync(url,
 				new StringContent(JsonConvert.SerializeObject(data), Encoding.UTF8, "application/json"));
 			var result = await content.Content.ReadAsStringAsync();
-			var response = JsonConvert.DeserializeObject<ApiResponse<T>>(result);
+			var response = JsonConvert.DeserializeObject<TResponse>(result);
 			return response;
 		}
 
-		public async Task<ApiResponse<T>> DeleteAsync<T>(string url, dynamic data) where T : class
+		public async Task<bool> PutAsync(string url, dynamic data)
+		{
+			ApiResponse result = await PutAsync<ApiResponse, object>(url, data);
+			return result.Success;
+		}
+
+		public async Task<TResponse> DeleteAsync<TResponse, TDataEntity>(string url)
+			where TResponse : ApiResponse<TDataEntity>
+			where TDataEntity : class
 		{
 			var httpClient = await GetHttpClient(url);
 			var content = await httpClient.DeleteAsync(url);
 			var result = await content.Content.ReadAsStringAsync();
-			var response = JsonConvert.DeserializeObject<ApiResponse<T>>(result);
+			var response = JsonConvert.DeserializeObject<TResponse>(result);
 			return response;
+		}
+
+		public async Task<bool> DeleteAsync(string url)
+		{
+			ApiResponse result = await DeleteAsync<ApiResponse, object>(url);
+			return result.Success;
 		}
 
 		private async Task<HttpClient> GetHttpClient(string url)

@@ -2,6 +2,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using MSFramework.Domain;
+using MSFramework.Domain.Entity;
 
 namespace MSFramework.Ef
 {
@@ -36,7 +37,7 @@ namespace MSFramework.Ef
 		/// <param name="modelBuilder">上下文模型构建器</param>
 		public void RegisterTo(ModelBuilder modelBuilder)
 		{
-			if (typeof(IVersion).IsAssignableFrom(typeof(TEntity)))
+			if (typeof(IOptimisticLock).IsAssignableFrom(typeof(TEntity)))
 			{
 				if (UseConcurrencyStamp)
 				{

@@ -7,10 +7,6 @@ namespace MSFramework.AspNetCore
 	{
 		private const int SuccessCode = 0;
 
-		public ApiResult(object value) : base(value)
-		{
-		}
-
 		public ApiResult() : base(new ApiResponse())
 		{
 		}

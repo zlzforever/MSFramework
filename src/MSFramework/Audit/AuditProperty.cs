@@ -2,13 +2,14 @@ using System;
 using System.ComponentModel.DataAnnotations;
 using MSFramework.Common;
 using MSFramework.Domain;
+using MSFramework.Domain.Entity;
 
 namespace MSFramework.Audit
 {
 	/// <summary>
 	/// 实体属性审计信息
 	/// </summary>
-	public class AuditProperty : IEntity<Guid>
+	public class AuditProperty : EntityBase<Guid>
 	{
 		/// <summary>
 		/// 获取或设置 所属审计实体编号
@@ -54,9 +55,5 @@ namespace MSFramework.Audit
 		/// </summary>
 		[StringLength(255)]
 		public string DataType { get; set; }
-
-		[StringLength(36)] public string ConcurrencyStamp { get; set; }
-
-		public Guid Id { get; set; } = CombGuid.NewGuid();
 	}
 }

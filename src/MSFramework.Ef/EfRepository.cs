@@ -6,11 +6,23 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using MSFramework.Domain;
+using MSFramework.Domain.Entity;
 using MSFramework.Domain.Repository;
 
 namespace MSFramework.Ef
 {
-	public class EfRepository<TEntity> : IRepository<TEntity> where TEntity : class, IEntity, IAggregateRoot
+	public class EfRepository<TEntity> : EfRepository<TEntity, Guid>
+		, IRepository<TEntity>
+		where TEntity : class, IAggregateRoot<Guid>, IEntity
+	{
+		public EfRepository(DbContextFactory dbContextFactory) : base(dbContextFactory)
+		{
+		}
+	}
+
+	public class EfRepository<TEntity, TKey> : IRepository<TEntity, TKey>
+		where TEntity : class, IAggregateRoot<TKey>, IEntity
+		where TKey : IEquatable<TKey>
 	{
 		protected bool IsDeletionAuditedEntity { get; }
 
@@ -54,14 +66,14 @@ namespace MSFramework.Ef
 			return Entities.ToListAsync();
 		}
 
-		public virtual TEntity Get(Guid id)
+		public virtual TEntity Get(TKey id)
 		{
-			return Entities.FirstOrDefault(x => x.Id == id);
+			return Entities.FirstOrDefault(x => x.Id.Equals(id));
 		}
 
-		public virtual async Task<TEntity> GetAsync(Guid id)
+		public virtual async Task<TEntity> GetAsync(TKey id)
 		{
-			return await Entities.FirstOrDefaultAsync(x => x.Id == id);
+			return await Entities.FirstOrDefaultAsync(x => x.Id.Equals(id));
 		}
 
 		public virtual TEntity Insert(TEntity entity)
@@ -96,7 +108,7 @@ namespace MSFramework.Ef
 			return Task.FromResult(entity);
 		}
 
-		public virtual TEntity Delete(Guid id)
+		public virtual TEntity Delete(TKey id)
 		{
 			var entity = Get(id);
 			if (entity != null)
@@ -107,7 +119,7 @@ namespace MSFramework.Ef
 			return entity;
 		}
 
-		public virtual async Task<TEntity> DeleteAsync(Guid id)
+		public virtual async Task<TEntity> DeleteAsync(TKey id)
 		{
 			var entity = await GetAsync(id);
 			if (entity != null)

@@ -5,8 +5,14 @@ using MSFramework.DependencyInjection;
 
 namespace MSFramework.Domain.Repository
 {
-	public interface IRepository<TEntity> : IScopeDependency
+	public interface IRepository<TEntity> : IRepository<TEntity, Guid>
 		where TEntity : IAggregateRoot
+	{
+	}
+
+	public interface IRepository<TEntity, in TKey> : IScopeDependency
+		where TEntity : IAggregateRoot
+		where TKey : IEquatable<TKey>
 	{
 		IUnitOfWork UnitOfWork { get; }
 
@@ -27,14 +33,14 @@ namespace MSFramework.Domain.Repository
 		/// </summary>
 		/// <param name="id">Primary key of the entity to get</param>
 		/// <returns>Entity</returns>
-		TEntity Get(Guid id);
+		TEntity Get(TKey id);
 
 		/// <summary>
 		/// Gets an entity with given primary key.
 		/// </summary>
 		/// <param name="id">Primary key of the entity to get</param>
 		/// <returns>Entity</returns>
-		Task<TEntity> GetAsync(Guid id);
+		Task<TEntity> GetAsync(TKey id);
 
 		/// <summary>
 		/// Inserts a new entity.
@@ -76,12 +82,12 @@ namespace MSFramework.Domain.Repository
 		/// Deletes an entity by primary key.
 		/// </summary>
 		/// <param name="id">Primary key of the entity</param>
-		TEntity Delete(Guid id);
+		TEntity Delete(TKey id);
 
 		/// <summary>
 		/// Deletes an entity by primary key.
 		/// </summary>
 		/// <param name="id">Primary key of the entity</param>
-		Task<TEntity> DeleteAsync(Guid id);
+		Task<TEntity> DeleteAsync(TKey id);
 	}
 }

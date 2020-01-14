@@ -1,5 +1,6 @@
 ﻿using System;
 using MSFramework.Domain;
+using MSFramework.Domain.Entity;
 
 namespace Ordering.Domain.AggregateRoot
 {
@@ -19,7 +20,7 @@ namespace Ordering.Domain.AggregateRoot
 		{
 		}
 
-		public OrderItem(Guid productId, string productName, decimal unitPrice, decimal discount, string PictureUrl,
+		public OrderItem(Guid productId, string productName, decimal unitPrice, decimal discount, string pictureUrl,
 			int units = 1)
 		{
 			if (units <= 0)
@@ -37,7 +38,7 @@ namespace Ordering.Domain.AggregateRoot
 			UnitPrice = unitPrice;
 			Discount = discount;
 			Units = units;
-			PictureUrl = PictureUrl;
+			PictureUrl = pictureUrl;
 		}
 
 

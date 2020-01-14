@@ -1,4 +1,4 @@
-﻿namespace MSFramework.Domain
+﻿namespace MSFramework.Domain.Entity
 {
 	/// <summary>
 	/// Defines an entity with a single primary key with "Id" property.
@@ -10,9 +10,11 @@
 		/// Unique identifier for this entity.
 		/// </summary>
 		TKey Id { get; }
+		
+		bool IsTransient();
 	}
 
-	public interface IEntity : IVersion
+	public interface IEntity
 	{
 	}
 }

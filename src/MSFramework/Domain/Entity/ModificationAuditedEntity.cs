@@ -2,14 +2,13 @@ using System;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 
-namespace MSFramework.Domain
+namespace MSFramework.Domain.Entity
 {
-	public abstract class ModificationAuditedAggregateRoot : ModificationAuditedAggregateRoot<Guid>
+	public abstract class ModificationAuditedEntity : ModificationAuditedEntity<Guid>
 	{
 	}
 
-	public abstract class ModificationAuditedAggregateRoot<TKey> : CreationAuditedAggregateRoot<TKey>,
-		IModificationAudited
+	public abstract class ModificationAuditedEntity<TKey> : EntityBase<TKey>, IModificationAudited
 		where TKey : IEquatable<TKey>
 	{
 		/// <summary>

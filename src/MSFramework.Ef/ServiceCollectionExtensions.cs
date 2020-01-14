@@ -54,7 +54,9 @@ namespace MSFramework.Ef
 			builder.Services.AddScoped<DbContextFactory>();
 			builder.Services.AddScoped<IUnitOfWorkManager, UnitOfWorkManager>();
 			builder.Services.AddScoped(typeof(IRepository<>), typeof(EfRepository<>));
+			builder.Services.AddScoped(typeof(IRepository<,>), typeof(EfRepository<,>));
 			builder.Services.AddScoped(typeof(EfRepository<>), typeof(EfRepository<>));
+			builder.Services.AddScoped(typeof(EfRepository<,>), typeof(EfRepository<,>));
 			return builder;
 		}
 	}

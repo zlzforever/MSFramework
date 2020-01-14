@@ -27,6 +27,6 @@ namespace Ordering.API
 
 		public static IWebHostBuilder CreateWebHostBuilder(string[] args) =>
 			WebHost.CreateDefaultBuilder(args)
-				.UseStartup<Startup>().UseSerilog().UseUrls("http://0.0.0.0:5000");
+				.UseStartup<Startup>().UseSerilog().UseUrls("http://localhost:5000");
 	}
 }

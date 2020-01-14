@@ -5,6 +5,8 @@ namespace MSFramework.Domain
 {
 	public interface IUnitOfWork : IDisposable
 	{
+		void Commit();
+
 		Task CommitAsync();
 	}
 }

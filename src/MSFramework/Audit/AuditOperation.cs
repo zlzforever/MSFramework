@@ -8,15 +8,8 @@ using MSFramework.EventBus;
 
 namespace MSFramework.Audit
 {
-	public class AuditOperation : IAggregateRoot, IEntity<Guid>
+	public class AuditOperation : AggregateRootBase
 	{
-		public Guid Id { get; set; } = CombGuid.NewGuid();
-
-		public bool IsTransient()
-		{
-			return true;
-		}
-
 		/// <summary>
 		/// 获取或设置 当前用户标识
 		/// </summary>
@@ -84,17 +77,5 @@ namespace MSFramework.Audit
 		/// 获取或设置 审计数据信息集合
 		/// </summary>
 		public virtual ICollection<AuditEntity> Entities { get; set; } = new List<AuditEntity>();
-
-		public IReadOnlyCollection<IEvent> DomainEvents => Enumerable.Empty<IEvent>().ToList();
-
-		public void AddDomainEvent(IEvent @event)
-		{
-		}
-
-		public void ClearDomainEvents()
-		{
-		}
-
-		public string ConcurrencyStamp { get; set; }
 	}
 }

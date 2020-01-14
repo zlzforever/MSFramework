@@ -4,11 +4,12 @@ using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using MSFramework.Common;
 using MSFramework.Domain;
+using MSFramework.Domain.Entity;
 using MSFramework.EventBus;
 
 namespace MSFramework.Audit
 {
-	public class AuditEntity : IEntity<Guid>
+	public class AuditEntity : EntityBase<Guid>
 	{
 		/// <summary>¬
 		/// 获取或设置 所属审计操作编号
@@ -54,9 +55,5 @@ namespace MSFramework.Audit
 		/// 获取或设置 操作实体属性集合
 		/// </summary>
 		public virtual ICollection<AuditProperty> Properties { get; set; } = new List<AuditProperty>();
-
-		public Guid Id { get; set; } = CombGuid.NewGuid();
-
-		[StringLength(36)] public string ConcurrencyStamp { get; set; }
 	}
 }

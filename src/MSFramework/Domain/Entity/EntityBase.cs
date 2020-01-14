@@ -1,21 +1,29 @@
 ﻿using System;
 using System.ComponentModel;
-using System.ComponentModel.DataAnnotations;
 using System.Reflection;
 
-namespace MSFramework.Domain
+namespace MSFramework.Domain.Entity
 {
+	public abstract class EntityBase : IEntity
+	{
+	}
+
 	/// <summary>
 	/// 实体类基类
 	/// </summary>
 	[Serializable]
-	public abstract class EntityBase<TKey> : IEntity<TKey> where TKey : IEquatable<TKey>
+	public abstract class EntityBase<TKey> : EntityBase, IEntity<TKey> where TKey : IEquatable<TKey>
 	{
-		protected TKey _id;
-
+		/// <summary>
+		/// 
+		/// </summary>
 		[Description("唯一标识")]
-		public virtual TKey Id => _id;
+		public TKey Id { get; private set; }
 
+		public bool IsTransient()
+		{
+			return Id.Equals(default);
+		}
 
 		protected EntityBase()
 		{
@@ -23,7 +31,7 @@ namespace MSFramework.Domain
 
 		protected EntityBase(TKey id)
 		{
-			_id = id;
+			Id = id;
 		}
 
 		/// <summary>
@@ -86,11 +94,5 @@ namespace MSFramework.Domain
 		{
 			return $"[ENTITY: {GetType().Name}] Id = {Id}";
 		}
-
-		/// <summary>
-		/// 
-		/// </summary>
-		[StringLength(40)]
-		public string ConcurrencyStamp { get; set; } = Guid.NewGuid().ToString();
 	}
 }

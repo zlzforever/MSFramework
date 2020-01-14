@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq.Expressions;
 using System.Reflection;
 
-namespace MSFramework.Domain
+namespace MSFramework.Domain.Entity
 {
     /// <summary>
     /// Some helper methods for entities.

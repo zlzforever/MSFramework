@@ -2,9 +2,7 @@ using System;
 using System.Collections.Concurrent;
 using System.Linq;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
 using MSFramework.Common;
 using MSFramework.Domain;
 
@@ -13,7 +11,7 @@ namespace MSFramework.Ef
 	public class DbContextFactory
 	{
 		private readonly IServiceProvider _serviceProvider;
-		private bool _designTimeDbContext = false;
+		private bool _designTimeDbContext;
 
 		private readonly ConcurrentDictionary<Type, DbContextBase> _dbContextDict =
 			new ConcurrentDictionary<Type, DbContextBase>();
@@ -43,7 +41,7 @@ namespace MSFramework.Ef
 		/// 获取指定数据实体的上下文类型
 		/// </summary>
 		/// <returns>实体所属上下文实例</returns>
-		public DbContextBase GetDbContext<TEntity>() where TEntity : class, IEntity
+		public DbContextBase GetDbContext<TEntity>() where TEntity : class, IAggregateRoot
 		{
 			Type dbContextType =
 				Singleton<IEntityConfigurationTypeFinder>.Instance.GetDbContextTypeForEntity(typeof(TEntity));
@@ -67,7 +65,7 @@ namespace MSFramework.Ef
 			return dbContext;
 		}
 
-		public DbSet<TEntity> GetDbSet<TEntity>() where TEntity : class, IEntity
+		public DbSet<TEntity> GetDbSet<TEntity>() where TEntity : class, IAggregateRoot
 		{
 			return GetDbContext<TEntity>().Set<TEntity>();
 		}

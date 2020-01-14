@@ -15,6 +15,16 @@ namespace MSFramework.Ef
 			_logger = logger;
 		}
 
+		public void Commit()
+		{
+			foreach (var dbContext in _dbContextFactory.GetAllDbContexts())
+			{
+				dbContext.Commit();
+			}
+
+			_logger.LogInformation("DbContexts committed");
+		}
+
 		public async Task CommitAsync()
 		{
 			foreach (var dbContext in _dbContextFactory.GetAllDbContexts())

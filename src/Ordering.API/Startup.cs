@@ -45,7 +45,7 @@ namespace Ordering.API
 
 			services.AddControllersWithViews(x =>
 			{
-				// x.Filters.Add<UnitOfWork>();
+				x.Filters.Add<UnitOfWork>();
 				x.Filters.Add<FunctionFilter>();
 			}).AddNewtonsoftJson().ConfigureApiBehaviorOptions(x =>
 			{

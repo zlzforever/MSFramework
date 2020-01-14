@@ -11,6 +11,8 @@ using MSFramework.EventBus;
 using Ordering.Application.Command;
 using Ordering.Application.Event;
 using Ordering.Application.Query;
+using Ordering.Domain.AggregateRoot;
+using Ordering.Domain.Repository;
 
 
 namespace Ordering.API.Controllers
@@ -21,31 +23,31 @@ namespace Ordering.API.Controllers
 	public class OrderController : MSFrameworkApiControllerBase
 	{
 		private readonly IOrderingQuery _orderingQuery;
-		private readonly IEventBus _eventBus;
-		private readonly IMediator _mediator;
+		private readonly IOrderingRepository _orderRepository;
 
-		public OrderController(IMediator mediator, IEventBus eventBus,
+		public OrderController(IOrderingRepository orderRepository,
 			IOrderingQuery orderingQuery,
 			IMSFrameworkSession session, ILogger<OrderController> logger) : base(session, logger)
 		{
 			_orderingQuery = orderingQuery;
-			_eventBus = eventBus;
-			_mediator = mediator;
+			_orderRepository = orderRepository;
 		}
 
-		[HttpGet("test")]
-		public IActionResult Get()
-		{
-			return Ok();
-		}
 
-		[HttpPost("test")]
-		public async Task<IActionResult> Publish()
+		[HttpPost("testCreate")]
+		public async Task<IActionResult> TestCreate()
 		{
-			await _eventBus.PublishAsync(new UserCheckoutAcceptedEvent(
-				new List<UserCheckoutAcceptedEvent.OrderItemDTO>() { }
-				, "aaa", "bbb", "ccc", "ddd", "eee", "fff", "xxx"));
-			return Ok();
+			var order = new Order(
+				"testUSer",
+				new Address("Street", "City", "State", "Country", "ZipCode"),
+				"Description",
+				new List<OrderItem>
+				{
+					new OrderItem(Guid.NewGuid(),
+						"testProduct", 10, 0, "")
+				});
+			await _orderRepository.InsertAsync(order);
+			return Ok(order);
 		}
 
 		#region Command
@@ -55,7 +57,7 @@ namespace Ordering.API.Controllers
 		/// </summary>
 		/// <returns></returns>
 		[HttpPost]
-		public async Task<IActionResult> CreateOrderAsync()
+		public IActionResult CreateOrderAsync()
 		{
 			var random = new Random();
 			var items = new List<CreateOrderCommand.OrderItemDTO>();
@@ -73,22 +75,24 @@ namespace Ordering.API.Controllers
 				});
 			}
 
-			return await _mediator.Send(new CreateOrderCommand(items, "HELLO",
-				"上海", "张扬路500号", "上海", "中国", "200000", "what?"));
+			return Ok();
+			// return await _mediator.Send(new CreateOrderCommand(items, "HELLO",
+			// 	"上海", "张扬路500号", "上海", "中国", "200000", "what?"));
 		}
 
 		[HttpDelete("{orderId}")]
-		public async Task<IActionResult> DeleteOrderAsync(Guid orderId)
+		public IActionResult DeleteOrderAsync(Guid orderId)
 		{
-			return await _mediator.Send(new DeleteOrderCommand(orderId));
+			// return await _mediator.Send(new DeleteOrderCommand(orderId));
+			return Ok();
 		}
 
 		[HttpPut("{orderId}/address")]
-		public async Task<IActionResult> ChangeOrderAddressAsync(Guid orderId,
+		public IActionResult ChangeOrderAddressAsync(Guid orderId,
 			[FromBody] ChangeOrderAddressCommand command)
 		{
 			command.OrderId = orderId;
-			return await _mediator.Send(command);
+			return Ok();
 		}
 
 		#endregion

@@ -78,7 +78,7 @@ namespace Template.API
 					x.CallbackPath = new PathString("/signin-oidc");
 				});
 
-			services.AddGrpc();
+			// services.AddGrpc();
 
 			services.AddScoped<AppOptions>();
 			services.AddMSFramework(builder =>
