@@ -79,7 +79,7 @@ namespace MSFramework.Extensions
 
 			entities = entities.Skip((result.Page - 1) * result.Limit).Take(result.Limit);
 
-			result.Entities = result.Total == 0 ? new List<TEntity>() : entities.ToList();
+			result.Data = result.Total == 0 ? new List<TEntity>() : entities.ToList();
 			return Task.FromResult(result);
 		}
 	}

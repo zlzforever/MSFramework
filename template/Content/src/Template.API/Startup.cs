@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -35,6 +36,8 @@ namespace Template.API
 		{
 			Configuration.Print();
 
+			// SwaggerUI require some service from views,
+			// if your project a pure api, please use AddControllers
 			services.AddControllersWithViews(x =>
 				{
 					x.Filters.Add<UnitOfWork>();
@@ -79,13 +82,12 @@ namespace Template.API
 				});
 
 			// services.AddGrpc();
-
 			services.AddScoped<AppOptions>();
 			services.AddMSFramework(builder =>
 			{
 				builder.AddEventHandler(typeof(AppOptions));
 				builder.AddPassThroughEventBus();
-				builder.AddAspNetCoreSession();
+				builder.AddAspNetCore();
 				builder.AddAspNetCoreFunction<EfFunctionStore>();
 				builder.AddEfAuditStore();
 				builder.AddAutoMapper(typeof(AppOptions), typeof(AutoMapperProfile));

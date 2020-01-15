@@ -33,18 +33,17 @@ namespace Template.API.Controllers
 		}
 
 		[HttpGet]
-		public async Task<IActionResult> PagedQueryAsync(string keyword, int page, int limit)
+		public async Task<PagedQueryResult<Class1Out>> PagedQueryAsync(string keyword, int page, int limit)
 		{
-			var result = await _class1Query.PagedQueryAsync(keyword, page, limit);
-			return result.ToPagedApiResult();
+			return await _class1Query.PagedQueryAsync(keyword, page, limit);
 		}
 
 		[HttpPost]
-		public async Task<IActionResult> CreateAsync([FromBody] CreateClass1ViewObject vo)
+		public async Task<CreatClass1Out> CreateAsync([FromBody] CreateClass1ViewObject vo)
 		{
 			var class1 = _mapper.Map<CreateClass1In>(vo);
 			var result = await _class1Service.CreateAsync(class1);
-			return Ok(result);
+			return result;
 		}
 	}
 }

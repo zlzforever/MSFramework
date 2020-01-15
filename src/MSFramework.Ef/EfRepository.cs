@@ -13,7 +13,7 @@ namespace MSFramework.Ef
 {
 	public class EfRepository<TEntity> : EfRepository<TEntity, Guid>
 		, IRepository<TEntity>
-		where TEntity : class, IAggregateRoot<Guid>, IEntity
+		where TEntity : class, IAggregateRoot<Guid>
 	{
 		public EfRepository(DbContextFactory dbContextFactory) : base(dbContextFactory)
 		{
@@ -21,7 +21,7 @@ namespace MSFramework.Ef
 	}
 
 	public class EfRepository<TEntity, TKey> : IRepository<TEntity, TKey>
-		where TEntity : class, IAggregateRoot<TKey>, IEntity
+		where TEntity : class, IAggregateRoot<TKey>
 		where TKey : IEquatable<TKey>
 	{
 		protected bool IsDeletionAuditedEntity { get; }

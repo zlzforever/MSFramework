@@ -63,7 +63,7 @@ namespace Ordering.API
 				builder.AddEventHandler(typeof(UserCheckoutAcceptedEvent));
 				// 开发环境可以使用本地消息总线，生产环境应该换成分布式消息队列
 				builder.AddPassThroughEventBus();
-				builder.AddAspNetCoreSession();
+				builder.AddAspNetCore();
 				builder.AddAspNetCoreFunction<EfFunctionStore>();
 				builder.AddEfAuditStore();
 				builder.AddPermission();

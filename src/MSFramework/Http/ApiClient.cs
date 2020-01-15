@@ -24,7 +24,7 @@ namespace MSFramework.Http
 		}
 
 		public async Task<TResponse> GetAsync<TResponse, TDataEntity>(string url)
-			where TResponse : ApiResponse<TDataEntity>
+			where TResponse : ApiResult<TDataEntity>
 			where TDataEntity : class
 		{
 			var httpClient = await GetHttpClient(url);
@@ -34,7 +34,7 @@ namespace MSFramework.Http
 		}
 
 		public async Task<TResponse> PostAsync<TResponse, TDataEntity>(string url, dynamic data)
-			where TResponse : ApiResponse<TDataEntity>
+			where TResponse : ApiResult<TDataEntity>
 			where TDataEntity : class
 		{
 			var httpClient = await GetHttpClient(url);
@@ -47,12 +47,12 @@ namespace MSFramework.Http
 
 		public async Task<bool> PostAsync(string url, dynamic data)
 		{
-			ApiResponse result = await PostAsync<ApiResponse, object>(url, data);
+			var result = await PostAsync<ApiResult, object>(url, data);
 			return result.Success;
 		}
 
 		public async Task<TResponse> PutAsync<TResponse, TDataEntity>(string url, dynamic data)
-			where TResponse : ApiResponse<TDataEntity>
+			where TResponse : ApiResult<TDataEntity>
 			where TDataEntity : class
 		{
 			var httpClient = await GetHttpClient(url);
@@ -65,12 +65,12 @@ namespace MSFramework.Http
 
 		public async Task<bool> PutAsync(string url, dynamic data)
 		{
-			ApiResponse result = await PutAsync<ApiResponse, object>(url, data);
+			var result = await PutAsync<ApiResult, object>(url, data);
 			return result.Success;
 		}
 
 		public async Task<TResponse> DeleteAsync<TResponse, TDataEntity>(string url)
-			where TResponse : ApiResponse<TDataEntity>
+			where TResponse : ApiResult<TDataEntity>
 			where TDataEntity : class
 		{
 			var httpClient = await GetHttpClient(url);
@@ -82,7 +82,7 @@ namespace MSFramework.Http
 
 		public async Task<bool> DeleteAsync(string url)
 		{
-			ApiResponse result = await DeleteAsync<ApiResponse, object>(url);
+			var result = await DeleteAsync<ApiResult, object>(url);
 			return result.Success;
 		}
 

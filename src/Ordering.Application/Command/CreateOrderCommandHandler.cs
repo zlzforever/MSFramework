@@ -3,6 +3,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using MediatR;
 using MSFramework.AspNetCore;
+using MSFramework.Http;
 using Ordering.Domain.AggregateRoot;
 using Ordering.Domain.Repository;
 

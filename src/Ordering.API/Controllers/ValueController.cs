@@ -27,26 +27,26 @@ namespace Ordering.API.Controllers
 		}
 
 		[HttpGet("getViewObject")]
-		public IActionResult GetViewObjectAsync()
+		public CreateViewObject GetViewObjectAsync()
 		{
-			return new ApiResult(new CreateViewObject
+			return new CreateViewObject
 			{
 				Name = Guid.NewGuid().ToString()
-			});
+			};
 		}
 
 		[UnitOfWork]
 		[HttpGet]
-		public async Task<IActionResult> GetAsync()
+		public async Task<object> GetAsync()
 		{
 			var host = $"{HttpContext.Request.Scheme}://{HttpContext.Request.Host}";
 			var apiResponse =
-				await _apiClient.GetAsync<ApiResponse<CreateViewObject>, CreateViewObject>(
+				await _apiClient.GetAsync<ApiResult<CreateViewObject>, CreateViewObject>(
 					$"{host}/getViewObject");
-			return new ApiResult(new
+			return new
 			{
 				apiResponse.Data.Name
-			});
+			};
 		}
 
 		[HttpPost]

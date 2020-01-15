@@ -15,7 +15,7 @@ namespace MSFramework.Extensions
 				Page = result.Page,
 				Limit = result.Limit,
 				Total = result.Total,
-				Entities = mapper.Map<List<DTO>>(result.GetEntities())
+				Data = mapper.Map<List<DTO>>(result.GetEntities())
 			};
 		}
 	}

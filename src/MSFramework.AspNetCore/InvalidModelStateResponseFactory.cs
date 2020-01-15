@@ -18,7 +18,8 @@ namespace MSFramework.AspNetCore
 							error = x.Value.Errors.FirstOrDefault()?.ErrorMessage
 						});
 
-				return new ApiResult(new
+
+				return new JsonResult(new
 				{
 					success = false,
 					code = 20000,

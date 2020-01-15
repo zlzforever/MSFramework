@@ -46,8 +46,8 @@ namespace MSFramework.Data
 		/// <summary>
 		/// 当前页结果
 		/// </summary>
-		public List<TEntity> Entities { get; set; }
+		public List<TEntity> Data { get; set; }
 
-		public IEnumerable<dynamic> GetEntities() => Entities.Select(x => (dynamic) x);
+		public IEnumerable<dynamic> GetEntities() => Data.Select(x => (dynamic) x);
 	}
 }

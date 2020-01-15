@@ -2,6 +2,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using MediatR;
 using MSFramework.AspNetCore;
+using MSFramework.Http;
 using Ordering.Domain.Repository;
 
 namespace Ordering.Application.Command
@@ -26,7 +27,7 @@ namespace Ordering.Application.Command
 			var order = await _orderRepository.GetAsync(command.OrderId);
 			if (order == null)
 			{
-				return new FailedApiResult("无效的订单号");
+				return new ApiResult(false, null, "无效的订单号", 200);
 			}
 
 			await _orderRepository.DeleteAsync(order);
