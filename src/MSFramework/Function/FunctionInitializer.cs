@@ -5,7 +5,6 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using MSFramework.Common;
 using MSFramework.Domain;
-using MSFramework.Domain.Repository;
 
 namespace MSFramework.Function
 {

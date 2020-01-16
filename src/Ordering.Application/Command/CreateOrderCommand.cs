@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using MediatR;
-using MSFramework.AspNetCore;
 using MSFramework.Http;
 using Ordering.Domain.AggregateRoot;
 

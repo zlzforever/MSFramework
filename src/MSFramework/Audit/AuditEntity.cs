@@ -1,11 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using MSFramework.Common;
-using MSFramework.Domain;
 using MSFramework.Domain.Entity;
-using MSFramework.EventBus;
 
 namespace MSFramework.Audit
 {

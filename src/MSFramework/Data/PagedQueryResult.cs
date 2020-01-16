@@ -8,7 +8,7 @@ namespace MSFramework.Data
 		/// <summary>
 		/// 总计
 		/// </summary>
-		int Total { get; set; }
+		int Count { get; set; }
 
 		/// <summary>
 		/// 当前页数 
@@ -31,7 +31,7 @@ namespace MSFramework.Data
 		/// <summary>
 		/// 总计
 		/// </summary>
-		public int Total { get; set; }
+		public int Count { get; set; }
 
 		/// <summary>
 		/// 当前页数 

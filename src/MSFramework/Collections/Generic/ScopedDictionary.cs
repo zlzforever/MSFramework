@@ -2,7 +2,6 @@ using System;
 using System.Collections.Concurrent;
 using System.Security.Claims;
 using MSFramework.Audit;
-using MSFramework.Function;
 
 namespace MSFramework.Collections.Generic
 {

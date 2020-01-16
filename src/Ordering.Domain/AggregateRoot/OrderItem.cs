@@ -1,5 +1,4 @@
 ﻿using System;
-using MSFramework.Domain;
 using MSFramework.Domain.Entity;
 
 namespace Ordering.Domain.AggregateRoot

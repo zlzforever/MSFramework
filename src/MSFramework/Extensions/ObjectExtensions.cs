@@ -1,9 +1,4 @@
 using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Dynamic;
-using System.IO;
-using System.Runtime.Serialization.Formatters.Binary;
 
 namespace MSFramework.Extensions
 {

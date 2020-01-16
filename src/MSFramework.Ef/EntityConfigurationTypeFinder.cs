@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using MSFramework.Common;
 using MSFramework.Reflection;
@@ -24,8 +23,12 @@ namespace MSFramework.Ef
 		{
 			IDictionary<Type, IEntityRegister[]> dict = _entityRegistersDict;
 			dict.Clear();
-			var assemblyFinder = Singleton<IAssemblyFinder>.Instance ?? new AssemblyFinder();
-			var assemblies = assemblyFinder.GetAllAssemblyList();
+			if (Singleton<IAssemblyFinder>.Instance == null)
+			{
+				Singleton<IAssemblyFinder>.Instance = new AssemblyFinder();
+			}
+
+			var assemblies = Singleton<IAssemblyFinder>.Instance.GetAllAssemblyList();
 			var types = assemblies.SelectMany(assembly => assembly.GetTypes()).Where(type =>
 					type.IsClass && !type.IsAbstract && typeof(IEntityRegister).IsAssignableFrom(type))
 				.Distinct()

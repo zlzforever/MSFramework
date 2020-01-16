@@ -6,7 +6,6 @@ using Microsoft.EntityFrameworkCore.Design;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using MSFramework.Common;
-using MSFramework.EventBus;
 
 namespace MSFramework.Ef
 {

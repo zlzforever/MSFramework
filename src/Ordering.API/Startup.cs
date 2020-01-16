@@ -1,9 +1,5 @@
 ﻿using System;
-using System.Linq;
 using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Infrastructure;
-using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -16,7 +12,6 @@ using MSFramework.Ef.Function;
 using MSFramework.Ef.MySql;
 using MSFramework.EventBus;
 using MSFramework.Permission;
-using MSFramework.Reflection;
 using Ordering.Application.Event;
 
 namespace Ordering.API

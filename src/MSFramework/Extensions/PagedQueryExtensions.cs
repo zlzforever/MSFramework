@@ -4,11 +4,24 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
 using MSFramework.Data;
+using MSFramework.Http;
 
 namespace MSFramework.Extensions
 {
 	public static class PagedQueryExtensions
 	{
+		public static LayUIApiPagedQueryResult<TEntity> ToLayUIApiPagedQueryResult<TEntity>(
+			PagedQueryResult<TEntity> result)
+		{
+			return new LayUIApiPagedQueryResult<TEntity>(result.Page, result.Limit, result.Count, result.Data);
+		}
+
+		public static LayUIApiPagedQueryResult ToLayUIApiPagedQueryResult(
+			PagedQueryResult<object> result)
+		{
+			return new LayUIApiPagedQueryResult(result.Page, result.Limit, result.Count, result.Data);
+		}
+
 		public static async Task<PagedQueryResult<TEntity>> PagedQueryAsync<TEntity, TOrderKey>(
 			this IQueryable<TEntity> queryable,
 			int page, int limit,
@@ -39,7 +52,7 @@ namespace MSFramework.Extensions
 			where TEntity : class
 		{
 			var result = new PagedQueryResult<TEntity>();
-			page = page < 0 ? 1 : page;
+			page = page < 1 ? 1 : page;
 			limit = limit < 10 ? 10 : limit;
 			var entities = where == null ? queryable : queryable.Where(where);
 			if (orderBy != null)
@@ -73,13 +86,13 @@ namespace MSFramework.Extensions
 					: ((IOrderedQueryable<TEntity>) entities).OrderByDescending(thenBy2.Expression);
 			}
 
-			result.Total = entities.Count();
+			result.Count = entities.Count();
 			result.Page = page;
 			result.Limit = limit;
 
 			entities = entities.Skip((result.Page - 1) * result.Limit).Take(result.Limit);
 
-			result.Data = result.Total == 0 ? new List<TEntity>() : entities.ToList();
+			result.Data = result.Count == 0 ? new List<TEntity>() : entities.ToList();
 			return Task.FromResult(result);
 		}
 	}

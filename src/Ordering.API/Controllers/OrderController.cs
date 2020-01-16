@@ -1,15 +1,12 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using MSFramework.AspNetCore;
 using MSFramework.AspNetCore.Permission;
 using MSFramework.Domain;
-using MSFramework.EventBus;
 using Ordering.Application.Command;
-using Ordering.Application.Event;
 using Ordering.Application.Query;
 using Ordering.Domain.AggregateRoot;
 using Ordering.Domain.Repository;

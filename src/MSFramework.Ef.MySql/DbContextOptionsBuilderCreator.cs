@@ -1,7 +1,5 @@
 ﻿using System;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
 using Pomelo.EntityFrameworkCore.MySql.Storage;
 
 namespace MSFramework.Ef.MySql

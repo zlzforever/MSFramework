@@ -1,14 +1,18 @@
 using System;
 using System.Collections.Generic;
-using System.Data.SqlTypes;
+using MSFramework.Data;
 
 namespace MSFramework.Http
 {
+	public interface IApiResult
+	{
+	}
+
 	/// <summary>
 	/// 用于内部系统调用外部 API 的返回做返序列化
 	/// </summary>
 	/// <typeparam name="T"></typeparam>
-	public class ApiResult<T> where T : class
+	public class ApiResult<T> : IApiResult where T : class
 	{
 		public bool Success { get; set; } = true;
 		public int Code { get; set; }
@@ -51,7 +55,33 @@ namespace MSFramework.Http
 
 	public class ErrorApiResult : ApiResult
 	{
-		public ErrorApiResult(string msg, int code = 1) : base(null, msg, code)
+		public ErrorApiResult(string msg, int code = 1) : base(false, null, msg, code)
+		{
+		}
+	}
+
+	public class LayUIApiPagedQueryResult<TEntity> : PagedQueryResult<TEntity>, IApiResult
+	{
+		public bool Success => true;
+		public int Code => 0;
+
+		private LayUIApiPagedQueryResult()
+		{
+		}
+
+		public LayUIApiPagedQueryResult(int page, int limit, int count, List<TEntity> data)
+		{
+			Page = page;
+			Limit = limit;
+			Count = count;
+			Data = data;
+		}
+	}
+
+	public class LayUIApiPagedQueryResult : LayUIApiPagedQueryResult<object>
+	{
+		public LayUIApiPagedQueryResult(int page, int limit, int count, List<object> data)
+			: base(page, limit, count, data)
 		{
 		}
 	}

@@ -1,7 +1,5 @@
 using System;
 using System.ComponentModel.DataAnnotations;
-using MSFramework.Common;
-using MSFramework.Domain;
 using MSFramework.Domain.Entity;
 
 namespace MSFramework.Audit

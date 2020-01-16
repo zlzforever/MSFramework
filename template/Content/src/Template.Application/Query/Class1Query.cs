@@ -1,9 +1,9 @@
 using System;
-using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using MSFramework.Data;
 using MSFramework.Ef;
+using MSFramework.Ef.Extensions;
 using MSFramework.Extensions;
 using Template.Application.DTO;
 using Template.Domain.AggregateRoot;

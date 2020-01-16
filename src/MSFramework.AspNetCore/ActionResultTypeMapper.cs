@@ -1,6 +1,7 @@
 using System;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
+using MSFramework.Data;
 using MSFramework.Http;
 
 namespace MSFramework.AspNetCore
@@ -22,6 +23,11 @@ namespace MSFramework.AspNetCore
 				throw new ArgumentNullException(nameof(returnType));
 			if (value is IConvertToActionResult convertToActionResult)
 				return convertToActionResult.Convert();
+			if (value is IApiResult)
+			{
+				return new JsonResult(value);
+			}
+
 			return new JsonResult(new ApiResult(value));
 		}
 	}

@@ -6,7 +6,7 @@ using MSFramework.Domain;
 using MSFramework.Domain.Entity;
 using MSFramework.Extensions;
 
-namespace MSFramework.Ef
+namespace MSFramework.Ef.Extensions
 {
 	public static class PagedQueryExtensions
 	{
