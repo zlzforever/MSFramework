@@ -9,7 +9,7 @@
     </ItemGroup>
 
     <ItemGroup>
-        <PackageReference Include="MSFramework.Ef" Version="0.10.70" />
+        <PackageReference Include="MSFramework.Ef" Version="0.10.71" />
         <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="3.1.1" />
     </ItemGroup>
 </Project>

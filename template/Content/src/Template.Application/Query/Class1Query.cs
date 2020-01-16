@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using MSFramework.Data;
 using MSFramework.Ef;
+using MSFramework.Extensions;
 using Template.Application.DTO;
 using Template.Domain.AggregateRoot;
 
@@ -45,13 +46,7 @@ namespace Template.Application.Query
 					new OrderCondition<Class1, DateTimeOffset?>(x => x.LastModificationTime, true));
 			}
 
-			return new PagedQueryResult<Class1Out>
-			{
-				Limit = result.Limit,
-				Total = result.Total,
-				Page = result.Page,
-				Entities = _mapper.Map<List<Class1Out>>(result.Entities)
-			};
+			return _mapper.ToPagedQueryResultDTO<Class1Out>(result);
 		}
 	}
 }

@@ -5,8 +5,8 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="MSFramework.MySql" Version="0.10.70" />
-        <PackageReference Include="MSFramework.Ef.MySql" Version="0.10.70" />
+        <PackageReference Include="MSFramework.MySql" Version="0.10.71" />
+        <PackageReference Include="MSFramework.Ef.MySql" Version="0.10.71" />
         <PackageReference Include="Microsoft.AspNetCore.Authentication.OpenIdConnect" Version="3.1.1" />
         <PackageReference Include="BuildBundlerMinifier" Version="3.2.435" />
         <PackageReference Include="Serilog.AspNetCore" Version="3.2.0" />
