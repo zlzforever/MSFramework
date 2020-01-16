@@ -25,7 +25,7 @@ namespace MSFramework.Http
 	/// </summary>
 	public class ApiResult : ApiResult<object>
 	{
-		public ApiResult(bool success = true, object data = null, string msg = "", int code = 0)
+		public ApiResult(bool success, object data = null, string msg = "", int code = 0)
 		{
 			Success = success;
 			Data = data;
@@ -42,7 +42,7 @@ namespace MSFramework.Http
 			}
 		}
 
-		public ApiResult(object data = null, string msg = "", int code = 0)
+		public ApiResult(object data, string msg = "", int code = 0)
 			: this(true, data, msg, code)
 		{
 		}

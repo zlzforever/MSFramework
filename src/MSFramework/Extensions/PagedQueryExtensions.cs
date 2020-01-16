@@ -53,7 +53,7 @@ namespace MSFramework.Extensions
 		{
 			var result = new PagedQueryResult<TEntity>();
 			page = page < 1 ? 1 : page;
-			limit = limit < 10 ? 10 : limit;
+			limit = limit < 1 ? 1 : limit;
 			var entities = where == null ? queryable : queryable.Where(where);
 			if (orderBy != null)
 			{

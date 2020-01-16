@@ -4,7 +4,7 @@ using System.Reflection;
 
 namespace MSFramework.Domain.Entity
 {
-	public abstract class EntityBase : IEntity
+	public abstract class EntityBase : EntityBase<Guid>
 	{
 	}
 
@@ -12,7 +12,7 @@ namespace MSFramework.Domain.Entity
 	/// 实体类基类
 	/// </summary>
 	[Serializable]
-	public abstract class EntityBase<TKey> : EntityBase, IEntity<TKey> where TKey : IEquatable<TKey>
+	public abstract class EntityBase<TKey> : IEntity<TKey> where TKey : IEquatable<TKey>
 	{
 		/// <summary>
 		/// 
