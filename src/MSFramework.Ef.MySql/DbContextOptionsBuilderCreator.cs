@@ -11,8 +11,8 @@ namespace MSFramework.Ef.MySql
 		public DbContextOptionsBuilder Create(Type dbContextType,
 			string connectionString)
 		{
-			DbContextOptionsBuilder optionsBuilder = new DbContextOptionsBuilder();
-			string entryAssemblyName = dbContextType.Assembly.GetName().Name;
+			var optionsBuilder = new DbContextOptionsBuilder();
+			var entryAssemblyName = dbContextType.Assembly.GetName().Name;
 			return optionsBuilder.UseMySql(connectionString,
 				builder =>
 				{

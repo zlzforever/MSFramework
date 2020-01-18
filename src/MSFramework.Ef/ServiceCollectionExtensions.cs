@@ -25,7 +25,7 @@ namespace MSFramework.Ef
 		{
 			configuration.NotNull(nameof(configuration));
 
-			EntityFrameworkBuilder eBuilder = new EntityFrameworkBuilder(builder.Services);
+			var eBuilder = new EntityFrameworkBuilder(builder.Services);
 			configure?.Invoke(eBuilder);
 
 			var section = configuration.GetSection("DbContexts");

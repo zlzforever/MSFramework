@@ -19,11 +19,11 @@ namespace MSFramework.Extensions
 				return data;
 			}
 
-			using MemoryStream ms = new MemoryStream();
-			GZipStream zip = new GZipStream(ms, CompressionMode.Compress, true);
+			using var ms = new MemoryStream();
+			var zip = new GZipStream(ms, CompressionMode.Compress, true);
 			zip.Write(data, 0, data.Length);
 			zip.Close();
-			byte[] buffer = new byte[ms.Length];
+			var buffer = new byte[ms.Length];
 			ms.Position = 0;
 			ms.Read(buffer, 0, buffer.Length);
 			return buffer;
@@ -41,10 +41,10 @@ namespace MSFramework.Extensions
 				return data;
 			}
 
-			using MemoryStream tmpMs = new MemoryStream();
-			using (MemoryStream ms = new MemoryStream(data))
+			using var tmpMs = new MemoryStream();
+			using (var ms = new MemoryStream(data))
 			{
-				GZipStream zip = new GZipStream(ms, CompressionMode.Decompress, true);
+				var zip = new GZipStream(ms, CompressionMode.Decompress, true);
 				zip.CopyTo(tmpMs);
 				zip.Close();
 			}
@@ -63,7 +63,7 @@ namespace MSFramework.Extensions
 			{
 				return string.Empty;
 			}
-			byte[] bytes = Encoding.UTF8.GetBytes(value);
+			var bytes = Encoding.UTF8.GetBytes(value);
 			bytes = Compress(bytes);
 			return Convert.ToBase64String(bytes);
 		}
@@ -79,7 +79,7 @@ namespace MSFramework.Extensions
 			{
 				return string.Empty;
 			}
-			byte[] bytes = Convert.FromBase64String(value);
+			var bytes = Convert.FromBase64String(value);
 			bytes = Decompress(bytes);
 			return Encoding.UTF8.GetString(bytes);
 		}

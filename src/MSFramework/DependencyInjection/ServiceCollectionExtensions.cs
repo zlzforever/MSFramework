@@ -21,7 +21,7 @@ namespace MSFramework.DependencyInjection
 			Type[] implementationTypes,
 			ServiceLifetime lifetime)
 		{
-			foreach (Type implementationType in implementationTypes)
+			foreach (var implementationType in implementationTypes)
 			{
 				if (implementationType.IsAbstract || implementationType.IsInterface)
 				{
@@ -29,7 +29,7 @@ namespace MSFramework.DependencyInjection
 				}
 
 				var excludeTypes = new[] {typeof(IApplicationService), typeof(IDomainService)};
-				Type[] interfaceTypes = implementationType.GetImplementedInterfaces(typeof(IDisposable),
+				var interfaceTypes = implementationType.GetImplementedInterfaces(typeof(IDisposable),
 						typeof(ITransientDependency), typeof(ISingletonDependency), typeof(IScopeDependency))
 					.Where(x => !excludeTypes.Contains(x)).ToArray();
 				if (interfaceTypes.Length == 0)
@@ -38,9 +38,9 @@ namespace MSFramework.DependencyInjection
 					continue;
 				}
 
-				for (int i = 0; i < interfaceTypes.Length; i++)
+				for (var i = 0; i < interfaceTypes.Length; i++)
 				{
-					Type interfaceType = interfaceTypes[i];
+					var interfaceType = interfaceTypes[i];
 					if (lifetime == ServiceLifetime.Transient)
 					{
 						services.TryAddEnumerable(new ServiceDescriptor(interfaceType, implementationType, lifetime));
@@ -54,7 +54,7 @@ namespace MSFramework.DependencyInjection
 					else
 					{
 						//有多个接口时，后边的接口注册使用第一个接口的实例，保证同个实现类的多个接口获得同一个实例
-						Type firstInterfaceType = interfaceTypes[0];
+						var firstInterfaceType = interfaceTypes[0];
 						services.TryAdd(new ServiceDescriptor(interfaceType,
 							provider => provider.GetService(firstInterfaceType), lifetime));
 					}

@@ -4,8 +4,8 @@
         <LangVersion>latest</LangVersion>
         <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
         <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
-        <Version>0.10.82</Version>
-        <FileVersion>0.10.82</FileVersion>
+        <Version>0.10.88</Version>
+        <FileVersion>0.10.88</FileVersion>
         <Authors>zlzforever@163.com;</Authors>
         <Copyright>Copyright 2019 Lewis Zou</Copyright>
         <Description>MSFramework is a lightweight DDD framework</Description>

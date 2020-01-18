@@ -38,13 +38,13 @@ namespace MSFramework.Extensions
 				return false;
 			}
 
-			byte[] filedata = File.ReadAllBytes(filename);
+			var filedata = File.ReadAllBytes(filename);
 			if (filedata.Length == 0)
 			{
 				return false;
 			}
 
-			ushort code = BitConverter.ToUInt16(filedata, 0);
+			var code = BitConverter.ToUInt16(filedata, 0);
 			switch (code)
 			{
 				case 0x4D42: //bmp
@@ -149,7 +149,7 @@ namespace MSFramework.Extensions
 				encoding = Encoding.UTF8;
 			}
 
-			byte[] bytes = encoding.GetBytes(source);
+			var bytes = encoding.GetBytes(source);
 			return bytes.ToHexString();
 		}
 
@@ -166,8 +166,8 @@ namespace MSFramework.Extensions
 				hexString = hexString ?? "";
 			}
 
-			byte[] bytes = new byte[hexString.Length / 2];
-			for (int i = 0; i < bytes.Length; i++)
+			var bytes = new byte[hexString.Length / 2];
+			for (var i = 0; i < bytes.Length; i++)
 			{
 				bytes[i] = Convert.ToByte(hexString.Substring(i * 2, 2), 16);
 			}
@@ -181,7 +181,7 @@ namespace MSFramework.Extensions
 		/// <param name="source">要进行编号的字符串</param>
 		public static string ToUnicode(this string source)
 		{
-			Regex regex = new Regex(@"[^\u0000-\u00ff]");
+			var regex = new Regex(@"[^\u0000-\u00ff]");
 			return regex.Replace(source, m => string.Format(@"\u{0:x4}", (short) m.Value[0]));
 		}
 	}

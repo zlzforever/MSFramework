@@ -51,7 +51,7 @@ namespace MSFramework.AspNetCore.Extensions
 		/// </summary>
 		public static string GetAreaName(this ActionDescriptor actionDescriptor)
 		{
-			actionDescriptor.RouteValues.TryGetValue("area", out string area);
+			actionDescriptor.RouteValues.TryGetValue("area", out var area);
 			return area;
 		}
 
@@ -60,7 +60,7 @@ namespace MSFramework.AspNetCore.Extensions
 		/// </summary>
 		public static string GetControllerName(this ActionDescriptor actionDescriptor)
 		{
-			actionDescriptor.RouteValues.TryGetValue("controller", out string area);
+			actionDescriptor.RouteValues.TryGetValue("controller", out var area);
 			return area;
 		}
 
@@ -69,7 +69,7 @@ namespace MSFramework.AspNetCore.Extensions
 		/// </summary>
 		public static string GetActionName(this ActionDescriptor actionDescriptor)
 		{
-			actionDescriptor.RouteValues.TryGetValue("action", out string area);
+			actionDescriptor.RouteValues.TryGetValue("action", out var area);
 			return area;
 		}
 	}

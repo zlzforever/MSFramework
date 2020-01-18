@@ -5,13 +5,14 @@ using System.Reflection;
 
 namespace MSFramework.Domain
 {
-	public abstract class Enumeration : IComparable
+	public abstract class Enumeration<TId> : IComparable
+		where TId : IComparable
 	{
 		public string Name { get; }
 
-		public int Id { get; }
+		public TId Id { get; }
 
-		protected Enumeration(int id, string name)
+		protected Enumeration(TId id, string name)
 		{
 			Id = id;
 			Name = name;
@@ -61,7 +62,7 @@ namespace MSFramework.Domain
 			return matchingItem;
 		}
 
-		private static T Parse<T, K>(K value, string description, Func<T, bool> predicate) where T : Enumeration
+		private static T Parse<T, TK>(TK value, string description, Func<T, bool> predicate) where T : Enumeration
 		{
 			var matchingItem = GetAll<T>().FirstOrDefault(predicate);
 
@@ -69,6 +70,13 @@ namespace MSFramework.Domain
 				throw new InvalidOperationException($"'{value}' is not a valid {description} in {typeof(T)}");
 
 			return matchingItem;
+		}
+	}
+
+	public abstract class Enumeration : Enumeration<int>
+	{
+		protected Enumeration(int id, string name) : base(id, name)
+		{
 		}
 	}
 }

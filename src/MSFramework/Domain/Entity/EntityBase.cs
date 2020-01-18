@@ -1,6 +1,8 @@
 ﻿using System;
 using System.ComponentModel;
 using System.Reflection;
+using MSFramework.Common;
+using MSFramework.Data;
 
 namespace MSFramework.Domain.Entity
 {
@@ -27,9 +29,10 @@ namespace MSFramework.Domain.Entity
 
 		protected EntityBase()
 		{
+			Id = Singleton<IIdGenerator>.Instance.GetNewId<TKey>();
 		}
 
-		protected EntityBase(TKey id)
+		protected EntityBase(TKey id) : this()
 		{
 			Id = id;
 		}

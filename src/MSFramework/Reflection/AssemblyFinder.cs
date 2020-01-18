@@ -23,7 +23,7 @@ namespace MSFramework.Reflection
 		{
 			if (_assemblies == null)
 			{
-				DependencyContext context = DependencyContext.Default;
+				var context = DependencyContext.Default;
 				var totalAssemblyNames = context.GetDefaultAssemblyNames().Select(x => x.Name).ToList();
 
 				AssemblyNamePatterns.Add("MSFramework");

@@ -195,7 +195,7 @@ namespace MSFramework.EventBus.RabbitMQ
 					{
 						if (subscription.IsDynamic)
 						{
-							IDynamicEventHandler handler =
+							var handler =
 								scope.ServiceProvider.GetService(subscription.HandlerType) as IDynamicEventHandler;
 							if (handler == null) continue;
 							await handler.Handle(@event);

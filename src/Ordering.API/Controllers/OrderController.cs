@@ -59,7 +59,7 @@ namespace Ordering.API.Controllers
 			var random = new Random();
 			var items = new List<CreateOrderCommand.OrderItemDTO>();
 			var count = random.Next(2, 5);
-			for (int i = 0; i < count; ++i)
+			for (var i = 0; i < count; ++i)
 			{
 				var product = Guid.NewGuid();
 				items.Add(new CreateOrderCommand.OrderItemDTO

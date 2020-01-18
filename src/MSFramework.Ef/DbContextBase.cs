@@ -41,10 +41,10 @@ namespace MSFramework.Ef
 		protected override void OnModelCreating(ModelBuilder modelBuilder)
 		{
 			//通过实体配置信息将实体注册到当前上下文
-			Type contextType = GetType();
-			IEntityRegister[] registers =
+			var contextType = GetType();
+			var registers =
 				Singleton<IEntityConfigurationTypeFinder>.Instance.GetEntityRegisters(contextType);
-			foreach (IEntityRegister register in registers)
+			foreach (var register in registers)
 			{
 				register.RegisterTo(modelBuilder);
 				_logger?.LogDebug($"将实体类“{register.EntityType}”注册到上下文“{contextType}”中");
@@ -283,14 +283,14 @@ namespace MSFramework.Ef
 				OperateType = operateType
 			};
 
-			foreach (IProperty property in entry.CurrentValues.Properties)
+			foreach (var property in entry.CurrentValues.Properties)
 			{
 				if (property.IsConcurrencyToken)
 				{
 					continue;
 				}
 
-				string name = property.Name;
+				var name = property.Name;
 				var propertyEntry = entry.Property(property.Name);
 				if (property.IsPrimaryKey())
 				{
@@ -324,8 +324,8 @@ namespace MSFramework.Ef
 				}
 				else if (entry.State == EntityState.Modified)
 				{
-					string currentValue = propertyEntry.CurrentValue?.ToString();
-					string originalValue = propertyEntry.OriginalValue?.ToString();
+					var currentValue = propertyEntry.CurrentValue?.ToString();
+					var originalValue = propertyEntry.OriginalValue?.ToString();
 					if (currentValue == originalValue)
 					{
 						continue;

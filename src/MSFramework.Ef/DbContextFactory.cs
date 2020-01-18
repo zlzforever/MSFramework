@@ -43,7 +43,7 @@ namespace MSFramework.Ef
 		/// <returns>实体所属上下文实例</returns>
 		public DbContextBase GetDbContext<TEntity>() where TEntity : class, IAggregateRoot
 		{
-			Type dbContextType =
+			var dbContextType =
 				Singleton<IEntityConfigurationTypeFinder>.Instance.GetDbContextTypeForEntity(typeof(TEntity));
 			return GetDbContext(dbContextType);
 		}
@@ -87,10 +87,10 @@ namespace MSFramework.Ef
 					$"无法解析类型为“{resolveOptions.DatabaseType}”的 {typeof(IDbContextOptionsBuilderCreator).FullName} 实例");
 			}
 
-			DbContextOptionsBuilder optionsBuilder =
+			var optionsBuilder =
 				builderCreator.Create(dbContextType, resolveOptions.ConnectionString);
 
-			DbContextOptions options = optionsBuilder.Options;
+			var options = optionsBuilder.Options;
 			//创建上下文实例
 			if (!(ActivatorUtilities.CreateInstance(_serviceProvider, dbContextType, options) is
 				DbContextBase context))

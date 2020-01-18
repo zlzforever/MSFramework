@@ -8,7 +8,7 @@ namespace MSFramework.EventBus
 		public static MSFrameworkBuilder AddPassThroughEventBus(this MSFrameworkBuilder builder,
 			Action<EventBusBuilder> configure = null)
 		{
-			EventBusBuilder eBuilder = new EventBusBuilder(builder.Services);
+			var eBuilder = new EventBusBuilder(builder.Services);
 			configure?.Invoke(eBuilder);
 
 			builder.Services.AddPassThroughEventBus();

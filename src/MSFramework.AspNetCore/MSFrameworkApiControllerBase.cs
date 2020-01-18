@@ -17,15 +17,15 @@ namespace MSFramework.AspNetCore
 			Logger = logger;
 		}
 
-		protected IActionResult Ok(dynamic value, string msg = "")
+		protected ApiResult ApiResult(dynamic value = null, string msg = "")
 		{
-			return new JsonResult(new ApiResult(value, msg));
+			return new ApiResult(value, msg);
 		}
 
-		protected IActionResult Failed(string msg = "", int code = 20000)
+		protected ErrorApiResult ErrorApiResult(string msg = "", int code = 20000)
 		{
 			HttpContext.Response.StatusCode = 400;
-			return new JsonResult(new ApiResult(false, null, msg, code));
+			return new ErrorApiResult(msg, code);
 		}
 	}
 }

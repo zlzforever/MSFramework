@@ -13,16 +13,16 @@ namespace MSFramework.Common
 		/// <returns>COMB类型 Guid 数据</returns>
 		public static Guid NewGuid()
 		{
-			byte[] guidArray = Guid.NewGuid().ToByteArray();
-			DateTime dtBase = new DateTime(1900, 1, 1);
-			DateTime dtNow = DateTime.Now;
+			var guidArray = Guid.NewGuid().ToByteArray();
+			var dtBase = new DateTime(1900, 1, 1);
+			var dtNow = DateTime.Now;
 			//获取用于生成byte字符串的天数与毫秒数
-			TimeSpan days = new TimeSpan(dtNow.Ticks - dtBase.Ticks);
-			TimeSpan msecs = new TimeSpan(dtNow.Ticks - new DateTime(dtNow.Year, dtNow.Month, dtNow.Day).Ticks);
+			var days = new TimeSpan(dtNow.Ticks - dtBase.Ticks);
+			var msecs = new TimeSpan(dtNow.Ticks - new DateTime(dtNow.Year, dtNow.Month, dtNow.Day).Ticks);
 			//转换成byte数组
 			//注意SqlServer的时间计数只能精确到1/300秒
-			byte[] daysArray = BitConverter.GetBytes(days.Days);
-			byte[] msecsArray = BitConverter.GetBytes((long) (msecs.TotalMilliseconds / 3.333333));
+			var daysArray = BitConverter.GetBytes(days.Days);
+			var msecsArray = BitConverter.GetBytes((long) (msecs.TotalMilliseconds / 3.333333));
 
 			//反转字节以符合SqlServer的排序
 			Array.Reverse(daysArray);
@@ -39,10 +39,10 @@ namespace MSFramework.Common
 		/// </summary>
 		public static DateTime GetDateFrom(Guid id)
 		{
-			DateTime baseDate = new DateTime(1900, 1, 1);
-			byte[] daysArray = new byte[4];
-			byte[] msecsArray = new byte[4];
-			byte[] guidArray = id.ToByteArray();
+			var baseDate = new DateTime(1900, 1, 1);
+			var daysArray = new byte[4];
+			var msecsArray = new byte[4];
+			var guidArray = id.ToByteArray();
 
 			// 将GUID的日期部分复制到相应的字节数组。 
 			Array.Copy(guidArray, guidArray.Length - 6, daysArray, 2, 2);
@@ -53,10 +53,10 @@ namespace MSFramework.Common
 			Array.Reverse(msecsArray);
 
 			// 将字节转换为int 
-			int days = BitConverter.ToInt32(daysArray, 0);
-			int msecs = BitConverter.ToInt32(msecsArray, 0);
+			var days = BitConverter.ToInt32(daysArray, 0);
+			var msecs = BitConverter.ToInt32(msecsArray, 0);
 
-			DateTime date = baseDate.AddDays(days);
+			var date = baseDate.AddDays(days);
 			date = date.AddMilliseconds(msecs * 3.333333);
 
 			return date;

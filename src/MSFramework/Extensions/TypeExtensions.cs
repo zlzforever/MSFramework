@@ -16,7 +16,7 @@ namespace MSFramework.Extensions
 		{
 			if (IsNullableType(type))
 			{
-				NullableConverter nullableConverter = new NullableConverter(type);
+				var nullableConverter = new NullableConverter(type);
 				return nullableConverter.UnderlyingType;
 			}
 
@@ -69,10 +69,10 @@ namespace MSFramework.Extensions
 
 		public static Type[] GetImplementedInterfaces(this Type type, params Type[] exceptInterfaces)
 		{
-			Type[] interfaceTypes = type.GetInterfaces().Where(t => !exceptInterfaces.Contains(t)).ToArray();
-			for (int index = 0; index < interfaceTypes.Length; index++)
+			var interfaceTypes = type.GetInterfaces().Where(t => !exceptInterfaces.Contains(t)).ToArray();
+			for (var index = 0; index < interfaceTypes.Length; index++)
 			{
-				Type interfaceType = interfaceTypes[index];
+				var interfaceType = interfaceTypes[index];
 				if (interfaceType.IsGenericType && !interfaceType.IsGenericTypeDefinition &&
 				    interfaceType.FullName == null)
 				{

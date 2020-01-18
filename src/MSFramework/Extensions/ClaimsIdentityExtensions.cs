@@ -50,7 +50,7 @@ namespace MSFramework.Extensions
 				return default(T);
 			}
 
-			string value = claimsIdentity.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+			var value = claimsIdentity.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 			if (value == null)
 			{
 				return default(T);
@@ -126,7 +126,7 @@ namespace MSFramework.Extensions
 				return;
 			}
 
-			Claim claim = claimsIdentity.FindFirst(claimType);
+			var claim = claimsIdentity.FindFirst(claimType);
 			if (claim == null)
 			{
 				return;
@@ -148,7 +148,7 @@ namespace MSFramework.Extensions
 
 			return claimsIdentity.FindAll(ClaimTypes.Role).SelectMany(m =>
 			{
-				string[] roles = m.Value.Split(new[] {','}, StringSplitOptions.RemoveEmptyEntries);
+				var roles = m.Value.Split(new[] {','}, StringSplitOptions.RemoveEmptyEntries);
 				return roles;
 			}).ToArray();
 		}

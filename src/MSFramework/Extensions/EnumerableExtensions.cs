@@ -53,10 +53,10 @@ namespace MSFramework.Extensions
 				return string.Empty;
 			}
 
-			StringBuilder sb = new StringBuilder();
-			int i = 0;
-			int count = collection.Count();
-			foreach (T t in collection)
+			var sb = new StringBuilder();
+			var i = 0;
+			var count = collection.Count();
+			foreach (var t in collection)
 			{
 				if (i == count - 1)
 				{

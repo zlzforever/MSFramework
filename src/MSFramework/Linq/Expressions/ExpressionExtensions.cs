@@ -9,7 +9,7 @@ namespace MSFramework.Linq.Expressions
 		{
 			// need to detect whether they use the same
 			// parameter instance; if not, they need fixing
-			ParameterExpression param = left.Parameters[0];
+			var param = left.Parameters[0];
 			if (ReferenceEquals(param, right.Parameters[0]))
 			{
 				// simple version

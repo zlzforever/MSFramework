@@ -21,7 +21,7 @@ namespace MSFramework.Ef
 		/// </summary>
 		public void Initialize()
 		{
-			IDictionary<Type, IEntityRegister[]> dict = _entityRegistersDict;
+			var dict = _entityRegistersDict;
 			dict.Clear();
 			if (Singleton<IAssemblyFinder>.Instance == null)
 			{
@@ -39,14 +39,14 @@ namespace MSFramework.Ef
 				return;
 			}
 
-			List<IEntityRegister> registers =
+			var registers =
 				types.Select(type => Activator.CreateInstance(type) as IEntityRegister).ToList();
-			List<IGrouping<Type, IEntityRegister>> groups = registers.GroupBy(m => m.DbContextType).ToList();
+			var groups = registers.GroupBy(m => m.DbContextType).ToList();
 			Type key;
-			foreach (IGrouping<Type, IEntityRegister> group in groups)
+			foreach (var group in groups)
 			{
 				key = group.Key ?? typeof(DefaultDbContext);
-				List<IEntityRegister> list = new List<IEntityRegister>();
+				var list = new List<IEntityRegister>();
 				if (group.Key == null || group.Key == typeof(DefaultDbContext))
 				{
 					list.AddRange(group);
@@ -66,7 +66,7 @@ namespace MSFramework.Ef
 			key = typeof(DefaultDbContext);
 			if (dict.ContainsKey(key))
 			{
-				List<IEntityRegister> list = dict[key].ToList();
+				var list = dict[key].ToList();
 
 				//TODO: list.Add(new AuditOperationConfiguration());
 				dict[key] = list.ToArray();

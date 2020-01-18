@@ -18,6 +18,16 @@ namespace MSFramework.Data
 			Require<ArgumentNullException>(value != null, $"参数“{paramName}”不能为空引用。");
 		}
 
+		public static void NotNullOrDefault<T>(this T value, string paramName)
+		{
+			if (value == null)
+			{
+				throw new ArgumentNullException($"参数“{paramName}”不能为空引用。");
+			}
+
+			Require<ArgumentException>(!value.Equals(default(T)), $"参数“{paramName}”不能为默认值。");
+		}
+
 		/// <summary>
 		/// 检查参数不能为空引用，否则抛出<see cref="ArgumentNullException"/>异常。
 		/// </summary>
@@ -51,7 +61,7 @@ namespace MSFramework.Data
 				throw new ArgumentNullException(nameof(message));
 			}
 
-			TException exception = (TException) Activator.CreateInstance(typeof(TException), message);
+			var exception = (TException) Activator.CreateInstance(typeof(TException), message);
 			throw exception;
 		}
 	}

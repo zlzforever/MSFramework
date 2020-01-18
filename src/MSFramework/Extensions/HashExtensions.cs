@@ -20,7 +20,7 @@ namespace MSFramework.Extensions
 				encoding = Encoding.UTF8;
 			}
 
-			byte[] bytes = encoding.GetBytes(value);
+			var bytes = encoding.GetBytes(value);
 			return bytes.ToMd5();
 		}
 
@@ -30,10 +30,10 @@ namespace MSFramework.Extensions
 		public static string ToMd5(this byte[] bytes)
 		{
 			bytes.NotNull(nameof(bytes));
-			StringBuilder sb = new StringBuilder();
+			var sb = new StringBuilder();
 			MD5 hash = new MD5CryptoServiceProvider();
 			bytes = hash.ComputeHash(bytes);
-			foreach (byte b in bytes)
+			foreach (var b in bytes)
 			{
 				sb.AppendFormat("{0:x2}", b);
 			}
@@ -55,8 +55,8 @@ namespace MSFramework.Extensions
 				encoding = Encoding.UTF8;
 			}
 
-			byte[] bytes = hash.ComputeHash(encoding.GetBytes(value));
-			foreach (byte b in bytes)
+			var bytes = hash.ComputeHash(encoding.GetBytes(value));
+			foreach (var b in bytes)
 			{
 				sb.AppendFormat("{0:x2}", b);
 			}
@@ -78,8 +78,8 @@ namespace MSFramework.Extensions
 				encoding = Encoding.UTF8;
 			}
 
-			byte[] bytes = hash.ComputeHash(encoding.GetBytes(value));
-			foreach (byte b in bytes)
+			var bytes = hash.ComputeHash(encoding.GetBytes(value));
+			foreach (var b in bytes)
 			{
 				sb.AppendFormat("{0:x2}", b);
 			}
@@ -101,8 +101,8 @@ namespace MSFramework.Extensions
 				encoding = Encoding.UTF8;
 			}
 
-			byte[] bytes = hash.ComputeHash(encoding.GetBytes(value));
-			foreach (byte b in bytes)
+			var bytes = hash.ComputeHash(encoding.GetBytes(value));
+			foreach (var b in bytes)
 			{
 				sb.AppendFormat("{0:x2}", b);
 			}

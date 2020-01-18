@@ -29,27 +29,25 @@ namespace MSFramework.Domain
 				return false;
 			}
 
-			ValueObject other = (ValueObject) obj;
-			using (var thisValues = GetAtomicValues().GetEnumerator())
-			using (var otherValues = other.GetAtomicValues().GetEnumerator())
+			var other = (ValueObject) obj;
+			using var thisValues = GetAtomicValues().GetEnumerator();
+			using var otherValues = other.GetAtomicValues().GetEnumerator();
+			while (thisValues.MoveNext() && otherValues.MoveNext())
 			{
-				while (thisValues.MoveNext() && otherValues.MoveNext())
+				if (ReferenceEquals(thisValues.Current, null) ^
+				    ReferenceEquals(otherValues.Current, null))
 				{
-					if (ReferenceEquals(thisValues.Current, null) ^
-					    ReferenceEquals(otherValues.Current, null))
-					{
-						return false;
-					}
-
-					if (thisValues.Current != null &&
-					    !thisValues.Current.Equals(otherValues.Current))
-					{
-						return false;
-					}
+					return false;
 				}
 
-				return !thisValues.MoveNext() && !otherValues.MoveNext();
+				if (thisValues.Current != null &&
+				    !thisValues.Current.Equals(otherValues.Current))
+				{
+					return false;
+				}
 			}
+
+			return !thisValues.MoveNext() && !otherValues.MoveNext();
 		}
 
 		public override int GetHashCode()
