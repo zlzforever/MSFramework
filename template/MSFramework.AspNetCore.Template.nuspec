@@ -2,7 +2,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2012/06/nuspec.xsd">
     <metadata>
         <id>MSFramework.AspNetCore.Template</id>
-        <version>0.1.20</version>
+        <version>0.1.21</version>
         <description>
             MSFramework, DDD, AspNetCore
         </description>

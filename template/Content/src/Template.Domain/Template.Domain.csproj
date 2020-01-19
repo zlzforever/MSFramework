@@ -5,7 +5,7 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="MSFramework" Version="0.10.80" />
+        <PackageReference Include="MSFramework" Version="0.10.92" />
     </ItemGroup>
 
     <ItemGroup>
