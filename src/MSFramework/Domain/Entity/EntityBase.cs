@@ -29,6 +29,11 @@ namespace MSFramework.Domain.Entity
 
 		protected EntityBase()
 		{
+			if (Singleton<IIdGenerator>.Instance == null)
+			{
+				Singleton<IIdGenerator>.Instance = new IdGenerator();
+			}
+
 			Id = Singleton<IIdGenerator>.Instance.GetNewId<TKey>();
 		}
 

@@ -21,7 +21,7 @@ namespace MSFramework.Domain
 		private readonly List<IEvent> _domainEvents =
 			new List<IEvent>();
 
-		protected AggregateRootBase() : base(Singleton<IIdGenerator>.Instance.GetNewId<TKey>())
+		protected AggregateRootBase()
 		{
 		}
 

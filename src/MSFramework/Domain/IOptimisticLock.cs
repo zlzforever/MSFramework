@@ -1,6 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace MSFramework.Domain.Entity
+namespace MSFramework.Domain
 {
 	public interface IOptimisticLock
 	{

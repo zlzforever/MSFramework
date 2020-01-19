@@ -15,17 +15,18 @@ namespace MSFramework.Data
 		/// <exception cref="ArgumentNullException"></exception>
 		public static void NotNull<T>(this T value, string paramName)
 		{
-			Require<ArgumentNullException>(value != null, $"参数“{paramName}”不能为空引用。");
+			Require<ArgumentException>(value != null, $"参数 {paramName} 不能为空引用");
 		}
 
 		public static void NotNullOrDefault<T>(this T value, string paramName)
 		{
 			if (value == null)
 			{
-				throw new ArgumentNullException($"参数“{paramName}”不能为空引用。");
+				throw new ArgumentException($"参数 {paramName} 不能为空引用");
 			}
 
-			Require<ArgumentException>(!value.Equals(default(T)), $"参数“{paramName}”不能为默认值。");
+			var defaultValue = default(T);
+			Require<ArgumentException>(!value.Equals(defaultValue), $"参数 {paramName} 不能为默认值 {defaultValue}");
 		}
 
 		/// <summary>
@@ -38,7 +39,7 @@ namespace MSFramework.Data
 		{
 			if (string.IsNullOrWhiteSpace(value))
 			{
-				throw new ArgumentException($"{paramName} is null or white space");
+				throw new ArgumentException($"参数 {paramName} 不能为空或空字符串");
 			}
 		}
 
