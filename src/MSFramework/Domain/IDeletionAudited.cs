@@ -15,13 +15,13 @@ namespace MSFramework.Domain
 		/// Which user deleted this entity?
 		/// </summary>
 		[DisplayName("删除者标识")]
-		string DeleterId { get; }
+		string DeletionUserId { get; }
 
 		/// <summary>
 		/// Which user deleted this entity?
 		/// </summary>
 		[DisplayName("删除者名称")]
-		string DeleterName { get; }
+		string DeletionUserName { get; }
 
 		/// <summary>
 		/// Deletion time of this entity.

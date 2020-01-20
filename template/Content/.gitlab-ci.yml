@@ -6,7 +6,6 @@ variables:
 before_script:
   - docker login -u pamirs -p wV7khLrohoGfDATmnEBazGYq registry-docker.pamirs.com
   - docker pull registry-docker.pamirs.com/dotnetsdk-yarn:latest
-  - app = xxx
 stages:
   - Build
   - Staging
@@ -20,6 +19,7 @@ stagging:
     - staging
   stage: Staging
   script:
+    - app=template
     - docker build -t $app .
     - tag=$(date +%Y%m%d)
     - docker tag $app registry-docker.pamirs.com/$app:$tag
@@ -30,6 +30,7 @@ production:
     - master
   stage: Production
   script:
+    - app=template
     - docker build -t $app .
     - tag=$(date +%Y%m%d)
     - docker tag $app registry-docker.pamirs.com/$app:latest

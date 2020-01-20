@@ -8,7 +8,7 @@ namespace MSFramework.Domain.Entity
 	{
 	}
 
-	public abstract class ModificationAuditedEntity<TKey> : EntityBase<TKey>, IModificationAudited
+	public abstract class ModificationAuditedEntity<TKey> : CreationAuditedEntity, IModificationAudited
 		where TKey : IEquatable<TKey>
 	{
 		/// <summary>

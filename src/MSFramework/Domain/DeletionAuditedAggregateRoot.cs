@@ -23,14 +23,14 @@ namespace MSFramework.Domain
 		/// </summary>
 		[StringLength(255)]
 		[Description("删除者标识")]
-		public string DeleterId { get; private set; }
+		public string DeletionUserId { get; private set; }
 
 		/// <summary>
 		/// Which user deleted this entity?
 		/// </summary>
 		[StringLength(255)]
 		[Description("删除者名称")]
-		public string DeleterName { get; private set; }
+		public string DeletionUserName { get; private set; }
 
 		/// <summary>
 		/// Deletion time of this entity.
@@ -50,15 +50,15 @@ namespace MSFramework.Domain
 					DeletionTime = deletionTime == default ? DateTimeOffset.Now : deletionTime;
 				}
 
-				if (!string.IsNullOrWhiteSpace(userId) && string.IsNullOrWhiteSpace(DeleterId))
+				if (!string.IsNullOrWhiteSpace(userId) && string.IsNullOrWhiteSpace(DeletionUserId))
 				{
-					DeleterId = userId;
+					DeletionUserId = userId;
 				}
 
 				if (!string.IsNullOrWhiteSpace(userName) &&
-				    string.IsNullOrWhiteSpace(DeleterName))
+				    string.IsNullOrWhiteSpace(DeletionUserName))
 				{
-					DeleterName = userName;
+					DeletionUserName = userName;
 				}
 			}
 		}
