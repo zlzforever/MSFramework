@@ -19,6 +19,8 @@ namespace Template.API
 
 			Log.Logger = new LoggerConfiguration()
 				.MinimumLevel.Information()
+				.MinimumLevel.Override("Microsoft.Hosting.Lifetime", LogEventLevel.Information)
+				.MinimumLevel.Override("Microsoft.EntityFrameworkCore.Database.Command", LogEventLevel.Information)
 				.MinimumLevel.Override("Microsoft", LogEventLevel.Warning)
 				.MinimumLevel.Override("System", LogEventLevel.Warning)
 				.MinimumLevel.Override("Microsoft.AspNetCore.Authentication", LogEventLevel.Warning)

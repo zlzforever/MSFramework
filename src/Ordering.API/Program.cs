@@ -9,18 +9,16 @@ namespace Ordering.API
 	{
 		public static void Main(string[] args)
 		{
-			var configure = new LoggerConfiguration()
-#if DEBUG
-				.MinimumLevel.Verbose()
-#else
-            	.MinimumLevel.Information()
-#endif
+			Log.Logger = new LoggerConfiguration()
+				.MinimumLevel.Information()
+				.MinimumLevel.Override("Microsoft.Hosting.Lifetime", LogEventLevel.Information)
+				.MinimumLevel.Override("Microsoft.EntityFrameworkCore.Database.Command", LogEventLevel.Information)
 				.MinimumLevel.Override("Microsoft", LogEventLevel.Warning)
+				.MinimumLevel.Override("System", LogEventLevel.Warning)
+				.MinimumLevel.Override("Microsoft.AspNetCore.Authentication", LogEventLevel.Warning)
 				.Enrich.FromLogContext()
-				.WriteTo.Console().WriteTo
-				.RollingFile("ordering.log");
-			Log.Logger = configure.CreateLogger();
-
+				.WriteTo.Console().WriteTo.RollingFile("order.log")
+				.CreateLogger();
 			CreateWebHostBuilder(args).Build().Run();
 		}
 
