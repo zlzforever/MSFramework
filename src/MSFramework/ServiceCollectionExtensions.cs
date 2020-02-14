@@ -156,7 +156,7 @@ namespace MSFramework
 		private static void Initialize(IServiceProvider applicationServices)
 		{
 			var initializers = applicationServices.GetServices<Initializer>().ToList();
-			initializers.Sort((x, y) => x.Order < y.Order ? 0 : 1);
+			initializers.Sort((x, y) => x.Order - y.Order);
 			foreach (var initializer in initializers)
 			{
 				initializer.Initialize(applicationServices);

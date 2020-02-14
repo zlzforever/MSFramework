@@ -11,6 +11,11 @@ namespace MSFramework.AspNetCore.Permission
 		public string Name { get; set; }
 
 		/// <summary>
+		/// 所属模块
+		/// </summary>
+		public string Module { get; set; }
+
+		/// <summary>
 		/// 权限描述
 		/// </summary>
 		public string Description { get; set; }

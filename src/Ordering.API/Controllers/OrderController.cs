@@ -16,7 +16,6 @@ namespace Ordering.API.Controllers
 {
 	[Route("api/v1.0/[controller]")]
 	[ApiController]
-	[Permission(Name = "order")]
 	public class OrderController : MSFrameworkApiControllerBase
 	{
 		private readonly IOrderingQuery _orderingQuery;
@@ -30,7 +29,7 @@ namespace Ordering.API.Controllers
 			_orderRepository = orderRepository;
 		}
 
-
+		[Permission(Name = "test", Module = "test")]
 		[HttpPost("testCreate")]
 		public async Task<IActionResult> TestCreate()
 		{

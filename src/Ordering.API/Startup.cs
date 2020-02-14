@@ -6,12 +6,12 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.OpenApi.Models;
 using MSFramework;
 using MSFramework.AspNetCore;
+using MSFramework.AspNetCore.Permission;
 using MSFramework.Common;
 using MSFramework.Ef;
 using MSFramework.Ef.Function;
 using MSFramework.Ef.MySql;
 using MSFramework.EventBus;
-using MSFramework.Permission;
 using Ordering.Application.Event;
 
 namespace Ordering.API
@@ -52,7 +52,7 @@ namespace Ordering.API
 				c.SwaggerDoc("v1.0", new OpenApiInfo {Version = "v1.0", Description = "Ordering API V1.0"});
 			});
 			services.AddHealthChecks();
- 
+
 			services.AddMSFramework(builder =>
 			{
 				builder.AddEventHandler(typeof(UserCheckoutAcceptedEvent));

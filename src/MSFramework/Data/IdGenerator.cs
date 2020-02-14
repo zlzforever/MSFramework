@@ -14,6 +14,7 @@ namespace MSFramework.Data
 	public class IdGenerator : IIdGenerator
 	{
 		private readonly Type _guidType = typeof(Guid);
+		private readonly Type _stringType = typeof(string);
 
 		public T GetNewId<T>()
 		{
@@ -21,6 +22,10 @@ namespace MSFramework.Data
 			if (type == _guidType)
 			{
 				return (T) GetNewGuid();
+			}
+			else if (type == _stringType)
+			{
+				return GetNewGuid().ToString();
 			}
 			else
 			{

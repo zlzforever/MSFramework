@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.RegularExpressions;
 using Microsoft.AspNetCore.Mvc.Abstractions;
 using Microsoft.AspNetCore.Mvc.Controllers;
 using Microsoft.AspNetCore.Routing;
@@ -42,7 +43,10 @@ namespace MSFramework.AspNetCore.Extensions
 			}
 			else
 			{
-				return $"{methods.ExpandAndToString()} {controllerAction.AttributeRouteInfo.Template.ToLower()}";
+				var regex = new Regex("{\\w+}");
+				var template = controllerAction.AttributeRouteInfo.Template.ToLower();
+				template = regex.Replace(template, "{arg}");
+				return $"{methods.ExpandAndToString()} {template}";
 			}
 		}
 

@@ -21,14 +21,15 @@ namespace MSFramework.AspNetCore
 		{
 			if (returnType == null)
 				throw new ArgumentNullException(nameof(returnType));
-			if (value is IConvertToActionResult convertToActionResult)
-				return convertToActionResult.Convert();
-			if (value is IApiResult)
+			switch (value)
 			{
-				return new JsonResult(value);
+				case IConvertToActionResult convertToActionResult:
+					return convertToActionResult.Convert();
+				case IApiResult _:
+					return new JsonResult(value);
+				default:
+					return new JsonResult(new ApiResult(value));
 			}
-
-			return new JsonResult(new ApiResult(value));
 		}
 	}
 }

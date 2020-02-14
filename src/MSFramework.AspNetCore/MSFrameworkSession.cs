@@ -24,17 +24,15 @@ namespace MSFramework.AspNetCore
 					return null;
 				}
 
-				var userId = HttpContext.User.FindFirst("sub")?.Value;
+				var userId = HttpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 				if (string.IsNullOrWhiteSpace(userId))
 				{
 					userId = HttpContext.User.FindFirst("sid")?.Value;
 				}
-
 				if (string.IsNullOrWhiteSpace(userId))
 				{
-					userId = HttpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+					userId = HttpContext.User.FindFirst("sub")?.Value;
 				}
-
 				return userId;
 			}
 		}
@@ -43,7 +41,17 @@ namespace MSFramework.AspNetCore
 		{
 			get
 			{
-				var userName = HttpContext?.User?.FindFirst("name")?.Value;
+				if (HttpContext?.User == null)
+				{
+					return null;
+				}
+
+				var userName = HttpContext.User.FindFirst(ClaimTypes.Name)?.Value;
+				if (string.IsNullOrWhiteSpace(userName))
+				{
+					userName = HttpContext.User.FindFirst("name")?.Value;
+				}
+
 				return userName;
 			}
 		}

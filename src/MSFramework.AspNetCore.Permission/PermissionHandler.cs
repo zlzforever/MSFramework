@@ -3,7 +3,9 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc.Controllers;
 using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.Extensions.DependencyInjection;
-using MSFramework.Permission.Application;
+using MSFramework.Application;
+using MSFramework.AspNetCore.Extensions;
+using MSFramework.Domain;
 
 namespace MSFramework.AspNetCore.Permission
 {
@@ -13,11 +15,20 @@ namespace MSFramework.AspNetCore.Permission
 		{
 			if (context.ActionDescriptor is ControllerActionDescriptor descriptor)
 			{
-				// 如果控制器上标了 Pay 则表达所有 action 都需要做支付校验
 				if (descriptor.ControllerTypeInfo.GetCustomAttribute<PermissionAttribute>() != null ||
 				    descriptor.MethodInfo.GetCustomAttribute<PermissionAttribute>() != null)
 				{
-					context.HttpContext.RequestServices.GetRequiredService<IPermissionChecker>();
+					var options = context.HttpContext.RequestServices.GetRequiredService<PermissionOptions>();
+					var cerberusClient =
+						context.HttpContext.RequestServices.GetRequiredService<CerberusClient>();
+					var identification = descriptor.GetFunctionPath();
+					var userId = context.HttpContext.RequestServices.GetRequiredService<IMSFrameworkSession>().UserId;
+					var hasPermission =
+						await cerberusClient.HasPermissionAsync(userId, options.Service, identification);
+					if (!hasPermission)
+					{
+						throw new ApplicationException("Access dined");
+					}
 				}
 			}
 

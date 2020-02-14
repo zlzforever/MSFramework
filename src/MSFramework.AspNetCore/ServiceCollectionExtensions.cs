@@ -26,6 +26,7 @@ namespace MSFramework.AspNetCore
 			builder.Services.AddSingleton<IActionResultTypeMapper, ActionResultTypeMapper>();
 			builder.Services.AddScoped<IMSFrameworkSession, MSFrameworkSession>();
 			builder.Services.AddScoped<IBearProvider, AuthenticationBearProvider>();
+			builder.Services.AddHttpClient();
 			return builder;
 		}
 

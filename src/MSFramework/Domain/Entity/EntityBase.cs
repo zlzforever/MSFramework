@@ -20,7 +20,7 @@ namespace MSFramework.Domain.Entity
 		/// 
 		/// </summary>
 		[Description("唯一标识")]
-		public TKey Id { get; private set; }
+		public TKey Id { get; protected set; }
 
 		public bool IsTransient()
 		{
