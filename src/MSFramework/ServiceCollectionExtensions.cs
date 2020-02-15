@@ -91,6 +91,7 @@ namespace MSFramework
 			builder.Services.AddScoped<ScopedDictionary>();
 			builder.Services.AddScoped<IBearProvider, DefaultBearProvider>();
 			builder.Services.AddScoped<ApiClient>();
+			builder.Services.AddMemoryCache();
 			builder.Services.AddHttpClient();
 		}
 

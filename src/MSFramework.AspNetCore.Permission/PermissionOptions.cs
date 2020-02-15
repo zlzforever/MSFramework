@@ -18,5 +18,9 @@ namespace MSFramework.AspNetCore.Permission
 		public string SecurityHeader => _configuration["CerberusSecurityHeader"];
 
 		public string Cerberus => _configuration["Cerberus"];
+
+		public int CahceTTL => string.IsNullOrWhiteSpace(_configuration["CahceTTL"])
+			? 1
+			: int.Parse(_configuration["CahceTTL"]);
 	}
 }

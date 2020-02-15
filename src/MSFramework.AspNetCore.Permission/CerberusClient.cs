@@ -1,11 +1,13 @@
+using System;
 using System.Collections.Generic;
 using System.Net;
 using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
-using MSFramework.Application;
+using Microsoft.Extensions.Caching.Memory;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using ApplicationException = MSFramework.Application.ApplicationException;
 
 namespace MSFramework.AspNetCore.Permission
 {
@@ -22,11 +24,13 @@ namespace MSFramework.AspNetCore.Permission
 	{
 		private readonly PermissionOptions _options;
 		private readonly IHttpClientFactory _httpClientFactory;
+		private readonly IMemoryCache _cache;
 
-		public CerberusClient(PermissionOptions options, IHttpClientFactory httpClientFactory)
+		public CerberusClient(IMemoryCache cache, PermissionOptions options, IHttpClientFactory httpClientFactory)
 		{
 			_options = options;
 			_httpClientFactory = httpClientFactory;
+			_cache = cache;
 		}
 
 		public async Task CreateService(string service)
@@ -50,6 +54,12 @@ namespace MSFramework.AspNetCore.Permission
 
 		public async Task<bool> HasPermissionAsync(string userId, string service, string identification)
 		{
+			var key = $"{userId}_{service}_{identification}";
+			if (_cache.TryGetValue(key, out object cacheValue))
+			{
+				return (bool) cacheValue;
+			}
+
 			var url =
 				$"{_options.Cerberus}/api/v1.0/users/{userId}/services/{service}/permissions/{WebUtility.UrlEncode(identification)}";
 			var client = _httpClientFactory.CreateClient("Cerberus");
@@ -63,7 +73,9 @@ namespace MSFramework.AspNetCore.Permission
 				throw new ApplicationException(result.Msg);
 			}
 
-			return result.Data.ToString() == "true";
+			var hasPermission = result.Data.ToString() == "true";
+			_cache.Set(key, hasPermission, new TimeSpan(0, 0, _options.CahceTTL, 0));
+			return hasPermission;
 		}
 
 		public async Task AddPermissionAsync(Permission permission)
