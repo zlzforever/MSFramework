@@ -29,7 +29,7 @@ namespace Ordering.API.Controllers
 			_orderRepository = orderRepository;
 		}
 
-		[Permission(Name = "test", Module = "test")]
+		[Permission(Name = "test", Module = "test222")]
 		[HttpPost("testCreate")]
 		public async Task<IActionResult> TestCreate()
 		{

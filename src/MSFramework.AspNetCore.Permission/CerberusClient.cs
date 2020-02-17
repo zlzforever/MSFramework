@@ -73,7 +73,7 @@ namespace MSFramework.AspNetCore.Permission
 				throw new ApplicationException(result.Msg);
 			}
 
-			var hasPermission = result.Data.ToString() == "true";
+			var hasPermission = result.Data?.ToString().ToLower() == "true";
 			_cache.Set(key, hasPermission, new TimeSpan(0, 0, _options.CahceTTL, 0));
 			return hasPermission;
 		}

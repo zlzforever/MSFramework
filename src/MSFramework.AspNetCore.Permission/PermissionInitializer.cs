@@ -24,7 +24,7 @@ namespace MSFramework.AspNetCore.Permission
 
 			if (string.IsNullOrWhiteSpace(options.SecurityHeader))
 			{
-				throw new ApplicationException("SecurityHeader is missing");
+				throw new ApplicationException("CerberusSecurityHeader is missing");
 			}
 
 			var cerberusClient = scope.ServiceProvider.GetRequiredService<CerberusClient>();
