@@ -4,7 +4,6 @@ namespace MSFramework.AspNetCore.Permission
 	{
 		public string Id { get; set; }
 		public bool Expired { get; set; }
-		public string Service { get; set; }
 		public string Module { get; set; }
 		public string Name { get; set; }
 		public string Identification { get; set; }

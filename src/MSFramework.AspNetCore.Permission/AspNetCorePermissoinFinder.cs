@@ -22,7 +22,7 @@ namespace MSFramework.AspNetCore.Permission
 			var actionDescriptorCollectionProvider =
 				_services.GetRequiredService<IActionDescriptorCollectionProvider>();
 			var permissions = new List<Permission>();
-			var options = _services.GetRequiredService<PermissionOptions>();
+
 			foreach (var actionDescriptor in actionDescriptorCollectionProvider.ActionDescriptors.Items)
 			{
 				if (actionDescriptor is ControllerActionDescriptor descriptor)
@@ -31,7 +31,6 @@ namespace MSFramework.AspNetCore.Permission
 					    descriptor.MethodInfo.GetCustomAttribute<PermissionAttribute>() != null)
 					{
 						var permission = actionDescriptor.GetPermission();
-						permission.Service = options.Service;
 						permissions.Add(permission);
 					}
 				}

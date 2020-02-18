@@ -33,23 +33,14 @@ namespace MSFramework.AspNetCore.Permission
 			_cache = cache;
 		}
 
-		public async Task CreateService(string service)
+		public async Task<bool> ExistsAsync(string service)
 		{
-			var url = $"{_options.Cerberus}/api/v1.0/services";
+			var url = $"{_options.Cerberus}/api/v1.0/services/{WebUtility.UrlEncode(service)}";
 			var client = _httpClientFactory.CreateClient("Cerberus");
-			var request = new HttpRequestMessage(HttpMethod.Post, url);
+			var request = new HttpRequestMessage(HttpMethod.Head, url);
 			request.Headers.TryAddWithoutValidation("SecurityHeader", _options.SecurityHeader);
-			request.Content = new StringContent(JsonConvert.SerializeObject(new
-			{
-				Name = service
-			}), Encoding.UTF8, "application/json");
 			var response = await client.SendAsync(request);
-			var str = await response.Content.ReadAsStringAsync();
-			var result = JsonConvert.DeserializeObject<CerberusResult>(str);
-			if (!result.Success && result.Msg != "Service exists")
-			{
-				throw new ApplicationException(result.Msg);
-			}
+			return response.StatusCode == HttpStatusCode.OK;
 		}
 
 		public async Task<bool> HasPermissionAsync(string userId, string service, string identification)
@@ -61,7 +52,7 @@ namespace MSFramework.AspNetCore.Permission
 			}
 
 			var url =
-				$"{_options.Cerberus}/api/v1.0/users/{userId}/services/{service}/permissions/{WebUtility.UrlEncode(identification)}";
+				$"{_options.Cerberus}/api/v1.0/users/{userId}/services/{WebUtility.UrlEncode(service)}/permissions/{WebUtility.UrlEncode(identification)}";
 			var client = _httpClientFactory.CreateClient("Cerberus");
 			var request = new HttpRequestMessage(HttpMethod.Get, url);
 			request.Headers.TryAddWithoutValidation("SecurityHeader", _options.SecurityHeader);
@@ -78,9 +69,9 @@ namespace MSFramework.AspNetCore.Permission
 			return hasPermission;
 		}
 
-		public async Task AddPermissionAsync(Permission permission)
+		public async Task AddPermissionAsync(string service, Permission permission)
 		{
-			var url = $"{_options.Cerberus}/api/v1.0/permissions";
+			var url = $"{_options.Cerberus}/api/v1.0/services/{WebUtility.UrlEncode(service)}/permissions";
 			var client = _httpClientFactory.CreateClient("Cerberus");
 			var request = new HttpRequestMessage(HttpMethod.Post, url);
 			request.Headers.TryAddWithoutValidation("SecurityHeader", _options.SecurityHeader);
@@ -98,7 +89,7 @@ namespace MSFramework.AspNetCore.Permission
 		public async Task<List<Permission>> GetPermissionsAsync(string service)
 		{
 			var client = _httpClientFactory.CreateClient("Cerberus");
-			var url = $"{_options.Cerberus}/api/v1.0/services/{service}/permissions";
+			var url = $"{_options.Cerberus}/api/v1.0/services/{WebUtility.UrlEncode(service)}/permissions";
 			var request = new HttpRequestMessage(HttpMethod.Get, url);
 			request.Headers.TryAddWithoutValidation("SecurityHeader", _options.SecurityHeader);
 			var response = await client.SendAsync(request);
@@ -112,9 +103,10 @@ namespace MSFramework.AspNetCore.Permission
 			return ((JArray) result.Data).ToObject<List<Permission>>();
 		}
 
-		public async Task RenewalAsync(string ids)
+		public async Task RenewalAsync(string service, string ids)
 		{
-			var url = $"{_options.Cerberus}/api/v1.0/permissions/{ids}/renewal";
+			var url =
+				$"{_options.Cerberus}/api/v1.0/services/{WebUtility.UrlEncode(service)}/permissions/{ids}/renewal";
 			var client = _httpClientFactory.CreateClient("Cerberus");
 			var request = new HttpRequestMessage(HttpMethod.Put, url);
 			request.Headers.TryAddWithoutValidation("SecurityHeader", _options.SecurityHeader);
@@ -127,9 +119,9 @@ namespace MSFramework.AspNetCore.Permission
 			}
 		}
 
-		public async Task ExpireAsync(string ids)
+		public async Task ExpireAsync(string service, string ids)
 		{
-			var url = $"{_options.Cerberus}/api/v1.0/permissions/{ids}/expire";
+			var url = $"{_options.Cerberus}/api/v1.0/services/{WebUtility.UrlEncode(service)}/permissions/{ids}/expire";
 			var client = _httpClientFactory.CreateClient("Cerberus");
 			var request = new HttpRequestMessage(HttpMethod.Put, url);
 			request.Headers.TryAddWithoutValidation("SecurityHeader", _options.SecurityHeader);
