@@ -13,6 +13,8 @@ namespace MSFramework.AspNetCore.Permission
 	[AttributeUsage(AttributeTargets.Class | AttributeTargets.Method)]
 	public class PermissionAttribute : ActionFilterAttribute
 	{
+		private static readonly Type AttributeType = typeof(PermissionAttribute);
+
 		/// <summary>
 		/// 权限名称
 		/// </summary>
@@ -32,16 +34,16 @@ namespace MSFramework.AspNetCore.Permission
 		{
 			if (context.ActionDescriptor is ControllerActionDescriptor descriptor)
 			{
-				if (descriptor.ControllerTypeInfo.GetCustomAttribute<PermissionAttribute>() != null ||
-				    descriptor.MethodInfo.GetCustomAttribute<PermissionAttribute>() != null)
+				if (descriptor.ControllerTypeInfo.GetCustomAttribute(AttributeType) != null ||
+				    descriptor.MethodInfo.GetCustomAttribute(AttributeType) != null)
 				{
 					var options = context.HttpContext.RequestServices.GetRequiredService<PermissionOptions>();
 					var cerberusClient =
-						context.HttpContext.RequestServices.GetRequiredService<CerberusClient>();
+						context.HttpContext.RequestServices.GetRequiredService<ICerberusClient>();
 					var identification = descriptor.GetFunctionPath();
 					var userId = context.HttpContext.RequestServices.GetRequiredService<IMSFrameworkSession>().UserId;
 					var hasPermission =
-						await cerberusClient.HasPermissionAsync(userId, options.Service, identification);
+						await cerberusClient.HasPermissionAsync(userId, options.CerberusServiceId, identification);
 					if (!hasPermission)
 					{
 						await context.HttpContext.ForbidAsync();

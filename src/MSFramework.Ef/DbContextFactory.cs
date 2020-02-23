@@ -97,7 +97,7 @@ namespace MSFramework.Ef
 			{
 				throw new MSFrameworkException($"实例化数据上下文“{dbContextType.AssemblyQualifiedName}”失败");
 			}
-
+			
 			context.ServiceProvider = _serviceProvider;
 
 			if (!_designTimeDbContext && resolveOptions.UseTransaction && context.Database.CurrentTransaction == null)

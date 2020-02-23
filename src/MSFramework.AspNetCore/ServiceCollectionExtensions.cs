@@ -6,7 +6,6 @@ using Microsoft.Extensions.DependencyInjection;
 using MSFramework.AspNetCore.Function;
 using MSFramework.Domain;
 using MSFramework.Function;
-using MSFramework.Http;
 
 namespace MSFramework.AspNetCore
 {
@@ -25,7 +24,6 @@ namespace MSFramework.AspNetCore
 			builder.Services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
 			builder.Services.AddSingleton<IActionResultTypeMapper, ActionResultTypeMapper>();
 			builder.Services.AddScoped<IMSFrameworkSession, MSFrameworkSession>();
-			builder.Services.AddScoped<IBearProvider, AuthenticationBearProvider>();
 			return builder;
 		}
 

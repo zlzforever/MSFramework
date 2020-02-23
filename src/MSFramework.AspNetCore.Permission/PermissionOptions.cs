@@ -11,16 +11,14 @@ namespace MSFramework.AspNetCore.Permission
 			_configuration = configuration;
 		}
 
-		public string Service => string.IsNullOrWhiteSpace(_configuration["Audience"])
-			? _configuration["Service"]
-			: _configuration["Audience"];
+		public string CerberusServiceId => _configuration["CerberusServiceId"];
 
-		public string SecurityHeader => _configuration["CerberusSecurityHeader"];
+		public string CerberusSecurityHeader => _configuration["CerberusSecurityHeader"];
 
 		public string Cerberus => _configuration["Cerberus"];
 
-		public int CahceTTL => string.IsNullOrWhiteSpace(_configuration["CahceTTL"])
+		public int CacheTTL => string.IsNullOrWhiteSpace(_configuration["CacheTTL"])
 			? 1
-			: int.Parse(_configuration["CahceTTL"]);
+			: int.Parse(_configuration["CacheTTL"]);
 	}
 }

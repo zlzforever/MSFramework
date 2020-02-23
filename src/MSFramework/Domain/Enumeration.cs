@@ -8,9 +8,9 @@ namespace MSFramework.Domain
 	public abstract class Enumeration<TId> : IComparable
 		where TId : IComparable
 	{
-		public string Name { get; }
+		public string Name { get; private set; }
 
-		public TId Id { get; }
+		public TId Id { get; private set; }
 
 		protected Enumeration(TId id, string name)
 		{

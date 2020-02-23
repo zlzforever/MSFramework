@@ -1,7 +1,5 @@
 using System;
 using System.Collections.Generic;
-using MSFramework.Common;
-using MSFramework.Data;
 using MSFramework.Domain.Entity;
 using MSFramework.EventBus;
 

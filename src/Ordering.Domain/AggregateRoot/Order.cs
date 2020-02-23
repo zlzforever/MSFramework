@@ -14,7 +14,7 @@ namespace Ordering.Domain.AggregateRoot
 		// Using a private collection field, better for DDD Aggregate's encapsulation
 		// so OrderItems cannot be added from "outside the AggregateRoot" directly to the collection,
 		// but only through the method OrderAggrergateRoot.AddOrderItem() which includes behaviour.
-		public List<OrderItem> OrderItems { get; private set; }
+		public virtual List<OrderItem> OrderItems { get; private set; }
 
 		// DDD Patterns comment
 		// Using private fields, allowed since EF Core 1.1, is a much better encapsulation
@@ -22,9 +22,11 @@ namespace Ordering.Domain.AggregateRoot
 		public DateTimeOffset CreationTime { get; private set; }
 
 		// Address is a Value Object pattern example persisted as EF Core 2.0 owned entity
-		[DisplayName("地址")] public Address Address { get; private set; }
+		[DisplayName("地址")]
+		public virtual Address Address { get; private set; }
 
-		[DisplayName("状态")] public OrderStatus OrderStatus { get; private set; }
+		[DisplayName("状态")] 
+		public OrderStatus OrderStatus { get; private set; }
 
 		public string UserId { get; private set; }
 

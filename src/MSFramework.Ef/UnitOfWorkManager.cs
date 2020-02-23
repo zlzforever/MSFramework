@@ -1,5 +1,4 @@
 using System.Threading.Tasks;
-using Microsoft.Extensions.Logging;
 using MSFramework.Domain;
 
 namespace MSFramework.Ef
@@ -7,12 +6,10 @@ namespace MSFramework.Ef
 	public class UnitOfWorkManager : IUnitOfWorkManager
 	{
 		private readonly DbContextFactory _dbContextFactory;
-		private readonly ILogger _logger;
 
-		public UnitOfWorkManager(DbContextFactory dbContextFactory, ILogger<UnitOfWorkManager> logger)
+		public UnitOfWorkManager(DbContextFactory dbContextFactory)
 		{
 			_dbContextFactory = dbContextFactory;
-			_logger = logger;
 		}
 
 		public void Commit()
@@ -21,8 +18,6 @@ namespace MSFramework.Ef
 			{
 				dbContext.Commit();
 			}
-
-			_logger.LogInformation("DbContexts committed");
 		}
 
 		public async Task CommitAsync()
@@ -31,8 +26,6 @@ namespace MSFramework.Ef
 			{
 				await dbContext.CommitAsync();
 			}
-
-			_logger.LogInformation("DbContexts committed");
 		}
 	}
 }

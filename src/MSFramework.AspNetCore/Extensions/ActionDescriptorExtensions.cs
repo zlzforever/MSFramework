@@ -39,14 +39,14 @@ namespace MSFramework.AspNetCore.Extensions
 				var controller = actionDescriptor.GetControllerName();
 				var action = actionDescriptor.GetActionName();
 				var path = (area == null ? $"{controller}/{action}" : $"{area}/{controller}/{action}").ToLower();
-				return $"{methods.ExpandAndToString()} {path}";
+				return $"{methods.ExpandAndToString()} {path}".ToLower();
 			}
 			else
 			{
 				var regex = new Regex("{\\w+}");
 				var template = controllerAction.AttributeRouteInfo.Template.ToLower();
 				template = regex.Replace(template, "{arg}");
-				return $"{methods.ExpandAndToString()} {template}";
+				return $"{methods.ExpandAndToString()} {template}".ToLower();;
 			}
 		}
 

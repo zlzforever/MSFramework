@@ -41,8 +41,8 @@ namespace Ordering.API.Controllers
 		{
 			var host = $"{HttpContext.Request.Scheme}://{HttpContext.Request.Host}";
 			var apiResponse =
-				await _apiClient.GetAsync<ApiResult<CreateViewObject>, CreateViewObject>(
-					$"{host}/getViewObject");
+				await _apiClient.GetAsync<CreateViewObject>(
+					"default", $"{host}/getViewObject");
 			return new
 			{
 				apiResponse.Data.Name

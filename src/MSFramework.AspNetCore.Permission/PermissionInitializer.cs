@@ -2,11 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
-using MSFramework.AspNetCore.Function;
 using MSFramework.Common;
-using MSFramework.Domain;
-using MSFramework.Function;
 
 namespace MSFramework.AspNetCore.Permission
 {
@@ -17,20 +13,15 @@ namespace MSFramework.AspNetCore.Permission
 			using var scope = serviceProvider.CreateScope();
 
 			var options = scope.ServiceProvider.GetRequiredService<PermissionOptions>();
-			if (string.IsNullOrWhiteSpace(options.Service))
-			{
-				throw new ApplicationException("Audience or Service is missing");
-			}
-
-			if (string.IsNullOrWhiteSpace(options.SecurityHeader))
+			if (string.IsNullOrWhiteSpace(options.CerberusSecurityHeader))
 			{
 				throw new ApplicationException("CerberusSecurityHeader is missing");
 			}
 
-			var cerberusClient = scope.ServiceProvider.GetRequiredService<CerberusClient>();
-			if (!cerberusClient.ExistsAsync(options.Service).Result)
+			var cerberusClient = scope.ServiceProvider.GetRequiredService<ICerberusClient>();
+			if (!cerberusClient.ExistsAsync(options.CerberusServiceId).Result)
 			{
-				throw new ApplicationException("Service not exists in cerberus, please create it firstly");
+				throw new ApplicationException("Service not exists in cerberus or your config is not correct, please create it firstly");
 			}
 
 			var permissionFinder = scope.ServiceProvider.GetRequiredService<AspNetCorePermissionFinder>();
@@ -50,7 +41,7 @@ namespace MSFramework.AspNetCore.Permission
 				}
 			}
 
-			var permissionsExistsDict = cerberusClient.GetPermissionsAsync(options.Service).Result
+			var permissionsExistsDict = cerberusClient.GetPermissionsAsync(options.CerberusServiceId).Result
 				.ToDictionary(x => x.Identification, x => x);
 
 			var renewalIds = new List<string>();
@@ -60,7 +51,7 @@ namespace MSFramework.AspNetCore.Permission
 				var permission = kv.Value;
 				if (!permissionsExistsDict.ContainsKey(permission.Identification))
 				{
-					cerberusClient.AddPermissionAsync(options.Service, permission).GetAwaiter()
+					cerberusClient.AddPermissionAsync(options.CerberusServiceId, permission).GetAwaiter()
 						.GetResult();
 				}
 				else
@@ -74,7 +65,7 @@ namespace MSFramework.AspNetCore.Permission
 
 			if (renewalIds.Count > 0)
 			{
-				cerberusClient.RenewalAsync(options.Service, string.Join(",", renewalIds)).GetAwaiter().GetResult();
+				cerberusClient.RenewalAsync(options.CerberusServiceId, string.Join(",", renewalIds)).GetAwaiter().GetResult();
 			}
 
 			var expiredIds = new List<string>();
@@ -90,7 +81,7 @@ namespace MSFramework.AspNetCore.Permission
 
 			if (expiredIds.Count > 0)
 			{
-				cerberusClient.ExpireAsync(options.Service, string.Join(",", expiredIds)).GetAwaiter().GetResult();
+				cerberusClient.ExpireAsync(options.CerberusServiceId, string.Join(",", expiredIds)).GetAwaiter().GetResult();
 			}
 		}
 	}

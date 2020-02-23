@@ -1,7 +1,6 @@
 using System;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
-using MSFramework.Data;
 using MSFramework.Http;
 
 namespace MSFramework.AspNetCore

@@ -4,7 +4,6 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using MSFramework.AspNetCore;
-using MSFramework.AspNetCore.Permission;
 using MSFramework.Domain;
 using Ordering.Application.Command;
 using Ordering.Application.Query;
@@ -29,7 +28,7 @@ namespace Ordering.API.Controllers
 			_orderRepository = orderRepository;
 		}
 
-		[Permission(Name = "test", Module = "test222")]
+		//[Permission(Name = "test", Module = "test222")]
 		[HttpPost("testCreate")]
 		public async Task<IActionResult> TestCreate()
 		{

@@ -2,7 +2,6 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using MSFramework.Domain;
-using MSFramework.Domain.Entity;
 
 namespace MSFramework.Ef
 {
