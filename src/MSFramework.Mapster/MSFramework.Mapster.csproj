@@ -1,0 +1,15 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <PackageId>MSFramework.Mapster</PackageId>
+    </PropertyGroup>
+    <Import Project="../../package.props" />
+
+    <ItemGroup>
+        <ProjectReference Include="..\MSFramework\MSFramework.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <PackageReference Include="Mapster" Version="5.0.0" />
+    </ItemGroup>
+</Project>

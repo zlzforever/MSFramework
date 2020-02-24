@@ -21,7 +21,7 @@ namespace MSFramework.AspNetCore.Permission
 			var cerberusClient = scope.ServiceProvider.GetRequiredService<ICerberusClient>();
 			if (!cerberusClient.ExistsAsync(options.CerberusServiceId).Result)
 			{
-				throw new ApplicationException("Service not exists in cerberus or your config is not correct, please create it firstly");
+				throw new ApplicationException($"Service {options.CerberusServiceId} not exists in cerberus or your config is not correct, please create it firstly");
 			}
 
 			var permissionFinder = scope.ServiceProvider.GetRequiredService<AspNetCorePermissionFinder>();

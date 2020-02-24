@@ -58,6 +58,7 @@ namespace MSFramework.Ef
 		public virtual void Configure(EntityTypeBuilder<TEntity> builder)
 		{
 			builder.HasKey("Id");
+			builder.Property("Id").ValueGeneratedNever();
 		}
 	}
 }

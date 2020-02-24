@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using MSFramework.Audit;
 using MSFramework.Collections.Generic;
@@ -65,14 +66,15 @@ namespace MSFramework.Ef
 				optionsBuilder.UseLazyLoadingProxies();
 			}
 
-			if ("Development" == Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT"))
-			{
-				optionsBuilder.EnableSensitiveDataLogging();
-			}
-
 			if (ServiceProvider != null)
 			{
 				var loggerFactory = ServiceProvider.GetRequiredService<ILoggerFactory>();
+				var hostEnvironment = ServiceProvider.GetService(typeof(IHostEnvironment));
+				if (hostEnvironment != null && ((IHostEnvironment) hostEnvironment).IsDevelopment())
+				{
+					optionsBuilder.EnableSensitiveDataLogging();
+				}
+
 				_logger = loggerFactory.CreateLogger(GetType());
 				_session = ServiceProvider.GetService<IMSFrameworkSession>();
 				_eventBus = ServiceProvider.GetService<IEventBus>();
@@ -305,7 +307,6 @@ namespace MSFramework.Ef
 						((DisplayNameAttribute) propertyEntry.Metadata.PropertyInfo.GetCustomAttribute(
 							typeof(DisplayNameAttribute)))?.DisplayName;
 				}
-
 
 				var auditProperty = new AuditProperty
 				{

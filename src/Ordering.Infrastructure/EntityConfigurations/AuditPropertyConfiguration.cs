@@ -16,6 +16,8 @@ namespace Ordering.Infrastructure.EntityConfigurations
 		/// <param name="builder">实体类型创建器</param>
 		public override void Configure(EntityTypeBuilder<AuditProperty> builder)
 		{
+			base.Configure(builder);
+			
 			builder.HasIndex(m => m.AuditEntityId);
 			builder.HasOne(m => m.AuditEntity)
 				.WithMany(n => n.Properties)

@@ -9,26 +9,28 @@ namespace Ordering.Infrastructure.EntityConfigurations
 	{
 		public override Type DbContextType => typeof(OrderingContext);
 		
-		public override void Configure(EntityTypeBuilder<OrderItem> orderItemConfiguration)
+		public override void Configure(EntityTypeBuilder<OrderItem> builder)
 		{
-			orderItemConfiguration.HasKey(o => o.Id);
+			base.Configure(builder);
+			
+			builder.HasKey(o => o.Id);
 
-			orderItemConfiguration.Property<decimal>("Discount")
+			builder.Property<decimal>("Discount")
 				.IsRequired();
 
-			orderItemConfiguration.Property<Guid>("ProductId")
+			builder.Property<Guid>("ProductId")
 				.IsRequired();
 
-			orderItemConfiguration.Property<string>("ProductName")
+			builder.Property<string>("ProductName")
 				.IsRequired();
 
-			orderItemConfiguration.Property<decimal>("UnitPrice")
+			builder.Property<decimal>("UnitPrice")
 				.IsRequired();
 
-			orderItemConfiguration.Property<int>("Units")
+			builder.Property<int>("Units")
 				.IsRequired();
 
-			orderItemConfiguration.Property<string>("PictureUrl")
+			builder.Property<string>("PictureUrl")
 				.IsRequired(false);
 		}
 	}

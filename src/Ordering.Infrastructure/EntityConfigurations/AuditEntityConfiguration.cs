@@ -8,9 +8,11 @@ namespace Ordering.Infrastructure.EntityConfigurations
 	public class AuditEntityConfiguration : EntityTypeConfigurationBase<AuditEntity>
 	{
 		public override Type DbContextType => typeof(OrderingContext);
-		
+
 		public override void Configure(EntityTypeBuilder<AuditEntity> builder)
 		{
+			base.Configure(builder);
+
 			builder.HasIndex(m => m.OperationId);
 			builder.HasOne(m => m.Operation)
 				.WithMany(n => n.Entities)

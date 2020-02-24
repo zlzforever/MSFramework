@@ -6,7 +6,6 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.OpenApi.Models;
 using MSFramework;
 using MSFramework.AspNetCore;
-using MSFramework.AspNetCore.Permission;
 using MSFramework.Common;
 using MSFramework.Ef;
 using MSFramework.Ef.Function;
@@ -61,7 +60,7 @@ namespace Ordering.API
 				builder.AddAspNetCore();
 				builder.AddAspNetCoreFunction<EfFunctionStore>();
 				builder.AddEfAuditStore();
-				builder.AddPermission();
+				// builder.AddPermission();
 				builder.AddEntityFramework(x =>
 				{
 					// 添加 MySql 支持

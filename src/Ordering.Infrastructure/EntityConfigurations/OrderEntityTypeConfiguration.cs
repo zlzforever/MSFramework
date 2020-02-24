@@ -9,22 +9,24 @@ namespace Ordering.Infrastructure.EntityConfigurations
 	public class OrderEntityTypeConfiguration : EntityTypeConfigurationBase<Order>
 	{
 		public override Type DbContextType => typeof(OrderingContext);
-		
-		public override void Configure(EntityTypeBuilder<Order> orderConfiguration)
-		{ 
-			orderConfiguration.HasKey(o => o.Id);
+
+		public override void Configure(EntityTypeBuilder<Order> builder)
+		{
+			base.Configure(builder);
+
+			builder.HasKey(o => o.Id);
 
 			//Address value object persisted as owned entity type supported since EF Core 2.0
-			orderConfiguration.OwnsOne(o => o.Address);
+			builder.OwnsOne(o => o.Address);
 
-			orderConfiguration.Property<DateTimeOffset>("CreationTime").IsRequired();
-			orderConfiguration.Property<bool>("IsDeleted").IsRequired();
-			orderConfiguration.Property<string>("UserId").IsRequired();
-			orderConfiguration.Property<string>("Description").IsRequired(false);			
-			orderConfiguration.Property<OrderStatus>("OrderStatus").IsRequired();
-			
-			var navigation = orderConfiguration.Metadata.FindNavigation(nameof(Order.OrderItems));
-            
+			builder.Property<DateTimeOffset>("CreationTime").IsRequired();
+			builder.Property<bool>("IsDeleted").IsRequired();
+			builder.Property<string>("UserId").IsRequired();
+			builder.Property<string>("Description").IsRequired(false);
+			builder.Property<OrderStatus>("OrderStatus").IsRequired();
+
+			var navigation = builder.Metadata.FindNavigation(nameof(Order.OrderItems));
+
 			// DDD Patterns comment:
 			//Set as field (New since EF 1.1) to access the OrderItem collection property through its field
 			navigation.SetPropertyAccessMode(PropertyAccessMode.Field);
