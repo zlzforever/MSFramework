@@ -58,7 +58,11 @@ namespace MSFramework.Ef
 		public virtual void Configure(EntityTypeBuilder<TEntity> builder)
 		{
 			builder.HasKey("Id");
-			builder.Property("Id").ValueGeneratedNever();
+			var primaryKeyType = builder.Property("Id").Metadata.ClrType;
+			if (primaryKeyType == Consts.Types.String || primaryKeyType == Consts.Types.Guid)
+			{
+				builder.Property("Id").ValueGeneratedNever();
+			}
 		}
 	}
 }

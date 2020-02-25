@@ -42,6 +42,10 @@ namespace Ordering.API.Controllers
 						"testProduct", 10, 0, "")
 				});
 			await _orderRepository.InsertAsync(order);
+			// var order = await _orderRepository.GetAsync(Guid.Parse("35a00497-cbb0-4311-af5d-ab6b01281569"));
+			// order.AddOrderItem(Guid.NewGuid(),
+			// 	"testProduct", 10, 0, "");
+			// await _orderRepository.UpdateAsync(order);
 			return Ok(order);
 		}
 
