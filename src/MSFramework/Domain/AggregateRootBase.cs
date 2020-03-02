@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
+using EventBus;
 using MSFramework.Domain.Entity;
-using MSFramework.EventBus;
 
 namespace MSFramework.Domain
 {

@@ -10,7 +10,6 @@ using MSFramework.Common;
 using MSFramework.Ef;
 using MSFramework.Ef.Function;
 using MSFramework.Ef.MySql;
-using MSFramework.EventBus;
 using Ordering.Application.Event;
 
 namespace Ordering.API
@@ -54,9 +53,8 @@ namespace Ordering.API
 
 			services.AddMSFramework(builder =>
 			{
-				builder.AddEventHandler(typeof(UserCheckoutAcceptedEvent));
+				builder.AddEventBus(typeof(UserCheckoutAcceptedEvent));
 				// 开发环境可以使用本地消息总线，生产环境应该换成分布式消息队列
-				builder.AddPassThroughEventBus();
 				builder.AddAspNetCore();
 				builder.AddAspNetCoreFunction<EfFunctionStore>();
 				builder.AddEfAuditStore();

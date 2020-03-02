@@ -1,6 +1,6 @@
 using System.Threading.Tasks;
+using EventBus;
 using MSFramework.Ef;
-using MSFramework.EventBus;
 using Ordering.Domain.AggregateRoot.Event;
 
 namespace Ordering.Application.DomainEventHandler
@@ -14,7 +14,7 @@ namespace Ordering.Application.DomainEventHandler
 			_dbContextFactory = dbContextFactory;
 		}
 
-		public Task Handle(OrderShippedDomainEvent @event)
+		public Task HandleAsync(OrderShippedDomainEvent @event)
 		{
 			// todo
 			return Task.CompletedTask;

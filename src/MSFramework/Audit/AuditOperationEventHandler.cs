@@ -1,8 +1,8 @@
 using System;
 using System.Threading.Tasks;
+using EventBus;
 using Microsoft.Extensions.DependencyInjection;
 using MSFramework.Domain;
-using MSFramework.EventBus;
 
 namespace MSFramework.Audit
 {
@@ -15,7 +15,7 @@ namespace MSFramework.Audit
 			_serviceProvider = serviceProvider;
 		}
 
-		public async Task Handle(AuditOperationEvent @event)
+		public async Task HandleAsync(AuditOperationEvent @event)
 		{
 			// 开新的 scope 避免和 httpcontext 的 dbcontext 混用
 			using var scope = _serviceProvider.CreateScope();

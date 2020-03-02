@@ -1,6 +1,6 @@
+using EventBus;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
-using MSFramework.EventBus;
 
 namespace MSFramework.Ef
 {

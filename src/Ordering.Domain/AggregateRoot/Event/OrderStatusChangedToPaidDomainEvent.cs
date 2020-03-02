@@ -4,7 +4,7 @@ using System.Collections.Generic;
 namespace Ordering.Domain.AggregateRoot.Event
 {
 	public class OrderStatusChangedToPaidDomainEvent
-		: MSFramework.EventBus.Event
+		: EventBus.Event
 	{
 		public Guid OrderId { get; }
 		public IEnumerable<OrderItem> OrderItems { get; }

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace Ordering.Application.Event
 {
-	public class UserCheckoutAcceptedEvent : MSFramework.EventBus.Event
+	public class UserCheckoutAcceptedEvent : EventBus.Event
 	{
 		public string UserId { get; }
 

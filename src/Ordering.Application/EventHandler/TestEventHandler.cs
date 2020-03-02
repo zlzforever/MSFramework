@@ -1,14 +1,13 @@
 using System.Threading.Tasks;
-using MSFramework.EventBus;
+using EventBus;
 
 namespace Ordering.Application.EventHandler
 {
-	[SubscribeName("test")]
 	public class TestEventHandler : IDynamicEventHandler
 	{
-		public Task Handle(dynamic @event)
+		public Task HandleAsync(object @event)
 		{
-			return Task.CompletedTask;
+			throw new System.NotImplementedException();
 		}
 	}
 }

@@ -4,6 +4,7 @@ using System.Linq;
 using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
+using EventBus;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.Extensions.DependencyInjection;
@@ -13,7 +14,6 @@ using MSFramework.Audit;
 using MSFramework.Collections.Generic;
 using MSFramework.Common;
 using MSFramework.Domain;
-using MSFramework.EventBus;
 using MSFramework.Extensions;
 
 namespace MSFramework.Ef

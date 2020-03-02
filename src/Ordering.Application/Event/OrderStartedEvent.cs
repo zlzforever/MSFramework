@@ -5,7 +5,7 @@ namespace Ordering.Application.Event
 	/// <summary>
 	/// 发送到外部的领域事件
 	/// </summary>
-	public class OrderStartedEvent : MSFramework.EventBus.Event
+	public class OrderStartedEvent : EventBus.Event
 	{
 		public string UserId { get; }
 		

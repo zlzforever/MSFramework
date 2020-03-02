@@ -1,9 +1,9 @@
 using System.Linq;
 using System.Threading.Tasks;
+using EventBus;
 using MediatR;
 using Microsoft.Extensions.Logging;
 using MSFramework.Domain;
-using MSFramework.EventBus;
 using Ordering.Application.Command;
 using Ordering.Application.Event;
 
@@ -24,7 +24,7 @@ namespace Ordering.Application.EventHandler
 			_session = session;
 		}
 
-		public async Task Handle(UserCheckoutAcceptedEvent @event)
+		public async Task HandleAsync(UserCheckoutAcceptedEvent @event)
 		{
 			await _mediator.Send(new CreateOrderCommand(@event.OrderItems.Select(x =>
 					new CreateOrderCommand.OrderItemDTO

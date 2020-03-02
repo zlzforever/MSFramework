@@ -1,46 +1,15 @@
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
-using RabbitMQ.Client;
+using System;
+using EventBus.RabbitMQ.DependencyInjection;
 
 namespace MSFramework.EventBus.RabbitMQ
 {
 	public static class ServiceCollectionExtensions
 	{
-		public static MSFrameworkBuilder AddRabbitMQEventBus(this MSFrameworkBuilder builder)
+		public static MSFrameworkBuilder AddRabbitMQEventBus(this MSFrameworkBuilder builder,
+			params Type[] handlerTypes)
 		{
-			builder.Services.AddRabbitMQEventBus();
+			builder.Services.AddRabbitMQEventBus(handlerTypes);
 			return builder;
-		}
-
-		public static IServiceCollection AddRabbitMQEventBus(this IServiceCollection services)
-		{
-			services.AddSingleton<RabbitMQOptions>();
-			services.AddSingleton(provider =>
-			{
-				var options = provider.GetRequiredService<RabbitMQOptions>();
-
-				var factory = new ConnectionFactory
-				{
-					HostName = options.HostName,
-					Port = options.Port,
-					DispatchConsumersAsync = true
-				};
-
-				if (!string.IsNullOrEmpty(options.UserName))
-				{
-					factory.UserName = options.UserName;
-				}
-
-				if (!string.IsNullOrEmpty(options.Password))
-				{
-					factory.Password = options.Password;
-				}
-				return new RabbitMQConnection(factory,
-					provider.GetRequiredService<ILogger<RabbitMQConnection>>(),
-					options.RetryCount);
-			});
-			services.AddSingleton<IEventBus, RabbitMQEventBus>();
-			return services;
 		}
 	}
 }
