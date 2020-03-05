@@ -19,8 +19,8 @@ namespace MSFramework.Domain
 		}
 
 		public override string ToString() => Name;
-
-		public static IEnumerable<T> GetAll<T>() where T : Enumeration
+		
+		public static IEnumerable<T> GetAll<T>() where T : Enumeration<TId>
 		{
 			var fields = typeof(T).GetFields(BindingFlags.Public | BindingFlags.Static | BindingFlags.DeclaredOnly);
 
@@ -29,7 +29,7 @@ namespace MSFramework.Domain
 
 		public override bool Equals(object obj)
 		{
-			var otherValue = obj as Enumeration;
+			var otherValue = obj as Enumeration<TId>;
 
 			if (otherValue == null)
 				return false;
@@ -40,29 +40,25 @@ namespace MSFramework.Domain
 			return typeMatches && valueMatches;
 		}
 
+		// ReSharper disable once NonReadonlyMemberInGetHashCode
 		public override int GetHashCode() => Id.GetHashCode();
 
 		public int CompareTo(object other) => Id.CompareTo(((Enumeration) other).Id);
 
-		public static int AbsoluteDifference(Enumeration firstValue, Enumeration secondValue)
+		public static T FromId<T>(TId value) where T : Enumeration<TId>
 		{
-			var absoluteDifference = Math.Abs(firstValue.Id - secondValue.Id);
-			return absoluteDifference;
-		}
-
-		public static T FromValue<T>(int value) where T : Enumeration
-		{
-			var matchingItem = Parse<T, int>(value, "value", item => item.Id == value);
+			var matchingItem = Parse<T, TId>(value, "value",
+				item => item.Id.Equals(value));
 			return matchingItem;
 		}
 
-		public static T FromDisplayName<T>(string displayName) where T : Enumeration
+		public static T FromName<T>(string name) where T : Enumeration<TId>
 		{
-			var matchingItem = Parse<T, string>(displayName, "display name", item => item.Name == displayName);
+			var matchingItem = Parse<T, string>(name, "display name", item => item.Name == name);
 			return matchingItem;
 		}
 
-		private static T Parse<T, TK>(TK value, string description, Func<T, bool> predicate) where T : Enumeration
+		private static T Parse<T, TK>(TK value, string description, Func<T, bool> predicate) where T : Enumeration<TId>
 		{
 			var matchingItem = GetAll<T>().FirstOrDefault(predicate);
 

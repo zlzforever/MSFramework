@@ -6,6 +6,8 @@ namespace MSFramework.Application
 	/// <summary>Serves as the base class for application-defined exceptions.</summary>
 	public class ApplicationException : MSFrameworkException
 	{
+		public int Code { get; private set; } = 1;
+
 		/// <summary>Initializes a new instance of the <see cref="T:System.ApplicationException"></see> class.</summary>
 		public ApplicationException()
 		{
@@ -29,6 +31,11 @@ namespace MSFramework.Application
 		/// <param name="innerException">The exception that is the cause of the current exception. If the innerException parameter is not a null reference, the current exception is raised in a catch block that handles the inner exception.</param>
 		public ApplicationException(string message, Exception innerException) : base(message, innerException)
 		{
+		}
+
+		public ApplicationException(int code, string message) : base(message)
+		{
+			Code = code;
 		}
 	}
 }
