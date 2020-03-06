@@ -15,7 +15,7 @@ namespace MSFramework.AspNetCore
 						new
 						{
 							name = x.Key,
-							error = x.Value.Errors.FirstOrDefault()?.ErrorMessage
+							message = x.Value.Errors.FirstOrDefault()?.ErrorMessage
 						});
 
 

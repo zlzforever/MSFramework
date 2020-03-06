@@ -8,6 +8,12 @@ namespace MSFramework.Http
 	{
 	}
 
+	public class Error
+	{
+		public string Name { get; set; }
+		public string Message { get; set; }
+	}
+
 	/// <summary>
 	/// 用于内部系统调用外部 API 的返回做返序列化
 	/// </summary>
@@ -18,6 +24,8 @@ namespace MSFramework.Http
 		public int Code { get; set; }
 		public string Msg { get; set; }
 		public T Data { get; set; }
+
+		public List<Error> Errors { get; set; }
 	}
 
 	/// <summary>

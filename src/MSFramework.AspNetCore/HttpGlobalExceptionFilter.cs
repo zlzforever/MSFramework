@@ -1,3 +1,4 @@
+using System;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.Extensions.Logging;
@@ -18,8 +19,10 @@ namespace MSFramework.AspNetCore
 		public void OnException(ExceptionContext context)
 		{
 			context.HttpContext.Response.StatusCode = 400;
+ 
 			_logger.LogError(context.Exception.ToString());
-			if (context.Exception is ApplicationException e)
+
+			if (context.Exception is MSFrameworkException e)
 			{
 				context.Result = new JsonResult(new ErrorApiResult(context.Exception.Message, e.Code));
 			}
