@@ -17,7 +17,6 @@ namespace MSFramework.Http
 		}
 
 		public async Task<ApiResult<TResponse>> GetAsync<TResponse>(string clientName, string url)
-			where TResponse : class
 		{
 			var httpClient = _httpClientFactory.CreateClient(clientName);
 
@@ -29,14 +28,15 @@ namespace MSFramework.Http
 		}
 
 		public async Task<ApiResult<TResponse>> PostAsync<TResponse>(string clientName, string url, dynamic data)
-			where TResponse : class
 		{
 			var httpClient = _httpClientFactory.CreateClient(clientName);
-
-			var request = new HttpRequestMessage(HttpMethod.Post, url)
+			var request = new HttpRequestMessage(HttpMethod.Post, url);
+			if (data != null)
 			{
-				Content = new StringContent(JsonConvert.SerializeObject(data), Encoding.UTF8, "application/json")
-			};
+				request.Content =
+					new StringContent(JsonConvert.SerializeObject(data), Encoding.UTF8, "application/json");
+			}
+
 			var response = await httpClient.SendAsync(request);
 
 			var result = await response.Content.ReadAsStringAsync();
@@ -50,14 +50,15 @@ namespace MSFramework.Http
 		}
 
 		public async Task<ApiResult<TResponse>> PutAsync<TResponse>(string clientName, string url, dynamic data)
-			where TResponse : class
 		{
 			var httpClient = _httpClientFactory.CreateClient(clientName);
 
-			var request = new HttpRequestMessage(HttpMethod.Put, url)
+			var request = new HttpRequestMessage(HttpMethod.Put, url);
+			if (data != null)
 			{
-				Content = new StringContent(JsonConvert.SerializeObject(data), Encoding.UTF8, "application/json")
-			};
+				request.Content =
+					new StringContent(JsonConvert.SerializeObject(data), Encoding.UTF8, "application/json");
+			}
 			var response = await httpClient.SendAsync(request);
 
 			var result = await response.Content.ReadAsStringAsync();
@@ -71,7 +72,6 @@ namespace MSFramework.Http
 		}
 
 		public async Task<ApiResult<TResponse>> HeadAsync<TResponse>(string clientName, string url)
-			where TResponse : class
 		{
 			var httpClient = _httpClientFactory.CreateClient(clientName);
 			var request = new HttpRequestMessage(HttpMethod.Head, url);
@@ -94,7 +94,6 @@ namespace MSFramework.Http
 		}
 
 		public async Task<ApiResult<TResponse>> DeleteAsync<TResponse>(string clientName, string url)
-			where TResponse : class
 		{
 			var httpClient = _httpClientFactory.CreateClient(clientName);
 			var content = await httpClient.SendAsync(new HttpRequestMessage(HttpMethod.Delete, url));

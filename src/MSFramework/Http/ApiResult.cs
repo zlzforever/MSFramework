@@ -12,7 +12,7 @@ namespace MSFramework.Http
 	/// 用于内部系统调用外部 API 的返回做返序列化
 	/// </summary>
 	/// <typeparam name="T"></typeparam>
-	public class ApiResult<T> : IApiResult where T : class
+	public class ApiResult<T> : IApiResult
 	{
 		public bool Success { get; set; } = true;
 		public int Code { get; set; }
