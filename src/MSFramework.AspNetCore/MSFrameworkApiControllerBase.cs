@@ -1,11 +1,13 @@
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.Extensions.Logging;
 using MSFramework.Domain;
 using MSFramework.Http;
 
 namespace MSFramework.AspNetCore
 {
-	public class MSFrameworkApiControllerBase : ControllerBase
+	public class MSFrameworkApiControllerBase : ControllerBase, IAsyncResultFilter
 	{
 		protected IMSFrameworkSession Session { get; }
 
@@ -26,6 +28,17 @@ namespace MSFramework.AspNetCore
 		{
 			HttpContext.Response.StatusCode = 400;
 			return new ErrorApiResult(msg, code);
+		}
+
+		[NonAction]
+		public Task OnResultExecutionAsync(ResultExecutingContext context, ResultExecutionDelegate next)
+		{
+			if (context.Result is EmptyResult)
+			{
+				context.Result = new JsonResult(ApiResult());
+			}
+
+			return next();
 		}
 	}
 }
