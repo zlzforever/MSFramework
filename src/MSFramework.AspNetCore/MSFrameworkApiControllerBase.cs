@@ -31,7 +31,7 @@ namespace MSFramework.AspNetCore
 		}
 
 		[NonAction]
-		public Task OnResultExecutionAsync(ResultExecutingContext context, ResultExecutionDelegate next)
+		public virtual Task OnResultExecutionAsync(ResultExecutingContext context, ResultExecutionDelegate next)
 		{
 			if (context.Result is EmptyResult)
 			{

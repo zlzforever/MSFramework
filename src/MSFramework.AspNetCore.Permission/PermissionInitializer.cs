@@ -12,7 +12,12 @@ namespace MSFramework.AspNetCore.Permission
 		{
 			using var scope = serviceProvider.CreateScope();
 
-			var options = scope.ServiceProvider.GetRequiredService<PermissionOptions>();
+			var options = scope.ServiceProvider.GetService<PermissionOptions>();
+			if (options == null)
+			{
+				return;
+			}
+
 			if (string.IsNullOrWhiteSpace(options.CerberusSecurityHeader))
 			{
 				throw new ApplicationException("CerberusSecurityHeader is missing");
@@ -21,7 +26,8 @@ namespace MSFramework.AspNetCore.Permission
 			var cerberusClient = scope.ServiceProvider.GetRequiredService<ICerberusClient>();
 			if (!cerberusClient.ExistsAsync(options.CerberusServiceId).Result)
 			{
-				throw new ApplicationException($"Service {options.CerberusServiceId} not exists in cerberus or your config is not correct, please create it firstly");
+				throw new ApplicationException(
+					$"Service {options.CerberusServiceId} not exists in cerberus or your config is not correct, please create it firstly");
 			}
 
 			var permissionFinder = scope.ServiceProvider.GetRequiredService<AspNetCorePermissionFinder>();
@@ -65,7 +71,8 @@ namespace MSFramework.AspNetCore.Permission
 
 			if (renewalIds.Count > 0)
 			{
-				cerberusClient.RenewalAsync(options.CerberusServiceId, string.Join(",", renewalIds)).GetAwaiter().GetResult();
+				cerberusClient.RenewalAsync(options.CerberusServiceId, string.Join(",", renewalIds)).GetAwaiter()
+					.GetResult();
 			}
 
 			var expiredIds = new List<string>();
@@ -81,7 +88,8 @@ namespace MSFramework.AspNetCore.Permission
 
 			if (expiredIds.Count > 0)
 			{
-				cerberusClient.ExpireAsync(options.CerberusServiceId, string.Join(",", expiredIds)).GetAwaiter().GetResult();
+				cerberusClient.ExpireAsync(options.CerberusServiceId, string.Join(",", expiredIds)).GetAwaiter()
+					.GetResult();
 			}
 		}
 	}

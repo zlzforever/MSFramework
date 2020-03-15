@@ -22,14 +22,3 @@ nuget push src/MSFramework.EventBus.RabbitMQ/bin/Release/*.nupkg -SkipDuplicate 
 nuget push src/MSFramework.AutoMapper/bin/Release/*.nupkg -SkipDuplicate  -Source $NUGET_SERVER
 nuget push src/MSFramework.MySql/bin/Release/*.nupkg -SkipDuplicate  -Source $NUGET_SERVER
 nuget push src/MSFramework.Mapster/bin/Release/*.nupkg -SkipDuplicate  -Source $NUGET_SERVER
-
-sudo cp src/MSFramework/bin/Release/*.nupkg  /usr/local/share/dotnet/sdk/NuGetFallbackFolder
-sudo cp src/MSFramework.AspNetCore/bin/Release/*.nupkg  /usr/local/share/dotnet/sdk/NuGetFallbackFolder
-sudo cp src/MSFramework.AspNetCore.Permission/bin/Release/*.nupkg  /usr/local/share/dotnet/sdk/NuGetFallbackFolder
-sudo cp src/MSFramework.Ef/bin/Release/*.nupkg  /usr/local/share/dotnet/sdk/NuGetFallbackFolder
-sudo cp src/MSFramework.Ef.MySql/bin/Release/*.nupkg  /usr/local/share/dotnet/sdk/NuGetFallbackFolder
-sudo cp src/MSFramework.Ef.SqlServer/bin/Release/*.nupkg  /usr/local/share/dotnet/sdk/NuGetFallbackFolder
-sudo cp src/MSFramework.EventBus.RabbitMQ/bin/Release/*.nupkg  /usr/local/share/dotnet/sdk/NuGetFallbackFolder
-sudo cp src/MSFramework.AutoMapper/bin/Release/*.nupkg  /usr/local/share/dotnet/sdk/NuGetFallbackFolder
-sudo cp src/MSFramework.MySql/bin/Release/*.nupkg  /usr/local/share/dotnet/sdk/NuGetFallbackFolder
-sudo cp src/MSFramework.Mapster/bin/Release/*.nupkg  /usr/local/share/dotnet/sdk/NuGetFallbackFolder

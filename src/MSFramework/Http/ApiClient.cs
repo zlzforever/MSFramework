@@ -1,3 +1,4 @@
+using System.Net;
 using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
@@ -59,6 +60,7 @@ namespace MSFramework.Http
 				request.Content =
 					new StringContent(JsonConvert.SerializeObject(data), Encoding.UTF8, "application/json");
 			}
+
 			var response = await httpClient.SendAsync(request);
 
 			var result = await response.Content.ReadAsStringAsync();
@@ -71,19 +73,13 @@ namespace MSFramework.Http
 			return result.Success;
 		}
 
-		public async Task<ApiResult<TResponse>> HeadAsync<TResponse>(string clientName, string url)
+		public async Task<bool> HeadAsync(string clientName, string url)
 		{
 			var httpClient = _httpClientFactory.CreateClient(clientName);
 			var request = new HttpRequestMessage(HttpMethod.Head, url);
 			var response = await httpClient.SendAsync(request);
-			var content = await response.Content.ReadAsStringAsync();
-			return JsonConvert.DeserializeObject<ApiResult<TResponse>>(content);
-		}
 
-		public async Task<bool> HeadAsync(string clientName, string url)
-		{
-			var result = await HeadAsync<ApiResult>(clientName, url);
-			return result.Success;
+			return response.StatusCode == HttpStatusCode.OK;
 		}
 
 		public async Task<HttpResponseMessage> SendAsync(string clientName, HttpRequestMessage message)
@@ -96,10 +92,10 @@ namespace MSFramework.Http
 		public async Task<ApiResult<TResponse>> DeleteAsync<TResponse>(string clientName, string url)
 		{
 			var httpClient = _httpClientFactory.CreateClient(clientName);
-			var content = await httpClient.SendAsync(new HttpRequestMessage(HttpMethod.Delete, url));
-			var result = await content.Content.ReadAsStringAsync();
-			var response = JsonConvert.DeserializeObject<ApiResult<TResponse>>(result);
-			return response;
+			var response = await httpClient.SendAsync(new HttpRequestMessage(HttpMethod.Delete, url));
+			var str = await response.Content.ReadAsStringAsync();
+			var result = JsonConvert.DeserializeObject<ApiResult<TResponse>>(str);
+			return result;
 		}
 
 		public async Task<bool> DeleteAsync(string clientName, string url)
