@@ -37,7 +37,7 @@ namespace MSFramework.Domain.Entity
 			Id = Singleton<IIdGenerator>.Instance.GetNewId<TKey>();
 		}
 
-		protected EntityBase(TKey id) : this()
+		protected EntityBase(TKey id)
 		{
 			Id = id;
 		}
