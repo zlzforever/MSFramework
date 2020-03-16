@@ -1,6 +1,6 @@
 using System.Threading.Tasks;
+using EventBus;
 using Microsoft.Extensions.Logging;
-using MSFramework.EventBus;
 using Template.Application.Event;
 
 namespace Template.Application.EventHandler
@@ -15,7 +15,7 @@ namespace Template.Application.EventHandler
 			_logger = logger;
 		}
 
-		public Task Handle(PublishClass1Event @event)
+		public Task HandleAsync(PublishClass1Event @event)
 		{
 			_logger.LogInformation($"Publish class1 {@event.Class1Id}");
 			return Task.CompletedTask;

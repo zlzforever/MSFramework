@@ -24,4 +24,3 @@ rm -rf template/Content/src/Template.API/obj
 
 nuget pack template/MSFramework.AspNetCore.Template.nuspec
 nuget push MSFramework.AspNetCore.Template.*.nupkg -SkipDuplicate  -Source http://nuget.pamirs.com/v3/index.json
-sudo cp MSFramework.AspNetCore.Template.*.nupkg  /usr/local/share/dotnet/sdk/NuGetFallbackFolder

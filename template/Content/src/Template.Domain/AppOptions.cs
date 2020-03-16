@@ -1,6 +1,6 @@
 using Microsoft.Extensions.Configuration;
 
-namespace Template.Application
+namespace Template.Domain
 {
 	public class AppOptions
 	{

@@ -1,9 +1,10 @@
 using System.Threading.Tasks;
+using EventBus;
 using Microsoft.Extensions.Logging;
 using MSFramework.Data;
 using MSFramework.Domain;
-using MSFramework.EventBus;
 using Template.Application.DTO;
+using Template.Domain;
 using Template.Domain.AggregateRoot;
 using Template.Domain.Repository;
 

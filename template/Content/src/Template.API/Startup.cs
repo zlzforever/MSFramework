@@ -2,7 +2,6 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -13,11 +12,12 @@ using MSFramework.AutoMapper;
 using MSFramework.Ef;
 using MSFramework.Ef.Function;
 using MSFramework.Ef.MySql;
-using MSFramework.EventBus;
 using MSFramework.Extensions;
 using MSFramework.MySql;
 using Template.API.ViewObject;
 using Template.Application;
+using Template.Application.Extensions;
+using Template.Domain;
 using Template.Domain.AggregateRoot;
 
 namespace Template.API
@@ -85,8 +85,7 @@ namespace Template.API
 			services.AddScoped<AppOptions>();
 			services.AddMSFramework(builder =>
 			{
-				builder.AddEventHandler(typeof(AppOptions));
-				builder.AddPassThroughEventBus();
+				builder.AddEventBus(typeof(AppOptions), typeof(MSFrameworkSessionExtensions));
 				builder.AddAspNetCore();
 				builder.AddAspNetCoreFunction<EfFunctionStore>();
 				builder.AddEfAuditStore();

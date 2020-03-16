@@ -2,7 +2,7 @@ using System;
 
 namespace Template.Application.Event
 {
-	public class PublishClass1Event : MSFramework.EventBus.Event
+	public class PublishClass1Event : EventBus.Event
 	{
 		public Guid Class1Id { get; private set; }
 
