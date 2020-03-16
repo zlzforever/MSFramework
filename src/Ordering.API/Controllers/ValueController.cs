@@ -14,13 +14,13 @@ namespace Ordering.API.Controllers
 		[Required] [StringLength(4)] public string Name { get; set; }
 	}
 
-	public class ValueController : Controller
+	public class ValueController : MSFrameworkApiControllerBase
 	{
 		private TestService _testService;
 		private ApiClient _apiClient;
 
 		public ValueController(TestService testService, ApiClient apiClient, IMSFrameworkSession session,
-			ILogger<ValueController> logger)
+			ILogger<ValueController> logger) : base(session, logger)
 		{
 			_testService = testService;
 			_apiClient = apiClient;

@@ -8,7 +8,7 @@ using MSFramework.Domain;
 
 namespace MSFramework.Ef
 {
-	public class DbContextFactory
+	public class DbContextFactory : IDisposable
 	{
 		private readonly IServiceProvider _serviceProvider;
 		private bool _designTimeDbContext;
@@ -97,7 +97,7 @@ namespace MSFramework.Ef
 			{
 				throw new MSFrameworkException($"实例化数据上下文“{dbContextType.AssemblyQualifiedName}”失败");
 			}
-			
+
 			context.ServiceProvider = _serviceProvider;
 
 			if (!_designTimeDbContext && resolveOptions.UseTransaction && context.Database.CurrentTransaction == null)
@@ -112,6 +112,14 @@ namespace MSFramework.Ef
 		public DbContextBase[] GetAllDbContexts()
 		{
 			return _dbContextDict.Values.ToArray();
+		}
+
+		public void Dispose()
+		{
+			foreach (var kv in _dbContextDict)
+			{
+				kv.Value.Dispose();
+			}
 		}
 	}
 }

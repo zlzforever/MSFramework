@@ -1,13 +1,15 @@
+using System;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using MSFramework.Domain;
 using MSFramework.Http;
 
 namespace MSFramework.AspNetCore
 {
-	public class MSFrameworkApiControllerBase : ControllerBase, IAsyncResultFilter
+	public class MSFrameworkApiControllerBase : ControllerBase, IAsyncResultFilter, IActionFilter, IAsyncActionFilter
 	{
 		protected IMSFrameworkSession Session { get; }
 
@@ -39,6 +41,49 @@ namespace MSFramework.AspNetCore
 			}
 
 			return next();
+		}
+
+		[NonAction]
+		public virtual void OnActionExecuting(ActionExecutingContext context)
+		{
+		}
+
+		[NonAction]
+		public virtual void OnActionExecuted(ActionExecutedContext context)
+		{
+		}
+
+		[NonAction]
+		public virtual async Task OnActionExecutionAsync(
+			ActionExecutingContext context,
+			ActionExecutionDelegate next)
+		{
+			if (context == null)
+			{
+				throw new ArgumentNullException(nameof(context));
+			}
+
+			if (next == null)
+			{
+				throw new ArgumentNullException(nameof(next));
+			}
+
+			try
+			{
+				OnActionExecuting(context);
+				if (context.Result != null)
+				{
+					return;
+				}
+
+				OnActionExecuted(await next());
+			}
+			finally
+			{
+				var uowManager = context.HttpContext.RequestServices.GetService<IUnitOfWorkManager>();
+				uowManager?.Dispose();
+				Logger.LogDebug("Release unit of work manager");
+			}
 		}
 	}
 }
