@@ -17,6 +17,7 @@ namespace MSFramework.Ef
 			foreach (var dbContext in _dbContextFactory.GetAllDbContexts())
 			{
 				dbContext.Commit();
+				dbContext.Dispose();
 			}
 		}
 
@@ -25,6 +26,7 @@ namespace MSFramework.Ef
 			foreach (var dbContext in _dbContextFactory.GetAllDbContexts())
 			{
 				await dbContext.CommitAsync();
+				await dbContext.DisposeAsync();
 			}
 		}
 	}
