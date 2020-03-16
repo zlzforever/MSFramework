@@ -68,22 +68,13 @@ namespace MSFramework.AspNetCore
 				throw new ArgumentNullException(nameof(next));
 			}
 
-			try
+			OnActionExecuting(context);
+			if (context.Result != null)
 			{
-				OnActionExecuting(context);
-				if (context.Result != null)
-				{
-					return;
-				}
+				return;
+			}
 
-				OnActionExecuted(await next());
-			}
-			finally
-			{
-				var uowManager = context.HttpContext.RequestServices.GetService<IUnitOfWorkManager>();
-				uowManager?.Dispose();
-				Logger.LogDebug("Release unit of work manager");
-			}
+			OnActionExecuted(await next());
 		}
 	}
 }

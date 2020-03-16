@@ -1,6 +1,7 @@
 using System;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc.Filters;
+using Microsoft.Extensions.DependencyInjection;
 using MSFramework.Domain;
 
 namespace MSFramework.AspNetCore
@@ -12,10 +13,11 @@ namespace MSFramework.AspNetCore
 		{
 			// FunctionFilter 必须在 uow 之后
 			var uowManager =
-				context.HttpContext.RequestServices.GetService(typeof(IUnitOfWorkManager));
+				context.HttpContext.RequestServices.GetService<IUnitOfWorkManager>();
 			if (uowManager != null)
 			{
-				await ((IUnitOfWorkManager) uowManager).CommitAsync();
+				await uowManager.CommitAsync();
+				uowManager.Dispose();
 			}
 
 			await next();
