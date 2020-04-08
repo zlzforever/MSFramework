@@ -57,7 +57,6 @@ namespace MSFramework
 		public static IMSFrameworkApplicationBuilder UseMSFramework(this IServiceProvider applicationServices,
 			Action<IMSFrameworkApplicationBuilder> configure = null)
 		{
-			Singleton<IServiceProvider>.Instance = applicationServices;
 			Initialize(applicationServices);
 			var builder = new MSFrameworkApplicationBuilder(applicationServices);
 			configure?.Invoke(builder);
@@ -71,7 +70,8 @@ namespace MSFramework
 			var initializers = applicationServices.GetServices<Initializer>().OrderBy(x => x.Order).ToList();
 			foreach (var initializer in initializers)
 			{
-				initializer.Initialize(applicationServices);
+				using var scope = applicationServices.CreateScope();
+				initializer.Initialize(scope.ServiceProvider);
 			}
 		}
 	}

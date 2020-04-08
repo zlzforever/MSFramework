@@ -12,9 +12,8 @@ namespace MSFramework.Function
 	{
 		public override void Initialize(IServiceProvider serviceProvider)
 		{
-			var scope = serviceProvider.CreateScope();
-			var functionFinder = scope.ServiceProvider.GetService<IFunctionFinder>();
-			var logger = scope.ServiceProvider.GetRequiredService<ILogger<FunctionInitializer>>();
+			var functionFinder = serviceProvider.GetService<IFunctionFinder>();
+			var logger = serviceProvider.GetRequiredService<ILogger<FunctionInitializer>>();
 			if (functionFinder == null)
 			{
 				logger.LogInformation("没有配置 Function 中间件");
@@ -36,7 +35,7 @@ namespace MSFramework.Function
 				}
 			}
 
-			var store = scope.ServiceProvider.GetService<IFunctionStore>();
+			var store = serviceProvider.GetService<IFunctionStore>();
 			var functionsInDatabaseDict = store.GetAllList().ToDictionary(x => x.Path, x => x);
 
 			// 添加新功能
@@ -71,8 +70,7 @@ namespace MSFramework.Function
 				}
 			}
 
-			scope.ServiceProvider.GetRequiredService<IUnitOfWorkManager>().CommitAsync().GetAwaiter();
-			scope.Dispose();
+			serviceProvider.GetRequiredService<IUnitOfWorkManager>().CommitAsync().GetAwaiter();
 		}
 	}
 }

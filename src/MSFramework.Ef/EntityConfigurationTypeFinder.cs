@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Microsoft.Extensions.Logging;
 using MSFramework.Common;
 using MSFramework.Reflection;
 
@@ -15,6 +16,12 @@ namespace MSFramework.Ef
 			= new Dictionary<Type, IEntityRegister[]>();
 
 		private readonly IDictionary<Type, Type> _entityMapDbContextDict = new Dictionary<Type, Type>();
+		private readonly ILogger _logger;
+
+		public EntityConfigurationTypeFinder(ILogger<EntityConfigurationTypeFinder> logger)
+		{
+			_logger = logger;
+		}
 
 		/// <summary>
 		/// 初始化
@@ -35,7 +42,7 @@ namespace MSFramework.Ef
 				.ToList();
 			if (types.Count == 0)
 			{
-				Console.WriteLine("There is no any entity register");
+				_logger.LogWarning("There is no any entity register");
 				return;
 			}
 

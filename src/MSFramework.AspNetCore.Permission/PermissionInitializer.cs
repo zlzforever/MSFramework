@@ -10,9 +10,7 @@ namespace MSFramework.AspNetCore.Permission
 	{
 		public override void Initialize(IServiceProvider serviceProvider)
 		{
-			using var scope = serviceProvider.CreateScope();
-
-			var options = scope.ServiceProvider.GetService<PermissionOptions>();
+			var options = serviceProvider.GetService<PermissionOptions>();
 			if (options == null)
 			{
 				return;
@@ -23,14 +21,14 @@ namespace MSFramework.AspNetCore.Permission
 				throw new ApplicationException("CerberusSecurityHeader is missing");
 			}
 
-			var cerberusClient = scope.ServiceProvider.GetRequiredService<ICerberusClient>();
+			var cerberusClient = serviceProvider.GetRequiredService<ICerberusClient>();
 			if (!cerberusClient.ExistsAsync(options.CerberusServiceId).Result)
 			{
 				throw new ApplicationException(
 					$"Service {options.CerberusServiceId} not exists in cerberus or your config is not correct, please create it firstly");
 			}
 
-			var permissionFinder = scope.ServiceProvider.GetRequiredService<AspNetCorePermissionFinder>();
+			var permissionFinder = serviceProvider.GetRequiredService<AspNetCorePermissionFinder>();
 
 			var permissionsInApp = permissionFinder.GetAllList();
 

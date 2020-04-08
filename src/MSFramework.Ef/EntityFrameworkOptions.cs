@@ -48,8 +48,5 @@ namespace MSFramework.Ef
 		/// 获取或设置 是否自动迁移
 		/// </summary>
 		public bool AutoMigrationEnabled { get; set; }
-
-		internal static Dictionary<string, EntityFrameworkOptions> EntityFrameworkOptionDict =
-			new Dictionary<string, EntityFrameworkOptions>();
 	}
 }

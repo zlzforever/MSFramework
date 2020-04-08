@@ -3,27 +3,25 @@ using System.Collections.Concurrent;
 using System.Linq;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
-using MSFramework.Common;
 using MSFramework.Domain;
 
 namespace MSFramework.Ef
 {
 	public class DbContextFactory : IDisposable
 	{
+		private readonly ConcurrentDictionary<string, EntityFrameworkOptions> _entityFrameworkOptionDict;
+		private readonly IEntityConfigurationTypeFinder _entityConfigurationTypeFinder;
 		private readonly IServiceProvider _serviceProvider;
-		private bool _designTimeDbContext;
 
 		private readonly ConcurrentDictionary<Type, DbContextBase> _dbContextDict =
 			new ConcurrentDictionary<Type, DbContextBase>();
 
-		public DbContextFactory(IServiceProvider serviceProvider)
+		public DbContextFactory(IEntityConfigurationTypeFinder entityConfigurationTypeFinder,
+			EntityFrameworkOptionDict optionDict, IServiceProvider serviceProvider)
 		{
+			_entityConfigurationTypeFinder = entityConfigurationTypeFinder;
 			_serviceProvider = serviceProvider;
-		}
-
-		public void SetDesignTimeDbContext()
-		{
-			_designTimeDbContext = true;
+			_entityFrameworkOptionDict = optionDict.Value;
 		}
 
 		/// <summary>
@@ -33,7 +31,7 @@ namespace MSFramework.Ef
 		/// <returns></returns>
 		private EntityFrameworkOptions GetDbContextOptions(Type dbContextType)
 		{
-			return EntityFrameworkOptions.EntityFrameworkOptionDict.Values.SingleOrDefault(m =>
+			return _entityFrameworkOptionDict.Values.SingleOrDefault(m =>
 				m.DbContextType == dbContextType);
 		}
 
@@ -43,8 +41,7 @@ namespace MSFramework.Ef
 		/// <returns>实体所属上下文实例</returns>
 		public DbContextBase GetDbContext<TEntity>() where TEntity : class, IAggregateRoot
 		{
-			var dbContextType =
-				Singleton<IEntityConfigurationTypeFinder>.Instance.GetDbContextTypeForEntity(typeof(TEntity));
+			var dbContextType = _entityConfigurationTypeFinder.GetDbContextTypeForEntity(typeof(TEntity));
 			return GetDbContext(dbContextType);
 		}
 
@@ -74,33 +71,15 @@ namespace MSFramework.Ef
 		{
 			var dbContextType = resolveOptions.DbContextType;
 			//已存在上下文对象，直接返回
-			if (_dbContextDict.ContainsKey(dbContextType))
+			if (_dbContextDict.TryGetValue(dbContextType, out DbContextBase context))
 			{
-				return _dbContextDict[dbContextType];
+				return context;
 			}
 
-			var builderCreator = _serviceProvider.GetServices<IDbContextOptionsBuilderCreator>()
-				.FirstOrDefault(m => m.Type == resolveOptions.DatabaseType);
-			if (builderCreator == null)
-			{
-				throw new MSFrameworkException(
-					$"无法解析类型为“{resolveOptions.DatabaseType}”的 {typeof(IDbContextOptionsBuilderCreator).FullName} 实例");
-			}
-
-			var optionsBuilder =
-				builderCreator.Create(dbContextType, resolveOptions.ConnectionString);
-
-			var options = optionsBuilder.Options;
 			//创建上下文实例
-			if (!(ActivatorUtilities.CreateInstance(_serviceProvider, dbContextType, options) is
-				DbContextBase context))
-			{
-				throw new MSFrameworkException($"实例化数据上下文“{dbContextType.AssemblyQualifiedName}”失败");
-			}
+			context = (DbContextBase) _serviceProvider.GetRequiredService(dbContextType);
 
-			context.ServiceProvider = _serviceProvider;
-
-			if (!_designTimeDbContext && resolveOptions.UseTransaction && context.Database.CurrentTransaction == null)
+			if (resolveOptions.UseTransaction && context.Database.CurrentTransaction == null)
 			{
 				context.Database.BeginTransaction();
 			}

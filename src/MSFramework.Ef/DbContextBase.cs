@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using EventBus;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
+using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
@@ -24,8 +25,6 @@ namespace MSFramework.Ef
 		private IEventBus _eventBus;
 		private IMSFrameworkSession _session;
 
-		public IServiceProvider ServiceProvider { get; internal set; }
-
 		/// <summary>
 		/// 初始化一个<see cref="DbContextBase"/>类型的新实例
 		/// </summary>
@@ -40,10 +39,13 @@ namespace MSFramework.Ef
 		/// <param name="modelBuilder">上下文数据模型构建器</param>
 		protected override void OnModelCreating(ModelBuilder modelBuilder)
 		{
+			_session = Database.GetService<IMSFrameworkSession>();
+			_eventBus = Database.GetService<IEventBus>();
+			_logger = Database.GetService<ILoggerFactory>().CreateLogger(GetType());
+			
 			//通过实体配置信息将实体注册到当前上下文
 			var contextType = GetType();
-			var registers =
-				Singleton<IEntityConfigurationTypeFinder>.Instance.GetEntityRegisters(contextType);
+			var registers = Database.GetService<IEntityConfigurationTypeFinder>().GetEntityRegisters(contextType);
 			foreach (var register in registers)
 			{
 				register.RegisterTo(modelBuilder);
@@ -51,35 +53,6 @@ namespace MSFramework.Ef
 			}
 
 			_logger?.LogInformation($"上下文“{contextType}”注册了{registers.Length}个实体类");
-		}
-
-		/// <summary>
-		/// 模型配置
-		/// </summary>
-		/// <param name="optionsBuilder"></param>
-		protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-		{
-			var options = EntityFrameworkOptions.EntityFrameworkOptionDict.Values.SingleOrDefault(m =>
-				m.DbContextType == GetType());
-			if (options != null && options.LazyLoadingProxiesEnabled)
-			{
-				optionsBuilder.UseLazyLoadingProxies();
-			}
-
-			if (ServiceProvider != null)
-			{
-				var loggerFactory = ServiceProvider.GetRequiredService<ILoggerFactory>();
-				var hostEnvironment = ServiceProvider.GetService(typeof(IHostEnvironment));
-				if (hostEnvironment != null && ((IHostEnvironment) hostEnvironment).IsDevelopment())
-				{
-					optionsBuilder.EnableSensitiveDataLogging();
-				}
-
-				_logger = loggerFactory.CreateLogger(GetType());
-				_session = ServiceProvider.GetService<IMSFrameworkSession>();
-				_eventBus = ServiceProvider.GetService<IEventBus>();
-				optionsBuilder.UseLoggerFactory(loggerFactory);
-			}
 		}
 
 		/// <summary>
@@ -219,7 +192,7 @@ namespace MSFramework.Ef
 
 		protected virtual void ApplyConcepts()
 		{
-			var scopedDict = ServiceProvider.GetService<ScopedDictionary>();
+			var scopedDict = Database.GetService<ScopedDictionary>();
 			var audit = false;
 			if (_eventBus != null && scopedDict?.AuditOperation != null && scopedDict.Function != null)
 			{

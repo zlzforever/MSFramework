@@ -10,18 +10,9 @@ namespace Ordering.API
 {
 	public class DesignTimeDbContextFactory : DesignTimeDbContextFactoryBase<OrderingContext>
 	{
-		protected override IConfiguration GetConfiguration()
-		{
-			var path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "appsettings.json");
-			Console.WriteLine("Config: " + path);
-			var configuration =
-				new ConfigurationBuilder().AddJsonFile(path, true, true).Build();
-			return configuration;
-		}
-
 		protected override void Configure(IServiceCollection services)
 		{
-			services.AddMySqlDbContextOptionsBuilderCreator();
+			services.AddMySql<OrderingContext>();
 		}
 	}
 }

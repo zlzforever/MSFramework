@@ -11,6 +11,7 @@ using MSFramework.Ef;
 using MSFramework.Ef.Function;
 using MSFramework.Ef.MySql;
 using Ordering.Application.Event;
+using Ordering.Infrastructure;
 
 namespace Ordering.API
 {
@@ -67,8 +68,8 @@ namespace Ordering.API
 				builder.AddEntityFramework(x =>
 				{
 					// 添加 MySql 支持
-					x.AddMySqlDbContextOptionsBuilderCreator();
-				}, Configuration);
+					x.AddMySql<OrderingContext>();
+				});
 			});
 		}
 

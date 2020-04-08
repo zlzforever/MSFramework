@@ -13,11 +13,11 @@ namespace MSFramework.Ef
 	{
 		public override int Order => int.MinValue;
 
-		public override void Initialize(IServiceProvider applicationServices)
+		public override void Initialize(IServiceProvider serviceProvider)
 		{
-			using var scope = applicationServices.CreateScope();
-			var dbContextFactory = scope.ServiceProvider.GetRequiredService<DbContextFactory>();
-			foreach (var kv in EntityFrameworkOptions.EntityFrameworkOptionDict)
+			var dbContextFactory = serviceProvider.GetRequiredService<DbContextFactory>();
+			var dict = serviceProvider.GetRequiredService<EntityFrameworkOptionDict>();
+			foreach (var kv in dict.Value)
 			{
 				var useTrans = kv.Value.UseTransaction;
 				if (kv.Value.AutoMigrationEnabled)

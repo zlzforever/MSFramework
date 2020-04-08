@@ -23,47 +23,12 @@ namespace MSFramework.Ef
 		public virtual TDbContext CreateDbContext(string[] args)
 		{
 			var services = new ServiceCollection();
-			Configure(services);
-
-			var entityConfigurationTypeFinder = new EntityConfigurationTypeFinder();
-			entityConfigurationTypeFinder.Initialize();
-
-			Singleton<IEntityConfigurationTypeFinder>.Instance = entityConfigurationTypeFinder;
-
 			services.AddLogging();
-
-			var section = GetConfiguration().GetSection("DbContexts");
-			EntityFrameworkOptions.EntityFrameworkOptionDict =
-				section.Get<Dictionary<string, EntityFrameworkOptions>>();
-			if (EntityFrameworkOptions.EntityFrameworkOptionDict == null ||
-			    EntityFrameworkOptions.EntityFrameworkOptionDict.Count == 0)
-			{
-				throw new MSFrameworkException("未能找到数据上下文配置");
-			}
-
-			var provider = services.BuildServiceProvider();
-			var factory = new DbContextFactory(provider);
-			factory.SetDesignTimeDbContext();
-			return factory.GetDbContext(typeof(TDbContext)) as TDbContext;
-		}
-
-		protected virtual IConfiguration GetConfiguration()
-		{
-			var path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "appsettings.Development.json");
-			if (!File.Exists(path))
-			{
-				path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "appsettings.json");
-			}
-
-			if (!File.Exists(path))
-			{
-				throw new MSFrameworkException("Can't find any appsettings.json");
-			}
-
-			Console.WriteLine("Config: " + path);
-			var configuration =
-				new ConfigurationBuilder().AddJsonFile(path, true, true).Build();
-			return configuration;
+			services.AddEntityFramework();
+			Configure(services);
+			var context = services.BuildServiceProvider().GetRequiredService<TDbContext>();
+			Console.WriteLine("Create context success");
+			return context;
 		}
 
 		protected abstract void Configure(IServiceCollection services);

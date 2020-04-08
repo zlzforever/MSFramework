@@ -1,9 +1,11 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using MSFramework.Data;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using MSFramework.Audit;
 using MSFramework.Common;
 using MSFramework.Domain;
@@ -21,43 +23,42 @@ namespace MSFramework.Ef
 		}
 
 		public static MSFrameworkBuilder AddEntityFramework(this MSFrameworkBuilder builder,
-			Action<EntityFrameworkBuilder> configure, IConfiguration configuration)
+			Action<EntityFrameworkBuilder> configure)
 		{
-			configuration.NotNull(nameof(configuration));
-
 			var eBuilder = new EntityFrameworkBuilder(builder.Services);
 			configure?.Invoke(eBuilder);
 
-			var section = configuration.GetSection("DbContexts");
-			EntityFrameworkOptions.EntityFrameworkOptionDict =
-				section.Get<Dictionary<string, EntityFrameworkOptions>>();
-			if (EntityFrameworkOptions.EntityFrameworkOptionDict == null ||
-			    EntityFrameworkOptions.EntityFrameworkOptionDict.Count == 0)
-			{
-				throw new MSFrameworkException("未能找到数据上下文配置");
-			}
-
-			var repeated = EntityFrameworkOptions.EntityFrameworkOptionDict.Values.GroupBy(m => m.DbContextType)
-				.FirstOrDefault(m => m.Count() > 1);
-			if (repeated != null)
-			{
-				throw new MSFrameworkException($"数据上下文配置中存在多个配置节点指向同一个上下文类型：{repeated.First().DbContextTypeName}");
-			}
-
-			if (Singleton<IEntityConfigurationTypeFinder>.Instance == null)
-			{
-				Singleton<IEntityConfigurationTypeFinder>.Instance = new EntityConfigurationTypeFinder();
-			}
-
-			Singleton<IEntityConfigurationTypeFinder>.Instance.Initialize();
-
-			builder.Services.AddScoped<DbContextFactory>();
-			builder.Services.AddScoped<IUnitOfWorkManager, UnitOfWorkManager>();
-			builder.Services.AddScoped(typeof(IRepository<>), typeof(EfRepository<>));
-			builder.Services.AddScoped(typeof(IRepository<,>), typeof(EfRepository<,>));
-			builder.Services.AddScoped(typeof(EfRepository<>), typeof(EfRepository<>));
-			builder.Services.AddScoped(typeof(EfRepository<,>), typeof(EfRepository<,>));
+			builder.Services.AddEntityFramework();
 			return builder;
+		}
+
+		public static IServiceCollection AddEntityFramework(this IServiceCollection services)
+		{
+			services.AddEntityFrameworkOptionDict();
+			services.AddSingleton<IEntityConfigurationTypeFinder, EntityConfigurationTypeFinder>(provider =>
+			{
+				var finder =
+					new EntityConfigurationTypeFinder(provider
+						.GetRequiredService<ILogger<EntityConfigurationTypeFinder>>());
+				finder.Initialize();
+				return finder;
+			});
+			services.AddScoped<DbContextFactory>();
+			services.AddScoped<IUnitOfWorkManager, UnitOfWorkManager>();
+			services.AddScoped(typeof(IRepository<>), typeof(EfRepository<>));
+			services.AddScoped(typeof(IRepository<,>), typeof(EfRepository<,>));
+			services.AddScoped(typeof(EfRepository<>), typeof(EfRepository<>));
+			services.AddScoped(typeof(EfRepository<,>), typeof(EfRepository<,>));
+			return services;
+		}
+
+		internal static void AddEntityFrameworkOptionDict(this IServiceCollection services)
+		{
+			services.AddSingleton(provider =>
+			{
+				var configuration = provider.GetRequiredService<IConfiguration>();
+				return EntityFrameworkOptionDict.LoadFrom(configuration);
+			});
 		}
 	}
 }
