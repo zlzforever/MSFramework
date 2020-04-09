@@ -47,5 +47,7 @@ namespace MSFramework.Ef
 		/// 获取或设置 是否自动迁移
 		/// </summary>
 		public bool AutoMigrationEnabled { get; set; }
+		
+		public bool EnableSensitiveDataLogging { get; set; }
 	}
 }

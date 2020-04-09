@@ -14,7 +14,7 @@ namespace Ordering.Domain.AggregateRoot
 		// Using a private collection field, better for DDD Aggregate's encapsulation
 		// so OrderItems cannot be added from "outside the AggregateRoot" directly to the collection,
 		// but only through the method OrderAggrergateRoot.AddOrderItem() which includes behaviour.
-		public ICollection<OrderItem> OrderItems { get; private set; }
+		public virtual ICollection<OrderItem> OrderItems { get; private set; } = new List<OrderItem>();
 
 		// DDD Patterns comment
 		// Using private fields, allowed since EF Core 1.1, is a much better encapsulation

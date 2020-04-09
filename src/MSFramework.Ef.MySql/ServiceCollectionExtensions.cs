@@ -66,8 +66,16 @@ namespace MSFramework.Ef.MySql
 					throw new ArgumentException("DbContextType is not correct");
 				}
 
-				// todo: config 
-				x.EnableSensitiveDataLogging();
+				if (option.EnableSensitiveDataLogging)
+				{
+					x.EnableSensitiveDataLogging();
+				}
+
+				if (option.LazyLoadingProxiesEnabled)
+				{
+					x.UseLazyLoadingProxies();
+				}
+
 				x.UseMySql(option.ConnectionString, options =>
 				{
 					options.MigrationsAssembly(entryAssemblyName);

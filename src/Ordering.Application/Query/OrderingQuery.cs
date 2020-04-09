@@ -18,9 +18,18 @@ namespace Ordering.Application.Query
 			_orderSet = _context.Set<Order>();
 		}
 
-		public Task<List<Order>> GetAllOrdersAsync()
+		public async Task<List<Order>> GetAllOrdersAsync()
 		{
-			return _orderSet.AsNoTracking().ToListAsync();
+			var result = await _orderSet.ToListAsync();
+			foreach (var item in result)
+			{
+				foreach (var orderItem in item.OrderItems)
+				{
+					Console.WriteLine(orderItem.ToString());
+				}
+			}
+
+			return result;
 		}
 
 		public async Task<Order> GetOrderAsync(Guid orderId)
