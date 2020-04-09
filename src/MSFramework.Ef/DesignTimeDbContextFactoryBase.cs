@@ -1,11 +1,8 @@
-using System;
-using System.Collections.Generic;
-using System.IO;
+using EventBus.DependencyInjection;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using MSFramework.Common;
+using MSFramework.Domain;
 
 namespace MSFramework.Ef
 {
@@ -24,13 +21,20 @@ namespace MSFramework.Ef
 		{
 			var services = new ServiceCollection();
 			services.AddLogging();
+			services.AddEventBus();
+			services.AddScoped<IMSFrameworkSession, FakeMSFrameworkSession>();
 			services.AddEntityFramework();
 			Configure(services);
 			var context = services.BuildServiceProvider().GetRequiredService<TDbContext>();
-			Console.WriteLine("Create context success");
 			return context;
 		}
 
 		protected abstract void Configure(IServiceCollection services);
+
+		class FakeMSFrameworkSession : IMSFrameworkSession
+		{
+			public string UserId { get; }
+			public string UserName { get; }
+		}
 	}
 }

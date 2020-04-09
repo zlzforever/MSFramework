@@ -11,8 +11,7 @@ namespace Template.API
 	{
 		protected override void Configure(IServiceCollection services)
 		{
-			Console.WriteLine("Configure mysql dbcontext builder creator");
-			services.AddMySqlDbContextOptionsBuilderCreator();
+			services.AddMySql<AppDbContext>(false);
 		}
 	}
 }

@@ -11,7 +11,7 @@ namespace Ordering.Infrastructure.Migrations
                 name: "AuditOperation",
                 columns: table => new
                 {
-                    Id = table.Column<Guid>(nullable: false),
+                    Id = table.Column<Guid>(nullable: false, comment: "唯一标识"),
                     UserId = table.Column<string>(maxLength: 255, nullable: true),
                     UserName = table.Column<string>(maxLength: 255, nullable: true),
                     NickName = table.Column<string>(maxLength: 255, nullable: true),
@@ -33,13 +33,13 @@ namespace Ordering.Infrastructure.Migrations
                 name: "Function",
                 columns: table => new
                 {
-                    Id = table.Column<Guid>(nullable: false),
-                    CreationTime = table.Column<DateTimeOffset>(nullable: false),
-                    CreationUserId = table.Column<string>(maxLength: 255, nullable: false),
-                    CreationUserName = table.Column<string>(maxLength: 255, nullable: false),
-                    LastModificationUserId = table.Column<string>(maxLength: 255, nullable: true),
-                    LastModificationUserName = table.Column<string>(maxLength: 255, nullable: true),
-                    LastModificationTime = table.Column<DateTimeOffset>(nullable: true),
+                    Id = table.Column<Guid>(nullable: false, comment: "唯一标识"),
+                    CreationTime = table.Column<DateTimeOffset>(nullable: false, comment: "创建时间"),
+                    CreationUserId = table.Column<string>(maxLength: 255, nullable: false, comment: "创建用户标识"),
+                    CreationUserName = table.Column<string>(maxLength: 255, nullable: false, comment: "创建用户名称"),
+                    LastModificationUserId = table.Column<string>(maxLength: 255, nullable: true, comment: "最后修改者标识"),
+                    LastModificationUserName = table.Column<string>(maxLength: 255, nullable: true, comment: "最后修改者名称"),
+                    LastModificationTime = table.Column<DateTimeOffset>(nullable: true, comment: "最后修改时间"),
                     Enabled = table.Column<bool>(nullable: false),
                     Name = table.Column<string>(maxLength: 255, nullable: true),
                     Path = table.Column<string>(maxLength: 255, nullable: false),
@@ -57,14 +57,14 @@ namespace Ordering.Infrastructure.Migrations
                 name: "Order",
                 columns: table => new
                 {
-                    Id = table.Column<Guid>(nullable: false),
+                    Id = table.Column<Guid>(nullable: false, comment: "唯一标识"),
                     CreationTime = table.Column<DateTimeOffset>(nullable: false),
                     Address_Street = table.Column<string>(nullable: true),
                     Address_City = table.Column<string>(nullable: true),
                     Address_State = table.Column<string>(nullable: true),
                     Address_Country = table.Column<string>(nullable: true),
                     Address_ZipCode = table.Column<string>(nullable: true),
-                    OrderStatus = table.Column<int>(nullable: false),
+                    OrderStatus = table.Column<int>(nullable: false, comment: "状态"),
                     UserId = table.Column<string>(nullable: false),
                     Description = table.Column<string>(nullable: true),
                     IsDeleted = table.Column<bool>(nullable: false)
@@ -72,13 +72,14 @@ namespace Ordering.Infrastructure.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Order", x => x.Id);
-                });
+                },
+                comment: "订单表");
 
             migrationBuilder.CreateTable(
                 name: "AuditEntity",
                 columns: table => new
                 {
-                    Id = table.Column<Guid>(nullable: false),
+                    Id = table.Column<Guid>(nullable: false, comment: "唯一标识"),
                     OperationId = table.Column<Guid>(nullable: false),
                     Name = table.Column<string>(maxLength: 255, nullable: true),
                     DisplayName = table.Column<string>(maxLength: 255, nullable: true),
@@ -101,7 +102,7 @@ namespace Ordering.Infrastructure.Migrations
                 name: "OrderItem",
                 columns: table => new
                 {
-                    Id = table.Column<Guid>(nullable: false),
+                    Id = table.Column<Guid>(nullable: false, comment: "唯一标识"),
                     ProductName = table.Column<string>(nullable: false),
                     PictureUrl = table.Column<string>(nullable: true),
                     UnitPrice = table.Column<decimal>(nullable: false),
@@ -125,7 +126,7 @@ namespace Ordering.Infrastructure.Migrations
                 name: "AuditProperty",
                 columns: table => new
                 {
-                    Id = table.Column<Guid>(nullable: false),
+                    Id = table.Column<Guid>(nullable: false, comment: "唯一标识"),
                     AuditEntityId = table.Column<Guid>(nullable: false),
                     EntityKey = table.Column<string>(maxLength: 64, nullable: true),
                     DisplayName = table.Column<string>(maxLength: 255, nullable: true),

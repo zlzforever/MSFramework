@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using EventBus.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection;
@@ -15,7 +16,18 @@ namespace MSFramework
 	{
 		public static MSFrameworkBuilder AddEventBus(this MSFrameworkBuilder builder, params Type[] eventTypes)
 		{
-			builder.Services.AddEventBus(eventTypes);
+			var asm = typeof(MSFrameworkBuilder).Assembly;
+			if (eventTypes.Any(x => x.Assembly != asm))
+			{
+				var list = new List<Type>(eventTypes);
+				list.Add(typeof(MSFrameworkBuilder));
+				builder.Services.AddEventBus(list.ToArray());
+			}
+			else
+			{
+				builder.Services.AddEventBus(eventTypes);
+			}
+
 			return builder;
 		}
 
@@ -24,6 +36,8 @@ namespace MSFramework
 		{
 			var builder = new MSFrameworkBuilder(services);
 			builderAction?.Invoke(builder);
+
+			builder.AddEventBus(typeof(MSFrameworkBuilder));
 
 			//初始化所有程序集查找器，如需更改程序集查找逻辑，请事先赋予自定义查找器的实例
 			if (Singleton<IAssemblyFinder>.Instance == null)

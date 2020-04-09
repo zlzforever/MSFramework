@@ -1,13 +1,8 @@
 ﻿using System;
-using System.Collections.Concurrent;
-using System.Collections.Generic;
-using System.Linq;
-using MSFramework.Data;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using MSFramework.Audit;
-using MSFramework.Common;
 using MSFramework.Domain;
 using MSFramework.Domain.Repository;
 using MSFramework.Ef.Audit;
@@ -57,7 +52,7 @@ namespace MSFramework.Ef
 			services.AddSingleton(provider =>
 			{
 				var configuration = provider.GetRequiredService<IConfiguration>();
-				return EntityFrameworkOptionDict.LoadFrom(configuration);
+				return EntityFrameworkOptionsStore.LoadFrom(configuration);
 			});
 		}
 	}

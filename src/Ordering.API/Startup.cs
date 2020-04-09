@@ -42,14 +42,11 @@ namespace Ordering.API
 					x.Filters.Add<UnitOfWork>();
 					x.Filters.Add<FunctionFilter>();
 				})
-				
 				.AddNewtonsoftJson()
 				.ConfigureApiBehaviorOptions(x =>
 				{
 					x.InvalidModelStateResponseFactory = InvalidModelStateResponseFactory.Instance;
 				});
-
-			IMvcBuilder builder;
 
 			services.AddSwaggerGen(c =>
 			{
@@ -103,7 +100,7 @@ namespace Ordering.API
 			app.UseSwagger();
 			//启用中间件服务对swagger-ui，指定Swagger JSON终结点
 			app.UseSwaggerUI(c => { c.SwaggerEndpoint("/swagger/v1.0/swagger.json", "Ordering API V1.0"); });
-			
+
 			app.UseMSFramework();
 		}
 	}

@@ -7,7 +7,7 @@ using Ordering.Domain.AggregateRoot.Event;
 
 namespace Ordering.Domain.AggregateRoot
 {
-	[DisplayName("订单")]
+	[Description("订单表")]
 	public class Order : AggregateRootBase
 	{
 		// DDD Patterns comment
@@ -21,10 +21,17 @@ namespace Ordering.Domain.AggregateRoot
 		// aligned with DDD Aggregates and Domain Entities (Instead of properties and property collections)
 		public DateTimeOffset CreationTime { get; private set; }
 
-		// Address is a Value Object pattern example persisted as EF Core 2.0 owned entity
-		[DisplayName("地址")] public virtual Address Address { get; private set; }
+		/// <summary>
+		/// Address is a Value Object pattern example persisted as EF Core 2.0 owned entity
+		/// </summary>
+		[Description("地址")]
+		public virtual Address Address { get; private set; }
 
-		[DisplayName("状态")] public OrderStatus OrderStatus { get; private set; }
+		/// <summary>
+		/// 
+		/// </summary>
+		[Description("状态")]
+		public OrderStatus OrderStatus { get; private set; }
 
 		public string UserId { get; private set; }
 

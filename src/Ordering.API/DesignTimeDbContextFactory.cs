@@ -1,6 +1,3 @@
-using System;
-using System.IO;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using MSFramework.Ef;
 using MSFramework.Ef.MySql;
@@ -12,7 +9,7 @@ namespace Ordering.API
 	{
 		protected override void Configure(IServiceCollection services)
 		{
-			services.AddMySql<OrderingContext>();
+			services.AddMySql<OrderingContext>(false);
 		}
 	}
 }

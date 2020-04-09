@@ -5,7 +5,7 @@ namespace MSFramework.Data
 	/// <summary>
 	/// 参数合法性检查类
 	/// </summary>
-	public static class Checker
+	public static class Check
 	{
 		/// <summary>
 		/// 检查参数不能为空引用，否则抛出<see cref="ArgumentNullException"/>异常。

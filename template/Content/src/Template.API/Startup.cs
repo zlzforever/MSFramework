@@ -19,6 +19,7 @@ using Template.Application;
 using Template.Application.Extensions;
 using Template.Domain;
 using Template.Domain.AggregateRoot;
+using Template.Infrastructure;
 
 namespace Template.API
 {
@@ -81,7 +82,6 @@ namespace Template.API
 					x.CallbackPath = new PathString("/signin-oidc");
 				});
 
-			// services.AddGrpc();
 			services.AddScoped<AppOptions>();
 			services.AddMSFramework(builder =>
 			{
@@ -90,12 +90,12 @@ namespace Template.API
 				builder.AddAspNetCoreFunction<EfFunctionStore>();
 				builder.AddEfAuditStore();
 				builder.AddAutoMapper(typeof(AppOptions), typeof(AutoMapperProfile));
-				builder.AddMySqlDatabaseMigration();
+				// builder.AddMySqlDatabaseMigration();
 				builder.AddEntityFramework(ef =>
 				{
 					// 添加 MyServer 支持
-					ef.AddMySqlDbContextOptionsBuilderCreator();
-				}, Configuration);
+					ef.AddMySql<AppDbContext>();
+				});
 			});
 		}
 
@@ -104,8 +104,8 @@ namespace Template.API
 		{
 			app.UseMSFramework(x =>
 			{
-				var options = new AppOptions(Configuration);
-				x.UseMySqlDatabaseMigration(typeof(Class1), options.DefaultConnectionString);
+				// var options = new AppOptions(Configuration);
+				// x.UseMySqlDatabaseMigration(typeof(Class1), options.DefaultConnectionString);
 			});
 
 			// 必须放在 UseMSFramework 后面

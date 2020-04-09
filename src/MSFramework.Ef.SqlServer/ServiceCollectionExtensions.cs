@@ -1,5 +1,4 @@
 using System;
-using System.Runtime.InteropServices;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -29,8 +28,8 @@ namespace MSFramework.Ef.SqlServer
 				}
 
 				var configuration = configurationBuilder.Build();
-				var dict = EntityFrameworkOptionDict.LoadFrom(configuration);
-				var option = dict.Value[dbContextType.Name];
+				var store = EntityFrameworkOptionsStore.LoadFrom(configuration);
+				var option = store.Get(dbContextType);
 				if (option.DbContextType != dbContextType)
 				{
 					throw new ArgumentException("DbContextType is not correct");

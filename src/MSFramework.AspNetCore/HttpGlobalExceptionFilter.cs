@@ -1,8 +1,6 @@
-using System;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.Extensions.Logging;
-using MSFramework.Application;
 using MSFramework.Http;
 
 namespace MSFramework.AspNetCore

@@ -16,14 +16,14 @@ namespace MSFramework.Ef
 		public override void Initialize(IServiceProvider serviceProvider)
 		{
 			var dbContextFactory = serviceProvider.GetRequiredService<DbContextFactory>();
-			var dict = serviceProvider.GetRequiredService<EntityFrameworkOptionDict>();
-			foreach (var kv in dict.Value)
+			var entityFrameworkOptionsStore = serviceProvider.GetRequiredService<EntityFrameworkOptionsStore>();
+			foreach (var option in entityFrameworkOptionsStore.GetAllOptions())
 			{
-				var useTrans = kv.Value.UseTransaction;
-				if (kv.Value.AutoMigrationEnabled)
+				var useTrans = option.UseTransaction;
+				if (option.AutoMigrationEnabled)
 				{
-					kv.Value.UseTransaction = false;
-					var dbContext = dbContextFactory.Create(kv.Value);
+					option.UseTransaction = false;
+					var dbContext = dbContextFactory.Create(option);
 					if (dbContext == null)
 					{
 						continue;
@@ -40,7 +40,7 @@ namespace MSFramework.Ef
 						logger.LogInformation($"已提交{migrations.Length}条挂起的迁移记录：{migrations.ExpandAndToString()}");
 					}
 
-					kv.Value.UseTransaction = useTrans;
+					option.UseTransaction = useTrans;
 				}
 			}
 		}

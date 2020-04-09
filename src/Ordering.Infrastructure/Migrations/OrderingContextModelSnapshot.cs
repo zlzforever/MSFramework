@@ -20,7 +20,8 @@ namespace Ordering.Infrastructure.Migrations
             modelBuilder.Entity("MSFramework.Audit.AuditEntity", b =>
                 {
                     b.Property<Guid>("Id")
-                        .HasColumnType("char(36)");
+                        .HasColumnType("char(36)")
+                        .HasComment("唯一标识");
 
                     b.Property<string>("DisplayName")
                         .HasColumnType("varchar(255) CHARACTER SET utf8mb4")
@@ -54,7 +55,8 @@ namespace Ordering.Infrastructure.Migrations
             modelBuilder.Entity("MSFramework.Audit.AuditOperation", b =>
                 {
                     b.Property<Guid>("Id")
-                        .HasColumnType("char(36)");
+                        .HasColumnType("char(36)")
+                        .HasComment("唯一标识");
 
                     b.Property<DateTimeOffset>("CreatedTime")
                         .HasColumnType("datetime(6)");
@@ -105,7 +107,8 @@ namespace Ordering.Infrastructure.Migrations
             modelBuilder.Entity("MSFramework.Audit.AuditProperty", b =>
                 {
                     b.Property<Guid>("Id")
-                        .HasColumnType("char(36)");
+                        .HasColumnType("char(36)")
+                        .HasComment("唯一标识");
 
                     b.Property<Guid>("AuditEntityId")
                         .HasColumnType("char(36)");
@@ -142,7 +145,8 @@ namespace Ordering.Infrastructure.Migrations
             modelBuilder.Entity("MSFramework.Function.Function", b =>
                 {
                     b.Property<Guid>("Id")
-                        .HasColumnType("char(36)");
+                        .HasColumnType("char(36)")
+                        .HasComment("唯一标识");
 
                     b.Property<bool>("AuditEntityEnabled")
                         .HasColumnType("tinyint(1)");
@@ -151,16 +155,19 @@ namespace Ordering.Infrastructure.Migrations
                         .HasColumnType("tinyint(1)");
 
                     b.Property<DateTimeOffset>("CreationTime")
-                        .HasColumnType("datetime(6)");
+                        .HasColumnType("datetime(6)")
+                        .HasComment("创建时间");
 
                     b.Property<string>("CreationUserId")
                         .IsRequired()
                         .HasColumnType("varchar(255) CHARACTER SET utf8mb4")
+                        .HasComment("创建用户标识")
                         .HasMaxLength(255);
 
                     b.Property<string>("CreationUserName")
                         .IsRequired()
                         .HasColumnType("varchar(255) CHARACTER SET utf8mb4")
+                        .HasComment("创建用户名称")
                         .HasMaxLength(255);
 
                     b.Property<string>("Description")
@@ -174,14 +181,17 @@ namespace Ordering.Infrastructure.Migrations
                         .HasColumnType("tinyint(1)");
 
                     b.Property<DateTimeOffset?>("LastModificationTime")
-                        .HasColumnType("datetime(6)");
+                        .HasColumnType("datetime(6)")
+                        .HasComment("最后修改时间");
 
                     b.Property<string>("LastModificationUserId")
                         .HasColumnType("varchar(255) CHARACTER SET utf8mb4")
+                        .HasComment("最后修改者标识")
                         .HasMaxLength(255);
 
                     b.Property<string>("LastModificationUserName")
                         .HasColumnType("varchar(255) CHARACTER SET utf8mb4")
+                        .HasComment("最后修改者名称")
                         .HasMaxLength(255);
 
                     b.Property<string>("Name")
@@ -206,7 +216,8 @@ namespace Ordering.Infrastructure.Migrations
             modelBuilder.Entity("Ordering.Domain.AggregateRoot.Order", b =>
                 {
                     b.Property<Guid>("Id")
-                        .HasColumnType("char(36)");
+                        .HasColumnType("char(36)")
+                        .HasComment("唯一标识");
 
                     b.Property<DateTimeOffset>("CreationTime")
                         .HasColumnType("datetime(6)");
@@ -218,7 +229,8 @@ namespace Ordering.Infrastructure.Migrations
                         .HasColumnType("tinyint(1)");
 
                     b.Property<int>("OrderStatus")
-                        .HasColumnType("int");
+                        .HasColumnType("int")
+                        .HasComment("状态");
 
                     b.Property<string>("UserId")
                         .IsRequired()
@@ -227,12 +239,15 @@ namespace Ordering.Infrastructure.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Order");
+
+                    b.HasComment("订单表");
                 });
 
             modelBuilder.Entity("Ordering.Domain.AggregateRoot.OrderItem", b =>
                 {
                     b.Property<Guid>("Id")
-                        .HasColumnType("char(36)");
+                        .HasColumnType("char(36)")
+                        .HasComment("唯一标识");
 
                     b.Property<decimal>("Discount")
                         .HasColumnType("decimal(65,30)");
