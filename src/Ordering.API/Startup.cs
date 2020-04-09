@@ -10,6 +10,7 @@ using MSFramework.Common;
 using MSFramework.Ef;
 using MSFramework.Ef.Function;
 using MSFramework.Ef.MySql;
+using MSFramework.MySql;
 using Ordering.Application.Event;
 using Ordering.Infrastructure;
 
@@ -62,6 +63,8 @@ namespace Ordering.API
 				builder.AddAspNetCoreFunction<EfFunctionStore>();
 				builder.AddEfAuditStore();
 				// builder.AddPermission();
+				builder.AddDatabaseMigration<MySqlDatabaseMigration>(typeof(OrderingContext),
+					"Database='ordering';Data Source=localhost;User ID=root;Password=1qazZAQ!;Port=3306;");
 				builder.AddEntityFramework(x =>
 				{
 					// 添加 MySql 支持

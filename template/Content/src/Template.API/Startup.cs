@@ -90,7 +90,8 @@ namespace Template.API
 				builder.AddAspNetCoreFunction<EfFunctionStore>();
 				builder.AddEfAuditStore();
 				builder.AddAutoMapper(typeof(AppOptions), typeof(AutoMapperProfile));
-				// builder.AddMySqlDatabaseMigration();
+				builder.AddDatabaseMigration<MySqlDatabaseMigration>(typeof(AppDbContext),
+					"Database='template';Data Source=localhost;password=1qazZAQ!;User ID=root;Port=3306;Allow User Variables=true");
 				builder.AddEntityFramework(ef =>
 				{
 					// 添加 MyServer 支持
@@ -102,11 +103,7 @@ namespace Template.API
 		// This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
 		public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
 		{
-			app.UseMSFramework(x =>
-			{
-				// var options = new AppOptions(Configuration);
-				// x.UseMySqlDatabaseMigration(typeof(Class1), options.DefaultConnectionString);
-			});
+			app.UseMSFramework();
 
 			// 必须放在 UseMSFramework 后面
 			var exit = Configuration["exit"] == "true";

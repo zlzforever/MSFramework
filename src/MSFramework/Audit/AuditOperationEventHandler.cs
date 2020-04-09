@@ -21,7 +21,6 @@ namespace MSFramework.Audit
 			using var scope = _serviceProvider.CreateScope();
 			var auditStore = scope.ServiceProvider.GetRequiredService<IAuditStore>();
 			await auditStore.SaveAsync(@event.AuditOperation);
-			scope.ServiceProvider.GetRequiredService<IUnitOfWorkManager>().CommitAsync().GetAwaiter();
 		}
 	}
 }

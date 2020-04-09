@@ -77,6 +77,7 @@ namespace MSFramework.Ef
 
 			//创建上下文实例
 			context = (DbContextBase) _serviceProvider.GetRequiredService(dbContextType);
+			context.SetServiceProvider(_serviceProvider);
 
 			if (resolveOptions.UseTransaction && context.Database.CurrentTransaction == null)
 			{
@@ -98,6 +99,8 @@ namespace MSFramework.Ef
 			{
 				kv.Value.Dispose();
 			}
+
+			_dbContextDict.Clear();
 		}
 	}
 }

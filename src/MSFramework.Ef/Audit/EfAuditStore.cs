@@ -16,6 +16,7 @@ namespace MSFramework.Ef.Audit
 		public async Task SaveAsync(AuditOperation operationEntry)
 		{
 			await _repository.InsertAsync(operationEntry);
+			await _repository.UnitOfWork.CommitAsync();
 		}
 	}
 }

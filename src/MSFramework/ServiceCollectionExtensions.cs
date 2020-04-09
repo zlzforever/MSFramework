@@ -72,20 +72,41 @@ namespace MSFramework
 			Action<IMSFrameworkApplicationBuilder> configure = null)
 		{
 			Initialize(applicationServices);
+
+			ExecuteDatabaseMigration(applicationServices);
+
 			var builder = new MSFrameworkApplicationBuilder(applicationServices);
 			configure?.Invoke(builder);
 
 			applicationServices.UseEventBus();
 			return builder;
 		}
+		
+		public static MSFrameworkBuilder AddDatabaseMigration<T>(this MSFrameworkBuilder builder, Type type,
+			string connectionString) where T : DatabaseMigration
+		{
+			builder.Services.AddScoped<IDatabaseMigration>(provider =>
+				ActivatorUtilities.CreateInstance<T>(provider, type, connectionString));
+			return builder;
+		}
 
 		private static void Initialize(IServiceProvider applicationServices)
 		{
-			var initializers = applicationServices.GetServices<Initializer>().OrderBy(x => x.Order).ToList();
+			using var scope = applicationServices.CreateScope();
+			var initializers = scope.ServiceProvider.GetServices<Initializer>().OrderBy(x => x.Order).ToList();
 			foreach (var initializer in initializers)
 			{
-				using var scope = applicationServices.CreateScope();
 				initializer.Initialize(scope.ServiceProvider);
+			}
+		}
+
+		private static void ExecuteDatabaseMigration(IServiceProvider serviceProvider)
+		{
+			using var scope = serviceProvider.CreateScope();
+			var migrations = scope.ServiceProvider.GetServices<IDatabaseMigration>();
+			foreach (var migration in migrations)
+			{
+				migration.Execute();
 			}
 		}
 	}

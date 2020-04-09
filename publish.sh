@@ -1,5 +1,4 @@
 #!/usr/bin/env bash
-source ~/.bash_profile
 echo $NUGET_SERVER
 rm -rf src/MSFramework/bin/Release
 rm -rf src/MSFramework.AspNetCore/bin/Release

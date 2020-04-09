@@ -1,3 +1,4 @@
+using System;
 using System.ComponentModel;
 using System.Linq;
 using System.Reflection;
@@ -7,9 +8,11 @@ using EventBus;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using MSFramework.Audit;
 using MSFramework.Collections.Generic;
+using MSFramework.Data;
 using MSFramework.Domain;
 using MSFramework.Extensions;
 
@@ -18,8 +21,13 @@ namespace MSFramework.Ef
 	public abstract class DbContextBase : DbContext, IUnitOfWork
 	{
 		private ILogger _logger;
-		private IEventBus _eventBus;
-		private IMSFrameworkSession _session;
+		private IServiceProvider _serviceProvider;
+
+		internal void SetServiceProvider(IServiceProvider serviceProvider)
+		{
+			serviceProvider.NotNull(nameof(serviceProvider));
+			_serviceProvider = serviceProvider;
+		}
 
 		/// <summary>
 		/// 初始化一个<see cref="DbContextBase"/>类型的新实例
@@ -35,20 +43,18 @@ namespace MSFramework.Ef
 		/// <param name="modelBuilder">上下文数据模型构建器</param>
 		protected override void OnModelCreating(ModelBuilder modelBuilder)
 		{
-			_session = Database.GetService<IMSFrameworkSession>();
-			_eventBus = Database.GetService<IEventBus>();
 			_logger = Database.GetService<ILoggerFactory>().CreateLogger(GetType());
-			
+
 			//通过实体配置信息将实体注册到当前上下文
 			var contextType = GetType();
 			var registers = Database.GetService<IEntityConfigurationTypeFinder>().GetEntityRegisters(contextType);
 			foreach (var register in registers)
 			{
 				register.RegisterTo(modelBuilder);
-				_logger?.LogDebug($"将实体类“{register.EntityType}”注册到上下文“{contextType}”中");
+				_logger.LogDebug($"将实体类“{register.EntityType}”注册到上下文“{contextType}”中");
 			}
 
-			_logger?.LogInformation($"上下文“{contextType}”注册了{registers.Length}个实体类");
+			_logger.LogInformation($"上下文“{contextType}”注册了{registers.Length}个实体类");
 		}
 
 		/// <summary>
@@ -80,10 +86,13 @@ namespace MSFramework.Ef
 					return 0;
 				}
 
-				ApplyConcepts();
+				var eventBus = ApplyConcepts();
 
-				// todo: 同步异步混用是否会死锁
-				HandleDomainEventsAsync().GetAwaiter().GetResult();
+				if (eventBus != null)
+				{
+					// todo: 同步异步混用是否会死锁
+					HandleDomainEventsAsync(eventBus).GetAwaiter().GetResult();
+				}
 
 				var effectCount = base.SaveChanges();
 				Database.CurrentTransaction?.Commit();
@@ -131,9 +140,12 @@ namespace MSFramework.Ef
 					return 0;
 				}
 
-				ApplyConcepts();
+				var eventBus = ApplyConcepts();
 
-				await HandleDomainEventsAsync();
+				if (eventBus != null)
+				{
+					await HandleDomainEventsAsync(eventBus);
+				}
 
 				var effectedCount = await base.SaveChangesAsync(cancellationToken);
 				Database.CurrentTransaction?.Commit();
@@ -146,13 +158,8 @@ namespace MSFramework.Ef
 			}
 		}
 
-		private async Task HandleDomainEventsAsync()
+		private async Task HandleDomainEventsAsync(IEventBus eventBus)
 		{
-			if (_eventBus == null)
-			{
-				return;
-			}
-
 			// Dispatch Domain Events collection. 
 			// Choices:
 			// A) Right BEFORE committing data (EF SaveChanges) into the DB will make a single transaction including  
@@ -172,7 +179,7 @@ namespace MSFramework.Ef
 
 			foreach (var @event in domainEvents)
 			{
-				await _eventBus.PublishAsync(@event);
+				await eventBus.PublishAsync(@event);
 			}
 		}
 
@@ -186,17 +193,20 @@ namespace MSFramework.Ef
 			await SaveChangesAsync();
 		}
 
-		protected virtual void ApplyConcepts()
+		protected IEventBus ApplyConcepts()
 		{
-			var scopedDict = Database.GetService<ScopedDictionary>();
+			var eventBus = _serviceProvider.GetService<IEventBus>();
+			var session = _serviceProvider.GetService<IMSFrameworkSession>();
+
+			var scopedDict = _serviceProvider.GetRequiredService<ScopedDictionary>();
 			var audit = false;
-			if (_eventBus != null && scopedDict?.AuditOperation != null && scopedDict.Function != null)
+			if (eventBus != null && scopedDict?.AuditOperation != null && scopedDict.Function != null)
 			{
 				audit = scopedDict.Function.AuditEntityEnabled;
 			}
 
-			var userId = _session?.UserId;
-			var userName = _session?.UserName;
+			var userId = session?.UserId;
+			var userName = session?.UserName;
 
 			foreach (var entry in ChangeTracker.Entries())
 			{
@@ -237,6 +247,8 @@ namespace MSFramework.Ef
 						break;
 				}
 			}
+
+			return eventBus;
 		}
 
 

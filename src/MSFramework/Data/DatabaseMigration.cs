@@ -11,11 +11,13 @@ namespace MSFramework.Data
 {
 	public abstract class DatabaseMigration : IDatabaseMigration
 	{
-		private readonly ILogger _logger;
+		protected readonly ILogger Logger;
+		protected readonly Type Type;
+		protected readonly string ConnectionString;
 
 		protected abstract DataSource DataSource { get; }
 
-		protected virtual string MigrationsHistoryTable => "__migrations_history";
+		protected virtual string MigrationsHistoryTable => "__migrations";
 
 		protected virtual string MigrationsHistorySql => $@"
 create table {MigrationsHistoryTable}
@@ -30,17 +32,19 @@ create table {MigrationsHistoryTable}
 
 		protected abstract DbConnection CreateConnection(string connectionString);
 
-		protected DatabaseMigration(ILogger<DatabaseMigration> logger)
+		protected DatabaseMigration(Type type, string connectionString, ILogger<DatabaseMigration> logger)
 		{
-			_logger = logger;
+			Logger = logger;
+			Type = type;
+			ConnectionString = connectionString;
 		}
 
-		public void Migrate(Type type, string connectionString)
+		public void Execute()
 		{
-			var assembly = type.Assembly;
+			var assembly = Type.Assembly;
 			var pre = $"{assembly.GetName().Name}.DDL.";
 
-			_logger.LogInformation($"Start migrate {DataSource} from assembly '{pre}'");
+			Logger.LogInformation($"Start migrate {DataSource} from assembly '{pre}'");
 
 			var files = assembly.GetManifestResourceNames()
 				.Where(x => x.StartsWith(pre)).ToList();
@@ -61,12 +65,17 @@ create table {MigrationsHistoryTable}
 
 			var numbers = dict.Keys.ToList();
 			numbers.Sort();
-			_logger.LogInformation($"Find sql scripts: {string.Join(",", numbers.Select(y => $"{y}.sql"))}");
+			Logger.LogInformation($"Find DDLs: {string.Join(",", numbers.Select(y => $"{y}.sql"))}");
 
-			PrepareDatabase(connectionString);
-			_logger.LogInformation($"Prepare database success");
+			if (numbers.Count == 0)
+			{
+				return;
+			}
 
-			var conn = CreateConnection(connectionString);
+			PrepareDatabase(ConnectionString);
+			Logger.LogInformation($"Prepare database success");
+
+			var conn = CreateConnection(ConnectionString);
 			try
 			{
 				conn.Execute(MigrationsHistorySql);
@@ -96,7 +105,7 @@ create table {MigrationsHistoryTable}
 						conn.Execute(sql, null, transaction);
 					}
 
-					_logger.LogInformation($"Migrate {number}.sql success");
+					Logger.LogInformation($"Execute DDL {number}.sql success");
 					conn.Execute(InsertMigrationsHistorySql,
 						new
 						{

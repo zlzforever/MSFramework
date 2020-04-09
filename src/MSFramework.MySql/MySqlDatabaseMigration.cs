@@ -1,4 +1,5 @@
-﻿using System.Data.Common;
+﻿using System;
+using System.Data.Common;
 using Dapper;
 using Microsoft.Extensions.Logging;
 using MSFramework.Data;
@@ -8,10 +9,6 @@ namespace MSFramework.MySql
 {
 	public class MySqlDatabaseMigration : DatabaseMigration
 	{
-		public MySqlDatabaseMigration(ILogger<DatabaseMigration> logger) : base(logger)
-		{
-		}
-
 		protected override DataSource DataSource => DataSource.MySql;
 
 		protected override DbConnection CreateConnection(string connectionString)
@@ -27,6 +24,11 @@ namespace MSFramework.MySql
 			using var conn = new MySqlConnection(mySqlConnectionStringBuilder.ToString());
 			conn.Open();
 			conn.Execute($"CREATE DATABASE IF NOT EXISTS `{database}`;");
+		}
+
+		public MySqlDatabaseMigration(Type type, string connectionString, ILogger<MySqlDatabaseMigration> logger) : base(
+			type, connectionString, logger)
+		{
 		}
 	}
 }
