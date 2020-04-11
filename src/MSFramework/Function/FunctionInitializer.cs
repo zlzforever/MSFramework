@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using MSFramework.Common;
@@ -10,7 +11,7 @@ namespace MSFramework.Function
 {
 	public class FunctionInitializer : Initializer
 	{
-		public override void Initialize(IServiceProvider serviceProvider)
+		public override async Task InitializeAsync(IServiceProvider serviceProvider)
 		{
 			var functionFinder = serviceProvider.GetService<IFunctionFinder>();
 			var logger = serviceProvider.GetRequiredService<ILogger<FunctionInitializer>>();
@@ -36,7 +37,8 @@ namespace MSFramework.Function
 			}
 
 			var store = serviceProvider.GetService<IFunctionStore>();
-			var functionsInDatabaseDict = store.GetAllList().ToDictionary(x => x.Path, x => x);
+			var functionsInDatabaseDict = store.GetAllList()
+				.ToDictionary(x => x.Path, x => x);
 
 			// 添加新功能
 			foreach (var kv in functionsInAppDict)
@@ -70,7 +72,7 @@ namespace MSFramework.Function
 				}
 			}
 
-			serviceProvider.GetRequiredService<IUnitOfWorkManager>().CommitAsync().GetAwaiter();
+			await serviceProvider.GetRequiredService<IUnitOfWorkManager>().CommitAsync();
 		}
 	}
 }

@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using EventBus.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection;
 using MSFramework.Collections.Generic;
@@ -71,7 +72,7 @@ namespace MSFramework
 		public static IMSFrameworkApplicationBuilder UseMSFramework(this IServiceProvider applicationServices,
 			Action<IMSFrameworkApplicationBuilder> configure = null)
 		{
-			Initialize(applicationServices);
+			InitializeAsync(applicationServices).GetAwaiter().GetResult();
 
 			ExecuteDatabaseMigration(applicationServices);
 
@@ -81,7 +82,7 @@ namespace MSFramework
 			applicationServices.UseEventBus();
 			return builder;
 		}
-		
+
 		public static MSFrameworkBuilder AddDatabaseMigration<T>(this MSFrameworkBuilder builder, Type type,
 			string connectionString) where T : DatabaseMigration
 		{
@@ -90,13 +91,13 @@ namespace MSFramework
 			return builder;
 		}
 
-		private static void Initialize(IServiceProvider applicationServices)
+		private static async Task InitializeAsync(IServiceProvider applicationServices)
 		{
 			using var scope = applicationServices.CreateScope();
 			var initializers = scope.ServiceProvider.GetServices<Initializer>().OrderBy(x => x.Order).ToList();
 			foreach (var initializer in initializers)
 			{
-				initializer.Initialize(scope.ServiceProvider);
+				await initializer.InitializeAsync(scope.ServiceProvider);
 			}
 		}
 

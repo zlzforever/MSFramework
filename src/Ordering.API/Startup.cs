@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -18,9 +19,10 @@ namespace Ordering.API
 {
 	class MyInitializer : Initializer
 	{
-		public override void Initialize(IServiceProvider builder)
+		public override Task InitializeAsync(IServiceProvider serviceProvider)
 		{
 			Console.WriteLine("HI, I'm a initializer");
+			return Task.CompletedTask;
 		}
 	}
 

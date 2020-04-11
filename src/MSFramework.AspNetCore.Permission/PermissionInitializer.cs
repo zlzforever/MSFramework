@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
 using MSFramework.Common;
 
@@ -8,7 +9,7 @@ namespace MSFramework.AspNetCore.Permission
 {
 	public class PermissionInitializer : Initializer
 	{
-		public override void Initialize(IServiceProvider serviceProvider)
+		public override async Task InitializeAsync(IServiceProvider serviceProvider)
 		{
 			var options = serviceProvider.GetService<PermissionOptions>();
 			if (options == null)
@@ -22,7 +23,7 @@ namespace MSFramework.AspNetCore.Permission
 			}
 
 			var cerberusClient = serviceProvider.GetRequiredService<ICerberusClient>();
-			if (!cerberusClient.ExistsAsync(options.CerberusServiceId).Result)
+			if (!await cerberusClient.ExistsAsync(options.CerberusServiceId))
 			{
 				throw new ApplicationException(
 					$"Service {options.CerberusServiceId} not exists in cerberus or your config is not correct, please create it firstly");
@@ -45,7 +46,7 @@ namespace MSFramework.AspNetCore.Permission
 				}
 			}
 
-			var permissionsExistsDict = cerberusClient.GetPermissionsAsync(options.CerberusServiceId).Result
+			var permissionsExistsDict = (await cerberusClient.GetPermissionsAsync(options.CerberusServiceId))
 				.ToDictionary(x => x.Identification, x => x);
 
 			var renewalIds = new List<string>();
@@ -55,8 +56,7 @@ namespace MSFramework.AspNetCore.Permission
 				var permission = kv.Value;
 				if (!permissionsExistsDict.ContainsKey(permission.Identification))
 				{
-					cerberusClient.AddPermissionAsync(options.CerberusServiceId, permission).GetAwaiter()
-						.GetResult();
+					await cerberusClient.AddPermissionAsync(options.CerberusServiceId, permission);
 				}
 				else
 				{
@@ -69,8 +69,7 @@ namespace MSFramework.AspNetCore.Permission
 
 			if (renewalIds.Count > 0)
 			{
-				cerberusClient.RenewalAsync(options.CerberusServiceId, string.Join(",", renewalIds)).GetAwaiter()
-					.GetResult();
+				await cerberusClient.RenewalAsync(options.CerberusServiceId, string.Join(",", renewalIds));
 			}
 
 			var expiredIds = new List<string>();
@@ -86,8 +85,7 @@ namespace MSFramework.AspNetCore.Permission
 
 			if (expiredIds.Count > 0)
 			{
-				cerberusClient.ExpireAsync(options.CerberusServiceId, string.Join(",", expiredIds)).GetAwaiter()
-					.GetResult();
+				await cerberusClient.ExpireAsync(options.CerberusServiceId, string.Join(",", expiredIds));
 			}
 		}
 	}

@@ -1,5 +1,6 @@
 using System;
 using System.Linq;
+using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.Extensions.DependencyInjection;
@@ -13,7 +14,7 @@ namespace MSFramework.Ef
 	{
 		public override int Order => int.MinValue;
 
-		public override void Initialize(IServiceProvider serviceProvider)
+		public override async Task InitializeAsync(IServiceProvider serviceProvider)
 		{
 			var dbContextFactory = serviceProvider.GetRequiredService<DbContextFactory>();
 			var entityFrameworkOptionsStore = serviceProvider.GetRequiredService<EntityFrameworkOptionsStore>();
@@ -31,10 +32,10 @@ namespace MSFramework.Ef
 
 					if (dbContext.Database.ProviderName == "Microsoft.EntityFrameworkCore.InMemory") continue;
 
-					var migrations = dbContext.Database.GetPendingMigrations().ToArray();
+					var migrations = (await dbContext.Database.GetPendingMigrationsAsync()).ToArray();
 					if (migrations.Length > 0)
 					{
-						dbContext.Database.Migrate();
+						await dbContext.Database.MigrateAsync();
 						ILogger logger = dbContext.GetService<ILoggerFactory>()
 							.CreateLogger<EntityFrameworkInitializer>();
 						logger.LogInformation($"已提交{migrations.Length}条挂起的迁移记录：{migrations.ExpandAndToString()}");

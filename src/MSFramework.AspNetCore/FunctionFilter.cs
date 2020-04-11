@@ -88,7 +88,7 @@ namespace MSFramework.AspNetCore
 				(int) (dict.AuditOperation.EndedTime - dict.AuditOperation.CreatedTime)
 				.TotalMilliseconds;
 			
-			eventBus.PublishAsync(new AuditOperationEvent(dict.AuditOperation)).GetAwaiter();
+			eventBus.PublishAsync(new AuditOperationEvent(dict.AuditOperation)).GetAwaiter().GetResult();
 		}
 	}
 }

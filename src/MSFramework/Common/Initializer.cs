@@ -1,4 +1,5 @@
 using System;
+using System.Threading.Tasks;
 
 namespace MSFramework.Common
 {
@@ -6,6 +7,6 @@ namespace MSFramework.Common
 	{
 		public virtual int Order => 0;
 
-		public abstract void Initialize(IServiceProvider serviceProvider);
+		public abstract Task InitializeAsync(IServiceProvider serviceProvider);
 	}
 }
