@@ -16,8 +16,7 @@ namespace MSFramework.Extensions
 		/// </summary>
 		public static string GetClaimValueFirstOrDefault(this IIdentity identity, string type)
 		{
-			identity.NotNull(nameof(identity));
-			if (!(identity is ClaimsIdentity claimsIdentity))
+			if (identity == null || !(identity is ClaimsIdentity claimsIdentity))
 			{
 				return null;
 			}
@@ -30,8 +29,7 @@ namespace MSFramework.Extensions
 		/// </summary>
 		public static string[] GetClaimValues(this IIdentity identity, string type)
 		{
-			identity.NotNull(nameof(identity));
-			if (!(identity is ClaimsIdentity claimsIdentity))
+			if (identity == null || !(identity is ClaimsIdentity claimsIdentity))
 			{
 				return null;
 			}
@@ -44,16 +42,15 @@ namespace MSFramework.Extensions
 		/// </summary>
 		public static T GetUserId<T>(this IIdentity identity)
 		{
-			identity.NotNull(nameof(identity));
-			if (!(identity is ClaimsIdentity claimsIdentity))
+			if (identity == null || !(identity is ClaimsIdentity claimsIdentity))
 			{
-				return default(T);
+				return default;
 			}
 
 			var value = claimsIdentity.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 			if (value == null)
 			{
-				return default(T);
+				return default;
 			}
 
 			return value.CastTo<T>();
@@ -64,8 +61,7 @@ namespace MSFramework.Extensions
 		/// </summary>
 		public static string GetUserId(this IIdentity identity)
 		{
-			identity.NotNull(nameof(identity));
-			if (!(identity is ClaimsIdentity claimsIdentity))
+			if (identity == null || !(identity is ClaimsIdentity claimsIdentity))
 			{
 				return null;
 			}
@@ -78,8 +74,7 @@ namespace MSFramework.Extensions
 		/// </summary>
 		public static string GetUserName(this IIdentity identity)
 		{
-			identity.NotNull(nameof(identity));
-			if (!(identity is ClaimsIdentity claimsIdentity))
+			if (identity == null || !(identity is ClaimsIdentity claimsIdentity))
 			{
 				return null;
 			}
@@ -92,8 +87,7 @@ namespace MSFramework.Extensions
 		/// </summary>
 		public static string GetEmail(this IIdentity identity)
 		{
-			identity.NotNull(nameof(identity));
-			if (!(identity is ClaimsIdentity claimsIdentity))
+			if (identity == null || !(identity is ClaimsIdentity claimsIdentity))
 			{
 				return null;
 			}
@@ -106,8 +100,7 @@ namespace MSFramework.Extensions
 		/// </summary>
 		public static string GetNickName(this IIdentity identity)
 		{
-			identity.NotNull(nameof(identity));
-			if (!(identity is ClaimsIdentity claimsIdentity))
+			if (identity == null || !(identity is ClaimsIdentity claimsIdentity))
 			{
 				return null;
 			}
@@ -120,8 +113,7 @@ namespace MSFramework.Extensions
 		/// </summary>
 		public static void RemoveClaim(this IIdentity identity, string claimType)
 		{
-			identity.NotNull(nameof(identity));
-			if (!(identity is ClaimsIdentity claimsIdentity))
+			if (identity == null || !(identity is ClaimsIdentity claimsIdentity))
 			{
 				return;
 			}
@@ -140,8 +132,7 @@ namespace MSFramework.Extensions
 		/// </summary>
 		public static string[] GetRoles(this IIdentity identity)
 		{
-			identity.NotNull(nameof(identity));
-			if (!(identity is ClaimsIdentity claimsIdentity))
+			if (identity == null || !(identity is ClaimsIdentity claimsIdentity))
 			{
 				return new string[0];
 			}

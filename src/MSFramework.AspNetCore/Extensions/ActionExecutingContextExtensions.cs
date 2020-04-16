@@ -10,7 +10,7 @@ namespace MSFramework.AspNetCore.Extensions
 			var ip = context.HttpContext.Request.Headers["X-Forwarded-For"].FirstOrDefault();
 			if (string.IsNullOrEmpty(ip))
 			{
-				ip = context.HttpContext.Connection.RemoteIpAddress.ToString();
+				ip = context.HttpContext.Connection.RemoteIpAddress?.ToString();
 			}
 
 			return ip;

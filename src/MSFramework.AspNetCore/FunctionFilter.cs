@@ -10,6 +10,7 @@ using MSFramework.AspNetCore.Extensions;
 using MSFramework.Audit;
 using MSFramework.Extensions;
 using MSFramework.Function;
+using ApplicationException = MSFramework.Application.ApplicationException;
 
 namespace MSFramework.AspNetCore
 {
@@ -31,9 +32,14 @@ namespace MSFramework.AspNetCore
 			}
 
 			var functionPath = context.ActionDescriptor.GetFunctionPath();
-			var function = provider.GetRequiredService<IFunctionStore>().Get(functionPath);
+			var functionStore = provider.GetService<IFunctionStore>();
+			if (functionStore == null)
+			{
+				throw new ApplicationException("未注册任何 FunctionStore");
+			}
 
-			if (!function.Enabled)
+			var function = functionStore.Get(functionPath);
+			if (function == null || !function.Enabled)
 			{
 				context.Result = new NotFoundResult();
 				return;
@@ -55,8 +61,7 @@ namespace MSFramework.AspNetCore
 				UserAgent = context.HttpContext.Request.Headers["User-Agent"].FirstOrDefault(),
 				CreatedTime = DateTimeOffset.Now
 			};
-			if (context.HttpContext.User.Identity.IsAuthenticated &&
-			    context.HttpContext.User.Identity is ClaimsIdentity identity)
+			if (context.HttpContext.User?.Identity != null && context.HttpContext.User.Identity.IsAuthenticated && context.HttpContext.User.Identity is ClaimsIdentity identity)
 			{
 				dict.Identity = identity;
 				operation.UserId = identity.GetUserId();
@@ -87,7 +92,7 @@ namespace MSFramework.AspNetCore
 			dict.AuditOperation.Elapsed =
 				(int) (dict.AuditOperation.EndedTime - dict.AuditOperation.CreatedTime)
 				.TotalMilliseconds;
-			
+
 			eventBus.PublishAsync(new AuditOperationEvent(dict.AuditOperation)).GetAwaiter().GetResult();
 		}
 	}
