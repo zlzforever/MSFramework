@@ -12,12 +12,12 @@ namespace Template.Infrastructure
 		{
 		}
 
-		protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+		protected override void OnConfiguring(DbContextOptionsBuilder builder)
 		{
-			base.OnConfiguring(optionsBuilder);
+			base.OnConfiguring(builder);
 			if (Assembly.GetEntryAssembly()?.GetName().Name == "ef")
 			{
-				optionsBuilder.ReplaceService<IProviderConventionSetBuilder, MySqlConventionSetBuilder>();
+				builder.ReplaceService<IProviderConventionSetBuilder, MySqlConventionSetBuilder>();
 			}
 		}
 	}

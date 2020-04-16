@@ -64,22 +64,40 @@ namespace Template.API
 			services.AddResponseCaching();
 
 			var options = new AppOptions(Configuration);
-			services.AddAuthentication(x =>
+			// comment: OIDC
+			// services.AddAuthentication(x =>
+			// 	{
+			// 		x.DefaultScheme = "Cookies";
+			// 		x.DefaultChallengeScheme = "oidc";
+			// 	})
+			// 	.AddCookie("Cookies")
+			// 	.AddOpenIdConnect("oidc", x =>
+			// 	{
+			// 		x.SignInScheme = "Cookies";
+			// 		x.Authority = options.Authority;
+			// 		x.RequireHttpsMetadata = options.RequireHttpsMetadata;
+			// 		x.ClientId = options.ClientId;
+			// 		if (!string.IsNullOrWhiteSpace(options.ClientSecret))
+			// 		{
+			// 			x.ClientSecret = options.ClientSecret;
+			// 		}
+			//
+			// 		x.SaveTokens = true;
+			// 		x.Scope.Add("role");
+			// 		// x.GetClaimsFromUserInfoEndpoint = true;
+			// 		x.CallbackPath = new PathString("/signin-oidc");
+			// 	});
+
+			services.AddAuthentication("Bearer")
+				.AddIdentityServerAuthentication(x =>
 				{
-					x.DefaultScheme = "Cookies";
-					x.DefaultChallengeScheme = "oidc";
-				})
-				.AddCookie("Cookies")
-				.AddOpenIdConnect("oidc", x =>
-				{
-					x.SignInScheme = "Cookies";
 					x.Authority = options.Authority;
 					x.RequireHttpsMetadata = options.RequireHttpsMetadata;
-					x.ClientId = options.ClientId;
-					x.SaveTokens = true;
-					x.Scope.Add("role");
-					// x.GetClaimsFromUserInfoEndpoint = true;
-					x.CallbackPath = new PathString("/signin-oidc");
+					x.ApiName = options.ApiName;
+					if (!string.IsNullOrWhiteSpace(options.ApiSecret))
+					{
+						x.ApiSecret = options.ApiSecret;
+					}
 				});
 
 			services.AddScoped<AppOptions>();
@@ -125,7 +143,8 @@ namespace Template.API
 			}
 
 			app.UseHttpsRedirection();
-			app.UseStaticFiles();
+			
+			// app.UseStaticFiles();
 
 			app.UseRouting();
 

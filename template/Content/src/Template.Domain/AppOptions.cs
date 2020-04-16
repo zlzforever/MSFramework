@@ -11,12 +11,15 @@ namespace Template.Domain
 			_configuration = configuration;
 		}
 
+		public string ApiName => _configuration["ApiName"];
+		public string ApiSecret => _configuration["ApiSecret"];
 		public string ClientId => _configuration["ClientId"];
+		public string ClientSecret => _configuration["ClientSecret"];
 
 		public string Authority => _configuration["Authority"];
 
 		public bool RequireHttpsMetadata => bool.Parse(_configuration["RequireHttpsMetadata"]);
-		
+
 		public int PageLimit => string.IsNullOrWhiteSpace(_configuration["Page:MaxLimit"])
 			? 15
 			: int.Parse(_configuration["Page:MaxLimit"]);
