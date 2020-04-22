@@ -2,6 +2,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 using Newtonsoft.Json;
 using Pomelo.EntityFrameworkCore.MySql.Storage;
 
@@ -44,19 +45,22 @@ namespace MSFramework.Ef.MySql
 			{
 				var dbContextType = typeof(TDbContext);
 				var entryAssemblyName = dbContextType.Assembly.GetName().Name;
-				var environment = Environment.GetEnvironmentVariable("ENVIRONMENT");
+
+				var environment = Environment.GetEnvironmentVariable("DOTNET_ENVIRONMENT");
 				if (string.IsNullOrWhiteSpace(environment))
 				{
 					environment = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT");
 				}
 
-				var configurationBuilder = new ConfigurationBuilder();
-				configurationBuilder.AddJsonFile("appsettings.json");
-				if (!string.IsNullOrWhiteSpace(environment))
+				if (string.IsNullOrWhiteSpace(environment))
 				{
-					configurationBuilder.AddJsonFile($"appsettings.{environment}.json");
+					environment = Environments.Production;
 				}
 
+				var configurationBuilder = new ConfigurationBuilder();
+				configurationBuilder
+					.AddJsonFile("appsettings.json", true, true)
+					.AddJsonFile($"appsettings.{environment}.json", true, true);
 				var configuration = configurationBuilder.Build();
 				var store = EntityFrameworkOptionsStore.LoadFrom(configuration);
 				var option = store.Get(dbContextType);

@@ -1,4 +1,3 @@
-using System;
 using Microsoft.Extensions.DependencyInjection;
 using MSFramework.Ef;
 using MSFramework.Ef.MySql;

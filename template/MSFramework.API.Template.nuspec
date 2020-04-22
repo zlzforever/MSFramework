@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <package xmlns="http://schemas.microsoft.com/packaging/2012/06/nuspec.xsd">
     <metadata>
-        <id>MSFramework.AspNetCore.Template</id>
-        <version>0.1.24</version>
+        <id>MSFramework.API.Template</id>
+        <version>0.1.27</version>
         <description>
             MSFramework, DDD, AspNetCore
         </description>

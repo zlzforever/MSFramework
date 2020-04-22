@@ -16,5 +16,6 @@ namespace MSFramework.AspNetCore.Permission
 		Task RenewalAsync(string serviceId, string ids);
 
 		Task ExpireAsync(string serviceId, string ids);
+		Task<PermissionData> GetPermissionAsync(string userId, string serviceId, string identification);
 	}
 }

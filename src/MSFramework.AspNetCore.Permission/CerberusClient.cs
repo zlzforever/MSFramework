@@ -53,7 +53,7 @@ namespace MSFramework.AspNetCore.Permission
 
 			var queryParam = $"identification={identification}";
 			var url =
-				$"{_options.Cerberus}/api/v1.0/users/{userId}/services/{serviceId}/permissions?" + queryParam;
+				$"{_options.Cerberus}/api/v1.0/users/{userId}/services/{serviceId}/permissions?{queryParam}";
 			var client = _httpClientFactory.CreateClient("Cerberus");
 			var request = new HttpRequestMessage(HttpMethod.Head, url);
 			request.Headers.TryAddWithoutValidation("SecurityHeader", _options.CerberusSecurityHeader);
@@ -61,6 +61,28 @@ namespace MSFramework.AspNetCore.Permission
 			var hasPermission = response.StatusCode == HttpStatusCode.OK;
 			_cache.Set(key, hasPermission, new TimeSpan(0, 0, _options.CacheTTL, 0));
 			return hasPermission;
+		}
+
+		public async Task<PermissionData> GetPermissionAsync(string userId, string serviceId, string identification)
+		{
+			var key = $"{userId}_{serviceId}_{identification}_data";
+			if (_cache.TryGetValue(key, out PermissionData cacheValue))
+			{
+				return cacheValue;
+			}
+
+			var queryParam = $"identification={identification}";
+			var url =
+				$"{_options.Cerberus}/api/v1.0/users/{userId}/services/{serviceId}/permissions?{queryParam}";
+			var client = _httpClientFactory.CreateClient("Cerberus");
+			var request = new HttpRequestMessage(HttpMethod.Get, url);
+			request.Headers.TryAddWithoutValidation("SecurityHeader", _options.CerberusSecurityHeader);
+			var response = await client.SendAsync(request);
+			response.EnsureSuccessStatusCode();
+			var json = await response.Content.ReadAsStringAsync();
+			var data = JsonConvert.DeserializeObject<PermissionData>(json);
+			_cache.Set(key, data, new TimeSpan(0, 0, _options.CacheTTL, 0));
+			return data;
 		}
 
 		public async Task AddPermissionAsync(string serviceId, Permission permission)

@@ -3,7 +3,12 @@
 ##
 ## Get latest from https://github.com/github/gitignore/blob/master/VisualStudio.gitignore
 
+output/
+out/
 **/wwwroot/lib
+# Wechat App
+miniprogram_npm/
+.DS_Store
 
 # User-specific files
 *.suo
@@ -14,7 +19,6 @@
 # User-specific files (MonoDevelop/Xamarin Studio)
 *.userprefs
 
-output/
 
 # Build results
 [Dd]ebug/

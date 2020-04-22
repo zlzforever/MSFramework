@@ -1,6 +1,5 @@
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -8,6 +7,9 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.OpenApi.Models;
 using MSFramework;
 using MSFramework.AspNetCore;
+#if !DEBUG
+using MSFramework.AspNetCore.Permission;
+#endif
 using MSFramework.AutoMapper;
 using MSFramework.Ef;
 using MSFramework.Ef.Function;
@@ -15,10 +17,8 @@ using MSFramework.Ef.MySql;
 using MSFramework.Extensions;
 using MSFramework.MySql;
 using Template.API.ViewObject;
-using Template.Application;
 using Template.Application.Extensions;
 using Template.Domain;
-using Template.Domain.AggregateRoot;
 using Template.Infrastructure;
 
 namespace Template.API
@@ -39,7 +39,7 @@ namespace Template.API
 
 			// SwaggerUI require some service from views,
 			// if your project a pure api, please use AddControllers
-			services.AddControllersWithViews(x =>
+			services.AddControllers(x =>
 				{
 					x.Filters.Add<UnitOfWork>();
 					x.Filters.Add<FunctionFilter>();
@@ -47,7 +47,6 @@ namespace Template.API
 				})
 				.SetCompatibilityVersion(CompatibilityVersion.Version_3_0)
 				.AddNewtonsoftJson()
-				.AddRazorRuntimeCompilation()
 				.ConfigureApiBehaviorOptions(x =>
 				{
 					x.InvalidModelStateResponseFactory = InvalidModelStateResponseFactory.Instance;
@@ -63,31 +62,8 @@ namespace Template.API
 			services.AddResponseCompression();
 			services.AddResponseCaching();
 
+#if !DEBUG
 			var options = new AppOptions(Configuration);
-			// comment: OIDC
-			// services.AddAuthentication(x =>
-			// 	{
-			// 		x.DefaultScheme = "Cookies";
-			// 		x.DefaultChallengeScheme = "oidc";
-			// 	})
-			// 	.AddCookie("Cookies")
-			// 	.AddOpenIdConnect("oidc", x =>
-			// 	{
-			// 		x.SignInScheme = "Cookies";
-			// 		x.Authority = options.Authority;
-			// 		x.RequireHttpsMetadata = options.RequireHttpsMetadata;
-			// 		x.ClientId = options.ClientId;
-			// 		if (!string.IsNullOrWhiteSpace(options.ClientSecret))
-			// 		{
-			// 			x.ClientSecret = options.ClientSecret;
-			// 		}
-			//
-			// 		x.SaveTokens = true;
-			// 		x.Scope.Add("role");
-			// 		// x.GetClaimsFromUserInfoEndpoint = true;
-			// 		x.CallbackPath = new PathString("/signin-oidc");
-			// 	});
-
 			services.AddAuthentication("Bearer")
 				.AddIdentityServerAuthentication(x =>
 				{
@@ -99,6 +75,7 @@ namespace Template.API
 						x.ApiSecret = options.ApiSecret;
 					}
 				});
+#endif
 
 			services.AddScoped<AppOptions>();
 			services.AddMSFramework(builder =>
@@ -107,6 +84,9 @@ namespace Template.API
 				builder.AddAspNetCore();
 				builder.AddAspNetCoreFunction<EfFunctionStore>();
 				builder.AddEfAuditStore();
+#if !DEBUG
+				builder.AddPermission();
+#endif
 				builder.AddAutoMapper(typeof(AppOptions), typeof(AutoMapperProfile));
 				builder.AddDatabaseMigration<MySqlDatabaseMigration>(typeof(AppDbContext),
 					"Database='template';Data Source=localhost;password=1qazZAQ!;User ID=root;Port=3306;Allow User Variables=true");
@@ -143,8 +123,6 @@ namespace Template.API
 			}
 
 			app.UseHttpsRedirection();
-			
-			// app.UseStaticFiles();
 
 			app.UseRouting();
 
@@ -157,7 +135,6 @@ namespace Template.API
 
 			app.UseEndpoints(endpoints =>
 			{
-				// endpoints.MapGrpcService<GreeterService>();
 				endpoints.MapControllerRoute(
 					name: "default",
 					pattern: "{controller=Home}/{action=Index}/{id?}");

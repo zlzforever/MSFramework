@@ -9,6 +9,8 @@ ProjectSection(SolutionItems) = preProject
 	Dockerfile = Dockerfile
 	.dockerignore = .dockerignore
 	.gitlab-ci.yml = .gitlab-ci.yml
+	up.sh = up.sh
+	Dockerfile.Development = Dockerfile.Development
 EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{9F5F19C8-AEBA-4078-AA74-18253FECC3A5}"

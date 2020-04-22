@@ -1,4 +1,4 @@
-rm -rf MSFramework.AspNetCore.Template.*.nupkg
+rm -rf MSFramework.API.Template.*.nupkg
 rm -rf template/.DS_Store
 rm -rf template/Content/.DS_Store
 rm -rf template/Content/.idea
@@ -22,5 +22,5 @@ rm -rf template/Content/src/Template.API/.DS_Store
 rm -rf template/Content/src/Template.API/bin
 rm -rf template/Content/src/Template.API/obj
 
-nuget pack template/MSFramework.AspNetCore.Template.nuspec
-nuget push MSFramework.AspNetCore.Template.*.nupkg -SkipDuplicate  -Source http://nuget.pamirs.com/v3/index.json
+nuget pack template/MSFramework.API.Template.nuspec
+nuget push MSFramework.API.Template.*.nupkg -SkipDuplicate  -Source http://nuget.pamirs.com/v3/index.json

@@ -2,7 +2,10 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using MSFramework.AspNetCore;
-using MSFramework.AspNetCore.Extensions;
+#if !DEBUG
+using Microsoft.AspNetCore.Authorization;
+using MSFramework.AspNetCore.Permission;
+#endif
 using MSFramework.Data;
 using MSFramework.Domain;
 using Template.API.ViewObject;
@@ -14,7 +17,9 @@ namespace Template.API.Controllers
 {
 	[Route("api/v1.0/class1")]
 	[ApiController]
-	// [Authorize]
+#if !DEBUG
+	[Authorize]
+#endif
 	public class Class1ApiController : MSFrameworkApiControllerBase
 	{
 		private readonly IClass1Query _class1Query;
@@ -33,12 +38,18 @@ namespace Template.API.Controllers
 		}
 
 		[HttpGet]
+#if !DEBUG
+		[Permission(Name = "查询 Class1", Module = "Class1")]
+#endif
 		public async Task<PagedQueryResult<Class1Out>> PagedQueryAsync(string keyword, int page, int limit)
 		{
 			return await _class1Query.PagedQueryAsync(keyword, page, limit);
 		}
 
 		[HttpPost]
+#if !DEBUG
+		[Permission(Name = "创建 Class1", Module = "Class1")]
+#endif
 		public async Task<CreatClass1Out> CreateAsync([FromBody] CreateClass1ViewObject vo)
 		{
 			var class1 = _mapper.Map<CreateClass1In>(vo);

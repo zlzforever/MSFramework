@@ -11,6 +11,8 @@ stages:
   - Staging
   - Production
 build:
+  only:
+    - dev
   stage: Build
   script:
     - docker build .
@@ -32,9 +34,6 @@ production:
   script:
     - app=template
     - docker build -t $app .
-    - tag=$(date +%Y%m%d)
     - docker tag $app registry-docker.pamirs.com/$app:latest
-    - docker tag $app registry-docker.pamirs.com/$app:$tag
     - docker push registry-docker.pamirs.com/$app:latest
-    - docker push registry-docker.pamirs.com/$app:$tag
     - curl -X POST -F token=fffefb3edc3365ff9910f472377a44 -F ref=$app http://c.pamirs.com/api/v4/projects/42/trigger/pipeline
