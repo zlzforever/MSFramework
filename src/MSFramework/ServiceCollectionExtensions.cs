@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using EventBus.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using MSFramework.Collections.Generic;
 using MSFramework.Common;
 using MSFramework.Data;
@@ -94,7 +95,9 @@ namespace MSFramework
 		private static async Task InitializeAsync(IServiceProvider applicationServices)
 		{
 			using var scope = applicationServices.CreateScope();
+			var logger = scope.ServiceProvider.GetRequiredService<ILoggerFactory>().CreateLogger("Initializer");
 			var initializers = scope.ServiceProvider.GetServices<Initializer>().OrderBy(x => x.Order).ToList();
+			logger.LogInformation($"{string.Join(", ", initializers.Select(x => x.GetType().FullName))}");
 			foreach (var initializer in initializers)
 			{
 				await initializer.InitializeAsync(scope.ServiceProvider);

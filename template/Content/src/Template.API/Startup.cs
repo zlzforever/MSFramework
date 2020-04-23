@@ -88,7 +88,7 @@ namespace Template.API
 				builder.AddPermission();
 #endif
 				builder.AddAutoMapper(typeof(AppOptions), typeof(AutoMapperProfile));
-				builder.AddDatabaseMigration<MySqlDatabaseMigration>(typeof(AppDbContext),
+				builder.AddDatabaseMigration<MySqlDatabaseMigration>(typeof(AppOptions),
 					"Database='template';Data Source=localhost;password=1qazZAQ!;User ID=root;Port=3306;Allow User Variables=true");
 				builder.AddEntityFramework(ef =>
 				{
