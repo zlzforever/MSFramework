@@ -17,6 +17,11 @@ namespace MSFramework.AspNetCore.Permission
 
 		public string Cerberus => _configuration["Cerberus"];
 
+		public bool UseSession => !string.IsNullOrWhiteSpace(_configuration["UseSession"]) &&
+		                          bool.Parse(_configuration["UseSession"]);
+
+		public string Authority => _configuration["Authority"];
+
 		public int CacheTTL => string.IsNullOrWhiteSpace(_configuration["CacheTTL"])
 			? 1
 			: int.Parse(_configuration["CacheTTL"]);

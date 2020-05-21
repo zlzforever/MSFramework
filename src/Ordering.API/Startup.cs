@@ -40,7 +40,7 @@ namespace Ordering.API
 		{
 			services.AddScoped<TestService>();
 
-			services.AddControllersWithViews(x =>
+			services.AddControllers(x =>
 				{
 					x.Filters.Add<UnitOfWork>();
 					x.Filters.Add<FunctionFilter>();

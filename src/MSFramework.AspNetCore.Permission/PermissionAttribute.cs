@@ -1,4 +1,7 @@
 ﻿using System;
+using System.Net;
+using System.Net.Http;
+using System.Net.Http.Headers;
 using System.Reflection;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authentication;
@@ -38,6 +41,28 @@ namespace MSFramework.AspNetCore.Permission
 				    descriptor.MethodInfo.GetCustomAttribute(AttributeType) != null)
 				{
 					var options = context.HttpContext.RequestServices.GetRequiredService<PermissionOptions>();
+
+					if (options.UseSession)
+					{
+						if (string.IsNullOrWhiteSpace(options.Authority))
+						{
+							throw new ApplicationException("Authority is missing in configuration");
+						}
+
+						var httpClientFactory =
+							context.HttpContext.RequestServices.GetRequiredService<IHttpClientFactory>();
+						var httpClient = httpClientFactory.CreateClient("Session");
+						var token = await context.HttpContext.GetTokenAsync("access_token");
+						httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+						var response = await httpClient.SendAsync(new HttpRequestMessage(HttpMethod.Head,
+							$"{options.Authority}/connect/online-session"));
+						if (response.StatusCode != HttpStatusCode.OK)
+						{
+							context.HttpContext.Response.StatusCode = 401;
+							return;
+						}
+					}
+
 					var cerberusClient =
 						context.HttpContext.RequestServices.GetRequiredService<ICerberusClient>();
 					var identification = descriptor.GetFunctionPath();
