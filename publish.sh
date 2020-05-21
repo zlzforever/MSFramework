@@ -12,13 +12,13 @@ rm -rf src/MSFramework.AspNetCore.Permission/bin/Release
 rm -rf src/MSFramework.Mapster/bin/Release
 dotnet build -c Release
 dotnet pack -c Release
-nuget push src/MSFramework/bin/Release/*.nupkg -SkipDuplicate -Source $NUGET_SERVER
-nuget push src/MSFramework.AspNetCore/bin/Release/*.nupkg -SkipDuplicate  -Source $NUGET_SERVER
-nuget push src/MSFramework.AspNetCore.Permission/bin/Release/*.nupkg -SkipDuplicate  -Source $NUGET_SERVER
-nuget push src/MSFramework.Ef/bin/Release/*.nupkg -SkipDuplicate  -Source $NUGET_SERVER
-nuget push src/MSFramework.Ef.MySql/bin/Release/*.nupkg -SkipDuplicate  -Source $NUGET_SERVER
-nuget push src/MSFramework.Ef.SqlServer/bin/Release/*.nupkg -SkipDuplicate  -Source $NUGET_SERVER
-nuget push src/MSFramework.EventBus.RabbitMQ/bin/Release/*.nupkg -SkipDuplicate  -Source $NUGET_SERVER
-nuget push src/MSFramework.AutoMapper/bin/Release/*.nupkg -SkipDuplicate  -Source $NUGET_SERVER
-nuget push src/MSFramework.MySql/bin/Release/*.nupkg -SkipDuplicate  -Source $NUGET_SERVER
-nuget push src/MSFramework.Mapster/bin/Release/*.nupkg -SkipDuplicate  -Source $NUGET_SERVER
+nuget push src/MSFramework/bin/Release/*.nupkg -Source $NUGET_SERVER
+nuget push src/MSFramework.AspNetCore/bin/Release/*.nupkg  -Source $NUGET_SERVER
+nuget push src/MSFramework.AspNetCore.Permission/bin/Release/*.nupkg  -Source $NUGET_SERVER
+nuget push src/MSFramework.Ef/bin/Release/*.nupkg  -Source $NUGET_SERVER
+nuget push src/MSFramework.Ef.MySql/bin/Release/*.nupkg  -Source $NUGET_SERVER
+nuget push src/MSFramework.Ef.SqlServer/bin/Release/*.nupkg  -Source $NUGET_SERVER
+nuget push src/MSFramework.EventBus.RabbitMQ/bin/Release/*.nupkg  -Source $NUGET_SERVER
+nuget push src/MSFramework.AutoMapper/bin/Release/*.nupkg  -Source $NUGET_SERVER
+nuget push src/MSFramework.MySql/bin/Release/*.nupkg  -Source $NUGET_SERVER
+nuget push src/MSFramework.Mapster/bin/Release/*.nupkg  -Source $NUGET_SERVER
