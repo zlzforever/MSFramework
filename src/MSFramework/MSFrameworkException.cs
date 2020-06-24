@@ -2,7 +2,7 @@ using System;
 
 namespace MSFramework
 {
-	public class MSFrameworkException : Exception
+	public class MSFrameworkException : ApplicationException
 	{
 		public MSFrameworkException() : this(1, null)
 		{

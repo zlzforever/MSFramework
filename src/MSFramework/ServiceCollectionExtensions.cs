@@ -2,32 +2,33 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using EventBus.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Logging;
+using MSFramework.Audit;
 using MSFramework.Collections.Generic;
 using MSFramework.Common;
 using MSFramework.Data;
 using MSFramework.DependencyInjection;
-using MSFramework.Http;
+using MSFramework.Domain;
+using MSFramework.Domain.Event;
 using MSFramework.Reflection;
 
 namespace MSFramework
 {
 	public static class ServiceCollectionExtensions
 	{
-		public static MSFrameworkBuilder AddEventBus(this MSFrameworkBuilder builder, params Type[] eventTypes)
+		public static MSFrameworkBuilder AddEventMediator(this MSFrameworkBuilder builder, params Type[] eventTypes)
 		{
-			var asm = typeof(MSFrameworkBuilder).Assembly;
-			if (eventTypes.Any(x => x.Assembly != asm))
+			var excludeAssembly = typeof(MSFrameworkBuilder).Assembly;
+			if (eventTypes.Any(x => x.Assembly != excludeAssembly))
 			{
-				var list = new List<Type>(eventTypes);
-				list.Add(typeof(MSFrameworkBuilder));
-				builder.Services.AddEventBus(list.ToArray());
+				var list = new List<Type>(eventTypes) {typeof(MSFrameworkBuilder)};
+				builder.Services.AddEventMediator(list.ToArray());
 			}
 			else
 			{
-				builder.Services.AddEventBus(eventTypes);
+				builder.Services.AddEventMediator(eventTypes);
 			}
 
 			return builder;
@@ -39,7 +40,7 @@ namespace MSFramework
 			var builder = new MSFrameworkBuilder(services);
 			builderAction?.Invoke(builder);
 
-			builder.AddEventBus(typeof(MSFrameworkBuilder));
+			builder.AddEventMediator(typeof(MSFrameworkBuilder));
 
 			//初始化所有程序集查找器，如需更改程序集查找逻辑，请事先赋予自定义查找器的实例
 			if (Singleton<IAssemblyFinder>.Instance == null)
@@ -64,10 +65,10 @@ namespace MSFramework
 
 			builder.AddInitializer();
 
-			builder.Services.AddScoped<ScopedDictionary>();
-			builder.Services.AddScoped<ApiClient>();
-			builder.Services.AddMemoryCache();
-			builder.Services.AddHttpClient();
+			builder.Services.TryAddScoped<ScopedDictionary>();
+			builder.Services.TryAddScoped<IUnitOfWorkManager, DefaultUnitOfWorkManager>();
+			// 如果你想换成消息队列，则重新注册一个对应的服务即可
+			builder.Services.TryAddScoped<IAuditService, DefaultAuditService>();
 		}
 
 		public static IMSFrameworkApplicationBuilder UseMSFramework(this IServiceProvider applicationServices,
@@ -79,8 +80,6 @@ namespace MSFramework
 
 			var builder = new MSFrameworkApplicationBuilder(applicationServices);
 			configure?.Invoke(builder);
-
-			applicationServices.UseEventBus();
 			return builder;
 		}
 

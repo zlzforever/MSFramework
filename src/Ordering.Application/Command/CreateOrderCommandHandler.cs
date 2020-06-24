@@ -2,19 +2,21 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using MediatR;
-using MSFramework.Http;
+using MSFramework.Domain;
 using Ordering.Domain.AggregateRoot;
 using Ordering.Domain.Repository;
 
 namespace Ordering.Application.Command
 {
-	public class CreateOrderCommandHandler : IRequestHandler<CreateOrderCommand, ApiResult>
+	public class CreateOrderCommandHandler : IRequestHandler<CreateOrderCommand>
 	{
 		private readonly IOrderingRepository _orderRepository;
+		private readonly IUnitOfWorkManager _unitOfWorkManager;
 
-		public CreateOrderCommandHandler(IOrderingRepository orderRepository)
+		public CreateOrderCommandHandler(IOrderingRepository orderRepository, IUnitOfWorkManager unitOfWorkManager)
 		{
 			_orderRepository = orderRepository;
+			_unitOfWorkManager = unitOfWorkManager;
 		}
 
 		/// <summary>
@@ -23,7 +25,7 @@ namespace Ordering.Application.Command
 		/// </summary>
 		/// <param name="command"></param>
 		/// <returns></returns>
-		public async Task<ApiResult> Handle(CreateOrderCommand command, CancellationToken cancellationToken)
+		public async Task<Unit> Handle(CreateOrderCommand command, CancellationToken cancellationToken)
 		{
 			var order = new Order(
 				command.UserId,
@@ -31,8 +33,8 @@ namespace Ordering.Application.Command
 				command.Description,
 				command.OrderItems.Select(x => x.ToOrderItem()).ToList());
 			await _orderRepository.InsertAsync(order);
-			await _orderRepository.UnitOfWork.CommitAsync();
-			return new ApiResult();
+			await _unitOfWorkManager.CommitAsync();
+			return Unit.Value;
 		}
 	}
 }

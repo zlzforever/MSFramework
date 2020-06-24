@@ -1,6 +1,8 @@
+using MSFramework.Domain.Event;
+
 namespace Ordering.Domain.AggregateRoot.Event
 {
-	public class OrderShippedDomainEvent : EventBus.Event
+	public class OrderShippedDomainEvent : EventBase
 	{
 		public Order Order { get; }
 

@@ -1,33 +1,29 @@
 using System.Threading;
 using System.Threading.Tasks;
 using MediatR;
-using MSFramework.Http;
+using MSFramework.Domain;
 using Ordering.Domain.Repository;
 
 namespace Ordering.Application.Command
 {
-	public class CancelOrderCommandHandler : IRequestHandler<CancelOrderCommand, ApiResult>
+	public class CancelOrderCommandHandler : IRequestHandler<CancelOrderCommand>
 	{
 		private readonly IOrderingRepository _orderRepository;
+		private readonly IUnitOfWorkManager _unitOfWorkManager;
 
-		public CancelOrderCommandHandler(IOrderingRepository orderRepository)
+		public CancelOrderCommandHandler(IOrderingRepository orderRepository, IUnitOfWorkManager unitOfWorkManager)
 		{
 			_orderRepository = orderRepository;
+			_unitOfWorkManager = unitOfWorkManager;
 		}
 
-		/// <summary>
-		/// Handler which processes the command when
-		/// customer executes cancel order from app
-		/// </summary>
-		/// <param name="command"></param>
-		/// <returns></returns>
-		public async Task<ApiResult> Handle(CancelOrderCommand command, CancellationToken cancellationToken)
+		public async Task<Unit> Handle(CancelOrderCommand request, CancellationToken cancellationToken)
 		{
-			var order = await _orderRepository.GetAsync(command.OrderId);
+			var order = await _orderRepository.GetAsync(request.OrderId);
 
 			order.SetCancelledStatus();
-			await _orderRepository.UnitOfWork.CommitAsync();
-			return new ApiResult();
+			await _unitOfWorkManager.CommitAsync();
+			return Unit.Value;
 		}
 	}
 }

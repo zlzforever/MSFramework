@@ -4,8 +4,8 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.Extensions.DependencyInjection;
 using MSFramework.AspNetCore.Function;
-using MSFramework.Domain;
 using MSFramework.Function;
+using ISession = MSFramework.Domain.ISession;
 
 namespace MSFramework.AspNetCore
 {
@@ -23,7 +23,7 @@ namespace MSFramework.AspNetCore
 		{
 			builder.Services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
 			builder.Services.AddSingleton<IActionResultTypeMapper, ActionResultTypeMapper>();
-			builder.Services.AddScoped<IMSFrameworkSession, MSFrameworkSession>();
+			builder.Services.AddScoped<ISession, AspNetCoreSession>();
 			return builder;
 		}
 

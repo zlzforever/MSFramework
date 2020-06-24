@@ -9,7 +9,8 @@ namespace Ordering.Infrastructure
 {
 	public class OrderingContext : DbContextBase
 	{
-		public OrderingContext(DbContextOptions options) : base(options)
+		public OrderingContext(DbContextOptions options, IServiceProvider serviceProvider) : base(options,
+			serviceProvider)
 		{
 		}
 

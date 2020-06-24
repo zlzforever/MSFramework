@@ -5,14 +5,14 @@ namespace MSFramework.Function
 {
 	public interface IFunctionStore
 	{
-		Function Get(string path);
+		FunctionDefine Get(string path);
 
-		List<Function> GetAllList();
+		List<FunctionDefine> GetAllList();
 
-		void Update(Function function);
+		void Update(FunctionDefine function);
 
 		void Delete(Guid id);
 
-		void Add(Function function);
+		void Add(FunctionDefine function);
 	}
 }

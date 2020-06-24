@@ -1,9 +1,8 @@
 using System;
 using System.Collections.Concurrent;
-using System.Linq;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using MSFramework.Domain;
+using MSFramework.Domain.AggregateRoot;
 
 namespace MSFramework.Ef
 {
@@ -16,10 +15,10 @@ namespace MSFramework.Ef
 		private readonly ConcurrentDictionary<Type, DbContextBase> _dbContextDict =
 			new ConcurrentDictionary<Type, DbContextBase>();
 
-		public DbContextFactory(IEntityConfigurationTypeFinder entityConfigurationTypeFinder,
+		public DbContextFactory( 
 			EntityFrameworkOptionsStore optionsStore, IServiceProvider serviceProvider)
 		{
-			_entityConfigurationTypeFinder = entityConfigurationTypeFinder;
+			_entityConfigurationTypeFinder = serviceProvider.GetRequiredService<IEntityConfigurationTypeFinder>();
 			_serviceProvider = serviceProvider;
 			_optionsStore = optionsStore;
 		}
@@ -61,11 +60,6 @@ namespace MSFramework.Ef
 			return dbContext;
 		}
 
-		public DbSet<TEntity> GetDbSet<TEntity>() where TEntity : class, IAggregateRoot
-		{
-			return GetDbContext<TEntity>().Set<TEntity>();
-		}
-
 		public DbContextBase Create(EntityFrameworkOptions resolveOptions)
 		{
 			var dbContextType = resolveOptions.DbContextType;
@@ -77,7 +71,9 @@ namespace MSFramework.Ef
 
 			//创建上下文实例
 			context = (DbContextBase) _serviceProvider.GetRequiredService(dbContextType);
-			context.SetServiceProvider(_serviceProvider);
+
+			var unitOfWorkManager = _serviceProvider.GetRequiredService<IUnitOfWorkManager>();
+			unitOfWorkManager.Register(context);
 
 			if (resolveOptions.UseTransaction && context.Database.CurrentTransaction == null)
 			{
@@ -86,11 +82,6 @@ namespace MSFramework.Ef
 
 			_dbContextDict.TryAdd(dbContextType, context);
 			return context;
-		}
-
-		public DbContextBase[] GetAllDbContexts()
-		{
-			return _dbContextDict.Values.ToArray();
 		}
 
 		public void Dispose()

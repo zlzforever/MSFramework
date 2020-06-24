@@ -16,7 +16,7 @@ namespace Ordering.Infrastructure.Repository
 
 		public override Task<Order> GetAsync(Guid id)
 		{
-			return Entities.Include(x => x.OrderItems).FirstOrDefaultAsync(x => x.Id == id);
+			return CurrentSet.Include(x => x.OrderItems).FirstOrDefaultAsync(x => x.Id == id);
 		}
 	}
 }

@@ -1,5 +1,5 @@
-﻿using Microsoft.AspNetCore;
-using Microsoft.AspNetCore.Hosting;
+﻿using Microsoft.AspNetCore.Hosting;
+using Microsoft.Extensions.Hosting;
 using Serilog;
 using Serilog.Events;
 
@@ -19,11 +19,16 @@ namespace Ordering.API
 				.Enrich.FromLogContext()
 				.WriteTo.Console().WriteTo.RollingFile("order.log")
 				.CreateLogger();
-			CreateWebHostBuilder(args).Build().Run();
+			CreateHostBuilder(args).Build().Run();
 		}
 
-		public static IWebHostBuilder CreateWebHostBuilder(string[] args) =>
-			WebHost.CreateDefaultBuilder(args)
-				.UseStartup<Startup>().UseSerilog().UseUrls("http://localhost:5000");
+		public static IHostBuilder CreateHostBuilder(string[] args) =>
+			Host.CreateDefaultBuilder(args)
+				.UseSerilog()
+				.ConfigureWebHostDefaults(webBuilder =>
+				{
+					webBuilder.UseUrls("http://localhost:5000");
+					webBuilder.UseStartup<Startup>();
+				});
 	}
 }

@@ -1,9 +1,10 @@
 using System;
+using MSFramework.Domain.Event;
 
 namespace Ordering.Domain.AggregateRoot.Event
 {
 	public class OrderStatusChangedToStockConfirmedDomainEvent
-		: EventBus.Event
+		: EventBase
 	{
 		public Guid OrderId { get; }
 

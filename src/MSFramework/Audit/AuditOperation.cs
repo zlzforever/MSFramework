@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using MSFramework.Domain;
+using MSFramework.Domain.AggregateRoot;
 
 namespace MSFramework.Audit
 {
@@ -73,6 +73,6 @@ namespace MSFramework.Audit
 		/// <summary>
 		/// 获取或设置 审计数据信息集合
 		/// </summary>
-		public virtual ICollection<AuditEntity> Entities { get; set; } = new List<AuditEntity>();
+		public virtual List<AuditEntity> Entities { get; set; } = new List<AuditEntity>();
 	}
 }

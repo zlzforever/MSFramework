@@ -4,24 +4,11 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
 using MSFramework.Data;
-using MSFramework.Http;
 
 namespace MSFramework.Extensions
 {
 	public static class PagedQueryExtensions
 	{
-		public static LayUIApiPagedQueryResult<TEntity> ToLayUIApiPagedQueryResult<TEntity>(
-			PagedQueryResult<TEntity> result)
-		{
-			return new LayUIApiPagedQueryResult<TEntity>(result.Page, result.Limit, result.Count, result.Data);
-		}
-
-		public static LayUIApiPagedQueryResult ToLayUIApiPagedQueryResult(
-			PagedQueryResult<object> result)
-		{
-			return new LayUIApiPagedQueryResult(result.Page, result.Limit, result.Count, result.Data);
-		}
-
 		public static async Task<PagedQueryResult<TEntity>> PagedQueryAsync<TEntity, TOrderKey>(
 			this IQueryable<TEntity> queryable,
 			int page, int limit,

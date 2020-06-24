@@ -1,11 +1,7 @@
 using System;
 using System.ComponentModel.DataAnnotations;
-using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Logging;
 using MSFramework.AspNetCore;
-using MSFramework.Domain;
-using MSFramework.Http;
 
 namespace Ordering.API.Controllers
 {
@@ -14,16 +10,10 @@ namespace Ordering.API.Controllers
 		[Required] [StringLength(4)] public string Name { get; set; }
 	}
 
-	public class ValueController : MSFrameworkApiControllerBase
+	public class ValueController : ApiControllerBase
 	{
-		private TestService _testService;
-		private ApiClient _apiClient;
-
-		public ValueController(TestService testService, ApiClient apiClient, IMSFrameworkSession session,
-			ILogger<ValueController> logger) : base(session, logger)
+		public ValueController()
 		{
-			_testService = testService;
-			_apiClient = apiClient;
 		}
 
 		[HttpGet("getViewObject")]
@@ -37,16 +27,9 @@ namespace Ordering.API.Controllers
 
 		[UnitOfWork]
 		[HttpGet]
-		public async Task<object> GetAsync()
+		public string GetAsync()
 		{
-			var host = $"{HttpContext.Request.Scheme}://{HttpContext.Request.Host}";
-			var apiResponse =
-				await _apiClient.GetAsync<CreateViewObject>(
-					"default", $"{host}/getViewObject");
-			return new
-			{
-				apiResponse.Data.Name
-			};
+			return "";
 		}
 
 		[HttpPost]

@@ -1,3 +1,4 @@
+using System;
 using Microsoft.EntityFrameworkCore;
 
 namespace MSFramework.Ef
@@ -10,8 +11,8 @@ namespace MSFramework.Ef
 		/// <summary>
 		/// 初始化一个<see cref="DefaultDbContext"/>类型的新实例
 		/// </summary>
-		public DefaultDbContext(DbContextOptions options)
-			: base(options)
+		public DefaultDbContext(DbContextOptions options, IServiceProvider serviceProvider)
+			: base(options, serviceProvider)
 		{
 		}
 	}

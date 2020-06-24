@@ -17,7 +17,6 @@ namespace MSFramework.AspNetCore
 			if (uowManager != null)
 			{
 				await uowManager.CommitAsync();
-				uowManager.Dispose();
 			}
 
 			await next();

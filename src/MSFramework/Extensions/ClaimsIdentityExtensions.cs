@@ -2,7 +2,6 @@ using System;
 using System.Linq;
 using System.Security.Claims;
 using System.Security.Principal;
-using MSFramework.Data;
 
 namespace MSFramework.Extensions
 {

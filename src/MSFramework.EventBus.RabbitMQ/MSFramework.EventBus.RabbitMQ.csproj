@@ -4,7 +4,7 @@
     </PropertyGroup>
     <Import Project="../../package.props" />
     <ItemGroup>
-        <PackageReference Include="EasyEventBus.RabbitMQ.DependencyInjection" Version="0.0.3" />
+        <PackageReference Include="EasyEventBus.RabbitMQ.DependencyInjection" Version="0.0.6" />
     </ItemGroup>
     <ItemGroup>
         <ProjectReference Include="..\MSFramework\MSFramework.csproj" />

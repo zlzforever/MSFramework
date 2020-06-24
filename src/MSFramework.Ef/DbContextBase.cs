@@ -1,19 +1,18 @@
 using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
 using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
-using EventBus;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
-using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using MSFramework.Audit;
-using MSFramework.Collections.Generic;
-using MSFramework.Data;
 using MSFramework.Domain;
+using MSFramework.Domain.Entity;
+using MSFramework.Domain.Event;
 using MSFramework.Extensions;
 
 namespace MSFramework.Ef
@@ -21,20 +20,15 @@ namespace MSFramework.Ef
 	public abstract class DbContextBase : DbContext, IUnitOfWork
 	{
 		private ILogger _logger;
-		private IServiceProvider _serviceProvider;
-
-		internal void SetServiceProvider(IServiceProvider serviceProvider)
-		{
-			serviceProvider.NotNull(nameof(serviceProvider));
-			_serviceProvider = serviceProvider;
-		}
+		private readonly IServiceProvider _serviceProvider;
 
 		/// <summary>
 		/// 初始化一个<see cref="DbContextBase"/>类型的新实例
 		/// </summary>
-		protected DbContextBase(DbContextOptions options)
+		protected DbContextBase(DbContextOptions options, IServiceProvider serviceProvider)
 			: base(options)
 		{
+			_serviceProvider = serviceProvider;
 		}
 
 		/// <summary>
@@ -43,18 +37,19 @@ namespace MSFramework.Ef
 		/// <param name="modelBuilder">上下文数据模型构建器</param>
 		protected override void OnModelCreating(ModelBuilder modelBuilder)
 		{
-			_logger = Database.GetService<ILoggerFactory>().CreateLogger(GetType());
+			_logger = _serviceProvider.GetService<ILoggerFactory>().CreateLogger(GetType());
 
 			//通过实体配置信息将实体注册到当前上下文
 			var contextType = GetType();
-			var registers = Database.GetService<IEntityConfigurationTypeFinder>().GetEntityRegisters(contextType);
+			var registers = _serviceProvider.GetService<IEntityConfigurationTypeFinder>()
+				.GetEntityRegisters(contextType);
 			foreach (var register in registers)
 			{
 				register.RegisterTo(modelBuilder);
-				_logger.LogDebug($"将实体类“{register.EntityType}”注册到上下文“{contextType}”中");
+				_logger.LogDebug($"将实体类 “{register.EntityType}” 注册到上下文 “{contextType}” 中");
 			}
 
-			_logger.LogInformation($"上下文“{contextType}”注册了{registers.Length}个实体类");
+			_logger.LogInformation($"上下文 “{contextType}” 注册了 {registers.Length} 个实体类");
 		}
 
 		/// <summary>
@@ -86,12 +81,13 @@ namespace MSFramework.Ef
 					return 0;
 				}
 
-				var eventBus = ApplyConcepts();
+				ApplyConcepts();
 
-				if (eventBus != null)
+				var eventMediator = _serviceProvider.GetService<IEventMediator>();
+				if (eventMediator != null)
 				{
 					// todo: 同步异步混用是否会死锁
-					HandleDomainEventsAsync(eventBus).GetAwaiter().GetResult();
+					HandleDomainEventsAsync().GetAwaiter().GetResult();
 				}
 
 				var effectCount = base.SaveChanges();
@@ -140,25 +136,46 @@ namespace MSFramework.Ef
 					return 0;
 				}
 
-				var eventBus = ApplyConcepts();
+				ApplyConcepts();
 
-				if (eventBus != null)
-				{
-					await HandleDomainEventsAsync(eventBus);
-				}
+				await HandleDomainEventsAsync();
 
 				var effectedCount = await base.SaveChangesAsync(cancellationToken);
-				Database.CurrentTransaction?.Commit();
+				if (Database.CurrentTransaction != null)
+				{
+					await Database.CurrentTransaction.CommitAsync(cancellationToken);
+				}
+
 				return effectedCount;
 			}
 			catch
 			{
-				Database.CurrentTransaction?.Rollback();
+				if (Database.CurrentTransaction != null)
+				{
+					await Database.CurrentTransaction.RollbackAsync(cancellationToken);
+				}
+
 				throw;
 			}
 		}
 
-		private async Task HandleDomainEventsAsync(IEventBus eventBus)
+		private async Task HandleDomainEventsAsync()
+		{
+			var eventMediator = _serviceProvider.GetService<IEventMediator>();
+			if (eventMediator == null)
+			{
+				return;
+			}
+
+			var domainEvents = GetDomainEvents();
+
+			foreach (var @event in domainEvents)
+			{
+				await eventMediator.PublishAsync(@event);
+			}
+		}
+
+		private IEnumerable<IEvent> GetDomainEvents()
 		{
 			// Dispatch Domain Events collection. 
 			// Choices:
@@ -167,7 +184,7 @@ namespace MSFramework.Ef
 			// B) Right AFTER committing data (EF SaveChanges) into the DB will make multiple transactions. 
 			// You will need to handle eventual consistency and compensatory actions in case of failures in any of the Handlers. 
 			var domainEntities = ChangeTracker
-				.Entries<IEventProvider>()
+				.Entries<EntityBase>()
 				.Where(x => x.Entity.DomainEvents != null && x.Entity.DomainEvents.Any()).ToList();
 
 			var domainEvents = domainEntities
@@ -177,10 +194,35 @@ namespace MSFramework.Ef
 			domainEntities
 				.ForEach(entity => entity.Entity.ClearDomainEvents());
 
-			foreach (var @event in domainEvents)
+			return domainEvents;
+		}
+
+		public IEnumerable<AuditEntity> GetAuditEntries()
+		{
+			var entities = new List<AuditEntity>();
+			AuditEntity auditEntity = null;
+			foreach (var entry in ChangeTracker.Entries())
 			{
-				await eventBus.PublishAsync(@event);
+				switch (entry.State)
+				{
+					case EntityState.Added:
+						auditEntity = GetAuditEntity(entry, OperateType.Insert);
+						break;
+					case EntityState.Modified:
+						auditEntity = GetAuditEntity(entry, OperateType.Update);
+						break;
+					case EntityState.Deleted:
+						auditEntity = GetAuditEntity(entry, OperateType.Delete);
+						break;
+				}
 			}
+
+			if (auditEntity != null)
+			{
+				entities.Add(auditEntity);
+			}
+
+			return entities;
 		}
 
 		public void Commit()
@@ -193,17 +235,9 @@ namespace MSFramework.Ef
 			await SaveChangesAsync();
 		}
 
-		protected IEventBus ApplyConcepts()
+		protected void ApplyConcepts()
 		{
-			var eventBus = _serviceProvider.GetService<IEventBus>();
-			var session = _serviceProvider.GetService<IMSFrameworkSession>();
-
-			var scopedDict = _serviceProvider.GetRequiredService<ScopedDictionary>();
-			var audit = false;
-			if (eventBus != null && scopedDict?.AuditOperation != null && scopedDict.Function != null)
-			{
-				audit = scopedDict.Function.AuditEntityEnabled;
-			}
+			var session = _serviceProvider.GetService<ISession>();
 
 			var userId = session?.UserId;
 			var userName = session?.UserName;
@@ -213,44 +247,17 @@ namespace MSFramework.Ef
 				switch (entry.State)
 				{
 					case EntityState.Added:
-						if (audit)
-						{
-							var auditEntity = GetAuditEntity(entry, OperateType.Insert);
-							auditEntity.OperationId = scopedDict.AuditOperation.Id;
-							auditEntity.Operation = scopedDict.AuditOperation;
-							scopedDict.AuditOperation.Entities.Add(auditEntity);
-						}
-
 						ApplyConceptsForAddedEntity(entry, userId, userName);
 						break;
 					case EntityState.Modified:
-						if (audit)
-						{
-							var auditEntity = GetAuditEntity(entry, OperateType.Update);
-							auditEntity.OperationId = scopedDict.AuditOperation.Id;
-							auditEntity.Operation = scopedDict.AuditOperation;
-							scopedDict.AuditOperation.Entities.Add(auditEntity);
-						}
-
 						ApplyConceptsForModifiedEntity(entry, userId, userName);
 						break;
 					case EntityState.Deleted:
-						if (audit)
-						{
-							var auditEntity = GetAuditEntity(entry, OperateType.Delete);
-							auditEntity.OperationId = scopedDict.AuditOperation.Id;
-							auditEntity.Operation = scopedDict.AuditOperation;
-							scopedDict.AuditOperation.Entities.Add(auditEntity);
-						}
-
 						ApplyConceptsForDeletedEntity(entry, userId, userName);
 						break;
 				}
 			}
-
-			return eventBus;
 		}
-
 
 		protected virtual AuditEntity GetAuditEntity(EntityEntry entry, OperateType operateType)
 		{

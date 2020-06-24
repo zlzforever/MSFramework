@@ -5,11 +5,9 @@ using MSFramework.Function;
 
 namespace Ordering.Infrastructure.EntityConfigurations
 {
-	public class FunctionEntityTypeConfiguration : EntityTypeConfigurationBase<Function>
+	public class FunctionEntityTypeConfiguration : EntityTypeConfigurationBase<FunctionDefine, OrderingContext>
 	{
-		public override Type DbContextType => typeof(OrderingContext);
-		
-		public override void Configure(EntityTypeBuilder<Function> builder)
+		public override void Configure(EntityTypeBuilder<FunctionDefine> builder)
 		{
 			base.Configure(builder);
 

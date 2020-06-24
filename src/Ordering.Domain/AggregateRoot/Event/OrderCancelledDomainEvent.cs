@@ -1,6 +1,8 @@
+using MSFramework.Domain.Event;
+
 namespace Ordering.Domain.AggregateRoot.Event
 {
-	public class OrderCancelledDomainEvent : EventBus.Event
+	public class OrderCancelledDomainEvent : EventBase
 	{
 		public Order Order { get; }
 

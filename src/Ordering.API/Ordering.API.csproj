@@ -7,14 +7,15 @@
     </PropertyGroup>
 
     <ItemGroup>
+        <PackageReference Include="Microsoft.AspNetCore.Mvc.Core" Version="2.2.5" />
         <PackageReference Include="Serilog.AspNetCore" Version="3.2.0" />
-        <PackageReference Include="Serilog.Sinks.PeriodicBatching" Version="2.2.0" />
+        <PackageReference Include="Serilog.Sinks.PeriodicBatching" Version="2.3.0" />
         <PackageReference Include="Serilog.Sinks.Console" Version="3.1.1" />
         <PackageReference Include="Serilog.Sinks.RollingFile" Version="3.3.0" />
-        <PackageReference Include="Swashbuckle.AspNetCore.SwaggerGen" Version="5.0.0" />
-        <PackageReference Include="Swashbuckle.AspNetCore.SwaggerUI" Version="5.0.0" />
-        <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="3.1.1" />
-        <PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="3.1.2" />
+        <PackageReference Include="Swashbuckle.AspNetCore.SwaggerGen" Version="5.5.0" />
+        <PackageReference Include="Swashbuckle.AspNetCore.SwaggerUI" Version="5.5.0" />
+        <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="3.1.5" />
+        <PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="3.1.5" />
     </ItemGroup>
 
     <ItemGroup>

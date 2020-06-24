@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
-using MSFramework.Domain;
+using MSFramework.Domain.AggregateRoot;
 using Ordering.Domain.AggregateRoot.Event;
 
 namespace Ordering.Domain.AggregateRoot

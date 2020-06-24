@@ -8,34 +8,34 @@ namespace MSFramework.Ef.Function
 {
 	public class EfFunctionStore : IFunctionStore
 	{
-		private readonly EfRepository<MSFramework.Function.Function> _repository;
+		private readonly EfRepository<FunctionDefine> _repository;
 		private readonly IMemoryCache _cache;
 		private readonly TimeSpan _ttl = new TimeSpan(0, 1, 0);
 
-		public EfFunctionStore(IMemoryCache cache, EfRepository<MSFramework.Function.Function> efRepository)
+		public EfFunctionStore(IMemoryCache cache, EfRepository<FunctionDefine> efRepository)
 		{
 			_repository = efRepository;
 			_cache = cache;
 		}
 
-		public MSFramework.Function.Function Get(string path)
+		public FunctionDefine Get(string path)
 		{
-			_cache.TryGetValue(path, out MSFramework.Function.Function function);
+			_cache.TryGetValue(path, out FunctionDefine function);
 			if (function == null)
 			{
-				function = _repository.Entities.FirstOrDefault(x => x.Path == path);
+				function = _repository.CurrentSet.FirstOrDefault(x => x.Path == path);
 				_cache.Set(path, function, _ttl);
 			}
 
 			return function;
 		}
 
-		public List<MSFramework.Function.Function> GetAllList()
+		public List<FunctionDefine> GetAllList()
 		{
-			return _repository.Entities.ToList();
+			return _repository.CurrentSet.ToList();
 		}
 
-		public void Update(MSFramework.Function.Function function)
+		public void Update(FunctionDefine function)
 		{
 			_repository.Update(function);
 			_cache.Set(function.Path, function, _ttl);
@@ -50,7 +50,7 @@ namespace MSFramework.Ef.Function
 			}
 		}
 
-		public void Add(MSFramework.Function.Function function)
+		public void Add(FunctionDefine function)
 		{
 			_repository.Insert(function);
 			_cache.Set(function.Path, function, _ttl);

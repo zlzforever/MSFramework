@@ -1,8 +1,7 @@
-using EventBus.DependencyInjection;
+using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
 using Microsoft.Extensions.DependencyInjection;
-using MSFramework.Domain;
 
 namespace MSFramework.Ef
 {
@@ -19,22 +18,11 @@ namespace MSFramework.Ef
 		/// <returns></returns>
 		public virtual TDbContext CreateDbContext(string[] args)
 		{
-			var services = new ServiceCollection();
-			services.AddLogging();
-			services.AddEventBus();
-			services.AddScoped<IMSFrameworkSession, FakeMSFrameworkSession>();
-			services.AddEntityFramework();
-			Configure(services);
-			var context = services.BuildServiceProvider().GetRequiredService<TDbContext>();
-			return context;
+			var services = GetServiceProvider();
+			return services.CreateScope().ServiceProvider.GetRequiredService<DbContextFactory>()
+				.GetDbContext(typeof(TDbContext)) as TDbContext;
 		}
 
-		protected abstract void Configure(IServiceCollection services);
-
-		class FakeMSFrameworkSession : IMSFrameworkSession
-		{
-			public string UserId { get; }
-			public string UserName { get; }
-		}
+		protected abstract IServiceProvider GetServiceProvider();
 	}
 }

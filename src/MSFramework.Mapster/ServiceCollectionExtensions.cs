@@ -6,7 +6,7 @@ namespace MSFramework.Mapster
 	{
 		public static MSFrameworkBuilder AddMapster(this MSFrameworkBuilder builder)
 		{
-			builder.Services.AddScoped<MSFramework.Data.IMapper, Mapper>();
+			builder.Services.AddScoped<Data.IMapper, Mapper>();
 			return builder;
 		}
 	}

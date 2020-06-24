@@ -7,7 +7,6 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.Caching.Memory;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
-using ApplicationException = MSFramework.Application.ApplicationException;
 
 namespace MSFramework.AspNetCore.Permission
 {
@@ -98,7 +97,7 @@ namespace MSFramework.AspNetCore.Permission
 			var result = JsonConvert.DeserializeObject<CerberusResult>(str);
 			if (!result.Success)
 			{
-				throw new ApplicationException(result.Msg);
+				throw new MSFrameworkException(result.Msg);
 			}
 		}
 
@@ -113,7 +112,7 @@ namespace MSFramework.AspNetCore.Permission
 			var result = JsonConvert.DeserializeObject<CerberusResult>(str);
 			if (!result.Success)
 			{
-				throw new ApplicationException(result.Msg);
+				throw new MSFrameworkException(result.Msg);
 			}
 
 			return ((JArray) result.Data).ToObject<List<Permission>>();
@@ -131,7 +130,7 @@ namespace MSFramework.AspNetCore.Permission
 			var result = JsonConvert.DeserializeObject<CerberusResult>(str);
 			if (!result.Success)
 			{
-				throw new ApplicationException(result.Msg);
+				throw new MSFrameworkException(result.Msg);
 			}
 		}
 
@@ -146,7 +145,7 @@ namespace MSFramework.AspNetCore.Permission
 			var result = JsonConvert.DeserializeObject<CerberusResult>(str);
 			if (!result.Success)
 			{
-				throw new ApplicationException(result.Msg);
+				throw new MSFrameworkException(result.Msg);
 			}
 		}
 	}

@@ -20,7 +20,7 @@ namespace MSFramework.Ef
 			var entityFrameworkOptionsStore = serviceProvider.GetRequiredService<EntityFrameworkOptionsStore>();
 			foreach (var option in entityFrameworkOptionsStore.GetAllOptions())
 			{
-				var useTrans = option.UseTransaction;
+				var useTransaction = option.UseTransaction;
 				if (option.AutoMigrationEnabled)
 				{
 					option.UseTransaction = false;
@@ -30,7 +30,10 @@ namespace MSFramework.Ef
 						continue;
 					}
 
-					if (dbContext.Database.ProviderName == "Microsoft.EntityFrameworkCore.InMemory") continue;
+					if (dbContext.Database.ProviderName == "Microsoft.EntityFrameworkCore.InMemory")
+					{
+						continue;
+					}
 
 					var migrations = (await dbContext.Database.GetPendingMigrationsAsync()).ToArray();
 					if (migrations.Length > 0)
@@ -38,10 +41,10 @@ namespace MSFramework.Ef
 						await dbContext.Database.MigrateAsync();
 						ILogger logger = dbContext.GetService<ILoggerFactory>()
 							.CreateLogger<EntityFrameworkInitializer>();
-						logger.LogInformation($"已提交{migrations.Length}条挂起的迁移记录：{migrations.ExpandAndToString()}");
+						logger.LogInformation($"已提交 {migrations.Length} 条挂起的迁移记录：{migrations.ExpandAndToString()}");
 					}
 
-					option.UseTransaction = useTrans;
+					option.UseTransaction = useTransaction;
 				}
 			}
 		}

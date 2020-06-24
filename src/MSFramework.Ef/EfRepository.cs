@@ -1,12 +1,9 @@
 using System;
-using System.Collections.Generic;
-using System.Data;
-using System.Data.Common;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using MSFramework.Domain;
-using MSFramework.Domain.Repository;
+using MSFramework.Domain.AggregateRoot;
 
 namespace MSFramework.Ef
 {
@@ -14,7 +11,7 @@ namespace MSFramework.Ef
 		, IRepository<TEntity>
 		where TEntity : class, IAggregateRoot<Guid>
 	{
-		public EfRepository(DbContextFactory dbContextFactory) : base(dbContextFactory)
+		protected EfRepository(DbContextFactory dbContextFactory) : base(dbContextFactory)
 		{
 		}
 	}
@@ -23,56 +20,27 @@ namespace MSFramework.Ef
 		where TEntity : class, IAggregateRoot<TKey>
 		where TKey : IEquatable<TKey>
 	{
-		protected bool IsDeletionAuditedEntity { get; }
+		public IQueryable<TEntity> CurrentSet { get; private set; }
 
-		public EfRepository(DbContextFactory dbContextFactory)
+		protected EfRepository(DbContextFactory dbContextFactory)
 		{
 			DbContext = dbContextFactory.GetDbContext<TEntity>();
-			IsDeletionAuditedEntity = typeof(IDeletionAudited).IsAssignableFrom(typeof(TEntity));
-			Entities = IsDeletionAuditedEntity
+			var isDeletionAuditedEntity = typeof(IDeletionAudited).IsAssignableFrom(typeof(TEntity));
+			CurrentSet = isDeletionAuditedEntity
 				? DbContext.Set<TEntity>().Where(x => !((IDeletionAudited) x).IsDeleted)
 				: DbContext.Set<TEntity>();
 		}
 
 		protected DbContextBase DbContext { get; }
 
-		public virtual DbConnection Connection
-		{
-			get
-			{
-				var connection = DbContext.Database.GetDbConnection();
-
-				if (connection.State != ConnectionState.Open)
-				{
-					connection.Open();
-				}
-
-				return connection;
-			}
-		}
-
-		public IQueryable<TEntity> Entities { get; }
-
-		public IUnitOfWork UnitOfWork => DbContext;
-
-		public virtual List<TEntity> GetAllList()
-		{
-			return Entities.ToList();
-		}
-
-		public virtual Task<List<TEntity>> GetAllListAsync()
-		{
-			return Entities.ToListAsync();
-		}
-
 		public virtual TEntity Get(TKey id)
 		{
-			return Entities.FirstOrDefault(x => x.Id.Equals(id));
+			return CurrentSet.FirstOrDefault(x => x.Id.Equals(id));
 		}
 
 		public virtual async Task<TEntity> GetAsync(TKey id)
 		{
-			return await Entities.FirstOrDefaultAsync(x => x.Id.Equals(id));
+			return await CurrentSet.FirstOrDefaultAsync(x => x.Id.Equals(id));
 		}
 
 		public virtual TEntity Insert(TEntity entity)

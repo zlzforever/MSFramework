@@ -6,10 +6,8 @@ using Ordering.Domain.AggregateRoot;
 
 namespace Ordering.Infrastructure.EntityConfigurations
 {
-	public class OrderEntityTypeConfiguration : EntityTypeConfigurationBase<Order>
+	public class OrderEntityTypeConfiguration : EntityTypeConfigurationBase<Order, OrderingContext>
 	{
-		public override Type DbContextType => typeof(OrderingContext);
-
 		public override void Configure(EntityTypeBuilder<Order> builder)
 		{
 			base.Configure(builder);

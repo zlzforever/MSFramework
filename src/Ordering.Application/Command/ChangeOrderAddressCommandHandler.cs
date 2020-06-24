@@ -1,18 +1,20 @@
 using System.Threading;
 using System.Threading.Tasks;
 using MediatR;
-using MSFramework.Http;
+using MSFramework.Domain;
 using Ordering.Domain.Repository;
 
 namespace Ordering.Application.Command
 {
-	public class ChangeOrderAddressCommandHandler : IRequestHandler<ChangeOrderAddressCommand, ApiResult>
+	public class ChangeOrderAddressCommandHandler : IRequestHandler<ChangeOrderAddressCommand>
 	{
 		private readonly IOrderingRepository _orderRepository;
-
-		public ChangeOrderAddressCommandHandler(IOrderingRepository orderRepository)
+		private readonly IUnitOfWorkManager _unitOfWorkManager;
+		
+		public ChangeOrderAddressCommandHandler(IOrderingRepository orderRepository, IUnitOfWorkManager unitOfWorkManager)
 		{
 			_orderRepository = orderRepository;
+			_unitOfWorkManager = unitOfWorkManager;
 		}
 
 		/// <summary>
@@ -21,17 +23,17 @@ namespace Ordering.Application.Command
 		/// </summary>
 		/// <param name="command"></param>
 		/// <returns></returns>
-		public async Task<ApiResult> Handle(ChangeOrderAddressCommand command, CancellationToken cancellationToken)
+		public async Task<Unit> Handle(ChangeOrderAddressCommand command, CancellationToken cancellationToken)
 		{
 			var order = await _orderRepository.GetAsync(command.OrderId);
 			if (order == null)
 			{
-				return new ApiResult(false, null, "无效的订单号");
+				return Unit.Value;
 			}
 
 			order.ChangeAddress(command.NewAddress);
-			await _orderRepository.UnitOfWork.CommitAsync();
-			return new ApiResult();
+			await _unitOfWorkManager.CommitAsync();
+			return Unit.Value;
 		}
 	}
 }

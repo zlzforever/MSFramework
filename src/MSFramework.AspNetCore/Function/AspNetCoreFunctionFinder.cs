@@ -16,11 +16,11 @@ namespace MSFramework.AspNetCore.Function
 			_services = serviceProvider;
 		}
 
-		public List<MSFramework.Function.Function> GetAllList()
+		public List<FunctionDefine> GetAllList()
 		{
 			var actionDescriptorCollectionProvider =
 				_services.GetRequiredService<IActionDescriptorCollectionProvider>();
-			var functions = new List<MSFramework.Function.Function>();
+			var functions = new List<FunctionDefine>();
 			foreach (var actionDescriptor in actionDescriptorCollectionProvider.ActionDescriptors.Items)
 			{
 				functions.Add(actionDescriptor.GetFunction());

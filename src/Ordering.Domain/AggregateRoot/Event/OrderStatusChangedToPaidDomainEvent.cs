@@ -1,10 +1,11 @@
 using System;
 using System.Collections.Generic;
+using MSFramework.Domain.Event;
 
 namespace Ordering.Domain.AggregateRoot.Event
 {
 	public class OrderStatusChangedToPaidDomainEvent
-		: EventBus.Event
+		: EventBase
 	{
 		public Guid OrderId { get; }
 		public IEnumerable<OrderItem> OrderItems { get; }

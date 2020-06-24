@@ -1,6 +1,8 @@
+using MSFramework.Domain.Event;
+
 namespace Ordering.Domain.AggregateRoot.Event
 {
-	public class OrderStartedDomainEvent : EventBus.Event
+	public class OrderStartedDomainEvent : EventBase
 	{
 		public string UserId { get; }
 

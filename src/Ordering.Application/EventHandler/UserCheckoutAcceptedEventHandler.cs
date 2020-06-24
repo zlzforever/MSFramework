@@ -1,22 +1,19 @@
-using System.Linq;
 using System.Threading.Tasks;
-using EventBus;
-using MediatR;
 using Microsoft.Extensions.Logging;
 using MSFramework.Domain;
-using Ordering.Application.Command;
+using MSFramework.Domain.Event;
 using Ordering.Application.Event;
 
 namespace Ordering.Application.EventHandler
 {
-	public class UserCheckoutAcceptedEventHandler : IEventHandler<UserCheckoutAcceptedEvent>
+	public class UserCheckoutAcceptedEventHandler : EventBus.IEventHandler<UserCheckoutAcceptedEvent>
 	{
 		private readonly ILogger _logger;
-		private readonly IMediator _mediator;
-		private readonly IMSFrameworkSession _session;
+		private readonly IEventMediator _mediator;
+		private readonly ISession _session;
 
-		public UserCheckoutAcceptedEventHandler(IMSFrameworkSession session,
-			IMediator mediator,
+		public UserCheckoutAcceptedEventHandler(ISession session,
+			IEventMediator mediator,
 			ILogger<UserCheckoutAcceptedEventHandler> logger)
 		{
 			_logger = logger;
@@ -26,17 +23,17 @@ namespace Ordering.Application.EventHandler
 
 		public async Task HandleAsync(UserCheckoutAcceptedEvent @event)
 		{
-			await _mediator.Send(new CreateOrderCommand(@event.OrderItems.Select(x =>
-					new CreateOrderCommand.OrderItemDTO
-					{
-						Discount = x.Discount,
-						ProductId = x.ProductId,
-						PictureUrl = x.PictureUrl,
-						ProductName = x.ProductName,
-						Units = x.Units,
-						UnitPrice = x.UnitPrice
-					}).ToList(), @event.UserId, @event.City, @event.Street,
-				@event.State, @event.Country, @event.ZipCode, @event.Description));
+			// await _mediator.Send(new CreateOrderCommand(@event.OrderItems.Select(x =>
+			// 		new CreateOrderCommand.OrderItemDTO
+			// 		{
+			// 			Discount = x.Discount,
+			// 			ProductId = x.ProductId,
+			// 			PictureUrl = x.PictureUrl,
+			// 			ProductName = x.ProductName,
+			// 			Units = x.Units,
+			// 			UnitPrice = x.UnitPrice
+			// 		}).ToList(), @event.UserId, @event.City, @event.Street,
+			// 	@event.State, @event.Country, @event.ZipCode, @event.Description));
 		}
 	}
 }

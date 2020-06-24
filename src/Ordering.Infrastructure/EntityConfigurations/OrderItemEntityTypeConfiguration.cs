@@ -5,14 +5,12 @@ using Ordering.Domain.AggregateRoot;
 
 namespace Ordering.Infrastructure.EntityConfigurations
 {
-	public class OrderItemEntityTypeConfiguration : EntityTypeConfigurationBase<OrderItem>
+	public class OrderItemEntityTypeConfiguration : EntityTypeConfigurationBase<OrderItem, OrderingContext>
 	{
-		public override Type DbContextType => typeof(OrderingContext);
-		
 		public override void Configure(EntityTypeBuilder<OrderItem> builder)
 		{
 			base.Configure(builder);
-			
+
 			builder.HasKey(o => o.Id);
 
 			builder.Property<decimal>("Discount")

@@ -14,14 +14,13 @@ namespace Ordering.Infrastructure.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "3.1.2")
+                .HasAnnotation("ProductVersion", "3.1.5")
                 .HasAnnotation("Relational:MaxIdentifierLength", 64);
 
             modelBuilder.Entity("MSFramework.Audit.AuditEntity", b =>
                 {
                     b.Property<Guid>("Id")
-                        .HasColumnType("char(36)")
-                        .HasComment("唯一标识");
+                        .HasColumnType("char(36)");
 
                     b.Property<string>("DisplayName")
                         .HasColumnType("varchar(255) CHARACTER SET utf8mb4")
@@ -55,8 +54,7 @@ namespace Ordering.Infrastructure.Migrations
             modelBuilder.Entity("MSFramework.Audit.AuditOperation", b =>
                 {
                     b.Property<Guid>("Id")
-                        .HasColumnType("char(36)")
-                        .HasComment("唯一标识");
+                        .HasColumnType("char(36)");
 
                     b.Property<DateTimeOffset>("CreatedTime")
                         .HasColumnType("datetime(6)");
@@ -107,8 +105,7 @@ namespace Ordering.Infrastructure.Migrations
             modelBuilder.Entity("MSFramework.Audit.AuditProperty", b =>
                 {
                     b.Property<Guid>("Id")
-                        .HasColumnType("char(36)")
-                        .HasComment("唯一标识");
+                        .HasColumnType("char(36)");
 
                     b.Property<Guid>("AuditEntityId")
                         .HasColumnType("char(36)");
@@ -142,11 +139,10 @@ namespace Ordering.Infrastructure.Migrations
                     b.ToTable("AuditProperty");
                 });
 
-            modelBuilder.Entity("MSFramework.Function.Function", b =>
+            modelBuilder.Entity("MSFramework.Function.FunctionDefine", b =>
                 {
                     b.Property<Guid>("Id")
-                        .HasColumnType("char(36)")
-                        .HasComment("唯一标识");
+                        .HasColumnType("char(36)");
 
                     b.Property<bool>("AuditEntityEnabled")
                         .HasColumnType("tinyint(1)");
@@ -210,14 +206,13 @@ namespace Ordering.Infrastructure.Migrations
                     b.HasIndex("Path")
                         .IsUnique();
 
-                    b.ToTable("Function");
+                    b.ToTable("FunctionDefine");
                 });
 
             modelBuilder.Entity("Ordering.Domain.AggregateRoot.Order", b =>
                 {
                     b.Property<Guid>("Id")
-                        .HasColumnType("char(36)")
-                        .HasComment("唯一标识");
+                        .HasColumnType("char(36)");
 
                     b.Property<DateTimeOffset>("CreationTime")
                         .HasColumnType("datetime(6)");
@@ -246,8 +241,7 @@ namespace Ordering.Infrastructure.Migrations
             modelBuilder.Entity("Ordering.Domain.AggregateRoot.OrderItem", b =>
                 {
                     b.Property<Guid>("Id")
-                        .HasColumnType("char(36)")
-                        .HasComment("唯一标识");
+                        .HasColumnType("char(36)");
 
                     b.Property<decimal>("Discount")
                         .HasColumnType("decimal(65,30)");

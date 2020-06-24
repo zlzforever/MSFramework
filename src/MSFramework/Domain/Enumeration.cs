@@ -5,74 +5,70 @@ using System.Reflection;
 
 namespace MSFramework.Domain
 {
-	public abstract class Enumeration<TId> : IComparable
-		where TId : IComparable
-	{
-		public string Name { get; private set; }
+	 public abstract class Enumeration : IComparable
+    {
+        public string Name { get; private set; }
 
-		public TId Id { get; private set; }
+        public int Id { get; private set; }
 
-		protected Enumeration(TId id, string name)
-		{
-			Id = id;
-			Name = name;
-		}
+        protected Enumeration(int id, string name)
+        {
+            Id = id;
+            Name = name;
+        }
 
-		public override string ToString() => Name;
-		
-		public static IEnumerable<T> GetAll<T>() where T : Enumeration<TId>
-		{
-			var fields = typeof(T).GetFields(BindingFlags.Public | BindingFlags.Static | BindingFlags.DeclaredOnly);
+        public override string ToString() => Name;
 
-			return fields.Select(f => f.GetValue(null)).Cast<T>();
-		}
+        public static IEnumerable<T> GetAll<T>() where T : Enumeration
+        {
+            var fields = typeof(T).GetFields(BindingFlags.Public | BindingFlags.Static | BindingFlags.DeclaredOnly);
 
-		public override bool Equals(object obj)
-		{
-			var otherValue = obj as Enumeration<TId>;
+            return fields.Select(f => f.GetValue(null)).Cast<T>();
+        }
 
-			if (otherValue == null)
-				return false;
+        public override bool Equals(object obj)
+        {
+            var otherValue = obj as Enumeration;
 
-			var typeMatches = GetType() == obj.GetType();
-			var valueMatches = Id.Equals(otherValue.Id);
+            if (otherValue == null)
+                return false;
 
-			return typeMatches && valueMatches;
-		}
+            var typeMatches = GetType() == obj.GetType();
+            var valueMatches = Id.Equals(otherValue.Id);
 
-		// ReSharper disable once NonReadonlyMemberInGetHashCode
-		public override int GetHashCode() => Id.GetHashCode();
+            return typeMatches && valueMatches;
+        }
 
-		public int CompareTo(object other) => Id.CompareTo(((Enumeration) other).Id);
+        public override int GetHashCode() => Id.GetHashCode();
 
-		public static T FromId<T>(TId value) where T : Enumeration<TId>
-		{
-			var matchingItem = Parse<T, TId>(value, "value",
-				item => item.Id.Equals(value));
-			return matchingItem;
-		}
+        public static int AbsoluteDifference(Enumeration firstValue, Enumeration secondValue)
+        {
+            var absoluteDifference = Math.Abs(firstValue.Id - secondValue.Id);
+            return absoluteDifference;
+        }
 
-		public static T FromName<T>(string name) where T : Enumeration<TId>
-		{
-			var matchingItem = Parse<T, string>(name, "display name", item => item.Name == name);
-			return matchingItem;
-		}
+        public static T FromValue<T>(int value) where T : Enumeration
+        {
+            var matchingItem = Parse<T, int>(value, "value", item => item.Id == value);
+            return matchingItem;
+        }
 
-		private static T Parse<T, TK>(TK value, string description, Func<T, bool> predicate) where T : Enumeration<TId>
-		{
-			var matchingItem = GetAll<T>().FirstOrDefault(predicate);
+        public static T FromDisplayName<T>(string displayName) where T : Enumeration
+        {
+            var matchingItem = Parse<T, string>(displayName, "display name", item => item.Name == displayName);
+            return matchingItem;
+        }
 
-			if (matchingItem == null)
-				throw new InvalidOperationException($"'{value}' is not a valid {description} in {typeof(T)}");
+        private static T Parse<T, TK>(TK value, string description, Func<T, bool> predicate) where T : Enumeration
+        {
+            var matchingItem = GetAll<T>().FirstOrDefault(predicate);
 
-			return matchingItem;
-		}
-	}
+            if (matchingItem == null)
+                throw new InvalidOperationException($"'{value}' is not a valid {description} in {typeof(T)}");
 
-	public abstract class Enumeration : Enumeration<int>
-	{
-		protected Enumeration(int id, string name) : base(id, name)
-		{
-		}
-	}
+            return matchingItem;
+        }
+
+        public int CompareTo(object other) => Id.CompareTo(((Enumeration)other).Id);
+    }
 }

@@ -26,7 +26,7 @@ namespace MSFramework.Ef
 		/// <summary>
 		/// 初始化
 		/// </summary>
-		public void Initialize()
+		void IEntityConfigurationTypeFinder.Initialize()
 		{
 			var dict = _entityRegistersDict;
 			dict.Clear();
@@ -116,11 +116,6 @@ namespace MSFramework.Ef
 			}
 
 			return _entityMapDbContextDict[entityType];
-		}
-
-		public bool ExistDbContextTypeForEntity(Type entityType)
-		{
-			return _entityMapDbContextDict.ContainsKey(entityType);
 		}
 	}
 }

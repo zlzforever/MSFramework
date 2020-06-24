@@ -2,7 +2,7 @@ using System;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
 using MSFramework.Data;
-using MSFramework.Domain;
+using MSFramework.Domain.AggregateRoot;
 using MSFramework.Domain.Entity;
 using MSFramework.Extensions;
 
@@ -25,7 +25,7 @@ namespace MSFramework.Ef.Extensions
 			Expression<Func<TEntity, bool>> where = null, OrderCondition<TEntity, TOrderKey> orderBy = null)
 			where TEntity : class, IAggregateRoot<TKey>, IEntity where TKey : IEquatable<TKey>
 		{
-			return await repository.Entities.PagedQueryAsync<TEntity, TOrderKey, object>(page, limit, where, orderBy);
+			return await repository.CurrentSet.PagedQueryAsync<TEntity, TOrderKey, object>(page, limit, where, orderBy);
 		}
 	}
 }

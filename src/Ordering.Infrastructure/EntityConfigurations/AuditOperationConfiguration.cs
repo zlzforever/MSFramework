@@ -5,8 +5,7 @@ using MSFramework.Ef;
 namespace Ordering.Infrastructure.EntityConfigurations
 {
 	public class AuditOperationConfiguration
-		: EntityTypeConfigurationBase<AuditOperation>
+		: EntityTypeConfigurationBase<AuditOperation, OrderingContext>
 	{
-		public override Type DbContextType => typeof(OrderingContext);
 	}
 }

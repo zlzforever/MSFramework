@@ -10,7 +10,7 @@ namespace MSFramework.AspNetCore.Extensions
 {
 	public static class ActionDescriptorExtensions
 	{
-		public static MSFramework.Function.Function GetFunction(this ActionDescriptor actionDescriptor)
+		public static MSFramework.Function.FunctionDefine GetFunction(this ActionDescriptor actionDescriptor)
 		{
 			var controllerAction = (ControllerActionDescriptor) actionDescriptor;
 			var functionPath = actionDescriptor.GetFunctionPath();
@@ -18,7 +18,7 @@ namespace MSFramework.AspNetCore.Extensions
 				.ExpandAndToString();
 			var name =
 				$"{controllerAction.MethodInfo.DeclaringType.FullName}.{controllerAction.MethodInfo.Name}({parameters})";
-			return new MSFramework.Function.Function(name, functionPath, null);
+			return new MSFramework.Function.FunctionDefine(name, functionPath, null);
 		}
 
 		public static string GetFunctionPath(this ActionDescriptor actionDescriptor)

@@ -6,11 +6,11 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="Microsoft.AspNetCore.DataProtection.Abstractions" Version="3.1.2" />
-        <PackageReference Include="Microsoft.AspNetCore.Authentication.OpenIdConnect" Version="3.1.2" />
-        <PackageReference Include="MSFramework.AspNetCore.Permission" Version="0.11.22" />
-        <PackageReference Include="MSFramework.AutoMapper" Version="0.11.22" />
-        <PackageReference Include="MSFramework.Ef.MySql" Version="0.11.22" />
+        <PackageReference Include="Microsoft.AspNetCore.DataProtection.Abstractions" Version="3.1.5" />
+        <PackageReference Include="Microsoft.AspNetCore.Authentication.OpenIdConnect" Version="3.1.5" />
+        <PackageReference Include="MSFramework.AspNetCore.Permission" Version="0.11.53" />
+        <PackageReference Include="MSFramework.AutoMapper" Version="0.11.53" />
+        <PackageReference Include="MSFramework.Ef.MySql" Version="0.11.53" />
     </ItemGroup>
 
     <ItemGroup>

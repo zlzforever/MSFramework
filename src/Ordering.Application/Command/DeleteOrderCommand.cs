@@ -1,10 +1,9 @@
 using System;
 using MediatR;
-using MSFramework.Http;
 
 namespace Ordering.Application.Command
 {
-	public class DeleteOrderCommand : IRequest<ApiResult>
+	public class DeleteOrderCommand : IRequest
 	{
 		public Guid OrderId { get; private set; }
 

@@ -1,18 +1,20 @@
 using System.Threading;
 using System.Threading.Tasks;
 using MediatR;
-using MSFramework.Http;
+using MSFramework.Domain;
 using Ordering.Domain.Repository;
 
 namespace Ordering.Application.Command
 {
-	public class DeleteOrderCommandHandler : IRequestHandler<DeleteOrderCommand, ApiResult>
+	public class DeleteOrderCommandHandler : IRequestHandler<DeleteOrderCommand>
 	{
 		private readonly IOrderingRepository _orderRepository;
-
-		public DeleteOrderCommandHandler(IOrderingRepository orderRepository)
+		private readonly IUnitOfWorkManager _unitOfWorkManager;
+		
+		public DeleteOrderCommandHandler(IOrderingRepository orderRepository, IUnitOfWorkManager unitOfWorkManager)
 		{
 			_orderRepository = orderRepository;
+			_unitOfWorkManager = unitOfWorkManager;
 		}
 
 		/// <summary>
@@ -21,17 +23,17 @@ namespace Ordering.Application.Command
 		/// </summary>
 		/// <param name="command"></param>
 		/// <returns></returns>
-		public async Task<ApiResult> Handle(DeleteOrderCommand command, CancellationToken cancellationToken)
+		public async Task<Unit> Handle(DeleteOrderCommand command, CancellationToken cancellationToken)
 		{
 			var order = await _orderRepository.GetAsync(command.OrderId);
 			if (order == null)
 			{
-				return new ApiResult(false, null, "无效的订单号", 200);
+				return Unit.Value;
 			}
 
 			await _orderRepository.DeleteAsync(order);
-			await _orderRepository.UnitOfWork.CommitAsync();
-			return new ApiResult();
+			await _unitOfWorkManager.CommitAsync();
+			return Unit.Value;
 		}
 	}
 }

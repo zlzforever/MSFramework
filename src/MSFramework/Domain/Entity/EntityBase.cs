@@ -1,55 +1,66 @@
 ﻿using System;
-using System.ComponentModel;
+using System.Collections.Generic;
 using System.Reflection;
-using MSFramework.Common;
-using MSFramework.Data;
+using MSFramework.Domain.Event;
 
 namespace MSFramework.Domain.Entity
 {
-	public abstract class EntityBase : EntityBase<Guid>
+	/// <inheritdoc/>
+	[Serializable]
+	public abstract class EntityBase : IEntity
 	{
+		private List<IEvent> _domainEvents;
+
+		public IReadOnlyCollection<IEvent> DomainEvents => _domainEvents?.AsReadOnly();
+
+		public void AddDomainEvent(IEvent @event)
+		{
+			_domainEvents ??= new List<IEvent>();
+			_domainEvents.Add(@event);
+		}
+
+		public void RemoveDomainEvent(IEvent @event)
+		{
+			_domainEvents?.Remove(@event);
+		}
+
+		public void ClearDomainEvents() => _domainEvents?.Clear();
+
+		/// <inheritdoc/>
+		public override string ToString()
+		{
+			return $"[ENTITY: {GetType().Name}] Keys = {string.Join(", ", GetKeys())}";
+		}
+
+		public abstract object[] GetKeys();
 	}
 
-	/// <summary>
-	/// 实体类基类
-	/// </summary>
+	/// <inheritdoc cref="IEntity{TKey}" />
 	[Serializable]
-	public abstract class EntityBase<TKey> : IEntity<TKey> where TKey : IEquatable<TKey>
+	public abstract class EntityBase<TKey> : EntityBase, IEntity<TKey>
 	{
-		/// <summary>
-		/// 
-		/// </summary>
-		[Description("唯一标识")]
-		public TKey Id { get; protected set; }
+		/// <inheritdoc/>
+		public virtual TKey Id { get; protected set; }
+
+		protected EntityBase()
+		{
+		}
+
+		protected EntityBase(TKey id)
+		{
+			// ReSharper disable once VirtualMemberCallInConstructor
+			Id = id;
+		}
+
 
 		public bool IsTransient()
 		{
 			return Id.Equals(default);
 		}
 
-		protected EntityBase()
+		public bool EntityEquals(object obj)
 		{
-			if (Singleton<IIdGenerator>.Instance == null)
-			{
-				Singleton<IIdGenerator>.Instance = new IdGenerator();
-			}
-
-			Id = Singleton<IIdGenerator>.Instance.GetNewId<TKey>();
-		}
-
-		protected EntityBase(TKey id)
-		{
-			Id = id;
-		}
-
-		/// <summary>
-		/// 判断两个实体是否是同一数据记录的实体
-		/// </summary>
-		/// <param name="obj">要比较的实体信息</param>
-		/// <returns></returns>
-		public override bool Equals(object obj)
-		{
-			if (!(obj is EntityBase<TKey>))
+			if (obj == null || !(obj is EntityBase<TKey>))
 			{
 				return false;
 			}
@@ -75,29 +86,23 @@ namespace MSFramework.Domain.Entity
 				return false;
 			}
 
+			// todo:
+			// //Different tenants may have an entity with same Id.
+			// if (this is IMultiTenant && other is IMultiTenant &&
+			//     this.As<IMultiTenant>().TenantId != other.As<IMultiTenant>().TenantId)
+			// {
+			// 	return false;
+			// }
+
 			return Id.Equals(other.Id);
 		}
 
-		public override int GetHashCode()
+		public override object[] GetKeys()
 		{
-			return Id == null ? 0 : Id.GetHashCode();
+			return new object[] {Id};
 		}
 
-		public static bool operator ==(EntityBase<TKey> left, EntityBase<TKey> right)
-		{
-			if (Equals(left, null))
-			{
-				return Equals(right, null);
-			}
-
-			return left.Equals(right);
-		}
-
-		public static bool operator !=(EntityBase<TKey> left, EntityBase<TKey> right)
-		{
-			return !(left == right);
-		}
-
+		/// <inheritdoc/>
 		public override string ToString()
 		{
 			return $"[ENTITY: {GetType().Name}] Id = {Id}";

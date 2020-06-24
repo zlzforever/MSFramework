@@ -1,7 +1,7 @@
 using System;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
-using MSFramework.Http;
+using MSFramework.AspNetCore.Infrastructure;
 
 namespace MSFramework.AspNetCore
 {
@@ -10,7 +10,10 @@ namespace MSFramework.AspNetCore
 		public Type GetResultDataType(Type returnType)
 		{
 			if (returnType == null)
+			{
 				throw new ArgumentNullException(nameof(returnType));
+			}
+
 			return returnType.IsGenericType && returnType.GetGenericTypeDefinition() == typeof(ActionResult<>)
 				? returnType.GetGenericArguments()[0]
 				: returnType;
@@ -24,10 +27,21 @@ namespace MSFramework.AspNetCore
 			{
 				case IConvertToActionResult convertToActionResult:
 					return convertToActionResult.Convert();
-				case IApiResult _:
-					return new JsonResult(value);
+				case DTO _:
+					return new JsonResult(new Response
+					{
+						Data = value,
+						Success = true,
+						Code = 0,
+						Msg = string.Empty
+					});
 				default:
-					return new JsonResult(new ApiResult(value));
+				{
+					return new ObjectResult(value)
+					{
+						DeclaredType = returnType,
+					};
+				}
 			}
 		}
 	}

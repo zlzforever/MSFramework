@@ -1,13 +1,10 @@
-﻿using System;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Builder;
+﻿using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.OpenApi.Models;
 using MSFramework;
 using MSFramework.AspNetCore;
-using MSFramework.Common;
 using MSFramework.Ef;
 using MSFramework.Ef.Function;
 using MSFramework.Ef.MySql;
@@ -17,15 +14,6 @@ using Ordering.Infrastructure;
 
 namespace Ordering.API
 {
-	class MyInitializer : Initializer
-	{
-		public override Task InitializeAsync(IServiceProvider serviceProvider)
-		{
-			Console.WriteLine("HI, I'm a initializer");
-			return Task.CompletedTask;
-		}
-	}
-
 	public class Startup
 	{
 		public Startup(IConfiguration configuration)
@@ -38,8 +26,6 @@ namespace Ordering.API
 		// This method gets called by the runtime. Use this method to add services to the container.
 		public void ConfigureServices(IServiceCollection services)
 		{
-			services.AddScoped<TestService>();
-
 			services.AddControllers(x =>
 				{
 					x.Filters.Add<UnitOfWork>();
@@ -59,18 +45,17 @@ namespace Ordering.API
 
 			services.AddMSFramework(builder =>
 			{
-				builder.AddEventBus(typeof(UserCheckoutAcceptedEvent));
+				builder.AddEventMediator(typeof(UserCheckoutAcceptedEvent));
 				// 开发环境可以使用本地消息总线，生产环境应该换成分布式消息队列
 				builder.AddAspNetCore();
 				builder.AddAspNetCoreFunction<EfFunctionStore>();
-				builder.AddEfAuditStore();
 				// builder.AddPermission();
 				builder.AddDatabaseMigration<MySqlDatabaseMigration>(typeof(OrderingContext),
 					"Database='ordering';Data Source=localhost;User ID=root;Password=1qazZAQ!;Port=3306;");
 				builder.AddEntityFramework(x =>
 				{
 					// 添加 MySql 支持
-					x.AddMySql<OrderingContext>();
+					x.AddMySql<OrderingContext>(Configuration);
 				});
 			});
 		}

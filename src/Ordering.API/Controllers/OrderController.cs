@@ -2,9 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Logging;
 using MSFramework.AspNetCore;
-using MSFramework.Domain;
 using Ordering.Application.Command;
 using Ordering.Application.Query;
 using Ordering.Domain.AggregateRoot;
@@ -15,14 +13,13 @@ namespace Ordering.API.Controllers
 {
 	[Route("api/v1.0/[controller]")]
 	[ApiController]
-	public class OrderController : MSFrameworkApiControllerBase
+	public class OrderController : ApiControllerBase
 	{
 		private readonly IOrderingQuery _orderingQuery;
 		private readonly IOrderingRepository _orderRepository;
 
 		public OrderController(IOrderingRepository orderRepository,
-			IOrderingQuery orderingQuery,
-			IMSFrameworkSession session, ILogger<OrderController> logger) : base(session, logger)
+			IOrderingQuery orderingQuery)
 		{
 			_orderingQuery = orderingQuery;
 			_orderRepository = orderRepository;

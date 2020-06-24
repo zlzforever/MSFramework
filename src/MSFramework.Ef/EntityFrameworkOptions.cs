@@ -29,11 +29,6 @@ namespace MSFramework.Ef
 		public string ConnectionString { get; set; }
 
 		/// <summary>
-		/// 获取或设置 数据库类型
-		/// </summary>
-		public string DatabaseType { get; set; }
-
-		/// <summary>
 		/// 启用事务
 		/// </summary>
 		public bool UseTransaction { get; set; }
