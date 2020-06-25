@@ -1,8 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using Microsoft.Extensions.DependencyInjection;
-using MSFramework.Audit;
 
 namespace MSFramework.Domain
 {
@@ -15,15 +13,12 @@ namespace MSFramework.Domain
 		/// 工作单元集合
 		/// </summary>
 		private readonly List<IUnitOfWork> _unitOfWorks;
-
-		private readonly IServiceProvider _serviceProvider;
-
+		
 		/// <summary>
 		/// 初始化工作单元管理器
 		/// </summary>
-		public DefaultUnitOfWorkManager(IServiceProvider serviceProvider)
+		public DefaultUnitOfWorkManager()
 		{
-			_serviceProvider = serviceProvider;
 			_unitOfWorks = new List<IUnitOfWork>();
 		}
 
@@ -32,24 +27,9 @@ namespace MSFramework.Domain
 		/// </summary>
 		public void Commit()
 		{
-			// 1. commit 完成则所有实体的变化信息被清空，无法还原
-			// 2. 审计信息通过审核服务来处理，即可以直接存储，也可以通过消息队列推出去。
-			var auditService = _serviceProvider.GetService<IAuditService>();
-			if (auditService == null)
+			foreach (var unitOfWork in _unitOfWorks)
 			{
-				foreach (var unitOfWork in _unitOfWorks)
-				{
-					unitOfWork.Commit();
-				}
-			}
-			else
-			{
-				foreach (var unitOfWork in _unitOfWorks)
-				{
-					auditEntities.AddRange(unitOfWork.GetAuditEntries());
-					unitOfWork.Commit();
-				}
-				auditService.SaveAsync()
+				unitOfWork.Commit();
 			}
 		}
 
@@ -79,6 +59,11 @@ namespace MSFramework.Domain
 			{
 				_unitOfWorks.Add(unitOfWork);
 			}
+		}
+
+		public IReadOnlyCollection<IUnitOfWork> GetUnitOfWorks()
+		{
+			return _unitOfWorks.AsReadOnly();
 		}
 	}
 }

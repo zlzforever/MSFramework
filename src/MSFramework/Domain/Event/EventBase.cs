@@ -1,4 +1,5 @@
 using System;
+using MSFramework.Common;
 
 namespace MSFramework.Domain.Event
 {
@@ -25,7 +26,7 @@ namespace MSFramework.Domain.Event
 
 		protected EventBase(object eventSource)
 		{
-			EventId = Guid.NewGuid();
+			EventId = CombGuid.NewGuid();
 			EventTime = DateTimeOffset.UtcNow;
 			EventSource = eventSource;
 		}

@@ -5,12 +5,12 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using MSFramework.Common;
 using MSFramework.Extensions;
+using MSFramework.Initializer;
 
 namespace MSFramework.Ef
 {
-	public class EntityFrameworkInitializer : Initializer
+	public class EntityFrameworkInitializer : InitializerBase
 	{
 		public override int Order => int.MinValue;
 

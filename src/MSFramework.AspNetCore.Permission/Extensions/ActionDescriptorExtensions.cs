@@ -11,7 +11,7 @@ namespace MSFramework.AspNetCore.Permission.Extensions
 		public static Permission GetPermission(this ActionDescriptor actionDescriptor)
 		{
 			var controllerAction = (ControllerActionDescriptor) actionDescriptor;
-			var identification = actionDescriptor.GetFunctionPath();
+			var identification = actionDescriptor.GetActionPath();
 			var parameters = controllerAction.Parameters.Select(x => $"{x.ParameterType.Name} {x.Name}")
 				.ExpandAndToString();
 

@@ -13,7 +13,7 @@ namespace MSFramework.AspNetCore.Extensions
 		public static MSFramework.Function.FunctionDefine GetFunction(this ActionDescriptor actionDescriptor)
 		{
 			var controllerAction = (ControllerActionDescriptor) actionDescriptor;
-			var functionPath = actionDescriptor.GetFunctionPath();
+			var functionPath = actionDescriptor.GetActionPath();
 			var parameters = controllerAction.Parameters.Select(x => $"{x.ParameterType.Name} {x.Name}")
 				.ExpandAndToString();
 			var name =
@@ -21,7 +21,7 @@ namespace MSFramework.AspNetCore.Extensions
 			return new MSFramework.Function.FunctionDefine(name, functionPath, null);
 		}
 
-		public static string GetFunctionPath(this ActionDescriptor actionDescriptor)
+		public static string GetActionPath(this ActionDescriptor actionDescriptor)
 		{
 			var controllerAction = (ControllerActionDescriptor) actionDescriptor;
 

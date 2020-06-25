@@ -7,16 +7,17 @@ namespace MSFramework.Audit
 {
 	public class DefaultAuditService : IAuditService
 	{
-		private readonly IRepository<AuditOperation> _repository;
+		private readonly IRepository<AuditedOperation> _repository;
 		private readonly ILogger<DefaultAuditService> _logger;
 
-		public DefaultAuditService(IServiceProvider serviceProvider, ILogger<DefaultAuditService> logger)
+		public DefaultAuditService(IServiceProvider serviceProvider,
+			ILogger<DefaultAuditService> logger)
 		{
 			_logger = logger;
-			_repository = serviceProvider.GetService<IRepository<AuditOperation>>();
+			_repository = serviceProvider.GetService<IRepository<AuditedOperation>>();
 		}
 
-		public void Save(AuditOperation auditOperation)
+		public void Save(AuditedOperation auditOperation)
 		{
 			if (_repository == null)
 			{
@@ -26,5 +27,7 @@ namespace MSFramework.Audit
 
 			_repository.Insert(auditOperation);
 		}
+
+		public bool Enabled => _repository != null;
 	}
 }

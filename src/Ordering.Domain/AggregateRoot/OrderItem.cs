@@ -1,4 +1,5 @@
 ﻿using System;
+using MSFramework.Common;
 using MSFramework.Domain.Entity;
 
 namespace Ordering.Domain.AggregateRoot
@@ -15,12 +16,12 @@ namespace Ordering.Domain.AggregateRoot
 		public int Units { get; private set; }
 		public Guid ProductId { get; private set; }
 
-		protected OrderItem()
+		private OrderItem() : base(CombGuid.NewGuid())
 		{
 		}
 
 		public OrderItem(Guid productId, string productName, decimal unitPrice, decimal discount, string pictureUrl,
-			int units = 1)
+			int units = 1) : this()
 		{
 			if (units <= 0)
 			{

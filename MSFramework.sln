@@ -56,13 +56,13 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MSFramework.AutoMapper", "s
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MSFramework.AspNetCore.Permission", "src\MSFramework.AspNetCore.Permission\MSFramework.AspNetCore.Permission.csproj", "{E722344D-C9D8-4720-B847-81B7B016B197}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MSFramework.MySql", "src\MSFramework.MySql\MSFramework.MySql.csproj", "{8E81158C-04B8-4021-AD66-6F8551146950}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MSFramework.Migrator.MySql", "src\MSFramework.Migrator.MySql\MSFramework.Migrator.MySql.csproj", "{8E81158C-04B8-4021-AD66-6F8551146950}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebApplication", "src\WebApplication\WebApplication.csproj", "{0882E9B7-7BB6-4356-81F0-E7EA27702982}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MSFramework.Mapster", "src\MSFramework.Mapster\MSFramework.Mapster.csproj", "{BF53121D-5E84-4FD7-A3E0-8B4DFBCBF6DF}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MSFramework.RabbitMQ", "src\MSFramework.RabbitMQ\MSFramework.RabbitMQ.csproj", "{F12DD37C-9875-4703-807D-864BAA4A8304}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MSFramework.EventBus.RabbitMQ", "src\MSFramework.EventBus.RabbitMQ\MSFramework.EventBus.RabbitMQ.csproj", "{F12DD37C-9875-4703-807D-864BAA4A8304}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MSFramework.Migrator", "src\MSFramework.Migrator\MSFramework.Migrator.csproj", "{110C6F8A-DE2F-40C8-94BB-5D0A5F395177}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -126,14 +126,14 @@ Global
 		{0882E9B7-7BB6-4356-81F0-E7EA27702982}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{0882E9B7-7BB6-4356-81F0-E7EA27702982}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{0882E9B7-7BB6-4356-81F0-E7EA27702982}.Release|Any CPU.Build.0 = Release|Any CPU
-		{BF53121D-5E84-4FD7-A3E0-8B4DFBCBF6DF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{BF53121D-5E84-4FD7-A3E0-8B4DFBCBF6DF}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{BF53121D-5E84-4FD7-A3E0-8B4DFBCBF6DF}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{BF53121D-5E84-4FD7-A3E0-8B4DFBCBF6DF}.Release|Any CPU.Build.0 = Release|Any CPU
 		{F12DD37C-9875-4703-807D-864BAA4A8304}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{F12DD37C-9875-4703-807D-864BAA4A8304}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F12DD37C-9875-4703-807D-864BAA4A8304}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F12DD37C-9875-4703-807D-864BAA4A8304}.Release|Any CPU.Build.0 = Release|Any CPU
+		{110C6F8A-DE2F-40C8-94BB-5D0A5F395177}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{110C6F8A-DE2F-40C8-94BB-5D0A5F395177}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{110C6F8A-DE2F-40C8-94BB-5D0A5F395177}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{110C6F8A-DE2F-40C8-94BB-5D0A5F395177}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -158,8 +158,8 @@ Global
 		{E722344D-C9D8-4720-B847-81B7B016B197} = {AFD16F00-F810-4A3C-BA74-59BBFBC2469D}
 		{8E81158C-04B8-4021-AD66-6F8551146950} = {AFD16F00-F810-4A3C-BA74-59BBFBC2469D}
 		{0882E9B7-7BB6-4356-81F0-E7EA27702982} = {09937860-AC15-416E-B9E1-2BC7041E4A39}
-		{BF53121D-5E84-4FD7-A3E0-8B4DFBCBF6DF} = {AFD16F00-F810-4A3C-BA74-59BBFBC2469D}
 		{F12DD37C-9875-4703-807D-864BAA4A8304} = {AFD16F00-F810-4A3C-BA74-59BBFBC2469D}
+		{110C6F8A-DE2F-40C8-94BB-5D0A5F395177} = {AFD16F00-F810-4A3C-BA74-59BBFBC2469D}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {BE296FC5-5695-4FE5-9BAE-7168B9BACB47}

@@ -59,10 +59,5 @@ namespace MSFramework.AspNetCore
 		}
 
 		public HttpContext HttpContext => _accessor.HttpContext;
-
-		public Task<string> GetTokenAsync(string tokenName = "access_token")
-		{
-			return HttpContext.GetTokenAsync(tokenName);
-		}
 	}
 }

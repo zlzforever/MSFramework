@@ -15,7 +15,7 @@ namespace MSFramework.AspNetCore.Extensions
 			var bytes = stream.ToArray();
 
 			var extension = Path.GetExtension(formFile.FileName);
-			var md5 = bytes.ToMd5();
+			var md5 = bytes.ComputeMD5();
 			var fileName = $"{md5}{extension}";
 			var date = $"{DateTime.Now:yyyMMdd}";
 			var path = $"{interval}/{date}";

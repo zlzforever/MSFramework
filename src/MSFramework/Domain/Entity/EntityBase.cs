@@ -1,7 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Reflection;
-using MSFramework.Domain.Event;
 
 namespace MSFramework.Domain.Entity
 {
@@ -9,23 +7,6 @@ namespace MSFramework.Domain.Entity
 	[Serializable]
 	public abstract class EntityBase : IEntity
 	{
-		private List<IEvent> _domainEvents;
-
-		public IReadOnlyCollection<IEvent> DomainEvents => _domainEvents?.AsReadOnly();
-
-		public void AddDomainEvent(IEvent @event)
-		{
-			_domainEvents ??= new List<IEvent>();
-			_domainEvents.Add(@event);
-		}
-
-		public void RemoveDomainEvent(IEvent @event)
-		{
-			_domainEvents?.Remove(@event);
-		}
-
-		public void ClearDomainEvents() => _domainEvents?.Clear();
-
 		/// <inheritdoc/>
 		public override string ToString()
 		{
@@ -40,19 +21,13 @@ namespace MSFramework.Domain.Entity
 	public abstract class EntityBase<TKey> : EntityBase, IEntity<TKey>
 	{
 		/// <inheritdoc/>
-		public virtual TKey Id { get; protected set; }
-
-		protected EntityBase()
-		{
-		}
-
+		public TKey Id { get; private set; }
+		
 		protected EntityBase(TKey id)
 		{
-			// ReSharper disable once VirtualMemberCallInConstructor
 			Id = id;
 		}
-
-
+		
 		public bool IsTransient()
 		{
 			return Id.Equals(default);

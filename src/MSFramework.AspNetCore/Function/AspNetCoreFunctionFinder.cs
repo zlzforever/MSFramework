@@ -16,7 +16,7 @@ namespace MSFramework.AspNetCore.Function
 			_services = serviceProvider;
 		}
 
-		public List<FunctionDefine> GetAllList()
+		public IEnumerable<FunctionDefine> GetAllList()
 		{
 			var actionDescriptorCollectionProvider =
 				_services.GetRequiredService<IActionDescriptorCollectionProvider>();

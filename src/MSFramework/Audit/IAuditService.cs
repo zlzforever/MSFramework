@@ -1,6 +1,3 @@
-using System.Collections.Generic;
-using System.Threading.Tasks;
-
 namespace MSFramework.Audit
 {
 	public interface IAuditService
@@ -10,6 +7,11 @@ namespace MSFramework.Audit
 		/// </summary>
 		/// <param name="auditOperation">操作审计数据</param>
 		/// <returns></returns>
-		void Save(AuditOperation auditOperation);
+		void Save(AuditedOperation auditOperation);
+		
+		/// <summary>
+		/// 审记服务是否开启
+		/// </summary>
+		bool Enabled { get; }
 	}
 }

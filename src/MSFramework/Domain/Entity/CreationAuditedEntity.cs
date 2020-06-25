@@ -1,11 +1,12 @@
 using System;
-using System.ComponentModel;
-using System.ComponentModel.DataAnnotations;
 
 namespace MSFramework.Domain.Entity
 {
 	public abstract class CreationAuditedEntity : CreationAuditedEntity<Guid>
 	{
+		protected CreationAuditedEntity(Guid id) : base(id)
+		{
+		}
 	}
 
 	public abstract class CreationAuditedEntity<TKey> :
@@ -15,24 +16,16 @@ namespace MSFramework.Domain.Entity
 		/// <summary>
 		/// 创建时间
 		/// </summary>
-		[Required]
-		[Description("创建时间")]
 		public DateTimeOffset CreationTime { get; private set; }
 
 		/// <summary>
 		/// 创建用户标识
 		/// </summary>
-		[Required]
-		[StringLength(255)]
-		[Description("创建用户标识")]
 		public string CreationUserId { get; private set; }
 
 		/// <summary>
 		/// 创建用户名称
 		/// </summary>
-		[Required]
-		[StringLength(255)]
-		[Description("创建用户名称")]
 		public string CreationUserName { get; private set; }
 
 		public virtual void SetCreationAudited(string userId, string userName, DateTimeOffset creationTime = default)
@@ -52,6 +45,10 @@ namespace MSFramework.Domain.Entity
 			{
 				CreationUserName = userName;
 			}
+		}
+
+		protected CreationAuditedEntity(TKey id) : base(id)
+		{
 		}
 	}
 }

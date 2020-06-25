@@ -65,7 +65,7 @@ namespace MSFramework.AspNetCore.Permission
 
 					var cerberusClient =
 						context.HttpContext.RequestServices.GetRequiredService<ICerberusClient>();
-					var identification = descriptor.GetFunctionPath();
+					var identification = descriptor.GetActionPath();
 					var userId = context.HttpContext.RequestServices.GetRequiredService<ISession>().UserId;
 					var hasPermission =
 						await cerberusClient.HasPermissionAsync(userId, options.CerberusServiceId, identification);

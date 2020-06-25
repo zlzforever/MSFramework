@@ -4,6 +4,6 @@ namespace MSFramework.Function
 {
 	public interface IFunctionFinder
 	{
-		List<FunctionDefine> GetAllList();
+		IEnumerable<FunctionDefine> GetAllList();
 	}
 }

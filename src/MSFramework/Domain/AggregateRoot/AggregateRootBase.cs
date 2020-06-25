@@ -1,11 +1,16 @@
 using System;
+using System.Collections.Generic;
 using MSFramework.Domain.Entity;
+using MSFramework.Domain.Event;
 
 namespace MSFramework.Domain.AggregateRoot
 {
 	[Serializable]
 	public abstract class AggregateRootBase : AggregateRootBase<Guid>
 	{
+		protected AggregateRootBase(Guid id) : base(id)
+		{
+		}
 	}
 
 	[Serializable]
@@ -14,12 +19,23 @@ namespace MSFramework.Domain.AggregateRoot
 		IAggregateRoot<TKey>
 		where TKey : IEquatable<TKey>
 	{
+		private List<IEvent> _domainEvents;
 
+		public IReadOnlyCollection<IEvent> DomainEvents => _domainEvents?.AsReadOnly();
 
-		protected AggregateRootBase()
+		public void AddDomainEvent(IEvent @event)
 		{
+			_domainEvents ??= new List<IEvent>();
+			_domainEvents.Add(@event);
 		}
 
+		public void RemoveDomainEvent(IEvent @event)
+		{
+			_domainEvents?.Remove(@event);
+		}
+
+		public void ClearDomainEvents() => _domainEvents?.Clear();
+		
 		protected AggregateRootBase(TKey id) : base(id)
 		{
 		}

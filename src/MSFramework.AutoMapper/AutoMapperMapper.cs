@@ -1,8 +1,9 @@
+using MSFramework.Mapper;
 using IAutoMapper = AutoMapper.IMapper;
 
 namespace MSFramework.AutoMapper
 {
-	public class AutoMapperMapper : Data.IMapper
+	public class AutoMapperMapper : IMapper
 	{
 		private readonly IAutoMapper _mapper;
 

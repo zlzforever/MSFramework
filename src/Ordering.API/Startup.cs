@@ -5,12 +5,19 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.OpenApi.Models;
 using MSFramework;
 using MSFramework.AspNetCore;
+using MSFramework.AspNetCore.Filters;
+using MSFramework.Audit;
+using MSFramework.DependencyInjection;
 using MSFramework.Ef;
 using MSFramework.Ef.Function;
 using MSFramework.Ef.MySql;
-using MSFramework.MySql;
+using MSFramework.EventBus.RabbitMQ;
+using MSFramework.Extensions;
+using MSFramework.Initializer;
+using MSFramework.Migrator.MySql;
 using Ordering.Application.Event;
 using Ordering.Infrastructure;
+using Serilog;
 
 namespace Ordering.API
 {
@@ -26,10 +33,13 @@ namespace Ordering.API
 		// This method gets called by the runtime. Use this method to add services to the container.
 		public void ConfigureServices(IServiceCollection services)
 		{
+			Configuration.Print(x => Log.Logger.Information(x));
+
 			services.AddControllers(x =>
 				{
 					x.Filters.Add<UnitOfWork>();
 					x.Filters.Add<FunctionFilter>();
+					x.Filters.Add<Audit>();
 				})
 				.AddNewtonsoftJson()
 				.ConfigureApiBehaviorOptions(x =>
@@ -45,14 +55,21 @@ namespace Ordering.API
 
 			services.AddMSFramework(builder =>
 			{
-				builder.AddEventMediator(typeof(UserCheckoutAcceptedEvent));
-				// 开发环境可以使用本地消息总线，生产环境应该换成分布式消息队列
-				builder.AddAspNetCore();
-				builder.AddAspNetCoreFunction<EfFunctionStore>();
-				// builder.AddPermission();
-				builder.AddDatabaseMigration<MySqlDatabaseMigration>(typeof(OrderingContext),
+				builder.UseDependencyInjectionScanner();
+				builder.UseEventDispatcher(typeof(UserCheckoutAcceptedEvent));
+				builder.UseRabbitMQEventDispatcher(new RabbitMQOptions(), typeof(UserCheckoutAcceptedEvent));
+
+				// 注册初始化器
+				builder.UseInitializer();
+				// 启用审计服务
+				builder.UseAudit();
+				builder.UseMySqlMigrator(typeof(OrderingContext),
 					"Database='ordering';Data Source=localhost;User ID=root;Password=1qazZAQ!;Port=3306;");
-				builder.AddEntityFramework(x =>
+
+				builder.UseAspNetCore();
+				// builder.AddPermission();
+
+				builder.UseEntityFramework(x =>
 				{
 					// 添加 MySql 支持
 					x.AddMySql<OrderingContext>(Configuration);

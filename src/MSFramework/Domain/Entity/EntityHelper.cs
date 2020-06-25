@@ -10,12 +10,7 @@ namespace MSFramework.Domain.Entity
     /// </summary>
     public static class EntityHelper
     {
-        public static bool IsEntity(Type type)
-        {
-            return typeof(IEntity).IsAssignableFrom(type);
-        }
-
-        public static bool HasDefaultId<TKey>(IEntity<TKey> entity)
+	    public static bool HasDefaultId<TKey>(IEntity<TKey> entity)
         {
             if (EqualityComparer<TKey>.Default.Equals(entity.Id, default))
             {
@@ -34,49 +29,6 @@ namespace MSFramework.Domain.Entity
             }
 
             return false;
-        }
-
-        /// <summary>
-        /// Tries to find the primary key type of the given entity type.
-        /// May return null if given type does not implement <see cref="IEntity{TKey}"/>
-        /// </summary>
-        public static Type FindPrimaryKeyType<TEntity>()
-            where TEntity : IEntity
-        {
-            return FindPrimaryKeyType(typeof(TEntity));
-        }
-
-        /// <summary>
-        /// Tries to find the primary key type of the given entity type.
-        /// May return null if given type does not implement <see cref="IEntity{TKey}"/>
-        /// </summary>
-        public static Type FindPrimaryKeyType(Type entityType)
-        {
-            if (!typeof(IEntity).IsAssignableFrom(entityType))
-            {
-                throw new MSFrameworkException($"Given {nameof(entityType)} is not an entity. It should implement {typeof(IEntity).AssemblyQualifiedName}!");
-            }
-
-            foreach (var interfaceType in entityType.GetTypeInfo().GetInterfaces())
-            {
-                if (interfaceType.GetTypeInfo().IsGenericType && interfaceType.GetGenericTypeDefinition() == typeof(IEntity<>))
-                {
-                    return interfaceType.GenericTypeArguments[0];
-                }
-            }
-
-            return null;
-        }
-
-        public static Expression<Func<TEntity, bool>> CreateEqualityExpressionForId<TEntity, TKey>(TKey id)
-            where TEntity : IEntity<TKey>
-        {
-            var lambdaParam = Expression.Parameter(typeof(TEntity));
-            var leftExpression = Expression.PropertyOrField(lambdaParam, "Id");
-            Expression<Func<object>> closure = () => id;
-            var rightExpression = Expression.Convert(closure.Body, leftExpression.Type);
-            var lambdaBody = Expression.Equal(leftExpression, rightExpression);
-            return Expression.Lambda<Func<TEntity, bool>>(lambdaBody, lambdaParam);
         }
     }
 }

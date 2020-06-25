@@ -1,29 +1,25 @@
-using System.ComponentModel.DataAnnotations;
+using MSFramework.Common;
 using MSFramework.Domain.AggregateRoot;
 
 namespace MSFramework.Function
 {
-	public class FunctionDefine : ModificationAuditedAggregateRoot, IFunction
+	public class FunctionDefine : ModificationAuditedAggregateRoot
 	{
 		public bool Enabled { get; private set; } = true;
 
 		/// <summary>
-		/// 功能名称，不唯一
+		/// 功能名称
 		/// </summary>
-		[StringLength(255)]
 		public string Name { get; private set; }
 
 		/// <summary>
-		/// 功能路径，唯一
+		/// 功能标识，必须是唯一的
 		/// </summary>
-		[StringLength(255)]
-		[Required]
-		public string Path { get; private set; }
+		public string Code { get; private set; }
 
 		/// <summary>
 		/// 功能描述
 		/// </summary>
-		[StringLength(500)]
 		public string Description { get; private set; }
 
 		/// <summary>
@@ -31,24 +27,11 @@ namespace MSFramework.Function
 		/// </summary>
 		public bool Expired { get; private set; }
 
-		/// <summary>
-		/// 获取或设置 是否启用操作审计
-		/// </summary>
-		public bool AuditOperationEnabled { get; private set; }
-
-		/// <summary>
-		/// 获取或设置 是否启用数据审计
-		/// </summary>
-		public bool AuditEntityEnabled { get; private set; }
-
-		public FunctionDefine(string name, string path, string description, bool auditOperationEnabled = true,
-			bool auditEntityEnabled = true)
+		public FunctionDefine(string name, string code, string description) : base(CombGuid.NewGuid())
 		{
 			Name = name;
-			Path = path;
+			Code = code;
 			Description = description;
-			AuditOperationEnabled = auditOperationEnabled;
-			AuditEntityEnabled = auditEntityEnabled;
 		}
 
 		public void Expire()
@@ -59,6 +42,12 @@ namespace MSFramework.Function
 		public void Renewal()
 		{
 			Expired = false;
+		}
+
+		public override string ToString()
+		{
+			return
+				$"[ENTITY: {GetType().Name}] Id = {Id}; {{ 'Name': {Name}, 'Code': {Code}, 'Enabled': {Enabled}, 'Expired': {Expired}, 'Description': {Description} }}";
 		}
 	}
 }

@@ -4,12 +4,12 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using MSFramework.Common;
 using MSFramework.Domain;
+using MSFramework.Initializer;
 
 namespace MSFramework.Function
 {
-	public class FunctionInitializer : Initializer
+	public class FunctionInitializer : InitializerBase
 	{
 		public override async Task InitializeAsync(IServiceProvider serviceProvider)
 		{
@@ -26,28 +26,28 @@ namespace MSFramework.Function
 			var functionsInAppDict = new Dictionary<string, FunctionDefine>();
 			foreach (var function in functionsInApp)
 			{
-				if (!functionsInAppDict.ContainsKey(function.Path))
+				if (!functionsInAppDict.ContainsKey(function.Code))
 				{
-					functionsInAppDict.Add(function.Path, function);
+					functionsInAppDict.Add(function.Code, function);
 				}
 				else
 				{
-					throw new MSFrameworkException($"There are same route apis: {function.Path}");
+					throw new MSFrameworkException($"There are same functions: {function.Code}");
 				}
 			}
 
-			var store = serviceProvider.GetService<IFunctionStore>();
-			var functionsInDatabaseDict = store.GetAllList()
-				.ToDictionary(x => x.Path, x => x);
+			var repository = serviceProvider.GetService<IFunctionRepository>();
+			var functionsInDatabaseDict = repository.GetAllList()
+				.ToDictionary(x => x.Code, x => x);
 
 			// 添加新功能
 			foreach (var kv in functionsInAppDict)
 			{
 				var function = kv.Value;
-				if (!functionsInDatabaseDict.ContainsKey(function.Path))
+				if (!functionsInDatabaseDict.ContainsKey(function.Code))
 				{
 					function.SetCreationAudited("System", "System");
-					store.Add(function);
+					await repository.InsertAsync(function);
 				}
 				else
 				{
@@ -55,7 +55,7 @@ namespace MSFramework.Function
 					{
 						function.Renewal();
 						function.SetModificationAudited("System", "System");
-						store.Update(function);
+						await repository.UpdateAsync(function);
 					}
 				}
 			}
@@ -68,7 +68,7 @@ namespace MSFramework.Function
 				{
 					function.Expire();
 					function.SetModificationAudited("System", "System");
-					store.Update(function);
+					await repository.UpdateAsync(function);
 				}
 			}
 

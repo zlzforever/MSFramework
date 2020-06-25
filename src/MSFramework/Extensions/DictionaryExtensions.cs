@@ -17,7 +17,7 @@ namespace MSFramework.Extensions
 		/// <returns>获取到的值</returns>
 		public static TValue GetOrDefault<TKey, TValue>(this IDictionary<TKey, TValue> dictionary, TKey key)
 		{
-			return dictionary.TryGetValue(key, out var value) ? value : default(TValue);
+			return dictionary.TryGetValue(key, out var value) ? value : default;
 		}
 
 		/// <summary>

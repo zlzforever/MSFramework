@@ -6,6 +6,9 @@ namespace MSFramework.Domain.AggregateRoot
 {
 	public abstract class ModificationAuditedAggregateRoot : ModificationAuditedAggregateRoot<Guid>
 	{
+		protected ModificationAuditedAggregateRoot(Guid id) : base(id)
+		{
+		}
 	}
 
 	public abstract class ModificationAuditedAggregateRoot<TKey> : CreationAuditedAggregateRoot<TKey>,
@@ -46,6 +49,10 @@ namespace MSFramework.Domain.AggregateRoot
 			{
 				LastModificationUserName = userName;
 			}
+		}
+
+		protected ModificationAuditedAggregateRoot(TKey id) : base(id)
+		{
 		}
 	}
 }

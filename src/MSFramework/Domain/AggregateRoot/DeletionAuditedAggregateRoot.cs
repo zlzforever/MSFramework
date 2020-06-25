@@ -6,6 +6,9 @@ namespace MSFramework.Domain.AggregateRoot
 {
 	public abstract class DeletionAuditedAggregateRoot : DeletionAuditedAggregateRoot<Guid>
 	{
+		protected DeletionAuditedAggregateRoot(Guid id) : base(id)
+		{
+		}
 	}
 
 	public abstract class DeletionAuditedAggregateRoot<TKey> : ModificationAuditedAggregateRoot<TKey>, IDeletionAudited
@@ -61,6 +64,10 @@ namespace MSFramework.Domain.AggregateRoot
 					DeletionUserName = userName;
 				}
 			}
+		}
+
+		protected DeletionAuditedAggregateRoot(TKey id) : base(id)
+		{
 		}
 	}
 }

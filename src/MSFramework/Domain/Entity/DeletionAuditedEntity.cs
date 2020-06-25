@@ -6,6 +6,9 @@ namespace MSFramework.Domain.Entity
 {
 	public abstract class DeletionAuditedEntity : DeletionAuditedEntity<Guid>
 	{
+		protected DeletionAuditedEntity(Guid id) : base(id)
+		{
+		}
 	}
 
 	public abstract class DeletionAuditedEntity<TKey> : ModificationAuditedEntity<TKey>, IDeletionAudited
@@ -21,21 +24,16 @@ namespace MSFramework.Domain.Entity
 		/// <summary>
 		/// Which user deleted this entity?
 		/// </summary>
-		[StringLength(255)]
-		[Description("删除者标识")]
 		public string DeletionUserId { get; private set; }
 
 		/// <summary>
 		/// Which user deleted this entity?
 		/// </summary>
-		[StringLength(255)]
-		[Description("删除者名称")]
 		public string DeletionUserName { get; private set; }
 
 		/// <summary>
 		/// Deletion time of this entity.
 		/// </summary>
-		[Description("删除时间")]
 		public DateTimeOffset? DeletionTime { get; set; }
 
 		public void Delete(string userId, string userName, DateTimeOffset deletionTime = default)
@@ -61,6 +59,10 @@ namespace MSFramework.Domain.Entity
 					DeletionUserName = userName;
 				}
 			}
+		}
+
+		protected DeletionAuditedEntity(Guid id) : base(id)
+		{
 		}
 	}
 }

@@ -7,7 +7,7 @@ namespace MSFramework.Domain
 {
 	public interface IUnitOfWork : IDisposable
 	{
-		IEnumerable<AuditEntity> GetAuditEntries();
+		IEnumerable<AuditedEntity> GetAuditEntities();
 
 		void Commit();
 

@@ -1,4 +1,3 @@
-using System;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using MSFramework.Ef;
 using MSFramework.Function;
@@ -11,7 +10,7 @@ namespace Ordering.Infrastructure.EntityConfigurations
 		{
 			base.Configure(builder);
 
-			builder.HasIndex(x => x.Path).IsUnique();
+			builder.HasIndex(x => x.Code).IsUnique();
 			builder.HasIndex(x => x.Name);
 		}
 	}

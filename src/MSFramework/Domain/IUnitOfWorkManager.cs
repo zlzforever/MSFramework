@@ -25,6 +25,6 @@ namespace MSFramework.Domain
 		/// <param name="unitOfWork">工作单元</param>
 		void Register(IUnitOfWork unitOfWork);
 
-		IEnumerable<IUnitOfWork> GetAllUnitOfWorks();
+		IReadOnlyCollection<IUnitOfWork> GetUnitOfWorks();
 	}
 }

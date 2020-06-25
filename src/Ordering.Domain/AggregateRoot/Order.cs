@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
+using MSFramework.Common;
 using MSFramework.Domain.AggregateRoot;
 using Ordering.Domain.AggregateRoot.Event;
 
@@ -37,7 +38,7 @@ namespace Ordering.Domain.AggregateRoot
 
 		public string Description { get; private set; }
 
-		protected Order()
+		private Order() : base(CombGuid.NewGuid())
 		{
 		}
 
@@ -46,7 +47,7 @@ namespace Ordering.Domain.AggregateRoot
 			Address address,
 			string description,
 			List<OrderItem> orderItems
-		)
+		) : this()
 		{
 			Address = address;
 			UserId = userId;

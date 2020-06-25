@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.Extensions.Logging;
-using MSFramework.Common;
 using MSFramework.Reflection;
 
 namespace MSFramework.Ef
@@ -30,12 +29,8 @@ namespace MSFramework.Ef
 		{
 			var dict = _entityRegistersDict;
 			dict.Clear();
-			if (Singleton<IAssemblyFinder>.Instance == null)
-			{
-				Singleton<IAssemblyFinder>.Instance = new AssemblyFinder();
-			}
 
-			var assemblies = Singleton<IAssemblyFinder>.Instance.GetAllAssemblyList();
+			var assemblies = AssemblyFinder.GetAllList();
 			var types = assemblies.SelectMany(assembly => assembly.GetTypes()).Where(type =>
 					type.IsClass && !type.IsAbstract && typeof(IEntityRegister).IsAssignableFrom(type))
 				.Distinct()

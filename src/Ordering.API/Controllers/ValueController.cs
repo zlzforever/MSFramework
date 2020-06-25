@@ -2,6 +2,7 @@ using System;
 using System.ComponentModel.DataAnnotations;
 using Microsoft.AspNetCore.Mvc;
 using MSFramework.AspNetCore;
+using MSFramework.AspNetCore.Filters;
 
 namespace Ordering.API.Controllers
 {

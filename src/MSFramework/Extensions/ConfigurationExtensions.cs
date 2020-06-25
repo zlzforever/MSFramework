@@ -5,19 +5,19 @@ namespace MSFramework.Extensions
 {
 	public static class ConfigurationExtensions
 	{
-		public static void Print(this IConfiguration configuration)
+		public static void Print(this IConfiguration configuration, Action<string> printer)
 		{
-			if (configuration == null)
+			if (configuration == null || printer == null)
 			{
 				return;
 			}
 
-			Console.WriteLine("Configuration: ");
+			printer("Configuration: ");
 			foreach (var kv in configuration.GetChildren())
 			{
 				if (!string.IsNullOrWhiteSpace(kv.Key))
 				{
-					Console.WriteLine($"{kv.Key} = {kv.Value}");
+					printer($"{kv.Key} = {kv.Value}");
 				}
 			}
 		}

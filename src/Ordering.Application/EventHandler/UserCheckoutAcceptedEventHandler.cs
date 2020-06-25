@@ -9,11 +9,11 @@ namespace Ordering.Application.EventHandler
 	public class UserCheckoutAcceptedEventHandler : EventBus.IEventHandler<UserCheckoutAcceptedEvent>
 	{
 		private readonly ILogger _logger;
-		private readonly IEventMediator _mediator;
+		private readonly IEventDispatcher _mediator;
 		private readonly ISession _session;
 
 		public UserCheckoutAcceptedEventHandler(ISession session,
-			IEventMediator mediator,
+			IEventDispatcher mediator,
 			ILogger<UserCheckoutAcceptedEventHandler> logger)
 		{
 			_logger = logger;
@@ -21,7 +21,7 @@ namespace Ordering.Application.EventHandler
 			_session = session;
 		}
 
-		public async Task HandleAsync(UserCheckoutAcceptedEvent @event)
+		public Task HandleAsync(UserCheckoutAcceptedEvent @event)
 		{
 			// await _mediator.Send(new CreateOrderCommand(@event.OrderItems.Select(x =>
 			// 		new CreateOrderCommand.OrderItemDTO
@@ -34,6 +34,7 @@ namespace Ordering.Application.EventHandler
 			// 			UnitPrice = x.UnitPrice
 			// 		}).ToList(), @event.UserId, @event.City, @event.Street,
 			// 	@event.State, @event.Country, @event.ZipCode, @event.Description));
+			return Task.CompletedTask;
 		}
 	}
 }

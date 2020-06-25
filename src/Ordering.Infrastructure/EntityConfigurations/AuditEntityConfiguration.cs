@@ -1,20 +1,16 @@
-using System;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using MSFramework.Audit;
 using MSFramework.Ef;
 
 namespace Ordering.Infrastructure.EntityConfigurations
 {
-	public class AuditEntityConfiguration : EntityTypeConfigurationBase<AuditEntity, OrderingContext>
+	public class AuditEntityConfiguration : EntityTypeConfigurationBase<AuditedEntity, OrderingContext>
 	{
-		public override void Configure(EntityTypeBuilder<AuditEntity> builder)
+		public override void Configure(EntityTypeBuilder<AuditedEntity> builder)
 		{
 			base.Configure(builder);
 
-			builder.HasIndex(m => m.OperationId);
-			builder.HasOne(m => m.Operation)
-				.WithMany(n => n.Entities)
-				.HasForeignKey(m => m.OperationId);
+			builder.HasIndex(m => m.EntityId);
 		}
 	}
 }

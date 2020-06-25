@@ -3,11 +3,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
-using MSFramework.Common;
+using MSFramework.Initializer;
 
 namespace MSFramework.AspNetCore.Permission
 {
-	public class PermissionInitializer : Initializer
+	public class PermissionInitializer : InitializerBase
 	{
 		public override async Task InitializeAsync(IServiceProvider serviceProvider)
 		{

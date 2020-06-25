@@ -7,16 +7,16 @@ namespace MSFramework.Domain.Event
 {
 	public static class ServiceCollectionExtensions
 	{
-		public static IServiceCollection AddEventMediator(this IServiceCollection serviceCollection,
+		public static IServiceCollection AddEventDispatcher(this IServiceCollection serviceCollection,
 			params Type[] types)
 		{
 			serviceCollection.TryAddScoped<IHandlerFactory, DependencyInjectionHandlerFactory>();
-			serviceCollection.TryAddScoped<IEventMediator, EventMediator>();
-			serviceCollection.RegisterEvents(types);
+			serviceCollection.TryAddScoped<IEventDispatcher, EventDispatcher>();
+			serviceCollection.RegisterEventHandler(types);
 			return serviceCollection;
 		}
 
-		private static IServiceCollection RegisterEvents(this IServiceCollection serviceCollection,
+		private static IServiceCollection RegisterEventHandler(this IServiceCollection serviceCollection,
 			params Type[] handlerTypes)
 		{
 			var store = new EventHandlerTypeStore();
@@ -37,7 +37,7 @@ namespace MSFramework.Domain.Event
 				}
 			}
 
-			serviceCollection.AddSingleton<IEventHandlerTypeStore>(store);
+			serviceCollection.TryAddSingleton<IEventHandlerTypeStore>(store);
 			return serviceCollection;
 		}
 	}

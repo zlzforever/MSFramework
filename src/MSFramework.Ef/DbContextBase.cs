@@ -1,8 +1,6 @@
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Linq;
-using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
@@ -11,9 +9,8 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using MSFramework.Audit;
 using MSFramework.Domain;
-using MSFramework.Domain.Entity;
+using MSFramework.Domain.AggregateRoot;
 using MSFramework.Domain.Event;
-using MSFramework.Extensions;
 
 namespace MSFramework.Ef
 {
@@ -83,7 +80,7 @@ namespace MSFramework.Ef
 
 				ApplyConcepts();
 
-				var eventMediator = _serviceProvider.GetService<IEventMediator>();
+				var eventMediator = _serviceProvider.GetService<IEventDispatcher>();
 				if (eventMediator != null)
 				{
 					// todo: 同步异步混用是否会死锁
@@ -161,7 +158,7 @@ namespace MSFramework.Ef
 
 		private async Task HandleDomainEventsAsync()
 		{
-			var eventMediator = _serviceProvider.GetService<IEventMediator>();
+			var eventMediator = _serviceProvider.GetService<IEventDispatcher>();
 			if (eventMediator == null)
 			{
 				return;
@@ -171,7 +168,7 @@ namespace MSFramework.Ef
 
 			foreach (var @event in domainEvents)
 			{
-				await eventMediator.PublishAsync(@event);
+				await eventMediator.DispatchAsync(@event);
 			}
 		}
 
@@ -184,7 +181,7 @@ namespace MSFramework.Ef
 			// B) Right AFTER committing data (EF SaveChanges) into the DB will make multiple transactions. 
 			// You will need to handle eventual consistency and compensatory actions in case of failures in any of the Handlers. 
 			var domainEntities = ChangeTracker
-				.Entries<EntityBase>()
+				.Entries<IAggregateRoot>()
 				.Where(x => x.Entity.DomainEvents != null && x.Entity.DomainEvents.Any()).ToList();
 
 			var domainEvents = domainEntities
@@ -197,29 +194,29 @@ namespace MSFramework.Ef
 			return domainEvents;
 		}
 
-		public IEnumerable<AuditEntity> GetAuditEntries()
+		public IEnumerable<AuditedEntity> GetAuditEntities()
 		{
-			var entities = new List<AuditEntity>();
-			AuditEntity auditEntity = null;
+			var entities = new List<AuditedEntity>();
 			foreach (var entry in ChangeTracker.Entries())
 			{
+				AuditedEntity auditEntity = null;
 				switch (entry.State)
 				{
 					case EntityState.Added:
-						auditEntity = GetAuditEntity(entry, OperateType.Insert);
+						auditEntity = GetAuditEntity(entry, OperationType.Add);
 						break;
 					case EntityState.Modified:
-						auditEntity = GetAuditEntity(entry, OperateType.Update);
+						auditEntity = GetAuditEntity(entry, OperationType.Modify);
 						break;
 					case EntityState.Deleted:
-						auditEntity = GetAuditEntity(entry, OperateType.Delete);
+						auditEntity = GetAuditEntity(entry, OperationType.Delete);
 						break;
 				}
-			}
 
-			if (auditEntity != null)
-			{
-				entities.Add(auditEntity);
+				if (auditEntity != null)
+				{
+					entities.Add(auditEntity);
+				}
 			}
 
 			return entities;
@@ -259,19 +256,13 @@ namespace MSFramework.Ef
 			}
 		}
 
-		protected virtual AuditEntity GetAuditEntity(EntityEntry entry, OperateType operateType)
+		protected virtual AuditedEntity GetAuditEntity(EntityEntry entry, OperationType operationType)
 		{
 			var type = entry.Entity.GetType();
-			var entityDisplayNameAttribute =
-				(DisplayNameAttribute) type.GetCustomAttribute(typeof(DisplayNameAttribute));
-			var audit = new AuditEntity
-			{
-				Name = type.Name,
-				TypeName = type.FullName,
-				DisplayName = entityDisplayNameAttribute?.DisplayName,
-				OperateType = operateType
-			};
+			var typeName = type.FullName;
 
+			string entityId = null;
+			var properties = new List<AuditedProperty>();
 			foreach (var property in entry.CurrentValues.Properties)
 			{
 				if (property.IsConcurrencyToken)
@@ -279,75 +270,59 @@ namespace MSFramework.Ef
 					continue;
 				}
 
-				var name = property.Name;
+				var propertyName = property.Name;
 				var propertyEntry = entry.Property(property.Name);
 				if (property.IsPrimaryKey())
 				{
-					audit.EntityKey = entry.State == EntityState.Deleted
+					entityId = entry.State == EntityState.Deleted
 						? propertyEntry.OriginalValue?.ToString()
 						: propertyEntry.CurrentValue?.ToString();
 				}
 
-				var propertyDisplayName = default(string);
-				if (propertyEntry.Metadata.PropertyInfo != null)
-				{
-					propertyDisplayName =
-						((DisplayNameAttribute) propertyEntry.Metadata.PropertyInfo.GetCustomAttribute(
-							typeof(DisplayNameAttribute)))?.DisplayName;
-				}
+				string propertyType = property.ClrType.ToString();
+				string originalValue = null;
+				string newValue = null;
 
-				var auditProperty = new AuditProperty
-				{
-					FieldName = name,
-					DisplayName = propertyDisplayName,
-					DataType = property.ClrType.ToString()
-				};
 				if (entry.State == EntityState.Added)
 				{
-					auditProperty.NewValue = propertyEntry.CurrentValue?.ToString();
+					newValue = propertyEntry.CurrentValue?.ToString();
 				}
 				else if (entry.State == EntityState.Deleted)
 				{
-					auditProperty.OriginalValue = propertyEntry.OriginalValue?.ToString();
+					originalValue = propertyEntry.OriginalValue?.ToString();
 				}
 				else if (entry.State == EntityState.Modified)
 				{
 					var currentValue = propertyEntry.CurrentValue?.ToString();
-					var originalValue = propertyEntry.OriginalValue?.ToString();
+					originalValue = propertyEntry.OriginalValue?.ToString();
 					if (currentValue == originalValue)
 					{
 						continue;
 					}
 
-					auditProperty.NewValue = currentValue;
-					auditProperty.OriginalValue = originalValue;
+					newValue = currentValue;
 				}
 
-				if (string.IsNullOrWhiteSpace(auditProperty.OriginalValue))
+				if (string.IsNullOrWhiteSpace(originalValue))
 				{
 					// 原值为空，新值不为空则记录
-					if (!auditProperty.NewValue.IsNullOrWhiteSpace())
+					if (!string.IsNullOrWhiteSpace(newValue))
 					{
-						audit.Properties.Add(auditProperty);
+						properties.Add(new AuditedProperty(propertyName, propertyType, originalValue, newValue));
 					}
 				}
 				else
 				{
-					if (!auditProperty.OriginalValue.Equals(auditProperty.NewValue))
+					if (!originalValue.Equals(newValue))
 					{
-						audit.Properties.Add(auditProperty);
+						properties.Add(new AuditedProperty(propertyName, propertyType, originalValue, newValue));
 					}
 				}
 			}
 
-			foreach (var auditProperty in audit.Properties)
-			{
-				auditProperty.AuditEntityId = audit.Id;
-				auditProperty.AuditEntity = audit;
-				auditProperty.EntityKey = audit.EntityKey;
-			}
-
-			return audit;
+			var auditedEntity = new AuditedEntity(typeName, entityId, operationType);
+			auditedEntity.AddProperties(properties);
+			return auditedEntity;
 		}
 
 		protected virtual void ApplyConceptsForAddedEntity(EntityEntry entry, string userId, string userName)

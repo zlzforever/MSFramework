@@ -9,16 +9,16 @@ namespace MSFramework.Ef
 {
 	public static class ServiceCollectionExtensions
 	{
-		public static MSFrameworkBuilder AddEntityFramework(this MSFrameworkBuilder builder,
+		public static MSFrameworkBuilder UseEntityFramework(this MSFrameworkBuilder builder,
 			Action<EntityFrameworkBuilder> configure)
 		{
 			var eBuilder = new EntityFrameworkBuilder(builder.Services);
 			configure?.Invoke(eBuilder);
-			builder.Services.AddEntityFramework();
+			builder.Services.UseEntityFramework();
 			return builder;
 		}
 
-		public static IServiceCollection AddEntityFramework(this IServiceCollection services)
+		public static IServiceCollection UseEntityFramework(this IServiceCollection services)
 		{
 			services.TryAddSingleton(provider =>
 			{

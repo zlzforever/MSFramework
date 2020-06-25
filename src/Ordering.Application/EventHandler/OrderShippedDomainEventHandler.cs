@@ -3,7 +3,7 @@ using MSFramework.Domain.Event;
 using MSFramework.Ef;
 using Ordering.Domain.AggregateRoot.Event;
 
-namespace Ordering.Application.DomainEventHandler
+namespace Ordering.Application.EventHandler
 {
 	public class OrderShippedDomainEventHandler : IEventHandler<OrderShippedDomainEvent>
 	{
