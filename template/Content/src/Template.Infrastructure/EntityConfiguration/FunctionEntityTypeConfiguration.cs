@@ -1,19 +1,17 @@
-using System;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using MSFramework.Ef;
 using MSFramework.Function;
+using Template.Infrastructure;
 
-namespace Template.Infrastructure.EntityConfiguration
+namespace Ordering.Infrastructure.EntityConfigurations
 {
-	public class FunctionEntityTypeConfiguration : EntityTypeConfigurationBase<Function>
+	public class FunctionEntityTypeConfiguration : EntityTypeConfigurationBase<FunctionDefine, AppDbContext>
 	{
-		public override Type DbContextType => typeof(AppDbContext);
-		
-		public override void Configure(EntityTypeBuilder<Function> builder)
+		public override void Configure(EntityTypeBuilder<FunctionDefine> builder)
 		{
 			base.Configure(builder);
 
-			builder.HasIndex(x => x.Path).IsUnique();
+			builder.HasIndex(x => x.Code).IsUnique();
 			builder.HasIndex(x => x.Name);
 		}
 	}

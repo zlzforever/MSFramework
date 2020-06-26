@@ -12,8 +12,9 @@ using MSFramework.AspNetCore.Api;
 using MSFramework.Audit;
 using MSFramework.Data;
 using MSFramework.Domain;
-using MSFramework.Ef;
+using MSFramework.Extensions;
 using MSFramework.Ef.Repository;
+using MSFramework.Mapper;
 using Ordering.Domain.AggregateRoot;
 using Ordering.Domain.Repository;
 
@@ -29,18 +30,28 @@ namespace Ordering.API.Controllers
 		public string Name { get; set; }
 	}
 
+	public class ProductDTO
+	{
+		public string Name { get; private set; }
+
+		public int Price { get; private set; }
+	}
+
 
 	[Route("api/v1.0/[controller]")]
 	[ApiController]
-	public class ProductController : ApiController
+	public class ProductController : ApiControllerBase
 	{
 		private readonly IProductRepository _productRepository;
 		private readonly IRepository<AuditedOperation> _repository;
+		private readonly IObjectMapper _mapper;
 
-		public ProductController(IProductRepository productRepository, IRepository<AuditedOperation> repository)
+		public ProductController(IProductRepository productRepository, IRepository<AuditedOperation> repository,
+			IObjectMapper mapper)
 		{
 			_productRepository = productRepository;
 			_repository = repository;
+			_mapper = mapper;
 		}
 
 		[HttpGet("getAudits")]
@@ -70,10 +81,11 @@ namespace Ordering.API.Controllers
 		}
 
 		[HttpGet("getPagedQuery")]
-		public async Task<Response<PagedResult<Product>>> GetPagedQuery()
+		public async Task<Response<PagedResult<ProductDTO>>> GetPagedQuery()
 		{
 			var a = await _productRepository.PagedQueryAsync(0, 10);
-			return new Response<PagedResult<Product>>(a);
+			var b = _mapper.MapPagedResult<ProductDTO>(a);
+			return new Response<PagedResult<ProductDTO>>(b);
 		}
 
 		[HttpGet("getError")]

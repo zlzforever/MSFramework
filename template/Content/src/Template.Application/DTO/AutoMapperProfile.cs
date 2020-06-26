@@ -1,4 +1,5 @@
 using AutoMapper;
+using MSFramework.Data;
 using Template.Domain.AggregateRoot;
 
 namespace Template.Application.DTO
@@ -7,9 +8,9 @@ namespace Template.Application.DTO
 	{
 		public AutoMapperProfile()
 		{
-			CreateMap<Class1, Class1Out>();
-			CreateMap<Class1, CreatClass1Out>();
-			CreateMap<CreateClass1In, Class1>();
+			CreateMap<Product, ProductOut>();
+			CreateMap<Product, CreatProductOut>();
+			CreateMap<CreateProductIn, Product>();
 		}
 	}
 }

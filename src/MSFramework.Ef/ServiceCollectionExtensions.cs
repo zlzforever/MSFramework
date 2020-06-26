@@ -38,8 +38,6 @@ namespace MSFramework.Ef
 				return finder;
 			});
 			services.TryAddScoped<DbContextFactory>();
-			services.TryAddScoped(typeof(IRepository<>), typeof(EfRepository<>));
-			services.TryAddScoped(typeof(IRepository<,>), typeof(EfRepository<,>));
 			services.AddInitializer<EntityFrameworkInitializer>();
 			return services;
 		}

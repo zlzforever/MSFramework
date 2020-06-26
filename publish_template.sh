@@ -23,4 +23,4 @@ rm -rf template/Content/src/Template.API/bin
 rm -rf template/Content/src/Template.API/obj
 
 nuget pack template/MSFramework.API.Template.nuspec
-nuget push MSFramework.API.Template.*.nupkg -SkipDuplicate  -Source http://nuget.pamirs.com/v3/index.json
+nuget push MSFramework.API.Template.*.nupkg -SkipDuplicate  -Source https://api.nuget.org/v3/index.json

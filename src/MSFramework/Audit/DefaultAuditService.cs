@@ -7,14 +7,14 @@ namespace MSFramework.Audit
 {
 	public class DefaultAuditService : IAuditService
 	{
-		private readonly IRepository<AuditedOperation> _repository;
+		private readonly IAuditRepository _repository;
 		private readonly ILogger<DefaultAuditService> _logger;
 
-		public DefaultAuditService(IServiceProvider serviceProvider,
+		public DefaultAuditService(IAuditRepository repository,
 			ILogger<DefaultAuditService> logger)
 		{
 			_logger = logger;
-			_repository = serviceProvider.GetService<IRepository<AuditedOperation>>();
+			_repository = repository;
 		}
 
 		public void Save(AuditedOperation auditOperation)

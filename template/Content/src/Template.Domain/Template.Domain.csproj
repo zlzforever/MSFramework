@@ -5,11 +5,6 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="MSFramework" Version="0.11.54" />
-    </ItemGroup>
-
-    <ItemGroup>
-      <None Remove="DDL\2020011001.sql" />
-      <EmbeddedResource Include="DDL\2020011001.sql" />
+        <PackageReference Include="MSFramework" Version="0.12.2" />
     </ItemGroup>
 </Project>

@@ -1,6 +1,5 @@
-using Microsoft.Extensions.DependencyInjection;
-using MSFramework.Ef;
-using MSFramework.Ef.MySql;
+using System;
+using MSFramework.Ef.Design;
 using Template.Infrastructure;
 
 namespace Template.API
@@ -8,9 +7,9 @@ namespace Template.API
 	public class DesignTimeDbContextFactory
 		: DesignTimeDbContextFactoryBase<AppDbContext>
 	{
-		protected override void Configure(IServiceCollection services)
+		protected override IServiceProvider GetServiceProvider()
 		{
-			services.AddMySql<AppDbContext>(false);
+			return Program.CreateHostBuilder(new string[0]).Build().Services;
 		}
 	}
 }

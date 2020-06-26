@@ -7,22 +7,22 @@ using MSFramework.Domain.AggregateRoot;
 
 namespace MSFramework.Ef.Repository
 {
-	public class EfRepository<TEntity> : EfRepository<TEntity, Guid>
+	public abstract class EfRepository<TEntity> : EfRepository<TEntity, Guid>
 		, IRepository<TEntity>
 		where TEntity : class, IAggregateRoot<Guid>
 	{
-		public EfRepository(DbContextFactory dbContextFactory) : base(dbContextFactory)
+		protected EfRepository(DbContextFactory dbContextFactory) : base(dbContextFactory)
 		{
 		}
 	}
 
-	public class EfRepository<TEntity, TKey> : IRepository<TEntity, TKey>
+	public abstract class EfRepository<TEntity, TKey> : IRepository<TEntity, TKey>
 		where TEntity : class, IAggregateRoot<TKey>
 		where TKey : IEquatable<TKey>
 	{
 		public IQueryable<TEntity> CurrentSet { get; private set; }
 
-		public EfRepository(DbContextFactory dbContextFactory)
+		protected EfRepository(DbContextFactory dbContextFactory)
 		{
 			DbContext = dbContextFactory.GetDbContext<TEntity>();
 			var isDeletionAuditedEntity = typeof(IDeletionAudited).IsAssignableFrom(typeof(TEntity));

@@ -1,9 +1,8 @@
-using MSFramework.Mapper;
 using IAutoMapper = AutoMapper.IMapper;
 
 namespace MSFramework.AutoMapper
 {
-	public class AutoMapperMapper : IMapper
+	public class AutoMapperMapper : Mapper.IObjectMapper
 	{
 		private readonly IAutoMapper _mapper;
 
@@ -12,6 +11,8 @@ namespace MSFramework.AutoMapper
 			_mapper = mapper;
 		}
 
+
+		
 		public TDestination Map<TDestination>(object source)
 		{
 			return _mapper.Map<TDestination>(source);

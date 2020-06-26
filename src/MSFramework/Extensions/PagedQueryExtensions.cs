@@ -59,7 +59,6 @@ namespace MSFramework.Extensions
 			OrderCondition<TEntity, TThenOrderKey2> thenBy2 = null)
 			where TEntity : class
 		{
-			var result = new PagedResult<TEntity>();
 			page = page < 1 ? 1 : page;
 			limit = limit < 1 ? 1 : limit;
 			var entities = where == null ? queryable : queryable.Where(where);
@@ -94,14 +93,9 @@ namespace MSFramework.Extensions
 					: ((IOrderedQueryable<TEntity>) entities).OrderByDescending(thenBy2.Expression);
 			}
 
-			result.Count = entities.Count();
-			result.Page = page;
-			result.Limit = limit;
-
-			entities = entities.Skip((result.Page - 1) * result.Limit).Take(result.Limit);
-
-			result.Data = result.Count == 0 ? new List<TEntity>() : entities.ToList();
-			return Task.FromResult(result);
+			var total = entities.Count();
+			var data = total == 0 ? new List<TEntity>() : entities.Skip((page - 1) * limit).Take(limit).ToList();
+			return Task.FromResult(new PagedResult<TEntity>(page, limit, total, data));
 		}
 	}
 }

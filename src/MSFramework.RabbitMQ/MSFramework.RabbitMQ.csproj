@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
     <PropertyGroup>
-        <PackageId>MSFramework.EventBus.RabbitMQ</PackageId>
+        <PackageId>MSFramework.RabbitMQ</PackageId>
     </PropertyGroup>
     <Import Project="../../package.props" />
     <ItemGroup>

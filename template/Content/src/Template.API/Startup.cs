@@ -7,17 +7,15 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.OpenApi.Models;
 using MSFramework;
 using MSFramework.AspNetCore;
-#if !DEBUG
-using MSFramework.AspNetCore.Permission;
-#endif
+using MSFramework.AspNetCore.Filters;
+using MSFramework.Audit;
 using MSFramework.AutoMapper;
+using MSFramework.DependencyInjection;
 using MSFramework.Ef;
-using MSFramework.Ef.Function;
 using MSFramework.Ef.MySql;
 using MSFramework.Extensions;
-using MSFramework.MySql;
-using Template.API.ViewObject;
-using Template.Application.Extensions;
+using MSFramework.Migrator.MySql;
+using Serilog;
 using Template.Domain;
 using Template.Infrastructure;
 
@@ -35,22 +33,20 @@ namespace Template.API
 		// This method gets called by the runtime. Use this method to add services to the container.
 		public void ConfigureServices(IServiceCollection services)
 		{
-			Configuration.Print();
+			Configuration.Print(x => Log.Logger.Information(x));
 
 			// SwaggerUI require some service from views,
 			// if your project a pure api, please use AddControllers
 			services.AddControllers(x =>
 				{
-					x.Filters.Add<UnitOfWork>();
-					x.Filters.Add<FunctionFilter>();
-					x.Filters.Add<HttpGlobalExceptionFilter>();
+					x.Filters.UseUnitOfWork();
+					x.Filters.UseFunctionFilter();
+					x.Filters.UseAudit();
+					x.Filters.UseGlobalExceptionFilter();
+					x.Filters.UseInvalidModelStateFilter();
 				})
 				.SetCompatibilityVersion(CompatibilityVersion.Version_3_0)
-				.AddNewtonsoftJson()
-				.ConfigureApiBehaviorOptions(x =>
-				{
-					x.InvalidModelStateResponseFactory = InvalidModelStateResponseFactory.Instance;
-				});
+				.AddNewtonsoftJson();
 
 			services.AddHealthChecks();
 			services.AddSwaggerGen(c =>
@@ -61,6 +57,8 @@ namespace Template.API
 
 			services.AddResponseCompression();
 			services.AddResponseCaching();
+
+			services.AddRouting(x => { x.LowercaseUrls = true; });
 
 #if !DEBUG
 			var options = new AppOptions(Configuration);
@@ -80,20 +78,20 @@ namespace Template.API
 			services.AddScoped<AppOptions>();
 			services.AddMSFramework(builder =>
 			{
-				builder.AddEventBus(typeof(AppOptions), typeof(MSFrameworkSessionExtensions));
-				builder.AddAspNetCore();
-				builder.AddAspNetCoreFunction<EfFunctionStore>();
-				builder.AddEfAuditStore();
-#if !DEBUG
-				builder.AddPermission();
-#endif
-				builder.AddAutoMapper(typeof(AppOptions), typeof(AutoMapperProfile));
-				builder.AddDatabaseMigration<MySqlDatabaseMigration>(typeof(AppOptions),
-					"Database='template';Data Source=localhost;password=1qazZAQ!;User ID=root;Port=3306;Allow User Variables=true");
-				builder.AddEntityFramework(ef =>
+				builder.UseAutoMapper();
+				builder.UseDependencyInjectionScanner();
+				builder.UseEventDispatcher();
+				// builder.UseRabbitMQEventDispatcher(new RabbitMQOptions(), typeof(UserCheckoutAcceptedEvent));
+				// 启用审计服务
+				builder.UseAudit();
+				builder.UseMySqlMigrator(typeof(AppDbContext),
+					"Database='template';Data Source=localhost;User ID=root;Password=1qazZAQ!;Port=3306;");
+
+				builder.UseAspNetCore();
+				builder.UseEntityFramework(x =>
 				{
-					// 添加 MyServer 支持
-					ef.AddMySql<AppDbContext>();
+					// 添加 MySql 支持
+					x.AddMySql<AppDbContext>(Configuration);
 				});
 			});
 		}
@@ -101,8 +99,6 @@ namespace Template.API
 		// This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
 		public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
 		{
-			app.UseMSFramework();
-
 			// 必须放在 UseMSFramework 后面
 			var exit = Configuration["exit"] == "true";
 			if (exit)
@@ -142,6 +138,8 @@ namespace Template.API
 
 			app.UseResponseCompression();
 			app.UseResponseCaching();
+			
+			app.UseMSFramework();
 		}
 	}
 }

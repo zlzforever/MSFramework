@@ -19,8 +19,11 @@ namespace MSFramework.Ef.Design
 		public virtual TDbContext CreateDbContext(string[] args)
 		{
 			var services = GetServiceProvider();
-			return services.CreateScope().ServiceProvider.GetRequiredService<DbContextFactory>()
-				.GetDbContext(typeof(TDbContext)) as TDbContext;
+			var dbContextFactory = services.CreateScope().ServiceProvider.GetRequiredService<DbContextFactory>();
+			var options = dbContextFactory.GetDbContextOptions(typeof(TDbContext));
+			// design time should not use transaction
+			options.UseTransaction = false;
+			return dbContextFactory.Create(options) as TDbContext;
 		}
 
 		protected abstract IServiceProvider GetServiceProvider();

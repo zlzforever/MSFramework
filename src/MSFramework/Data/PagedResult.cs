@@ -3,28 +3,34 @@ using System.Linq;
 
 namespace MSFramework.Data
 {
-	public class PagedResult<TEntity>
+	public abstract class PagedResult
 	{
 		/// <summary>
 		/// 总计
 		/// </summary>
-		public int Count { get; set; }
+		public int Count { get; protected set; }
 
 		/// <summary>
 		/// 当前页数 
 		/// </summary>
-		public int Page { get; set; }
+		public int Page { get; protected set; }
 
 		/// <summary>
 		/// 每页数据量 
 		/// </summary>
-		public int Limit { get; set; }
+		public int Limit { get; protected set; }
 
-		/// <summary>
-		/// 当前页结果
-		/// </summary>
-		public List<TEntity> Data { get; set; }
+		public IEnumerable<dynamic> Data { get; protected set; }
+	}
 
-		public IEnumerable<dynamic> GetEntities() => Data.Select(x => (dynamic) x);
+	public class PagedResult<TEntity> : PagedResult
+	{
+		public PagedResult(int page, int limit, int count, IEnumerable<TEntity> data)
+		{
+			Page = page;
+			Limit = limit;
+			Count = count;
+			Data = data.Select(x => (dynamic) x);
+		}
 	}
 }

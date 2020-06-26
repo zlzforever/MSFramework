@@ -2,7 +2,7 @@ using System;
 
 namespace Template.Application.DTO
 {
-	public class Class1Out
+	public class ProductOut
 	{
 		public string Name { get; set; }
 		public Guid Id { get; set; }

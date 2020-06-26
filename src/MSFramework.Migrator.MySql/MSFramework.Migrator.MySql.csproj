@@ -1,9 +1,9 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
-        <PackageId>MSFramework.MySql</PackageId>
+        <PackageId>MSFramework.Migrator.MySql</PackageId>
     </PropertyGroup>
-
+    <Import Project="../../package.props" />
     <ItemGroup>
       <ProjectReference Include="..\MSFramework.Migrator\MSFramework.Migrator.csproj" />
     </ItemGroup>
@@ -11,5 +11,4 @@
     <ItemGroup>
       <PackageReference Include="MySqlConnector" Version="0.69.3" />
     </ItemGroup>
-    <Import Project="../../package.props" />
 </Project>

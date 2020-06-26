@@ -3,7 +3,6 @@ using System.Reflection;
 using AutoMapper;
 using Microsoft.Extensions.DependencyInjection;
 using MSFramework.Reflection;
-using IMapper = MSFramework.Mapper.IMapper;
 
 namespace MSFramework.AutoMapper
 {
@@ -18,7 +17,7 @@ namespace MSFramework.AutoMapper
 		public static MSFrameworkBuilder UseAutoMapper(this MSFrameworkBuilder builder,
 			params Assembly[] assemblies)
 		{
-			builder.Services.AddScoped<IMapper, AutoMapperMapper>();
+			builder.Services.AddScoped<Mapper.IObjectMapper, AutoMapperMapper>();
 			builder.Services.AddAutoMapper(assemblies);
 			return builder;
 		}
@@ -26,7 +25,7 @@ namespace MSFramework.AutoMapper
 		public static MSFrameworkBuilder UseAutoMapper(this MSFrameworkBuilder builder,
 			params Type[] types)
 		{
-			builder.Services.AddScoped<IMapper, AutoMapperMapper>();
+			builder.Services.AddScoped<Mapper.IObjectMapper, AutoMapperMapper>();
 			builder.Services.AddAutoMapper(types);
 			return builder;
 		}

@@ -9,7 +9,7 @@ namespace MSFramework.Ef
 {
 	public class DbContextFactory : IDisposable
 	{
-		private readonly EntityFrameworkOptionsCollection _optionsStore;
+		private readonly EntityFrameworkOptionsCollection _optionsCollection;
 		private readonly IEntityConfigurationTypeFinder _entityConfigurationTypeFinder;
 		private readonly IServiceProvider _serviceProvider;
 
@@ -17,11 +17,11 @@ namespace MSFramework.Ef
 			new ConcurrentDictionary<Type, DbContextBase>();
 
 		public DbContextFactory( 
-			EntityFrameworkOptionsCollection optionsStore, IServiceProvider serviceProvider)
+			EntityFrameworkOptionsCollection optionsCollection, IServiceProvider serviceProvider)
 		{
 			_entityConfigurationTypeFinder = serviceProvider.GetRequiredService<IEntityConfigurationTypeFinder>();
 			_serviceProvider = serviceProvider;
-			_optionsStore = optionsStore;
+			_optionsCollection = optionsCollection;
 		}
 
 		/// <summary>
@@ -29,9 +29,9 @@ namespace MSFramework.Ef
 		/// </summary>
 		/// <param name="dbContextType"></param>
 		/// <returns></returns>
-		private EntityFrameworkOptions GetDbContextOptions(Type dbContextType)
+		public EntityFrameworkOptions GetDbContextOptions(Type dbContextType)
 		{
-			return _optionsStore.Get(dbContextType);
+			return _optionsCollection.Get(dbContextType);
 		}
 
 		/// <summary>

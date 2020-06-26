@@ -16,7 +16,7 @@ namespace Ordering.Infrastructure.EntityConfigurations
 			builder.Property(x => x.EntityId).HasMaxLength(256);
 			builder.Property(x => x.TypeName).HasMaxLength(256);
 
-			builder.Property(e => e.OperationType).UseEnumeration();
+			builder.Property(e => e.OperationType).IsEnumeration();
 		}
 	}
 }

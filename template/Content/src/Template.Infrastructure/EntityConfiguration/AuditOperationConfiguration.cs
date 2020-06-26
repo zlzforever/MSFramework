@@ -1,20 +1,23 @@
-using System;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using MSFramework.Audit;
 using MSFramework.Ef;
+using Template.Infrastructure;
 
-namespace Template.Infrastructure.EntityConfiguration
+namespace Ordering.Infrastructure.EntityConfigurations
 {
 	public class AuditOperationConfiguration
-		: EntityTypeConfigurationBase<AuditOperation>
+		: EntityTypeConfigurationBase<AuditedOperation, AppDbContext>
 	{
-		public override Type DbContextType => typeof(AppDbContext);
-
-		public override void Configure(EntityTypeBuilder<AuditOperation> builder)
+		public override void Configure(EntityTypeBuilder<AuditedOperation> builder)
 		{
 			base.Configure(builder);
 
-			builder.HasIndex(m => m.FunctionPath);
+			builder.Property(x => x.Ip).HasMaxLength(256);
+			builder.Property(x => x.Path).HasMaxLength(256);
+			builder.Property(x => x.ApplicationName).HasMaxLength(256);
+			builder.Property(x => x.UserAgent).HasMaxLength(256);
+			builder.Property(x => x.CreationUserId).HasMaxLength(256);
+			builder.Property(x => x.CreationUserName).HasMaxLength(256);
 		}
 	}
 }

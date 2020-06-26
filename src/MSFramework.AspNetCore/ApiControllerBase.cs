@@ -8,7 +8,7 @@ using MSFramework.Domain;
 
 namespace MSFramework.AspNetCore
 {
-	public abstract class ApiController : ControllerBase, IAsyncResultFilter, IActionFilter, IAsyncActionFilter
+	public abstract class ApiControllerBase : ControllerBase, IAsyncResultFilter, IActionFilter, IAsyncActionFilter
 	{
 		protected ISession Session { get; private set; }
 
