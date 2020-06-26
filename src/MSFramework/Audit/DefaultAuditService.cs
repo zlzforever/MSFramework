@@ -27,7 +27,5 @@ namespace MSFramework.Audit
 
 			_repository.Insert(auditOperation);
 		}
-
-		public bool Enabled => _repository != null;
 	}
 }

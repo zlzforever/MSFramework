@@ -1,13 +1,10 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using EventBus.RabbitMQ.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.DependencyInjection.Extensions;
 using MSFramework.Domain.Event;
-using MSFramework.RabbitMQ;
 
-namespace MSFramework.EventBus.RabbitMQ
+namespace MSFramework.RabbitMQ
 {
 	public static class ServiceCollectionExtensions
 	{

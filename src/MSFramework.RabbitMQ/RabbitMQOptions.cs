@@ -1,4 +1,4 @@
-namespace MSFramework.EventBus.RabbitMQ
+namespace MSFramework.RabbitMQ
 {
 	public class RabbitMQOptions
 	{

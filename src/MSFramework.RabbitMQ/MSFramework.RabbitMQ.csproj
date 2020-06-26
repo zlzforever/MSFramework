@@ -4,10 +4,11 @@
     </PropertyGroup>
     <Import Project="../../package.props" />
     <ItemGroup>
-        <PackageReference Include="EasyEventBus.RabbitMQ.DependencyInjection" Version="0.0.6" />
+        <ProjectReference Include="..\MSFramework\MSFramework.csproj" />
     </ItemGroup>
     <ItemGroup>
-        <ProjectReference Include="..\MSFramework\MSFramework.csproj" />
+      <PackageReference Include="MessagePack" Version="2.1.143" />
+      <PackageReference Include="RabbitMQ.Client" Version="6.1.0" />
     </ItemGroup>
 
 </Project>

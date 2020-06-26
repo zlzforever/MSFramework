@@ -3,7 +3,6 @@ using System.Collections.Concurrent;
 using System.Threading.Tasks;
 using MessagePack;
 using MSFramework.Domain.Event;
-using MSFramework.EventBus.RabbitMQ;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
 
@@ -59,24 +58,30 @@ namespace MSFramework.RabbitMQ
 			return false;
 		}
 
-		public override Task DispatchAsync(IEvent @event)
+		public override async Task DispatchAsync(IEvent @event)
 		{
 			if (@event == null)
 			{
 				throw new ArgumentNullException(nameof(@event));
 			}
 
-			var eventType = @event.GetType();
-			var topic = GenerateTopic(eventType);
-			if (_modelDict.TryGetValue(topic, out var channel))
+			if (@event is IIntegrationEvent)
 			{
-				var bytes = MessagePackSerializer.Typeless.Serialize(@event);
-				channel.BasicPublish(_options.Exchange, topic, null, bytes);
-				return Task.CompletedTask;
+				var eventType = @event.GetType();
+				var topic = GenerateTopic(eventType);
+				if (_modelDict.TryGetValue(topic, out var channel))
+				{
+					var bytes = MessagePackSerializer.Typeless.Serialize(@event);
+					channel.BasicPublish(_options.Exchange, topic, null, bytes);
+				}
+				else
+				{
+					throw new ApplicationException("Get channel failed");
+				}
 			}
 			else
 			{
-				throw new ApplicationException("Get channel failed");
+				await base.DispatchAsync(@event);
 			}
 		}
 
@@ -103,7 +108,8 @@ namespace MSFramework.RabbitMQ
 
 					consumer.Received += async (model, ea) =>
 					{
-						var obj = MessagePackSerializer.Typeless.Deserialize(ea.Body) as IEvent;
+						var bytes = ea.Body.ToArray();
+						var obj = MessagePackSerializer.Typeless.Deserialize(bytes) as IEvent;
 						await base.DispatchAsync(obj);
 						channel.BasicAck(deliveryTag: ea.DeliveryTag, multiple: false);
 					};

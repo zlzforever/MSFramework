@@ -7,15 +7,12 @@ using MSFramework;
 using MSFramework.AspNetCore;
 using MSFramework.AspNetCore.Filters;
 using MSFramework.Audit;
+using MSFramework.AutoMapper;
 using MSFramework.DependencyInjection;
 using MSFramework.Ef;
-using MSFramework.Ef.Function;
 using MSFramework.Ef.MySql;
-using MSFramework.EventBus.RabbitMQ;
 using MSFramework.Extensions;
-using MSFramework.Initializer;
 using MSFramework.Migrator.MySql;
-using Ordering.Application.Event;
 using Ordering.Infrastructure;
 using Serilog;
 
@@ -37,15 +34,13 @@ namespace Ordering.API
 
 			services.AddControllers(x =>
 				{
-					x.Filters.Add<UnitOfWork>();
-					x.Filters.Add<FunctionFilter>();
-					x.Filters.Add<Audit>();
+					x.Filters.UseUnitOfWork();
+					x.Filters.UseFunctionFilter();
+					x.Filters.UseAudit();
+					x.Filters.UseGlobalExceptionFilter();
+					x.Filters.UseInvalidModelStateFilter();
 				})
-				.AddNewtonsoftJson()
-				.ConfigureApiBehaviorOptions(x =>
-				{
-					x.InvalidModelStateResponseFactory = InvalidModelStateResponseFactory.Instance;
-				});
+				.AddNewtonsoftJson();
 
 			services.AddSwaggerGen(c =>
 			{
@@ -55,12 +50,10 @@ namespace Ordering.API
 
 			services.AddMSFramework(builder =>
 			{
+				builder.UseAutoMapper();
 				builder.UseDependencyInjectionScanner();
-				builder.UseEventDispatcher(typeof(UserCheckoutAcceptedEvent));
-				builder.UseRabbitMQEventDispatcher(new RabbitMQOptions(), typeof(UserCheckoutAcceptedEvent));
-
-				// 注册初始化器
-				builder.UseInitializer();
+				builder.UseEventDispatcher();
+				// builder.UseRabbitMQEventDispatcher(new RabbitMQOptions(), typeof(UserCheckoutAcceptedEvent));
 				// 启用审计服务
 				builder.UseAudit();
 				builder.UseMySqlMigrator(typeof(OrderingContext),

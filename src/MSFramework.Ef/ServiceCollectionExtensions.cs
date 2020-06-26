@@ -4,6 +4,10 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Logging;
 using MSFramework.Domain;
+using MSFramework.Ef.Infrastructure;
+using MSFramework.Ef.Initializer;
+using MSFramework.Ef.Repository;
+using MSFramework.Initializer;
 
 namespace MSFramework.Ef
 {
@@ -23,7 +27,7 @@ namespace MSFramework.Ef
 			services.TryAddSingleton(provider =>
 			{
 				var configuration = provider.GetRequiredService<IConfiguration>();
-				return EntityFrameworkOptionsStore.LoadFrom(configuration);
+				return EntityFrameworkOptionsCollection.LoadFrom(configuration);
 			});
 			services.TryAddSingleton<IEntityConfigurationTypeFinder>(provider =>
 			{
@@ -36,6 +40,7 @@ namespace MSFramework.Ef
 			services.TryAddScoped<DbContextFactory>();
 			services.TryAddScoped(typeof(IRepository<>), typeof(EfRepository<>));
 			services.TryAddScoped(typeof(IRepository<,>), typeof(EfRepository<,>));
+			services.AddInitializer<EntityFrameworkInitializer>();
 			return services;
 		}
 	}

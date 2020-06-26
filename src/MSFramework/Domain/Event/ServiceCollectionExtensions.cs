@@ -1,5 +1,6 @@
 using System;
 using System.Linq;
+using System.Reflection;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 
@@ -10,17 +11,25 @@ namespace MSFramework.Domain.Event
 		public static IServiceCollection AddEventDispatcher(this IServiceCollection serviceCollection,
 			params Type[] types)
 		{
-			serviceCollection.TryAddScoped<IHandlerFactory, DependencyInjectionHandlerFactory>();
-			serviceCollection.TryAddScoped<IEventDispatcher, EventDispatcher>();
-			serviceCollection.RegisterEventHandler(types);
+			var assemblies = types.Select(x => x.Assembly).ToArray();
+			serviceCollection.AddEventDispatcher(assemblies);
 			return serviceCollection;
 		}
 
-		private static IServiceCollection RegisterEventHandler(this IServiceCollection serviceCollection,
-			params Type[] handlerTypes)
+		public static IServiceCollection AddEventDispatcher(this IServiceCollection serviceCollection,
+			params Assembly[] assemblies)
+		{
+			serviceCollection.TryAddScoped<IHandlerFactory, DependencyInjectionHandlerFactory>();
+			serviceCollection.TryAddScoped<IEventDispatcher, EventDispatcher>();
+			serviceCollection.RegisterEventHandler(assemblies);
+			return serviceCollection;
+		}
+
+		private static void RegisterEventHandler(this IServiceCollection serviceCollection,
+			params Assembly[] assemblies)
 		{
 			var store = new EventHandlerTypeStore();
-			var types = handlerTypes.SelectMany(x => x.Assembly.GetTypes());
+			var types = assemblies.SelectMany(x => x.GetTypes());
 
 			foreach (var handlerType in types)
 			{
@@ -38,7 +47,6 @@ namespace MSFramework.Domain.Event
 			}
 
 			serviceCollection.TryAddSingleton<IEventHandlerTypeStore>(store);
-			return serviceCollection;
 		}
 	}
 }

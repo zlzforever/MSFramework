@@ -3,12 +3,13 @@ using System.Collections.Concurrent;
 using Microsoft.Extensions.DependencyInjection;
 using MSFramework.Domain;
 using MSFramework.Domain.AggregateRoot;
+using MSFramework.Ef.Infrastructure;
 
 namespace MSFramework.Ef
 {
 	public class DbContextFactory : IDisposable
 	{
-		private readonly EntityFrameworkOptionsStore _optionsStore;
+		private readonly EntityFrameworkOptionsCollection _optionsStore;
 		private readonly IEntityConfigurationTypeFinder _entityConfigurationTypeFinder;
 		private readonly IServiceProvider _serviceProvider;
 
@@ -16,7 +17,7 @@ namespace MSFramework.Ef
 			new ConcurrentDictionary<Type, DbContextBase>();
 
 		public DbContextFactory( 
-			EntityFrameworkOptionsStore optionsStore, IServiceProvider serviceProvider)
+			EntityFrameworkOptionsCollection optionsStore, IServiceProvider serviceProvider)
 		{
 			_entityConfigurationTypeFinder = serviceProvider.GetRequiredService<IEntityConfigurationTypeFinder>();
 			_serviceProvider = serviceProvider;
@@ -71,7 +72,7 @@ namespace MSFramework.Ef
 
 			//创建上下文实例
 			context = (DbContextBase) _serviceProvider.GetRequiredService(dbContextType);
-
+			
 			var unitOfWorkManager = _serviceProvider.GetRequiredService<IUnitOfWorkManager>();
 			unitOfWorkManager.Register(context);
 

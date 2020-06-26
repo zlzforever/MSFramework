@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Memory;
+using MSFramework.Ef.Repository;
 using MSFramework.Function;
 
 namespace MSFramework.Ef.Function
@@ -10,7 +11,7 @@ namespace MSFramework.Ef.Function
 	public class FunctionRepository : EfRepository<FunctionDefine, Guid>, IFunctionRepository
 	{
 		private readonly IMemoryCache _cache;
-		private readonly TimeSpan _ttl = new TimeSpan(0, 1, 0);
+		private readonly TimeSpan _ttl = new TimeSpan(0, 5, 0);
 
 		public FunctionRepository(DbContextFactory dbContextFactory, IMemoryCache cache) : base(dbContextFactory)
 		{

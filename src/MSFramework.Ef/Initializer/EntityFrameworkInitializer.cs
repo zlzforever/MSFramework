@@ -8,16 +8,16 @@ using Microsoft.Extensions.Logging;
 using MSFramework.Extensions;
 using MSFramework.Initializer;
 
-namespace MSFramework.Ef
+namespace MSFramework.Ef.Initializer
 {
-	public class EntityFrameworkInitializer : InitializerBase
+	public class EntityFrameworkInitializer : InitializerBase, INotAutoRegisterInitializer
 	{
 		public override int Order => int.MinValue;
 
 		public override async Task InitializeAsync(IServiceProvider serviceProvider)
 		{
 			var dbContextFactory = serviceProvider.GetRequiredService<DbContextFactory>();
-			var entityFrameworkOptionsStore = serviceProvider.GetRequiredService<EntityFrameworkOptionsStore>();
+			var entityFrameworkOptionsStore = serviceProvider.GetRequiredService<EntityFrameworkOptionsCollection>();
 			foreach (var option in entityFrameworkOptionsStore.GetAllOptions())
 			{
 				var useTransaction = option.UseTransaction;

@@ -1,6 +1,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using MSFramework.Domain.AggregateRoot;
 using MSFramework.Domain.Entity;
 
 namespace MSFramework.Ef
@@ -52,10 +53,16 @@ namespace MSFramework.Ef
 		public virtual void Configure(EntityTypeBuilder<TEntity> builder)
 		{
 			builder.HasKey("Id");
+
 			var primaryKeyType = builder.Property("Id").Metadata.ClrType;
 			if (primaryKeyType == Consts.Types.String || primaryKeyType == Consts.Types.Guid)
 			{
 				builder.Property("Id").ValueGeneratedNever();
+			}
+
+			if (typeof(IAggregateRoot).IsAssignableFrom(EntityType))
+			{
+				builder.Ignore("DomainEvents");
 			}
 		}
 	}

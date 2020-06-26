@@ -1,6 +1,6 @@
 using System;
 
-namespace MSFramework.Ef
+namespace MSFramework.Ef.Infrastructure
 {
 	/// <summary>
 	/// 定义实体类配置类型查找器

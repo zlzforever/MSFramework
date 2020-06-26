@@ -19,7 +19,7 @@ namespace MSFramework.Domain.AggregateRoot
 	/// </summary>
 	public interface IAggregateRoot : IEntity
 	{
-		IReadOnlyCollection<IEvent> DomainEvents { get; }
+		IReadOnlyCollection<IEvent> GetDomainEvents();
 
 		void AddDomainEvent(IEvent @event);
 

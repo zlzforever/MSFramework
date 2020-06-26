@@ -10,12 +10,12 @@ namespace MSFramework.Ef.SqlServer
 		public static EntityFrameworkBuilder AddSqlServer<TDbContext>(
 			this EntityFrameworkBuilder builder, IConfiguration configuration) where TDbContext : DbContextBase
 		{
-			builder.Services.AddDbContextPool<TDbContext>(x =>
+			builder.Services.AddDbContext<TDbContext>(x =>
 			{
 				var dbContextType = typeof(TDbContext);
 				var entryAssemblyName = dbContextType.Assembly.GetName().Name;
 
-				var store = EntityFrameworkOptionsStore.LoadFrom(configuration);
+				var store = EntityFrameworkOptionsCollection.LoadFrom(configuration);
 				var option = store.Get(dbContextType);
 				if (option.DbContextType != dbContextType)
 				{

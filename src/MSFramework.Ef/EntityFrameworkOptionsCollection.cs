@@ -1,21 +1,18 @@
 using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.Extensions.Configuration;
 
-
 namespace MSFramework.Ef
 {
-	public class EntityFrameworkOptionsStore
+	public class EntityFrameworkOptionsCollection
 	{
-		private readonly ConcurrentDictionary<string, EntityFrameworkOptions> _dict;
-		private readonly ConcurrentDictionary<Type, EntityFrameworkOptions> _contextTypeMapOptionsDict;
+		private readonly Dictionary<string, EntityFrameworkOptions> _dict;
+		private readonly Dictionary<Type, EntityFrameworkOptions> _contextTypeMapOptionsDict;
 
-		private EntityFrameworkOptionsStore(ConcurrentDictionary<string, EntityFrameworkOptions> dict)
+		private EntityFrameworkOptionsCollection(Dictionary<string, EntityFrameworkOptions> dict)
 		{
-			if (dict == null ||
-			    dict.IsEmpty)
+			if (dict == null || dict.Count == 0)
 			{
 				throw new MSFrameworkException("未能找到数据上下文配置");
 			}
@@ -28,10 +25,10 @@ namespace MSFramework.Ef
 			}
 
 			_dict = dict;
-			_contextTypeMapOptionsDict = new ConcurrentDictionary<Type, EntityFrameworkOptions>();
+			_contextTypeMapOptionsDict = new Dictionary<Type, EntityFrameworkOptions>();
 			foreach (var value in dict.Values)
 			{
-				_contextTypeMapOptionsDict.TryAdd(value.DbContextType, value);
+				_contextTypeMapOptionsDict.Add(value.DbContextType, value);
 			}
 		}
 
@@ -46,10 +43,10 @@ namespace MSFramework.Ef
 			return options;
 		}
 
-		public static EntityFrameworkOptionsStore LoadFrom(IConfiguration configuration)
+		public static EntityFrameworkOptionsCollection LoadFrom(IConfiguration configuration)
 		{
 			var section = configuration.GetSection("DbContexts");
-			return new EntityFrameworkOptionsStore(section.Get<ConcurrentDictionary<string, EntityFrameworkOptions>>());
+			return new EntityFrameworkOptionsCollection(section.Get<Dictionary<string, EntityFrameworkOptions>>());
 		}
 	}
 }

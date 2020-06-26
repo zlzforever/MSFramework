@@ -1,6 +1,6 @@
 using System;
-using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
@@ -15,19 +15,31 @@ namespace MSFramework
 {
 	public static class ServiceCollectionExtensions
 	{
+		public static MSFrameworkBuilder UseEventDispatcher(this MSFrameworkBuilder builder)
+		{
+			var assemblies = AssemblyFinder.GetAllList();
+			builder.UseEventDispatcher(assemblies.ToArray());
+			return builder;
+		}
+
 		public static MSFrameworkBuilder UseEventDispatcher(this MSFrameworkBuilder builder, params Type[] eventTypes)
 		{
 			var excludeAssembly = typeof(MSFrameworkBuilder).Assembly;
-			if (eventTypes.Any(x => x.Assembly != excludeAssembly))
+			var assemblies = eventTypes.Select(x => x.Assembly).ToList();
+
+			if (!assemblies.Contains(excludeAssembly))
 			{
-				var list = new List<Type>(eventTypes) {typeof(MSFrameworkBuilder)};
-				builder.Services.AddEventDispatcher(list.ToArray());
-			}
-			else
-			{
-				builder.Services.AddEventDispatcher(eventTypes);
+				assemblies.Add(excludeAssembly);
 			}
 
+			builder.UseEventDispatcher(assemblies.ToArray());
+			return builder;
+		}
+
+		public static MSFrameworkBuilder UseEventDispatcher(this MSFrameworkBuilder builder,
+			params Assembly[] assemblies)
+		{
+			builder.Services.AddEventDispatcher(assemblies);
 			return builder;
 		}
 
@@ -37,14 +49,17 @@ namespace MSFramework
 			var builder = new MSFrameworkBuilder(services);
 			builderAction?.Invoke(builder);
 
-			builder.UseInitializer();
-			
+			services.AddMemoryCache();
+
 			builder.Services.TryAddScoped<IUnitOfWorkManager, DefaultUnitOfWorkManager>();
 
 			// 如果你想换成消息队列，则重新注册一个对应的服务即可
 			builder.Services.TryAddScoped<IAuditService, DefaultAuditService>();
 
+			builder.UseInitializer();
+
 			var assemblies = AssemblyFinder.GetAllList();
+
 			// todo: how to print logs in ConfigureService method
 			Console.WriteLine($"Find assemblies: {string.Join(", ", assemblies.Select(x => x.GetName().Name))}");
 		}

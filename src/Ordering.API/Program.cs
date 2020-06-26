@@ -1,5 +1,4 @@
-﻿using System;
-using Microsoft.AspNetCore.Hosting;
+﻿using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Hosting;
 using Serilog;
 using Serilog.Events;
@@ -11,7 +10,7 @@ namespace Ordering.API
 		public static void Main(string[] args)
 		{
 			Log.Logger = new LoggerConfiguration()
-				.MinimumLevel.Information()
+				.MinimumLevel.Debug()
 				.MinimumLevel.Override("Microsoft.Hosting.Lifetime", LogEventLevel.Information)
 				.MinimumLevel.Override("Microsoft.EntityFrameworkCore.Database.Command", LogEventLevel.Information)
 				.MinimumLevel.Override("Microsoft", LogEventLevel.Warning)

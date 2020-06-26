@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using MSFramework.Audit;
 using MSFramework.Ef;
+using MSFramework.Ef.Extensions;
 
 namespace Ordering.Infrastructure.EntityConfigurations
 {
@@ -11,6 +12,11 @@ namespace Ordering.Infrastructure.EntityConfigurations
 			base.Configure(builder);
 
 			builder.HasIndex(m => m.EntityId);
+
+			builder.Property(x => x.EntityId).HasMaxLength(256);
+			builder.Property(x => x.TypeName).HasMaxLength(256);
+
+			builder.Property(e => e.OperationType).UseEnumeration();
 		}
 	}
 }

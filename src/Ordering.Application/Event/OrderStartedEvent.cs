@@ -1,11 +1,12 @@
 using System;
+using MSFramework.Domain.Event;
 
 namespace Ordering.Application.Event
 {
 	/// <summary>
 	/// 发送到外部的领域事件
 	/// </summary>
-	public class OrderStartedEvent : EventBus.Event
+	public class OrderStartedEvent :  EventBase
 	{
 		public string UserId { get; }
 		

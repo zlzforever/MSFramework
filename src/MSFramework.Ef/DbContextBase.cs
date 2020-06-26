@@ -11,6 +11,7 @@ using MSFramework.Audit;
 using MSFramework.Domain;
 using MSFramework.Domain.AggregateRoot;
 using MSFramework.Domain.Event;
+using MSFramework.Ef.Infrastructure;
 
 namespace MSFramework.Ef
 {
@@ -80,8 +81,8 @@ namespace MSFramework.Ef
 
 				ApplyConcepts();
 
-				var eventMediator = _serviceProvider.GetService<IEventDispatcher>();
-				if (eventMediator != null)
+				var eventDispatcher = _serviceProvider.GetService<IEventDispatcher>();
+				if (eventDispatcher != null)
 				{
 					// todo: 同步异步混用是否会死锁
 					HandleDomainEventsAsync().GetAwaiter().GetResult();
@@ -158,8 +159,8 @@ namespace MSFramework.Ef
 
 		private async Task HandleDomainEventsAsync()
 		{
-			var eventMediator = _serviceProvider.GetService<IEventDispatcher>();
-			if (eventMediator == null)
+			var eventDispatcher = _serviceProvider.GetService<IEventDispatcher>();
+			if (eventDispatcher == null)
 			{
 				return;
 			}
@@ -168,7 +169,7 @@ namespace MSFramework.Ef
 
 			foreach (var @event in domainEvents)
 			{
-				await eventMediator.DispatchAsync(@event);
+				await eventDispatcher.DispatchAsync(@event);
 			}
 		}
 
@@ -180,16 +181,19 @@ namespace MSFramework.Ef
 			// side effects from the domain event handlers which are using the same DbContext with "InstancePerLifetimeScope" or "scoped" lifetime
 			// B) Right AFTER committing data (EF SaveChanges) into the DB will make multiple transactions. 
 			// You will need to handle eventual consistency and compensatory actions in case of failures in any of the Handlers. 
-			var domainEntities = ChangeTracker
-				.Entries<IAggregateRoot>()
-				.Where(x => x.Entity.DomainEvents != null && x.Entity.DomainEvents.Any()).ToList();
 
-			var domainEvents = domainEntities
-				.SelectMany(x => x.Entity.DomainEvents)
-				.ToList();
+			var domainEvents = new List<IEvent>();
 
-			domainEntities
-				.ForEach(entity => entity.Entity.ClearDomainEvents());
+			foreach (var aggregateRoot in ChangeTracker
+				.Entries<IAggregateRoot>())
+			{
+				var events = aggregateRoot.Entity.GetDomainEvents();
+				if (events != null && events.Any())
+				{
+					domainEvents.AddRange(events);
+					domainEvents.Clear();
+				}
+			}
 
 			return domainEvents;
 		}

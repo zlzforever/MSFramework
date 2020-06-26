@@ -8,27 +8,33 @@ namespace MSFramework.Domain.Event
 		/// <summary>
 		/// 事件源标识
 		/// </summary>
-		public Guid EventId { get; set; }
+		public Guid EventId { get; private set; }
 
 		/// <summary>
 		/// 事件发生时间
 		/// </summary>
-		public DateTimeOffset EventTime { get; set; }
+		public DateTimeOffset EventTime { get; private set; }
 
 		/// <summary>
 		/// 触发事件的对象
 		/// </summary>
-		public object EventSource { get; set; }
+		public object EventSource { get; private set; }
 
-		protected EventBase() : this(null)
+		protected EventBase() : this(CombGuid.NewGuid(), DateTimeOffset.Now, null)
 		{
 		}
 
-		protected EventBase(object eventSource)
+		protected EventBase(Guid id, DateTimeOffset eventTime, object eventSource)
 		{
-			EventId = CombGuid.NewGuid();
-			EventTime = DateTimeOffset.UtcNow;
+			EventId = id;
+			EventTime = eventTime;
 			EventSource = eventSource;
+		}
+
+		public override string ToString()
+		{
+			return
+				$"[{GetType().Name}] EventId = {EventId}, EventTime = {EventTime:YYYY-MM-DD HH:mm:ss}, EventSource = {EventSource}";
 		}
 	}
 }

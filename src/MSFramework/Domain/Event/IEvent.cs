@@ -7,11 +7,11 @@ namespace MSFramework.Domain.Event
 		/// <summary>
 		/// 事件标识
 		/// </summary>
-		Guid EventId { get; set; }
+		Guid EventId { get; }
 
 		/// <summary>
 		/// 事件发生时间
 		/// </summary>
-		DateTimeOffset EventTime { get; set; }
+		DateTimeOffset EventTime { get; }
 	}
 }

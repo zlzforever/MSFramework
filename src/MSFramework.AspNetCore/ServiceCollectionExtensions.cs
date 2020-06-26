@@ -1,10 +1,10 @@
-using System;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using MSFramework.AspNetCore.Function;
+using MSFramework.AspNetCore.Infrastructure;
 using MSFramework.Function;
 using ISession = MSFramework.Domain.ISession;
 
@@ -16,8 +16,8 @@ namespace MSFramework.AspNetCore
 		{
 			builder.Services.TryAddSingleton<IFunctionFinder, AspNetCoreFunctionFinder>();
 			builder.Services.TryAddSingleton<IHttpContextAccessor, HttpContextAccessor>();
-			builder.Services.TryAddSingleton<ISession, AspNetCoreSession>();
 			builder.Services.AddSingleton<IActionResultTypeMapper, ActionResultTypeMapper>();
+			builder.Services.TryAddScoped<ISession, HttpContextSession>();
 			return builder;
 		}
 

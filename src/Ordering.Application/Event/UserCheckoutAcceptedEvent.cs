@@ -1,9 +1,10 @@
 using System;
 using System.Collections.Generic;
+using MSFramework.Domain.Event;
 
 namespace Ordering.Application.Event
 {
-	public class UserCheckoutAcceptedEvent : EventBus.Event
+	public class UserCheckoutAcceptedEvent : EventBase
 	{
 		public string UserId { get; }
 

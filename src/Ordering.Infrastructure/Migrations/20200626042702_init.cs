@@ -8,25 +8,23 @@ namespace Ordering.Infrastructure.Migrations
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.CreateTable(
-                name: "AuditOperation",
+                name: "AuditedOperation",
                 columns: table => new
                 {
                     Id = table.Column<Guid>(nullable: false),
-                    UserId = table.Column<string>(maxLength: 255, nullable: true),
-                    UserName = table.Column<string>(maxLength: 255, nullable: true),
-                    NickName = table.Column<string>(maxLength: 255, nullable: true),
-                    CreatedTime = table.Column<DateTimeOffset>(nullable: false),
-                    FunctionName = table.Column<string>(maxLength: 255, nullable: true),
-                    FunctionPath = table.Column<string>(maxLength: 255, nullable: true),
-                    Ip = table.Column<string>(maxLength: 40, nullable: true),
-                    UserAgent = table.Column<string>(maxLength: 255, nullable: true),
-                    Message = table.Column<string>(maxLength: 500, nullable: true),
+                    CreationTime = table.Column<DateTimeOffset>(nullable: false),
+                    CreationUserId = table.Column<string>(maxLength: 256, nullable: true),
+                    CreationUserName = table.Column<string>(maxLength: 256, nullable: true),
+                    ApplicationName = table.Column<string>(maxLength: 256, nullable: true),
+                    Path = table.Column<string>(maxLength: 256, nullable: true),
+                    Ip = table.Column<string>(maxLength: 256, nullable: true),
+                    UserAgent = table.Column<string>(maxLength: 256, nullable: true),
                     EndedTime = table.Column<DateTimeOffset>(nullable: false),
                     Elapsed = table.Column<int>(nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_AuditOperation", x => x.Id);
+                    table.PrimaryKey("PK_AuditedOperation", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -34,19 +32,17 @@ namespace Ordering.Infrastructure.Migrations
                 columns: table => new
                 {
                     Id = table.Column<Guid>(nullable: false),
-                    CreationTime = table.Column<DateTimeOffset>(nullable: false, comment: "创建时间"),
-                    CreationUserId = table.Column<string>(maxLength: 255, nullable: false, comment: "创建用户标识"),
-                    CreationUserName = table.Column<string>(maxLength: 255, nullable: false, comment: "创建用户名称"),
-                    LastModificationUserId = table.Column<string>(maxLength: 255, nullable: true, comment: "最后修改者标识"),
-                    LastModificationUserName = table.Column<string>(maxLength: 255, nullable: true, comment: "最后修改者名称"),
-                    LastModificationTime = table.Column<DateTimeOffset>(nullable: true, comment: "最后修改时间"),
+                    CreationTime = table.Column<DateTimeOffset>(nullable: false),
+                    CreationUserId = table.Column<string>(nullable: true),
+                    CreationUserName = table.Column<string>(nullable: true),
+                    LastModificationUserId = table.Column<string>(maxLength: 255, nullable: true),
+                    LastModificationUserName = table.Column<string>(maxLength: 255, nullable: true),
+                    LastModificationTime = table.Column<DateTimeOffset>(nullable: true),
                     Enabled = table.Column<bool>(nullable: false),
-                    Name = table.Column<string>(maxLength: 255, nullable: true),
-                    Path = table.Column<string>(maxLength: 255, nullable: false),
-                    Description = table.Column<string>(maxLength: 500, nullable: true),
-                    Expired = table.Column<bool>(nullable: false),
-                    AuditOperationEnabled = table.Column<bool>(nullable: false),
-                    AuditEntityEnabled = table.Column<bool>(nullable: false)
+                    Name = table.Column<string>(nullable: true),
+                    Code = table.Column<string>(nullable: true),
+                    Description = table.Column<string>(nullable: true),
+                    Expired = table.Column<bool>(nullable: false)
                 },
                 constraints: table =>
                 {
@@ -64,7 +60,7 @@ namespace Ordering.Infrastructure.Migrations
                     Address_State = table.Column<string>(nullable: true),
                     Address_Country = table.Column<string>(nullable: true),
                     Address_ZipCode = table.Column<string>(nullable: true),
-                    OrderStatus = table.Column<int>(nullable: false, comment: "状态"),
+                    OrderStatus = table.Column<int>(nullable: false),
                     UserId = table.Column<string>(nullable: false),
                     Description = table.Column<string>(nullable: true),
                     IsDeleted = table.Column<bool>(nullable: false)
@@ -72,30 +68,40 @@ namespace Ordering.Infrastructure.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Order", x => x.Id);
-                },
-                comment: "订单表");
+                });
 
             migrationBuilder.CreateTable(
-                name: "AuditEntity",
+                name: "Product",
                 columns: table => new
                 {
                     Id = table.Column<Guid>(nullable: false),
-                    OperationId = table.Column<Guid>(nullable: false),
-                    Name = table.Column<string>(maxLength: 255, nullable: true),
-                    DisplayName = table.Column<string>(maxLength: 255, nullable: true),
-                    TypeName = table.Column<string>(maxLength: 255, nullable: true),
-                    EntityKey = table.Column<string>(maxLength: 64, nullable: true),
-                    OperateType = table.Column<int>(nullable: false)
+                    Name = table.Column<string>(maxLength: 256, nullable: true),
+                    Price = table.Column<int>(nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_AuditEntity", x => x.Id);
+                    table.PrimaryKey("PK_Product", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "AuditedEntity",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(nullable: false),
+                    TypeName = table.Column<string>(maxLength: 256, nullable: true),
+                    EntityId = table.Column<string>(maxLength: 256, nullable: true),
+                    OperationType = table.Column<int>(nullable: true),
+                    AuditedOperationId = table.Column<Guid>(nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_AuditedEntity", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_AuditEntity_AuditOperation_OperationId",
-                        column: x => x.OperationId,
-                        principalTable: "AuditOperation",
+                        name: "FK_AuditedEntity_AuditedOperation_AuditedOperationId",
+                        column: x => x.AuditedOperationId,
+                        principalTable: "AuditedOperation",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateTable(
@@ -123,49 +129,52 @@ namespace Ordering.Infrastructure.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "AuditProperty",
+                name: "AuditedProperty",
                 columns: table => new
                 {
                     Id = table.Column<Guid>(nullable: false),
-                    AuditEntityId = table.Column<Guid>(nullable: false),
-                    EntityKey = table.Column<string>(maxLength: 64, nullable: true),
-                    DisplayName = table.Column<string>(maxLength: 255, nullable: true),
-                    FieldName = table.Column<string>(maxLength: 255, nullable: true),
+                    PropertyName = table.Column<string>(maxLength: 256, nullable: true),
+                    PropertyType = table.Column<string>(maxLength: 256, nullable: true),
                     OriginalValue = table.Column<string>(nullable: true),
                     NewValue = table.Column<string>(nullable: true),
-                    DataType = table.Column<string>(maxLength: 255, nullable: true)
+                    AuditedEntityId = table.Column<Guid>(nullable: true)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_AuditProperty", x => x.Id);
+                    table.PrimaryKey("PK_AuditedProperty", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_AuditProperty_AuditEntity_AuditEntityId",
-                        column: x => x.AuditEntityId,
-                        principalTable: "AuditEntity",
+                        name: "FK_AuditedProperty_AuditedEntity_AuditedEntityId",
+                        column: x => x.AuditedEntityId,
+                        principalTable: "AuditedEntity",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateIndex(
-                name: "IX_AuditEntity_OperationId",
-                table: "AuditEntity",
-                column: "OperationId");
+                name: "IX_AuditedEntity_AuditedOperationId",
+                table: "AuditedEntity",
+                column: "AuditedOperationId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_AuditProperty_AuditEntityId",
-                table: "AuditProperty",
-                column: "AuditEntityId");
+                name: "IX_AuditedEntity_EntityId",
+                table: "AuditedEntity",
+                column: "EntityId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_AuditedProperty_AuditedEntityId",
+                table: "AuditedProperty",
+                column: "AuditedEntityId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_FunctionDefine_Code",
+                table: "FunctionDefine",
+                column: "Code",
+                unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_FunctionDefine_Name",
                 table: "FunctionDefine",
                 column: "Name");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_FunctionDefine_Path",
-                table: "FunctionDefine",
-                column: "Path",
-                unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_OrderItem_OrderId",
@@ -176,7 +185,7 @@ namespace Ordering.Infrastructure.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "AuditProperty");
+                name: "AuditedProperty");
 
             migrationBuilder.DropTable(
                 name: "FunctionDefine");
@@ -185,13 +194,16 @@ namespace Ordering.Infrastructure.Migrations
                 name: "OrderItem");
 
             migrationBuilder.DropTable(
-                name: "AuditEntity");
+                name: "Product");
+
+            migrationBuilder.DropTable(
+                name: "AuditedEntity");
 
             migrationBuilder.DropTable(
                 name: "Order");
 
             migrationBuilder.DropTable(
-                name: "AuditOperation");
+                name: "AuditedOperation");
         }
     }
 }

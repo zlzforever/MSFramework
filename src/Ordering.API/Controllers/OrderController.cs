@@ -13,7 +13,7 @@ namespace Ordering.API.Controllers
 {
 	[Route("api/v1.0/[controller]")]
 	[ApiController]
-	public class OrderController : ApiControllerBase
+	public class OrderController : ApiController
 	{
 		private readonly IOrderingQuery _orderingQuery;
 		private readonly IOrderingRepository _orderRepository;

@@ -1,5 +1,6 @@
 using System;
 using MSFramework.Ef;
+using MSFramework.Ef.Design;
 using Ordering.Infrastructure;
 
 namespace Ordering.API

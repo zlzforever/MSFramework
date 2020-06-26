@@ -16,8 +16,9 @@ namespace MSFramework.AspNetCore.Extensions
 			var functionPath = actionDescriptor.GetActionPath();
 			var parameters = controllerAction.Parameters.Select(x => $"{x.ParameterType.Name} {x.Name}")
 				.ExpandAndToString();
-			var name =
-				$"{controllerAction.MethodInfo.DeclaringType.FullName}.{controllerAction.MethodInfo.Name}({parameters})";
+			var typeName = controllerAction.MethodInfo.DeclaringType?.FullName;
+			var name =string.IsNullOrWhiteSpace(typeName)?
+				$"{controllerAction.MethodInfo.Name}({parameters})":$"{typeName}.{controllerAction.MethodInfo.Name}({parameters})";
 			return new MSFramework.Function.FunctionDefine(name, functionPath, null);
 		}
 
@@ -46,7 +47,8 @@ namespace MSFramework.AspNetCore.Extensions
 				var regex = new Regex("{\\w+}");
 				var template = controllerAction.AttributeRouteInfo.Template.ToLower();
 				template = regex.Replace(template, "{arg}");
-				return $"{methods.ExpandAndToString()} {template}".ToLower();;
+				return $"{methods.ExpandAndToString()} {template}".ToLower();
+				;
 			}
 		}
 

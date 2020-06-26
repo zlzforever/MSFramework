@@ -4,7 +4,7 @@ using System.Linq;
 using Microsoft.Extensions.Logging;
 using MSFramework.Reflection;
 
-namespace MSFramework.Ef
+namespace MSFramework.Ef.Infrastructure
 {
 	/// <summary>
 	/// 实体类配置类型查找器

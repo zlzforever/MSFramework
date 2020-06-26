@@ -3,30 +3,7 @@ using System.Linq;
 
 namespace MSFramework.Data
 {
-	public interface IPagedQueryResult
-	{
-		/// <summary>
-		/// 总计
-		/// </summary>
-		int Count { get; set; }
-
-		/// <summary>
-		/// 当前页数 
-		/// </summary>
-		int Page { get; set; }
-
-		/// <summary>
-		/// 每页数据量 
-		/// </summary>
-		int Limit { get; set; }
-
-		/// <summary>
-		/// 当前页结果
-		/// </summary>
-		IEnumerable<dynamic> GetEntities();
-	}
-
-	public class PagedQueryResult<TEntity> : IPagedQueryResult
+	public class PagedResult<TEntity>
 	{
 		/// <summary>
 		/// 总计

@@ -2,6 +2,7 @@ using System;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using MSFramework.Ef;
+using MSFramework.Ef.Repository;
 using Ordering.Domain.AggregateRoot;
 using Ordering.Domain.Repository;
 

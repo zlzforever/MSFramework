@@ -1,5 +1,4 @@
 using System;
-using System.Reflection;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -45,7 +44,7 @@ namespace MSFramework.Ef.MySql
 				var dbContextType = typeof(TDbContext);
 				var entryAssemblyName = dbContextType.Assembly.GetName().Name;
 
-				var store = EntityFrameworkOptionsStore.LoadFrom(configuration);
+				var store = EntityFrameworkOptionsCollection.LoadFrom(configuration);
 				var option = store.Get(dbContextType);
 
 				if (option.DbContextType != dbContextType)
@@ -58,10 +57,11 @@ namespace MSFramework.Ef.MySql
 					x.EnableSensitiveDataLogging();
 				}
 
-				if (option.LazyLoadingProxiesEnabled)
-				{
-					x.UseLazyLoadingProxies();
-				}
+				// todo:
+				// if (option.LazyLoadingProxiesEnabled)
+				// {
+				// 	x.UseLazyLoadingProxies();
+				// }
 
 				x.UseMySql(option.ConnectionString, options =>
 				{
@@ -70,14 +70,7 @@ namespace MSFramework.Ef.MySql
 				});
 			});
 
-			if ("ef" == Assembly.GetEntryAssembly()?.GetName().Name)
-			{
-				services.AddDbContext<TDbContext>(action);
-			}
-			else
-			{
-				services.AddDbContextPool<TDbContext>(action);
-			}
+			services.AddDbContext<TDbContext>(action);
 
 			return services;
 		}

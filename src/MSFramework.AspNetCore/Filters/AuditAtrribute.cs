@@ -1,11 +1,11 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Reflection;
 using System.Security.Claims;
 using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using MSFramework.Audit;
 using MSFramework.AspNetCore.Extensions;
 using MSFramework.Domain;
@@ -17,25 +17,32 @@ namespace MSFramework.AspNetCore.Filters
 	public class Audit : ActionFilterAttribute
 	{
 		private AuditedOperation _auditedOperation;
-		private IServiceProvider _serviceProvider;
+		private ILogger _logger;
 		private IAuditService _auditService;
 
 		public Audit()
 		{
-			Order = FilterOrders.AuditFilterOrder;
+			Order = FilterOrders.Audit;
 		}
 
 		public override void OnActionExecuting(ActionExecutingContext context)
 		{
-			_serviceProvider = context.HttpContext.RequestServices;
-			_auditService = _serviceProvider.GetRequiredService<IAuditService>();
-			var configuration = _serviceProvider.GetRequiredService<IConfiguration>();
+			_logger = context.HttpContext.RequestServices.GetRequiredService<ILogger<InvalidModelStateFilter>>();
+			_logger.LogDebug("Executing audit filter");
+
+			_auditService = context.HttpContext.RequestServices.GetRequiredService<IAuditService>();
+			if (_auditService == null)
+			{
+				throw new MSFrameworkException("AuditService is not registered");
+			}
+
+			var configuration = context.HttpContext.RequestServices.GetRequiredService<IConfiguration>();
 			var applicationName = configuration["ApplicationName"];
 			applicationName = string.IsNullOrWhiteSpace(applicationName)
 				? Assembly.GetEntryAssembly()?.FullName
 				: applicationName;
 			var path = context.ActionDescriptor.GetActionPath();
-			var ua = string.Join(";", context.HttpContext.Request.Headers["User-Agent"]);
+			var ua = context.HttpContext.Request.Headers["User-Agent"].ToString();
 			var ip = context.GetClientIp();
 			_auditedOperation = new AuditedOperation(applicationName, path, ip, ua);
 			if (context.HttpContext.User?.Identity != null && context.HttpContext.User.Identity.IsAuthenticated &&
@@ -43,11 +50,15 @@ namespace MSFramework.AspNetCore.Filters
 			{
 				_auditedOperation.SetCreationAudited(identity.GetUserId(), identity.GetUserName());
 			}
+			else
+			{
+				_auditedOperation.SetCreationAudited("Anonymous", "Anonymous");
+			}
 		}
 
-		public override void OnResultExecuted(ResultExecutedContext context)
+		public override void OnActionExecuted(ActionExecutedContext context)
 		{
-			var unitOfWorkManager = _serviceProvider.GetService<IUnitOfWorkManager>();
+			var unitOfWorkManager = context.HttpContext.RequestServices.GetService<IUnitOfWorkManager>();
 			if (unitOfWorkManager != null)
 			{
 				var entities = new List<AuditedEntity>();
@@ -61,6 +72,8 @@ namespace MSFramework.AspNetCore.Filters
 
 			_auditedOperation.End();
 			_auditService.Save(_auditedOperation);
+
+			_logger.LogDebug("Executed audit filter");
 		}
 	}
 }

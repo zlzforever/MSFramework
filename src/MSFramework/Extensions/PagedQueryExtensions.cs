@@ -18,10 +18,19 @@ namespace MSFramework.Extensions
 			Desc = desc;
 		}
 	}
-	
+
 	public static class PagedQueryExtensions
 	{
-		public static async Task<PagedQueryResult<TEntity>> PagedQueryAsync<TEntity, TOrderKey>(
+		public static async Task<PagedResult<TEntity>> PagedQueryAsync<TEntity>(
+			this IQueryable<TEntity> queryable,
+			int page, int limit,
+			Expression<Func<TEntity, bool>> where = null)
+			where TEntity : class
+		{
+			return await queryable.PagedQueryAsync<TEntity, object>(page, limit, where);
+		}
+
+		public static async Task<PagedResult<TEntity>> PagedQueryAsync<TEntity, TOrderKey>(
 			this IQueryable<TEntity> queryable,
 			int page, int limit,
 			Expression<Func<TEntity, bool>> where = null, OrderCondition<TEntity, TOrderKey> orderBy = null)
@@ -30,7 +39,7 @@ namespace MSFramework.Extensions
 			return await queryable.PagedQueryAsync<TEntity, TOrderKey, object>(page, limit, where, orderBy);
 		}
 
-		public static async Task<PagedQueryResult<TEntity>> PagedQueryAsync<TEntity, TOrderKey, TThenOrderKey>(
+		public static async Task<PagedResult<TEntity>> PagedQueryAsync<TEntity, TOrderKey, TThenOrderKey>(
 			this IQueryable<TEntity> queryable,
 			int page, int limit,
 			Expression<Func<TEntity, bool>> where = null, OrderCondition<TEntity, TOrderKey> orderBy = null,
@@ -41,7 +50,7 @@ namespace MSFramework.Extensions
 				orderBy, thenBy);
 		}
 
-		public static Task<PagedQueryResult<TEntity>> PagedQueryAsync<TEntity, TOrderKey, TThenOrderKey1,
+		public static Task<PagedResult<TEntity>> PagedQueryAsync<TEntity, TOrderKey, TThenOrderKey1,
 			TThenOrderKey2>(
 			this IQueryable<TEntity> queryable,
 			int page, int limit,
@@ -50,7 +59,7 @@ namespace MSFramework.Extensions
 			OrderCondition<TEntity, TThenOrderKey2> thenBy2 = null)
 			where TEntity : class
 		{
-			var result = new PagedQueryResult<TEntity>();
+			var result = new PagedResult<TEntity>();
 			page = page < 1 ? 1 : page;
 			limit = limit < 1 ? 1 : limit;
 			var entities = where == null ? queryable : queryable.Where(where);

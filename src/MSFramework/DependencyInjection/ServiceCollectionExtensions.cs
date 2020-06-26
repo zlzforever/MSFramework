@@ -67,7 +67,11 @@ namespace MSFramework.DependencyInjection
 						//有多个接口时，后边的接口注册使用第一个接口的实例，保证同个实现类的多个接口获得同一个实例
 						var firstInterfaceType = interfaceTypes[0];
 						services.Add(new ServiceDescriptor(interfaceType,
-							provider => provider.GetService(firstInterfaceType), lifetime));
+							provider =>
+							{
+								var service = provider.GetService(firstInterfaceType);
+								return service;
+							}, lifetime));
 					}
 				}
 			}

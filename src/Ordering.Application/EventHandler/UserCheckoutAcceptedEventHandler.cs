@@ -6,7 +6,7 @@ using Ordering.Application.Event;
 
 namespace Ordering.Application.EventHandler
 {
-	public class UserCheckoutAcceptedEventHandler : EventBus.IEventHandler<UserCheckoutAcceptedEvent>
+	public class UserCheckoutAcceptedEventHandler : IEventHandler<UserCheckoutAcceptedEvent>
 	{
 		private readonly ILogger _logger;
 		private readonly IEventDispatcher _mediator;

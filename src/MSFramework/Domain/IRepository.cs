@@ -16,7 +16,7 @@ namespace MSFramework.Domain
 	{
 	}
 
-	public interface IRepository<TEntity, in TKey>
+	public interface IRepository<TEntity, in TKey> : IRepository
 		where TEntity : IAggregateRoot
 		where TKey : IEquatable<TKey>
 	{

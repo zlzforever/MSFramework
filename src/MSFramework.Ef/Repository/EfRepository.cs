@@ -5,13 +5,13 @@ using Microsoft.EntityFrameworkCore;
 using MSFramework.Domain;
 using MSFramework.Domain.AggregateRoot;
 
-namespace MSFramework.Ef
+namespace MSFramework.Ef.Repository
 {
 	public class EfRepository<TEntity> : EfRepository<TEntity, Guid>
 		, IRepository<TEntity>
 		where TEntity : class, IAggregateRoot<Guid>
 	{
-		protected EfRepository(DbContextFactory dbContextFactory) : base(dbContextFactory)
+		public EfRepository(DbContextFactory dbContextFactory) : base(dbContextFactory)
 		{
 		}
 	}
@@ -22,7 +22,7 @@ namespace MSFramework.Ef
 	{
 		public IQueryable<TEntity> CurrentSet { get; private set; }
 
-		protected EfRepository(DbContextFactory dbContextFactory)
+		public EfRepository(DbContextFactory dbContextFactory)
 		{
 			DbContext = dbContextFactory.GetDbContext<TEntity>();
 			var isDeletionAuditedEntity = typeof(IDeletionAudited).IsAssignableFrom(typeof(TEntity));
@@ -55,12 +55,16 @@ namespace MSFramework.Ef
 
 		public virtual TEntity Update(TEntity entity)
 		{
-			return DbContext.Set<TEntity>().Update(entity).Entity;
+			var entry = DbContext.Entry(entity);
+			entry.State = EntityState.Modified;
+			return entry.Entity;
 		}
 
 		public virtual Task<TEntity> UpdateAsync(TEntity entity)
 		{
-			return Task.FromResult(Update(entity));
+			var entry = DbContext.Entry(entity);
+			entry.State = EntityState.Modified;
+			return Task.FromResult(entry.Entity);
 		}
 
 		public virtual TEntity Delete(TEntity entity)
@@ -81,9 +85,12 @@ namespace MSFramework.Ef
 			if (entity != null)
 			{
 				DbContext.Set<TEntity>().Remove(entity);
+				return entity;
 			}
-
-			return entity;
+			else
+			{
+				return null;
+			}
 		}
 
 		public virtual async Task<TEntity> DeleteAsync(TKey id)
@@ -92,9 +99,12 @@ namespace MSFramework.Ef
 			if (entity != null)
 			{
 				DbContext.Set<TEntity>().Remove(entity);
+				return entity;
 			}
-
-			return entity;
+			else
+			{
+				return null;
+			}
 		}
 	}
 }

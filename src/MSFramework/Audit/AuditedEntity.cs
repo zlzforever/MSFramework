@@ -7,11 +7,11 @@ namespace MSFramework.Audit
 {
 	public class AuditedEntity : EntityBase<Guid>
 	{
-		public AuditedEntity(string typeName, string entityId, OperationType operateType) : this()
+		public AuditedEntity(string typeName, string entityId, OperationType operationType) : this()
 		{
 			TypeName = typeName;
 			EntityId = entityId;
-			OperateType = operateType;
+			OperationType = operationType;
 		}
 
 		private AuditedEntity() : base(CombGuid.NewGuid())
@@ -32,7 +32,7 @@ namespace MSFramework.Audit
 		/// <summary>
 		/// 获取或设置 操作类型
 		/// </summary>
-		public OperationType OperateType { get; private set; }
+		public OperationType OperationType { get; private set; }
 
 		/// <summary>
 		/// 获取或设置 操作实体属性集合
@@ -49,7 +49,8 @@ namespace MSFramework.Audit
 
 		public override string ToString()
 		{
-			return $"[ENTITY: {GetType().Name}] Id = {Id}; {{ 'TypeName': {TypeName}, 'EntityId': {EntityId}, 'OperateType': {OperateType} }}";
+			return
+				$"[ENTITY: {GetType().Name}] Id = {Id}; {{ 'TypeName': {TypeName}, 'EntityId': {EntityId}, 'OperateType': {OperationType} }}";
 		}
 	}
 }

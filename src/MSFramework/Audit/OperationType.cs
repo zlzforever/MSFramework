@@ -8,9 +8,9 @@ namespace MSFramework.Audit
 	public class OperationType : Enumeration
 	{
 		public static OperationType Query = new OperationType(1, nameof(Query));
-		public static OperationType Add = new OperationType(1, nameof(Add));
-		public static OperationType Modify = new OperationType(1, nameof(Modify));
-		public static OperationType Delete = new OperationType(1, nameof(Delete));
+		public static OperationType Add = new OperationType(2, nameof(Add));
+		public static OperationType Modify = new OperationType(3, nameof(Modify));
+		public static OperationType Delete = new OperationType(4, nameof(Delete));
 
 		public OperationType(int id, string name) : base(id, name)
 		{

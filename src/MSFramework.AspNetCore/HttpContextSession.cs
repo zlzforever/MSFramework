@@ -1,16 +1,14 @@
 using System.Security.Claims;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Http;
 using ISession = MSFramework.Domain.ISession;
 
 namespace MSFramework.AspNetCore
 {
-	public class AspNetCoreSession : ISession
+	public class HttpContextSession : ISession
 	{
 		private readonly IHttpContextAccessor _accessor;
 
-		public AspNetCoreSession(IHttpContextAccessor accessor)
+		public HttpContextSession(IHttpContextAccessor accessor)
 		{
 			_accessor = accessor;
 		}

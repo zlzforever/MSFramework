@@ -4,34 +4,16 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using MSFramework.AspNetCore.Infrastructure;
 using MSFramework.Domain;
 
 namespace MSFramework.AspNetCore
 {
-	public abstract class ApiControllerBase : ControllerBase, IAsyncResultFilter, IActionFilter, IAsyncActionFilter
+	public abstract class ApiController : ControllerBase, IAsyncResultFilter, IActionFilter, IAsyncActionFilter
 	{
 		protected ISession Session { get; private set; }
 
 		protected ILogger Logger { get; private set; }
-
-		protected ApiControllerBase()
-		{
-			Session = HttpContext.RequestServices.GetService<ISession>();
-			Logger = HttpContext.RequestServices.GetRequiredService<ILoggerFactory>().CreateLogger(GetType());
-		}
-
-		protected IActionResult Error(string msg = "", int code = 20000)
-		{
-			HttpContext.Response.StatusCode = 400;
-			return new JsonResult(new Response
-			{
-				Code = code,
-				Msg = msg,
-				Success = false
-			});
-		}
-
+		
 		[NonAction]
 		public virtual Task OnResultExecutionAsync(ResultExecutingContext context, ResultExecutionDelegate next)
 		{
@@ -62,6 +44,9 @@ namespace MSFramework.AspNetCore
 			{
 				throw new ArgumentNullException(nameof(next));
 			}
+
+			Session = HttpContext.RequestServices.GetService<ISession>();
+			Logger = HttpContext.RequestServices.GetRequiredService<ILoggerFactory>().CreateLogger(GetType());
 
 			OnActionExecuting(context);
 
