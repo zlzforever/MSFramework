@@ -6,7 +6,7 @@ namespace MSFramework.AspNetCore.Filters
 	{
 		public static FilterCollection UseUnitOfWork(this FilterCollection filters)
 		{
-			filters.Add<UnitOfWork>(FilterOrders.UnitOfWork);
+			filters.Add<UnitOfWorkFilter>(FilterOrders.UnitOfWork);
 			return filters;
 		}
 
