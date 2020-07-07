@@ -21,6 +21,6 @@ namespace Template.API.ViewObject
 		/// 类型
 		/// </summary>
 		[Required]
-		public int Type { get; set; }
+		public string Type { get; set; }
 	}
 }

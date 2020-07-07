@@ -7,14 +7,14 @@ namespace Template.Domain.AggregateRoot
 		/// <summary>
 		/// 家居
 		/// </summary>
-		public static ProductType Home = new ProductType(1, nameof(Home));
+		public static ProductType Home = new ProductType(nameof(Home), nameof(Home));
 
 		/// <summary>
 		/// 美妆
 		/// </summary>
-		public static ProductType Beauty = new ProductType(2, nameof(Home));
+		public static ProductType Beauty = new ProductType(nameof(Beauty), nameof(Beauty));
 
-		public ProductType(int id, string name) : base(id, name)
+		public ProductType(string id, string name) : base(id, name)
 		{
 		}
 	}

@@ -7,7 +7,6 @@ using MSFramework.Domain;
 
 namespace MSFramework.AspNetCore.Filters
 {
-	[AttributeUsage(AttributeTargets.Class | AttributeTargets.Method)]
 	public class UnitOfWorkFilter : IActionFilter, IOrderedFilter
 	{
 		private readonly ILogger<UnitOfWorkFilter> _logger;
