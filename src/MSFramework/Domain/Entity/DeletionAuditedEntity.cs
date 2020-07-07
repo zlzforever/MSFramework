@@ -17,8 +17,6 @@ namespace MSFramework.Domain.Entity
 		/// <summary>
 		/// 是否已经删除
 		/// </summary>
-		[Required]
-		[Description("是否已经删除")]
 		public bool IsDeleted { get; private set; }
 
 		/// <summary>

@@ -48,7 +48,7 @@ namespace MSFramework.Reflection
 							}
 						}
 
-						var assemblyNames = new List<string>();
+						var assemblyNames = new HashSet<string>();
 						foreach (var assemblyName in totalAssemblyNames)
 						{
 							foreach (var pattern in AssemblyNamePatterns)
@@ -62,7 +62,17 @@ namespace MSFramework.Reflection
 						}
 
 						_assemblies = new List<Assembly>();
-						var dict = AppDomain.CurrentDomain.GetAssemblies().ToDictionary(x => x.GetName().Name, x => x);
+
+						var dict = new Dictionary<string, Assembly>();
+						foreach (var assembly in AppDomain.CurrentDomain.GetAssemblies())
+						{
+							var name = assembly.GetName().Name;
+							if (!string.IsNullOrWhiteSpace(name) && !dict.ContainsKey(name))
+							{
+								dict.Add(name, assembly);
+							}
+						}
+
 						foreach (var assemblyName in assemblyNames)
 						{
 							if (!dict.ContainsKey(assemblyName))
