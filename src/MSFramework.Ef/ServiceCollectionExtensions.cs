@@ -3,10 +3,8 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Logging;
-using MSFramework.Domain;
 using MSFramework.Ef.Infrastructure;
 using MSFramework.Ef.Initializer;
-using MSFramework.Ef.Repository;
 using MSFramework.Initializer;
 
 namespace MSFramework.Ef

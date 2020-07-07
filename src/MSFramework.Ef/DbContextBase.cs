@@ -198,12 +198,12 @@ namespace MSFramework.Ef
 			return domainEvents;
 		}
 
-		public IEnumerable<AuditedEntity> GetAuditEntities()
+		public IEnumerable<AuditEntity> GetAuditEntities()
 		{
-			var entities = new List<AuditedEntity>();
+			var entities = new List<AuditEntity>();
 			foreach (var entry in ChangeTracker.Entries())
 			{
-				AuditedEntity auditEntity = null;
+				AuditEntity auditEntity = null;
 				switch (entry.State)
 				{
 					case EntityState.Added:
@@ -260,13 +260,13 @@ namespace MSFramework.Ef
 			}
 		}
 
-		protected virtual AuditedEntity GetAuditEntity(EntityEntry entry, OperationType operationType)
+		protected virtual AuditEntity GetAuditEntity(EntityEntry entry, OperationType operationType)
 		{
 			var type = entry.Entity.GetType();
 			var typeName = type.FullName;
 
 			string entityId = null;
-			var properties = new List<AuditedProperty>();
+			var properties = new List<AuditProperty>();
 			foreach (var property in entry.CurrentValues.Properties)
 			{
 				if (property.IsConcurrencyToken)
@@ -312,19 +312,19 @@ namespace MSFramework.Ef
 					// 原值为空，新值不为空则记录
 					if (!string.IsNullOrWhiteSpace(newValue))
 					{
-						properties.Add(new AuditedProperty(propertyName, propertyType, originalValue, newValue));
+						properties.Add(new AuditProperty(propertyName, propertyType, originalValue, newValue));
 					}
 				}
 				else
 				{
 					if (!originalValue.Equals(newValue))
 					{
-						properties.Add(new AuditedProperty(propertyName, propertyType, originalValue, newValue));
+						properties.Add(new AuditProperty(propertyName, propertyType, originalValue, newValue));
 					}
 				}
 			}
 
-			var auditedEntity = new AuditedEntity(typeName, entityId, operationType);
+			var auditedEntity = new AuditEntity(typeName, entityId, operationType);
 			auditedEntity.AddProperties(properties);
 			return auditedEntity;
 		}

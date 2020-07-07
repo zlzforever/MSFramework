@@ -62,6 +62,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MSFramework.RabbitMQ", "src
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MSFramework.Migrator", "src\MSFramework.Migrator\MSFramework.Migrator.csproj", "{110C6F8A-DE2F-40C8-94BB-5D0A5F395177}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MSFramework.AspNetCore.Permission", "src\MSFramework.AspNetCore.Permission\MSFramework.AspNetCore.Permission.csproj", "{C970D0A4-F33C-407D-AC8C-D503C16EE1A6}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -128,6 +130,10 @@ Global
 		{110C6F8A-DE2F-40C8-94BB-5D0A5F395177}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{110C6F8A-DE2F-40C8-94BB-5D0A5F395177}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{110C6F8A-DE2F-40C8-94BB-5D0A5F395177}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C970D0A4-F33C-407D-AC8C-D503C16EE1A6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C970D0A4-F33C-407D-AC8C-D503C16EE1A6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C970D0A4-F33C-407D-AC8C-D503C16EE1A6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C970D0A4-F33C-407D-AC8C-D503C16EE1A6}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -153,6 +159,7 @@ Global
 		{0882E9B7-7BB6-4356-81F0-E7EA27702982} = {09937860-AC15-416E-B9E1-2BC7041E4A39}
 		{F12DD37C-9875-4703-807D-864BAA4A8304} = {AFD16F00-F810-4A3C-BA74-59BBFBC2469D}
 		{110C6F8A-DE2F-40C8-94BB-5D0A5F395177} = {AFD16F00-F810-4A3C-BA74-59BBFBC2469D}
+		{C970D0A4-F33C-407D-AC8C-D503C16EE1A6} = {AFD16F00-F810-4A3C-BA74-59BBFBC2469D}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {BE296FC5-5695-4FE5-9BAE-7168B9BACB47}

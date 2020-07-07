@@ -5,7 +5,7 @@ using MSFramework.Domain.AggregateRoot;
 
 namespace MSFramework.Audit
 {
-	public class AuditedOperation : CreationAuditedAggregateRoot<Guid>
+	public class AuditOperation : CreationAuditedAggregateRoot<Guid>
 	{
 		/// <summary>
 		/// 应用名称
@@ -30,18 +30,18 @@ namespace MSFramework.Audit
 		/// <summary>
 		/// 获取或设置 审计数据信息集合
 		/// </summary>
-		public virtual ICollection<AuditedEntity> Entities { get; private set; }
+		public virtual ICollection<AuditEntity> Entities { get; private set; }
 
-		public DateTimeOffset EndedTime { get; private set; }
+		public DateTimeOffset EndTime { get; private set; }
 
 		public int Elapsed { get; private set; }
 
-		private AuditedOperation() : base(CombGuid.NewGuid())
+		private AuditOperation() : base(CombGuid.NewGuid())
 		{
-			Entities = new List<AuditedEntity>();
+			Entities = new List<AuditEntity>();
 		}
 
-		public AuditedOperation(string applicationName, string path, string ip, string userAgent) : this()
+		public AuditOperation(string applicationName, string path, string ip, string userAgent) : this()
 		{
 			ApplicationName = applicationName;
 			Path = path;
@@ -49,7 +49,7 @@ namespace MSFramework.Audit
 			UserAgent = userAgent;
 		}
 
-		public void AddEntities(IEnumerable<AuditedEntity> entities)
+		public void AddEntities(IEnumerable<AuditEntity> entities)
 		{
 			foreach (var entity in entities)
 			{
@@ -59,20 +59,20 @@ namespace MSFramework.Audit
 
 		public void End()
 		{
-			EndedTime = DateTimeOffset.Now;
+			EndTime = DateTimeOffset.Now;
 			if (CreationTime == default)
 			{
 				Elapsed = 0;
 			}
 			else
 			{
-				Elapsed = (int) (EndedTime - CreationTime).TotalMilliseconds;
+				Elapsed = (int) (EndTime - CreationTime).TotalMilliseconds;
 			}
 		}
 		
 		public override string ToString()
 		{
-			return $"[ENTITY: {GetType().Name}] Id = {Id}; {{ 'ApplicationName': {ApplicationName}, 'Path': {Path}, 'Ip': {Ip}, 'UserAgent': {UserAgent}, 'EndedTime': {EndedTime:yyyy-MM-dd HH:mm:ss}, 'Elapsed': {Elapsed} }}";
+			return $"[ENTITY: {GetType().Name}] Id = {Id}; {{ 'ApplicationName': {ApplicationName}, 'Path': {Path}, 'Ip': {Ip}, 'UserAgent': {UserAgent}, 'EndedTime': {EndTime:yyyy-MM-dd HH:mm:ss}, 'Elapsed': {Elapsed} }}";
 		}
 	}
 }

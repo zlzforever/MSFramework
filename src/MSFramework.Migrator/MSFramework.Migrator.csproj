@@ -3,9 +3,11 @@
     <PropertyGroup>
         <PackageId>MSFramework.Migrator</PackageId>
     </PropertyGroup>
-    <Import Project="../../package.props" />
+    <Import Project="../../package.props"/>
     <ItemGroup>
-      <ProjectReference Include="..\MSFramework\MSFramework.csproj" />
+        <ProjectReference Include="..\MSFramework\MSFramework.csproj"/>
     </ItemGroup>
-
+    <ItemGroup>
+        <PackageReference Include="Dapper" Version="2.0.35"/>
+    </ItemGroup>
 </Project>

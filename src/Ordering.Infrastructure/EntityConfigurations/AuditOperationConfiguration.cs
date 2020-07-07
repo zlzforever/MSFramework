@@ -5,9 +5,9 @@ using MSFramework.Ef;
 namespace Ordering.Infrastructure.EntityConfigurations
 {
 	public class AuditOperationConfiguration
-		: EntityTypeConfigurationBase<AuditedOperation, OrderingContext>
+		: EntityTypeConfigurationBase<AuditOperation, OrderingContext>
 	{
-		public override void Configure(EntityTypeBuilder<AuditedOperation> builder)
+		public override void Configure(EntityTypeBuilder<AuditOperation> builder)
 		{
 			base.Configure(builder);
 

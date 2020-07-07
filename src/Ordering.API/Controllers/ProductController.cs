@@ -43,10 +43,10 @@ namespace Ordering.API.Controllers
 	public class ProductController : ApiControllerBase
 	{
 		private readonly IProductRepository _productRepository;
-		private readonly IRepository<AuditedOperation> _repository;
+		private readonly IRepository<AuditOperation> _repository;
 		private readonly IObjectMapper _mapper;
 
-		public ProductController(IProductRepository productRepository, IRepository<AuditedOperation> repository,
+		public ProductController(IProductRepository productRepository, IRepository<AuditOperation> repository,
 			IObjectMapper mapper)
 		{
 			_productRepository = productRepository;
@@ -55,10 +55,10 @@ namespace Ordering.API.Controllers
 		}
 
 		[HttpGet("getAudits")]
-		public List<AuditedOperation> GetAudits()
+		public List<AuditOperation> GetAudits()
 		{
 			Logger.LogInformation($"{Session.UserId}");
-			return ((EfRepository<AuditedOperation>) _repository).CurrentSet.Include(x => x.Entities).ToList();
+			return ((EfRepository<AuditOperation>) _repository).CurrentSet.Include(x => x.Entities).ToList();
 		}
 
 		[HttpGet("getBaseValueType")]

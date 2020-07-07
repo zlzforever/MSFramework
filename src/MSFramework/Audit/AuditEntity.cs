@@ -5,24 +5,24 @@ using MSFramework.Domain.Entity;
 
 namespace MSFramework.Audit
 {
-	public class AuditedEntity : EntityBase<Guid>
+	public class AuditEntity : EntityBase<Guid>
 	{
-		public AuditedEntity(string typeName, string entityId, OperationType operationType) : this()
+		public AuditEntity(string typeName, string entityId, OperationType operationType) : this()
 		{
-			TypeName = typeName;
+			Type = typeName;
 			EntityId = entityId;
 			OperationType = operationType;
 		}
 
-		private AuditedEntity() : base(CombGuid.NewGuid())
+		private AuditEntity() : base(CombGuid.NewGuid())
 		{
-			Properties = new List<AuditedProperty>();
+			Properties = new List<AuditProperty>();
 		}
 
 		/// <summary>
 		/// 获取或设置 类型名称
 		/// </summary>
-		public string TypeName { get; private set; }
+		public string Type { get; private set; }
 
 		/// <summary>
 		/// 获取或设置 数据编号
@@ -37,9 +37,9 @@ namespace MSFramework.Audit
 		/// <summary>
 		/// 获取或设置 操作实体属性集合
 		/// </summary>
-		public virtual ICollection<AuditedProperty> Properties { get; private set; }
+		public virtual ICollection<AuditProperty> Properties { get; private set; }
 
-		public void AddProperties(IEnumerable<AuditedProperty> properties)
+		public void AddProperties(IEnumerable<AuditProperty> properties)
 		{
 			foreach (var entity in properties)
 			{
@@ -50,7 +50,7 @@ namespace MSFramework.Audit
 		public override string ToString()
 		{
 			return
-				$"[ENTITY: {GetType().Name}] Id = {Id}; {{ 'TypeName': {TypeName}, 'EntityId': {EntityId}, 'OperateType': {OperationType} }}";
+				$"[ENTITY: {GetType().Name}] Id = {Id}; {{ 'TypeName': {Type}, 'EntityId': {EntityId}, 'OperateType': {OperationType} }}";
 		}
 	}
 }

@@ -5,16 +5,16 @@ using MSFramework.Ef.Extensions;
 
 namespace Ordering.Infrastructure.EntityConfigurations
 {
-	public class AuditEntityConfiguration : EntityTypeConfigurationBase<AuditedEntity, OrderingContext>
+	public class AuditEntityConfiguration : EntityTypeConfigurationBase<AuditEntity, OrderingContext>
 	{
-		public override void Configure(EntityTypeBuilder<AuditedEntity> builder)
+		public override void Configure(EntityTypeBuilder<AuditEntity> builder)
 		{
 			base.Configure(builder);
 
 			builder.HasIndex(m => m.EntityId);
 
 			builder.Property(x => x.EntityId).HasMaxLength(256);
-			builder.Property(x => x.TypeName).HasMaxLength(256);
+			builder.Property(x => x.Type).HasMaxLength(256);
 
 			builder.Property(e => e.OperationType).IsEnumeration();
 		}

@@ -1,6 +1,4 @@
 using System;
-using System.ComponentModel;
-using System.ComponentModel.DataAnnotations;
 
 namespace MSFramework.Domain.AggregateRoot
 {
@@ -17,7 +15,7 @@ namespace MSFramework.Domain.AggregateRoot
 		/// <summary>
 		/// 是否已经删除
 		/// </summary>
-		public bool IsDeleted { get; private set; }
+		public bool Deleted { get; private set; }
 
 		/// <summary>
 		/// Which user deleted this entity?
@@ -37,9 +35,9 @@ namespace MSFramework.Domain.AggregateRoot
 		public void Delete(string userId, string userName, DateTimeOffset deletionTime = default)
 		{
 			// 删除只能一次操作，因此如果已经有值，不能再做设置
-			if (!IsDeleted)
+			if (!Deleted)
 			{
-				IsDeleted = true;
+				Deleted = true;
 
 				if (DeletionTime == default)
 				{

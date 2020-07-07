@@ -27,7 +27,7 @@ namespace MSFramework.Ef.Repository
 			DbContext = dbContextFactory.GetDbContext<TEntity>();
 			var isDeletionAuditedEntity = typeof(IDeletionAudited).IsAssignableFrom(typeof(TEntity));
 			CurrentSet = isDeletionAuditedEntity
-				? DbContext.Set<TEntity>().Where(x => !((IDeletionAudited) x).IsDeleted)
+				? DbContext.Set<TEntity>().Where(x => !((IDeletionAudited) x).Deleted)
 				: DbContext.Set<TEntity>();
 		}
 

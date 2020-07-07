@@ -9,6 +9,6 @@ namespace MSFramework.Audit
 		/// </summary>
 		/// <param name="auditOperation">操作审计数据</param>
 		/// <returns></returns>
-		void Save(AuditedOperation auditOperation);
+		void Save(AuditOperation auditOperation);
 	}
 }

@@ -16,7 +16,7 @@ namespace MSFramework.AspNetCore.Filters
 	[AttributeUsage(AttributeTargets.Class | AttributeTargets.Method)]
 	public class Audit : ActionFilterAttribute
 	{
-		private AuditedOperation _auditedOperation;
+		private AuditOperation _auditedOperation;
 		private ILogger _logger;
 		private IAuditService _auditService;
 
@@ -44,7 +44,7 @@ namespace MSFramework.AspNetCore.Filters
 			var path = context.ActionDescriptor.GetActionPath();
 			var ua = context.HttpContext.Request.Headers["User-Agent"].ToString();
 			var ip = context.GetClientIp();
-			_auditedOperation = new AuditedOperation(applicationName, path, ip, ua);
+			_auditedOperation = new AuditOperation(applicationName, path, ip, ua);
 			if (context.HttpContext.User?.Identity != null && context.HttpContext.User.Identity.IsAuthenticated &&
 			    context.HttpContext.User.Identity is ClaimsIdentity identity)
 			{
@@ -61,7 +61,7 @@ namespace MSFramework.AspNetCore.Filters
 			var unitOfWorkManager = context.HttpContext.RequestServices.GetService<IUnitOfWorkManager>();
 			if (unitOfWorkManager != null)
 			{
-				var entities = new List<AuditedEntity>();
+				var entities = new List<AuditEntity>();
 				foreach (var unitOfWork in unitOfWorkManager.GetUnitOfWorks())
 				{
 					entities.AddRange(unitOfWork.GetAuditEntities());

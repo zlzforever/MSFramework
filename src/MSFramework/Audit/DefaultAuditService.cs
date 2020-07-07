@@ -1,7 +1,4 @@
-using System;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using MSFramework.Domain;
 
 namespace MSFramework.Audit
 {
@@ -17,7 +14,7 @@ namespace MSFramework.Audit
 			_repository = repository;
 		}
 
-		public void Save(AuditedOperation auditOperation)
+		public void Save(AuditOperation auditOperation)
 		{
 			if (_repository == null)
 			{

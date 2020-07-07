@@ -7,17 +7,17 @@ namespace MSFramework.Audit
 	/// <summary>
 	/// 实体属性审计信息
 	/// </summary>
-	public class AuditedProperty : EntityBase<Guid>
+	public class AuditProperty : EntityBase<Guid>
 	{
-		private AuditedProperty() : base(CombGuid.NewGuid())
+		private AuditProperty() : base(CombGuid.NewGuid())
 		{
 		}
 
-		public AuditedProperty(string propertyName, string propertyType, string originalValue, string newValue)
+		public AuditProperty(string propertyName, string propertyType, string originalValue, string newValue)
 			: this()
 		{
-			PropertyName = propertyName;
-			PropertyType = propertyType;
+			Name = propertyName;
+			Type = propertyType;
 			OriginalValue = originalValue;
 			NewValue = newValue;
 		}
@@ -25,12 +25,12 @@ namespace MSFramework.Audit
 		/// <summary>
 		/// 获取或设置 字段
 		/// </summary>
-		public virtual string PropertyName { get; private set; }
+		public virtual string Name { get; private set; }
 
 		/// <summary>
 		/// 获取或设置 数据类型
 		/// </summary>
-		public virtual string PropertyType { get; private set; }
+		public virtual string Type { get; private set; }
 
 		/// <summary>
 		/// 获取或设置 旧值
@@ -44,7 +44,7 @@ namespace MSFramework.Audit
 		
 		public override string ToString()
 		{
-			return $"[ENTITY: {GetType().Name}] Id = {Id}; {{ 'PropertyName': {PropertyName}, 'PropertyType': {PropertyType}, 'OriginalValue': {OriginalValue}, 'NewValue': {NewValue} }}";
+			return $"[ENTITY: {GetType().Name}] Id = {Id}; {{ 'PropertyName': {Name}, 'PropertyType': {Type}, 'OriginalValue': {OriginalValue}, 'NewValue': {NewValue} }}";
 		}
 	}
 }

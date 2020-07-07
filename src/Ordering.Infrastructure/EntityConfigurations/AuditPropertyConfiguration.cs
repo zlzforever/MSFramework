@@ -5,14 +5,14 @@ using MSFramework.Ef;
 namespace Ordering.Infrastructure.EntityConfigurations
 {
 	public class AuditPropertyConfiguration
-		: EntityTypeConfigurationBase<AuditedProperty, OrderingContext>
+		: EntityTypeConfigurationBase<AuditProperty, OrderingContext>
 	{
-		public override void Configure(EntityTypeBuilder<AuditedProperty> builder)
+		public override void Configure(EntityTypeBuilder<AuditProperty> builder)
 		{
 			base.Configure(builder);
 
-			builder.Property(x => x.PropertyName).HasMaxLength(256);
-			builder.Property(x => x.PropertyType).HasMaxLength(256);
+			builder.Property(x => x.Name).HasMaxLength(256);
+			builder.Property(x => x.Type).HasMaxLength(256);
 		}
 	}
 }
