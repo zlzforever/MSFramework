@@ -19,6 +19,7 @@ namespace MSFramework.AspNetCore.Filters
 		private AuditOperation _auditedOperation;
 		private ILogger _logger;
 		private IAuditService _auditService;
+		private IUnitOfWorkManager _auditUnitOfWorkManager;
 
 		public Audit()
 		{
@@ -27,16 +28,20 @@ namespace MSFramework.AspNetCore.Filters
 
 		public override void OnActionExecuting(ActionExecutingContext context)
 		{
-			_logger = context.HttpContext.RequestServices.GetRequiredService<ILogger<InvalidModelStateFilter>>();
+			var scope = context.HttpContext.RequestServices.CreateScope();
+
+			_logger = scope.ServiceProvider.GetRequiredService<ILogger<InvalidModelStateFilter>>();
 			_logger.LogDebug("Executing audit filter");
 
-			_auditService = context.HttpContext.RequestServices.GetRequiredService<IAuditService>();
+			_auditService = scope.ServiceProvider.GetRequiredService<IAuditService>();
 			if (_auditService == null)
 			{
 				throw new MSFrameworkException("AuditService is not registered");
 			}
 
-			var configuration = context.HttpContext.RequestServices.GetRequiredService<IConfiguration>();
+			_auditUnitOfWorkManager = scope.ServiceProvider.GetService<IUnitOfWorkManager>();
+
+			var configuration = scope.ServiceProvider.GetRequiredService<IConfiguration>();
 			var applicationName = configuration["ApplicationName"];
 			applicationName = string.IsNullOrWhiteSpace(applicationName)
 				? Assembly.GetEntryAssembly()?.FullName
@@ -58,11 +63,11 @@ namespace MSFramework.AspNetCore.Filters
 
 		public override void OnActionExecuted(ActionExecutedContext context)
 		{
-			var unitOfWorkManager = context.HttpContext.RequestServices.GetService<IUnitOfWorkManager>();
-			if (unitOfWorkManager != null)
+			var currentUnitOfWorkManager = context.HttpContext.RequestServices.GetService<IUnitOfWorkManager>();
+			if (currentUnitOfWorkManager != null)
 			{
 				var entities = new List<AuditEntity>();
-				foreach (var unitOfWork in unitOfWorkManager.GetUnitOfWorks())
+				foreach (var unitOfWork in currentUnitOfWorkManager.GetUnitOfWorks())
 				{
 					entities.AddRange(unitOfWork.GetAuditEntities());
 				}
@@ -71,7 +76,9 @@ namespace MSFramework.AspNetCore.Filters
 			}
 
 			_auditedOperation.End();
+
 			_auditService.Save(_auditedOperation);
+			_auditUnitOfWorkManager.Commit();
 
 			_logger.LogDebug("Executed audit filter");
 		}

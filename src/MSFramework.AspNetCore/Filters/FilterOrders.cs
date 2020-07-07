@@ -7,7 +7,7 @@ namespace MSFramework.AspNetCore.Filters
 	{
 		public const int FunctionFilter = 0;
 		public const int InvalidModelStateFilter = 1000;
-		public const int UnitOfWork = 2000;
-		public const int Audit = 3000;
+		public const int Audit = 2000;
+		public const int UnitOfWork = 3000;
 	}
 }

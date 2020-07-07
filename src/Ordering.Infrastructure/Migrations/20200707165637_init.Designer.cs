@@ -9,7 +9,7 @@ using Ordering.Infrastructure;
 namespace Ordering.Infrastructure.Migrations
 {
     [DbContext(typeof(OrderingContext))]
-    [Migration("20200626173232_init")]
+    [Migration("20200707165637_init")]
     partial class init
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -19,145 +19,188 @@ namespace Ordering.Infrastructure.Migrations
                 .HasAnnotation("ProductVersion", "3.1.5")
                 .HasAnnotation("Relational:MaxIdentifierLength", 64);
 
-            modelBuilder.Entity("MSFramework.Audit.AuditedEntity", b =>
+            modelBuilder.Entity("MSFramework.Audit.AuditEntity", b =>
                 {
                     b.Property<Guid>("Id")
-                        .HasColumnType("char(36)");
-
-                    b.Property<Guid?>("AuditedOperationId")
+                        .HasColumnName("id")
                         .HasColumnType("char(36)");
 
                     b.Property<string>("EntityId")
-                        .HasColumnType("varchar(256) CHARACTER SET utf8mb4")
-                        .HasMaxLength(256);
+                        .HasColumnName("entity_id")
+                        .HasColumnType("varchar(255) CHARACTER SET utf8mb4")
+                        .HasMaxLength(255);
 
-                    b.Property<int?>("OperationType")
-                        .HasColumnType("int");
+                    b.Property<string>("OperationType")
+                        .HasColumnName("operation_type")
+                        .HasColumnType("varchar(255) CHARACTER SET utf8mb4")
+                        .HasMaxLength(255);
 
-                    b.Property<string>("TypeName")
-                        .HasColumnType("varchar(256) CHARACTER SET utf8mb4")
-                        .HasMaxLength(256);
+                    b.Property<string>("Type")
+                        .HasColumnName("type_name")
+                        .HasColumnType("varchar(255) CHARACTER SET utf8mb4")
+                        .HasMaxLength(255);
+
+                    b.Property<Guid?>("audit_operation_id")
+                        .HasColumnType("char(36)");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("AuditedOperationId");
-
                     b.HasIndex("EntityId");
 
-                    b.ToTable("AuditedEntity");
+                    b.HasIndex("audit_operation_id");
+
+                    b.ToTable("audit_entity");
                 });
 
-            modelBuilder.Entity("MSFramework.Audit.AuditedOperation", b =>
+            modelBuilder.Entity("MSFramework.Audit.AuditOperation", b =>
                 {
                     b.Property<Guid>("Id")
+                        .HasColumnName("id")
                         .HasColumnType("char(36)");
 
                     b.Property<string>("ApplicationName")
-                        .HasColumnType("varchar(256) CHARACTER SET utf8mb4")
-                        .HasMaxLength(256);
+                        .HasColumnName("application_name")
+                        .HasColumnType("varchar(255) CHARACTER SET utf8mb4")
+                        .HasMaxLength(255);
 
                     b.Property<DateTimeOffset>("CreationTime")
+                        .HasColumnName("creation_time")
                         .HasColumnType("datetime(6)");
 
                     b.Property<string>("CreationUserId")
+                        .HasColumnName("creation_user_id")
                         .HasColumnType("varchar(256) CHARACTER SET utf8mb4")
                         .HasMaxLength(256);
 
                     b.Property<string>("CreationUserName")
+                        .HasColumnName("creation_user_name")
                         .HasColumnType("varchar(256) CHARACTER SET utf8mb4")
                         .HasMaxLength(256);
 
                     b.Property<int>("Elapsed")
+                        .HasColumnName("elapsed")
                         .HasColumnType("int");
 
-                    b.Property<DateTimeOffset>("EndedTime")
+                    b.Property<DateTimeOffset>("EndTime")
+                        .HasColumnName("end_time")
                         .HasColumnType("datetime(6)");
 
                     b.Property<string>("Ip")
-                        .HasColumnType("varchar(256) CHARACTER SET utf8mb4")
-                        .HasMaxLength(256);
+                        .HasColumnName("ip")
+                        .HasColumnType("varchar(255) CHARACTER SET utf8mb4")
+                        .HasMaxLength(255);
 
                     b.Property<string>("Path")
-                        .HasColumnType("varchar(256) CHARACTER SET utf8mb4")
-                        .HasMaxLength(256);
+                        .HasColumnName("path")
+                        .HasColumnType("varchar(255) CHARACTER SET utf8mb4")
+                        .HasMaxLength(255);
 
                     b.Property<string>("UserAgent")
-                        .HasColumnType("varchar(256) CHARACTER SET utf8mb4")
-                        .HasMaxLength(256);
+                        .HasColumnName("user_agent")
+                        .HasColumnType("varchar(500) CHARACTER SET utf8mb4")
+                        .HasMaxLength(500);
 
                     b.HasKey("Id");
 
-                    b.ToTable("AuditedOperation");
+                    b.HasIndex("CreationTime");
+
+                    b.HasIndex("CreationUserId");
+
+                    b.HasIndex("EndTime");
+
+                    b.ToTable("audit_operation");
                 });
 
-            modelBuilder.Entity("MSFramework.Audit.AuditedProperty", b =>
+            modelBuilder.Entity("MSFramework.Audit.AuditProperty", b =>
                 {
                     b.Property<Guid>("Id")
+                        .HasColumnName("id")
                         .HasColumnType("char(36)");
 
-                    b.Property<Guid?>("AuditedEntityId")
-                        .HasColumnType("char(36)");
+                    b.Property<string>("Name")
+                        .HasColumnName("name")
+                        .HasColumnType("varchar(255) CHARACTER SET utf8mb4")
+                        .HasMaxLength(255);
 
                     b.Property<string>("NewValue")
+                        .HasColumnName("new_value")
                         .HasColumnType("longtext CHARACTER SET utf8mb4");
 
                     b.Property<string>("OriginalValue")
+                        .HasColumnName("original_value")
                         .HasColumnType("longtext CHARACTER SET utf8mb4");
 
-                    b.Property<string>("PropertyName")
-                        .HasColumnType("varchar(256) CHARACTER SET utf8mb4")
-                        .HasMaxLength(256);
+                    b.Property<string>("Type")
+                        .HasColumnName("type")
+                        .HasColumnType("varchar(255) CHARACTER SET utf8mb4")
+                        .HasMaxLength(255);
 
-                    b.Property<string>("PropertyType")
-                        .HasColumnType("varchar(256) CHARACTER SET utf8mb4")
-                        .HasMaxLength(256);
+                    b.Property<Guid?>("audit_entity_id")
+                        .HasColumnType("char(36)");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("AuditedEntityId");
+                    b.HasIndex("audit_entity_id");
 
-                    b.ToTable("AuditedProperty");
+                    b.ToTable("audit_property");
                 });
 
             modelBuilder.Entity("MSFramework.Function.FunctionDefine", b =>
                 {
                     b.Property<Guid>("Id")
+                        .HasColumnName("id")
                         .HasColumnType("char(36)");
 
                     b.Property<string>("Code")
-                        .HasColumnType("varchar(255) CHARACTER SET utf8mb4");
+                        .HasColumnName("code")
+                        .HasColumnType("varchar(255) CHARACTER SET utf8mb4")
+                        .HasMaxLength(255);
 
                     b.Property<DateTimeOffset>("CreationTime")
+                        .HasColumnName("creation_time")
                         .HasColumnType("datetime(6)");
 
                     b.Property<string>("CreationUserId")
-                        .HasColumnType("longtext CHARACTER SET utf8mb4");
+                        .HasColumnName("creation_user_id")
+                        .HasColumnType("varchar(256) CHARACTER SET utf8mb4")
+                        .HasMaxLength(256);
 
                     b.Property<string>("CreationUserName")
-                        .HasColumnType("longtext CHARACTER SET utf8mb4");
+                        .HasColumnName("creation_user_name")
+                        .HasColumnType("varchar(256) CHARACTER SET utf8mb4")
+                        .HasMaxLength(256);
 
                     b.Property<string>("Description")
-                        .HasColumnType("longtext CHARACTER SET utf8mb4");
+                        .HasColumnName("description")
+                        .HasColumnType("varchar(2000) CHARACTER SET utf8mb4")
+                        .HasMaxLength(2000);
 
                     b.Property<bool>("Enabled")
+                        .HasColumnName("enabled")
                         .HasColumnType("tinyint(1)");
 
                     b.Property<bool>("Expired")
+                        .HasColumnName("expired")
                         .HasColumnType("tinyint(1)");
 
                     b.Property<DateTimeOffset?>("LastModificationTime")
+                        .HasColumnName("last_modification_time")
                         .HasColumnType("datetime(6)");
 
                     b.Property<string>("LastModificationUserId")
-                        .HasColumnType("varchar(255) CHARACTER SET utf8mb4")
-                        .HasMaxLength(255);
+                        .HasColumnName("last_modification_user_id")
+                        .HasColumnType("varchar(256) CHARACTER SET utf8mb4")
+                        .HasMaxLength(256);
 
                     b.Property<string>("LastModificationUserName")
-                        .HasColumnType("varchar(255) CHARACTER SET utf8mb4")
-                        .HasMaxLength(255);
+                        .HasColumnName("last_modification_user_name")
+                        .HasColumnType("varchar(256) CHARACTER SET utf8mb4")
+                        .HasMaxLength(256);
 
                     b.Property<string>("Name")
-                        .HasColumnType("varchar(255) CHARACTER SET utf8mb4");
+                        .HasColumnName("name")
+                        .HasColumnType("varchar(255) CHARACTER SET utf8mb4")
+                        .HasMaxLength(255);
 
                     b.HasKey("Id");
 
@@ -166,7 +209,7 @@ namespace Ordering.Infrastructure.Migrations
 
                     b.HasIndex("Name");
 
-                    b.ToTable("FunctionDefine");
+                    b.ToTable("function");
                 });
 
             modelBuilder.Entity("Ordering.Domain.AggregateRoot.Order", b =>
@@ -246,18 +289,18 @@ namespace Ordering.Infrastructure.Migrations
                     b.ToTable("Product");
                 });
 
-            modelBuilder.Entity("MSFramework.Audit.AuditedEntity", b =>
+            modelBuilder.Entity("MSFramework.Audit.AuditEntity", b =>
                 {
-                    b.HasOne("MSFramework.Audit.AuditedOperation", null)
+                    b.HasOne("MSFramework.Audit.AuditOperation", null)
                         .WithMany("Entities")
-                        .HasForeignKey("AuditedOperationId");
+                        .HasForeignKey("audit_operation_id");
                 });
 
-            modelBuilder.Entity("MSFramework.Audit.AuditedProperty", b =>
+            modelBuilder.Entity("MSFramework.Audit.AuditProperty", b =>
                 {
-                    b.HasOne("MSFramework.Audit.AuditedEntity", null)
+                    b.HasOne("MSFramework.Audit.AuditEntity", null)
                         .WithMany("Properties")
-                        .HasForeignKey("AuditedEntityId");
+                        .HasForeignKey("audit_entity_id");
                 });
 
             modelBuilder.Entity("Ordering.Domain.AggregateRoot.Order", b =>
