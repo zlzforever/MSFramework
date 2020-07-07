@@ -10,12 +10,12 @@ namespace MSFramework.AspNetCore.Filters
 	[AttributeUsage(AttributeTargets.Class | AttributeTargets.Method)]
 	public class UnitOfWorkFilter : IActionFilter, IOrderedFilter
 	{
-		private ILogger _logger;
-		private static Dictionary<string, object> _methodDict;
+		private readonly ILogger<UnitOfWorkFilter> _logger;
+		private static readonly Dictionary<string, object> MethodDict;
 
 		static UnitOfWorkFilter()
 		{
-			_methodDict = new Dictionary<string, object>
+			MethodDict = new Dictionary<string, object>
 			{
 				{"POST", null},
 				{"DELETE", null},
@@ -24,16 +24,19 @@ namespace MSFramework.AspNetCore.Filters
 			};
 		}
 
+		public UnitOfWorkFilter(ILogger<UnitOfWorkFilter> logger)
+		{
+			_logger = logger;
+		}
+
 		public void OnActionExecuting(ActionExecutingContext context)
 		{
-			_logger = context.HttpContext.RequestServices.GetRequiredService<ILogger<InvalidModelStateFilter>>();
 			_logger.LogDebug("Executing unit of work filter");
 		}
 
 		public void OnActionExecuted(ActionExecutedContext context)
 		{
-			// FunctionFilter 必须在 uow 之后
-			if (_methodDict.ContainsKey(context.HttpContext.Request.Method))
+			if (MethodDict.ContainsKey(context.HttpContext.Request.Method))
 			{
 				var uowManager =
 					context.HttpContext.RequestServices.GetService<IUnitOfWorkManager>();

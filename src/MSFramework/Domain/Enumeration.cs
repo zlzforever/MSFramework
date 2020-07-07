@@ -9,9 +9,9 @@ namespace MSFramework.Domain
 	{
 		public string Name { get; }
 
-		public int Id { get; }
+		public string Id { get; }
 
-		protected Enumeration(int id, string name)
+		protected Enumeration(string id, string name)
 		{
 			Id = id;
 			Name = name;
@@ -40,16 +40,10 @@ namespace MSFramework.Domain
 		}
 
 		public override int GetHashCode() => Id.GetHashCode();
-
-		public static int AbsoluteDifference(Enumeration firstValue, Enumeration secondValue)
+		
+		public static T FromValue<T>(string value) where T : Enumeration
 		{
-			var absoluteDifference = Math.Abs(firstValue.Id - secondValue.Id);
-			return absoluteDifference;
-		}
-
-		public static T FromValue<T>(int value) where T : Enumeration
-		{
-			var matchingItem = Parse<T, int>(value, "value", item => item.Id == value);
+			var matchingItem = Parse<T, string>(value, "value", item => item.Id == value);
 			return matchingItem;
 		}
 
@@ -69,6 +63,6 @@ namespace MSFramework.Domain
 			return matchingItem;
 		}
 
-		public int CompareTo(object other) => Id.CompareTo(((Enumeration) other).Id);
+		public int CompareTo(object other) => String.Compare(Id, ((Enumeration) other).Id, StringComparison.Ordinal);
 	}
 }
