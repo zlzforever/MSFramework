@@ -48,7 +48,7 @@ namespace MSFramework.AspNetCore.Filters
 				: applicationName;
 			var path = context.ActionDescriptor.GetActionPath();
 			var ua = context.HttpContext.Request.Headers["User-Agent"].ToString();
-			var ip = context.GetClientIp();
+			var ip = context.GetRemoteIpAddress();
 			_auditedOperation = new AuditOperation(applicationName, path, ip, ua);
 			if (context.HttpContext.User?.Identity != null && context.HttpContext.User.Identity.IsAuthenticated &&
 			    context.HttpContext.User.Identity is ClaimsIdentity identity)
