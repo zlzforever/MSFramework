@@ -1,7 +1,7 @@
 using System;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
-using MSFramework.Data;
+using MSFramework.Common;
 using MSFramework.Extensions;
 using MSFramework.Mapper;
 using Template.Application.DTO;
@@ -50,7 +50,7 @@ namespace Template.Application.Query
 					new OrderCondition<Product, DateTimeOffset?>(x => x.LastModificationTime, true));
 			}
 
-			return _mapper.MapPagedResult<ProductOut>(result);
+			return _mapper.Map<PagedResult<ProductOut>>(result);
 		}
 	}
 }

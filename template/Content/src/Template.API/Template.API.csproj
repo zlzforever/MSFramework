@@ -5,7 +5,7 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="MSFramework.Migrator.MySql" Version="0.12.4" />
+        <PackageReference Include="MSFramework.Migrator.MySql" Version="0.12.8-beta2" />
         <PackageReference Include="Serilog.AspNetCore" Version="3.2.0" />
         <PackageReference Include="Serilog.Sinks.PeriodicBatching" Version="2.3.0" />
         <PackageReference Include="Serilog.Sinks.Console" Version="3.1.1" />

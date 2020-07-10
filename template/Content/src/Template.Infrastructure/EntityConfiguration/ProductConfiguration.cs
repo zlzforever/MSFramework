@@ -12,8 +12,7 @@ namespace Template.Infrastructure.EntityConfiguration
 			base.Configure(builder);
 
 			builder.HasIndex(x => x.Name);
-			// DDD enumeration
-			builder.Property(e => e.ProductType).IsEnumeration();
+			builder.Property(e => e.ProductType).UseEnumeration();
 		}
 	}
 }

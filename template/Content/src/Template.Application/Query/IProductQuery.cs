@@ -1,5 +1,5 @@
 using System.Threading.Tasks;
-using MSFramework.Data;
+using MSFramework.Common;
 using MSFramework.DependencyInjection;
 using Template.Application.DTO;
 

@@ -20,17 +20,17 @@ namespace Template.API.Controllers
 #endif
 	public class AuditController :  ApiControllerBase
 	{
-		private readonly IRepository<AuditedOperation> _repository;
+		private readonly IRepository<AuditOperation> _repository;
 
-		public AuditController(IRepository<AuditedOperation> repository)
+		public AuditController(IRepository<AuditOperation> repository)
 		{
 			_repository = repository;
 		}
 
 		[HttpGet("GetAudits")]
-		public List<AuditedOperation> GetAudits()
+		public List<AuditOperation> GetAudits()
 		{
-			return ((EfRepository<AuditedOperation>) _repository).CurrentSet.Include(x => x.Entities).ToList();
+			return ((EfRepository<AuditOperation>) _repository).CurrentSet.Include(x => x.Entities).ToList();
 		}
 
 		[HttpGet("GetDefaultValueType")]

@@ -1,5 +1,4 @@
 using AutoMapper;
-using MSFramework.Data;
 using Template.Domain.AggregateRoot;
 
 namespace Template.Application.DTO

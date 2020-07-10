@@ -4,8 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using MSFramework;
 using MSFramework.AspNetCore;
 using MSFramework.AspNetCore.Api;
-using MSFramework.Data;
-using MSFramework.Extensions;
+using MSFramework.Common;
 using MSFramework.Mapper;
 #if !DEBUG
 using Microsoft.AspNetCore.Authorization;
@@ -42,7 +41,7 @@ namespace Template.API.Controllers
 		public async Task<PagedResult<ProductOut>> PagedQuery1Async(string keyword, int page, int limit)
 		{
 			var @out = await _productQuery.PagedQueryAsync(keyword, page, limit);
-			return _mapper.MapPagedResult<ProductOut>(@out);
+			return _mapper.Map<PagedResult<ProductOut>>(@out);
 		}
 
 		[HttpGet("q2")]
