@@ -83,8 +83,8 @@ namespace Ordering.API.Controllers
 		[HttpGet("getPagedQuery")]
 		public async Task<Response<PagedResult<ProductDTO>>> GetPagedQuery()
 		{
-			var a = await _productRepository.PagedQueryAsync(0, 10);
-			var b = a.To<ProductDTO>(_mapper);
+			PagedResult<Product> a = await _productRepository.PagedQueryAsync(0, 10);
+			var b = _mapper.Map<PagedResult<ProductDTO>>(a);
 			return new Response<PagedResult<ProductDTO>>(b);
 		}
 

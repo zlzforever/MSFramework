@@ -29,11 +29,5 @@ namespace MSFramework.Common
 			Count = count;
 			Data = data;
 		}
-
-		public PagedResult<TDestination> To<TDestination>(IObjectMapper mapper)
-		{
-			return new PagedResult<TDestination>(Page, Limit, Count,
-				mapper.Map<List<TDestination>>(Data));
-		}
 	}
 }
