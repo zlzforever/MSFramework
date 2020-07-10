@@ -1,5 +1,5 @@
 using System.Threading.Tasks;
-using MSFramework.Data;
+using MSFramework.Common;
 using MSFramework.DependencyInjection;
 using MSFramework.Domain;
 using Ordering.Domain.AggregateRoot;

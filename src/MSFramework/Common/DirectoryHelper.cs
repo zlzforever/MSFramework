@@ -1,8 +1,7 @@
 using System;
 using System.IO;
-using MSFramework.Common;
 
-namespace MSFramework.Helper
+namespace MSFramework.Common
 {
 	public class DirectoryHelper
 	{

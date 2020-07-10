@@ -10,7 +10,7 @@ using MSFramework;
 using MSFramework.AspNetCore;
 using MSFramework.AspNetCore.Api;
 using MSFramework.Audit;
-using MSFramework.Data;
+using MSFramework.Common;
 using MSFramework.Domain;
 using MSFramework.Extensions;
 using MSFramework.Ef.Repository;
@@ -84,7 +84,7 @@ namespace Ordering.API.Controllers
 		public async Task<Response<PagedResult<ProductDTO>>> GetPagedQuery()
 		{
 			var a = await _productRepository.PagedQueryAsync(0, 10);
-			var b = _mapper.MapPagedResult<ProductDTO>(a);
+			var b = a.To<ProductDTO>(_mapper);
 			return new Response<PagedResult<ProductDTO>>(b);
 		}
 

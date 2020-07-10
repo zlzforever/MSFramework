@@ -3,7 +3,7 @@ using System.Data.Common;
 using System.Threading.Tasks;
 using Dapper;
 using Microsoft.Extensions.Logging;
-using MSFramework.Data;
+using MSFramework.Common;
 using MySql.Data.MySqlClient;
 
 namespace MSFramework.Migrator.MySql

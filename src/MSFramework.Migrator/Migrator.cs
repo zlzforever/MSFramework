@@ -6,7 +6,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Dapper;
 using Microsoft.Extensions.Logging;
-using MSFramework.Data;
+using MSFramework.Common;
 using MSFramework.Initializer;
 
 namespace MSFramework.Migrator

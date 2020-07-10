@@ -1,6 +1,6 @@
 using System.Linq;
 using System.Threading.Tasks;
-using MSFramework.Data;
+using MSFramework.Common;
 using MSFramework.Ef;
 using MSFramework.Ef.Repository;
 using MSFramework.Extensions;

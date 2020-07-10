@@ -1,4 +1,4 @@
-namespace MSFramework.Data
+namespace MSFramework.Common
 {
 	public enum DataSource
 	{
