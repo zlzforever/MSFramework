@@ -8,7 +8,7 @@ namespace MSFramework.Ef.Extensions
 {
 	public static class PropertyBuilderExtensions
 	{
-		public static PropertyBuilder<TProperty> IsEnumeration<TProperty>(this PropertyBuilder<TProperty> builder)
+		public static PropertyBuilder<TProperty> UseEnumeration<TProperty>(this PropertyBuilder<TProperty> builder)
 			where TProperty : Enumeration
 		{
 			builder.HasConversion(new ValueConverter<TProperty, string>(

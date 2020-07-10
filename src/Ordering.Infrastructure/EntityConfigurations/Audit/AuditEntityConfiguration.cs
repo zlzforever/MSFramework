@@ -19,7 +19,7 @@ namespace Ordering.Infrastructure.EntityConfigurations.Audit
 			builder.Property(x => x.Id).HasColumnName("id");
 			builder.Property(x => x.EntityId).HasColumnName("entity_id").HasMaxLength(255);
 			builder.Property(x => x.Type).HasColumnName("type_name").HasMaxLength(255);
-			builder.Property(e => e.OperationType).HasColumnName("operation_type").HasMaxLength(255).IsEnumeration();
+			builder.Property(e => e.OperationType).HasColumnName("operation_type").HasMaxLength(255).UseEnumeration();
 
 			builder.HasIndex(m => m.EntityId);
 		}
