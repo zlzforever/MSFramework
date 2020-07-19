@@ -21,7 +21,7 @@ namespace MSFramework.Domain.Entity
 	public abstract class EntityBase<TKey> : EntityBase, IEntity<TKey>
 	{
 		/// <inheritdoc/>
-		public TKey Id { get; private set; }
+		public TKey Id { get; protected set; }
 		
 		protected EntityBase(TKey id)
 		{
