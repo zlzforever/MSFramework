@@ -53,6 +53,7 @@ namespace Template.API
 			{
 				c.SwaggerDoc("v1.0",
 					new OpenApiInfo {Version = "v1.0", Description = "Template API V1.0"});
+				c.CustomSchemaIds(x => x.FullName);
 			});
 
 			services.AddResponseCompression();
