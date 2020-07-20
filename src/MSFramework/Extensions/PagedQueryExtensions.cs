@@ -60,7 +60,7 @@ namespace MSFramework.Extensions
 			where TEntity : class
 		{
 			page = page < 1 ? 1 : page;
-			limit = limit < 1 ? 1 : limit;
+			limit = limit < 1 ? 10 : limit;
 			var entities = where == null ? queryable : queryable.Where(where);
 			if (orderBy != null)
 			{

@@ -9,8 +9,8 @@
     </ItemGroup>
 
     <ItemGroup>
-        <PackageReference Include="MSFramework.Ef" Version="0.12.8-beta2" />
+        <PackageReference Include="MSFramework.Ef" Version="0.12.8-beta4" />
         <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="3.1.5" />
-        <PackageReference Include="MSFramework.Ef.MySql" Version="0.12.8-beta2" />
+        <PackageReference Include="MSFramework.Ef.MySql" Version="0.12.8-beta4" />
     </ItemGroup>
 </Project>
