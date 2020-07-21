@@ -9,7 +9,7 @@ namespace MSFramework.Domain.Entity
 		}
 	}
 
-	public abstract class ModificationAuditedEntity<TKey> : CreationAuditedEntity, IModificationAudited
+	public abstract class ModificationAuditedEntity<TKey> : CreationAuditedEntity<TKey>, IModificationAudited
 		where TKey : IEquatable<TKey>
 	{
 		/// <summary>
@@ -43,7 +43,7 @@ namespace MSFramework.Domain.Entity
 			}
 		}
 
-		protected ModificationAuditedEntity(Guid id) : base(id)
+		protected ModificationAuditedEntity(TKey id) : base(id)
 		{
 		}
 	}

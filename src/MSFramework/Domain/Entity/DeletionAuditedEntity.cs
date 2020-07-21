@@ -57,7 +57,7 @@ namespace MSFramework.Domain.Entity
 			}
 		}
 
-		protected DeletionAuditedEntity(Guid id) : base(id)
+		protected DeletionAuditedEntity(TKey id) : base(id)
 		{
 		}
 	}

@@ -16,17 +16,16 @@ namespace MSFramework.AspNetCore.Filters
 
 		public void OnException(ExceptionContext context)
 		{
-			context.HttpContext.Response.StatusCode = 400;
-
 			_logger.LogError(context.Exception.ToString());
 
 			if (context.Exception is MSFrameworkException e)
 			{
-				context.Result = new JsonResult(new Response(null, "服务出小差", false, e.Code));
+				context.HttpContext.Response.StatusCode = 200;
+				context.Result = new JsonResult(new Response(null, e.Message, false, e.Code));
 			}
-			// todo: only outerException print to UI
 			else
 			{
+				context.HttpContext.Response.StatusCode = 400;
 				context.Result = new JsonResult(new Response(null, "服务出小差", false, 1));
 			}
 		}
