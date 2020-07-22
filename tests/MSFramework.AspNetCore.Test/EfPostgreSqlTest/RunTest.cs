@@ -42,8 +42,7 @@ namespace MSFramework.AspNetCore.Test.EfPostgreSqlTest
 						service.AddMSFramework(builder =>
 						{
 							builder.UseDependencyInjectionScanner();
-							builder.Services.TryAddSingleton<IHttpContextAccessor, HttpContextAccessor>();
-							builder.Services.AddSingleton<IActionResultTypeMapper, ActionResultTypeMapper>();
+							builder.UseAspNetCore();
 							builder.UseEntityFramework(x => { x.AddNpgsql<TestDataContext>(config); });
 						});
 					}).Configure(builder => 
