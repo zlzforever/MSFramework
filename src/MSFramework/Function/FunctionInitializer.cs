@@ -13,8 +13,15 @@ namespace MSFramework.Function
 	{
 		public override async Task InitializeAsync(IServiceProvider serviceProvider)
 		{
-			var functionFinder = serviceProvider.GetService<IFunctionFinder>();
 			var logger = serviceProvider.GetRequiredService<ILogger<FunctionInitializer>>();
+			var repository = serviceProvider.GetService<IFunctionRepository>();
+			if (!repository.IsAvailable())
+			{
+				logger.LogInformation("没有配置 Function 仓储");
+				return;
+			}
+
+			var functionFinder = serviceProvider.GetService<IFunctionFinder>();
 			if (functionFinder == null)
 			{
 				logger.LogInformation("没有配置 Function 中间件");
@@ -36,7 +43,6 @@ namespace MSFramework.Function
 				}
 			}
 
-			var repository = serviceProvider.GetService<IFunctionRepository>();
 			var functionsInDatabaseDict = repository.GetAllList()
 				.ToDictionary(x => x.Code, x => x);
 
