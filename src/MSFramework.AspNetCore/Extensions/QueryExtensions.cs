@@ -5,7 +5,7 @@ using MSFramework.AspNetCore.Api;
 
 namespace MSFramework.AspNetCore.Extensions
 {
-	public static class RequestQueryExtensions
+	public static class QueryExtensions
 	{
 		static readonly ConcurrentDictionary<Type, PropertyInfo[]> Dict =
 			new ConcurrentDictionary<Type, PropertyInfo[]>();
@@ -13,7 +13,7 @@ namespace MSFramework.AspNetCore.Extensions
 		static readonly ConcurrentDictionary<Type, dynamic> DefaultValueDict =
 			new ConcurrentDictionary<Type, dynamic>();
 
-		public static bool IsEmptyQuery(this IRequestQuery query)
+		public static bool IsNullOrEmpty(this IQuery query)
 		{
 			if (query == null)
 			{
