@@ -10,7 +10,7 @@ namespace MSFramework.Migrator.MySql
 {
 	public class MySqlMigrator : Migrator
 	{
-		protected override DataSource DataSource => DataSource.MySql;
+		protected override Database DataSource => Database.MySql;
 
 		protected override DbConnection CreateConnection()
 		{

@@ -1,6 +1,6 @@
 namespace MSFramework.Common
 {
-	public enum DataSource
+	public enum Database
 	{
 		PostgreSql,
 		MySql,

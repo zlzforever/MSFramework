@@ -18,7 +18,7 @@ namespace MSFramework.Migrator
 
 		public override int Order => 10;
 
-		protected abstract DataSource DataSource { get; }
+		protected abstract Database DataSource { get; }
 
 		protected virtual string MigrationHistoryTable => "__migration_history";
 
