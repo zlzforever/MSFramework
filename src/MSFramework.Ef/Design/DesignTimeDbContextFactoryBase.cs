@@ -21,8 +21,6 @@ namespace MSFramework.Ef.Design
 			var services = GetServiceProvider();
 			var dbContextFactory = services.CreateScope().ServiceProvider.GetRequiredService<DbContextFactory>();
 			var options = dbContextFactory.GetDbContextOptions(typeof(TDbContext));
-			// design time should not use transaction
-			options.UseTransaction = false;
 			return dbContextFactory.Create(options) as TDbContext;
 		}
 

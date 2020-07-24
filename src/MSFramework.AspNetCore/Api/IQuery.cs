@@ -1,6 +1,6 @@
 namespace MSFramework.AspNetCore.Api
 {
-	public interface IRequestQuery
+	public interface IQuery
 	{
 	}
 }
