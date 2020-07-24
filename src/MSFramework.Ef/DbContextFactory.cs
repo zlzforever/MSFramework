@@ -16,7 +16,7 @@ namespace MSFramework.Ef
 		private readonly ConcurrentDictionary<Type, DbContextBase> _dbContextDict =
 			new ConcurrentDictionary<Type, DbContextBase>();
 
-		public DbContextFactory( 
+		public DbContextFactory(
 			EntityFrameworkOptionsCollection optionsCollection, IServiceProvider serviceProvider)
 		{
 			_entityConfigurationTypeFinder = serviceProvider.GetRequiredService<IEntityConfigurationTypeFinder>();
@@ -72,15 +72,12 @@ namespace MSFramework.Ef
 
 			//创建上下文实例
 			context = (DbContextBase) _serviceProvider.GetRequiredService(dbContextType);
-			
+
 			var unitOfWorkManager = _serviceProvider.GetRequiredService<IUnitOfWorkManager>();
 			unitOfWorkManager.Register(context);
 
-			if (resolveOptions.UseTransaction && context.Database.CurrentTransaction == null)
-			{
-				context.Database.BeginTransaction();
-			}
-		 
+			context.Database.AutoTransactionsEnabled = resolveOptions.AutoTransactionsEnabled;
+
 			_dbContextDict.TryAdd(dbContextType, context);
 			return context;
 		}

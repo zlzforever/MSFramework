@@ -12,6 +12,9 @@ namespace MSFramework.AspNetCore.Api
 			int code = 0) : base(data, msg, success, code)
 		{
 		}
+
+		public static readonly Response Ok = new Response(null);
+		public static readonly Response Error = new Response(null, null, false, 1);
 	}
 
 	public class Response<T> : IResponse

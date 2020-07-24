@@ -20,10 +20,9 @@ namespace MSFramework.Ef.Initializer
 			var entityFrameworkOptionsStore = serviceProvider.GetRequiredService<EntityFrameworkOptionsCollection>();
 			foreach (var option in entityFrameworkOptionsStore.GetAllOptions())
 			{
-				var useTransaction = option.UseTransaction;
 				if (option.AutoMigrationEnabled)
 				{
-					option.UseTransaction = false;
+					option.AutoTransactionsEnabled = false;
 					var dbContext = dbContextFactory.Create(option);
 					if (dbContext == null)
 					{
@@ -44,7 +43,7 @@ namespace MSFramework.Ef.Initializer
 						logger.LogInformation($"已提交 {migrations.Length} 条挂起的迁移记录：{migrations.ExpandAndToString()}");
 					}
 
-					option.UseTransaction = useTransaction;
+					option.AutoTransactionsEnabled = option.AutoTransactionsEnabled;
 				}
 			}
 		}
