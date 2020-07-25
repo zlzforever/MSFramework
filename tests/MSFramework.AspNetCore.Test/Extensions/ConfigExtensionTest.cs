@@ -30,7 +30,7 @@ namespace MSFramework.AspNetCore.Test.Extensions
 					webHost.UseTestServer().ConfigureAppConfiguration(i => { i.AddJsonFile("appsettings.json"); });
 					webHost.UseStartup<Startup>().ConfigureServices((context, service) =>
 					{
-						service.AddConfigModel(GetType().Assembly);
+						service.AddConfigType(GetType().Assembly);
 					}).Configure(builder => { builder.UseMSFramework(); });
 				});
 			var host = hostBuilder.Start();

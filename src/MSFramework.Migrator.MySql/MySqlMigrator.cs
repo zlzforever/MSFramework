@@ -5,6 +5,7 @@ using Dapper;
 using Microsoft.Extensions.Logging;
 using MSFramework.Common;
 using MySql.Data.MySqlClient;
+using MySqlConnector;
 
 namespace MSFramework.Migrator.MySql
 {

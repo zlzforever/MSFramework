@@ -6,7 +6,7 @@ namespace MSFramework.Application
 	/// 配置模型标志
 	/// </summary>
 	[AttributeUsage(AttributeTargets.Class)]
-	public class ConfigModelAttribute: Attribute
+	public class ConfigTypeAttribute : Attribute
 	{
 		/// <summary>
 		/// 配置节点的名词，默认为类名称
@@ -16,24 +16,24 @@ namespace MSFramework.Application
 		/// <summary>
 		/// 是否可选
 		/// </summary>
-		public bool IsOptional { get; }
+		public bool Optional { get; }
 
 		/// <summary>
 		/// 是否允许重载
 		/// </summary>
-		public bool IsAllowReload { get; }
+		public bool ReloadOnChange { get; }
 
 		/// <summary>
 		/// 配置模型标志
 		/// </summary>
 		/// <param name="sectionName">不配置，默认为类名称</param>
-		/// <param name="isOption">是否可选</param>
-		/// <param name="isAllowReload">是否允许重载</param>
-		public ConfigModelAttribute(string sectionName = "", bool isOption = true, bool isAllowReload = false)
+		/// <param name="optional">是否可选</param>
+		/// <param name="reloadOnChange">是否允许重载</param>
+		public ConfigTypeAttribute(string sectionName = "", bool optional = true, bool reloadOnChange = false)
 		{
 			SectionName = sectionName;
-			IsAllowReload = isAllowReload;
-			IsOptional = isOption;
+			ReloadOnChange = reloadOnChange;
+			Optional = optional;
 		}
 	}
 }

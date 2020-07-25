@@ -11,30 +11,33 @@ namespace MSFramework.AspNetCore.Extensions
 {
 	public static class ConfigExtension
 	{
-		public static IServiceCollection AddConfigModel(this IServiceCollection services, Assembly assembly)
+		public static IServiceCollection AddConfigType(this IServiceCollection services, Assembly assembly)
 		{
-			var typeInfos = assembly.GetTypes().Where(t => t.GetCustomAttributes<ConfigModelAttribute>().Any())
-				.Select(i => new
+			var typeInfos = assembly.GetTypes()
+				.Where(type => type.GetCustomAttributes<ConfigTypeAttribute>().Any())
+				.Select(x => new
 				{
-					TypeInfo = i,
-					ConfigAttribute = i.GetCustomAttributes<ConfigModelAttribute>().First()
+					Type = x,
+					Attribute = x.GetCustomAttributes<ConfigTypeAttribute>().First()
 				}).ToArray();
 
-			foreach (var i in typeInfos)
+			foreach (var typeInfo in typeInfos)
 			{
-				services.Add(new ServiceDescriptor(i.TypeInfo, provider =>
+				var type = typeInfo.Type;
+				var attribute = typeInfo.Attribute;
+				services.TryAdd(new ServiceDescriptor(type, provider =>
 				{
 					var configSection = provider.GetService<IConfiguration>()
-						.GetSection(i.ConfigAttribute.SectionName.IsNullOrEmpty()
-							? i.TypeInfo.Name
-							: i.ConfigAttribute.SectionName);
-					if (i.ConfigAttribute.IsOptional)
+						.GetSection(attribute.SectionName.IsNullOrEmpty()
+							? type.Name
+							: attribute.SectionName);
+					if (attribute.Optional)
 					{
-						return configSection.Get(i.TypeInfo) ?? Activator.CreateInstance(i.TypeInfo);
+						return configSection.Get(type) ?? Activator.CreateInstance(type);
 					}
 
-					return configSection.Get(i.TypeInfo);
-				}, i.ConfigAttribute.IsAllowReload ? ServiceLifetime.Transient : ServiceLifetime.Singleton));
+					return configSection.Get(type);
+				}, attribute.ReloadOnChange ? ServiceLifetime.Transient : ServiceLifetime.Singleton));
 			}
 
 			return services;
