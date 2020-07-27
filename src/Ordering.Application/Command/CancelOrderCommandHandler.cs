@@ -6,7 +6,7 @@ using Ordering.Domain.Repository;
 
 namespace Ordering.Application.Command
 {
-	public class CancelOrderCommandHandler : IRequestHandler<CancelOrderCommand>
+	public class CancelOrderCommandHandler : IRequestHandler 
 	{
 		private readonly IOrderingRepository _orderRepository;
 		private readonly IUnitOfWorkManager _unitOfWorkManager;
@@ -23,6 +23,11 @@ namespace Ordering.Application.Command
 
 			order.SetCancelledStatus();
 			await _unitOfWorkManager.CommitAsync();
+		}
+
+		public Task HandleAsync<TCommand>(TCommand command, CancellationToken cancellationToken = default) where TCommand : IRequest
+		{
+			throw new System.NotImplementedException();
 		}
 	}
 }

@@ -9,8 +9,8 @@ namespace MSFramework.Application
 	{
 		void Register(Type requestType, Type handlerType);
 
-		Task ExecuteAsync(IRequest request, CancellationToken cancellationToken);
+		Task ExecuteAsync(IRequest request, CancellationToken cancellationToken = default);
 
-		Task<TResult> ExecuteAsync<TResult>(IRequest<TResult> request, CancellationToken cancellationToken);
+		Task<TResult> ExecuteAsync<TResult>(IRequest<TResult> request, CancellationToken cancellationToken = default);
 	}
 }

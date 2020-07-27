@@ -9,11 +9,11 @@ namespace MSFramework.Application
 
 	public interface IRequestHandler<in TCommand> : IRequestHandler where TCommand : IRequest
 	{
-		Task HandleAsync(TCommand command, CancellationToken cancellationToken);
+		Task HandleAsync(TCommand command, CancellationToken cancellationToken = default);
 	}
 
 	public interface IRequestHandler<in TCommand, TResult> : IRequestHandler where TCommand : IRequest<TResult>
 	{
-		Task<TResult> HandleAsync(TCommand command, CancellationToken cancellationToken);
+		Task<TResult> HandleAsync(TCommand command, CancellationToken cancellationToken = default);
 	}
 }

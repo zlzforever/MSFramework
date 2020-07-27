@@ -54,7 +54,7 @@ namespace MSFramework.Application
 			}
 		}
 
-		public async Task ExecuteAsync(IRequest request, CancellationToken cancellationToken)
+		public async Task ExecuteAsync(IRequest request, CancellationToken cancellationToken = default)
 		{
 			if (request == null)
 			{
@@ -74,7 +74,7 @@ namespace MSFramework.Application
 		}
 
 		public async Task<TResult> ExecuteAsync<TResult>(IRequest<TResult> command,
-			CancellationToken cancellationToken)
+			CancellationToken cancellationToken = default)
 		{
 			if (command == null)
 			{

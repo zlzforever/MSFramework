@@ -8,15 +8,15 @@ namespace MSFramework.Application
 {
 	public static class ServiceCollectionExtensions
 	{
-		public static IServiceCollection AddCommandExecutor(this IServiceCollection serviceCollection,
+		public static IServiceCollection AddRequestExecutor(this IServiceCollection serviceCollection,
 			params Type[] types)
 		{
 			var assemblies = types.Select(x => x.Assembly).ToArray();
-			serviceCollection.AddCommandExecutor(assemblies);
+			serviceCollection.AddRequestExecutor(assemblies);
 			return serviceCollection;
 		}
 
-		public static IServiceCollection AddCommandExecutor(this IServiceCollection serviceCollection,
+		public static IServiceCollection AddRequestExecutor(this IServiceCollection serviceCollection,
 			params Assembly[] assemblies)
 		{
 			var types = assemblies.SelectMany(x => x.GetTypes()).ToArray();
@@ -55,7 +55,7 @@ namespace MSFramework.Application
 			}
 
 			serviceCollection.TryAddSingleton(cache);
-			serviceCollection.TryAddSingleton<IRequestExecutor, DefaultRequestExecutor>();
+			serviceCollection.TryAddScoped<IRequestExecutor, DefaultRequestExecutor>();
 
 			return serviceCollection;
 		}
