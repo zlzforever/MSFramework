@@ -55,7 +55,7 @@ namespace MSFramework.Domain.Event
 			}
 		}
 
-		public virtual async Task DispatchAsync(IEvent @event)
+		public virtual Task DispatchAsync(IEvent @event)
 		{
 			if (@event == null)
 			{
@@ -74,7 +74,7 @@ namespace MSFramework.Domain.Event
 					{
 						if (methodInfo.Invoke(handler, new object[] {@event}) is Task task)
 						{
-							await task;
+							task.ConfigureAwait(false);
 						}
 						else
 						{
@@ -87,6 +87,8 @@ namespace MSFramework.Domain.Event
 					}
 				}
 			}
+
+			return Task.CompletedTask;
 		}
 	}
 }
