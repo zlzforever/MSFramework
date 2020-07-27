@@ -4,13 +4,11 @@
     </PropertyGroup>
     <Import Project="../../package.props" />
     <ItemGroup>
+        <PackageReference Include="Microsoft.CSharp" Version="4.7.0" />
         <PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="3.1.6" />
         <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="3.1.6" />
         <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="3.1.6" />
         <PackageReference Include="Microsoft.Extensions.DependencyModel" Version="3.1.6" />
         <PackageReference Include="Microsoft.Extensions.Caching.Memory" Version="3.1.6" />
-    </ItemGroup>
-    <ItemGroup>
-      <Folder Include="Mediator" />
     </ItemGroup>
 </Project>

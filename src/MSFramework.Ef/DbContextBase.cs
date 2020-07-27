@@ -84,8 +84,7 @@ namespace MSFramework.Ef
 				var eventDispatcher = _serviceProvider.GetService<IEventDispatcher>();
 				if (eventDispatcher != null)
 				{
-					// todo: 同步异步混用是否会死锁
-					HandleDomainEventsAsync().GetAwaiter().GetResult();
+					HandleDomainEvents();
 				}
 
 				var effectCount = base.SaveChanges();
@@ -136,7 +135,7 @@ namespace MSFramework.Ef
 
 				ApplyConcepts();
 
-				await HandleDomainEventsAsync();
+				HandleDomainEvents();
 
 				var effectedCount = await base.SaveChangesAsync(cancellationToken);
 				if (Database.CurrentTransaction != null)
@@ -157,7 +156,7 @@ namespace MSFramework.Ef
 			}
 		}
 
-		private async Task HandleDomainEventsAsync()
+		private void HandleDomainEvents()
 		{
 			var eventDispatcher = _serviceProvider.GetService<IEventDispatcher>();
 			if (eventDispatcher == null)
@@ -169,7 +168,7 @@ namespace MSFramework.Ef
 
 			foreach (var @event in domainEvents)
 			{
-				await eventDispatcher.DispatchAsync(@event);
+				eventDispatcher.Dispatch(@event);
 			}
 		}
 

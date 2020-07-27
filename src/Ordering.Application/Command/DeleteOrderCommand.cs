@@ -1,9 +1,9 @@
 using System;
-using MediatR;
+using MSFramework.Application;
 
 namespace Ordering.Application.Command
 {
-	public class DeleteOrderCommand : IRequest
+	public class DeleteOrderCommand : ICommand
 	{
 		public Guid OrderId { get; private set; }
 

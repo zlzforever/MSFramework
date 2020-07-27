@@ -5,11 +5,11 @@ namespace MSFramework.Domain.Event
 {
 	public static class Extensions
 	{
-		public static bool IsHandler(this Type handlerType)
+		public static bool CanHandle(this Type handlerType, Type eventType)
 		{
-			var eventType = handlerType.GetInterface("IEventHandler`1")?.GenericTypeArguments
+			var eventType1 = handlerType.GetInterface("IEventHandler`1")?.GenericTypeArguments
 				.SingleOrDefault();
-			return eventType != null && eventType.IsEvent();
+			return eventType1 != null && eventType1.IsEvent() && eventType == eventType1;
 		}
 
 		public static bool IsEvent(this Type eventType)

@@ -1,9 +1,9 @@
 using System;
-using MediatR;
+using MSFramework.Application;
 
 namespace Ordering.Application.Command
 {
-	public class CancelOrderCommand : IRequest
+	public class CancelOrderCommand : ICommand
 	{
 		public Guid OrderId { get; private set; }
 

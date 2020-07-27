@@ -1,12 +1,12 @@
 using System.Threading;
 using System.Threading.Tasks;
-using MediatR;
+using MSFramework.Application;
 using MSFramework.Domain;
 using Ordering.Domain.Repository;
 
 namespace Ordering.Application.Command
 {
-	public class CancelOrderCommandHandler : IRequestHandler<CancelOrderCommand>
+	public class CancelOrderCommandHandler : ICommandHandler<CancelOrderCommand>
 	{
 		private readonly IOrderingRepository _orderRepository;
 		private readonly IUnitOfWorkManager _unitOfWorkManager;
@@ -17,13 +17,12 @@ namespace Ordering.Application.Command
 			_unitOfWorkManager = unitOfWorkManager;
 		}
 
-		public async Task<Unit> Handle(CancelOrderCommand request, CancellationToken cancellationToken)
+		public async Task HandleAsync(CancelOrderCommand request, CancellationToken cancellationToken)
 		{
 			var order = await _orderRepository.GetAsync(request.OrderId);
 
 			order.SetCancelledStatus();
 			await _unitOfWorkManager.CommitAsync();
-			return Unit.Value;
 		}
 	}
 }

@@ -24,11 +24,8 @@ namespace MSFramework.Domain.Event
 				}
 			}
 
-			lock (_eventHandlerTypesDict)
-			{
-				return _eventHandlerTypesDict[eventType].ContainsKey(handlerType) ||
-				       _eventHandlerTypesDict[eventType].TryAdd(handlerType, null);
-			}
+			return _eventHandlerTypesDict[eventType].ContainsKey(handlerType) ||
+			       _eventHandlerTypesDict[eventType].TryAdd(handlerType, null);
 		}
 
 		public IEnumerable<Type> GetHandlerTypes(Type eventType)

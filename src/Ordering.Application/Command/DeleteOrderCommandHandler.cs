@@ -1,16 +1,16 @@
 using System.Threading;
 using System.Threading.Tasks;
-using MediatR;
+using MSFramework.Application;
 using MSFramework.Domain;
 using Ordering.Domain.Repository;
 
 namespace Ordering.Application.Command
 {
-	public class DeleteOrderCommandHandler : IRequestHandler<DeleteOrderCommand>
+	public class DeleteOrderCommandHandler : ICommandHandler<DeleteOrderCommand>
 	{
 		private readonly IOrderingRepository _orderRepository;
 		private readonly IUnitOfWorkManager _unitOfWorkManager;
-		
+
 		public DeleteOrderCommandHandler(IOrderingRepository orderRepository, IUnitOfWorkManager unitOfWorkManager)
 		{
 			_orderRepository = orderRepository;
@@ -23,17 +23,16 @@ namespace Ordering.Application.Command
 		/// </summary>
 		/// <param name="command"></param>
 		/// <returns></returns>
-		public async Task<Unit> Handle(DeleteOrderCommand command, CancellationToken cancellationToken)
+		public async Task HandleAsync(DeleteOrderCommand command, CancellationToken cancellationToken)
 		{
 			var order = await _orderRepository.GetAsync(command.OrderId);
 			if (order == null)
 			{
-				return Unit.Value;
+				return;
 			}
 
 			await _orderRepository.DeleteAsync(order);
 			await _unitOfWorkManager.CommitAsync();
-			return Unit.Value;
 		}
 	}
 }

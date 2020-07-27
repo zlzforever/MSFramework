@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Logging;
+using MSFramework.Application;
 using MSFramework.Audit;
 using MSFramework.Domain;
 using MSFramework.Domain.Event;
@@ -19,6 +20,27 @@ namespace MSFramework
 		{
 			var assemblies = AssemblyFinder.GetAllList();
 			builder.UseEventDispatcher(assemblies.ToArray());
+			return builder;
+		}
+
+		public static MSFrameworkBuilder UseCommandExecutor(this MSFrameworkBuilder builder)
+		{
+			var assemblies = AssemblyFinder.GetAllList();
+			builder.UseCommandExecutor(assemblies.ToArray());
+			return builder;
+		}
+
+		public static MSFrameworkBuilder UseCommandExecutor(this MSFrameworkBuilder builder, params Type[] commandTypes)
+		{
+			var excludeAssembly = typeof(MSFrameworkBuilder).Assembly;
+			var assemblies = commandTypes.Select(x => x.Assembly).ToList();
+
+			if (!assemblies.Contains(excludeAssembly))
+			{
+				assemblies.Add(excludeAssembly);
+			}
+
+			builder.UseCommandExecutor(assemblies.ToArray());
 			return builder;
 		}
 
@@ -43,6 +65,13 @@ namespace MSFramework
 			return builder;
 		}
 
+		public static MSFrameworkBuilder UseCommandExecutor(this MSFrameworkBuilder builder,
+			params Assembly[] assemblies)
+		{
+			builder.Services.AddCommandExecutor(assemblies);
+			return builder;
+		}
+
 		public static void AddMSFramework(this IServiceCollection services,
 			Action<MSFrameworkBuilder> builderAction = null)
 		{
@@ -57,11 +86,6 @@ namespace MSFramework
 			builder.Services.TryAddScoped<IAuditService, DefaultAuditService>();
 
 			builder.UseInitializer();
-
-			var assemblies = AssemblyFinder.GetAllList();
-
-			// todo: how to print logs in ConfigureService method
-			Console.WriteLine($"Find assemblies: {string.Join(", ", assemblies.Select(x => x.GetName().Name))}");
 		}
 
 		public static void UseMSFramework(this IServiceProvider applicationServices)

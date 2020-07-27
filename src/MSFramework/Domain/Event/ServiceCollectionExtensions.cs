@@ -30,19 +30,18 @@ namespace MSFramework.Domain.Event
 		{
 			var store = new EventHandlerTypeStore();
 			var types = assemblies.SelectMany(x => x.GetTypes());
-
+			var handlerInterfaceType = typeof(IEventHandler);
 			foreach (var handlerType in types)
 			{
-				if (handlerType.IsHandler())
+				if (handlerInterfaceType.IsAssignableFrom(handlerType))
 				{
-					serviceCollection.TryAddScoped(handlerType);
-				}
-
-				var eventType = handlerType.GetInterface("IEventHandler`1")?.GenericTypeArguments
-					.SingleOrDefault();
-				if (eventType != null)
-				{
-					store.Add(eventType, handlerType);
+					var eventType = handlerType.GetInterface("IEventHandler`1")?.GenericTypeArguments
+						.SingleOrDefault();
+					if (eventType != null)
+					{
+						serviceCollection.TryAddScoped(handlerType);
+						store.Add(eventType, handlerType);
+					}
 				}
 			}
 

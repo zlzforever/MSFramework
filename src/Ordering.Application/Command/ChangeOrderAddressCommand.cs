@@ -1,10 +1,10 @@
 ﻿using System;
-using MediatR;
+using MSFramework.Application;
 using Ordering.Domain.AggregateRoot;
 
 namespace Ordering.Application.Command
 {
-	public class ChangeOrderAddressCommand : IRequest
+	public class ChangeOrderAddressCommand : ICommand
 	{
 		public Address NewAddress { get; set; }
 		

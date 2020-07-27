@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
+using MSFramework.Application;
 using MSFramework.AspNetCore;
 using Ordering.Application.Command;
 using Ordering.Application.Query;
@@ -17,11 +18,13 @@ namespace Ordering.API.Controllers
 	{
 		private readonly IOrderingQuery _orderingQuery;
 		private readonly IOrderingRepository _orderRepository;
+		private readonly ICommandExecutor _commandExecutor;
 
 		public OrderController(IOrderingRepository orderRepository,
-			IOrderingQuery orderingQuery)
+			IOrderingQuery orderingQuery, ICommandExecutor commandExecutor)
 		{
 			_orderingQuery = orderingQuery;
+			_commandExecutor = commandExecutor;
 			_orderRepository = orderRepository;
 		}
 
@@ -47,6 +50,19 @@ namespace Ordering.API.Controllers
 		}
 
 		#region Command
+
+		[HttpPost("test-command1")]
+		public async Task<string> TestCommand1Async([FromBody] TestCommand1 command)
+		{
+			var a = await _commandExecutor.ExecuteAsync(command, default);
+			return a;
+		}
+
+		[HttpPost("test-command2")]
+		public async Task TestCommand2Async([FromBody] TestCommand2 command)
+		{
+			await _commandExecutor.ExecuteAsync(command, default);
+		}
 
 		/// <summary>
 		/// FOR TEST Method

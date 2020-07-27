@@ -53,6 +53,7 @@ namespace Ordering.API
 				builder.UseAutoMapper();
 				builder.UseDependencyInjectionScanner();
 				builder.UseEventDispatcher();
+				builder.UseCommandExecutor();
 				// builder.UseRabbitMQEventDispatcher(new RabbitMQOptions(), typeof(UserCheckoutAcceptedEvent));
 				// 启用审计服务
 				builder.UseAudit();

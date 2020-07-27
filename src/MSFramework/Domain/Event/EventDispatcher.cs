@@ -45,9 +45,10 @@ namespace MSFramework.Domain.Event
 				throw new ArgumentException("Event should inherit from Event and be a class ");
 			}
 
-			if (handlerType.IsHandler())
+			if (handlerType.CanHandle(eventType))
 			{
-				return _eventHandlerTypeStore.Add(eventType, handlerType);
+				_eventHandlerTypeStore.Add(eventType, handlerType);
+				return true;
 			}
 			else
 			{
@@ -55,7 +56,7 @@ namespace MSFramework.Domain.Event
 			}
 		}
 
-		public virtual Task DispatchAsync(IEvent @event)
+		public virtual void Dispatch(IEvent @event)
 		{
 			if (@event == null)
 			{
@@ -87,8 +88,6 @@ namespace MSFramework.Domain.Event
 					}
 				}
 			}
-
-			return Task.CompletedTask;
 		}
 	}
 }
