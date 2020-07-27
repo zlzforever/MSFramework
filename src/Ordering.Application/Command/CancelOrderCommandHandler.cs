@@ -6,7 +6,7 @@ using Ordering.Domain.Repository;
 
 namespace Ordering.Application.Command
 {
-	public class CancelOrderCommandHandler : ICommandHandler<CancelOrderCommand>
+	public class CancelOrderCommandHandler : IRequestHandler<CancelOrderCommand>
 	{
 		private readonly IOrderingRepository _orderRepository;
 		private readonly IUnitOfWorkManager _unitOfWorkManager;

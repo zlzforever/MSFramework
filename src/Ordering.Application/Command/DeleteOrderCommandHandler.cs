@@ -6,7 +6,7 @@ using Ordering.Domain.Repository;
 
 namespace Ordering.Application.Command
 {
-	public class DeleteOrderCommandHandler : ICommandHandler<DeleteOrderCommand>
+	public class DeleteOrderCommandHandler : IRequestHandler<DeleteOrderCommand>
 	{
 		private readonly IOrderingRepository _orderRepository;
 		private readonly IUnitOfWorkManager _unitOfWorkManager;

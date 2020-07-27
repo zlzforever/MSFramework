@@ -3,7 +3,7 @@ using MSFramework.Application;
 
 namespace Ordering.Application.Command
 {
-	public class CancelOrderCommand : ICommand
+	public class CancelOrderCommand : IRequest
 	{
 		public Guid OrderId { get; private set; }
 

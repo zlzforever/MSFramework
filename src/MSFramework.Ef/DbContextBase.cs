@@ -168,7 +168,7 @@ namespace MSFramework.Ef
 
 			foreach (var @event in domainEvents)
 			{
-				eventDispatcher.Dispatch(@event);
+				eventDispatcher.DispatchAsync(@event);
 			}
 		}
 

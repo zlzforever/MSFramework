@@ -4,7 +4,7 @@ using Ordering.Domain.AggregateRoot;
 
 namespace Ordering.Application.Command
 {
-	public class ChangeOrderAddressCommand : ICommand
+	public class ChangeOrderAddressCommand : IRequest
 	{
 		public Address NewAddress { get; set; }
 		

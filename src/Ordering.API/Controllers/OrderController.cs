@@ -18,10 +18,10 @@ namespace Ordering.API.Controllers
 	{
 		private readonly IOrderingQuery _orderingQuery;
 		private readonly IOrderingRepository _orderRepository;
-		private readonly ICommandExecutor _commandExecutor;
+		private readonly IRequestExecutor _commandExecutor;
 
 		public OrderController(IOrderingRepository orderRepository,
-			IOrderingQuery orderingQuery, ICommandExecutor commandExecutor)
+			IOrderingQuery orderingQuery, IRequestExecutor commandExecutor)
 		{
 			_orderingQuery = orderingQuery;
 			_commandExecutor = commandExecutor;

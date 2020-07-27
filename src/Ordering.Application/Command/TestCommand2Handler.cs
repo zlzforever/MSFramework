@@ -6,7 +6,7 @@ using MSFramework.Application;
 namespace Ordering.Application.Command
 {
 	public class TestCommand2Handler
-		: ICommandHandler<TestCommand2>
+		: IRequestHandler<TestCommand2>
 	{
 		public Task HandleAsync(TestCommand2 command, CancellationToken cancellationToken)
 		{

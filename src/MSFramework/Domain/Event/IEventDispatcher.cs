@@ -14,6 +14,6 @@ namespace MSFramework.Domain.Event
 
 		bool Register(Type eventType, Type handlerType);
 		
-		void Dispatch(IEvent @event);
+		Task DispatchAsync(IEvent @event);
 	}
 }

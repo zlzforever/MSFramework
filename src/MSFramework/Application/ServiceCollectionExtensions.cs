@@ -20,8 +20,8 @@ namespace MSFramework.Application
 			params Assembly[] assemblies)
 		{
 			var types = assemblies.SelectMany(x => x.GetTypes()).ToArray();
-			var cache = new CommandHandlerTypeCache();
-			var handlerInterfaceType = typeof(ICommandHandler);
+			var cache = new RequestHandlerTypeCache();
+			var handlerInterfaceType = typeof(IRequestHandler);
 			foreach (var handlerType in types)
 			{
 				if (handlerType != handlerInterfaceType
@@ -30,8 +30,8 @@ namespace MSFramework.Application
 					var interface1 = handlerType.GetInterfaces()
 						.FirstOrDefault(x =>
 							!string.IsNullOrWhiteSpace(x.FullName)
-							&& x.FullName != "MSFramework.Application.ICommandHandler"
-							&& x.FullName.StartsWith("MSFramework.Application.ICommandHandler")
+							&& x.FullName != handlerInterfaceType.Name
+							&& x.FullName.StartsWith(handlerInterfaceType.Name)
 						);
 					if (interface1 == null)
 					{
@@ -40,16 +40,16 @@ namespace MSFramework.Application
 
 					var commandType = interface1.GenericTypeArguments
 						.FirstOrDefault();
-					if (commandType != null && !cache.Contains(commandType))
+					if (commandType != null && !cache.ContainsKey(commandType))
 					{
 						serviceCollection.TryAddScoped(handlerType);
-						cache.TryAdd(commandType, handlerType);
+						cache.TryAdd(commandType, (handlerType, handlerType.GetMethod("HandleAsync")));
 					}
 				}
 			}
 
 			serviceCollection.TryAddSingleton(cache);
-			serviceCollection.TryAddSingleton<ICommandExecutor, DefaultCommandExecutor>();
+			serviceCollection.TryAddSingleton<IRequestExecutor, DefaultRequestExecutor>();
 
 			return serviceCollection;
 		}

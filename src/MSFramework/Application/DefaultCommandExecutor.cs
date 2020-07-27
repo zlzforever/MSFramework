@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Concurrent;
 using System.Linq;
 using System.Reflection;
 using System.Threading;
@@ -8,22 +7,22 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace MSFramework.Application
 {
-	public class DefaultCommandExecutor : ICommandExecutor
+	public class DefaultRequestExecutor : IRequestExecutor
 	{
-		private readonly CommandHandlerTypeCache _cache;
 		private readonly IServiceProvider _serviceProvider;
+		private readonly RequestHandlerTypeCache _cache;
 
-		public DefaultCommandExecutor(IServiceProvider serviceProvider)
+		public DefaultRequestExecutor(IServiceProvider serviceProvider)
 		{
 			_serviceProvider = serviceProvider;
-			_cache = _serviceProvider.GetRequiredService<CommandHandlerTypeCache>();
+			_cache = _serviceProvider.GetRequiredService<RequestHandlerTypeCache>();
 		}
 
-		public void Register(Type commandType, Type handlerType)
+		public void Register(Type requestType, Type handlerType)
 		{
-			if (commandType == null)
+			if (requestType == null)
 			{
-				throw new ArgumentNullException(nameof(commandType));
+				throw new ArgumentNullException(nameof(requestType));
 			}
 
 			if (handlerType == null)
@@ -31,41 +30,42 @@ namespace MSFramework.Application
 				throw new ArgumentNullException(nameof(handlerType));
 			}
 
-			if (!typeof(ICommand).IsAssignableFrom(commandType))
+			if (!typeof(IRequest).IsAssignableFrom(requestType))
 			{
-				throw new ArgumentException("Command should inherit from ICommand or ICommand<T>");
+				throw new ArgumentException(
+					$"Request {requestType.FullName} should inherit from IRequest or IRequest<>");
 			}
 
-			var commandType1 = handlerType.GetInterface("ICommandHandler`1")?.GenericTypeArguments
+			var handleRequestType = handlerType.GetInterface("IRequestHandler`1")?.GenericTypeArguments
 				.FirstOrDefault();
-			if (commandType1 != null && commandType1 == commandType)
+			if (handleRequestType != null && handleRequestType == requestType)
 			{
-				if (_cache.Contains(commandType))
+				if (_cache.ContainsKey(requestType))
 				{
 					throw new ArgumentException(
-						$"There are more than 1 command handler for command: [{commandType.FullName}]");
+						$"There are more than 1 request handler for request: [{requestType.FullName}]");
 				}
 
-				_cache.TryAdd(commandType, handlerType);
+				_cache.TryAdd(requestType, (handlerType, handlerType.GetMethod("HandleAsync")));
 			}
 			else
 			{
-				throw new ArgumentException($"Type {handlerType} is not a valid command handler");
+				throw new ArgumentException($"Type {handlerType} is not a valid request handler");
 			}
 		}
 
-		public async Task ExecuteAsync(ICommand command, CancellationToken cancellationToken)
+		public async Task ExecuteAsync(IRequest request, CancellationToken cancellationToken)
 		{
-			if (command == null)
+			if (request == null)
 			{
-				throw new ArgumentNullException(nameof(command));
+				throw new ArgumentNullException(nameof(request));
 			}
 
-			var commandType = command.GetType();
-			if (_cache.TryGetHandlerType(commandType, out (Type Type, MethodInfo Method) tuple))
+			var commandType = request.GetType();
+			if (_cache.TryGetValue(commandType, out (Type Type, MethodInfo Method) tuple))
 			{
 				var handler = _serviceProvider.GetRequiredService(tuple.Type);
-				await (Task) tuple.Method.Invoke(handler, new object[] {command, cancellationToken});
+				await (Task) tuple.Method.Invoke(handler, new object[] {request, cancellationToken});
 			}
 			else
 			{
@@ -73,7 +73,7 @@ namespace MSFramework.Application
 			}
 		}
 
-		public async Task<TResult> ExecuteAsync<TResult>(ICommand<TResult> command,
+		public async Task<TResult> ExecuteAsync<TResult>(IRequest<TResult> command,
 			CancellationToken cancellationToken)
 		{
 			if (command == null)
@@ -82,7 +82,7 @@ namespace MSFramework.Application
 			}
 
 			var commandType = command.GetType();
-			if (_cache.TryGetHandlerType(commandType, out (Type Type, MethodInfo Method) tuple))
+			if (_cache.TryGetValue(commandType, out (Type Type, MethodInfo Method) tuple))
 			{
 				var handler = _serviceProvider.GetRequiredService(tuple.Type);
 				return await (Task<TResult>) tuple.Method.Invoke(handler, new object[] {command, cancellationToken});

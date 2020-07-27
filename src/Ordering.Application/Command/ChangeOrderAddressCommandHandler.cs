@@ -6,7 +6,7 @@ using Ordering.Domain.Repository;
 
 namespace Ordering.Application.Command
 {
-	public class ChangeOrderAddressCommandHandler : ICommandHandler<ChangeOrderAddressCommand>
+	public class ChangeOrderAddressCommandHandler : IRequestHandler<ChangeOrderAddressCommand>
 	{
 		private readonly IOrderingRepository _orderRepository;
 		private readonly IUnitOfWorkManager _unitOfWorkManager;

@@ -58,7 +58,7 @@ namespace MSFramework.RabbitMQ
 			return false;
 		}
 
-		public override void Dispatch(IEvent @event)
+		public override async Task DispatchAsync(IEvent @event)
 		{
 			if (@event == null)
 			{
@@ -81,7 +81,7 @@ namespace MSFramework.RabbitMQ
 			}
 			else
 			{
-				base.Dispatch(@event);
+				await base.DispatchAsync(@event);
 			}
 		}
 
@@ -106,13 +106,12 @@ namespace MSFramework.RabbitMQ
 
 					var consumer = new AsyncEventingBasicConsumer(channel);
 
-					consumer.Received += (model, ea) =>
+					consumer.Received += async (model, ea) =>
 					{
 						var bytes = ea.Body.ToArray();
 						var obj = MessagePackSerializer.Typeless.Deserialize(bytes) as IEvent;
-						base.Dispatch(obj);
+						await base.DispatchAsync(obj);
 						channel.BasicAck(deliveryTag: ea.DeliveryTag, multiple: false);
-						return Task.CompletedTask;
 					};
 
 					//7. 启动消费者

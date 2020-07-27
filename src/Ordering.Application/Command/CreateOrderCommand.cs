@@ -5,7 +5,7 @@ using Ordering.Domain.AggregateRoot;
 
 namespace Ordering.Application.Command
 {
-	public class CreateOrderCommand: ICommand
+	public class CreateOrderCommand: IRequest
 	{
 		public string UserId { get; set; }
 

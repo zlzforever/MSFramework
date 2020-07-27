@@ -8,7 +8,7 @@ using Ordering.Domain.Repository;
 
 namespace Ordering.Application.Command
 {
-	public class CreateOrderCommandHandler : ICommandHandler<CreateOrderCommand>
+	public class CreateOrderCommandHandler : IRequestHandler<CreateOrderCommand>
 	{
 		private readonly IOrderingRepository _orderRepository;
 		private readonly IUnitOfWorkManager _unitOfWorkManager;
