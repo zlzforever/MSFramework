@@ -22,6 +22,12 @@ namespace MSFramework.Application
 			var types = assemblies.SelectMany(x => x.GetTypes()).ToArray();
 			var cache = new RequestHandlerTypeCache();
 			var handlerInterfaceType = typeof(IRequestHandler);
+			var handlerInterfaceName = handlerInterfaceType.FullName;
+			if (string.IsNullOrWhiteSpace(handlerInterfaceName))
+			{
+				throw new ArgumentException(nameof(handlerInterfaceName));
+			}
+
 			foreach (var handlerType in types)
 			{
 				if (handlerType != handlerInterfaceType
@@ -30,8 +36,8 @@ namespace MSFramework.Application
 					var interface1 = handlerType.GetInterfaces()
 						.FirstOrDefault(x =>
 							!string.IsNullOrWhiteSpace(x.FullName)
-							&& x.FullName != handlerInterfaceType.Name
-							&& x.FullName.StartsWith(handlerInterfaceType.Name)
+							&& x.FullName != handlerInterfaceName
+							&& x.FullName.StartsWith(handlerInterfaceName)
 						);
 					if (interface1 == null)
 					{
