@@ -23,6 +23,11 @@ namespace MSFramework.Audit
 		}
 
 		/// <summary>
+		/// 所属实体
+		/// </summary>
+		public virtual AuditEntity Entity { get; internal set; }
+
+		/// <summary>
 		/// 获取或设置 字段
 		/// </summary>
 		public virtual string Name { get; private set; }
@@ -41,10 +46,11 @@ namespace MSFramework.Audit
 		/// 获取或设置 新值
 		/// </summary>
 		public virtual string NewValue { get; private set; }
-		
+
 		public override string ToString()
 		{
-			return $"[ENTITY: {GetType().Name}] Id = {Id}; {{ 'PropertyName': {Name}, 'PropertyType': {Type}, 'OriginalValue': {OriginalValue}, 'NewValue': {NewValue} }}";
+			return
+				$"[ENTITY: {GetType().Name}] Id = {Id}; {{ 'PropertyName': {Name}, 'PropertyType': {Type}, 'OriginalValue': {OriginalValue}, 'NewValue': {NewValue} }}";
 		}
 	}
 }

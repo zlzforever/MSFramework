@@ -9,19 +9,19 @@ namespace MSFramework.Application
 		private readonly ConcurrentDictionary<Type, (Type, MethodInfo)> _cache =
 			new ConcurrentDictionary<Type, (Type, MethodInfo)>();
 
-		public void TryAdd(Type commandType, (Type, MethodInfo) tuple)
+		public void TryAdd(Type requestType, (Type, MethodInfo) tuple)
 		{
-			_cache.TryAdd(commandType, tuple);
+			_cache.TryAdd(requestType, tuple);
 		}
 
-		public bool ContainsKey(Type commandType)
+		public bool ContainsKey(Type requestType)
 		{
-			return _cache.ContainsKey(commandType);
+			return _cache.ContainsKey(requestType);
 		}
 
-		public bool TryGetValue(Type commandType, out (Type, MethodInfo) handlerType)
+		public bool TryGetValue(Type requestType, out (Type, MethodInfo) handlerType)
 		{
-			var result = _cache.TryGetValue(commandType, out handlerType);
+			var result = _cache.TryGetValue(requestType, out handlerType);
 			return result;
 		}
 	}

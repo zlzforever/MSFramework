@@ -4,7 +4,7 @@ namespace MSFramework.Application
 	{
 	}
 
-	public interface IRequest<TResult> : IRequest
+	public interface IRequest<TResponse> : IRequest
 	{
 	}
 }

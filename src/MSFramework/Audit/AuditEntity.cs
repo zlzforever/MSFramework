@@ -20,6 +20,11 @@ namespace MSFramework.Audit
 		}
 
 		/// <summary>
+		/// 所属的操作
+		/// </summary>
+		public AuditOperation Operation { get; internal set; }
+
+		/// <summary>
 		/// 获取或设置 类型名称
 		/// </summary>
 		public string Type { get; private set; }
@@ -41,9 +46,10 @@ namespace MSFramework.Audit
 
 		public void AddProperties(IEnumerable<AuditProperty> properties)
 		{
-			foreach (var entity in properties)
+			foreach (var property in properties)
 			{
-				Properties.Add(entity);
+				property.Entity = this;
+				Properties.Add(property);
 			}
 		}
 

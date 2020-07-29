@@ -61,8 +61,8 @@ namespace MSFramework.Application
 				throw new ArgumentNullException(nameof(request));
 			}
 
-			var commandType = request.GetType();
-			if (_cache.TryGetValue(commandType, out (Type Type, MethodInfo Method) tuple))
+			var requestType = request.GetType();
+			if (_cache.TryGetValue(requestType, out (Type Type, MethodInfo Method) tuple))
 			{
 				var handler = _serviceProvider.GetRequiredService(tuple.Type);
 				await (Task) tuple.Method.Invoke(handler, new object[] {request, cancellationToken});
@@ -73,19 +73,19 @@ namespace MSFramework.Application
 			}
 		}
 
-		public async Task<TResult> ExecuteAsync<TResult>(IRequest<TResult> command,
+		public async Task<TResult> ExecuteAsync<TResult>(IRequest<TResult> request,
 			CancellationToken cancellationToken = default)
 		{
-			if (command == null)
+			if (request == null)
 			{
-				throw new ArgumentNullException(nameof(command));
+				throw new ArgumentNullException(nameof(request));
 			}
 
-			var commandType = command.GetType();
-			if (_cache.TryGetValue(commandType, out (Type Type, MethodInfo Method) tuple))
+			var requestType = request.GetType();
+			if (_cache.TryGetValue(requestType, out (Type Type, MethodInfo Method) tuple))
 			{
 				var handler = _serviceProvider.GetRequiredService(tuple.Type);
-				return await (Task<TResult>) tuple.Method.Invoke(handler, new object[] {command, cancellationToken});
+				return await (Task<TResult>) tuple.Method.Invoke(handler, new object[] {request, cancellationToken});
 			}
 			else
 			{

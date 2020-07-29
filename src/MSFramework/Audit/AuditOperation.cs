@@ -53,6 +53,7 @@ namespace MSFramework.Audit
 		{
 			foreach (var entity in entities)
 			{
+				entity.Operation = this;
 				Entities.Add(entity);
 			}
 		}
@@ -69,10 +70,11 @@ namespace MSFramework.Audit
 				Elapsed = (int) (EndTime - CreationTime).TotalMilliseconds;
 			}
 		}
-		
+
 		public override string ToString()
 		{
-			return $"[ENTITY: {GetType().Name}] Id = {Id}; {{ 'ApplicationName': {ApplicationName}, 'Path': {Path}, 'Ip': {Ip}, 'UserAgent': {UserAgent}, 'EndedTime': {EndTime:yyyy-MM-dd HH:mm:ss}, 'Elapsed': {Elapsed} }}";
+			return
+				$"[ENTITY: {GetType().Name}] Id = {Id}; {{ 'ApplicationName': {ApplicationName}, 'Path': {Path}, 'Ip': {Ip}, 'UserAgent': {UserAgent}, 'EndedTime': {EndTime:yyyy-MM-dd HH:mm:ss}, 'Elapsed': {Elapsed} }}";
 		}
 	}
 }

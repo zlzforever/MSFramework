@@ -7,13 +7,13 @@ namespace MSFramework.Application
 	{
 	}
 
-	public interface IRequestHandler<in TCommand> : IRequestHandler where TCommand : IRequest
+	public interface IRequestHandler<in TRequest> : IRequestHandler where TRequest : IRequest
 	{
-		Task HandleAsync(TCommand command, CancellationToken cancellationToken = default);
+		Task HandleAsync(TRequest request, CancellationToken cancellationToken = default);
 	}
 
-	public interface IRequestHandler<in TCommand, TResult> : IRequestHandler where TCommand : IRequest<TResult>
+	public interface IRequestHandler<in TRequest, TResponse> : IRequestHandler where TRequest : IRequest<TResponse>
 	{
-		Task<TResult> HandleAsync(TCommand command, CancellationToken cancellationToken = default);
+		Task<TResponse> HandleAsync(TRequest request, CancellationToken cancellationToken = default);
 	}
 }
