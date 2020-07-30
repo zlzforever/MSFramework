@@ -27,16 +27,23 @@ namespace MSFramework.AspNetCore.Extensions
 				var attribute = typeInfo.Attribute;
 				services.TryAdd(new ServiceDescriptor(type, provider =>
 				{
-					var configSection = provider.GetService<IConfiguration>()
-						.GetSection(attribute.SectionName.IsNullOrEmpty()
-							? type.Name
-							: attribute.SectionName);
-					if (attribute.Optional)
+					var configuration = provider.GetService<IConfiguration>();
+					var constructor = type.GetConstructor(new[] {typeof(IConfiguration)});
+					var result = constructor == null
+						? Activator.CreateInstance(type)
+						: Activator.CreateInstance(type, configuration);
+
+					if (attribute.SectionName.IsNullOrEmpty())
 					{
-						return configSection.Get(type) ?? Activator.CreateInstance(type);
+						configuration.Bind(result);
+					}
+					else
+					{
+						var section = provider.GetService<IConfiguration>().GetSection(attribute.SectionName);
+						section.Bind(result);
 					}
 
-					return configSection.Get(type);
+					return result;
 				}, attribute.ReloadOnChange ? ServiceLifetime.Transient : ServiceLifetime.Singleton));
 			}
 

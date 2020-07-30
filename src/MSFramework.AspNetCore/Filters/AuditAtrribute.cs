@@ -30,7 +30,7 @@ namespace MSFramework.AspNetCore.Filters
 		{
 			var scope = context.HttpContext.RequestServices.CreateScope();
 
-			_logger = scope.ServiceProvider.GetRequiredService<ILogger<InvalidModelStateFilter>>();
+			_logger = scope.ServiceProvider.GetRequiredService<ILogger<Audit>>();
 			_logger.LogDebug("Executing audit filter");
 
 			_auditService = scope.ServiceProvider.GetRequiredService<IAuditService>();

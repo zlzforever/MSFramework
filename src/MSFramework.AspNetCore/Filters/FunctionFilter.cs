@@ -18,7 +18,7 @@ namespace MSFramework.AspNetCore.Filters
 
 		public override void OnActionExecuting(ActionExecutingContext context)
 		{
-			_logger = context.HttpContext.RequestServices.GetRequiredService<ILogger<InvalidModelStateFilter>>();
+			_logger = context.HttpContext.RequestServices.GetRequiredService<ILogger<FunctionFilter>>();
 			_logger.LogDebug("Executing function filter");
 
 			var provider = context.HttpContext.RequestServices;

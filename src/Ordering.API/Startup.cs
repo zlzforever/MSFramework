@@ -5,6 +5,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.OpenApi.Models;
 using MSFramework;
 using MSFramework.AspNetCore;
+using MSFramework.AspNetCore.Extensions;
 using MSFramework.AspNetCore.Filters;
 using MSFramework.Audit;
 using MSFramework.AutoMapper;
@@ -13,6 +14,7 @@ using MSFramework.Ef;
 using MSFramework.Ef.MySql;
 using MSFramework.Extensions;
 using MSFramework.Migrator.MySql;
+using Ordering.Domain;
 using Ordering.Infrastructure;
 using Serilog;
 
@@ -38,8 +40,8 @@ namespace Ordering.API
 					x.Filters.UseFunctionFilter();
 					x.Filters.UseAudit();
 					x.Filters.UseGlobalExceptionFilter();
-					x.Filters.UseInvalidModelStateFilter();
 				})
+				.UseInvalidModelStateResponse()
 				.AddNewtonsoftJson();
 
 			services.AddSwaggerGen(c =>
@@ -47,6 +49,8 @@ namespace Ordering.API
 				c.SwaggerDoc("v1.0", new OpenApiInfo {Version = "v1.0", Description = "Ordering API V1.0"});
 			});
 			services.AddHealthChecks();
+
+			services.AddConfigType(typeof(AppOptions).Assembly);
 
 			services.AddMSFramework(builder =>
 			{
@@ -74,6 +78,8 @@ namespace Ordering.API
 		// This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
 		public void Configure(IApplicationBuilder app, IHostEnvironment env)
 		{
+			var options1 = app.ApplicationServices.GetRequiredService<AppOptions>();
+			var options2 = app.ApplicationServices.GetRequiredService<EmailOptions>();
 			if (env.IsDevelopment())
 			{
 				app.UseDeveloperExceptionPage();

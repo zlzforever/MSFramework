@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc.Filters;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace MSFramework.AspNetCore.Filters
 {
@@ -27,12 +28,6 @@ namespace MSFramework.AspNetCore.Filters
 
 		{
 			filters.Add<GlobalExceptionFilter>();
-			return filters;
-		}
-
-		public static FilterCollection UseInvalidModelStateFilter(this FilterCollection filters)
-		{
-			filters.Add<InvalidModelStateFilter>(FilterOrders.InvalidModelStateFilter);
 			return filters;
 		}
 	}

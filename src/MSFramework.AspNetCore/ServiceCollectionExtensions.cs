@@ -25,5 +25,14 @@ namespace MSFramework.AspNetCore
 		{
 			builder.ApplicationServices.UseMSFramework();
 		}
+
+		public static IMvcBuilder UseInvalidModelStateResponse(this IMvcBuilder builder)
+		{
+			builder.ConfigureApiBehaviorOptions(x =>
+			{
+				x.InvalidModelStateResponseFactory = InvalidModelStateResponseFactory.Instance;
+			});
+			return builder;
+		}
 	}
 }

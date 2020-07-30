@@ -17,7 +17,7 @@ namespace MSFramework.Domain
 			Name = name;
 		}
 
-		public override string ToString() => $"[{GetType().Name}] Id = {Id}, Name = {Name}";
+		public override string ToString() => Id;
 
 		public static IEnumerable<T> GetAll<T>() where T : Enumeration
 		{
@@ -40,7 +40,7 @@ namespace MSFramework.Domain
 		}
 
 		public override int GetHashCode() => Id.GetHashCode();
-		
+
 		public static T FromValue<T>(string value) where T : Enumeration
 		{
 			var matchingItem = Parse<T, string>(value, "value", item => item.Id == value);
