@@ -8,7 +8,8 @@ namespace MSFramework.AspNetCore.Extensions
 {
 	public static class FormFileExtensions
 	{
-		public static async Task<string> SaveAsync(this IFormFile formFile, string interval = "upload")
+		public static async Task<(string OriginName, string NewPath)> SaveAsync(this IFormFile formFile,
+			string interval = "upload")
 		{
 			using var stream = new MemoryStream();
 			await formFile.CopyToAsync(stream);
@@ -32,7 +33,7 @@ namespace MSFramework.AspNetCore.Extensions
 				File.WriteAllBytes(filePath, bytes);
 			}
 
-			return $"{path}/{fileName}";
+			return (formFile.FileName, $"{path}/{fileName}");
 		}
 	}
 }
