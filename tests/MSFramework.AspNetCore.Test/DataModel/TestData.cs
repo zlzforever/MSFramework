@@ -6,7 +6,7 @@ namespace MSFramework.AspNetCore.Test.DataModel
 {
 	public class TestData: ModificationAuditedAggregateRoot
 	{
-		public TestData() : base(CombGuid.NewGuid())
+		public TestData() : base(ObjectId.NewId())
 		{
 		}
 	}

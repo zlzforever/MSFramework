@@ -1,5 +1,6 @@
 ﻿using System;
 using MSFramework.Application;
+using MSFramework.Common;
 using Ordering.Domain.AggregateRoot;
 
 namespace Ordering.Application.Command
@@ -8,6 +9,6 @@ namespace Ordering.Application.Command
 	{
 		public Address NewAddress { get; set; }
 		
-		public Guid OrderId { get; set; }
+		public ObjectId OrderId { get; set; }
     }
 }

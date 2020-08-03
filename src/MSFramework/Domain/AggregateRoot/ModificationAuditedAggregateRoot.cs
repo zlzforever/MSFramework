@@ -1,10 +1,11 @@
 using System;
+using MSFramework.Common;
 
 namespace MSFramework.Domain.AggregateRoot
 {
-	public abstract class ModificationAuditedAggregateRoot : ModificationAuditedAggregateRoot<Guid>
+	public abstract class ModificationAuditedAggregateRoot : ModificationAuditedAggregateRoot<ObjectId>
 	{
-		protected ModificationAuditedAggregateRoot(Guid id) : base(id)
+		protected ModificationAuditedAggregateRoot(ObjectId id) : base(id)
 		{
 		}
 	}

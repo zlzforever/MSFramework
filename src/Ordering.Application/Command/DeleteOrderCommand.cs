@@ -1,13 +1,14 @@
 using System;
 using MSFramework.Application;
+using MSFramework.Common;
 
 namespace Ordering.Application.Command
 {
 	public class DeleteOrderCommand : IRequest
 	{
-		public Guid OrderId { get; private set; }
+		public ObjectId OrderId { get; private set; }
 
-		public DeleteOrderCommand(Guid orderId)
+		public DeleteOrderCommand(ObjectId orderId)
 		{
 			OrderId = orderId;
 		}

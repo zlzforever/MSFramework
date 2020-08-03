@@ -9,26 +9,29 @@ using Ordering.Infrastructure;
 namespace Ordering.Infrastructure.Migrations
 {
     [DbContext(typeof(OrderingContext))]
-    [Migration("20200724125723_init")]
+    [Migration("20200803060828_init")]
     partial class init
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "3.1.5")
+                .HasAnnotation("ProductVersion", "3.1.6")
                 .HasAnnotation("Relational:MaxIdentifierLength", 64);
 
             modelBuilder.Entity("MSFramework.Audit.AuditEntity", b =>
                 {
-                    b.Property<Guid>("Id")
+                    b.Property<string>("Id")
                         .HasColumnName("id")
-                        .HasColumnType("char(36)");
+                        .HasColumnType("varchar(36) CHARACTER SET utf8mb4");
 
                     b.Property<string>("EntityId")
                         .HasColumnName("entity_id")
                         .HasColumnType("varchar(255) CHARACTER SET utf8mb4")
                         .HasMaxLength(255);
+
+                    b.Property<string>("OperationId")
+                        .HasColumnType("varchar(36) CHARACTER SET utf8mb4");
 
                     b.Property<string>("OperationType")
                         .HasColumnName("operation_type")
@@ -40,12 +43,14 @@ namespace Ordering.Infrastructure.Migrations
                         .HasColumnType("varchar(255) CHARACTER SET utf8mb4")
                         .HasMaxLength(255);
 
-                    b.Property<Guid?>("audit_operation_id")
-                        .HasColumnType("char(36)");
+                    b.Property<string>("audit_operation_id")
+                        .HasColumnType("varchar(36) CHARACTER SET utf8mb4");
 
                     b.HasKey("Id");
 
                     b.HasIndex("EntityId");
+
+                    b.HasIndex("OperationId");
 
                     b.HasIndex("audit_operation_id");
 
@@ -54,9 +59,9 @@ namespace Ordering.Infrastructure.Migrations
 
             modelBuilder.Entity("MSFramework.Audit.AuditOperation", b =>
                 {
-                    b.Property<Guid>("Id")
+                    b.Property<string>("Id")
                         .HasColumnName("id")
-                        .HasColumnType("char(36)");
+                        .HasColumnType("varchar(36) CHARACTER SET utf8mb4");
 
                     b.Property<string>("ApplicationName")
                         .HasColumnName("application_name")
@@ -113,9 +118,12 @@ namespace Ordering.Infrastructure.Migrations
 
             modelBuilder.Entity("MSFramework.Audit.AuditProperty", b =>
                 {
-                    b.Property<Guid>("Id")
+                    b.Property<string>("Id")
                         .HasColumnName("id")
-                        .HasColumnType("char(36)");
+                        .HasColumnType("varchar(36) CHARACTER SET utf8mb4");
+
+                    b.Property<string>("EntityId")
+                        .HasColumnType("varchar(36) CHARACTER SET utf8mb4");
 
                     b.Property<string>("Name")
                         .HasColumnName("name")
@@ -135,10 +143,12 @@ namespace Ordering.Infrastructure.Migrations
                         .HasColumnType("varchar(255) CHARACTER SET utf8mb4")
                         .HasMaxLength(255);
 
-                    b.Property<Guid?>("audit_entity_id")
-                        .HasColumnType("char(36)");
+                    b.Property<string>("audit_entity_id")
+                        .HasColumnType("varchar(36) CHARACTER SET utf8mb4");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("EntityId");
 
                     b.HasIndex("audit_entity_id");
 
@@ -147,9 +157,9 @@ namespace Ordering.Infrastructure.Migrations
 
             modelBuilder.Entity("MSFramework.Function.FunctionDefine", b =>
                 {
-                    b.Property<Guid>("Id")
+                    b.Property<string>("Id")
                         .HasColumnName("id")
-                        .HasColumnType("char(36)");
+                        .HasColumnType("varchar(36) CHARACTER SET utf8mb4");
 
                     b.Property<string>("Code")
                         .HasColumnName("code")
@@ -214,8 +224,8 @@ namespace Ordering.Infrastructure.Migrations
 
             modelBuilder.Entity("Ordering.Domain.AggregateRoot.Order", b =>
                 {
-                    b.Property<Guid>("Id")
-                        .HasColumnType("char(36)");
+                    b.Property<string>("Id")
+                        .HasColumnType("varchar(36) CHARACTER SET utf8mb4");
 
                     b.Property<DateTimeOffset>("CreationTime")
                         .HasColumnType("datetime(6)");
@@ -240,14 +250,14 @@ namespace Ordering.Infrastructure.Migrations
 
             modelBuilder.Entity("Ordering.Domain.AggregateRoot.OrderItem", b =>
                 {
-                    b.Property<Guid>("Id")
-                        .HasColumnType("char(36)");
+                    b.Property<string>("Id")
+                        .HasColumnType("varchar(36) CHARACTER SET utf8mb4");
 
                     b.Property<decimal>("Discount")
                         .HasColumnType("decimal(65,30)");
 
-                    b.Property<Guid?>("OrderId")
-                        .HasColumnType("char(36)");
+                    b.Property<string>("OrderId")
+                        .HasColumnType("varchar(36) CHARACTER SET utf8mb4");
 
                     b.Property<string>("PictureUrl")
                         .HasColumnType("longtext CHARACTER SET utf8mb4");
@@ -274,8 +284,8 @@ namespace Ordering.Infrastructure.Migrations
 
             modelBuilder.Entity("Ordering.Domain.AggregateRoot.Product", b =>
                 {
-                    b.Property<Guid>("Id")
-                        .HasColumnType("char(36)");
+                    b.Property<string>("Id")
+                        .HasColumnType("varchar(36) CHARACTER SET utf8mb4");
 
                     b.Property<string>("Name")
                         .HasColumnType("varchar(256) CHARACTER SET utf8mb4")
@@ -291,6 +301,10 @@ namespace Ordering.Infrastructure.Migrations
 
             modelBuilder.Entity("MSFramework.Audit.AuditEntity", b =>
                 {
+                    b.HasOne("MSFramework.Audit.AuditOperation", "Operation")
+                        .WithMany()
+                        .HasForeignKey("OperationId");
+
                     b.HasOne("MSFramework.Audit.AuditOperation", null)
                         .WithMany("Entities")
                         .HasForeignKey("audit_operation_id");
@@ -298,6 +312,10 @@ namespace Ordering.Infrastructure.Migrations
 
             modelBuilder.Entity("MSFramework.Audit.AuditProperty", b =>
                 {
+                    b.HasOne("MSFramework.Audit.AuditEntity", "Entity")
+                        .WithMany()
+                        .HasForeignKey("EntityId");
+
                     b.HasOne("MSFramework.Audit.AuditEntity", null)
                         .WithMany("Properties")
                         .HasForeignKey("audit_entity_id");
@@ -307,8 +325,8 @@ namespace Ordering.Infrastructure.Migrations
                 {
                     b.OwnsOne("Ordering.Domain.AggregateRoot.Address", "Address", b1 =>
                         {
-                            b1.Property<Guid>("OrderId")
-                                .HasColumnType("char(36)");
+                            b1.Property<string>("OrderId")
+                                .HasColumnType("varchar(36) CHARACTER SET utf8mb4");
 
                             b1.Property<string>("City")
                                 .HasColumnType("longtext CHARACTER SET utf8mb4");

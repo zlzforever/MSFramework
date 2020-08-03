@@ -27,7 +27,7 @@ namespace MSFramework.Function
 		/// </summary>
 		public bool Expired { get; private set; }
 
-		public FunctionDefine(string name, string code, string description) : base(CombGuid.NewGuid())
+		public FunctionDefine(string name, string code, string description) : base(ObjectId.NewId())
 		{
 			Name = name;
 			Code = code;

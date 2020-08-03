@@ -2,13 +2,14 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using MSFramework.Application;
+using MSFramework.Common;
 using MSFramework.Domain;
 using Ordering.Domain.AggregateRoot;
 using Ordering.Domain.Repository;
 
 namespace Ordering.Application.Command
 {
-	public class CreateOrderCommandHandler : IRequestHandler<CreateOrderCommand>
+	public class CreateOrderCommandHandler : IRequestHandler<CreateOrderCommand, ObjectId>
 	{
 		private readonly IOrderingRepository _orderRepository;
 		private readonly IUnitOfWorkManager _unitOfWorkManager;
@@ -25,7 +26,7 @@ namespace Ordering.Application.Command
 		/// </summary>
 		/// <param name="command"></param>
 		/// <returns></returns>
-		public async Task HandleAsync(CreateOrderCommand command, CancellationToken cancellationToken)
+		public async Task<ObjectId> HandleAsync(CreateOrderCommand command, CancellationToken cancellationToken)
 		{
 			var order = new Order(
 				command.UserId,
@@ -33,7 +34,7 @@ namespace Ordering.Application.Command
 				command.Description,
 				command.OrderItems.Select(x => x.ToOrderItem()).ToList());
 			await _orderRepository.InsertAsync(order);
-			await _unitOfWorkManager.CommitAsync();
+			return order.Id;
 		}
 	}
 }

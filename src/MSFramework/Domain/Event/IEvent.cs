@@ -1,4 +1,5 @@
 using System;
+using MSFramework.Common;
 
 namespace MSFramework.Domain.Event
 {
@@ -7,7 +8,7 @@ namespace MSFramework.Domain.Event
 		/// <summary>
 		/// 事件标识
 		/// </summary>
-		Guid EventId { get; }
+		ObjectId EventId { get; }
 
 		/// <summary>
 		/// 事件发生时间

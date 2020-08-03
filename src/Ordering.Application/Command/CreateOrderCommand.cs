@@ -1,11 +1,12 @@
 using System;
 using System.Collections.Generic;
 using MSFramework.Application;
+using MSFramework.Common;
 using Ordering.Domain.AggregateRoot;
 
 namespace Ordering.Application.Command
 {
-	public class CreateOrderCommand: IRequest
+	public class CreateOrderCommand: IRequest<ObjectId>
 	{
 		public string UserId { get; set; }
 

@@ -7,6 +7,7 @@ using MSFramework;
 using MSFramework.AspNetCore;
 using MSFramework.AspNetCore.Extensions;
 using MSFramework.AspNetCore.Filters;
+using MSFramework.AspNetCore.Infrastructure;
 using MSFramework.Audit;
 using MSFramework.AutoMapper;
 using MSFramework.DependencyInjection;
@@ -14,6 +15,8 @@ using MSFramework.Ef;
 using MSFramework.Ef.MySql;
 using MSFramework.Extensions;
 using MSFramework.Migrator.MySql;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Converters;
 using Ordering.Domain;
 using Ordering.Infrastructure;
 using Serilog;
@@ -34,15 +37,17 @@ namespace Ordering.API
 		{
 			Configuration.Print(x => Log.Logger.Information(x));
 
+
 			services.AddControllers(x =>
 				{
 					x.Filters.UseUnitOfWork();
 					x.Filters.UseFunctionFilter();
 					x.Filters.UseAudit();
 					x.Filters.UseGlobalExceptionFilter();
+					x.ModelBinderProviders.Insert(0, new ObjectIdModelBinderProvider());
 				})
 				.UseInvalidModelStateResponse()
-				.AddNewtonsoftJson();
+				.AddNewtonsoftJson(x => { x.SerializerSettings.Converters.Add(new ObjectIdConverter()); });
 
 			services.AddSwaggerGen(c =>
 			{

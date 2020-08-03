@@ -2,14 +2,15 @@ using System;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
+using MSFramework.Common;
 using MSFramework.Domain;
 using MSFramework.Domain.AggregateRoot;
 
 namespace MSFramework.Ef.Repository
 {
-	public abstract class EfRepository<TEntity> : EfRepository<TEntity, Guid>
+	public abstract class EfRepository<TEntity> : EfRepository<TEntity, ObjectId>
 		, IRepository<TEntity>
-		where TEntity : class, IAggregateRoot<Guid>
+		where TEntity : class, IAggregateRoot<ObjectId>
 	{
 		protected EfRepository(DbContextFactory dbContextFactory) : base(dbContextFactory)
 		{
