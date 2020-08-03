@@ -1,7 +1,7 @@
 using System;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using MSFramework.Initializer;
+using MSFramework.Initializers;
 
 namespace MSFramework.Migrator.MySql
 {
@@ -10,7 +10,7 @@ namespace MSFramework.Migrator.MySql
 		public static MSFrameworkBuilder UseMySqlMigrator(this MSFrameworkBuilder builder, Type type,
 			string connectionString)
 		{
-			builder.Services.AddSingleton<InitializerBase>(provider => new MySqlMigrator(type, connectionString,
+			builder.Services.AddSingleton<Initializer>(provider => new MySqlMigrator(type, connectionString,
 				provider.GetRequiredService<ILogger<MySqlMigrator>>()));
 			return builder;
 		}

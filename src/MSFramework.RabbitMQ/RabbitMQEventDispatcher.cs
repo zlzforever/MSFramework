@@ -2,7 +2,7 @@ using System;
 using System.Collections.Concurrent;
 using System.Threading.Tasks;
 using MessagePack;
-using MSFramework.Domain.Event;
+using MSFramework.Domain.Events;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
 

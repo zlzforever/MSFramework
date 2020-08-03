@@ -3,10 +3,10 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
-using MSFramework.AspNetCore.Function;
+using MSFramework.AspNetCore.Functions;
 using MSFramework.AspNetCore.Infrastructure;
-using MSFramework.Function;
-using ISession = MSFramework.Domain.ISession;
+using MSFramework.Functions;
+using ISession = MSFramework.Application.ISession;
 
 namespace MSFramework.AspNetCore
 {

@@ -11,8 +11,6 @@ namespace MSFramework.AutoMapper
 			_mapper = mapper;
 		}
 
-
-		
 		public TDestination Map<TDestination>(object source)
 		{
 			return _mapper.Map<TDestination>(source);

@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using MSFramework.AspNetCore.Extensions;
-using MSFramework.Function;
+using MSFramework.Functions;
 
 namespace MSFramework.AspNetCore.Filters
 {

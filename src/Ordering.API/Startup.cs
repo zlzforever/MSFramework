@@ -8,7 +8,7 @@ using MSFramework.AspNetCore;
 using MSFramework.AspNetCore.Extensions;
 using MSFramework.AspNetCore.Filters;
 using MSFramework.AspNetCore.Infrastructure;
-using MSFramework.Audit;
+using MSFramework.Audits;
 using MSFramework.AutoMapper;
 using MSFramework.DependencyInjection;
 using MSFramework.Ef;

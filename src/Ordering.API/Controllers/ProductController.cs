@@ -8,15 +8,15 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using MSFramework;
 using MSFramework.AspNetCore;
-using MSFramework.AspNetCore.Api;
-using MSFramework.Audit;
+using MSFramework.AspNetCore.Mvc;
+using MSFramework.Audits;
 using MSFramework.Common;
 using MSFramework.Domain;
+using MSFramework.Ef.Repositories;
 using MSFramework.Extensions;
-using MSFramework.Ef.Repository;
 using MSFramework.Mapper;
-using Ordering.Domain.AggregateRoot;
-using Ordering.Domain.Repository;
+using Ordering.Domain.AggregateRoots;
+using Ordering.Domain.Repositories;
 
 namespace Ordering.API.Controllers
 {

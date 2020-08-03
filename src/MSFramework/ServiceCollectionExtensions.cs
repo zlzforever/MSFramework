@@ -6,10 +6,10 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Logging;
 using MSFramework.Application;
-using MSFramework.Audit;
+using MSFramework.Audits;
 using MSFramework.Domain;
-using MSFramework.Domain.Event;
-using MSFramework.Initializer;
+using MSFramework.Domain.Events;
+using MSFramework.Initializers;
 using MSFramework.Reflection;
 
 namespace MSFramework
@@ -97,7 +97,7 @@ namespace MSFramework
 		{
 			using var scope = applicationServices.CreateScope();
 			var logger = scope.ServiceProvider.GetRequiredService<ILoggerFactory>().CreateLogger("Initializer");
-			var initializers = scope.ServiceProvider.GetServices<InitializerBase>().OrderBy(x => x.Order).ToList();
+			var initializers = scope.ServiceProvider.GetServices<Initializer>().OrderBy(x => x.Order).ToList();
 			logger.LogInformation($"{string.Join(", ", initializers.Select(x => x.GetType().FullName))}");
 			foreach (var initializer in initializers)
 			{

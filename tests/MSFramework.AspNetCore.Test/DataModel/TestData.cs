@@ -1,10 +1,10 @@
 ﻿using System;
 using MSFramework.Common;
-using MSFramework.Domain.AggregateRoot;
+using MSFramework.Domain;
 
 namespace MSFramework.AspNetCore.Test.DataModel
 {
-	public class TestData: ModificationAuditedAggregateRoot
+	public class TestData: ModificationAggregateRoot
 	{
 		public TestData() : base(ObjectId.NewId())
 		{

@@ -12,11 +12,11 @@ using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using MSFramework.Audit;
+using MSFramework.Application;
+using MSFramework.Audits;
 using MSFramework.Common;
 using MSFramework.Domain;
-using MSFramework.Domain.AggregateRoot;
-using MSFramework.Domain.Event;
+using MSFramework.Domain.Events;
 using MSFramework.Ef.Extensions;
 using MSFramework.Ef.Infrastructure;
 
@@ -339,23 +339,23 @@ namespace MSFramework.Ef
 
 		protected virtual void ApplyConceptsForAddedEntity(EntityEntry entry, string userId, string userName)
 		{
-			if (entry.Entity is ICreationAudited creationAudited)
+			if (entry.Entity is ICreation creationAudited)
 			{
-				creationAudited.SetCreationAudited(userId, userName);
+				creationAudited.SetCreation(userId, userName);
 			}
 		}
 
 		protected virtual void ApplyConceptsForModifiedEntity(EntityEntry entry, string userId, string userName)
 		{
-			if (entry.Entity is IModificationAudited creationAudited)
+			if (entry.Entity is IModification creationAudited)
 			{
-				creationAudited.SetModificationAudited(userId, userName);
+				creationAudited.SetModification(userId, userName);
 			}
 		}
 
 		protected virtual void ApplyConceptsForDeletedEntity(EntityEntry entry, string userId, string userName)
 		{
-			if (entry.Entity is IDeletionAudited deletionAudited)
+			if (entry.Entity is IDeletion deletionAudited)
 			{
 				entry.Reload();
 				entry.State = EntityState.Modified;

@@ -1,8 +1,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using MSFramework.Domain.AggregateRoot;
-using MSFramework.Domain.Entity;
+using MSFramework.Domain;
 
 namespace MSFramework.Ef
 {

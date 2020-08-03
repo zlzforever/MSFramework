@@ -6,8 +6,8 @@ using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using MSFramework.Audit;
 using MSFramework.AspNetCore.Extensions;
+using MSFramework.Audits;
 using MSFramework.Domain;
 using MSFramework.Extensions;
 
@@ -53,11 +53,11 @@ namespace MSFramework.AspNetCore.Filters
 			if (context.HttpContext.User?.Identity != null && context.HttpContext.User.Identity.IsAuthenticated &&
 			    context.HttpContext.User.Identity is ClaimsIdentity identity)
 			{
-				_auditedOperation.SetCreationAudited(identity.GetUserId(), identity.GetUserName());
+				_auditedOperation.SetCreation(identity.GetUserId(), identity.GetUserName());
 			}
 			else
 			{
-				_auditedOperation.SetCreationAudited("Anonymous", "Anonymous");
+				_auditedOperation.SetCreation("Anonymous", "Anonymous");
 			}
 		}
 

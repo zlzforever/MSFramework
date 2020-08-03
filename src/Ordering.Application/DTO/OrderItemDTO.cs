@@ -1,4 +1,0 @@
-namespace Ordering.Application.DTO
-{
-
-}

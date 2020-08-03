@@ -1,7 +1,6 @@
 using System;
 using System.Threading.Tasks;
 using MSFramework.Common;
-using MSFramework.Domain.AggregateRoot;
 
 namespace MSFramework.Domain
 {
