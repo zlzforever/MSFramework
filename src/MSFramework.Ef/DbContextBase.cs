@@ -1,16 +1,23 @@
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
+using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
+using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
+using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using MSFramework.Audit;
+using MSFramework.Common;
 using MSFramework.Domain;
 using MSFramework.Domain.AggregateRoot;
 using MSFramework.Domain.Event;
+using MSFramework.Ef.Extensions;
 using MSFramework.Ef.Infrastructure;
 
 namespace MSFramework.Ef
@@ -46,6 +53,8 @@ namespace MSFramework.Ef
 				register.RegisterTo(modelBuilder);
 				_logger.LogDebug($"将实体类 “{register.EntityType}” 注册到上下文 “{contextType}” 中");
 			}
+
+			modelBuilder.UseObjectId();
 
 			_logger.LogInformation($"上下文 “{contextType}” 注册了 {registers.Length} 个实体类");
 		}

@@ -7,9 +7,9 @@ namespace MSFramework.Audit
 	/// <summary>
 	/// 实体属性审计信息
 	/// </summary>
-	public class AuditProperty : EntityBase<Guid>
+	public class AuditProperty : EntityBase<ObjectId>
 	{
-		private AuditProperty() : base(CombGuid.NewGuid())
+		private AuditProperty() : base(ObjectId.NewId())
 		{
 		}
 

@@ -38,7 +38,7 @@ namespace Ordering.Domain.AggregateRoot
 
 		public string Description { get; private set; }
 
-		private Order() : base(CombGuid.NewGuid())
+		private Order() : base(ObjectId.NewId())
 		{
 		}
 

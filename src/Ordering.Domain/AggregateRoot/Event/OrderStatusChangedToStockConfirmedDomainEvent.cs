@@ -1,4 +1,5 @@
 using System;
+using MSFramework.Common;
 using MSFramework.Domain.Event;
 
 namespace Ordering.Domain.AggregateRoot.Event
@@ -6,9 +7,9 @@ namespace Ordering.Domain.AggregateRoot.Event
 	public class OrderStatusChangedToStockConfirmedDomainEvent
 		: EventBase
 	{
-		public Guid OrderId { get; }
+		public ObjectId OrderId { get; }
 
-		public OrderStatusChangedToStockConfirmedDomainEvent(Guid orderId)
+		public OrderStatusChangedToStockConfirmedDomainEvent(ObjectId orderId)
 			=> OrderId = orderId;
 	}
 }

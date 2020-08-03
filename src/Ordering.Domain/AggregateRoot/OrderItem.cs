@@ -4,7 +4,7 @@ using MSFramework.Domain.Entity;
 
 namespace Ordering.Domain.AggregateRoot
 {
-	public class OrderItem : EntityBase<Guid>
+	public class OrderItem : EntityBase<ObjectId>
 	{
 		// DDD Patterns comment
 		// Using private fields, allowed since EF Core 1.1, is a much better encapsulation
@@ -16,7 +16,7 @@ namespace Ordering.Domain.AggregateRoot
 		public int Units { get; private set; }
 		public Guid ProductId { get; private set; }
 
-		private OrderItem() : base(CombGuid.NewGuid())
+		private OrderItem() : base(ObjectId.NewId())
 		{
 		}
 

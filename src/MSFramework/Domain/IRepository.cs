@@ -1,5 +1,6 @@
 using System;
 using System.Threading.Tasks;
+using MSFramework.Common;
 using MSFramework.Domain.AggregateRoot;
 
 namespace MSFramework.Domain
@@ -11,7 +12,7 @@ namespace MSFramework.Domain
 	{
 	}
 
-	public interface IRepository<TEntity> : IRepository<TEntity, Guid>
+	public interface IRepository<TEntity> : IRepository<TEntity, ObjectId>
 		where TEntity : IAggregateRoot
 	{
 	}

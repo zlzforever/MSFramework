@@ -1,6 +1,7 @@
 using System;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
+using MSFramework.Common;
 using MSFramework.Ef;
 using MSFramework.Ef.Repository;
 using Ordering.Domain.AggregateRoot;
@@ -15,7 +16,7 @@ namespace Ordering.Infrastructure.Repository
 		{
 		}
 
-		public override Task<Order> GetAsync(Guid id)
+		public override Task<Order> GetAsync(ObjectId id)
 		{
 			return CurrentSet.Include(x => x.OrderItems).FirstOrDefaultAsync(x => x.Id == id);
 		}

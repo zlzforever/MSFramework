@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using MSFramework.Common;
 using MSFramework.Domain.Event;
 
 namespace Ordering.Domain.AggregateRoot.Event
@@ -7,10 +8,10 @@ namespace Ordering.Domain.AggregateRoot.Event
 	public class OrderStatusChangedToAwaitingValidationDomainEvent
 		: EventBase
 	{
-		public Guid OrderId { get; }
+		public ObjectId OrderId { get; }
 		public IEnumerable<OrderItem> OrderItems { get; }
 
-		public OrderStatusChangedToAwaitingValidationDomainEvent(Guid orderId,
+		public OrderStatusChangedToAwaitingValidationDomainEvent(ObjectId orderId,
 			IEnumerable<OrderItem> orderItems)
 		{
 			OrderId = orderId;

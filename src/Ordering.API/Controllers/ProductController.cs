@@ -107,13 +107,13 @@ namespace Ordering.API.Controllers
 		}
 
 		[HttpGet]
-		public Product GetAsync(Guid productId)
+		public Product GetAsync(ObjectId productId)
 		{
 			return _productRepository.Get(productId);
 		}
 
 		[HttpDelete]
-		public Product DeleteAsync(Guid productId)
+		public Product DeleteAsync(ObjectId productId)
 		{
 			return _productRepository.Delete(productId);
 		}

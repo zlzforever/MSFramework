@@ -5,7 +5,7 @@ using MSFramework.Domain.AggregateRoot;
 
 namespace MSFramework.Audit
 {
-	public class AuditOperation : CreationAuditedAggregateRoot<Guid>
+	public class AuditOperation : CreationAuditedAggregateRoot<ObjectId>
 	{
 		/// <summary>
 		/// 应用名称
@@ -36,7 +36,7 @@ namespace MSFramework.Audit
 
 		public int Elapsed { get; private set; }
 
-		private AuditOperation() : base(CombGuid.NewGuid())
+		private AuditOperation() : base(ObjectId.NewId())
 		{
 			Entities = new List<AuditEntity>();
 		}

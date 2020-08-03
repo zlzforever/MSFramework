@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using MSFramework.Application;
 using MSFramework.AspNetCore;
+using MSFramework.Common;
 using Ordering.Application.Command;
 using Ordering.Application.Query;
 using Ordering.Domain.AggregateRoot;
@@ -69,7 +70,7 @@ namespace Ordering.API.Controllers
 		/// </summary>
 		/// <returns></returns>
 		[HttpPost]
-		public IActionResult CreateOrderAsync()
+		public async Task<ObjectId> CreateOrderAsync()
 		{
 			var random = new Random();
 			var items = new List<CreateOrderCommand.OrderItemDTO>();
@@ -87,9 +88,9 @@ namespace Ordering.API.Controllers
 				});
 			}
 
-			return Ok();
-			// return await _mediator.Send(new CreateOrderCommand(items, "HELLO",
-			// 	"上海", "张扬路500号", "上海", "中国", "200000", "what?"));
+
+			return await _commandExecutor.ExecuteAsync(new CreateOrderCommand(items, "HELLO", "上海", "张扬路500号", "上海",
+				"中国", "200000", "what?"));
 		}
 
 		[HttpDelete("{orderId}")]
@@ -100,7 +101,7 @@ namespace Ordering.API.Controllers
 		}
 
 		[HttpPut("{orderId}/address")]
-		public IActionResult ChangeOrderAddressAsync(Guid orderId,
+		public IActionResult ChangeOrderAddressAsync([FromRoute] ObjectId orderId,
 			[FromBody] ChangeOrderAddressCommand command)
 		{
 			command.OrderId = orderId;
@@ -112,7 +113,7 @@ namespace Ordering.API.Controllers
 		#region QUERY
 
 		[HttpGet("{orderId}")]
-		public async Task<IActionResult> GetOrderAsync(Guid orderId)
+		public async Task<IActionResult> GetOrderAsync([FromRoute]ObjectId orderId)
 		{
 			var order = await _orderingQuery.GetOrderAsync(orderId);
 			return Ok(order);

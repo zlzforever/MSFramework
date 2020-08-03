@@ -5,7 +5,7 @@ using MSFramework.Domain.Entity;
 
 namespace MSFramework.Audit
 {
-	public class AuditEntity : EntityBase<Guid>
+	public class AuditEntity : EntityBase<ObjectId>
 	{
 		public AuditEntity(string typeName, string entityId, OperationType operationType) : this()
 		{
@@ -14,7 +14,7 @@ namespace MSFramework.Audit
 			OperationType = operationType;
 		}
 
-		private AuditEntity() : base(CombGuid.NewGuid())
+		private AuditEntity() : base(ObjectId.NewId())
 		{
 			Properties = new List<AuditProperty>();
 		}

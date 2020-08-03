@@ -1,14 +1,15 @@
 using System;
 using System.Collections.Generic;
+using MSFramework.Common;
 using MSFramework.Domain.Entity;
 using MSFramework.Domain.Event;
 
 namespace MSFramework.Domain.AggregateRoot
 {
 	[Serializable]
-	public abstract class AggregateRootBase : AggregateRootBase<Guid>
+	public abstract class AggregateRootBase : AggregateRootBase<ObjectId>
 	{
-		protected AggregateRootBase(Guid id) : base(id)
+		protected AggregateRootBase(ObjectId id) : base(id)
 		{
 		}
 	}

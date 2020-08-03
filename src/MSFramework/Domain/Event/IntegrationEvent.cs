@@ -8,18 +8,18 @@ namespace MSFramework.Domain.Event
 		/// <summary>
 		/// 事件源标识
 		/// </summary>
-		public Guid EventId { get; private set; }
+		public ObjectId EventId { get; private set; }
 
 		/// <summary>
 		/// 事件发生时间
 		/// </summary>
 		public DateTimeOffset EventTime { get; private set; }
 
-		protected IntegrationEvent() : this(CombGuid.NewGuid(), DateTimeOffset.Now)
+		protected IntegrationEvent() : this(ObjectId.NewId(), DateTimeOffset.Now)
 		{
 		}
 
-		protected IntegrationEvent(Guid id, DateTimeOffset eventTime)
+		protected IntegrationEvent(ObjectId id, DateTimeOffset eventTime)
 		{
 			EventId = id;
 			EventTime = eventTime;

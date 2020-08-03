@@ -11,7 +11,7 @@ namespace Ordering.Infrastructure.Migrations
                 name: "audit_operation",
                 columns: table => new
                 {
-                    id = table.Column<Guid>(nullable: false),
+                    id = table.Column<string>(nullable: false),
                     creation_time = table.Column<DateTimeOffset>(nullable: false),
                     creation_user_id = table.Column<string>(maxLength: 256, nullable: true),
                     creation_user_name = table.Column<string>(maxLength: 256, nullable: true),
@@ -31,7 +31,7 @@ namespace Ordering.Infrastructure.Migrations
                 name: "function",
                 columns: table => new
                 {
-                    id = table.Column<Guid>(nullable: false),
+                    id = table.Column<string>(nullable: false),
                     creation_time = table.Column<DateTimeOffset>(nullable: false),
                     creation_user_id = table.Column<string>(maxLength: 256, nullable: true),
                     creation_user_name = table.Column<string>(maxLength: 256, nullable: true),
@@ -53,7 +53,7 @@ namespace Ordering.Infrastructure.Migrations
                 name: "Order",
                 columns: table => new
                 {
-                    Id = table.Column<Guid>(nullable: false),
+                    Id = table.Column<string>(nullable: false),
                     CreationTime = table.Column<DateTimeOffset>(nullable: false),
                     Address_Street = table.Column<string>(nullable: true),
                     Address_City = table.Column<string>(nullable: true),
@@ -74,7 +74,7 @@ namespace Ordering.Infrastructure.Migrations
                 name: "Product",
                 columns: table => new
                 {
-                    Id = table.Column<Guid>(nullable: false),
+                    Id = table.Column<string>(nullable: false),
                     Name = table.Column<string>(maxLength: 256, nullable: true),
                     Price = table.Column<int>(nullable: false)
                 },
@@ -87,15 +87,22 @@ namespace Ordering.Infrastructure.Migrations
                 name: "audit_entity",
                 columns: table => new
                 {
-                    id = table.Column<Guid>(nullable: false),
+                    id = table.Column<string>(nullable: false),
+                    OperationId = table.Column<string>(nullable: true),
                     type_name = table.Column<string>(maxLength: 255, nullable: true),
                     entity_id = table.Column<string>(maxLength: 255, nullable: true),
                     operation_type = table.Column<string>(maxLength: 255, nullable: true),
-                    audit_operation_id = table.Column<Guid>(nullable: true)
+                    audit_operation_id = table.Column<string>(nullable: true)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_audit_entity", x => x.id);
+                    table.ForeignKey(
+                        name: "FK_audit_entity_audit_operation_OperationId",
+                        column: x => x.OperationId,
+                        principalTable: "audit_operation",
+                        principalColumn: "id",
+                        onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
                         name: "FK_audit_entity_audit_operation_audit_operation_id",
                         column: x => x.audit_operation_id,
@@ -108,14 +115,14 @@ namespace Ordering.Infrastructure.Migrations
                 name: "OrderItem",
                 columns: table => new
                 {
-                    Id = table.Column<Guid>(nullable: false),
+                    Id = table.Column<string>(nullable: false),
                     ProductName = table.Column<string>(nullable: false),
                     PictureUrl = table.Column<string>(nullable: true),
                     UnitPrice = table.Column<decimal>(nullable: false),
                     Discount = table.Column<decimal>(nullable: false),
                     Units = table.Column<int>(nullable: false),
                     ProductId = table.Column<Guid>(nullable: false),
-                    OrderId = table.Column<Guid>(nullable: true)
+                    OrderId = table.Column<string>(nullable: true)
                 },
                 constraints: table =>
                 {
@@ -132,16 +139,23 @@ namespace Ordering.Infrastructure.Migrations
                 name: "audit_property",
                 columns: table => new
                 {
-                    id = table.Column<Guid>(nullable: false),
+                    id = table.Column<string>(nullable: false),
+                    EntityId = table.Column<string>(nullable: true),
                     name = table.Column<string>(maxLength: 255, nullable: true),
                     type = table.Column<string>(maxLength: 255, nullable: true),
                     original_value = table.Column<string>(nullable: true),
                     new_value = table.Column<string>(nullable: true),
-                    audit_entity_id = table.Column<Guid>(nullable: true)
+                    audit_entity_id = table.Column<string>(nullable: true)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_audit_property", x => x.id);
+                    table.ForeignKey(
+                        name: "FK_audit_property_audit_entity_EntityId",
+                        column: x => x.EntityId,
+                        principalTable: "audit_entity",
+                        principalColumn: "id",
+                        onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
                         name: "FK_audit_property_audit_entity_audit_entity_id",
                         column: x => x.audit_entity_id,
@@ -154,6 +168,11 @@ namespace Ordering.Infrastructure.Migrations
                 name: "IX_audit_entity_entity_id",
                 table: "audit_entity",
                 column: "entity_id");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_audit_entity_OperationId",
+                table: "audit_entity",
+                column: "OperationId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_audit_entity_audit_operation_id",
@@ -174,6 +193,11 @@ namespace Ordering.Infrastructure.Migrations
                 name: "IX_audit_operation_end_time",
                 table: "audit_operation",
                 column: "end_time");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_audit_property_EntityId",
+                table: "audit_property",
+                column: "EntityId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_audit_property_audit_entity_id",

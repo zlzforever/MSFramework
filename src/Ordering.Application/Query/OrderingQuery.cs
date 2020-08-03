@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
+using MSFramework.Common;
 using MSFramework.Ef;
 using Ordering.Domain.AggregateRoot;
 
@@ -32,7 +33,7 @@ namespace Ordering.Application.Query
 			return result;
 		}
 
-		public async Task<Order> GetOrderAsync(Guid orderId)
+		public async Task<Order> GetOrderAsync(ObjectId orderId)
 		{
 			var order = await _orderSet.AsNoTracking().FirstOrDefaultAsync(x => x.Id == orderId);
 			return order;

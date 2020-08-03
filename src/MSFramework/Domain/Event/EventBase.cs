@@ -8,7 +8,7 @@ namespace MSFramework.Domain.Event
 		/// <summary>
 		/// 事件源标识
 		/// </summary>
-		public Guid EventId { get; private set; }
+		public ObjectId EventId { get; private set; }
 
 		/// <summary>
 		/// 事件发生时间
@@ -20,11 +20,11 @@ namespace MSFramework.Domain.Event
 		/// </summary>
 		public object EventSource { get; private set; }
 
-		protected EventBase() : this(CombGuid.NewGuid(), DateTimeOffset.Now, null)
+		protected EventBase() : this(ObjectId.NewId(), DateTimeOffset.Now, null)
 		{
 		}
 
-		protected EventBase(Guid id, DateTimeOffset eventTime, object eventSource)
+		protected EventBase(ObjectId id, DateTimeOffset eventTime, object eventSource)
 		{
 			EventId = id;
 			EventTime = eventTime;

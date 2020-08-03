@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
+using MSFramework.Common;
 using Serilog;
 using Serilog.Events;
 
@@ -21,7 +22,6 @@ namespace Ordering.API
 				.WriteTo.Console().WriteTo.RollingFile("order.log")
 				.CreateLogger();
 			CreateHostBuilder(args).Build().Run();
-			
 		}
 
 		public static IHostBuilder CreateHostBuilder(string[] args) =>

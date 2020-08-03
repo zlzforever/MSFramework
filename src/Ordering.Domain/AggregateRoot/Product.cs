@@ -5,7 +5,7 @@ namespace Ordering.Domain.AggregateRoot
 {
 	public class Product : AggregateRootBase
 	{
-		public Product(string name, int price) : base(CombGuid.NewGuid())
+		public Product(string name, int price) : base(ObjectId.NewId())
 		{
 			Name = name;
 			Price = price;
