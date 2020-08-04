@@ -1,7 +1,7 @@
 using System;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
-using MSFramework.AspNetCore.Api;
+using MSFramework.AspNetCore.Mvc;
 
 namespace MSFramework.AspNetCore.Infrastructure
 {

@@ -15,10 +15,8 @@ namespace MSFramework.Extensions
 		public static string ComputeMD5(this string value, Encoding encoding = null)
 		{
 			value.NotNull(nameof(value));
-			if (encoding == null)
-			{
-				encoding = Encoding.UTF8;
-			}
+			
+			encoding ??= Encoding.UTF8;
 
 			var bytes = encoding.GetBytes(value);
 			return bytes.ComputeMD5();

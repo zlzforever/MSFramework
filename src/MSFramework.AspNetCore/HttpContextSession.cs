@@ -1,10 +1,10 @@
 using System.Security.Claims;
 using Microsoft.AspNetCore.Http;
-using ISession = MSFramework.Domain.ISession;
+using ISession = MSFramework.Application.ISession;
 
 namespace MSFramework.AspNetCore
 {
-	public class HttpContextSession : ISession
+	public class HttpContextSession : Application.ISession
 	{
 		private readonly IHttpContextAccessor _accessor;
 

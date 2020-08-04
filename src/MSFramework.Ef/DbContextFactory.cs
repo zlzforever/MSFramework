@@ -2,7 +2,6 @@ using System;
 using System.Collections.Concurrent;
 using Microsoft.Extensions.DependencyInjection;
 using MSFramework.Domain;
-using MSFramework.Domain.AggregateRoot;
 using MSFramework.Ef.Infrastructure;
 
 namespace MSFramework.Ef

@@ -1,6 +1,6 @@
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using MSFramework.Ef;
-using Ordering.Domain.AggregateRoot;
+using Ordering.Domain.AggregateRoots;
 
 namespace Ordering.Infrastructure.EntityConfigurations
 {

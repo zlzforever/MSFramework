@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.Extensions.Logging;
-using MSFramework.AspNetCore.Api;
+using MSFramework.AspNetCore.Mvc;
 
 namespace MSFramework.AspNetCore.Filters
 {

@@ -1,19 +1,11 @@
-﻿using System;
-using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc.Infrastructure;
+﻿using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.TestHost;
 using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Hosting;
-using MSFramework.AspNetCore.Function;
-using MSFramework.AspNetCore.Infrastructure;
 using MSFramework.AspNetCore.Test.EfPostgreSqlTest.Infrastructure;
 using MSFramework.DependencyInjection;
 using MSFramework.Ef;
 using MSFramework.Ef.PostgreSql;
-using MSFramework.Function;
 using Xunit;
 using Xunit.Abstractions;
 

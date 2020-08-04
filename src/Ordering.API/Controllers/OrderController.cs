@@ -5,10 +5,10 @@ using Microsoft.AspNetCore.Mvc;
 using MSFramework.Application;
 using MSFramework.AspNetCore;
 using MSFramework.Common;
-using Ordering.Application.Command;
-using Ordering.Application.Query;
-using Ordering.Domain.AggregateRoot;
-using Ordering.Domain.Repository;
+using Ordering.Application.Commands;
+using Ordering.Application.Queries;
+using Ordering.Domain.AggregateRoots;
+using Ordering.Domain.Repositories;
 
 
 namespace Ordering.API.Controllers

@@ -7,11 +7,11 @@ using System.Threading.Tasks;
 using Dapper;
 using Microsoft.Extensions.Logging;
 using MSFramework.Common;
-using MSFramework.Initializer;
+using MSFramework.Initializers;
 
 namespace MSFramework.Migrator
 {
-	public abstract class Migrator : InitializerBase, INotAutoRegisterInitializer
+	public abstract class Migrator : Initializer, INotAutoRegisterInitializer
 	{
 		protected readonly ILogger Logger;
 		protected readonly Type Type;

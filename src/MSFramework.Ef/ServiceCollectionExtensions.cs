@@ -4,8 +4,8 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Logging;
 using MSFramework.Ef.Infrastructure;
-using MSFramework.Ef.Initializer;
-using MSFramework.Initializer;
+using MSFramework.Ef.Initializers;
+using MSFramework.Initializers;
 
 namespace MSFramework.Ef
 {

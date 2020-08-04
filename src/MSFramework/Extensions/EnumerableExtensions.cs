@@ -98,8 +98,7 @@ namespace MSFramework.Extensions
 			keySelector.NotNull(nameof(keySelector));
 			return source.GroupBy(keySelector).Select(group => group.First());
 		}
-
-		[DebuggerStepThrough]
+		
 		public static bool IsNullOrEmpty<T>(this IEnumerable<T> list)
 		{
 			if (list == null)
