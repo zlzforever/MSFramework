@@ -203,6 +203,8 @@ namespace MSFramework.Ef
 				}
 			}
 
+			// todo: make sure sort is correct
+			domainEvents.Sort((x, y) => x.EventTime > y.EventTime ? 0 : 1);
 			return domainEvents;
 		}
 
