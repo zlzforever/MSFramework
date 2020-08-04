@@ -55,7 +55,7 @@ namespace MSFramework.Application
 			}
 
 			serviceCollection.TryAddSingleton(cache);
-			serviceCollection.TryAddScoped<IRequestExecutor, DefaultRequestExecutor>();
+			serviceCollection.TryAddScoped<IRequestProcessor, DefaultRequestProcessor>();
 
 			return serviceCollection;
 		}

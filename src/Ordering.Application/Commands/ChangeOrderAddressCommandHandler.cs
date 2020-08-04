@@ -6,7 +6,7 @@ using Ordering.Domain.Repositories;
 
 namespace Ordering.Application.Commands
 {
-	public class ChangeOrderAddressCommandHandler : IRequestHandler<ChangeOrderAddressCommand>
+	public class ChangeOrderAddressCommandHandler : IRequestHandler<ChangeOrderAddressCommand, int>
 	{
 		private readonly IOrderingRepository _orderRepository;
 		private readonly IUnitOfWorkManager _unitOfWorkManager;
@@ -24,7 +24,7 @@ namespace Ordering.Application.Commands
 		/// </summary>
 		/// <param name="command"></param>
 		/// <returns></returns>
-		public async Task HandleAsync(ChangeOrderAddressCommand command, CancellationToken cancellationToken)
+		public async Task<int> HandleAsync(ChangeOrderAddressCommand command, CancellationToken cancellationToken)
 		{
 			var order = await _orderRepository.GetAsync(command.OrderId);
 			if (order == null)

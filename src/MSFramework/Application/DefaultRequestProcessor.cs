@@ -7,12 +7,12 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace MSFramework.Application
 {
-	public class DefaultRequestExecutor : IRequestExecutor
+	public class DefaultRequestProcessor : IRequestProcessor
 	{
 		private readonly IServiceProvider _serviceProvider;
 		private readonly RequestHandlerTypeCache _cache;
 
-		public DefaultRequestExecutor(IServiceProvider serviceProvider)
+		public DefaultRequestProcessor(IServiceProvider serviceProvider)
 		{
 			_serviceProvider = serviceProvider;
 			_cache = _serviceProvider.GetRequiredService<RequestHandlerTypeCache>();
@@ -54,7 +54,7 @@ namespace MSFramework.Application
 			}
 		}
 
-		public async Task ExecuteAsync(IRequest request, CancellationToken cancellationToken = default)
+		public async Task ProcessAsync(IRequest request, CancellationToken cancellationToken = default)
 		{
 			if (request == null)
 			{
@@ -73,7 +73,7 @@ namespace MSFramework.Application
 			}
 		}
 
-		public async Task<TResult> ExecuteAsync<TResult>(IRequest<TResult> request,
+		public async Task<TResult> ProcessAsync<TResult>(IRequest<TResult> request,
 			CancellationToken cancellationToken = default)
 		{
 			if (request == null)

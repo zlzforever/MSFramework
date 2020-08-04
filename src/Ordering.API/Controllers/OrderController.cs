@@ -19,10 +19,10 @@ namespace Ordering.API.Controllers
 	{
 		private readonly IOrderingQuery _orderingQuery;
 		private readonly IOrderingRepository _orderRepository;
-		private readonly IRequestExecutor _commandExecutor;
+		private readonly IRequestProcessor _commandExecutor;
 
 		public OrderController(IOrderingRepository orderRepository,
-			IOrderingQuery orderingQuery, IRequestExecutor commandExecutor)
+			IOrderingQuery orderingQuery, IRequestProcessor commandExecutor)
 		{
 			_orderingQuery = orderingQuery;
 			_commandExecutor = commandExecutor;
@@ -55,14 +55,14 @@ namespace Ordering.API.Controllers
 		[HttpPost("test-command1")]
 		public async Task<string> TestCommand1Async([FromBody] TestCommand1 command)
 		{
-			var a = await _commandExecutor.ExecuteAsync(command, default);
+			var a = await _commandExecutor.ProcessAsync(command, default);
 			return a;
 		}
 
 		[HttpPost("test-command2")]
 		public async Task TestCommand2Async([FromBody] TestCommand2 command)
 		{
-			await _commandExecutor.ExecuteAsync(command, default);
+			await _commandExecutor.ProcessAsync(command, default);
 		}
 
 		/// <summary>
@@ -89,7 +89,7 @@ namespace Ordering.API.Controllers
 			}
 
 
-			return await _commandExecutor.ExecuteAsync(new CreateOrderCommand(items, "HELLO", "上海", "张扬路500号", "上海",
+			return await _commandExecutor.ProcessAsync(new CreateOrderCommand(items, "HELLO", "上海", "张扬路500号", "上海",
 				"中国", "200000", "what?"));
 		}
 
