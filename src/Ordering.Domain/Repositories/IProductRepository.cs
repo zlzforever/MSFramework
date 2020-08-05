@@ -1,7 +1,7 @@
 using System.Threading.Tasks;
-using MSFramework.Common;
 using MSFramework.DependencyInjection;
 using MSFramework.Domain;
+using MSFramework.Shared;
 using Ordering.Domain.AggregateRoots;
 
 namespace Ordering.Domain.Repositories

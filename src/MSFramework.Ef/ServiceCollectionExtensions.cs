@@ -25,7 +25,7 @@ namespace MSFramework.Ef
 			services.TryAddSingleton(provider =>
 			{
 				var configuration = provider.GetRequiredService<IConfiguration>();
-				return EntityFrameworkOptionsCollection.LoadFrom(configuration);
+				return new EntityFrameworkOptionsConfiguration(configuration);
 			});
 			services.TryAddSingleton<IEntityConfigurationTypeFinder>(provider =>
 			{

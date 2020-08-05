@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Hosting;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
-using MSFramework.Common;
+using MSFramework.Application;
+using Ordering.Application.Commands;
 using Serilog;
 using Serilog.Events;
 
@@ -11,6 +11,19 @@ namespace Ordering.API
 	{
 		public static void Main(string[] args)
 		{
+	
+			
+			var t1 = typeof(CreateOrderCommand);
+			var t2 = typeof(ChangeOrderAddressCommand);
+
+			var r1 = typeof(IRequest).IsAssignableFrom(t1);
+			var r2 = typeof(IRequest).IsAssignableFrom(t2);
+			var r3 = typeof(IRequest<>).IsAssignableFrom(t1);
+			var r4 = typeof(IRequest<>).IsAssignableFrom(t2);
+
+			var i = t1.GetInterfaces();
+
+			var a = i[0].GetGenericTypeDefinition();
 			Log.Logger = new LoggerConfiguration()
 				.MinimumLevel.Debug()
 				.MinimumLevel.Override("Microsoft.Hosting.Lifetime", LogEventLevel.Information)

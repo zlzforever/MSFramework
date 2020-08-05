@@ -1,5 +1,5 @@
 using System;
-using MSFramework.Common;
+using MSFramework.Shared;
 using Newtonsoft.Json;
 
 namespace MSFramework.AspNetCore.Infrastructure

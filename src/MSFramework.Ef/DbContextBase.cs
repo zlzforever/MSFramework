@@ -1,20 +1,14 @@
 using System;
 using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
-using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
-using Microsoft.EntityFrameworkCore.Metadata;
-using Microsoft.EntityFrameworkCore.Metadata.Internal;
-using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using MSFramework.Application;
 using MSFramework.Audits;
-using MSFramework.Common;
 using MSFramework.Domain;
 using MSFramework.Domain.Events;
 using MSFramework.Ef.Extensions;
@@ -34,6 +28,27 @@ namespace MSFramework.Ef
 			: base(options)
 		{
 			_serviceProvider = serviceProvider;
+
+			var unitOfWorkManager = _serviceProvider.GetService<IUnitOfWorkManager>();
+			unitOfWorkManager?.Register(this);
+		}
+
+		protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+		{
+			base.OnConfiguring(optionsBuilder);
+
+			var option = _serviceProvider.GetRequiredService<EntityFrameworkOptionsConfiguration>().Get(GetType());
+			Database.AutoTransactionsEnabled = option.AutoTransactionsEnabled;
+
+			if (option.EnableSensitiveDataLogging)
+			{
+				optionsBuilder.EnableSensitiveDataLogging();
+			}
+
+			if (option.LazyLoadingProxiesEnabled)
+			{
+				optionsBuilder.UseLazyLoadingProxies();
+			}
 		}
 
 		/// <summary>

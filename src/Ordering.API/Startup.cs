@@ -15,8 +15,6 @@ using MSFramework.Ef;
 using MSFramework.Ef.MySql;
 using MSFramework.Extensions;
 using MSFramework.Migrator.MySql;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Converters;
 using Ordering.Domain;
 using Ordering.Infrastructure;
 using Serilog;
@@ -62,7 +60,7 @@ namespace Ordering.API
 				builder.UseAutoMapper();
 				builder.UseDependencyInjectionScanner();
 				builder.UseEventDispatcher();
-				builder.UseRequestExecutor();
+				builder.UseRequestProcessor();
 				// builder.UseRabbitMQEventDispatcher(new RabbitMQOptions(), typeof(UserCheckoutAcceptedEvent));
 				// 启用审计服务
 				builder.UseAudit();

@@ -3,9 +3,6 @@ using Microsoft.AspNetCore.TestHost;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
 using MSFramework.AspNetCore.Extensions;
-using MSFramework.AspNetCore.Test.EfPostgreSqlTest.Infrastructure;
-using MSFramework.DependencyInjection;
-using MSFramework.Ef;
 using Xunit;
 using Xunit.Abstractions;
 

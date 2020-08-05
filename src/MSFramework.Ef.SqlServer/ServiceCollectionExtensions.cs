@@ -15,17 +15,8 @@ namespace MSFramework.Ef.SqlServer
 				var dbContextType = typeof(TDbContext);
 				var entryAssemblyName = dbContextType.Assembly.GetName().Name;
 
-				var store = EntityFrameworkOptionsCollection.LoadFrom(configuration);
+				var store = new EntityFrameworkOptionsConfiguration(configuration);
 				var option = store.Get(dbContextType);
-				if (option.DbContextType != dbContextType)
-				{
-					throw new ArgumentException("DbContextType is not correct");
-				}
-
-				if (option.EnableSensitiveDataLogging)
-				{
-					x.EnableSensitiveDataLogging();
-				}
 
 				x.UseSqlServer(option.ConnectionString, options => { options.MigrationsAssembly(entryAssemblyName); });
 			});

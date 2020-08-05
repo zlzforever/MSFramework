@@ -1,6 +1,5 @@
 using System.Security.Claims;
 using Microsoft.AspNetCore.Http;
-using ISession = MSFramework.Application.ISession;
 
 namespace MSFramework.AspNetCore
 {

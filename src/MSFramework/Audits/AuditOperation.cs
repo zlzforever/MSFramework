@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
-using MSFramework.Common;
 using MSFramework.Domain;
+using MSFramework.Shared;
 
 namespace MSFramework.Audits
 {

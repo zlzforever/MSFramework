@@ -1,5 +1,5 @@
 using AutoMapper;
-using MSFramework.Common;
+using MSFramework.Shared;
 
 namespace MSFramework.AutoMapper
 {

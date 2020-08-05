@@ -1,5 +1,5 @@
 using Microsoft.AspNetCore.Mvc.ModelBinding;
-using MSFramework.Common;
+using MSFramework.Shared;
 
 namespace MSFramework.AspNetCore.Infrastructure
 {

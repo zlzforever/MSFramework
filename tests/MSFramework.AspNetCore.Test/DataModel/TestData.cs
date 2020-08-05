@@ -1,6 +1,5 @@
-﻿using System;
-using MSFramework.Common;
-using MSFramework.Domain;
+﻿using MSFramework.Domain;
+using MSFramework.Shared;
 
 namespace MSFramework.AspNetCore.Test.DataModel
 {

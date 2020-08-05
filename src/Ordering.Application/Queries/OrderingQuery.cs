@@ -2,20 +2,21 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
-using MSFramework.Common;
 using MSFramework.Ef;
+using MSFramework.Shared;
 using Ordering.Domain.AggregateRoots;
+using Ordering.Infrastructure;
 
 namespace Ordering.Application.Queries
 {
 	public class OrderingQuery : IOrderingQuery
 	{
-		private readonly DbContext _context;
+		private readonly OrderingContext _context;
 		private readonly DbSet<Order> _orderSet;
 
-		public OrderingQuery(DbContextFactory dbContextFactory)
+		public OrderingQuery(OrderingContext context)
 		{
-			_context = dbContextFactory.GetDbContext<Order>();
+			_context = context;
 			_orderSet = _context.Set<Order>();
 		}
 

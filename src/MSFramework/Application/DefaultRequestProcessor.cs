@@ -1,5 +1,4 @@
 using System;
-using System.Linq;
 using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
@@ -16,42 +15,6 @@ namespace MSFramework.Application
 		{
 			_serviceProvider = serviceProvider;
 			_cache = _serviceProvider.GetRequiredService<RequestHandlerTypeCache>();
-		}
-
-		public void Register(Type requestType, Type handlerType)
-		{
-			if (requestType == null)
-			{
-				throw new ArgumentNullException(nameof(requestType));
-			}
-
-			if (handlerType == null)
-			{
-				throw new ArgumentNullException(nameof(handlerType));
-			}
-
-			if (!typeof(IRequest).IsAssignableFrom(requestType))
-			{
-				throw new ArgumentException(
-					$"Request {requestType.FullName} should inherit from IRequest or IRequest<>");
-			}
-
-			var handleRequestType = handlerType.GetInterface("IRequestHandler`1")?.GenericTypeArguments
-				.FirstOrDefault();
-			if (handleRequestType != null && handleRequestType == requestType)
-			{
-				if (_cache.ContainsKey(requestType))
-				{
-					throw new ArgumentException(
-						$"There are more than 1 request handler for request: [{requestType.FullName}]");
-				}
-
-				_cache.TryAdd(requestType, (handlerType, handlerType.GetMethod("HandleAsync")));
-			}
-			else
-			{
-				throw new ArgumentException($"Type {handlerType} is not a valid request handler");
-			}
 		}
 
 		public async Task ProcessAsync(IRequest request, CancellationToken cancellationToken = default)

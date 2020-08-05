@@ -6,8 +6,8 @@ using System.Linq;
 using System.Threading.Tasks;
 using Dapper;
 using Microsoft.Extensions.Logging;
-using MSFramework.Common;
 using MSFramework.Initializers;
+using MSFramework.Shared;
 
 namespace MSFramework.Migrator
 {

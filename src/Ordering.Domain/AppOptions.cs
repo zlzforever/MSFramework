@@ -1,4 +1,3 @@
-using System.Configuration;
 using Microsoft.Extensions.Configuration;
 using MSFramework.Application;
 

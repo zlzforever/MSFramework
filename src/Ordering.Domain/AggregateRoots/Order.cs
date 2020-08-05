@@ -2,8 +2,8 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
-using MSFramework.Common;
 using MSFramework.Domain;
+using MSFramework.Shared;
 using Ordering.Domain.AggregateRoots.Events;
 
 namespace Ordering.Domain.AggregateRoots

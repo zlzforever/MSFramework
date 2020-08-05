@@ -1,7 +1,8 @@
 using System;
 using System.IO;
+using MSFramework.Shared;
 
-namespace MSFramework.Common
+namespace MSFramework.Utilities
 {
 	public class DirectoryHelper
 	{
@@ -25,8 +26,8 @@ namespace MSFramework.Common
 		/// <param name="searchPatterns"> 要复制的文件扩展名数组 </param>
 		public static void Copy(string sourcePath, string targetPath, string[] searchPatterns = null)
 		{
-			sourcePath.NotNullOrWhiteSpace("sourcePath");
-			targetPath.NotNullOrWhiteSpace("targetPath");
+			Check.NotEmpty(sourcePath, nameof(sourcePath));
+			Check.NotEmpty(targetPath, nameof(targetPath));
 
 			if (!Directory.Exists(sourcePath))
 			{
@@ -86,8 +87,7 @@ namespace MSFramework.Common
 		/// <returns> 是否成功 </returns>
 		public static bool Delete(string directory, bool isDeleteRoot = true)
 		{
-			directory.NotNullOrWhiteSpace("directory");
-
+			Check.NotEmpty(directory, nameof(directory));
 			var flag = false;
 			var dirPathInfo = new DirectoryInfo(directory);
 			if (dirPathInfo.Exists)

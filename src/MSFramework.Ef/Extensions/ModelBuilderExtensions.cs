@@ -1,6 +1,6 @@
 using Microsoft.EntityFrameworkCore;
-using MSFramework.Common;
 using MSFramework.Ef.Infrastructure;
+using MSFramework.Shared;
 
 namespace MSFramework.Ef.Extensions
 {

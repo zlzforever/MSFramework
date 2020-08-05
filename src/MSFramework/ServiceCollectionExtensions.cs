@@ -23,14 +23,14 @@ namespace MSFramework
 			return builder;
 		}
 
-		public static MSFrameworkBuilder UseRequestExecutor(this MSFrameworkBuilder builder)
+		public static MSFrameworkBuilder UseRequestProcessor(this MSFrameworkBuilder builder)
 		{
 			var assemblies = AssemblyFinder.GetAllList();
-			builder.UseRequestExecutor(assemblies.ToArray());
+			builder.UseRequestProcessor(assemblies.ToArray());
 			return builder;
 		}
 
-		public static MSFrameworkBuilder UseRequestExecutor(this MSFrameworkBuilder builder, params Type[] commandTypes)
+		public static MSFrameworkBuilder UseRequestProcessor(this MSFrameworkBuilder builder, params Type[] commandTypes)
 		{
 			var excludeAssembly = typeof(MSFrameworkBuilder).Assembly;
 			var assemblies = commandTypes.Select(x => x.Assembly).ToList();
@@ -40,7 +40,7 @@ namespace MSFramework
 				assemblies.Add(excludeAssembly);
 			}
 
-			builder.UseRequestExecutor(assemblies.ToArray());
+			builder.UseRequestProcessor(assemblies.ToArray());
 			return builder;
 		}
 
@@ -65,10 +65,10 @@ namespace MSFramework
 			return builder;
 		}
 
-		public static MSFrameworkBuilder UseRequestExecutor(this MSFrameworkBuilder builder,
+		public static MSFrameworkBuilder UseRequestProcessor(this MSFrameworkBuilder builder,
 			params Assembly[] assemblies)
 		{
-			builder.Services.AddRequestExecutor(assemblies);
+			builder.Services.AddRequestProcessor(assemblies);
 			return builder;
 		}
 

@@ -1,12 +1,12 @@
 using System;
 using System.Collections.Generic;
 using MSFramework.Application;
-using MSFramework.Common;
+using MSFramework.Shared;
 using Ordering.Domain.AggregateRoots;
 
 namespace Ordering.Application.Commands
 {
-	public class CreateOrderCommand: IRequest<ObjectId>
+	public class CreateOrderCommand : IRequest<ObjectId>
 	{
 		public string UserId { get; set; }
 
@@ -24,7 +24,7 @@ namespace Ordering.Application.Commands
 
 		public List<OrderItemDTO> OrderItems { get; }
 
- 
+
 		public CreateOrderCommand(List<OrderItemDTO> basketItems, string userId, string city,
 			string street, string state, string country, string zipcode, string description)
 		{
@@ -38,7 +38,7 @@ namespace Ordering.Application.Commands
 			ZipCode = zipcode;
 			Description = description;
 		}
-		
+
 		public class OrderItemDTO
 		{
 			public Guid ProductId { get; set; }

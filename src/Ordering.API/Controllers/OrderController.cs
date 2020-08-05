@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using MSFramework.Application;
 using MSFramework.AspNetCore;
-using MSFramework.Common;
+using MSFramework.Shared;
 using Ordering.Application.Commands;
 using Ordering.Application.Queries;
 using Ordering.Domain.AggregateRoots;

@@ -4,7 +4,7 @@ using System.Net;
 using System.Security.Cryptography;
 using System.Text;
 
-namespace MSFramework.Common
+namespace MSFramework.Shared
 {
 	public class ObjectId : IEquatable<ObjectId>
 	{

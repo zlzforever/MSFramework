@@ -17,13 +17,13 @@ namespace MSFramework.Ef.Initializers
 		public override async Task InitializeAsync(IServiceProvider serviceProvider)
 		{
 			var dbContextFactory = serviceProvider.GetRequiredService<DbContextFactory>();
-			var entityFrameworkOptionsStore = serviceProvider.GetRequiredService<EntityFrameworkOptionsCollection>();
+			var entityFrameworkOptionsStore = serviceProvider.GetRequiredService<EntityFrameworkOptionsConfiguration>();
 			foreach (var option in entityFrameworkOptionsStore.GetAllOptions())
 			{
 				if (option.AutoMigrationEnabled)
 				{
-					option.AutoTransactionsEnabled = false;
-					var dbContext = dbContextFactory.Create(option);
+		 
+					var dbContext = dbContextFactory.GetDbContext(option.DbContextType);
 					if (dbContext == null)
 					{
 						continue;
@@ -42,8 +42,6 @@ namespace MSFramework.Ef.Initializers
 							.CreateLogger<EntityFrameworkInitializer>();
 						logger.LogInformation($"已提交 {migrations.Length} 条挂起的迁移记录：{migrations.ExpandAndToString()}");
 					}
-
-					option.AutoTransactionsEnabled = option.AutoTransactionsEnabled;
 				}
 			}
 		}

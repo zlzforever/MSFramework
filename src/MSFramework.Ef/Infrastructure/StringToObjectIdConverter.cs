@@ -1,5 +1,5 @@
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
-using MSFramework.Common;
+using MSFramework.Shared;
 
 namespace MSFramework.Ef.Infrastructure
 {

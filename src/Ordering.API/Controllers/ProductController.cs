@@ -10,11 +10,10 @@ using MSFramework;
 using MSFramework.AspNetCore;
 using MSFramework.AspNetCore.Mvc;
 using MSFramework.Audits;
-using MSFramework.Common;
 using MSFramework.Domain;
 using MSFramework.Ef.Repositories;
-using MSFramework.Extensions;
 using MSFramework.Mapper;
+using MSFramework.Shared;
 using Ordering.Domain.AggregateRoots;
 using Ordering.Domain.Repositories;
 

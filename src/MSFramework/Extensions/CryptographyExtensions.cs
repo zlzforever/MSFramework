@@ -1,6 +1,6 @@
 using System.Security.Cryptography;
 using System.Text;
-using MSFramework.Common;
+using MSFramework.Shared;
 
 namespace MSFramework.Extensions
 {
@@ -14,8 +14,8 @@ namespace MSFramework.Extensions
 		/// </summary>
 		public static string ComputeMD5(this string value, Encoding encoding = null)
 		{
-			value.NotNull(nameof(value));
-			
+			Check.NotNull(value, nameof(value));
+
 			encoding ??= Encoding.UTF8;
 
 			var bytes = encoding.GetBytes(value);
@@ -27,7 +27,7 @@ namespace MSFramework.Extensions
 		/// </summary>
 		public static string ComputeMD5(this byte[] bytes)
 		{
-			bytes.NotNull(nameof(bytes));
+			Check.NotNull(bytes, nameof(bytes));
 			var sb = new StringBuilder();
 			MD5 hash = new MD5CryptoServiceProvider();
 			bytes = hash.ComputeHash(bytes);
@@ -44,7 +44,7 @@ namespace MSFramework.Extensions
 		/// </summary>
 		public static string ComputeSHA1(this string value, Encoding encoding = null)
 		{
-			value.NotNull(nameof(value));
+			Check.NotNull(value, nameof(value));
 
 			var sb = new StringBuilder();
 			var hash = new SHA1Managed();
@@ -67,7 +67,7 @@ namespace MSFramework.Extensions
 		/// </summary>
 		public static string ComputeSHA256(this string value, Encoding encoding = null)
 		{
-			value.NotNull(nameof(value));
+			Check.NotNull(value, nameof(value));
 
 			var sb = new StringBuilder();
 			var hash = new SHA256Managed();
@@ -90,7 +90,7 @@ namespace MSFramework.Extensions
 		/// </summary>
 		public static string ComputeSHA512(this string value, Encoding encoding = null)
 		{
-			value.NotNull(nameof(value));
+			Check.NotNull(value, nameof(value));
 
 			var sb = new StringBuilder();
 			var hash = new SHA512Managed();

@@ -1,10 +1,10 @@
 ﻿using MSFramework.Application;
-using MSFramework.Common;
+using MSFramework.Shared;
 using Ordering.Domain.AggregateRoots;
 
 namespace Ordering.Application.Commands
 {
-	public class ChangeOrderAddressCommand : IRequest<int>
+	public class ChangeOrderAddressCommand : IRequest
 	{
 		public Address NewAddress { get; set; }
 		

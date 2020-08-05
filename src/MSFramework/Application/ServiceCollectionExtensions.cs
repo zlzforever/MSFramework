@@ -1,6 +1,7 @@
 using System;
 using System.Linq;
 using System.Reflection;
+using System.Threading;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 
@@ -8,49 +9,61 @@ namespace MSFramework.Application
 {
 	public static class ServiceCollectionExtensions
 	{
-		public static IServiceCollection AddRequestExecutor(this IServiceCollection serviceCollection,
+		public static IServiceCollection AddRequestProcessor(this IServiceCollection serviceCollection,
 			params Type[] types)
 		{
 			var assemblies = types.Select(x => x.Assembly).ToArray();
-			serviceCollection.AddRequestExecutor(assemblies);
+			serviceCollection.AddRequestProcessor(assemblies);
 			return serviceCollection;
 		}
 
-		public static IServiceCollection AddRequestExecutor(this IServiceCollection serviceCollection,
+		public static IServiceCollection AddRequestProcessor(this IServiceCollection serviceCollection,
 			params Assembly[] assemblies)
 		{
 			var types = assemblies.SelectMany(x => x.GetTypes()).ToArray();
 			var cache = new RequestHandlerTypeCache();
-			var handlerInterfaceType = typeof(IRequestHandler);
-			var handlerInterfaceName = handlerInterfaceType.FullName;
-			if (string.IsNullOrWhiteSpace(handlerInterfaceName))
-			{
-				throw new ArgumentException(nameof(handlerInterfaceName));
-			}
 
-			foreach (var handlerType in types)
+			var handlerInterfaceTypes = new[] {typeof(IRequestHandler<>), typeof(IRequestHandler<,>)};
+			foreach (var type in types)
 			{
-				if (handlerType != handlerInterfaceType
-				    && handlerInterfaceType.IsAssignableFrom(handlerType))
+				var interfaces = type.GetInterfaces();
+				var handlerTypes = interfaces
+					.Where(@interface => @interface.IsGenericType)
+					.Where(@interface => handlerInterfaceTypes.Any(x => x == @interface.GetGenericTypeDefinition()))
+					.ToList();
+
+				if (handlerTypes.Count == 0)
 				{
-					var interface1 = handlerType.GetInterfaces()
-						.FirstOrDefault(x =>
-							!string.IsNullOrWhiteSpace(x.FullName)
-							&& x.FullName != handlerInterfaceName
-							&& x.FullName.StartsWith(handlerInterfaceName)
-						);
-					if (interface1 == null)
-					{
-						continue;
-					}
+					continue;
+				}
 
-					var commandType = interface1.GenericTypeArguments
-						.FirstOrDefault();
-					if (commandType != null && !cache.ContainsKey(commandType))
-					{
-						serviceCollection.TryAddScoped(handlerType);
-						cache.TryAdd(commandType, (handlerType, handlerType.GetMethod("HandleAsync")));
-					}
+				if (handlerTypes.Count > 1)
+				{
+					throw new MSFrameworkException($"{type.FullName} should impl one handler");
+				}
+
+				var handlerType = handlerTypes.First();
+				var requestType = handlerType.GenericTypeArguments.First();
+
+				var method = type.GetMethods()
+					.FirstOrDefault(x =>
+						x.Name == "HandleAsync"
+						&& x.GetParameters().Length == 2
+						&& x.GetParameters()[0].ParameterType == requestType
+						&& x.GetParameters()[1].ParameterType == typeof(CancellationToken));
+				if (method == null)
+				{
+					throw new MSFrameworkException("Can't find handler method");
+				}
+
+				if (cache.TryAdd(requestType, (type, method)))
+				{
+					serviceCollection.TryAddScoped(type);
+				}
+				else
+				{
+					throw new MSFrameworkException(
+						$"Register {requestType.FullName} with handler {type.FullName} failed");
 				}
 			}
 

@@ -1,5 +1,5 @@
 using MSFramework.Application;
-using MSFramework.Common;
+using MSFramework.Shared;
 
 namespace Ordering.Application.Commands
 {

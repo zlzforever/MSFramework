@@ -1,6 +1,6 @@
 using System;
 using System.Threading.Tasks;
-using MSFramework.Common;
+using MSFramework.Shared;
 
 namespace MSFramework.Domain
 {

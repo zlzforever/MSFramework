@@ -17,7 +17,7 @@ namespace Ordering.Infrastructure.Migrations
                 .HasAnnotation("ProductVersion", "3.1.6")
                 .HasAnnotation("Relational:MaxIdentifierLength", 64);
 
-            modelBuilder.Entity("MSFramework.Audit.AuditEntity", b =>
+            modelBuilder.Entity("MSFramework.Audits.AuditEntity", b =>
                 {
                     b.Property<string>("Id")
                         .HasColumnName("id")
@@ -55,7 +55,7 @@ namespace Ordering.Infrastructure.Migrations
                     b.ToTable("audit_entity");
                 });
 
-            modelBuilder.Entity("MSFramework.Audit.AuditOperation", b =>
+            modelBuilder.Entity("MSFramework.Audits.AuditOperation", b =>
                 {
                     b.Property<string>("Id")
                         .HasColumnName("id")
@@ -114,7 +114,7 @@ namespace Ordering.Infrastructure.Migrations
                     b.ToTable("audit_operation");
                 });
 
-            modelBuilder.Entity("MSFramework.Audit.AuditProperty", b =>
+            modelBuilder.Entity("MSFramework.Audits.AuditProperty", b =>
                 {
                     b.Property<string>("Id")
                         .HasColumnName("id")
@@ -153,7 +153,7 @@ namespace Ordering.Infrastructure.Migrations
                     b.ToTable("audit_property");
                 });
 
-            modelBuilder.Entity("MSFramework.Function.FunctionDefine", b =>
+            modelBuilder.Entity("MSFramework.Functions.FunctionDefine", b =>
                 {
                     b.Property<string>("Id")
                         .HasColumnName("id")
@@ -191,16 +191,16 @@ namespace Ordering.Infrastructure.Migrations
                         .HasColumnName("expired")
                         .HasColumnType("tinyint(1)");
 
-                    b.Property<DateTimeOffset?>("LastModificationTime")
+                    b.Property<DateTimeOffset?>("ModificationTime")
                         .HasColumnName("last_modification_time")
                         .HasColumnType("datetime(6)");
 
-                    b.Property<string>("LastModificationUserId")
+                    b.Property<string>("ModificationUserId")
                         .HasColumnName("last_modification_user_id")
                         .HasColumnType("varchar(256) CHARACTER SET utf8mb4")
                         .HasMaxLength(256);
 
-                    b.Property<string>("LastModificationUserName")
+                    b.Property<string>("ModificationUserName")
                         .HasColumnName("last_modification_user_name")
                         .HasColumnType("varchar(256) CHARACTER SET utf8mb4")
                         .HasMaxLength(256);
@@ -220,7 +220,7 @@ namespace Ordering.Infrastructure.Migrations
                     b.ToTable("function");
                 });
 
-            modelBuilder.Entity("Ordering.Domain.AggregateRoot.Order", b =>
+            modelBuilder.Entity("Ordering.Domain.AggregateRoots.Order", b =>
                 {
                     b.Property<string>("Id")
                         .HasColumnType("varchar(36) CHARACTER SET utf8mb4");
@@ -246,7 +246,7 @@ namespace Ordering.Infrastructure.Migrations
                     b.ToTable("Order");
                 });
 
-            modelBuilder.Entity("Ordering.Domain.AggregateRoot.OrderItem", b =>
+            modelBuilder.Entity("Ordering.Domain.AggregateRoots.OrderItem", b =>
                 {
                     b.Property<string>("Id")
                         .HasColumnType("varchar(36) CHARACTER SET utf8mb4");
@@ -280,7 +280,7 @@ namespace Ordering.Infrastructure.Migrations
                     b.ToTable("OrderItem");
                 });
 
-            modelBuilder.Entity("Ordering.Domain.AggregateRoot.Product", b =>
+            modelBuilder.Entity("Ordering.Domain.AggregateRoots.Product", b =>
                 {
                     b.Property<string>("Id")
                         .HasColumnType("varchar(36) CHARACTER SET utf8mb4");
@@ -297,31 +297,31 @@ namespace Ordering.Infrastructure.Migrations
                     b.ToTable("Product");
                 });
 
-            modelBuilder.Entity("MSFramework.Audit.AuditEntity", b =>
+            modelBuilder.Entity("MSFramework.Audits.AuditEntity", b =>
                 {
-                    b.HasOne("MSFramework.Audit.AuditOperation", "Operation")
+                    b.HasOne("MSFramework.Audits.AuditOperation", "Operation")
                         .WithMany()
                         .HasForeignKey("OperationId");
 
-                    b.HasOne("MSFramework.Audit.AuditOperation", null)
+                    b.HasOne("MSFramework.Audits.AuditOperation", null)
                         .WithMany("Entities")
                         .HasForeignKey("audit_operation_id");
                 });
 
-            modelBuilder.Entity("MSFramework.Audit.AuditProperty", b =>
+            modelBuilder.Entity("MSFramework.Audits.AuditProperty", b =>
                 {
-                    b.HasOne("MSFramework.Audit.AuditEntity", "Entity")
+                    b.HasOne("MSFramework.Audits.AuditEntity", "Entity")
                         .WithMany()
                         .HasForeignKey("EntityId");
 
-                    b.HasOne("MSFramework.Audit.AuditEntity", null)
+                    b.HasOne("MSFramework.Audits.AuditEntity", null)
                         .WithMany("Properties")
                         .HasForeignKey("audit_entity_id");
                 });
 
-            modelBuilder.Entity("Ordering.Domain.AggregateRoot.Order", b =>
+            modelBuilder.Entity("Ordering.Domain.AggregateRoots.Order", b =>
                 {
-                    b.OwnsOne("Ordering.Domain.AggregateRoot.Address", "Address", b1 =>
+                    b.OwnsOne("Ordering.Domain.AggregateRoots.Address", "Address", b1 =>
                         {
                             b1.Property<string>("OrderId")
                                 .HasColumnType("varchar(36) CHARACTER SET utf8mb4");
@@ -350,9 +350,9 @@ namespace Ordering.Infrastructure.Migrations
                         });
                 });
 
-            modelBuilder.Entity("Ordering.Domain.AggregateRoot.OrderItem", b =>
+            modelBuilder.Entity("Ordering.Domain.AggregateRoots.OrderItem", b =>
                 {
-                    b.HasOne("Ordering.Domain.AggregateRoot.Order", null)
+                    b.HasOne("Ordering.Domain.AggregateRoots.Order", null)
                         .WithMany("OrderItems")
                         .HasForeignKey("OrderId");
                 });

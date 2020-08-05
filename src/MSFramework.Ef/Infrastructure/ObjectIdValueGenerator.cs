@@ -1,6 +1,6 @@
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.EntityFrameworkCore.ValueGeneration;
-using MSFramework.Common;
+using MSFramework.Shared;
 
 namespace MSFramework.Ef.Infrastructure
 {

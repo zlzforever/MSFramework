@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace MSFramework.Common
+namespace MSFramework.Utilities
 {
 	/// <summary>
 	/// 将一个数字转成随机字符串

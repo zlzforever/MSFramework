@@ -43,24 +43,8 @@ namespace MSFramework.Ef.PostgreSql
 				var dbContextType = typeof(TDbContext);
 				var entryAssemblyName = dbContextType.Assembly.GetName().Name;
 
-				var store = EntityFrameworkOptionsCollection.LoadFrom(configuration);
-				var option = store.Get(dbContextType);
-
-				if (option.DbContextType != dbContextType)
-				{
-					throw new ArgumentException("DbContextType is not correct");
-				}
-
-				if (option.EnableSensitiveDataLogging)
-				{
-					x.EnableSensitiveDataLogging();
-				}
-
-				// todo:
-				// if (option.LazyLoadingProxiesEnabled)
-				// {
-				// 	x.UseLazyLoadingProxies();
-				// }
+				var optionsConfiguration = new EntityFrameworkOptionsConfiguration(configuration);
+				var option = optionsConfiguration.Get(dbContextType);
 
 				x.UseNpgsql(option.ConnectionString, options => { options.MigrationsAssembly(entryAssemblyName); });
 			});

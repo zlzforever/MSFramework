@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 
-namespace MSFramework.Common
+namespace MSFramework.Shared
 {
 	public class PagedResult<TEntity>
 	{

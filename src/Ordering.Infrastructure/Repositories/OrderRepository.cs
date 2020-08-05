@@ -1,8 +1,8 @@
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
-using MSFramework.Common;
 using MSFramework.Ef;
 using MSFramework.Ef.Repositories;
+using MSFramework.Shared;
 using Ordering.Domain.AggregateRoots;
 using Ordering.Domain.Repositories;
 

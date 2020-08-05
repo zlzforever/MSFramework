@@ -1,9 +1,8 @@
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using System.Text;
-using MSFramework.Common;
+using MSFramework.Shared;
 
 namespace MSFramework.Extensions
 {
@@ -47,8 +46,9 @@ namespace MSFramework.Extensions
 		public static string ExpandAndToString<T>(this IEnumerable<T> collection, Func<T, string> itemFormatFunc,
 			string separator = ",")
 		{
+			Check.NotNull(itemFormatFunc, nameof(itemFormatFunc));
+
 			collection = collection as IList<T> ?? collection.ToList();
-			itemFormatFunc.NotNull(nameof(itemFormatFunc));
 			if (!collection.Any())
 			{
 				return string.Empty;
@@ -95,10 +95,10 @@ namespace MSFramework.Extensions
 		/// <returns>不重复元素的集合</returns>
 		public static IEnumerable<T> DistinctBy<T, TKey>(this IEnumerable<T> source, Func<T, TKey> keySelector)
 		{
-			keySelector.NotNull(nameof(keySelector));
+			Check.NotNull(keySelector, nameof(keySelector));
 			return source.GroupBy(keySelector).Select(group => group.First());
 		}
-		
+
 		public static bool IsNullOrEmpty<T>(this IEnumerable<T> list)
 		{
 			if (list == null)

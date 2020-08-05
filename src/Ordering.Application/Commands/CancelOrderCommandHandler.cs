@@ -1,8 +1,8 @@
 using System.Threading;
 using System.Threading.Tasks;
 using MSFramework.Application;
-using MSFramework.Common;
 using MSFramework.Domain;
+using MSFramework.Shared;
 using Ordering.Domain.Repositories;
 
 namespace Ordering.Application.Commands
@@ -25,12 +25,6 @@ namespace Ordering.Application.Commands
 			order.SetCancelledStatus();
 			await _unitOfWorkManager.CommitAsync();
 			return ObjectId.NewId();
-		}
-
-		public Task HandleAsync<TCommand>(TCommand command, CancellationToken cancellationToken = default)
-			where TCommand : IRequest
-		{
-			throw new System.NotImplementedException();
 		}
 	}
 }

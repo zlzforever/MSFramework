@@ -1,5 +1,5 @@
-using MSFramework.Common;
 using MSFramework.Domain.Events;
+using MSFramework.Shared;
 
 namespace Ordering.Domain.AggregateRoots.Events
 {

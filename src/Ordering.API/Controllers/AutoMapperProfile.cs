@@ -1,5 +1,4 @@
 using AutoMapper;
-using MSFramework.Common;
 using Ordering.Domain.AggregateRoots;
 
 namespace Ordering.API.Controllers

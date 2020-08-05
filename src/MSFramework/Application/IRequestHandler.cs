@@ -3,16 +3,12 @@ using System.Threading.Tasks;
 
 namespace MSFramework.Application
 {
-	public interface IRequestHandler
-	{
-	}
-
-	public interface IRequestHandler<in TRequest> : IRequestHandler where TRequest : IRequest
+	public interface IRequestHandler<in TRequest> where TRequest : IRequest
 	{
 		Task HandleAsync(TRequest request, CancellationToken cancellationToken = default);
 	}
 
-	public interface IRequestHandler<in TRequest, TResponse> : IRequestHandler where TRequest : IRequest<TResponse>
+	public interface IRequestHandler<in TRequest, TResponse> where TRequest : IRequest<TResponse>
 	{
 		Task<TResponse> HandleAsync(TRequest request, CancellationToken cancellationToken = default);
 	}

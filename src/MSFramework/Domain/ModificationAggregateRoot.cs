@@ -1,5 +1,5 @@
 using System;
-using MSFramework.Common;
+using MSFramework.Shared;
 
 namespace MSFramework.Domain
 {

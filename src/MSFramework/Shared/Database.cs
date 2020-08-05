@@ -1,4 +1,4 @@
-namespace MSFramework.Common
+namespace MSFramework.Shared
 {
 	public enum Database
 	{

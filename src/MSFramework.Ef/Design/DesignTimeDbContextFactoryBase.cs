@@ -20,8 +20,7 @@ namespace MSFramework.Ef.Design
 		{
 			var services = GetServiceProvider();
 			var dbContextFactory = services.CreateScope().ServiceProvider.GetRequiredService<DbContextFactory>();
-			var options = dbContextFactory.GetDbContextOptions(typeof(TDbContext));
-			return dbContextFactory.Create(options) as TDbContext;
+			return dbContextFactory.GetDbContext(typeof(TDbContext)) as TDbContext;
 		}
 
 		protected abstract IServiceProvider GetServiceProvider();

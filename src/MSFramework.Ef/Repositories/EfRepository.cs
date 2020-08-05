@@ -2,8 +2,8 @@ using System;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
-using MSFramework.Common;
 using MSFramework.Domain;
+using MSFramework.Shared;
 
 namespace MSFramework.Ef.Repositories
 {

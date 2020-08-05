@@ -5,13 +5,15 @@ using Microsoft.Extensions.Configuration;
 
 namespace MSFramework.Ef
 {
-	public class EntityFrameworkOptionsCollection
+	public class EntityFrameworkOptionsConfiguration
 	{
 		private readonly Dictionary<string, EntityFrameworkOptions> _dict;
 		private readonly Dictionary<Type, EntityFrameworkOptions> _contextTypeMapOptionsDict;
 
-		private EntityFrameworkOptionsCollection(Dictionary<string, EntityFrameworkOptions> dict)
+		public EntityFrameworkOptionsConfiguration(IConfiguration configuration)
 		{
+			var section = configuration.GetSection("DbContexts");
+			var dict = section.Get<Dictionary<string, EntityFrameworkOptions>>();
 			if (dict == null || dict.Count == 0)
 			{
 				throw new MSFrameworkException("未能找到数据上下文配置");
@@ -41,12 +43,6 @@ namespace MSFramework.Ef
 		{
 			_contextTypeMapOptionsDict.TryGetValue(contextType, out var options);
 			return options;
-		}
-
-		public static EntityFrameworkOptionsCollection LoadFrom(IConfiguration configuration)
-		{
-			var section = configuration.GetSection("DbContexts");
-			return new EntityFrameworkOptionsCollection(section.Get<Dictionary<string, EntityFrameworkOptions>>());
 		}
 	}
 }
