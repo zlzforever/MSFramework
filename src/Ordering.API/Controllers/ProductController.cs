@@ -53,6 +53,12 @@ namespace Ordering.API.Controllers
 			_mapper = mapper;
 		}
 
+		[HttpGet("objectid")]
+		public ObjectId Get()
+		{
+			return ObjectId.NewId();
+		}
+
 		[HttpGet("getAudits")]
 		public List<AuditOperation> GetAudits()
 		{

@@ -3,7 +3,7 @@ using MSFramework.Domain;
 
 namespace Ordering.Domain.AggregateRoots
 {
-	public class Address : ValueObject<Address>
+	public class Address : ValueObject
 	{
 		public string Street { get; private set; }
 		public string City { get; private set; }
@@ -24,7 +24,7 @@ namespace Ordering.Domain.AggregateRoots
 			ZipCode = zipcode;
 		}
 
-		public override IEnumerable<object> GetAtomicValues()
+		protected override IEnumerable<object> GetAtomicValues()
 		{
 			// Using a yield return statement to return each element one at a time
 			yield return Street;

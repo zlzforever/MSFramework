@@ -45,7 +45,10 @@ namespace Ordering.API
 					x.ModelBinderProviders.Insert(0, new ObjectIdModelBinderProvider());
 				})
 				.UseInvalidModelStateResponse()
-				.AddNewtonsoftJson(x => { x.SerializerSettings.Converters.Add(new ObjectIdConverter()); });
+				.AddNewtonsoftJson(x =>
+				{
+					x.SerializerSettings.Converters.Add(new ObjectIdConverter());
+				});
 
 			services.AddSwaggerGen(c =>
 			{
@@ -81,8 +84,6 @@ namespace Ordering.API
 		// This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
 		public void Configure(IApplicationBuilder app, IHostEnvironment env)
 		{
-			var options1 = app.ApplicationServices.GetRequiredService<AppOptions>();
-			var options2 = app.ApplicationServices.GetRequiredService<EmailOptions>();
 			if (env.IsDevelopment())
 			{
 				app.UseDeveloperExceptionPage();
