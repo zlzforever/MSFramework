@@ -98,7 +98,7 @@ namespace MSFramework
 			using var scope = applicationServices.CreateScope();
 			var logger = scope.ServiceProvider.GetRequiredService<ILoggerFactory>().CreateLogger("Initializer");
 			var initializers = scope.ServiceProvider.GetServices<Initializer>().OrderBy(x => x.Order).ToList();
-			logger.LogInformation($"{string.Join(", ", initializers.Select(x => x.GetType().FullName))}");
+			logger.LogInformation($"{string.Join(" -> ", initializers.Select(x => x.GetType().FullName))}");
 			foreach (var initializer in initializers)
 			{
 				await initializer.InitializeAsync(scope.ServiceProvider);

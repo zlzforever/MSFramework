@@ -1,10 +1,11 @@
 using System;
+using MSFramework.Shared;
 
 namespace MSFramework.Domain
 {
-	public abstract class CreationAggregateRoot : CreationAggregateRoot<Guid>
+	public abstract class CreationAggregateRoot : CreationAggregateRoot<ObjectId>
 	{
-		protected CreationAggregateRoot(Guid id) : base(id)
+		protected CreationAggregateRoot(ObjectId id) : base(id)
 		{
 		}
 	}

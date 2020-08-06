@@ -10,27 +10,12 @@ namespace MSFramework.Shared
 	{
 		private static readonly ObjectIdFactory Factory = new ObjectIdFactory();
 
-		public ObjectId(byte[] hexData)
+		public ObjectId(byte[] hex)
 		{
-			Hex = hexData;
+			Hex = hex;
 			ReverseHex();
 		}
-
-		public override string ToString()
-		{
-			Hex ??= new byte[12];
-
-			var hexText = new StringBuilder();
-			foreach (var t in Hex)
-			{
-				hexText.Append(t.ToString("x2"));
-			}
-
-			return hexText.ToString();
-		}
-
-		public override int GetHashCode() => ToString().GetHashCode();
-
+		
 		public ObjectId(string value)
 		{
 			if (string.IsNullOrEmpty(value)) throw new ArgumentNullException(nameof(value));
@@ -50,6 +35,21 @@ namespace MSFramework.Shared
 
 			ReverseHex();
 		}
+
+		public override string ToString()
+		{
+			Hex ??= new byte[12];
+
+			var hexText = new StringBuilder();
+			foreach (var t in Hex)
+			{
+				hexText.Append(t.ToString("x2"));
+			}
+
+			return hexText.ToString();
+		}
+
+		public override int GetHashCode() => ToString().GetHashCode();
 
 		private void ReverseHex()
 		{

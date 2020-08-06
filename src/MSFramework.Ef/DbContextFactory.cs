@@ -31,7 +31,7 @@ namespace MSFramework.Ef
 		/// </summary>
 		/// <param name="dbContextType">数据上下文类型</param>
 		/// <returns>数据上下文</returns>
-		public DbContextBase GetDbContext(Type dbContextType)
+		private DbContextBase GetDbContext(Type dbContextType)
 		{
 			var dbContext = (DbContextBase) _serviceProvider.GetRequiredService(dbContextType);
 			return dbContext;

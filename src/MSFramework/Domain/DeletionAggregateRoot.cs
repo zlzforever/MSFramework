@@ -1,10 +1,11 @@
 using System;
+using MSFramework.Shared;
 
 namespace MSFramework.Domain
 {
-	public abstract class DeletionAggregateRoot : DeletionAggregateRoot<Guid>
+	public abstract class DeletionAggregateRoot : DeletionAggregateRoot<ObjectId>
 	{
-		protected DeletionAggregateRoot(Guid id) : base(id)
+		protected DeletionAggregateRoot(ObjectId id) : base(id)
 		{
 		}
 	}

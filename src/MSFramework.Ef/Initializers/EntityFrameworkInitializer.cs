@@ -16,14 +16,12 @@ namespace MSFramework.Ef.Initializers
 
 		public override async Task InitializeAsync(IServiceProvider serviceProvider)
 		{
-			var dbContextFactory = serviceProvider.GetRequiredService<DbContextFactory>();
 			var entityFrameworkOptionsStore = serviceProvider.GetRequiredService<EntityFrameworkOptionsConfiguration>();
 			foreach (var option in entityFrameworkOptionsStore.GetAllOptions())
 			{
 				if (option.AutoMigrationEnabled)
 				{
-		 
-					var dbContext = dbContextFactory.GetDbContext(option.DbContextType);
+					var dbContext = (DbContextBase) serviceProvider.GetRequiredService(option.DbContextType);
 					if (dbContext == null)
 					{
 						continue;
