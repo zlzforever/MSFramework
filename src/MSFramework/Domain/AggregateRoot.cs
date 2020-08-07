@@ -17,7 +17,6 @@ namespace MSFramework.Domain
 	public abstract class AggregateRoot<TKey> :
 		EntityBase<TKey>,
 		IAggregateRoot<TKey>
-		where TKey : IEquatable<TKey>
 	{
 		private List<IEvent> _domainEvents;
 

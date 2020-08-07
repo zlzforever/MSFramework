@@ -12,7 +12,6 @@ namespace MSFramework.Domain
 
 	public abstract class ModificationAggregateRoot<TKey> : CreationAggregateRoot<TKey>,
 		IModification
-		where TKey : IEquatable<TKey>
 	{
 		/// <summary>
 		/// Last modifier user for this entity.

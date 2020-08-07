@@ -1,12 +1,14 @@
 using System;
 using System.Diagnostics;
 using System.Net;
+using System.Reflection;
 using System.Security.Cryptography;
 using System.Text;
+using MSFramework.Domain;
 
 namespace MSFramework.Shared
 {
-	public class ObjectId : IEquatable<ObjectId>
+	public class ObjectId
 	{
 		private static readonly ObjectIdFactory Factory = new ObjectIdFactory();
 
@@ -15,7 +17,7 @@ namespace MSFramework.Shared
 			Hex = hex;
 			ReverseHex();
 		}
-		
+
 		public ObjectId(string value)
 		{
 			if (string.IsNullOrEmpty(value)) throw new ArgumentNullException(nameof(value));
@@ -98,12 +100,21 @@ namespace MSFramework.Shared
 			return 0;
 		}
 
-		public bool Equals(ObjectId other) => CompareTo(other) == 0;
-
 		public static bool operator <(ObjectId a, ObjectId b) => a.CompareTo(b) < 0;
 		public static bool operator <=(ObjectId a, ObjectId b) => a.CompareTo(b) <= 0;
-		public static bool operator ==(ObjectId a, ObjectId b) => a.Equals(b);
-		public override bool Equals(object obj) => base.Equals(obj);
+
+		public static bool operator ==(ObjectId a, ObjectId b)
+		{
+			if (!Equals(a, null))
+			{
+				return a.CompareTo(b) == 0;
+			}
+			else
+			{
+				return b == null;
+			}
+		}
+
 		public static bool operator !=(ObjectId a, ObjectId b) => !(a == b);
 		public static bool operator >=(ObjectId a, ObjectId b) => a.CompareTo(b) >= 0;
 		public static bool operator >(ObjectId a, ObjectId b) => a.CompareTo(b) > 0;
@@ -111,6 +122,23 @@ namespace MSFramework.Shared
 		public static implicit operator ObjectId(string objectId) => new ObjectId(objectId);
 
 		public static ObjectId Empty => new ObjectId("000000000000000000000000");
+
+		public override bool Equals(object obj)
+		{
+			if (!(obj is ObjectId))
+			{
+				return false;
+			}
+
+			//Same instances must be considered as equal
+			if (ReferenceEquals(this, obj))
+			{
+				return true;
+			}
+
+			var other = (ObjectId) obj;
+			return CompareTo(other) == 0;
+		}
 
 		public byte[] Hex { get; private set; }
 		public int Timestamp { get; private set; }

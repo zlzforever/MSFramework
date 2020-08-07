@@ -18,7 +18,6 @@ namespace MSFramework.Ef.Repositories
 
 	public abstract class EfRepository<TEntity, TKey> : IRepository<TEntity, TKey>
 		where TEntity : class, IAggregateRoot<TKey>
-		where TKey : IEquatable<TKey>
 	{
 		public IQueryable<TEntity> CurrentSet { get; private set; }
 

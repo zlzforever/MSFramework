@@ -10,7 +10,6 @@ namespace MSFramework.Domain
 	}
 
 	public abstract class ModificationEntity<TKey> : CreationEntity<TKey>, IModification
-		where TKey : IEquatable<TKey>
 	{
 		/// <summary>
 		/// Last modifier user for this entity.

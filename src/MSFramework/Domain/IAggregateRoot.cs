@@ -6,7 +6,7 @@ namespace MSFramework.Domain
 	/// <summary>
 	/// Represents an aggregate root.
 	/// </summary>
-	public interface IAggregateRoot<TKey> :
+	public interface IAggregateRoot<out TKey> :
 		IAggregateRoot,
 		IEntity<TKey>
 	{

@@ -11,7 +11,6 @@ namespace MSFramework.Domain
 	}
 
 	public abstract class DeletionAggregateRoot<TKey> : ModificationAggregateRoot<TKey>, IDeletion
-		where TKey : IEquatable<TKey>
 	{
 		/// <summary>
 		/// 是否已经删除
@@ -33,7 +32,7 @@ namespace MSFramework.Domain
 		/// </summary>
 		public DateTimeOffset? DeletionTime { get; set; }
 
-		public void Delete(string userId, string userName, DateTimeOffset deletionTime = default)
+		public virtual void Delete(string userId, string userName, DateTimeOffset deletionTime = default)
 		{
 			// 删除只能一次操作，因此如果已经有值，不能再做设置
 			if (!Deleted)

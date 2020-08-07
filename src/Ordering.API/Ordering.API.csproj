@@ -16,6 +16,7 @@
         <PackageReference Include="Swashbuckle.AspNetCore.SwaggerUI" Version="5.5.1" />
         <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="3.1.6" />
         <PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="3.1.6" />
+        <PackageReference Include="xunit.assert" Version="2.4.1" />
     </ItemGroup>
 
     <ItemGroup>

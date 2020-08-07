@@ -18,7 +18,6 @@ namespace MSFramework.Domain
 
 	public interface IRepository<TEntity, in TKey> : IRepository
 		where TEntity : IAggregateRoot
-		where TKey : IEquatable<TKey>
 	{
 		/// <summary>
 		/// Gets an entity with given primary key.

@@ -1,4 +1,5 @@
 using System;
+using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
@@ -11,6 +12,7 @@ using MSFramework.Domain;
 using MSFramework.Domain.Events;
 using MSFramework.Initializers;
 using MSFramework.Reflection;
+using MSFramework.Utilities;
 
 namespace MSFramework
 {
@@ -30,7 +32,8 @@ namespace MSFramework
 			return builder;
 		}
 
-		public static MSFrameworkBuilder UseRequestProcessor(this MSFrameworkBuilder builder, params Type[] commandTypes)
+		public static MSFrameworkBuilder UseRequestProcessor(this MSFrameworkBuilder builder,
+			params Type[] commandTypes)
 		{
 			var excludeAssembly = typeof(MSFrameworkBuilder).Assembly;
 			var assemblies = commandTypes.Select(x => x.Assembly).ToList();
@@ -86,6 +89,29 @@ namespace MSFramework
 			builder.Services.TryAddScoped<IAuditService, DefaultAuditService>();
 
 			builder.UseInitializer();
+		}
+
+		public static MSFrameworkBuilder UseNumberEncoding(this MSFrameworkBuilder builder,
+			string path = "number_encoding.txt")
+		{
+			string codes;
+			if (!File.Exists(path))
+			{
+				codes = NumberEncoding.GetRandomCodes();
+				File.WriteAllText(path, codes);
+			}
+			else
+			{
+				codes = File.ReadAllLines(path).FirstOrDefault();
+			}
+
+			if (string.IsNullOrWhiteSpace(codes) || codes.Length < 34)
+			{
+				throw new ArgumentException("Codes show large than 34 char");
+			}
+
+			NumberEncoding.Load(codes);
+			return builder;
 		}
 
 		public static void UseMSFramework(this IServiceProvider applicationServices)
