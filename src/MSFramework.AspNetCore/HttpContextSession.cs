@@ -1,3 +1,4 @@
+using System.Linq;
 using System.Security.Claims;
 using Microsoft.AspNetCore.Http;
 
@@ -52,6 +53,14 @@ namespace MSFramework.AspNetCore
 				}
 
 				return userName;
+			}
+		}
+
+		public string[] Roles
+		{
+			get
+			{
+				return HttpContext?.User?.FindAll(ClaimTypes.Role).Select(x => x.Value).ToArray();
 			}
 		}
 

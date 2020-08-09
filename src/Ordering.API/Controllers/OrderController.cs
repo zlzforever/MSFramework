@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using MSFramework.Application;
 using MSFramework.AspNetCore;
+using MSFramework.AspNetCore.AccessControl;
 using MSFramework.Shared;
 using Ordering.Application.Commands;
 using Ordering.Application.Queries;
@@ -29,7 +30,7 @@ namespace Ordering.API.Controllers
 			_orderRepository = orderRepository;
 		}
 
-		//[Permission(Name = "test", Module = "test222")]
+		[AccessControl("string")]
 		[HttpPost("testCreate")]
 		public async Task<IActionResult> TestCreate()
 		{
@@ -113,7 +114,7 @@ namespace Ordering.API.Controllers
 		#region QUERY
 
 		[HttpGet("{orderId}")]
-		public async Task<IActionResult> GetOrderAsync([FromRoute]ObjectId orderId)
+		public async Task<IActionResult> GetOrderAsync([FromRoute] ObjectId orderId)
 		{
 			var order = await _orderingQuery.GetOrderAsync(orderId);
 			return Ok(order);

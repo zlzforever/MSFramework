@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
-        <PackageId>MSFramework.AspNetCore.Permission</PackageId>
+        <PackageId>MSFramework.AspNetCore.AccessControl</PackageId>
     </PropertyGroup>
     <Import Project="../../package.props" />
 

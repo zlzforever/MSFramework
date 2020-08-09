@@ -5,5 +5,7 @@ namespace MSFramework.Application
 		string UserId { get; }
 
 		string UserName { get; }
+		
+		string[] Roles { get; }
 	}
 }

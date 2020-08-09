@@ -10,6 +10,7 @@ using MSFramework.AspNetCore;
 using MSFramework.AspNetCore.Extensions;
 using MSFramework.AspNetCore.Filters;
 using MSFramework.AspNetCore.Infrastructure;
+using MSFramework.AspNetCore.AccessControl;
 using MSFramework.Audits;
 using MSFramework.AutoMapper;
 using MSFramework.DependencyInjection;
@@ -72,6 +73,7 @@ namespace Ordering.API
 				builder.UseEventDispatcher();
 				builder.UseRequestProcessor();
 				builder.UseNumberEncoding();
+				builder.UseAccessControl();
 				// builder.UseRabbitMQEventDispatcher(new RabbitMQOptions(), typeof(UserCheckoutAcceptedEvent));
 				// 启用审计服务
 				builder.UseAudit();
@@ -92,6 +94,7 @@ namespace Ordering.API
 		// This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
 		public void Configure(IApplicationBuilder app, IHostEnvironment env)
 		{
+			 
 			if (env.IsDevelopment())
 			{
 				app.UseDeveloperExceptionPage();

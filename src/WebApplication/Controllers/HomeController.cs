@@ -2,7 +2,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
-using MSFramework.AspNetCore.Permission;
+using MSFramework.AspNetCore.AccessControl;
 using WebApplication.Models;
 
 namespace WebApplication.Controllers
@@ -17,7 +17,7 @@ namespace WebApplication.Controllers
 			_logger = logger;
 		}
 
-		[Permission(Name = "首页", Module = "UI")]
+		[AccessControl(Name = "首页", Module = "UI")]
 		public IActionResult Index()
 		{
 			return View();

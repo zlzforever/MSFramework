@@ -20,6 +20,7 @@
     </ItemGroup>
 
     <ItemGroup>
+        <ProjectReference Include="..\MSFramework.AspNetCore.AccessControl\MSFramework.AspNetCore.AccessControl.csproj" />
         <ProjectReference Include="..\MSFramework.AspNetCore\MSFramework.AspNetCore.csproj" />
         <ProjectReference Include="..\MSFramework.AutoMapper\MSFramework.AutoMapper.csproj" />
         <ProjectReference Include="..\MSFramework.Ef.SqlServer\MSFramework.Ef.SqlServer.csproj" />

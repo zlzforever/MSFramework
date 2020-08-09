@@ -62,7 +62,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MSFramework.RabbitMQ", "src
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MSFramework.Migrator", "src\MSFramework.Migrator\MSFramework.Migrator.csproj", "{110C6F8A-DE2F-40C8-94BB-5D0A5F395177}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MSFramework.AspNetCore.Permission", "src\MSFramework.AspNetCore.Permission\MSFramework.AspNetCore.Permission.csproj", "{C970D0A4-F33C-407D-AC8C-D503C16EE1A6}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MSFramework.AspNetCore.AccessControl", "src\MSFramework.AspNetCore.AccessControl\MSFramework.AspNetCore.AccessControl.csproj", "{C970D0A4-F33C-407D-AC8C-D503C16EE1A6}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MSFramework.Ef.PostgreSql", "src\MSFramework.Ef.PostgreSql\MSFramework.Ef.PostgreSql.csproj", "{570C8E10-B66E-4339-8D16-13B5E5D3CEE5}"
 EndProject

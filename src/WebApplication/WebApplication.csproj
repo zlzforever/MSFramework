@@ -14,6 +14,6 @@
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\MSFramework.AspNetCore.Permission\MSFramework.AspNetCore.Permission.csproj" />
+      <ProjectReference Include="..\MSFramework.AspNetCore.AccessControl\MSFramework.AspNetCore.AccessControl.csproj" />
     </ItemGroup>
 </Project>
