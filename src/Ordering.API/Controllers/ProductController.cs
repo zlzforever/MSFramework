@@ -36,6 +36,12 @@ namespace Ordering.API.Controllers
 		public int Price { get; private set; }
 	}
 
+	public class MyBody
+	{
+		internal ObjectId Id { get; set; }
+		public ObjectId MyId { get; set; }
+		public string Name { get; set; }
+	}
 
 	[Route("api/v1.0/[controller]")]
 	[ApiController]
@@ -57,6 +63,14 @@ namespace Ordering.API.Controllers
 		public ObjectId Get()
 		{
 			return ObjectId.NewId();
+		}
+
+		[HttpPost("objectid/{id}")]
+
+		public MyBody Post([FromRoute]ObjectId id, [FromBody] MyBody body)
+		{
+			body.Id = id;
+			return body;
 		}
 
 		[HttpGet("getAudits")]

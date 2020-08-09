@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.OpenApi.Any;
 using Microsoft.OpenApi.Models;
 using MSFramework;
 using MSFramework.AspNetCore;
@@ -16,6 +17,7 @@ using MSFramework.Ef;
 using MSFramework.Ef.MySql;
 using MSFramework.Extensions;
 using MSFramework.Migrator.MySql;
+using MSFramework.Shared;
 using Newtonsoft.Json;
 using Ordering.Domain;
 using Ordering.Infrastructure;
@@ -47,16 +49,17 @@ namespace Ordering.API
 					x.ModelBinderProviders.Insert(0, new ObjectIdModelBinderProvider());
 				})
 				.UseInvalidModelStateResponse()
-				.AddNewtonsoftJson(x =>
-				{
-					x.SerializerSettings.Converters.Add(new ObjectIdConverter());
-				});
-			
- 
+				.AddNewtonsoftJson(x => { x.SerializerSettings.Converters.Add(new ObjectIdConverter()); });
 
 			services.AddSwaggerGen(c =>
 			{
 				c.SwaggerDoc("v1.0", new OpenApiInfo {Version = "v1.0", Description = "Ordering API V1.0"});
+				c.CustomSchemaIds(type => type.FullName);
+				c.MapType<ObjectId>(() => new OpenApiSchema
+				{
+					Type = "string", Default = new OpenApiString(ObjectId.Empty.ToString()),
+					
+				});
 			});
 			services.AddHealthChecks();
 
