@@ -12,7 +12,7 @@ namespace MSFramework.Ef.Functions
 	{
 		private readonly IMemoryCache _cache;
 		private readonly TimeSpan _ttl = new TimeSpan(0, 5, 0);
-		private readonly IQueryable<FunctionDefine> _currentSet;
+		private readonly IQueryable<Function> _currentSet;
 		private readonly DbContext _dbContext;
 
 		public FunctionRepository(DbContextFactory dbContextFactory, IMemoryCache cache)
@@ -21,8 +21,8 @@ namespace MSFramework.Ef.Functions
 
 			try
 			{
-				_dbContext = dbContextFactory.GetDbContext<FunctionDefine>();
-				_currentSet = _dbContext.Set<FunctionDefine>();
+				_dbContext = dbContextFactory.GetDbContext<Function>();
+				_currentSet = _dbContext.Set<Function>();
 			}
 			catch
 			{
@@ -30,9 +30,9 @@ namespace MSFramework.Ef.Functions
 			}
 		}
 
-		public FunctionDefine GetByCode(string code)
+		public Function GetByCode(string code)
 		{
-			_cache.TryGetValue(code, out FunctionDefine function);
+			_cache.TryGetValue(code, out Function function);
 			if (function == null)
 			{
 				function = _currentSet.AsNoTracking()
@@ -43,17 +43,17 @@ namespace MSFramework.Ef.Functions
 			return function;
 		}
 
-		public IEnumerable<FunctionDefine> GetAllList()
+		public IEnumerable<Function> GetAllList()
 		{
 			return _currentSet;
 		}
 
-		public async Task InsertAsync(FunctionDefine entity)
+		public async Task InsertAsync(Function entity)
 		{
-			await _dbContext.Set<FunctionDefine>().AddAsync(entity);
+			await _dbContext.Set<Function>().AddAsync(entity);
 		}
 
-		public Task UpdateAsync(FunctionDefine entity)
+		public Task UpdateAsync(Function entity)
 		{
 			var entry = _dbContext.Entry(entity);
 			entry.State = EntityState.Modified;

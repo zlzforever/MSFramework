@@ -7,13 +7,13 @@ namespace MSFramework.Functions
 {
 	public interface IFunctionRepository : IRepository, IScopeDependency
 	{
-		FunctionDefine GetByCode(string code);
+		Function GetByCode(string code);
 
-		IEnumerable<FunctionDefine> GetAllList();
+		IEnumerable<Function> GetAllList();
 
-		Task InsertAsync(FunctionDefine entity);
+		Task InsertAsync(Function entity);
 
-		Task UpdateAsync(FunctionDefine entity);
+		Task UpdateAsync(Function entity);
 
 		bool IsAvailable();
 	}

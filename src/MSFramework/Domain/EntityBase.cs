@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Reflection;
 
 namespace MSFramework.Domain
 {
@@ -18,54 +17,58 @@ namespace MSFramework.Domain
 
 	/// <inheritdoc cref="IEntity{TKey}" />
 	[Serializable]
-	public abstract class EntityBase<TKey> : EntityBase, IEntity<TKey>
+	public abstract class EntityBase<TKey> : EntityBase, IEntity<TKey>, IComparable<EntityBase<TKey>>
 	{
+		private int? _hashCodeCache;
+		private TKey _id;
+
 		/// <inheritdoc/>
-		public TKey Id { get; protected set; }
-		
+		public TKey Id
+		{
+			get => _id;
+			protected set => _id = value;
+		}
+
 		protected EntityBase(TKey id)
 		{
 			Id = id;
 		}
 
-		public bool EntityEquals(object obj)
+		public bool IsTransient()
 		{
-			if (obj == null || !(obj is EntityBase<TKey>))
+			return EntityHelper.HasDefaultId(this);
+		}
+
+		public override bool Equals(object obj)
+		{
+			if (!(obj is EntityBase<TKey>))
 			{
 				return false;
 			}
 
-			//Same instances must be considered as equal
 			if (ReferenceEquals(this, obj))
 			{
 				return true;
 			}
 
-			//Transient objects are not considered as equal
-			var other = (EntityBase<TKey>) obj;
-			if (EntityHelper.HasDefaultId(this) && EntityHelper.HasDefaultId(other))
+			if (GetType() != obj.GetType())
 			{
 				return false;
 			}
 
-			//Must have a IS-A relation of types or must be same type
-			var typeOfThis = GetType().GetTypeInfo();
-			var typeOfOther = other.GetType().GetTypeInfo();
-			if (!typeOfThis.IsAssignableFrom(typeOfOther) && !typeOfOther.IsAssignableFrom(typeOfThis))
+			var item = (EntityBase<TKey>) obj;
+
+			if (item.IsTransient() || IsTransient())
 			{
 				return false;
 			}
-
-			// todo:
-			// //Different tenants may have an entity with same Id.
-			// if (this is IMultiTenant && other is IMultiTenant &&
-			//     this.As<IMultiTenant>().TenantId != other.As<IMultiTenant>().TenantId)
-			// {
-			// 	return false;
-			// }
-
-			return Id.Equals(other.Id);
+			else
+			{
+				return item.Id.Equals(Id);
+			}
 		}
+
+		public override int GetHashCode() => ComputeHashCode();
 
 		public override object[] GetKeys()
 		{
@@ -76,6 +79,24 @@ namespace MSFramework.Domain
 		public override string ToString()
 		{
 			return $"[ENTITY: {GetType().Name}] Id = {Id}";
+		}
+
+		private int ComputeHashCode()
+		{
+			if (!IsTransient())
+			{
+				_hashCodeCache ??= Id.GetHashCode() ^ 31;
+				return _hashCodeCache.Value;
+			}
+			else
+			{
+				return base.GetHashCode();
+			}
+		}
+
+		public int CompareTo(EntityBase<TKey> other)
+		{
+			throw new NotImplementedException();
 		}
 	}
 }

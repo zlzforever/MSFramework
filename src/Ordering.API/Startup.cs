@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Builder;
+﻿using System;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -15,6 +16,7 @@ using MSFramework.Ef;
 using MSFramework.Ef.MySql;
 using MSFramework.Extensions;
 using MSFramework.Migrator.MySql;
+using Newtonsoft.Json;
 using Ordering.Domain;
 using Ordering.Infrastructure;
 using Serilog;
@@ -49,6 +51,8 @@ namespace Ordering.API
 				{
 					x.SerializerSettings.Converters.Add(new ObjectIdConverter());
 				});
+			
+ 
 
 			services.AddSwaggerGen(c =>
 			{

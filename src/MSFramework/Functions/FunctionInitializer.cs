@@ -30,7 +30,7 @@ namespace MSFramework.Functions
 
 			var functionsInApp = functionFinder.GetAllList();
 
-			var functionsInAppDict = new Dictionary<string, FunctionDefine>();
+			var functionsInAppDict = new Dictionary<string, Function>();
 			foreach (var function in functionsInApp)
 			{
 				if (!functionsInAppDict.ContainsKey(function.Code))

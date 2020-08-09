@@ -3,7 +3,7 @@ using MSFramework.Shared;
 
 namespace MSFramework.Functions
 {
-	public class FunctionDefine : ModificationAggregateRoot
+	public class Function : ModificationAggregateRoot
 	{
 		public bool Enabled { get; private set; } = true;
 
@@ -27,7 +27,7 @@ namespace MSFramework.Functions
 		/// </summary>
 		public bool Expired { get; private set; }
 
-		public FunctionDefine(string name, string code, string description) : base(ObjectId.NewId())
+		public Function(string name, string code, string description) : base(ObjectId.NewId())
 		{
 			Name = name;
 			Code = code;

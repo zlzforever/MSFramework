@@ -5,9 +5,9 @@ using MSFramework.Functions;
 
 namespace Ordering.Infrastructure.EntityConfigurations.Audits
 {
-	public class FunctionEntityTypeConfiguration : EntityTypeConfigurationBase<FunctionDefine, OrderingContext>
+	public class FunctionEntityTypeConfiguration : EntityTypeConfigurationBase<Function, OrderingContext>
 	{
-		public override void Configure(EntityTypeBuilder<FunctionDefine> builder)
+		public override void Configure(EntityTypeBuilder<Function> builder)
 		{
 			base.Configure(builder);
 

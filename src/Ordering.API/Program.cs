@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Hosting;
+﻿using System;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Hosting;
 using MSFramework.Application;
 using MSFramework.Shared;
@@ -13,8 +14,18 @@ namespace Ordering.API
 {
 	public class Program
 	{
+		struct MyStruct
+		{
+			private int a;
+		}
+
 		public static void Main(string[] args)
 		{
+			var id1 = Guid.NewGuid();
+			var j1 = JsonConvert.SerializeObject(id1);
+			var id2 = new MyStruct();
+			var j2 = JsonConvert.SerializeObject(id2);
+
 			Log.Logger = new LoggerConfiguration()
 				.MinimumLevel.Debug()
 				.MinimumLevel.Override("Microsoft.Hosting.Lifetime", LogEventLevel.Information)

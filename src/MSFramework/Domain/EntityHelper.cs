@@ -1,32 +1,38 @@
 using System;
 using System.Collections.Generic;
+using MSFramework.Shared;
 
 namespace MSFramework.Domain
 {
-    /// <summary>
-    /// Some helper methods for entities.
-    /// </summary>
-    public static class EntityHelper
-    {
-	    public static bool HasDefaultId<TKey>(IEntity<TKey> entity)
-        {
-            if (EqualityComparer<TKey>.Default.Equals(entity.Id, default))
-            {
-                return true;
-            }
+	/// <summary>
+	/// Some helper methods for entities.
+	/// </summary>
+	public static class EntityHelper
+	{
+		public static bool HasDefaultId<TKey>(IEntity<TKey> entity)
+		{
+			if (EqualityComparer<TKey>.Default.Equals(entity.Id, default))
+			{
+				return true;
+			}
 
-            //Workaround for EF Core since it sets int/long to min value when attaching to dbcontext
-            if (typeof(TKey) == typeof(int))
-            {
-                return Convert.ToInt32(entity.Id) <= 0;
-            }
+			//Workaround for EF Core since it sets int/long to min value when attaching to dbcontext
+			if (typeof(TKey) == typeof(int))
+			{
+				return Convert.ToInt32(entity.Id) <= 0;
+			}
 
-            if (typeof(TKey) == typeof(long))
-            {
-                return Convert.ToInt64(entity.Id) <= 0;
-            }
+			if (typeof(TKey) == typeof(long))
+			{
+				return Convert.ToInt64(entity.Id) <= 0;
+			}
 
-            return false;
-        }
-    }
+			if (typeof(TKey) == typeof(ObjectId))
+			{
+				return entity.Id.Equals(ObjectId.Empty);
+			}
+
+			return false;
+		}
+	}
 }
