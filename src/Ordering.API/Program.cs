@@ -1,6 +1,10 @@
 ﻿using System;
+using System.Net.Http;
+using System.Threading.Tasks;
+using IdentityModel.Client;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Hosting;
+using MSFramework;
 using MSFramework.Application;
 using MSFramework.Shared;
 using MSFramework.Utilities;
@@ -14,18 +18,37 @@ namespace Ordering.API
 {
 	public class Program
 	{
-		struct MyStruct
+		private static async Task SetAuthorizationHeader()
 		{
-			private int a;
+			var client = new HttpClient();
+			var disco = await client.GetDiscoveryDocumentAsync("http://localhost:7897");
+			if (disco.IsError)
+			{
+				throw new MSFrameworkException($"Connect to authority failed: {disco.Error}");
+			}
+
+			var tokenResponse = await client.RequestClientCredentialsTokenAsync(new ClientCredentialsTokenRequest
+			{
+				Address = disco.TokenEndpoint,
+				ClientId = "cerberus-client",
+				ClientSecret = "secret",
+				Scope = "cerberus-api cerberus-access-server-api"
+			});
+
+			if (tokenResponse.IsError)
+			{
+				throw new MSFrameworkException($"Request access token failed: {tokenResponse.Error}");
+			}
+
+			var httpClient = new HttpClient();
+			var token = tokenResponse.AccessToken;
+			httpClient.SetBearerToken(token);
+			var response = await httpClient.GetAsync("http://localhost:8100/api/v1.1/api-infos?application=x");
+			response.EnsureSuccessStatusCode();
 		}
 
 		public static void Main(string[] args)
 		{
-			var id1 = Guid.NewGuid();
-			var j1 = JsonConvert.SerializeObject(id1);
-			var id2 = new MyStruct();
-			var j2 = JsonConvert.SerializeObject(id2);
-
 			Log.Logger = new LoggerConfiguration()
 				.MinimumLevel.Debug()
 				.MinimumLevel.Override("Microsoft.Hosting.Lifetime", LogEventLevel.Information)

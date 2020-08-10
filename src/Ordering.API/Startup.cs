@@ -1,5 +1,6 @@
 ﻿using System;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.DataProtection;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -38,6 +39,8 @@ namespace Ordering.API
 		// This method gets called by the runtime. Use this method to add services to the container.
 		public void ConfigureServices(IServiceCollection services)
 		{
+			
+			 
 			Configuration.Print(x => Log.Logger.Information(x));
 
 
@@ -59,7 +62,6 @@ namespace Ordering.API
 				c.MapType<ObjectId>(() => new OpenApiSchema
 				{
 					Type = "string", Default = new OpenApiString(ObjectId.Empty.ToString()),
-					
 				});
 			});
 			services.AddHealthChecks();
@@ -73,7 +75,7 @@ namespace Ordering.API
 				builder.UseEventDispatcher();
 				builder.UseRequestProcessor();
 				builder.UseNumberEncoding();
-				builder.UseAccessControl();
+				builder.UseAccessControl(Configuration);
 				// builder.UseRabbitMQEventDispatcher(new RabbitMQOptions(), typeof(UserCheckoutAcceptedEvent));
 				// 启用审计服务
 				builder.UseAudit();
@@ -94,7 +96,6 @@ namespace Ordering.API
 		// This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
 		public void Configure(IApplicationBuilder app, IHostEnvironment env)
 		{
-			 
 			if (env.IsDevelopment())
 			{
 				app.UseDeveloperExceptionPage();

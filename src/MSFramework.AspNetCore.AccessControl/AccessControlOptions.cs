@@ -18,5 +18,9 @@ namespace MSFramework.AspNetCore.AccessControl
 			: int.Parse(_configuration["AccessControl:CacheTTL"]);
 
 		public string AuthorizeToken => _configuration["AccessControl:AuthorizeToken"];
+		public string Authority => _configuration["AccessControl:Authority"];
+		public string ClientId => _configuration["AccessControl:ClientId"];
+		public string ClientSecret => _configuration["AccessControl:ClientSecret"];
+		public string HttpClient { get; set; } = "MSFramework.AspNetCore.AccessControl.HttpClient";
 	}
 }
