@@ -1,12 +1,20 @@
-using MSFramework.Application;
+using Microsoft.Extensions.Configuration;
 
 namespace MSFramework.AspNetCore.AccessControl
 {
-	[ConfigType("AccessControl")]
 	public class AccessControlOptions
 	{
-		public string ServiceUrl { get; set; }
+		private readonly IConfiguration _configuration;
 
-		public int CacheTTL { get; set; } = 5;
+		public AccessControlOptions(IConfiguration configuration)
+		{
+			_configuration = configuration;
+		}
+
+		public string ServiceUrl => _configuration["AccessControl:ServiceUrl"];
+
+		public int CacheTTL => string.IsNullOrWhiteSpace(_configuration["AccessControl:CacheTTL"])
+			? 5
+			: int.Parse(_configuration["AccessControl:CacheTTL"]);
 	}
 }

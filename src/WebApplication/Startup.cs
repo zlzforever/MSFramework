@@ -45,7 +45,6 @@ namespace WebApplication
 			services.AddMSFramework(x =>
 			{
 				x.UseAspNetCore();
-				x.AddPermission();
 			});
 		}
 

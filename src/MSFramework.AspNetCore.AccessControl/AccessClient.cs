@@ -1,10 +1,14 @@
 using System;
+using System.Collections.Generic;
 using System.Net;
 using System.Net.Http;
+using System.Text;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Caching.Memory;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 
 namespace MSFramework.AspNetCore.AccessControl
 {
@@ -36,8 +40,7 @@ namespace MSFramework.AspNetCore.AccessControl
 				var url = $"{_options.ServiceUrl}/api/v1.0/access?{queryParam}";
 				var client = _httpClientFactory.CreateClient(GetType().Name);
 				var httpRequestMessage = new HttpRequestMessage(HttpMethod.Head, url);
-				var accessToken = await _accessor.HttpContext.GetTokenAsync("access_token");
-				httpRequestMessage.Headers.TryAddWithoutValidation("Authorization", $"Bear {accessToken}");
+				await SetAuthorizationHeader(httpRequestMessage);
 				var response = await client.SendAsync(httpRequestMessage);
 				var hasPermission = response.StatusCode == HttpStatusCode.OK;
 				var result = hasPermission ? (true, HttpStatusCode.OK) : (false, response.StatusCode);
@@ -45,6 +48,79 @@ namespace MSFramework.AspNetCore.AccessControl
 				entry.Value = result;
 				return result;
 			});
+		}
+
+		public async Task<Dictionary<string, List<ApiInfo>>> GetAllListAsync(string application)
+		{
+			var queryParam = $"application={application}";
+			var url = $"{_options.ServiceUrl}/api/v1.0/api-infos?{queryParam}";
+			var client = _httpClientFactory.CreateClient(GetType().Name);
+			var httpRequestMessage = new HttpRequestMessage(HttpMethod.Get, url);
+			await SetAuthorizationHeader(httpRequestMessage);
+			var response = await client.SendAsync(httpRequestMessage);
+			response.EnsureSuccessStatusCode();
+			var str = await response.Content.ReadAsStringAsync();
+			var json = JObject.Parse(str);
+			if (json["success"].ToObject<bool>())
+			{
+				return json["data"].ToObject<Dictionary<string, List<ApiInfo>>>();
+			}
+			else
+			{
+				throw new MSFrameworkException("Query exist api-info failed");
+			}
+		}
+
+		public async Task CreateAsync(ApiInfo apiInfo)
+		{
+			var url = $"{_options.ServiceUrl}/api/v1.0/api-infos";
+			var client = _httpClientFactory.CreateClient(GetType().Name);
+			var httpRequestMessage = new HttpRequestMessage(HttpMethod.Post, url)
+			{
+				Content = new StringContent(JsonConvert.SerializeObject(new
+				{
+					apiInfo.Name,
+					apiInfo.Application,
+					apiInfo.Description,
+					apiInfo.Group
+				}), Encoding.UTF8, "application/json")
+			};
+			await SetAuthorizationHeader(httpRequestMessage);
+			var response = await client.SendAsync(httpRequestMessage);
+			response.EnsureSuccessStatusCode();
+			var str = await response.Content.ReadAsStringAsync();
+			var json = JObject.Parse(str);
+			if (!json["success"].ToObject<bool>())
+			{
+				var msg = json["message"].ToString();
+				throw new MSFrameworkException($"Create api-info failed: {msg}");
+			}
+		}
+
+		public async Task RenewalAsync(string id)
+		{
+			var url = $"{_options.ServiceUrl}/api/v1.0/api-infos/{id}/renewal";
+			var client = _httpClientFactory.CreateClient(GetType().Name);
+			var httpRequestMessage = new HttpRequestMessage(new HttpMethod("PATCH"), url);
+			await SetAuthorizationHeader(httpRequestMessage);
+			var response = await client.SendAsync(httpRequestMessage);
+			response.EnsureSuccessStatusCode();
+		}
+
+		public async Task ObsoleteAsync(string id)
+		{
+			var url = $"{_options.ServiceUrl}/api/v1.0/api-infos/{id}/obsolete";
+			var client = _httpClientFactory.CreateClient(GetType().Name);
+			var httpRequestMessage = new HttpRequestMessage(new HttpMethod("PATCH"), url);
+			await SetAuthorizationHeader(httpRequestMessage);
+			var response = await client.SendAsync(httpRequestMessage);
+			response.EnsureSuccessStatusCode();
+		}
+
+		private async Task SetAuthorizationHeader(HttpRequestMessage httpRequestMessage)
+		{
+			// var accessToken = await _accessor.HttpContext.GetTokenAsync("access_token");
+			// httpRequestMessage.Headers.TryAddWithoutValidation("Authorization", $"Bear {accessToken}");
 		}
 	}
 }
