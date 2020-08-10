@@ -4,8 +4,6 @@ using System.Net;
 using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Caching.Memory;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -17,15 +15,13 @@ namespace MSFramework.AspNetCore.AccessControl
 		private readonly AccessControlOptions _options;
 		private readonly IHttpClientFactory _httpClientFactory;
 		private readonly IMemoryCache _cache;
-		private readonly IHttpContextAccessor _accessor;
 
 		public AccessClient(IMemoryCache cache,
 			AccessControlOptions options,
-			IHttpClientFactory httpClientFactory, IHttpContextAccessor accessor)
+			IHttpClientFactory httpClientFactory)
 		{
 			_options = options;
 			_httpClientFactory = httpClientFactory;
-			_accessor = accessor;
 			_cache = cache;
 		}
 
@@ -40,7 +36,7 @@ namespace MSFramework.AspNetCore.AccessControl
 				var url = $"{_options.ServiceUrl}/api/v1.0/access?{queryParam}";
 				var client = _httpClientFactory.CreateClient(GetType().Name);
 				var httpRequestMessage = new HttpRequestMessage(HttpMethod.Head, url);
-				await SetAuthorizationHeader(httpRequestMessage);
+				SetAuthorizationHeader(httpRequestMessage);
 				var response = await client.SendAsync(httpRequestMessage);
 				var hasPermission = response.StatusCode == HttpStatusCode.OK;
 				var result = hasPermission ? (true, HttpStatusCode.OK) : (false, response.StatusCode);
@@ -56,7 +52,7 @@ namespace MSFramework.AspNetCore.AccessControl
 			var url = $"{_options.ServiceUrl}/api/v1.0/api-infos?{queryParam}";
 			var client = _httpClientFactory.CreateClient(GetType().Name);
 			var httpRequestMessage = new HttpRequestMessage(HttpMethod.Get, url);
-			await SetAuthorizationHeader(httpRequestMessage);
+			SetAuthorizationHeader(httpRequestMessage);
 			var response = await client.SendAsync(httpRequestMessage);
 			response.EnsureSuccessStatusCode();
 			var str = await response.Content.ReadAsStringAsync();
@@ -85,7 +81,7 @@ namespace MSFramework.AspNetCore.AccessControl
 					apiInfo.Group
 				}), Encoding.UTF8, "application/json")
 			};
-			await SetAuthorizationHeader(httpRequestMessage);
+			SetAuthorizationHeader(httpRequestMessage);
 			var response = await client.SendAsync(httpRequestMessage);
 			response.EnsureSuccessStatusCode();
 			var str = await response.Content.ReadAsStringAsync();
@@ -102,7 +98,7 @@ namespace MSFramework.AspNetCore.AccessControl
 			var url = $"{_options.ServiceUrl}/api/v1.0/api-infos/{id}/renewal";
 			var client = _httpClientFactory.CreateClient(GetType().Name);
 			var httpRequestMessage = new HttpRequestMessage(new HttpMethod("PATCH"), url);
-			await SetAuthorizationHeader(httpRequestMessage);
+			SetAuthorizationHeader(httpRequestMessage);
 			var response = await client.SendAsync(httpRequestMessage);
 			response.EnsureSuccessStatusCode();
 		}
@@ -112,15 +108,15 @@ namespace MSFramework.AspNetCore.AccessControl
 			var url = $"{_options.ServiceUrl}/api/v1.0/api-infos/{id}/obsolete";
 			var client = _httpClientFactory.CreateClient(GetType().Name);
 			var httpRequestMessage = new HttpRequestMessage(new HttpMethod("PATCH"), url);
-			await SetAuthorizationHeader(httpRequestMessage);
+			SetAuthorizationHeader(httpRequestMessage);
 			var response = await client.SendAsync(httpRequestMessage);
 			response.EnsureSuccessStatusCode();
 		}
 
-		private async Task SetAuthorizationHeader(HttpRequestMessage httpRequestMessage)
+		private void SetAuthorizationHeader(HttpRequestMessage httpRequestMessage)
 		{
-			// var accessToken = await _accessor.HttpContext.GetTokenAsync("access_token");
-			// httpRequestMessage.Headers.TryAddWithoutValidation("Authorization", $"Bear {accessToken}");
+			var accessToken = _options.AuthorizeToken;
+			httpRequestMessage.Headers.TryAddWithoutValidation("AuthorizeToken", accessToken);
 		}
 	}
 }

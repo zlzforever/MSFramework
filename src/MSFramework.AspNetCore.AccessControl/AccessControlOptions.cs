@@ -16,5 +16,7 @@ namespace MSFramework.AspNetCore.AccessControl
 		public int CacheTTL => string.IsNullOrWhiteSpace(_configuration["AccessControl:CacheTTL"])
 			? 5
 			: int.Parse(_configuration["AccessControl:CacheTTL"]);
+
+		public string AuthorizeToken => _configuration["AccessControl:AuthorizeToken"];
 	}
 }

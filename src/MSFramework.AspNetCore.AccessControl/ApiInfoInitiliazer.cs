@@ -23,6 +23,11 @@ namespace MSFramework.AspNetCore.AccessControl
 				return;
 			}
 
+			if (string.IsNullOrWhiteSpace(options.ServiceUrl) || string.IsNullOrWhiteSpace(options.AuthorizeToken))
+			{
+				throw new MSFrameworkException("ServiceUrl and AuthorizeToken should not be empty/null");
+			}
+
 			var apiInfoFinder = serviceProvider.GetRequiredService<AspNetCoreApiInfoFinder>();
 
 			var localApiInfos = apiInfoFinder.GetAllList();

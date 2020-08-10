@@ -2,7 +2,7 @@
 using System.Net;
 using System.Reflection;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Mvc.Controllers;
 using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.Extensions.DependencyInjection;
@@ -82,7 +82,7 @@ namespace MSFramework.AspNetCore.AccessControl
 
 					if (string.IsNullOrWhiteSpace(subject))
 					{
-						context.Result = new StatusCodeResult(401);
+						await context.HttpContext.ChallengeAsync();
 						return;
 					}
 
@@ -106,7 +106,7 @@ namespace MSFramework.AspNetCore.AccessControl
 							}
 							default:
 							{
-								context.Result = new StatusCodeResult(401);
+								await context.HttpContext.ChallengeAsync();
 								return;
 							}
 						}
