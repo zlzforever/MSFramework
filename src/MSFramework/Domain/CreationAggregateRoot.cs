@@ -15,7 +15,7 @@ namespace MSFramework.Domain
 		/// <summary>
 		/// 创建时间
 		/// </summary>
-		public DateTimeOffset CreationTime { get; private set; }
+		public DateTimeOffset? CreationTime { get; private set; }
 
 		/// <summary>
 		/// 创建用户标识
