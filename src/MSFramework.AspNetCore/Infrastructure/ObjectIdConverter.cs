@@ -4,14 +4,15 @@ using Newtonsoft.Json;
 
 namespace MSFramework.AspNetCore.Infrastructure
 {
-	public class ObjectIdConverter : JsonConverter
+	public class ObjectIdConverter : JsonConverter<ObjectId>
 	{
-		public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
+		public override void WriteJson(JsonWriter writer, ObjectId value, JsonSerializer serializer)
 		{
 			writer.WriteValue(value.ToString());
 		}
 
-		public override object ReadJson(JsonReader reader, Type objectType, object existingValue,
+		public override ObjectId ReadJson(JsonReader reader, Type objectType, ObjectId existingValue,
+			bool hasExistingValue,
 			JsonSerializer serializer)
 		{
 			if (reader.TokenType != JsonToken.String)
@@ -20,11 +21,6 @@ namespace MSFramework.AspNetCore.Infrastructure
 			}
 
 			return new ObjectId((string) reader.Value);
-		}
-
-		public override bool CanConvert(Type objectType)
-		{
-			return objectType == typeof(ObjectId);
 		}
 	}
 }
