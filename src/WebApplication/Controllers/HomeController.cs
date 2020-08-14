@@ -17,7 +17,7 @@ namespace WebApplication.Controllers
 			_logger = logger;
 		}
 
-		[AccessControl(Name = "首页", Module = "UI")]
+		[AccessControl("首页", "UI")]
 		public IActionResult Index()
 		{
 			return View();

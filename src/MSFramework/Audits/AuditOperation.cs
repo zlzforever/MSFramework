@@ -61,13 +61,13 @@ namespace MSFramework.Audits
 		public void End()
 		{
 			EndTime = DateTimeOffset.Now;
-			if (CreationTime == default)
+			if (!CreationTime.HasValue)
 			{
 				Elapsed = 0;
 			}
 			else
 			{
-				Elapsed = (int) (EndTime - CreationTime).TotalMilliseconds;
+				Elapsed = (int) (EndTime - CreationTime.Value).TotalMilliseconds;
 			}
 		}
 

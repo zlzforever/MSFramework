@@ -3,10 +3,8 @@ using System.Net;
 using System.Reflection;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Controllers;
 using Microsoft.AspNetCore.Mvc.Filters;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using MSFramework.Application;
@@ -14,7 +12,7 @@ using MSFramework.Shared;
 
 namespace MSFramework.AspNetCore.AccessControl
 {
-	[AttributeUsage(AttributeTargets.Class | AttributeTargets.Method)]
+	[AttributeUsage(AttributeTargets.Method)]
 	public class AccessControlAttribute : ActionFilterAttribute
 	{
 		private static readonly Type AttributeType = typeof(AccessControlAttribute);
@@ -22,22 +20,31 @@ namespace MSFramework.AspNetCore.AccessControl
 		/// <summary>
 		/// 权限名称
 		/// </summary>
-		public string Name { get; private set; }
+		public string Name { get; }
 
 		/// <summary>
 		/// 访问此资源的访问者类型
 		/// </summary>
-		public SubjectType SubjectType { get; private set; }
+		public SubjectType SubjectType { get; }
+
+		/// <summary>
+		/// 分组
+		/// </summary>
+		public string Group { get; }
 
 		/// <summary>
 		/// 权限描述
 		/// </summary>
-		public string Description { get; private set; }
+		public string Description { get; }
 
-		public AccessControlAttribute(string name, SubjectType subjectType = SubjectType.Role, string description = null)
+		public AccessControlAttribute(string name, string group = "Default", SubjectType subjectType = SubjectType.Role,
+			string description = null)
 		{
 			Check.NotEmpty(name, nameof(name));
+			Check.NotEmpty(group, nameof(group));
+
 			Name = name;
+			Group = group;
 			SubjectType = subjectType;
 			Description = description;
 		}
@@ -54,73 +61,56 @@ namespace MSFramework.AspNetCore.AccessControl
 					return;
 				}
 
-				var permission1 = descriptor.ControllerTypeInfo.GetCustomAttribute(AttributeType);
-				var permission2 = descriptor.MethodInfo.GetCustomAttribute(AttributeType);
+				var accessControl = (AccessControlAttribute) descriptor.MethodInfo.GetCustomAttribute(AttributeType);
 
-				if (permission1 == null && permission2 == null)
+				if (accessControl == null)
 				{
 					await next();
 				}
 				else
 				{
-					var permission = (AccessControlAttribute) (permission2 ?? permission1);
-
 					var session = context.HttpContext.RequestServices.GetRequiredService<ISession>();
-					var hostingEnvironment =
-						context.HttpContext.RequestServices.GetRequiredService<IHostingEnvironment>();
+					var hostEnvironment = context.HttpContext.RequestServices.GetRequiredService<IHostEnvironment>();
 
-					var subject = permission.SubjectType == SubjectType.Identity
-						? session.UserId
-						: session.Roles == null
-							? null
-							: string.Join(",", session.Roles);
+					var subject = hostEnvironment.IsDevelopment()
+						? "admin"
+						: accessControl.SubjectType == SubjectType.Identity
+							? session.UserId
+							: session.Roles == null
+								? null
+								: string.Join(",", session.Roles);
 
 					if (string.IsNullOrWhiteSpace(subject))
 					{
-						// todo: 401
-						await context.HttpContext.ForbidAsync();
+						await context.HttpContext.ChallengeAsync();
 						return;
 					}
 
-					var configuration = context.HttpContext.RequestServices.GetRequiredService<IConfiguration>();
-					var applicationName = configuration["ApplicationName"];
-					applicationName = string.IsNullOrWhiteSpace(applicationName)
-						? hostingEnvironment.ApplicationName
-						: applicationName;
-					applicationName = string.IsNullOrWhiteSpace(applicationName)
-						? Assembly.GetEntryAssembly()?.FullName
-						: applicationName;
+					var applicationInfo = context.HttpContext.RequestServices.GetRequiredService<ApplicationInfo>();
 
-					if (string.IsNullOrWhiteSpace(applicationName))
+					if (string.IsNullOrWhiteSpace(applicationInfo.Name))
 					{
-						throw new MSFrameworkException("ApplicationName is empty");
+						throw new MSFrameworkException("Application name is not config");
 					}
 
 					var tuple =
-						await accessClient.HasAccessAsync(subject, permission.Name, "full", applicationName);
+						await accessClient.HasAccessAsync(subject, accessControl.Name, "access", applicationInfo.Name);
 					if (!tuple.HasAccess)
 					{
 						//todo:
 						switch (tuple.StatusCode)
 						{
-							case HttpStatusCode.Forbidden:
+							case HttpStatusCode.InternalServerError:
 							{
-								await context.HttpContext.ForbidAsync();
-								return;
-							}
-							case HttpStatusCode.NotFound:
-							{
-								context.Result = new NotFoundResult();
-								return;
+								throw new MSFrameworkException("权限服务异常");
 							}
 							default:
 							{
-								context.Result = new NotFoundResult();
+								await context.HttpContext.ChallengeAsync();
 								return;
 							}
 						}
 					}
-
 
 					await next();
 				}
