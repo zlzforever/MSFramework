@@ -22,6 +22,7 @@ using MSFramework.Migrator.MySql;
 using MSFramework.Shared;
 using Newtonsoft.Json;
 using Ordering.Domain;
+using Ordering.Domain.AggregateRoots;
 using Ordering.Infrastructure;
 using Serilog;
 
@@ -53,12 +54,18 @@ namespace Ordering.API
 					x.ModelBinderProviders.Insert(0, new ObjectIdModelBinderProvider());
 				})
 				.UseInvalidModelStateResponse()
-				.AddNewtonsoftJson(x => { x.SerializerSettings.Converters.Add(new ObjectIdConverter()); });
+				.AddNewtonsoftJson(x =>
+				{
+					x.SerializerSettings.Converters.Add(new ObjectIdConverter()); 
+					x.SerializerSettings.Converters.Add(new EnumerationConverter());
+					x.SerializerSettings.ContractResolver= new EnumerationContractResolver();
+				});
 
 			services.AddSwaggerGen(c =>
 			{
 				c.SwaggerDoc("v1.0", new OpenApiInfo {Version = "v1.0", Description = "Ordering API V1.0"});
 				c.CustomSchemaIds(type => type.FullName);
+        c.AddEnumerationDoc(typeof(Address).Assembly).AddObjectIdDoc();
 				c.MapType<ObjectId>(() => new OpenApiSchema
 				{
 					Type = "string", Default = new OpenApiString(ObjectId.Empty.ToString()),
