@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 using Dapper;
 using Microsoft.Extensions.Logging;
 using MSFramework.Shared;
-using MySqlConnector;
+using MySql.Data.MySqlClient;
 
 namespace MSFramework.Migrator.MySql
 {

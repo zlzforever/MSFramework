@@ -1,15 +1,18 @@
-# First stage of multi-stage build
-FROM registry-docker.pamirs.com/dotnetsdk-yarn:latest AS build-env
-WORKDIR /template
-# copy the contents of agent working directory on host to workdir in container
+# First stage: restore
+FROM registry.cn-shanghai.aliyuncs.com/zlzforever/dotnetsdk-yarn:3.1-latest AS prebuild
+WORKDIR /app
 COPY . ./
-
-# RUN cd src/Template.API && yarn install && cd ../..
-# dotnet commands to build, test, and publish
-RUN dotnet publish -c Release -o out
+RUN dotnet restore
+RUN cd .. && rm -rf app
 
 # Second stage - Build runtime image
-FROM registry-docker.pamirs.com/aspnet:3.1
-WORKDIR /template
-COPY --from=build-env /template/out/ .
+FROM registry.cn-shanghai.aliyuncs.com/zlzforever/Template as build-env
+WORKDIR /app
+COPY . ./
+RUN dotnet publish -c Release -o out
+
+# Third stage - Copy to host env
+FROM registry-docker.pamirs.com/aspnet:3.1 as release
+WORKDIR /app
+COPY --from=build-env /app/out/ .
 ENTRYPOINT ["dotnet", "template.API.dll"]
