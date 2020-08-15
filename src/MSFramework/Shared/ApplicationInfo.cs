@@ -14,7 +14,10 @@ namespace MSFramework.Shared
 		{
 			get
 			{
-				var applicationName = _configuration["ApplicationName"];
+				var applicationName = _configuration["ApiName"];
+				applicationName = string.IsNullOrWhiteSpace(applicationName)
+					? _configuration["ApplicationName"]
+					: applicationName;
 				applicationName = string.IsNullOrWhiteSpace(applicationName)
 					? _hostEnvironment.ApplicationName
 					: applicationName;

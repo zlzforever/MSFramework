@@ -13,33 +13,39 @@ namespace MSFramework.AspNetCore.AccessControl
 		{
 			builder.Services.TryAddScoped<AccessControlOptions>();
 			builder.Services.TryAddScoped<IAccessClient, AccessClient>();
+			builder.Services.AddHttpClient();
 
 			var options = new AccessControlOptions(configuration);
-			var httpClient = new HttpClient();
-			var disco = httpClient.GetDiscoveryDocumentAsync(new DiscoveryDocumentRequest
+
+			if (!string.IsNullOrWhiteSpace(options.Authority))
 			{
-				Address = options.Authority,
-				Policy = new DiscoveryPolicy
+				var httpClient = new HttpClient();
+				var disco = httpClient.GetDiscoveryDocumentAsync(new DiscoveryDocumentRequest
 				{
-					RequireHttps = false
+					Address = options.Authority,
+					Policy = new DiscoveryPolicy
+					{
+						RequireHttps = false
+					}
+				}).Result;
+				if (disco.TokenEndpoint == null)
+				{
+					throw new ApplicationException($"TokenEndpoint {options.Authority} is null");
 				}
-			}).Result;
-			if (disco.TokenEndpoint == null)
-			{
-				throw new ApplicationException($"TokenEndpoint {options.Authority} is null");
+
+				builder.Services.AddAccessTokenManagement(x =>
+				{
+					x.Client.Clients.Add("default", new ClientCredentialsTokenRequest
+					{
+						Address = disco.TokenEndpoint,
+						ClientId = options.ClientId,
+						ClientSecret = options.ClientSecret
+					});
+					x.Client.Scope = "cerberus-api cerberus-access-server-api";
+				});
+				builder.Services.AddClientAccessTokenClient(options.HttpClient);
 			}
 
-			builder.Services.AddAccessTokenManagement(x =>
-			{
-				x.Client.Clients.Add("default", new ClientCredentialsTokenRequest
-				{
-					Address = disco.TokenEndpoint,
-					ClientId = options.ClientId,
-					ClientSecret = options.ClientSecret
-				});
-				x.Client.Scope = "cerberus-api cerberus-access-server-api";
-			});
-			builder.Services.AddClientAccessTokenClient(options.HttpClient);
 			return builder;
 		}
 	}

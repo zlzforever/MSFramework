@@ -8,6 +8,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using MSFramework;
 using MSFramework.AspNetCore;
+using MSFramework.AspNetCore.AccessControl;
 using MSFramework.AspNetCore.Mvc;
 using MSFramework.Audits;
 using MSFramework.Domain;
@@ -66,8 +67,7 @@ namespace Ordering.API.Controllers
 		}
 
 		[HttpPost("objectid/{id}")]
-
-		public MyBody Post([FromRoute]ObjectId id, [FromBody] MyBody body)
+		public MyBody Post([FromRoute] ObjectId id, [FromBody] MyBody body)
 		{
 			body.Id = id;
 			return body;
@@ -87,6 +87,7 @@ namespace Ordering.API.Controllers
 		}
 
 		[HttpGet("getFirst1")]
+		[AccessControl("查看第一个产品", "产品")]
 		public Product GetFirst1()
 		{
 			return _productRepository.GetFirst();
@@ -100,6 +101,7 @@ namespace Ordering.API.Controllers
 		}
 
 		[HttpGet("getPagedQuery")]
+		[AccessControl("查询产品", "产品")]
 		public async Task<Response<PagedResult<ProductDTO>>> GetPagedQuery()
 		{
 			PagedResult<Product> a = await _productRepository.PagedQueryAsync(0, 10);
@@ -132,6 +134,7 @@ namespace Ordering.API.Controllers
 		}
 
 		[HttpDelete]
+		[AccessControl("删除产品", "产品")]
 		public Product DeleteAsync(ObjectId productId)
 		{
 			return _productRepository.Delete(productId);

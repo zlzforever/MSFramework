@@ -23,7 +23,7 @@ namespace MSFramework.AspNetCore.AccessControl
 				return;
 			}
 
-			if (string.IsNullOrWhiteSpace(options.ServiceUrl) || string.IsNullOrWhiteSpace(options.AuthorizeToken))
+			if (string.IsNullOrWhiteSpace(options.ServiceUrl))
 			{
 				throw new MSFrameworkException("ServiceUrl and AuthorizeToken should not be empty/null");
 			}

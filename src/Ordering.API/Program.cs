@@ -18,34 +18,7 @@ namespace Ordering.API
 {
 	public class Program
 	{
-		private static async Task SetAuthorizationHeader()
-		{
-			var client = new HttpClient();
-			var disco = await client.GetDiscoveryDocumentAsync("http://localhost:7897");
-			if (disco.IsError)
-			{
-				throw new MSFrameworkException($"Connect to authority failed: {disco.Error}");
-			}
-
-			var tokenResponse = await client.RequestClientCredentialsTokenAsync(new ClientCredentialsTokenRequest
-			{
-				Address = disco.TokenEndpoint,
-				ClientId = "cerberus-client",
-				ClientSecret = "secret",
-				Scope = "cerberus-api cerberus-access-server-api"
-			});
-
-			if (tokenResponse.IsError)
-			{
-				throw new MSFrameworkException($"Request access token failed: {tokenResponse.Error}");
-			}
-
-			var httpClient = new HttpClient();
-			var token = tokenResponse.AccessToken;
-			httpClient.SetBearerToken(token);
-			var response = await httpClient.GetAsync("http://localhost:8100/api/v1.1/api-infos?application=x");
-			response.EnsureSuccessStatusCode();
-		}
+ 
 
 		public static void Main(string[] args)
 		{

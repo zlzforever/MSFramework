@@ -30,7 +30,7 @@ namespace Ordering.API.Controllers
 			_orderRepository = orderRepository;
 		}
 
-		[AccessControl("string")]
+		[AccessControl("TestCreate")]
 		[HttpPost("testCreate")]
 		public async Task<IActionResult> TestCreate()
 		{
@@ -54,6 +54,7 @@ namespace Ordering.API.Controllers
 		#region Command
 
 		[HttpPost("test-command1")]
+		[AccessControl("test-command1")]
 		public async Task<string> TestCommand1Async([FromBody] TestCommand1 command)
 		{
 			var a = await _commandExecutor.ProcessAsync(command, default);
@@ -61,6 +62,7 @@ namespace Ordering.API.Controllers
 		}
 
 		[HttpPost("test-command2")]
+		[AccessControl("test-command2")]
 		public async Task TestCommand2Async([FromBody] TestCommand2 command)
 		{
 			await _commandExecutor.ProcessAsync(command, default);
@@ -71,6 +73,7 @@ namespace Ordering.API.Controllers
 		/// </summary>
 		/// <returns></returns>
 		[HttpPost]
+		[AccessControl("创建订单")]
 		public async Task<ObjectId> CreateOrderAsync()
 		{
 			var random = new Random();
@@ -95,6 +98,7 @@ namespace Ordering.API.Controllers
 		}
 
 		[HttpDelete("{orderId}")]
+		[AccessControl("删除订单")]
 		public IActionResult DeleteOrderAsync(Guid orderId)
 		{
 			// return await _mediator.Send(new DeleteOrderCommand(orderId));
@@ -102,6 +106,7 @@ namespace Ordering.API.Controllers
 		}
 
 		[HttpPut("{orderId}/address")]
+		[AccessControl("修改订单地址")]
 		public IActionResult ChangeOrderAddressAsync([FromRoute] ObjectId orderId,
 			[FromBody] ChangeOrderAddressCommand command)
 		{
@@ -114,6 +119,7 @@ namespace Ordering.API.Controllers
 		#region QUERY
 
 		[HttpGet("{orderId}")]
+		[AccessControl("查看订单")]
 		public async Task<IActionResult> GetOrderAsync([FromRoute] ObjectId orderId)
 		{
 			var order = await _orderingQuery.GetOrderAsync(orderId);
@@ -121,6 +127,7 @@ namespace Ordering.API.Controllers
 		}
 
 		[HttpGet()]
+		// [AccessControl("查看所有订单")]
 		public async Task<IActionResult> GetOrdersAsync()
 		{
 			var order = await _orderingQuery.GetAllOrdersAsync();
