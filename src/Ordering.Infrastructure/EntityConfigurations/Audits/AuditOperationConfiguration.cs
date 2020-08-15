@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using MSFramework.Audits;
 using MSFramework.Ef;
+using MSFramework.Ef.Extensions;
 
 namespace Ordering.Infrastructure.EntityConfigurations.Audits
 {
@@ -23,7 +24,7 @@ namespace Ordering.Infrastructure.EntityConfigurations.Audits
 			builder.Property(x => x.UserAgent).HasColumnName("user_agent").HasMaxLength(500);
 			builder.Property(x => x.Elapsed).HasColumnName("elapsed");
 			builder.Property(x => x.EndTime).HasColumnName("end_time");
-			builder.ConfigureCreationAudited();
+			builder.ConfigureCreation();
 
 			builder.HasIndex(x => x.CreationTime);
 			builder.HasIndex(x => x.CreationUserId);

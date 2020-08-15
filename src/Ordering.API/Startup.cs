@@ -37,8 +37,6 @@ namespace Ordering.API
 		// This method gets called by the runtime. Use this method to add services to the container.
 		public void ConfigureServices(IServiceCollection services)
 		{
-			
-			 
 			Configuration.Print(x => Log.Logger.Information(x));
 
 
@@ -53,16 +51,16 @@ namespace Ordering.API
 				.UseInvalidModelStateResponse()
 				.AddNewtonsoftJson(x =>
 				{
-					x.SerializerSettings.Converters.Add(new ObjectIdConverter()); 
+					x.SerializerSettings.Converters.Add(new ObjectIdConverter());
 					x.SerializerSettings.Converters.Add(new EnumerationConverter());
-					x.SerializerSettings.ContractResolver= new EnumerationContractResolver();
+					x.SerializerSettings.ContractResolver = new EnumerationContractResolver();
 				});
 
 			services.AddSwaggerGen(c =>
 			{
 				c.SwaggerDoc("v1.0", new OpenApiInfo {Version = "v1.0", Description = "Ordering API V1.0"});
 				c.CustomSchemaIds(type => type.FullName);
-        c.AddEnumerationDoc(typeof(Address).Assembly).AddObjectIdDoc();
+				c.AddEnumerationDoc(typeof(Address).Assembly).AddObjectIdDoc();
 				c.MapType<ObjectId>(() => new OpenApiSchema
 				{
 					Type = "string", Default = new OpenApiString(ObjectId.Empty.ToString()),

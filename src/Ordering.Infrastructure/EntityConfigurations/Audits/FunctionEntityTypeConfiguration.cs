@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using MSFramework.Ef;
+using MSFramework.Ef.Extensions;
 using MSFramework.Functions;
 
 namespace Ordering.Infrastructure.EntityConfigurations.Audits
@@ -19,8 +20,8 @@ namespace Ordering.Infrastructure.EntityConfigurations.Audits
 			builder.Property(x => x.Description).HasColumnName("description").HasMaxLength(2000);
 			builder.Property(x => x.Enabled).HasColumnName("enabled");
 			builder.Property(x => x.Expired).HasColumnName("expired");
-			builder.ConfigureCreationAudited();
-			builder.ConfigureModificationAudited();
+			builder.ConfigureCreation();
+			builder.ConfigureModification();
 
 			builder.HasIndex(x => x.Code).IsUnique();
 			builder.HasIndex(x => x.Name);

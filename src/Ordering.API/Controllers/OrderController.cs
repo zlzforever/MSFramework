@@ -122,7 +122,7 @@ namespace Ordering.API.Controllers
 		[AccessControl("查看订单")]
 		public async Task<IActionResult> GetOrderAsync([FromRoute] ObjectId orderId)
 		{
-			var order = await _orderingQuery.GetOrderAsync(orderId);
+			var order = await _orderingQuery.GetAsync(orderId);
 			return Ok(order);
 		}
 
@@ -130,7 +130,7 @@ namespace Ordering.API.Controllers
 		// [AccessControl("查看所有订单")]
 		public async Task<IActionResult> GetOrdersAsync()
 		{
-			var order = await _orderingQuery.GetAllOrdersAsync();
+			var order = await _orderingQuery.GetAllListAsync();
 			return Ok(order);
 		}
 

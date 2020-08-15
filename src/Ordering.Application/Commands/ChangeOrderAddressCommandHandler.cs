@@ -9,13 +9,10 @@ namespace Ordering.Application.Commands
 	public class ChangeOrderAddressCommandHandler : IRequestHandler<ChangeOrderAddressCommand>
 	{
 		private readonly IOrderingRepository _orderRepository;
-		private readonly IUnitOfWorkManager _unitOfWorkManager;
 
-		public ChangeOrderAddressCommandHandler(IOrderingRepository orderRepository,
-			IUnitOfWorkManager unitOfWorkManager)
+		public ChangeOrderAddressCommandHandler(IOrderingRepository orderRepository)
 		{
 			_orderRepository = orderRepository;
-			_unitOfWorkManager = unitOfWorkManager;
 		}
 
 		/// <summary>
@@ -23,17 +20,12 @@ namespace Ordering.Application.Commands
 		/// customer executes cancel order from app
 		/// </summary>
 		/// <param name="command"></param>
+		/// <param name="cancellationToken"></param>
 		/// <returns></returns>
 		public async Task HandleAsync(ChangeOrderAddressCommand command, CancellationToken cancellationToken)
 		{
 			var order = await _orderRepository.GetAsync(command.OrderId);
-			if (order == null)
-			{
-				return;
-			}
-
-			order.ChangeAddress(command.NewAddress);
-			await _unitOfWorkManager.CommitAsync();
+			order?.ChangeAddress(command.NewAddress);
 		}
 	}
 }

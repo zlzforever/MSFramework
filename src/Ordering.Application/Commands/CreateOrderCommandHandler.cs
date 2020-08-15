@@ -12,12 +12,10 @@ namespace Ordering.Application.Commands
 	public class CreateOrderCommandHandler : IRequestHandler<CreateOrderCommand, ObjectId>
 	{
 		private readonly IOrderingRepository _orderRepository;
-		private readonly IUnitOfWorkManager _unitOfWorkManager;
 
-		public CreateOrderCommandHandler(IOrderingRepository orderRepository, IUnitOfWorkManager unitOfWorkManager)
+		public CreateOrderCommandHandler(IOrderingRepository orderRepository)
 		{
 			_orderRepository = orderRepository;
-			_unitOfWorkManager = unitOfWorkManager;
 		}
 
 		/// <summary>
@@ -25,6 +23,7 @@ namespace Ordering.Application.Commands
 		/// customer executes cancel order from app
 		/// </summary>
 		/// <param name="command"></param>
+		/// <param name="cancellationToken"></param>
 		/// <returns></returns>
 		public async Task<ObjectId> HandleAsync(CreateOrderCommand command, CancellationToken cancellationToken)
 		{

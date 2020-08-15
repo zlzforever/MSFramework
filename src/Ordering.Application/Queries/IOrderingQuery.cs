@@ -8,8 +8,8 @@ namespace Ordering.Application.Queries
 {
 	public interface IOrderingQuery : IScopeDependency
 	{
-		Task<List<Order>> GetAllOrdersAsync();
+		Task<List<Order>> GetAllListAsync();
 
-		Task<Order> GetOrderAsync(ObjectId orderId);
+		Task<Order> GetAsync(ObjectId orderId);
 	}
 }

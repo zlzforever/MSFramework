@@ -1,7 +1,6 @@
 using System.Threading;
 using System.Threading.Tasks;
 using MSFramework.Application;
-using MSFramework.Domain;
 using Ordering.Domain.Repositories;
 
 namespace Ordering.Application.Commands
@@ -9,12 +8,10 @@ namespace Ordering.Application.Commands
 	public class DeleteOrderCommandHandler : IRequestHandler<DeleteOrderCommand>
 	{
 		private readonly IOrderingRepository _orderRepository;
-		private readonly IUnitOfWorkManager _unitOfWorkManager;
 
-		public DeleteOrderCommandHandler(IOrderingRepository orderRepository, IUnitOfWorkManager unitOfWorkManager)
+		public DeleteOrderCommandHandler(IOrderingRepository orderRepository)
 		{
 			_orderRepository = orderRepository;
-			_unitOfWorkManager = unitOfWorkManager;
 		}
 
 		/// <summary>
@@ -22,6 +19,7 @@ namespace Ordering.Application.Commands
 		/// customer executes cancel order from app
 		/// </summary>
 		/// <param name="command"></param>
+		/// <param name="cancellationToken"></param>
 		/// <returns></returns>
 		public async Task HandleAsync(DeleteOrderCommand command, CancellationToken cancellationToken)
 		{
@@ -32,7 +30,6 @@ namespace Ordering.Application.Commands
 			}
 
 			await _orderRepository.DeleteAsync(order);
-			await _unitOfWorkManager.CommitAsync();
 		}
 	}
 }
