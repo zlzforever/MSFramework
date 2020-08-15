@@ -1,6 +1,4 @@
-﻿using System;
-using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.DataProtection;
+﻿using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -20,7 +18,6 @@ using MSFramework.Ef.MySql;
 using MSFramework.Extensions;
 using MSFramework.Migrator.MySql;
 using MSFramework.Shared;
-using Newtonsoft.Json;
 using Ordering.Domain;
 using Ordering.Domain.AggregateRoots;
 using Ordering.Infrastructure;

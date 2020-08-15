@@ -14,8 +14,11 @@
         <PackageReference Include="Serilog.Sinks.RollingFile" Version="3.3.0" />
         <PackageReference Include="Swashbuckle.AspNetCore.SwaggerGen" Version="5.5.1" />
         <PackageReference Include="Swashbuckle.AspNetCore.SwaggerUI" Version="5.5.1" />
-        <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="3.1.6" />
-        <PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="3.1.6" />
+        <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="3.1.7">
+          <PrivateAssets>all</PrivateAssets>
+          <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+        </PackageReference>
+        <PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="3.1.7" />
         <PackageReference Include="xunit.assert" Version="2.4.1" />
     </ItemGroup>
 

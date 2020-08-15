@@ -21,9 +21,15 @@ namespace MSFramework.Domain
 
 		public static IEnumerable<T> GetAll<T>() where T : Enumeration
 		{
-			var fields = typeof(T).GetFields(BindingFlags.Public | BindingFlags.Static | BindingFlags.DeclaredOnly);
+			var enumerations = GetAll(typeof(T));
+			return enumerations.Cast<T>();
+		}
 
-			return fields.Select(f => f.GetValue(null)).Cast<T>();
+		public static IEnumerable<Enumeration> GetAll(Type type)
+		{
+			return type
+				.GetFields(BindingFlags.Public | BindingFlags.Static | BindingFlags.DeclaredOnly)
+				.Where(i => i.FieldType.IsSubclassOf(typeof(Enumeration))).Select(f => (Enumeration) f.GetValue(null));
 		}
 
 		public override bool Equals(object obj)

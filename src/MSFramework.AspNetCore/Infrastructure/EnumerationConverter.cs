@@ -1,7 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
+﻿#nullable enable
+using System;
 using System.Linq;
-using System.Reflection;
 using MSFramework.Domain;
 using MSFramework.Extensions;
 using Newtonsoft.Json;
@@ -23,7 +22,7 @@ namespace MSFramework.AspNetCore.Infrastructure
 			}
 			else
 			{
-				throw new MSFrameworkException(122, $" no support json output");
+				throw new MSFrameworkException(122, " no support json output");
 			}
 		}
 
@@ -31,7 +30,8 @@ namespace MSFramework.AspNetCore.Infrastructure
 			JsonSerializer serializer)
 		{
 			JToken token = JToken.Load(reader);
-			var vaule = token?.ToString();
+			var value = token?.ToString();
+			
 			var isNullable = objectType.IsGenericType && objectType.GetGenericTypeDefinition() == typeof(Nullable<>);
 			var enumType = objectType;
 			if (isNullable)
@@ -39,7 +39,7 @@ namespace MSFramework.AspNetCore.Infrastructure
 				enumType = objectType.GetGenericArguments().FirstOrDefault();
 			}
 
-			if (vaule.IsNullOrEmpty())
+			if (value.IsNullOrEmpty())
 			{
 				if (isNullable)
 				{
@@ -51,32 +51,25 @@ namespace MSFramework.AspNetCore.Infrastructure
 
 			try
 			{
-				var matchingItem = GetAll(enumType).FirstOrDefault(i => i.Id == vaule);
-				if (matchingItem != null)
+				var enumeration = Enumeration.GetAll(enumType).FirstOrDefault(i => i.Id == value);
+				if (enumeration != null)
 				{
-					return matchingItem;
+					return enumeration;
 				}
 			}
-			catch (Exception e)
+			catch (Exception)
 			{
 				// 异常数据，不允许绑定
-				throw new MSFrameworkException(122, $" {reader.Path} 不支持绑定值 {vaule}");
+				throw new MSFrameworkException(122, $" {reader.Path} 不支持绑定值 {value}");
 			}
 
 			// 异常数据，不允许绑定
-			throw new MSFrameworkException(122, $" {reader.Path} 不支持绑定值 {vaule}");
+			throw new MSFrameworkException(122, $" {reader.Path} 不支持绑定值 {value}");
 		}
 
 		public override bool CanConvert(Type objectType)
 		{
 			return objectType.IsSubclassOf(typeof(Enumeration));
-		}
-
-		static IEnumerable<Enumeration> GetAll(Type type)
-		{
-			return type
-				.GetFields(BindingFlags.Public | BindingFlags.Static | BindingFlags.DeclaredOnly)
-				.Where(i => i.FieldType.IsSubclassOf(typeof(Enumeration))).Select(f => (Enumeration) f.GetValue(null));
 		}
 	}
 }

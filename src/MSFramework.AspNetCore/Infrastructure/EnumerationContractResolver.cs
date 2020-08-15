@@ -8,7 +8,7 @@ namespace MSFramework.AspNetCore.Infrastructure
 	{
 		protected override JsonContract CreateContract(Type objectType)
 		{
-			JsonContract contract = base.CreateContract(objectType);
+			var contract = base.CreateContract(objectType);
 
 			// this will only be called once and then cached
 			if (objectType.IsSubclassOf(typeof(Enumeration)))

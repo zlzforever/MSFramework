@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
-using MSFramework.Ef;
 using MSFramework.Shared;
 using Ordering.Domain.AggregateRoots;
 using Ordering.Infrastructure;

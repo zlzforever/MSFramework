@@ -1,18 +1,7 @@
-﻿using System;
-using System.Net.Http;
-using System.Threading.Tasks;
-using IdentityModel.Client;
-using Microsoft.AspNetCore.Hosting;
+﻿using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Hosting;
-using MSFramework;
-using MSFramework.Application;
-using MSFramework.Shared;
-using MSFramework.Utilities;
-using Newtonsoft.Json;
-using Ordering.Application.Commands;
 using Serilog;
 using Serilog.Events;
-using Xunit;
 
 namespace Ordering.API
 {
