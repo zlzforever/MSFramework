@@ -20,10 +20,11 @@ namespace MSFramework.AspNetCore.AccessControl
 
 		public List<ApiInfo> GetAllList()
 		{
+			var scope = _services.CreateScope();
 			var actionDescriptorCollectionProvider =
-				_services.GetRequiredService<IActionDescriptorCollectionProvider>();
+				scope.ServiceProvider.GetRequiredService<IActionDescriptorCollectionProvider>();
 			var apiInfos = new List<ApiInfo>();
-			var applicationInfo = _services.GetRequiredService<ApplicationInfo>();
+			var applicationInfo = scope.ServiceProvider.GetRequiredService<ApplicationInfo>();
 			if (string.IsNullOrWhiteSpace(applicationInfo.Name))
 			{
 				throw new MSFrameworkException("Application name is not config");

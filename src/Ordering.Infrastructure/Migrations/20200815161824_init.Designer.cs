@@ -9,14 +9,14 @@ using Ordering.Infrastructure;
 namespace Ordering.Infrastructure.Migrations
 {
     [DbContext(typeof(OrderingContext))]
-    [Migration("20200806062731_init")]
+    [Migration("20200815161824_init")]
     partial class init
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "3.1.6")
+                .HasAnnotation("ProductVersion", "3.1.7")
                 .HasAnnotation("Relational:MaxIdentifierLength", 64);
 
             modelBuilder.Entity("MSFramework.Audits.AuditEntity", b =>
@@ -68,9 +68,9 @@ namespace Ordering.Infrastructure.Migrations
                         .HasColumnType("varchar(255) CHARACTER SET utf8mb4")
                         .HasMaxLength(255);
 
-                    b.Property<DateTimeOffset>("CreationTime")
+                    b.Property<int?>("CreationTime")
                         .HasColumnName("creation_time")
-                        .HasColumnType("datetime(6)");
+                        .HasColumnType("int");
 
                     b.Property<string>("CreationUserId")
                         .HasColumnName("creation_user_id")
@@ -155,7 +155,7 @@ namespace Ordering.Infrastructure.Migrations
                     b.ToTable("audit_property");
                 });
 
-            modelBuilder.Entity("MSFramework.Functions.FunctionDefine", b =>
+            modelBuilder.Entity("MSFramework.Functions.Function", b =>
                 {
                     b.Property<string>("Id")
                         .HasColumnName("id")
@@ -166,9 +166,9 @@ namespace Ordering.Infrastructure.Migrations
                         .HasColumnType("varchar(255) CHARACTER SET utf8mb4")
                         .HasMaxLength(255);
 
-                    b.Property<DateTimeOffset>("CreationTime")
+                    b.Property<int?>("CreationTime")
                         .HasColumnName("creation_time")
-                        .HasColumnType("datetime(6)");
+                        .HasColumnType("int");
 
                     b.Property<string>("CreationUserId")
                         .HasColumnName("creation_user_id")
@@ -193,17 +193,17 @@ namespace Ordering.Infrastructure.Migrations
                         .HasColumnName("expired")
                         .HasColumnType("tinyint(1)");
 
-                    b.Property<DateTimeOffset?>("ModificationTime")
-                        .HasColumnName("last_modification_time")
-                        .HasColumnType("datetime(6)");
+                    b.Property<int?>("ModificationTime")
+                        .HasColumnName("modification_time")
+                        .HasColumnType("int");
 
                     b.Property<string>("ModificationUserId")
-                        .HasColumnName("last_modification_user_id")
+                        .HasColumnName("modification_user_id")
                         .HasColumnType("varchar(256) CHARACTER SET utf8mb4")
                         .HasMaxLength(256);
 
                     b.Property<string>("ModificationUserName")
-                        .HasColumnName("last_modification_user_name")
+                        .HasColumnName("modification_user_name")
                         .HasColumnType("varchar(256) CHARACTER SET utf8mb4")
                         .HasMaxLength(256);
 

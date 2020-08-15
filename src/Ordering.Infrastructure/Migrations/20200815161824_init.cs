@@ -12,7 +12,7 @@ namespace Ordering.Infrastructure.Migrations
                 columns: table => new
                 {
                     id = table.Column<string>(nullable: false),
-                    creation_time = table.Column<DateTimeOffset>(nullable: false),
+                    creation_time = table.Column<int>(type: "int", nullable: true),
                     creation_user_id = table.Column<string>(maxLength: 256, nullable: true),
                     creation_user_name = table.Column<string>(maxLength: 256, nullable: true),
                     application_name = table.Column<string>(maxLength: 255, nullable: true),
@@ -32,12 +32,12 @@ namespace Ordering.Infrastructure.Migrations
                 columns: table => new
                 {
                     id = table.Column<string>(nullable: false),
-                    creation_time = table.Column<DateTimeOffset>(nullable: false),
+                    creation_time = table.Column<int>(type: "int", nullable: true),
                     creation_user_id = table.Column<string>(maxLength: 256, nullable: true),
                     creation_user_name = table.Column<string>(maxLength: 256, nullable: true),
-                    last_modification_user_id = table.Column<string>(maxLength: 256, nullable: true),
-                    last_modification_user_name = table.Column<string>(maxLength: 256, nullable: true),
-                    last_modification_time = table.Column<DateTimeOffset>(nullable: true),
+                    modification_user_id = table.Column<string>(maxLength: 256, nullable: true),
+                    modification_user_name = table.Column<string>(maxLength: 256, nullable: true),
+                    modification_time = table.Column<int>(type: "int", nullable: true),
                     enabled = table.Column<bool>(nullable: false),
                     name = table.Column<string>(maxLength: 255, nullable: true),
                     code = table.Column<string>(maxLength: 255, nullable: true),

@@ -33,7 +33,7 @@ namespace MSFramework.AspNetCore.AccessControl
 			return await _cache.GetOrCreateAsync(key, async (entry) =>
 			{
 				var queryParam = $"subject={subject}&object={@object}&action={action}&application={application}";
-				var url = $"{_options.ServiceUrl}/api/v1.1/access?{queryParam}";
+				var url = $"{_options.ServiceUrl}/v1.1/access?{queryParam}";
 				var client = _httpClientFactory.CreateClient(_options.HttpClient);
 				var httpRequestMessage = new HttpRequestMessage(HttpMethod.Head, url);
 				var response = await client.SendAsync(httpRequestMessage);
@@ -48,7 +48,7 @@ namespace MSFramework.AspNetCore.AccessControl
 		public async Task<Dictionary<string, List<ApiInfo>>> GetAllListAsync(string application)
 		{
 			var queryParam = $"application={application}";
-			var url = $"{_options.ServiceUrl}/api/v1.1/api-infos?{queryParam}";
+			var url = $"{_options.ServiceUrl}/v1.1/api-infos?{queryParam}";
 			var client = _httpClientFactory.CreateClient(_options.HttpClient);
 			var httpRequestMessage = new HttpRequestMessage(HttpMethod.Get, url);
 			var response = await client.SendAsync(httpRequestMessage);
@@ -67,7 +67,7 @@ namespace MSFramework.AspNetCore.AccessControl
 
 		public async Task CreateAsync(ApiInfo apiInfo)
 		{
-			var url = $"{_options.ServiceUrl}/api/v1.1/api-infos";
+			var url = $"{_options.ServiceUrl}/v1.1/api-infos";
 			var client = _httpClientFactory.CreateClient(_options.HttpClient);
 			var httpRequestMessage = new HttpRequestMessage(HttpMethod.Post, url)
 			{
@@ -92,7 +92,7 @@ namespace MSFramework.AspNetCore.AccessControl
 
 		public async Task RenewalAsync(string id)
 		{
-			var url = $"{_options.ServiceUrl}/api/v1.1/api-infos/{id}/renewal";
+			var url = $"{_options.ServiceUrl}/v1.1/api-infos/{id}/renewal";
 			var client = _httpClientFactory.CreateClient(_options.HttpClient);
 			var httpRequestMessage = new HttpRequestMessage(new HttpMethod("PATCH"), url);
 			var response = await client.SendAsync(httpRequestMessage);
@@ -101,7 +101,7 @@ namespace MSFramework.AspNetCore.AccessControl
 
 		public async Task ObsoleteAsync(string id)
 		{
-			var url = $"{_options.ServiceUrl}/api/v1.1/api-infos/{id}/obsolete";
+			var url = $"{_options.ServiceUrl}/v1.1/api-infos/{id}/obsolete";
 			var client = _httpClientFactory.CreateClient(_options.HttpClient);
 			var httpRequestMessage = new HttpRequestMessage(new HttpMethod("PATCH"), url);
 			var response = await client.SendAsync(httpRequestMessage);
