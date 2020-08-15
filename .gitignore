@@ -12,6 +12,8 @@
 # User-specific files (MonoDevelop/Xamarin Studio)
 *.userprefs
 
+# customize 
+.DS_Store
 output/
 
 # Build results

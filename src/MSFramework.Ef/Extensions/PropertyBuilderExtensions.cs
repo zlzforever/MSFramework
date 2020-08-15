@@ -34,5 +34,13 @@ namespace MSFramework.Ef.Extensions
 			builder.HasColumnType("int");
 			return builder;
 		}
+
+		public static PropertyBuilder<string> UseNotNullOrWhiteSpace(this PropertyBuilder<string> builder)
+		{
+			builder.HasConversion(new ValueConverter<string, string>(
+				v => v,
+				v => string.IsNullOrWhiteSpace(v) ? string.Empty : v));
+			return builder;
+		}
 	}
 }
