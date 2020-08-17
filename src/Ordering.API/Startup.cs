@@ -61,10 +61,10 @@ namespace Ordering.API
 				c.SwaggerDoc("v1.0", new OpenApiInfo {Version = "v1.0", Description = "Ordering API V1.0"});
 				c.CustomSchemaIds(type => type.FullName);
 				c.AddEnumerationDoc(typeof(Address).Assembly).AddObjectIdDoc();
-				c.MapType<ObjectId>(() => new OpenApiSchema
-				{
-					Type = "string", Default = new OpenApiString(ObjectId.Empty.ToString()),
-				});
+				// c.MapType<ObjectId>(() => new OpenApiSchema
+				// {
+				// 	//Type = "string", Default = new OpenApiString(ObjectId.Empty.ToString()),
+				// });
 			});
 			services.AddHealthChecks();
 
@@ -77,12 +77,12 @@ namespace Ordering.API
 				builder.UseEventDispatcher();
 				builder.UseRequestProcessor();
 				builder.UseNumberEncoding();
-				builder.UseAccessControl(Configuration);
+				//builder.UseAccessControl(Configuration);
 				// builder.UseRabbitMQEventDispatcher(new RabbitMQOptions(), typeof(UserCheckoutAcceptedEvent));
 				// 启用审计服务
 				builder.UseAudit();
-				builder.UseMySqlMigrator(typeof(OrderingContext),
-					"Database='ordering';Data Source=localhost;User ID=root;Password=1qazZAQ!;Port=3306;");
+				// builder.UseMySqlMigrator(typeof(OrderingContext),
+				// 	"Database='ordering';Data Source=localhost;User ID=root;Password=1qazZAQ!;Port=3306;");
 
 				builder.UseAspNetCore();
 				// builder.AddPermission();

@@ -44,5 +44,10 @@ namespace MSFramework.Ef
 		public bool AutoMigrationEnabled { get; set; }
 
 		public bool EnableSensitiveDataLogging { get; set; }
+
+		/// <summary>
+		/// 不创建实际的外键约束
+		/// </summary>
+		public bool IgnoreForeignKey { get; set; }
 	}
 }

@@ -1,7 +1,9 @@
 using System;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Pomelo.EntityFrameworkCore.MySql.Migrations.Internal;
 using Pomelo.EntityFrameworkCore.MySql.Storage;
 
 namespace MSFramework.Ef.MySql
@@ -42,10 +44,15 @@ namespace MSFramework.Ef.MySql
 			var action = new Action<DbContextOptionsBuilder>(x =>
 			{
 				var dbContextType = typeof(TDbContext);
-				var entryAssemblyName = dbContextType.Assembly.GetName().Name;
-
 				var optionsConfiguration = new EntityFrameworkOptionsConfiguration(configuration);
 				var option = optionsConfiguration.Get(dbContextType);
+
+				var entryAssemblyName = dbContextType.Assembly.GetName().Name;
+
+				if (option.IgnoreForeignKey)
+				{
+					x.ReplaceService<IMigrator, IgnoreForeignKeyMySqlMigrator>();
+				}
 
 				x.UseMySql(option.ConnectionString, options =>
 				{
@@ -54,7 +61,6 @@ namespace MSFramework.Ef.MySql
 				});
 			});
 			services.AddDbContext<TDbContext>(action);
-
 			return services;
 		}
 	}

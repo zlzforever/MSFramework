@@ -87,7 +87,7 @@ namespace Ordering.API.Controllers
 		}
 
 		[HttpGet("getFirst1")]
-		[AccessControl("查看第一个产品", "产品")]
+		//[AccessControl("查看第一个产品", "产品")]
 		public Product GetFirst1()
 		{
 			return _productRepository.GetFirst();
@@ -101,7 +101,7 @@ namespace Ordering.API.Controllers
 		}
 
 		[HttpGet("getPagedQuery")]
-		[AccessControl("查询产品", "产品")]
+		//[AccessControl("查询产品", "产品")]
 		public async Task<Response<PagedResult<ProductDTO>>> GetPagedQuery()
 		{
 			PagedResult<Product> a = await _productRepository.PagedQueryAsync(0, 10);
@@ -134,7 +134,7 @@ namespace Ordering.API.Controllers
 		}
 
 		[HttpDelete]
-		[AccessControl("删除产品", "产品")]
+		//[AccessControl("删除产品", "产品")]
 		public Product DeleteAsync(ObjectId productId)
 		{
 			return _productRepository.Delete(productId);

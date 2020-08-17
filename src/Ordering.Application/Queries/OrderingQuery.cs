@@ -25,7 +25,7 @@ namespace Ordering.Application.Queries
 		public async Task<Order> GetAsync(ObjectId orderId)
 		{
 			var order = await _orderSet
-				.AsNoTracking()
+				.Include(x=>x.OrderItems)
 				.FirstOrDefaultAsync(x => x.Id == orderId);
 			return order;
 		}
