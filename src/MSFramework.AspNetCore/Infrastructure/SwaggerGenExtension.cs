@@ -16,9 +16,9 @@ namespace MSFramework.AspNetCore.Infrastructure
 		public static SwaggerGenOptions AddEnumerationDoc(this SwaggerGenOptions options, Assembly assembly)
 		{
 			var enumTypes = assembly.GetTypes().Where(i => i.IsSubclassOf(typeof(Enumeration)));
-			var enumDoc = new List<IOpenApiAny> { };
 			foreach (var enumType in enumTypes)
 			{
+				var enumDoc = new List<IOpenApiAny> { };
 				var enums = GetAll(enumType);
 				foreach (var enumeration in enums)
 				{
