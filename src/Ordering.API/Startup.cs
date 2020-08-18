@@ -18,6 +18,7 @@ using MSFramework.Ef.MySql;
 using MSFramework.Extensions;
 using MSFramework.Migrator.MySql;
 using MSFramework.Shared;
+using Newtonsoft.Json.Serialization;
 using Ordering.Domain;
 using Ordering.Domain.AggregateRoots;
 using Ordering.Infrastructure;
@@ -53,7 +54,11 @@ namespace Ordering.API
 				{
 					x.SerializerSettings.Converters.Add(new ObjectIdConverter());
 					x.SerializerSettings.Converters.Add(new EnumerationConverter());
-					x.SerializerSettings.ContractResolver = new EnumerationContractResolver();
+					x.SerializerSettings.ContractResolver = new CompositeContractResolver
+					{
+						new EnumerationContractResolver(),
+						new CamelCasePropertyNamesContractResolver()
+					};
 				});
 
 			services.AddSwaggerGen(c =>
