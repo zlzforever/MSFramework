@@ -50,37 +50,37 @@ namespace Ordering.Infrastructure.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Order",
+                name: "order",
                 columns: table => new
                 {
-                    Id = table.Column<string>(nullable: false),
-                    CreationTime = table.Column<DateTimeOffset>(nullable: false),
-                    Address_Street = table.Column<string>(nullable: true),
-                    Address_City = table.Column<string>(nullable: true),
-                    Address_State = table.Column<string>(nullable: true),
-                    Address_Country = table.Column<string>(nullable: true),
-                    Address_ZipCode = table.Column<string>(nullable: true),
-                    OrderStatus = table.Column<int>(nullable: false),
-                    UserId = table.Column<string>(nullable: false),
-                    Description = table.Column<string>(nullable: true),
-                    IsDeleted = table.Column<bool>(nullable: false)
+                    id = table.Column<string>(nullable: false),
+                    creation_time = table.Column<DateTimeOffset>(nullable: false),
+                    address_street = table.Column<string>(nullable: true),
+                    address_city = table.Column<string>(nullable: true),
+                    address_state = table.Column<string>(nullable: true),
+                    address_country = table.Column<string>(nullable: true),
+                    address_zip_code = table.Column<string>(nullable: true),
+                    order_status = table.Column<int>(nullable: false),
+                    user_id = table.Column<string>(nullable: false),
+                    description = table.Column<string>(nullable: true),
+                    is_deleted = table.Column<bool>(nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Order", x => x.Id);
+                    table.PrimaryKey("PK_order", x => x.id);
                 });
 
             migrationBuilder.CreateTable(
-                name: "Product",
+                name: "product",
                 columns: table => new
                 {
-                    Id = table.Column<string>(nullable: false),
-                    Name = table.Column<string>(maxLength: 256, nullable: true),
-                    Price = table.Column<int>(nullable: false)
+                    id = table.Column<string>(nullable: false),
+                    name = table.Column<string>(maxLength: 256, nullable: true),
+                    price = table.Column<int>(nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Product", x => x.Id);
+                    table.PrimaryKey("PK_product", x => x.id);
                 });
 
             migrationBuilder.CreateTable(
@@ -88,7 +88,7 @@ namespace Ordering.Infrastructure.Migrations
                 columns: table => new
                 {
                     id = table.Column<string>(nullable: false),
-                    OperationId = table.Column<string>(nullable: true),
+                    operation_id = table.Column<string>(nullable: true),
                     type_name = table.Column<string>(maxLength: 255, nullable: true),
                     entity_id = table.Column<string>(maxLength: 255, nullable: true),
                     operation_type = table.Column<string>(maxLength: 255, nullable: true),
@@ -98,8 +98,8 @@ namespace Ordering.Infrastructure.Migrations
                 {
                     table.PrimaryKey("PK_audit_entity", x => x.id);
                     table.ForeignKey(
-                        name: "FK_audit_entity_audit_operation_OperationId",
-                        column: x => x.OperationId,
+                        name: "FK_audit_entity_audit_operation_operation_id",
+                        column: x => x.operation_id,
                         principalTable: "audit_operation",
                         principalColumn: "id",
                         onDelete: ReferentialAction.Restrict);
@@ -112,26 +112,26 @@ namespace Ordering.Infrastructure.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "OrderItem",
+                name: "order_item",
                 columns: table => new
                 {
-                    Id = table.Column<string>(nullable: false),
-                    ProductName = table.Column<string>(nullable: false),
-                    PictureUrl = table.Column<string>(nullable: true),
-                    UnitPrice = table.Column<decimal>(nullable: false),
-                    Discount = table.Column<decimal>(nullable: false),
-                    Units = table.Column<int>(nullable: false),
-                    ProductId = table.Column<Guid>(nullable: false),
-                    OrderId = table.Column<string>(nullable: true)
+                    id = table.Column<string>(nullable: false),
+                    product_name = table.Column<string>(nullable: false),
+                    picture_url = table.Column<string>(nullable: true),
+                    unit_price = table.Column<decimal>(nullable: false),
+                    discount = table.Column<decimal>(nullable: false),
+                    units = table.Column<int>(nullable: false),
+                    product_id = table.Column<Guid>(nullable: false),
+                    order_id = table.Column<string>(nullable: true)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_OrderItem", x => x.Id);
+                    table.PrimaryKey("PK_order_item", x => x.id);
                     table.ForeignKey(
-                        name: "FK_OrderItem_Order_OrderId",
-                        column: x => x.OrderId,
-                        principalTable: "Order",
-                        principalColumn: "Id",
+                        name: "FK_order_item_order_order_id",
+                        column: x => x.order_id,
+                        principalTable: "order",
+                        principalColumn: "id",
                         onDelete: ReferentialAction.Restrict);
                 });
 
@@ -140,7 +140,7 @@ namespace Ordering.Infrastructure.Migrations
                 columns: table => new
                 {
                     id = table.Column<string>(nullable: false),
-                    EntityId = table.Column<string>(nullable: true),
+                    entity_id = table.Column<string>(nullable: true),
                     name = table.Column<string>(maxLength: 255, nullable: true),
                     type = table.Column<string>(maxLength: 255, nullable: true),
                     original_value = table.Column<string>(nullable: true),
@@ -151,8 +151,8 @@ namespace Ordering.Infrastructure.Migrations
                 {
                     table.PrimaryKey("PK_audit_property", x => x.id);
                     table.ForeignKey(
-                        name: "FK_audit_property_audit_entity_EntityId",
-                        column: x => x.EntityId,
+                        name: "FK_audit_property_audit_entity_entity_id",
+                        column: x => x.entity_id,
                         principalTable: "audit_entity",
                         principalColumn: "id",
                         onDelete: ReferentialAction.Restrict);
@@ -170,9 +170,9 @@ namespace Ordering.Infrastructure.Migrations
                 column: "entity_id");
 
             migrationBuilder.CreateIndex(
-                name: "IX_audit_entity_OperationId",
+                name: "IX_audit_entity_operation_id",
                 table: "audit_entity",
-                column: "OperationId");
+                column: "operation_id");
 
             migrationBuilder.CreateIndex(
                 name: "IX_audit_entity_audit_operation_id",
@@ -195,9 +195,9 @@ namespace Ordering.Infrastructure.Migrations
                 column: "end_time");
 
             migrationBuilder.CreateIndex(
-                name: "IX_audit_property_EntityId",
+                name: "IX_audit_property_entity_id",
                 table: "audit_property",
-                column: "EntityId");
+                column: "entity_id");
 
             migrationBuilder.CreateIndex(
                 name: "IX_audit_property_audit_entity_id",
@@ -216,9 +216,9 @@ namespace Ordering.Infrastructure.Migrations
                 column: "name");
 
             migrationBuilder.CreateIndex(
-                name: "IX_OrderItem_OrderId",
-                table: "OrderItem",
-                column: "OrderId");
+                name: "IX_order_item_order_id",
+                table: "order_item",
+                column: "order_id");
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
@@ -230,16 +230,16 @@ namespace Ordering.Infrastructure.Migrations
                 name: "function");
 
             migrationBuilder.DropTable(
-                name: "OrderItem");
+                name: "order_item");
 
             migrationBuilder.DropTable(
-                name: "Product");
+                name: "product");
 
             migrationBuilder.DropTable(
                 name: "audit_entity");
 
             migrationBuilder.DropTable(
-                name: "Order");
+                name: "order");
 
             migrationBuilder.DropTable(
                 name: "audit_operation");

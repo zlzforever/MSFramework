@@ -48,6 +48,11 @@ namespace MSFramework.Ef
 		/// <summary>
 		/// 不创建实际的外键约束
 		/// </summary>
-		public bool IgnoreForeignKey { get; set; }
+		public bool IgnoreForeignKey { get; set; } = true;
+
+		/// <summary>
+		/// 使用 unix 风格的表名、列名
+		/// </summary>
+		public bool UseUnixLikeName { get; set; } = true;
 	}
 }

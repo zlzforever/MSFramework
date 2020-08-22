@@ -71,6 +71,12 @@ namespace MSFramework.Ef
 
 			modelBuilder.UseObjectId();
 
+			var option = _serviceProvider.GetRequiredService<EntityFrameworkOptionsConfiguration>().Get(GetType());
+			if (option.UseUnixLikeName)
+			{
+				modelBuilder.UseUnixLikeName();
+			}
+
 			_logger.LogInformation($"上下文 “{contextType}” 注册了 {registers.Length} 个实体类");
 		}
 
