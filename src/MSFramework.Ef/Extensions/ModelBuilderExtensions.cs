@@ -41,6 +41,11 @@ namespace MSFramework.Ef.Extensions
 				foreach (var property in properties)
 				{
 					var propertyName = property.GetColumnName();
+					if (propertyName.StartsWith("_"))
+					{
+						propertyName = propertyName.Substring(1, propertyName.Length - 1);
+					}
+
 					property.SetColumnName(StringUtilities.ToUnixLike(propertyName));
 				}
 			}

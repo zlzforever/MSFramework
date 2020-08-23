@@ -1,10 +1,11 @@
 using System;
+using MSFramework.Shared;
 
 namespace MSFramework.Domain
 {
-	public abstract class DeletionEntity : DeletionEntity<Guid>
+	public abstract class DeletionEntity : DeletionEntity<ObjectId>
 	{
-		protected DeletionEntity(Guid id) : base(id)
+		protected DeletionEntity(ObjectId id) : base(id)
 		{
 		}
 	}

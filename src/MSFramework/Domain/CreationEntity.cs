@@ -1,10 +1,11 @@
 using System;
+using MSFramework.Shared;
 
 namespace MSFramework.Domain
 {
-	public abstract class CreationEntity : CreationEntity<Guid>
+	public abstract class CreationEntity : CreationEntity<ObjectId>
 	{
-		protected CreationEntity(Guid id) : base(id)
+		protected CreationEntity(ObjectId id) : base(id)
 		{
 		}
 	}

@@ -1,10 +1,11 @@
 using System;
+using MSFramework.Shared;
 
 namespace MSFramework.Domain
 {
-	public abstract class ModificationEntity : ModificationEntity<Guid>
+	public abstract class ModificationEntity : ModificationEntity<ObjectId>
 	{
-		protected ModificationEntity(Guid id) : base(id)
+		protected ModificationEntity(ObjectId id) : base(id)
 		{
 		}
 	}
