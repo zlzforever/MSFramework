@@ -29,6 +29,10 @@ namespace MSFramework.Domain
 			protected set => _id = value;
 		}
 
+		protected EntityBase() : this(default)
+		{
+		}
+
 		protected EntityBase(TKey id)
 		{
 			Id = id;
