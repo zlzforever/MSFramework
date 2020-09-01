@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 
-namespace MSFramework.Functions
+namespace MicroserviceFramework.Functions
 {
 	public interface IFunctionFinder
 	{

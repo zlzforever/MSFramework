@@ -1,6 +1,6 @@
 using System;
 
-namespace MSFramework
+namespace MicroserviceFramework
 {
 	public static class Consts
 	{

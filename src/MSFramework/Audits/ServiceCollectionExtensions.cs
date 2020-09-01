@@ -1,6 +1,6 @@
 using Microsoft.Extensions.DependencyInjection.Extensions;
 
-namespace MSFramework.Audits
+namespace MicroserviceFramework.Audits
 {
 	public static class ServiceCollectionExtensions
 	{
@@ -11,14 +11,14 @@ namespace MSFramework.Audits
 		/// <param name="builder"></param>
 		/// <typeparam name="TAuditService"></typeparam>
 		/// <returns></returns>
-		public static MSFrameworkBuilder UseAudit<TAuditService>(this MSFrameworkBuilder builder)
+		public static MicroserviceFrameworkBuilder UseAudit<TAuditService>(this MicroserviceFrameworkBuilder builder)
 			where TAuditService : class, IAuditService
 		{
 			builder.Services.TryAddScoped<IAuditService, TAuditService>();
 			return builder;
 		}
 
-		public static MSFrameworkBuilder UseAudit(this MSFrameworkBuilder builder)
+		public static MicroserviceFrameworkBuilder UseAudit(this MicroserviceFrameworkBuilder builder)
 		{
 			builder.UseAudit<DefaultAuditService>();
 			return builder;

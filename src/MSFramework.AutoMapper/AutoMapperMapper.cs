@@ -1,8 +1,9 @@
+using MicroserviceFramework.Mapper;
 using IAutoMapper = AutoMapper.IMapper;
 
-namespace MSFramework.AutoMapper
+namespace MicroserviceFramework.AutoMapper
 {
-	public class AutoMapperMapper : Mapper.IObjectMapper
+	public class AutoMapperMapper : IObjMapper
 	{
 		private readonly IAutoMapper _mapper;
 

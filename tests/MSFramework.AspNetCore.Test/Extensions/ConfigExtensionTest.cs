@@ -1,8 +1,9 @@
-﻿using Microsoft.AspNetCore.Hosting;
+﻿using MicroserviceFramework.AspNetCore;
+using MicroserviceFramework.AspNetCore.Extensions;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.TestHost;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
-using MSFramework.AspNetCore.Extensions;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -28,7 +29,7 @@ namespace MSFramework.AspNetCore.Test.Extensions
 					webHost.UseStartup<Startup>().ConfigureServices((context, service) =>
 					{
 						service.AddConfigType(GetType().Assembly);
-					}).Configure(builder => { builder.UseMSFramework(); });
+					}).Configure(builder => { builder.UseMicroserviceFramework(); });
 				});
 			var host = hostBuilder.Start();
 			_output.WriteLine("server is runing");

@@ -1,10 +1,11 @@
 using System.ComponentModel.DataAnnotations;
-using MSFramework.Application;
+using MicroserviceFramework.Application;
+using MicroserviceFramework.Application.CQRS.Command;
 
 namespace Ordering.Application.Commands
 {
 	public class TestCommand2
-		: IRequest
+		: ICommand
 	{
 		[Required]
 		public string Name { get; set; }

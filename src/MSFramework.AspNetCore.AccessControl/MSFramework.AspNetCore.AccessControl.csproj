@@ -2,6 +2,8 @@
 
     <PropertyGroup>
         <PackageId>MSFramework.AspNetCore.AccessControl</PackageId>
+        <AssemblyName>MSFramework.AspNetCore.AccessControl</AssemblyName>
+        <RootNamespace>MicroserviceFramework.AspNetCore.AccessControl</RootNamespace>
     </PropertyGroup>
     <Import Project="../../package.props" />
 

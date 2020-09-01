@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace MSFramework.Domain
+namespace MicroserviceFramework.Domain
 {
 	//Inspired from https://docs.microsoft.com/en-us/dotnet/standard/microservices-architecture/microservice-ddd-cqrs-patterns/implement-value-objects
 

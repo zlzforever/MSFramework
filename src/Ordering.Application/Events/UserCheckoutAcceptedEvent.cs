@@ -1,6 +1,6 @@
 using System;
 using System.Collections.Generic;
-using MSFramework.Domain.Events;
+using MicroserviceFramework.Domain.Events;
 
 namespace Ordering.Application.Events
 {

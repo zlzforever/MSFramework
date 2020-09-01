@@ -1,6 +1,6 @@
 ﻿using System;
+using MicroserviceFramework.Ef;
 using Microsoft.EntityFrameworkCore;
-using MSFramework.Ef;
 
 namespace MSFramework.AspNetCore.Test.EfPostgreSqlTest.Infrastructure
 {

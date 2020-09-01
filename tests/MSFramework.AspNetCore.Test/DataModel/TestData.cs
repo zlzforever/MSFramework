@@ -1,5 +1,5 @@
-﻿using MSFramework.Domain;
-using MSFramework.Shared;
+﻿using MicroserviceFramework.Domain;
+using MicroserviceFramework.Shared;
 
 namespace MSFramework.AspNetCore.Test.DataModel
 {

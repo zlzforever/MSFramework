@@ -5,11 +5,11 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 
-namespace MSFramework.AspNetCore.AccessControl
+namespace MicroserviceFramework.AspNetCore.AccessControl
 {
 	public static class ServiceCollectionExtensions
 	{
-		public static MSFrameworkBuilder UseAccessControl(this MSFrameworkBuilder builder, IConfiguration configuration)
+		public static MicroserviceFrameworkBuilder UseAccessControl(this MicroserviceFrameworkBuilder builder, IConfiguration configuration)
 		{
 			builder.Services.TryAddScoped<AccessControlOptions>();
 			builder.Services.TryAddScoped<IAccessClient, AccessClient>();

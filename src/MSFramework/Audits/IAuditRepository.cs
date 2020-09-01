@@ -1,7 +1,7 @@
-using MSFramework.DependencyInjection;
-using MSFramework.Domain;
+using MicroserviceFramework.DependencyInjection;
+using MicroserviceFramework.Domain;
 
-namespace MSFramework.Audits
+namespace MicroserviceFramework.Audits
 {
 	public interface IAuditRepository : IRepository<AuditOperation>, IScopeDependency
 	{

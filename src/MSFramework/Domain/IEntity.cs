@@ -1,4 +1,4 @@
-﻿namespace MSFramework.Domain
+﻿namespace MicroserviceFramework.Domain
 {
 	/// <summary>
 	/// Defines an entity with a single primary key with "Id" property.

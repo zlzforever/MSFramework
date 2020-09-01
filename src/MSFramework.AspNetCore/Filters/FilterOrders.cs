@@ -1,4 +1,4 @@
-namespace MSFramework.AspNetCore.Filters
+namespace MicroserviceFramework.AspNetCore.Filters
 {
 	/// <summary>
 	/// Filter 的顺序，越大则先运行

@@ -2,6 +2,8 @@
 
     <PropertyGroup>
         <PackageId>MSFramework.Ef.PostgreSql</PackageId>
+        <AssemblyName>MSFramework.Ef.PostgreSql</AssemblyName>
+        <RootNamespace>MicroserviceFramework.Ef.PostgreSql</RootNamespace>
     </PropertyGroup>
     <Import Project="../../package.props" />
     <ItemGroup>

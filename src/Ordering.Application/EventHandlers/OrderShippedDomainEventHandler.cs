@@ -1,6 +1,6 @@
 using System.Threading.Tasks;
-using MSFramework.Domain.Events;
-using MSFramework.Ef;
+using MicroserviceFramework.Domain.Events;
+using MicroserviceFramework.Ef;
 using Ordering.Domain.AggregateRoots.Events;
 
 namespace Ordering.Application.EventHandlers

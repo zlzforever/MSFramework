@@ -3,39 +3,40 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
+using MicroserviceFramework.Application;
+using MicroserviceFramework.Audits;
+using MicroserviceFramework.Domain;
+using MicroserviceFramework.Domain.Events;
+using MicroserviceFramework.Initializers;
+using MicroserviceFramework.Reflection;
+using MicroserviceFramework.Shared;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Logging;
-using MSFramework.Application;
-using MSFramework.Audits;
-using MSFramework.Domain;
-using MSFramework.Domain.Events;
-using MSFramework.Initializers;
-using MSFramework.Reflection;
-using MSFramework.Utilities;
+// ReSharper disable InconsistentNaming
 
-namespace MSFramework
+namespace MicroserviceFramework
 {
 	public static class ServiceCollectionExtensions
 	{
-		public static MSFrameworkBuilder UseEventDispatcher(this MSFrameworkBuilder builder)
+		public static MicroserviceFrameworkBuilder UseEventDispatcher(this MicroserviceFrameworkBuilder builder)
 		{
 			var assemblies = AssemblyFinder.GetAllList();
 			builder.UseEventDispatcher(assemblies.ToArray());
 			return builder;
 		}
 
-		public static MSFrameworkBuilder UseRequestProcessor(this MSFrameworkBuilder builder)
+		public static MicroserviceFrameworkBuilder UseCQRS(this MicroserviceFrameworkBuilder builder)
 		{
 			var assemblies = AssemblyFinder.GetAllList();
-			builder.UseRequestProcessor(assemblies.ToArray());
+			builder.UseCQRS(assemblies.ToArray());
 			return builder;
 		}
 
-		public static MSFrameworkBuilder UseRequestProcessor(this MSFrameworkBuilder builder,
+		public static MicroserviceFrameworkBuilder UseCQRS(this MicroserviceFrameworkBuilder builder,
 			params Type[] commandTypes)
 		{
-			var excludeAssembly = typeof(MSFrameworkBuilder).Assembly;
+			var excludeAssembly = typeof(MicroserviceFrameworkBuilder).Assembly;
 			var assemblies = commandTypes.Select(x => x.Assembly).ToList();
 
 			if (!assemblies.Contains(excludeAssembly))
@@ -43,13 +44,13 @@ namespace MSFramework
 				assemblies.Add(excludeAssembly);
 			}
 
-			builder.UseRequestProcessor(assemblies.ToArray());
+			builder.UseCQRS(assemblies.ToArray());
 			return builder;
 		}
 
-		public static MSFrameworkBuilder UseEventDispatcher(this MSFrameworkBuilder builder, params Type[] eventTypes)
+		public static MicroserviceFrameworkBuilder UseEventDispatcher(this MicroserviceFrameworkBuilder builder, params Type[] eventTypes)
 		{
-			var excludeAssembly = typeof(MSFrameworkBuilder).Assembly;
+			var excludeAssembly = typeof(MicroserviceFrameworkBuilder).Assembly;
 			var assemblies = eventTypes.Select(x => x.Assembly).ToList();
 
 			if (!assemblies.Contains(excludeAssembly))
@@ -61,28 +62,26 @@ namespace MSFramework
 			return builder;
 		}
 
-		public static MSFrameworkBuilder UseEventDispatcher(this MSFrameworkBuilder builder,
+		public static MicroserviceFrameworkBuilder UseEventDispatcher(this MicroserviceFrameworkBuilder builder,
 			params Assembly[] assemblies)
 		{
 			builder.Services.AddEventDispatcher(assemblies);
 			return builder;
 		}
-
-		public static MSFrameworkBuilder UseRequestProcessor(this MSFrameworkBuilder builder,
+		
+		public static MicroserviceFrameworkBuilder UseCQRS(this MicroserviceFrameworkBuilder builder,
 			params Assembly[] assemblies)
 		{
-			builder.Services.AddRequestProcessor(assemblies);
+			builder.Services.AddCQRS(assemblies);
 			return builder;
 		}
 
-		public static void AddMSFramework(this IServiceCollection services,
-			Action<MSFrameworkBuilder> builderAction = null)
+		public static void AddMicroserviceFramework(this IServiceCollection services,
+			Action<MicroserviceFrameworkBuilder> builderAction = null)
 		{
-			var builder = new MSFrameworkBuilder(services);
+			var builder = new MicroserviceFrameworkBuilder(services);
 			builderAction?.Invoke(builder);
-
-			services.AddMemoryCache();
-
+			
 			builder.Services.TryAddScoped<IUnitOfWorkManager, DefaultUnitOfWorkManager>();
 
 			// 如果你想换成消息队列，则重新注册一个对应的服务即可
@@ -91,13 +90,13 @@ namespace MSFramework
 			builder.UseInitializer();
 		}
 
-		public static MSFrameworkBuilder UseNumberEncoding(this MSFrameworkBuilder builder,
-			string path = "number_encoding.txt")
+		public static MicroserviceFrameworkBuilder UseBaseX(this MicroserviceFrameworkBuilder builder,
+			string path = "basex.txt")
 		{
 			string codes;
 			if (!File.Exists(path))
 			{
-				codes = NumberEncoding.GetRandomCodes();
+				codes = BaseX.GetRandomCodes();
 				File.WriteAllText(path, codes);
 			}
 			else
@@ -110,11 +109,11 @@ namespace MSFramework
 				throw new ArgumentException("Codes show large than 34 char");
 			}
 
-			NumberEncoding.Load(codes);
+			BaseX.Load(codes);
 			return builder;
 		}
 
-		public static void UseMSFramework(this IServiceProvider applicationServices)
+		public static void UseMicroserviceFramework(this IServiceProvider applicationServices)
 		{
 			InitializeAsync(applicationServices).GetAwaiter().GetResult();
 		}

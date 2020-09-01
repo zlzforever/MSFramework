@@ -1,7 +1,7 @@
-using MSFramework.Audits;
-using MSFramework.Ef.Repositories;
+using MicroserviceFramework.Audits;
+using MicroserviceFramework.Ef.Repositories;
 
-namespace MSFramework.Ef.Audits
+namespace MicroserviceFramework.Ef.Audits
 {
 	public class AuditRepository : EfRepository<AuditOperation>, IAuditRepository
 	{

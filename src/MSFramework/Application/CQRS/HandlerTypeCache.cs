@@ -2,9 +2,9 @@ using System;
 using System.Collections.Concurrent;
 using System.Reflection;
 
-namespace MSFramework.Application
+namespace MicroserviceFramework.Application.CQRS
 {
-	public class RequestHandlerTypeCache
+	public class HandlerTypeCache
 	{
 		private readonly ConcurrentDictionary<Type, (Type, MethodInfo)> _cache =
 			new ConcurrentDictionary<Type, (Type, MethodInfo)>();

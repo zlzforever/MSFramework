@@ -1,9 +1,9 @@
+using MicroserviceFramework.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.Extensions.Logging;
-using MSFramework.AspNetCore.Mvc;
 
-namespace MSFramework.AspNetCore.Filters
+namespace MicroserviceFramework.AspNetCore.Filters
 {
 	public class GlobalExceptionFilter : IExceptionFilter
 	{
@@ -18,7 +18,7 @@ namespace MSFramework.AspNetCore.Filters
 		{
 			_logger.LogError(context.Exception.ToString());
 
-			if (context.Exception is MSFrameworkException e)
+			if (context.Exception is MicroserviceFrameworkException e)
 			{
 				context.HttpContext.Response.StatusCode = 200;
 				context.Result = new JsonResult(new Response(null, e.Message, false, e.Code));

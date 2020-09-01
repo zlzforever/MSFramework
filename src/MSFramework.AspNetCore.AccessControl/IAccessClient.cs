@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using System.Net;
 using System.Threading.Tasks;
 
-namespace MSFramework.AspNetCore.AccessControl
+namespace MicroserviceFramework.AspNetCore.AccessControl
 {
 	public interface IAccessClient
 	{

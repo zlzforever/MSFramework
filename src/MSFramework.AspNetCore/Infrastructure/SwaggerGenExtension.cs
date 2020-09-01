@@ -2,14 +2,14 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using MicroserviceFramework.Domain;
+using MicroserviceFramework.Shared;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.OpenApi.Any;
 using Microsoft.OpenApi.Models;
-using MSFramework.Domain;
-using MSFramework.Shared;
 using Swashbuckle.AspNetCore.SwaggerGen;
 
-namespace MSFramework.AspNetCore.Infrastructure
+namespace MicroserviceFramework.AspNetCore.Infrastructure
 {
 	public static class SwaggerGenExtension
 	{
@@ -24,8 +24,10 @@ namespace MSFramework.AspNetCore.Infrastructure
 				{
 					enumDoc.Add(new OpenApiString(enumeration.Id));
 				}
+
 				options.MapType(enumType, () => new OpenApiSchema {Type = "enum", Enum = enumDoc});
 			}
+
 			return options;
 		}
 
@@ -35,7 +37,7 @@ namespace MSFramework.AspNetCore.Infrastructure
 			return options;
 		}
 
-		static IEnumerable<Enumeration> GetAll(Type type)
+		private static IEnumerable<Enumeration> GetAll(Type type)
 		{
 			return type
 				.GetFields(BindingFlags.Public | BindingFlags.Static | BindingFlags.DeclaredOnly)

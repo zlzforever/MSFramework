@@ -1,8 +1,8 @@
 using System;
 
-namespace MSFramework.Domain
+namespace MicroserviceFramework.Domain
 {
-	public class DomainException : MSFrameworkException
+	public class DomainException : MicroserviceFrameworkException
 	{
 		public DomainException() : this(2, null)
 		{

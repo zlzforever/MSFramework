@@ -1,7 +1,7 @@
 using System;
-using MSFramework.Shared;
+using MicroserviceFramework.Shared;
 
-namespace MSFramework.Domain
+namespace MicroserviceFramework.Domain
 {
 	public abstract class DeletionAggregateRoot : DeletionAggregateRoot<ObjectId>
 	{

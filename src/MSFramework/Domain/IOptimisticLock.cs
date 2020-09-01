@@ -1,4 +1,4 @@
-namespace MSFramework.Domain
+namespace MicroserviceFramework.Domain
 {
 	public interface IOptimisticLock
 	{

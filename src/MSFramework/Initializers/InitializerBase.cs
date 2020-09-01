@@ -1,7 +1,7 @@
 using System;
 using System.Threading.Tasks;
 
-namespace MSFramework.Initializers
+namespace MicroserviceFramework.Initializers
 {
 	public abstract class Initializer
 	{

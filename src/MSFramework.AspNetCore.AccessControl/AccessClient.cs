@@ -8,7 +8,7 @@ using Microsoft.Extensions.Caching.Memory;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
-namespace MSFramework.AspNetCore.AccessControl
+namespace MicroserviceFramework.AspNetCore.AccessControl
 {
 	public class AccessClient : IAccessClient
 	{
@@ -61,7 +61,7 @@ namespace MSFramework.AspNetCore.AccessControl
 			}
 			else
 			{
-				throw new MSFrameworkException("Query exist api-info failed");
+				throw new MicroserviceFrameworkException("Query exist api-info failed");
 			}
 		}
 
@@ -86,7 +86,7 @@ namespace MSFramework.AspNetCore.AccessControl
 			if (!json["success"].ToObject<bool>())
 			{
 				var msg = json["message"].ToString();
-				throw new MSFrameworkException($"Create api-info failed: {msg}");
+				throw new MicroserviceFrameworkException($"Create api-info failed: {msg}");
 			}
 		}
 

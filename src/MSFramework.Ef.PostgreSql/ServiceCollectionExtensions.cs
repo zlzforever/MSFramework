@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace MSFramework.Ef.PostgreSql
+namespace MicroserviceFramework.Ef.PostgreSql
 {
 	public static class ServiceCollectionExtensions
 	{

@@ -2,7 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace MSFramework.Ef.SqlServer
+namespace MicroserviceFramework.Ef.SqlServer
 {
 	public static class ServiceCollectionExtensions
 	{

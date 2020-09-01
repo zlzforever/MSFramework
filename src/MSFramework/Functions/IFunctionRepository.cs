@@ -1,9 +1,9 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using MSFramework.DependencyInjection;
-using MSFramework.Domain;
+using MicroserviceFramework.DependencyInjection;
+using MicroserviceFramework.Domain;
 
-namespace MSFramework.Functions
+namespace MicroserviceFramework.Functions
 {
 	public interface IFunctionRepository : IRepository, IScopeDependency
 	{

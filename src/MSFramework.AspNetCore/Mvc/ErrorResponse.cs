@@ -1,4 +1,4 @@
-namespace MSFramework.AspNetCore.Mvc
+namespace MicroserviceFramework.AspNetCore.Mvc
 {
 	public class ErrorResponse : Response
 	{

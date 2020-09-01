@@ -1,7 +1,7 @@
 using System;
 using Microsoft.Extensions.Configuration;
 
-namespace MSFramework.Extensions
+namespace MicroserviceFramework.Extensions
 {
 	public static class ConfigurationExtensions
 	{

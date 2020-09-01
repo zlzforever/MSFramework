@@ -5,7 +5,7 @@ using System.Reflection;
 using System.Text.RegularExpressions;
 using Microsoft.Extensions.DependencyModel;
 
-namespace MSFramework.Reflection
+namespace MicroserviceFramework.Reflection
 {
 	/// <summary>
 	/// 应用程序目录程序集查找器，静态类，只搜索一次并缓存数据，不考虑动态类型等
@@ -17,7 +17,7 @@ namespace MSFramework.Reflection
 
 		public static readonly HashSet<string> AssemblyNamePatterns = new HashSet<string>
 		{
-			"MSFramework"
+			"MicroserviceFramework"
 		};
 
 		public static List<Assembly> GetAllList()
@@ -30,7 +30,7 @@ namespace MSFramework.Reflection
 					{
 						var context = DependencyContext.Default;
 						var totalAssemblyNames = context.GetDefaultAssemblyNames().Select(x => x.Name).ToList();
-
+						
 						AssemblyNamePatterns.Add("MSFramework");
 						AssemblyNamePatterns.Add(".+\\.Domain$");
 						AssemblyNamePatterns.Add(".+\\.Infrastructure$");

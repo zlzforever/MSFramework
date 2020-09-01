@@ -1,5 +1,5 @@
-using MSFramework.DependencyInjection;
-using MSFramework.Domain;
+using MicroserviceFramework.DependencyInjection;
+using MicroserviceFramework.Domain;
 using Ordering.Domain.AggregateRoots;
 
 namespace Ordering.Domain.Repositories

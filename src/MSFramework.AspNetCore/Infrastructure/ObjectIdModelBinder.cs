@@ -1,8 +1,8 @@
 using System.Threading.Tasks;
+using MicroserviceFramework.Shared;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
-using MSFramework.Shared;
 
-namespace MSFramework.AspNetCore.Infrastructure
+namespace MicroserviceFramework.AspNetCore.Infrastructure
 {
 	public class ObjectIdModelBinder : IModelBinder
 	{

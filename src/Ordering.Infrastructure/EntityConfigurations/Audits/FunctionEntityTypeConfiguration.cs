@@ -1,8 +1,8 @@
+using MicroserviceFramework.Ef;
+using MicroserviceFramework.Ef.Extensions;
+using MicroserviceFramework.Functions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using MSFramework.Ef;
-using MSFramework.Ef.Extensions;
-using MSFramework.Functions;
 
 namespace Ordering.Infrastructure.EntityConfigurations.Audits
 {

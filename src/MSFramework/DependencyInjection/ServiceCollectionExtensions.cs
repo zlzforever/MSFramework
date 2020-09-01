@@ -1,16 +1,17 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
+using MicroserviceFramework.Application;
+using MicroserviceFramework.Domain;
+using MicroserviceFramework.Extensions;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
-using MSFramework.Application;
-using MSFramework.Domain;
-using MSFramework.Extensions;
 
-namespace MSFramework.DependencyInjection
+namespace MicroserviceFramework.DependencyInjection
 {
 	public static class ServiceCollectionExtensions
 	{
-		public static MSFrameworkBuilder UseDependencyInjectionScanner(this MSFrameworkBuilder builder)
+		public static MicroserviceFrameworkBuilder UseDependencyInjectionScanner(this MicroserviceFrameworkBuilder builder)
 		{
 			var dependencyTypeDict = DependencyTypeFinder.GetDependencyTypeDict();
 			foreach (var kv in dependencyTypeDict)
@@ -29,7 +30,7 @@ namespace MSFramework.DependencyInjection
 		/// <param name="implementationTypes">要注册的实现类型集合</param>
 		/// <param name="lifetime">注册的生命周期类型</param>
 		private static void Add(this IServiceCollection services,
-			Type[] implementationTypes,
+			IEnumerable<Type> implementationTypes,
 			ServiceLifetime lifetime)
 		{
 			foreach (var implementationType in implementationTypes)

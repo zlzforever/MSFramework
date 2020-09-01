@@ -2,31 +2,30 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using MSFramework.Extensions;
-using MSFramework.Shared;
+using MicroserviceFramework.Extensions;
 
-namespace MSFramework.Utilities
+namespace MicroserviceFramework.Shared
 {
 	/// <summary>
 	/// 将一个数字转成随机字符串
 	/// https://github.com/WinterChen/go_project/tree/master/base34
 	/// </summary>
-	public static class NumberEncoding
+	public static class BaseX
 	{
 		private static string _codes;
 		private static Dictionary<char, int> _cache;
 
-		public static string GetCodes()
+		internal static string GetCodes()
 		{
 			return (string) _codes.Clone();
 		}
 
-		public static string GetRandomCodes()
+		internal static string GetRandomCodes()
 		{
 			return new string("0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz".Shuffle().ToArray());
 		}
 
-		static NumberEncoding()
+		static BaseX()
 		{
 			Load();
 		}
@@ -82,7 +81,7 @@ namespace MSFramework.Utilities
 				var c = str[i];
 				if (!_cache.ContainsKey(c))
 				{
-					throw new MSFrameworkException($"字符 {c} 不合法");
+					throw new MicroserviceFrameworkException($"字符 {c} 不合法");
 				}
 
 				var v = _cache[c];
@@ -104,7 +103,7 @@ namespace MSFramework.Utilities
 		/// </summary>
 		/// <param name="str"></param>
 		/// <returns></returns>
-		/// <exception cref="MSFrameworkException"></exception>
+		/// <exception cref="MicroserviceFrameworkException"></exception>
 		public static long ToInt64(string str)
 		{
 			Check.NotEmpty(str, nameof(str));
@@ -116,7 +115,7 @@ namespace MSFramework.Utilities
 				var c = str[i];
 				if (!_cache.ContainsKey(c))
 				{
-					throw new MSFrameworkException($"字符 {c} 不合法");
+					throw new MicroserviceFrameworkException($"字符 {c} 不合法");
 				}
 
 				var v = _cache[c];

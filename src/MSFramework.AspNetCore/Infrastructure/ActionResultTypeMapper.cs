@@ -1,9 +1,9 @@
 using System;
+using MicroserviceFramework.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
-using MSFramework.AspNetCore.Mvc;
 
-namespace MSFramework.AspNetCore.Infrastructure
+namespace MicroserviceFramework.AspNetCore.Infrastructure
 {
 	public class ActionResultTypeMapper : IActionResultTypeMapper
 	{

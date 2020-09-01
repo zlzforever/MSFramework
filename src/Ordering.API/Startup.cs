@@ -1,23 +1,19 @@
-﻿using Microsoft.AspNetCore.Builder;
+﻿using MicroserviceFramework;
+using MicroserviceFramework.AspNetCore;
+using MicroserviceFramework.AspNetCore.Extensions;
+using MicroserviceFramework.AspNetCore.Filters;
+using MicroserviceFramework.AspNetCore.Infrastructure;
+using MicroserviceFramework.Audits;
+using MicroserviceFramework.AutoMapper;
+using MicroserviceFramework.DependencyInjection;
+using MicroserviceFramework.Ef;
+using MicroserviceFramework.Ef.MySql;
+using MicroserviceFramework.Extensions;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Microsoft.OpenApi.Any;
 using Microsoft.OpenApi.Models;
-using MSFramework;
-using MSFramework.AspNetCore;
-using MSFramework.AspNetCore.Extensions;
-using MSFramework.AspNetCore.Filters;
-using MSFramework.AspNetCore.Infrastructure;
-using MSFramework.AspNetCore.AccessControl;
-using MSFramework.Audits;
-using MSFramework.AutoMapper;
-using MSFramework.DependencyInjection;
-using MSFramework.Ef;
-using MSFramework.Ef.MySql;
-using MSFramework.Extensions;
-using MSFramework.Migrator.MySql;
-using MSFramework.Shared;
 using Newtonsoft.Json.Serialization;
 using Ordering.Domain;
 using Ordering.Domain.AggregateRoots;
@@ -49,7 +45,7 @@ namespace Ordering.API
 					x.Filters.UseGlobalExceptionFilter();
 					x.ModelBinderProviders.Insert(0, new ObjectIdModelBinderProvider());
 				})
-				.UseInvalidModelStateResponse()
+				.ConfigureInvalidModelStateResponse()
 				.AddNewtonsoftJson(x =>
 				{
 					x.SerializerSettings.Converters.Add(new ObjectIdConverter());
@@ -75,13 +71,13 @@ namespace Ordering.API
 
 			services.AddConfigType(typeof(AppOptions).Assembly);
 
-			services.AddMSFramework(builder =>
+			services.AddMicroserviceFramework(builder =>
 			{
 				builder.UseAutoMapper();
 				builder.UseDependencyInjectionScanner();
 				builder.UseEventDispatcher();
-				builder.UseRequestProcessor();
-				builder.UseNumberEncoding();
+				builder.UseCQRS();
+				builder.UseBaseX();
 				//builder.UseAccessControl(Configuration);
 				// builder.UseRabbitMQEventDispatcher(new RabbitMQOptions(), typeof(UserCheckoutAcceptedEvent));
 				// 启用审计服务
@@ -90,8 +86,6 @@ namespace Ordering.API
 				// 	"Database='ordering';Data Source=localhost;User ID=root;Password=1qazZAQ!;Port=3306;");
 
 				builder.UseAspNetCore();
-				// builder.AddPermission();
-
 				builder.UseEntityFramework(x =>
 				{
 					// 添加 MySql 支持
@@ -131,7 +125,7 @@ namespace Ordering.API
 			//启用中间件服务对swagger-ui，指定Swagger JSON终结点
 			app.UseSwaggerUI(c => { c.SwaggerEndpoint("/swagger/v1.0/swagger.json", "Ordering API V1.0"); });
 
-			app.UseMSFramework();
+			app.UseMicroserviceFramework();
 		}
 	}
 }

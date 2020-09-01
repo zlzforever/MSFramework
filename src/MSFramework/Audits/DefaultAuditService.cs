@@ -1,6 +1,6 @@
 using Microsoft.Extensions.Logging;
 
-namespace MSFramework.Audits
+namespace MicroserviceFramework.Audits
 {
 	public class DefaultAuditService : IAuditService
 	{

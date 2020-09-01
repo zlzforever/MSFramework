@@ -1,13 +1,13 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
+using MicroserviceFramework.Extensions;
+using MicroserviceFramework.Functions;
 using Microsoft.AspNetCore.Mvc.Abstractions;
 using Microsoft.AspNetCore.Mvc.Controllers;
 using Microsoft.AspNetCore.Routing;
-using MSFramework.Extensions;
-using MSFramework.Functions;
 
-namespace MSFramework.AspNetCore.Extensions
+namespace MicroserviceFramework.AspNetCore.Extensions
 {
 	public static class ActionDescriptorExtensions
 	{

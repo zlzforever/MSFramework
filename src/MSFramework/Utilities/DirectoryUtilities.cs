@@ -1,10 +1,10 @@
 using System;
 using System.IO;
-using MSFramework.Shared;
+using MicroserviceFramework.Shared;
 
-namespace MSFramework.Utilities
+namespace MicroserviceFramework.Utilities
 {
-	public class DirectoryHelper
+	public class DirectoryUtilities
 	{
 		/// <summary>
 		/// 创建文件夹，如果不存在

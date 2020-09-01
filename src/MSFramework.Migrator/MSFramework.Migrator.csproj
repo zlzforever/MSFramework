@@ -2,6 +2,8 @@
 
     <PropertyGroup>
         <PackageId>MSFramework.Migrator</PackageId>
+        <AssemblyName>MSFramework.Migrator</AssemblyName>
+        <RootNamespace>MicroserviceFramework.Migrator</RootNamespace>
     </PropertyGroup>
     <Import Project="../../package.props"/>
     <ItemGroup>

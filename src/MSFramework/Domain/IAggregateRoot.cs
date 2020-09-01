@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
-using MSFramework.Domain.Events;
+using MicroserviceFramework.Domain.Events;
 
-namespace MSFramework.Domain
+namespace MicroserviceFramework.Domain
 {
 	/// <summary>
 	/// Represents an aggregate root.

@@ -1,12 +1,11 @@
 ﻿#nullable enable
 using System;
 using System.Linq;
-using MSFramework.Domain;
-using MSFramework.Extensions;
+using MicroserviceFramework.Domain;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
-namespace MSFramework.AspNetCore.Infrastructure
+namespace MicroserviceFramework.AspNetCore.Infrastructure
 {
 	public class EnumerationConverter : JsonConverter
 	{
@@ -22,7 +21,7 @@ namespace MSFramework.AspNetCore.Infrastructure
 			}
 			else
 			{
-				throw new MSFrameworkException(122, " no support json output");
+				throw new MicroserviceFrameworkException(122, " no support json output");
 			}
 		}
 
@@ -39,14 +38,14 @@ namespace MSFramework.AspNetCore.Infrastructure
 				enumType = objectType.GetGenericArguments().FirstOrDefault();
 			}
 
-			if (value.IsNullOrEmpty())
+			if (string.IsNullOrWhiteSpace(value))
 			{
 				if (isNullable)
 				{
 					return null;
 				}
 
-				throw new MSFrameworkException(122, $" {reader.Path} 不支持空值");
+				throw new MicroserviceFrameworkException(122, $" {reader.Path} 不支持空值");
 			}
 
 			try
@@ -60,11 +59,11 @@ namespace MSFramework.AspNetCore.Infrastructure
 			catch (Exception)
 			{
 				// 异常数据，不允许绑定
-				throw new MSFrameworkException(122, $" {reader.Path} 不支持绑定值 {value}");
+				throw new MicroserviceFrameworkException(122, $" {reader.Path} 不支持绑定值 {value}");
 			}
 
 			// 异常数据，不允许绑定
-			throw new MSFrameworkException(122, $" {reader.Path} 不支持绑定值 {value}");
+			throw new MicroserviceFrameworkException(122, $" {reader.Path} 不支持绑定值 {value}");
 		}
 
 		public override bool CanConvert(Type objectType)

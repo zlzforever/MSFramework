@@ -4,20 +4,20 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace MSFramework.Application
+namespace MicroserviceFramework.Application.CQRS.Query
 {
-	public class DefaultRequestProcessor : IRequestProcessor
+	public class DefaultQueryProcessor : IQueryProcessor
 	{
 		private readonly IServiceProvider _serviceProvider;
-		private readonly RequestHandlerTypeCache _cache;
+		private readonly HandlerTypeCache _cache;
 
-		public DefaultRequestProcessor(IServiceProvider serviceProvider)
+		public DefaultQueryProcessor(IServiceProvider serviceProvider)
 		{
 			_serviceProvider = serviceProvider;
-			_cache = _serviceProvider.GetRequiredService<RequestHandlerTypeCache>();
+			_cache = _serviceProvider.GetRequiredService<HandlerTypeCache>();
 		}
 
-		public async Task ProcessAsync(IRequest request, CancellationToken cancellationToken = default)
+		public async Task ProcessAsync(IQuery request, CancellationToken cancellationToken = default)
 		{
 			if (request == null)
 			{
@@ -32,11 +32,11 @@ namespace MSFramework.Application
 			}
 			else
 			{
-				throw new ApplicationException("找不到命令处理器");
+				throw new ApplicationException("找不到查询处理器");
 			}
 		}
 
-		public async Task<TResult> ProcessAsync<TResult>(IRequest<TResult> request,
+		public async Task<TResult> ProcessAsync<TResult>(IQuery<TResult> request,
 			CancellationToken cancellationToken = default)
 		{
 			if (request == null)
@@ -52,7 +52,7 @@ namespace MSFramework.Application
 			}
 			else
 			{
-				throw new ApplicationException("找不到命令处理器");
+				throw new ApplicationException("找不到查询处理器");
 			}
 		}
 	}

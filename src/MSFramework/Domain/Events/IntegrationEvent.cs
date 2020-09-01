@@ -1,7 +1,7 @@
 using System;
-using MSFramework.Shared;
+using MicroserviceFramework.Shared;
 
-namespace MSFramework.Domain.Events
+namespace MicroserviceFramework.Domain.Events
 {
 	public abstract class IntegrationEvent : IIntegrationEvent
 	{

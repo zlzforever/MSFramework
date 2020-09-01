@@ -1,9 +1,9 @@
 using System;
+using MicroserviceFramework.Domain;
+using MicroserviceFramework.Ef.Infrastructure;
 using Microsoft.Extensions.DependencyInjection;
-using MSFramework.Domain;
-using MSFramework.Ef.Infrastructure;
 
-namespace MSFramework.Ef
+namespace MicroserviceFramework.Ef
 {
 	public class DbContextFactory
 	{

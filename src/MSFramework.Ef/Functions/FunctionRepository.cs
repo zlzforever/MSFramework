@@ -2,11 +2,12 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using MicroserviceFramework.Ef.Infrastructure;
+using MicroserviceFramework.Functions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Memory;
-using MSFramework.Functions;
 
-namespace MSFramework.Ef.Functions
+namespace MicroserviceFramework.Ef.Functions
 {
 	public class FunctionRepository : IFunctionRepository
 	{
@@ -14,20 +15,22 @@ namespace MSFramework.Ef.Functions
 		private readonly TimeSpan _ttl = new TimeSpan(0, 5, 0);
 		private readonly IQueryable<Function> _currentSet;
 		private readonly DbContext _dbContext;
+		private readonly IEntityConfigurationTypeFinder _entityConfigurationTypeFinder;
 
-		public FunctionRepository(DbContextFactory dbContextFactory, IMemoryCache cache)
+		public FunctionRepository(DbContextFactory dbContextFactory,
+			IMemoryCache cache,
+			IEntityConfigurationTypeFinder entityConfigurationTypeFinder)
 		{
 			_cache = cache;
+			_entityConfigurationTypeFinder = entityConfigurationTypeFinder;
 
-			try
+			if (!_entityConfigurationTypeFinder.HasDbContextForEntity<Function>())
 			{
-				_dbContext = dbContextFactory.GetDbContext<Function>();
-				_currentSet = _dbContext.Set<Function>();
+				return;
 			}
-			catch
-			{
-				// ignored
-			}
+
+			_dbContext = dbContextFactory.GetDbContext<Function>();
+			_currentSet = _dbContext.Set<Function>();
 		}
 
 		public Function GetByCode(string code)

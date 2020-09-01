@@ -1,8 +1,8 @@
+using MicroserviceFramework.Domain;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using MSFramework.Domain;
 
-namespace MSFramework.Ef.Extensions
+namespace MicroserviceFramework.Ef.Extensions
 {
 	public static class EntityTypeBuilderExtensions
 	{

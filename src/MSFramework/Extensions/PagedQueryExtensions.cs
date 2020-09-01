@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
-using MSFramework.Shared;
+using MicroserviceFramework.Shared;
 
-namespace MSFramework.Extensions
+namespace MicroserviceFramework.Extensions
 {
 	public class OrderCondition<TEntity, TKey>
 	{

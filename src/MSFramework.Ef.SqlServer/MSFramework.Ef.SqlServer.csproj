@@ -1,6 +1,8 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
     <PropertyGroup>
         <PackageId>MSFramework.Ef.SqlServer</PackageId>
+        <AssemblyName>MSFramework.Ef.SqlServer</AssemblyName>
+        <RootNamespace>MicroserviceFramework.Ef.SqlServer</RootNamespace>
     </PropertyGroup>
     <Import Project="../../package.props" />
     <ItemGroup>

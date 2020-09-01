@@ -1,6 +1,6 @@
 using Microsoft.Extensions.DependencyInjection;
 
-namespace MSFramework.Ef
+namespace MicroserviceFramework.Ef
 {
 	public class EntityFrameworkBuilder
 	{

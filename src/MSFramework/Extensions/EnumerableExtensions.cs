@@ -2,9 +2,9 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using MSFramework.Shared;
+using MicroserviceFramework.Shared;
 
-namespace MSFramework.Extensions
+namespace MicroserviceFramework.Extensions
 {
 	/// <summary>
 	/// Enumerable集合扩展方法

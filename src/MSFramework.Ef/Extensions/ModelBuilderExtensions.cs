@@ -1,12 +1,9 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
+using MicroserviceFramework.Ef.Infrastructure;
+using MicroserviceFramework.Shared;
+using MicroserviceFramework.Utilities;
 using Microsoft.EntityFrameworkCore;
-using MSFramework.Ef.Infrastructure;
-using MSFramework.Shared;
-using MSFramework.Utilities;
 
-namespace MSFramework.Ef.Extensions
+namespace MicroserviceFramework.Ef.Extensions
 {
 	public static class ModelBuilderExtensions
 	{

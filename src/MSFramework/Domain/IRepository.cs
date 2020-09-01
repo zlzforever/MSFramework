@@ -1,7 +1,7 @@
 using System.Threading.Tasks;
-using MSFramework.Shared;
+using MicroserviceFramework.Shared;
 
-namespace MSFramework.Domain
+namespace MicroserviceFramework.Domain
 {
 	/// <summary>
 	/// Just to mark a class as repository.

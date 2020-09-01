@@ -1,6 +1,6 @@
 using System.Threading.Tasks;
 
-namespace MSFramework.Domain.Events
+namespace MicroserviceFramework.Domain.Events
 {
 	public interface IEventHandler
 	{

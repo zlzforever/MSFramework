@@ -1,11 +1,11 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using MicroserviceFramework.Initializers;
+using MicroserviceFramework.Shared;
 using Microsoft.Extensions.DependencyInjection;
-using MSFramework.Initializers;
-using MSFramework.Shared;
 
-namespace MSFramework.AspNetCore.AccessControl
+namespace MicroserviceFramework.AspNetCore.AccessControl
 {
 	public class ApiInfoInitializer : Initializer
 	{
@@ -25,7 +25,7 @@ namespace MSFramework.AspNetCore.AccessControl
 
 			if (string.IsNullOrWhiteSpace(options.ServiceUrl))
 			{
-				throw new MSFrameworkException("ServiceUrl and AuthorizeToken should not be empty/null");
+				throw new MicroserviceFrameworkException("ServiceUrl and AuthorizeToken should not be empty/null");
 			}
 
 			var apiInfoFinder = serviceProvider.GetRequiredService<AspNetCoreApiInfoFinder>();
@@ -41,7 +41,7 @@ namespace MSFramework.AspNetCore.AccessControl
 				}
 				else
 				{
-					throw new MSFrameworkException(
+					throw new MicroserviceFrameworkException(
 						$"There are more than one access control named: {apiInfo.Name} in local");
 				}
 			}
@@ -50,7 +50,7 @@ namespace MSFramework.AspNetCore.AccessControl
 
 			if (string.IsNullOrWhiteSpace(applicationInfo.Name))
 			{
-				throw new MSFrameworkException("Application name is not config");
+				throw new MicroserviceFrameworkException("Application name is not config");
 			}
 
 			var remoteApiInfos = await accessClient.GetAllListAsync(applicationInfo.Name);
@@ -66,7 +66,7 @@ namespace MSFramework.AspNetCore.AccessControl
 					}
 					else
 					{
-						throw new MSFrameworkException(
+						throw new MicroserviceFrameworkException(
 							$"There are more than one access control named: {apiInfo.Name} in remote");
 					}
 				}

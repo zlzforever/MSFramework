@@ -17,7 +17,7 @@ namespace Ordering.Infrastructure.Migrations
                 .HasAnnotation("ProductVersion", "3.1.7")
                 .HasAnnotation("Relational:MaxIdentifierLength", 64);
 
-            modelBuilder.Entity("MSFramework.Audits.AuditEntity", b =>
+            modelBuilder.Entity("MicroserviceFramework.Audits.AuditEntity", b =>
                 {
                     b.Property<string>("Id")
                         .HasColumnName("id")
@@ -57,7 +57,7 @@ namespace Ordering.Infrastructure.Migrations
                     b.ToTable("audit_entity");
                 });
 
-            modelBuilder.Entity("MSFramework.Audits.AuditOperation", b =>
+            modelBuilder.Entity("MicroserviceFramework.Audits.AuditOperation", b =>
                 {
                     b.Property<string>("Id")
                         .HasColumnName("id")
@@ -74,13 +74,13 @@ namespace Ordering.Infrastructure.Migrations
 
                     b.Property<string>("CreationUserId")
                         .HasColumnName("creation_user_id")
-                        .HasColumnType("varchar(256) CHARACTER SET utf8mb4")
-                        .HasMaxLength(256);
+                        .HasColumnType("varchar(255) CHARACTER SET utf8mb4")
+                        .HasMaxLength(255);
 
                     b.Property<string>("CreationUserName")
                         .HasColumnName("creation_user_name")
-                        .HasColumnType("varchar(256) CHARACTER SET utf8mb4")
-                        .HasMaxLength(256);
+                        .HasColumnType("varchar(255) CHARACTER SET utf8mb4")
+                        .HasMaxLength(255);
 
                     b.Property<int>("Elapsed")
                         .HasColumnName("elapsed")
@@ -116,7 +116,7 @@ namespace Ordering.Infrastructure.Migrations
                     b.ToTable("audit_operation");
                 });
 
-            modelBuilder.Entity("MSFramework.Audits.AuditProperty", b =>
+            modelBuilder.Entity("MicroserviceFramework.Audits.AuditProperty", b =>
                 {
                     b.Property<string>("Id")
                         .HasColumnName("id")
@@ -157,7 +157,7 @@ namespace Ordering.Infrastructure.Migrations
                     b.ToTable("audit_property");
                 });
 
-            modelBuilder.Entity("MSFramework.Functions.Function", b =>
+            modelBuilder.Entity("MicroserviceFramework.Functions.Function", b =>
                 {
                     b.Property<string>("Id")
                         .HasColumnName("id")
@@ -174,13 +174,13 @@ namespace Ordering.Infrastructure.Migrations
 
                     b.Property<string>("CreationUserId")
                         .HasColumnName("creation_user_id")
-                        .HasColumnType("varchar(256) CHARACTER SET utf8mb4")
-                        .HasMaxLength(256);
+                        .HasColumnType("varchar(255) CHARACTER SET utf8mb4")
+                        .HasMaxLength(255);
 
                     b.Property<string>("CreationUserName")
                         .HasColumnName("creation_user_name")
-                        .HasColumnType("varchar(256) CHARACTER SET utf8mb4")
-                        .HasMaxLength(256);
+                        .HasColumnType("varchar(255) CHARACTER SET utf8mb4")
+                        .HasMaxLength(255);
 
                     b.Property<string>("Description")
                         .HasColumnName("description")
@@ -201,13 +201,13 @@ namespace Ordering.Infrastructure.Migrations
 
                     b.Property<string>("ModificationUserId")
                         .HasColumnName("modification_user_id")
-                        .HasColumnType("varchar(256) CHARACTER SET utf8mb4")
-                        .HasMaxLength(256);
+                        .HasColumnType("varchar(255) CHARACTER SET utf8mb4")
+                        .HasMaxLength(255);
 
                     b.Property<string>("ModificationUserName")
                         .HasColumnName("modification_user_name")
-                        .HasColumnType("varchar(256) CHARACTER SET utf8mb4")
-                        .HasMaxLength(256);
+                        .HasColumnType("varchar(255) CHARACTER SET utf8mb4")
+                        .HasMaxLength(255);
 
                     b.Property<string>("Name")
                         .HasColumnName("name")
@@ -318,24 +318,24 @@ namespace Ordering.Infrastructure.Migrations
                     b.ToTable("product");
                 });
 
-            modelBuilder.Entity("MSFramework.Audits.AuditEntity", b =>
+            modelBuilder.Entity("MicroserviceFramework.Audits.AuditEntity", b =>
                 {
-                    b.HasOne("MSFramework.Audits.AuditOperation", "Operation")
+                    b.HasOne("MicroserviceFramework.Audits.AuditOperation", "Operation")
                         .WithMany()
                         .HasForeignKey("OperationId");
 
-                    b.HasOne("MSFramework.Audits.AuditOperation", null)
+                    b.HasOne("MicroserviceFramework.Audits.AuditOperation", null)
                         .WithMany("Entities")
                         .HasForeignKey("audit_operation_id");
                 });
 
-            modelBuilder.Entity("MSFramework.Audits.AuditProperty", b =>
+            modelBuilder.Entity("MicroserviceFramework.Audits.AuditProperty", b =>
                 {
-                    b.HasOne("MSFramework.Audits.AuditEntity", "Entity")
+                    b.HasOne("MicroserviceFramework.Audits.AuditEntity", "Entity")
                         .WithMany()
                         .HasForeignKey("EntityId");
 
-                    b.HasOne("MSFramework.Audits.AuditEntity", null)
+                    b.HasOne("MicroserviceFramework.Audits.AuditEntity", null)
                         .WithMany("Properties")
                         .HasForeignKey("audit_entity_id");
                 });

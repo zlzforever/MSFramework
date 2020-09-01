@@ -1,8 +1,8 @@
 using System.Security.Cryptography;
 using System.Text;
-using MSFramework.Shared;
+using MicroserviceFramework.Shared;
 
-namespace MSFramework.Extensions
+namespace MicroserviceFramework.Extensions
 {
 	/// <summary>
 	/// 字符串Hash操作类

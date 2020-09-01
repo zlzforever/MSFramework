@@ -2,12 +2,12 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using MicroserviceFramework.Domain;
+using MicroserviceFramework.Initializers;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using MSFramework.Domain;
-using MSFramework.Initializers;
 
-namespace MSFramework.Functions
+namespace MicroserviceFramework.Functions
 {
 	public class FunctionInitializer : Initializer
 	{
@@ -17,7 +17,7 @@ namespace MSFramework.Functions
 			var repository = serviceProvider.GetService<IFunctionRepository>();
 			if (!repository.IsAvailable())
 			{
-				logger.LogInformation("没有配置 Function 仓储");
+				logger.LogInformation("Function 仓储不可用");
 				return;
 			}
 
@@ -39,7 +39,7 @@ namespace MSFramework.Functions
 				}
 				else
 				{
-					throw new MSFrameworkException($"There are same functions: {function.Code}");
+					throw new MicroserviceFrameworkException($"There are same functions: {function.Code}");
 				}
 			}
 

@@ -1,8 +1,8 @@
 ﻿using System;
-using MSFramework.Domain;
+using MicroserviceFramework.Domain;
 using Newtonsoft.Json.Serialization;
 
-namespace MSFramework.AspNetCore.Infrastructure
+namespace MicroserviceFramework.AspNetCore.Infrastructure
 {
 	public class EnumerationContractResolver: DefaultContractResolver
 	{

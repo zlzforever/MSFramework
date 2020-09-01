@@ -1,4 +1,4 @@
-namespace MSFramework.Application
+namespace MicroserviceFramework.Application
 {
 	public interface ISession
 	{

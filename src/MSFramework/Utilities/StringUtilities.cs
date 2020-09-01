@@ -1,10 +1,15 @@
 using System.Collections.Generic;
 using System.Linq;
 
-namespace MSFramework.Utilities
+namespace MicroserviceFramework.Utilities
 {
 	public class StringUtilities
 	{
+		/// <summary>
+		/// todo: 优化
+		/// </summary>
+		/// <param name="str"></param>
+		/// <returns></returns>
 		public static string ToUnixLike(string str)
 		{
 			var array = str.ToList();

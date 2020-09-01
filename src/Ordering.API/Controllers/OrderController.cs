@@ -1,11 +1,11 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using MicroserviceFramework.Application;
+using MicroserviceFramework.Application.CQRS.Command;
+using MicroserviceFramework.AspNetCore;
+using MicroserviceFramework.Shared;
 using Microsoft.AspNetCore.Mvc;
-using MSFramework.Application;
-using MSFramework.AspNetCore;
-using MSFramework.AspNetCore.AccessControl;
-using MSFramework.Shared;
 using Ordering.Application.Commands;
 using Ordering.Application.Queries;
 using Ordering.Domain.AggregateRoots;
@@ -20,10 +20,10 @@ namespace Ordering.API.Controllers
 	{
 		private readonly IOrderingQuery _orderingQuery;
 		private readonly IOrderingRepository _orderRepository;
-		private readonly IRequestProcessor _commandExecutor;
+		private readonly ICommandProcessor _commandExecutor;
 
 		public OrderController(IOrderingRepository orderRepository,
-			IOrderingQuery orderingQuery, IRequestProcessor commandExecutor)
+			IOrderingQuery orderingQuery, ICommandProcessor commandExecutor)
 		{
 			_orderingQuery = orderingQuery;
 			_commandExecutor = commandExecutor;
@@ -57,7 +57,7 @@ namespace Ordering.API.Controllers
 		//[AccessControl("test-command1")]
 		public async Task<string> TestCommand1Async([FromBody] TestCommand1 command)
 		{
-			var a = await _commandExecutor.ProcessAsync(command, default);
+			var a = await _commandExecutor.ExecuteAsync(command, default);
 			return a;
 		}
 
@@ -65,7 +65,7 @@ namespace Ordering.API.Controllers
 		//[AccessControl("test-command2")]
 		public async Task TestCommand2Async([FromBody] TestCommand2 command)
 		{
-			await _commandExecutor.ProcessAsync(command, default);
+			await _commandExecutor.ExecuteAsync(command, default);
 		}
 
 		/// <summary>
@@ -93,7 +93,7 @@ namespace Ordering.API.Controllers
 			}
 
 
-			return await _commandExecutor.ProcessAsync(new CreateOrderCommand(items, "HELLO", "上海", "张扬路500号", "上海",
+			return await _commandExecutor.ExecuteAsync(new CreateOrderCommand(items, "HELLO", "上海", "张扬路500号", "上海",
 				"中国", "200000", "what?"));
 		}
 

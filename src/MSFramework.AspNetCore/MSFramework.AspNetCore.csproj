@@ -1,6 +1,8 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
     <PropertyGroup>
         <PackageId>MSFramework.AspNetCore</PackageId>
+        <AssemblyName>MSFramework.AspNetCore</AssemblyName>
+        <RootNamespace>MicroserviceFramework.AspNetCore</RootNamespace>
     </PropertyGroup>
     <Import Project="../../package.props" />
 
@@ -12,9 +14,9 @@
         <PackageReference Include="Swashbuckle.AspNetCore.SwaggerGen" Version="5.5.1" />
         <PackageReference Include="Swashbuckle.AspNetCore.SwaggerUI" Version="5.5.1" />
     </ItemGroup>
-    
+
     <ItemGroup>
-      <ProjectReference Include="..\MSFramework\MSFramework.csproj" />
+        <ProjectReference Include="..\MSFramework\MSFramework.csproj" />
     </ItemGroup>
 
 </Project>

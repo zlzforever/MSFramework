@@ -1,9 +1,9 @@
 using System;
 using System.Collections.Generic;
-using MSFramework.Domain;
-using MSFramework.Shared;
+using MicroserviceFramework.Domain;
+using MicroserviceFramework.Shared;
 
-namespace MSFramework.Audits
+namespace MicroserviceFramework.Audits
 {
 	public class AuditOperation : CreationAggregateRoot<ObjectId>
 	{

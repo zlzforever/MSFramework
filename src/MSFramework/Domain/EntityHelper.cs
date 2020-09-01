@@ -1,8 +1,8 @@
 using System;
 using System.Collections.Generic;
-using MSFramework.Shared;
+using MicroserviceFramework.Shared;
 
-namespace MSFramework.Domain
+namespace MicroserviceFramework.Domain
 {
 	/// <summary>
 	/// Some helper methods for entities.

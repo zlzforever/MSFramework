@@ -1,7 +1,7 @@
 using System;
 using System.Linq;
 
-namespace MSFramework.Domain.Events
+namespace MicroserviceFramework.Domain.Events
 {
 	public static class Extensions
 	{

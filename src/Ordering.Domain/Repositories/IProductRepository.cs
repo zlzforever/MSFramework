@@ -1,7 +1,7 @@
 using System.Threading.Tasks;
-using MSFramework.DependencyInjection;
-using MSFramework.Domain;
-using MSFramework.Shared;
+using MicroserviceFramework.DependencyInjection;
+using MicroserviceFramework.Domain;
+using MicroserviceFramework.Shared;
 using Ordering.Domain.AggregateRoots;
 
 namespace Ordering.Domain.Repositories

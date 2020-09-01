@@ -1,6 +1,6 @@
-namespace MSFramework.Mapper
+namespace MicroserviceFramework.Mapper
 {
-	public interface IObjectMapper
+	public interface IObjMapper
 	{
 		TDestination Map<TDestination>(object source);
 		

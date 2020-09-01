@@ -1,6 +1,6 @@
-namespace MSFramework.RabbitMQ
+namespace MicroserviceFramework.RabbitMQ
 {
-	public class RabbitMQOptions
+	public class RabbitMqOptions
 	{
 		public string Exchange { get; set; }
 

@@ -1,6 +1,6 @@
 using Microsoft.Extensions.Configuration;
 
-namespace MSFramework.AspNetCore.AccessControl
+namespace MicroserviceFramework.AspNetCore.AccessControl
 {
 	public class AccessControlOptions
 	{
@@ -20,6 +20,6 @@ namespace MSFramework.AspNetCore.AccessControl
 		public string Authority => _configuration["AccessControl:Authority"];
 		public string ClientId => _configuration["AccessControl:ClientId"];
 		public string ClientSecret => _configuration["AccessControl:ClientSecret"];
-		public string HttpClient { get; set; } = "MSFramework.AspNetCore.AccessControl.HttpClient";
+		public string HttpClient { get; set; } = "MicroserviceFramework.AspNetCore.AccessControl.HttpClient";
 	}
 }

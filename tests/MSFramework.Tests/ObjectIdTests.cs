@@ -1,4 +1,4 @@
-using MSFramework.Shared;
+using MicroserviceFramework.Shared;
 using Xunit;
 
 namespace MSFramework.Tests

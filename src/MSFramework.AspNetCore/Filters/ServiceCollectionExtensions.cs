@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Mvc.Filters;
 
-namespace MSFramework.AspNetCore.Filters
+namespace MicroserviceFramework.AspNetCore.Filters
 {
 	public static class ServiceCollectionExtensions
 	{

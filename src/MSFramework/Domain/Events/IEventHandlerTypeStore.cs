@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace MSFramework.Domain.Events
+namespace MicroserviceFramework.Domain.Events
 {
 	public interface IEventHandlerTypeStore
 	{

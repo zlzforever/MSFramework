@@ -1,13 +1,13 @@
 using System;
 using System.Collections.Generic;
 using System.Reflection;
+using MicroserviceFramework.DependencyInjection;
+using MicroserviceFramework.Shared;
 using Microsoft.AspNetCore.Mvc.Controllers;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.Extensions.DependencyInjection;
-using MSFramework.DependencyInjection;
-using MSFramework.Shared;
 
-namespace MSFramework.AspNetCore.AccessControl
+namespace MicroserviceFramework.AspNetCore.AccessControl
 {
 	public class AspNetCoreApiInfoFinder : ISingletonDependency
 	{
@@ -27,7 +27,7 @@ namespace MSFramework.AspNetCore.AccessControl
 			var applicationInfo = scope.ServiceProvider.GetRequiredService<ApplicationInfo>();
 			if (string.IsNullOrWhiteSpace(applicationInfo.Name))
 			{
-				throw new MSFrameworkException("Application name is not config");
+				throw new MicroserviceFrameworkException("Application name is not config");
 			}
 
 			foreach (var actionDescriptor in actionDescriptorCollectionProvider.ActionDescriptors.Items)

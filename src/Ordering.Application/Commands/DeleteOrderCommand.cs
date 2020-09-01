@@ -1,9 +1,10 @@
-using MSFramework.Application;
-using MSFramework.Shared;
+using MicroserviceFramework.Application;
+using MicroserviceFramework.Application.CQRS.Command;
+using MicroserviceFramework.Shared;
 
 namespace Ordering.Application.Commands
 {
-	public class DeleteOrderCommand : IRequest
+	public class DeleteOrderCommand : ICommand
 	{
 		public ObjectId OrderId { get; private set; }
 

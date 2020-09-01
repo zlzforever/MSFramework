@@ -2,11 +2,11 @@
 using System.Data.Common;
 using System.Threading.Tasks;
 using Dapper;
+using MicroserviceFramework.Shared;
 using Microsoft.Extensions.Logging;
-using MSFramework.Shared;
 using MySql.Data.MySqlClient;
 
-namespace MSFramework.Migrator.MySql
+namespace MicroserviceFramework.Migrator.MySql
 {
 	public class MySqlMigrator : Migrator
 	{

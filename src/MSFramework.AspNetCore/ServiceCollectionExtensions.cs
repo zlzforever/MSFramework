@@ -1,32 +1,42 @@
+using MicroserviceFramework.Application;
+using MicroserviceFramework.AspNetCore.Functions;
+using MicroserviceFramework.AspNetCore.Infrastructure;
+using MicroserviceFramework.Functions;
+using MicroserviceFramework.Shared;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
-using MSFramework.AspNetCore.Functions;
-using MSFramework.AspNetCore.Infrastructure;
-using MSFramework.Functions;
-using ISession = MSFramework.Application.ISession;
+using ISession = MicroserviceFramework.Application.ISession;
 
-namespace MSFramework.AspNetCore
+namespace MicroserviceFramework.AspNetCore
 {
 	public static class ServiceCollectionExtensions
 	{
-		public static MSFrameworkBuilder UseAspNetCore(this MSFrameworkBuilder builder)
+		public static MicroserviceFrameworkBuilder UseAspNetCore(this MicroserviceFrameworkBuilder builder,
+			bool enableFunction = true)
 		{
-			builder.Services.TryAddSingleton<IFunctionFinder, AspNetCoreFunctionFinder>();
-			builder.Services.TryAddSingleton<IHttpContextAccessor, HttpContextAccessor>();
+			if (enableFunction)
+			{
+				builder.Services.TryAddSingleton<IFunctionFinder, AspNetCoreFunctionFinder>();
+			}
+
+			var httpContextAccessor = new HttpContextAccessor();
+			ServiceLocator.Provider = type => httpContextAccessor.HttpContext.RequestServices.GetService(type);
+
+			builder.Services.TryAddSingleton<IHttpContextAccessor>(httpContextAccessor);
 			builder.Services.AddSingleton<IActionResultTypeMapper, ActionResultTypeMapper>();
 			builder.Services.TryAddScoped<ISession, HttpContextSession>();
 			return builder;
 		}
 
-		public static void UseMSFramework(this IApplicationBuilder builder)
+		public static void UseMicroserviceFramework(this IApplicationBuilder builder)
 		{
-			builder.ApplicationServices.UseMSFramework();
+			builder.ApplicationServices.UseMicroserviceFramework();
 		}
 
-		public static IMvcBuilder UseInvalidModelStateResponse(this IMvcBuilder builder)
+		public static IMvcBuilder ConfigureInvalidModelStateResponse(this IMvcBuilder builder)
 		{
 			builder.ConfigureApiBehaviorOptions(x =>
 			{

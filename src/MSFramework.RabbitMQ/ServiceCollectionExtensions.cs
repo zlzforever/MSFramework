@@ -1,20 +1,20 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using MicroserviceFramework.Domain.Events;
 using Microsoft.Extensions.DependencyInjection;
-using MSFramework.Domain.Events;
 
-namespace MSFramework.RabbitMQ
+namespace MicroserviceFramework.RabbitMQ
 {
 	public static class ServiceCollectionExtensions
 	{
-		public static MSFrameworkBuilder UseRabbitMQEventDispatcher(this MSFrameworkBuilder builder,
-			RabbitMQOptions options, params Type[] eventTypes)
+		public static MicroserviceFrameworkBuilder UseRabbitMqEventDispatcher(this MicroserviceFrameworkBuilder builder,
+			RabbitMqOptions options, params Type[] eventTypes)
 		{
-			var excludeAssembly = typeof(MSFrameworkBuilder).Assembly;
+			var excludeAssembly = typeof(MicroserviceFrameworkBuilder).Assembly;
 			if (eventTypes.Any(x => x.Assembly != excludeAssembly))
 			{
-				var list = new List<Type>(eventTypes) {typeof(MSFrameworkBuilder)};
+				var list = new List<Type>(eventTypes) {typeof(MicroserviceFrameworkBuilder)};
 				builder.Services.AddEventDispatcher(list.ToArray());
 			}
 			else
@@ -23,17 +23,17 @@ namespace MSFramework.RabbitMQ
 			}
 
 			builder.Services.AddSingleton(options);
-			builder.Services.AddScoped<IEventDispatcher, RabbitMQEventDispatcher>();
+			builder.Services.AddScoped<IEventDispatcher, RabbitMqEventDispatcher>();
 			return builder;
 		}
 
-		public static MSFrameworkBuilder UseRabbitMQEventDispatcher(this MSFrameworkBuilder builder,
-			Action<RabbitMQOptions> configure, params Type[] eventTypes)
+		public static MicroserviceFrameworkBuilder UseRabbitMqEventDispatcher(this MicroserviceFrameworkBuilder builder,
+			Action<RabbitMqOptions> configure, params Type[] eventTypes)
 		{
-			var options = new RabbitMQOptions();
+			var options = new RabbitMqOptions();
 			configure?.Invoke(options);
 
-			builder.UseRabbitMQEventDispatcher(options, eventTypes);
+			builder.UseRabbitMqEventDispatcher(options, eventTypes);
 			return builder;
 		}
 	}

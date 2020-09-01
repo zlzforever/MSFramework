@@ -2,9 +2,9 @@ using System.Linq;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
-namespace MSFramework.AspNetCore.Extensions
+namespace MicroserviceFramework.AspNetCore.Extensions
 {
-	public static class ContextContextExtensions
+	public static class ContextExtensions
 	{
 		public static string GetRemoteIpAddress(this ActionContext context)
 		{

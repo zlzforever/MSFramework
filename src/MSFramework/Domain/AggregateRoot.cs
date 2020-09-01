@@ -1,9 +1,9 @@
 using System;
 using System.Collections.Generic;
-using MSFramework.Domain.Events;
-using MSFramework.Shared;
+using MicroserviceFramework.Domain.Events;
+using MicroserviceFramework.Shared;
 
-namespace MSFramework.Domain
+namespace MicroserviceFramework.Domain
 {
 	[Serializable]
 	public abstract class AggregateRoot : AggregateRoot<ObjectId>

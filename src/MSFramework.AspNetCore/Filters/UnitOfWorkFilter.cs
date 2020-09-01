@@ -1,10 +1,10 @@
 using System.Collections.Generic;
+using MicroserviceFramework.Domain;
 using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using MSFramework.Domain;
 
-namespace MSFramework.AspNetCore.Filters
+namespace MicroserviceFramework.AspNetCore.Filters
 {
 	public class UnitOfWorkFilter : IActionFilter, IOrderedFilter
 	{

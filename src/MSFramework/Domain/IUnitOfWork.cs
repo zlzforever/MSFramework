@@ -1,9 +1,9 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using MSFramework.Audits;
+using MicroserviceFramework.Audits;
 
-namespace MSFramework.Domain
+namespace MicroserviceFramework.Domain
 {
 	public interface IUnitOfWork : IDisposable
 	{

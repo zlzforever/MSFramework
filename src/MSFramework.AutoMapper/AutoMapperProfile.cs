@@ -1,7 +1,7 @@
 using AutoMapper;
-using MSFramework.Shared;
+using MicroserviceFramework.Shared;
 
-namespace MSFramework.AutoMapper
+namespace MicroserviceFramework.AutoMapper
 {
 	public class AutoMapperProfile : Profile
 	{

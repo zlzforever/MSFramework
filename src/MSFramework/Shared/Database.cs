@@ -1,4 +1,4 @@
-namespace MSFramework.Shared
+namespace MicroserviceFramework.Shared
 {
 	public enum Database
 	{

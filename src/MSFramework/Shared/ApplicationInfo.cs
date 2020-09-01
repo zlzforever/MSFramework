@@ -1,9 +1,9 @@
 using System.Reflection;
+using MicroserviceFramework.DependencyInjection;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
-using MSFramework.DependencyInjection;
 
-namespace MSFramework.Shared
+namespace MicroserviceFramework.Shared
 {
 	public class ApplicationInfo : IScopeDependency
 	{

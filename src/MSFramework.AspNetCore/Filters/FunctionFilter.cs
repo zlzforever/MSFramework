@@ -1,11 +1,11 @@
+using MicroserviceFramework.AspNetCore.Extensions;
+using MicroserviceFramework.Functions;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using MSFramework.AspNetCore.Extensions;
-using MSFramework.Functions;
 
-namespace MSFramework.AspNetCore.Filters
+namespace MicroserviceFramework.AspNetCore.Filters
 {
 	public class FunctionFilter : ActionFilterAttribute
 	{
@@ -25,9 +25,9 @@ namespace MSFramework.AspNetCore.Filters
 
 			var functionPath = context.ActionDescriptor.GetActionPath();
 			var repository = provider.GetService<IFunctionRepository>();
-			if (repository == null)
+			if (repository == null || !repository.IsAvailable())
 			{
-				throw new MSFrameworkException("未注册任何 FunctionStore");
+				throw new MicroserviceFrameworkException("Function 仓储不可用");
 			}
 
 			var function = repository.GetByCode(functionPath);

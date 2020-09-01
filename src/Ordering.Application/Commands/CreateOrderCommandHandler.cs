@@ -1,15 +1,15 @@
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using MSFramework.Application;
-using MSFramework.Domain;
-using MSFramework.Shared;
+using MicroserviceFramework.Application;
+using MicroserviceFramework.Application.CQRS.Command;
+using MicroserviceFramework.Shared;
 using Ordering.Domain.AggregateRoots;
 using Ordering.Domain.Repositories;
 
 namespace Ordering.Application.Commands
 {
-	public class CreateOrderCommandHandler : IRequestHandler<CreateOrderCommand, ObjectId>
+	public class CreateOrderCommandHandler : ICommandHandler<CreateOrderCommand, ObjectId>
 	{
 		private readonly IOrderingRepository _orderRepository;
 

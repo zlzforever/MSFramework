@@ -1,12 +1,12 @@
 using System.Threading;
 using System.Threading.Tasks;
-using MSFramework.Application;
-using MSFramework.Domain;
+using MicroserviceFramework.Application;
+using MicroserviceFramework.Application.CQRS.Command;
 using Ordering.Domain.Repositories;
 
 namespace Ordering.Application.Commands
 {
-	public class ChangeOrderAddressCommandHandler : IRequestHandler<ChangeOrderAddressCommand>
+	public class ChangeOrderAddressCommandHandler : ICommandHandler<ChangeOrderAddressCommand>
 	{
 		private readonly IOrderingRepository _orderRepository;
 

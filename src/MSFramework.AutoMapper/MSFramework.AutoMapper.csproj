@@ -1,6 +1,8 @@
 <Project Sdk="Microsoft.NET.Sdk">
     <PropertyGroup>
         <PackageId>MSFramework.AutoMapper</PackageId>
+        <AssemblyName>MSFramework.AutoMapper</AssemblyName>
+        <RootNamespace>MicroserviceFramework.AutoMapper</RootNamespace>
     </PropertyGroup>
     <Import Project="../../package.props" />
     <ItemGroup>

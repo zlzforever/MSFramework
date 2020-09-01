@@ -1,5 +1,5 @@
 using System;
-using MSFramework.Ef.Design;
+using MicroserviceFramework.Ef.Design;
 using Ordering.Infrastructure;
 
 namespace Ordering.API

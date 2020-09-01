@@ -3,10 +3,9 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Pomelo.EntityFrameworkCore.MySql.Migrations.Internal;
 using Pomelo.EntityFrameworkCore.MySql.Storage;
 
-namespace MSFramework.Ef.MySql
+namespace MicroserviceFramework.Ef.MySql
 {
 	public static class ServiceCollectionExtensions
 	{

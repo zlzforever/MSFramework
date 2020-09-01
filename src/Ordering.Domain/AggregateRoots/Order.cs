@@ -2,8 +2,8 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
-using MSFramework.Domain;
-using MSFramework.Shared;
+using MicroserviceFramework.Domain;
+using MicroserviceFramework.Shared;
 using Ordering.Domain.AggregateRoots.Events;
 
 namespace Ordering.Domain.AggregateRoots

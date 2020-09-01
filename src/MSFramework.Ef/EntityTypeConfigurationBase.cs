@@ -1,9 +1,9 @@
 using System;
+using MicroserviceFramework.Domain;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using MSFramework.Domain;
 
-namespace MSFramework.Ef
+namespace MicroserviceFramework.Ef
 {
 	/// <summary>
 	/// 数据实体映射配置基类

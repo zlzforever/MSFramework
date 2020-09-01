@@ -3,18 +3,17 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Threading.Tasks;
+using MicroserviceFramework;
+using MicroserviceFramework.AspNetCore;
+using MicroserviceFramework.AspNetCore.Mvc;
+using MicroserviceFramework.Audits;
+using MicroserviceFramework.Domain;
+using MicroserviceFramework.Ef.Repositories;
+using MicroserviceFramework.Mapper;
+using MicroserviceFramework.Shared;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
-using MSFramework;
-using MSFramework.AspNetCore;
-using MSFramework.AspNetCore.AccessControl;
-using MSFramework.AspNetCore.Mvc;
-using MSFramework.Audits;
-using MSFramework.Domain;
-using MSFramework.Ef.Repositories;
-using MSFramework.Mapper;
-using MSFramework.Shared;
 using Ordering.Domain.AggregateRoots;
 using Ordering.Domain.Repositories;
 
@@ -50,10 +49,10 @@ namespace Ordering.API.Controllers
 	{
 		private readonly IProductRepository _productRepository;
 		private readonly IRepository<AuditOperation> _repository;
-		private readonly IObjectMapper _mapper;
+		private readonly IObjMapper _mapper;
 
 		public ProductController(IProductRepository productRepository, IRepository<AuditOperation> repository,
-			IObjectMapper mapper)
+			IObjMapper mapper)
 		{
 			_productRepository = productRepository;
 			_repository = repository;
@@ -118,7 +117,7 @@ namespace Ordering.API.Controllers
 		[HttpGet("getMSFrameworkException")]
 		public Response GetMSFrameworkException()
 		{
-			throw new MSFrameworkException(2, "i'm framework exception");
+			throw new MicroserviceFrameworkException(2, "i'm framework exception");
 		}
 
 		[HttpGet("getException")]

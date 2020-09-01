@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Microsoft.Extensions.Configuration;
 
-namespace MSFramework.Ef
+namespace MicroserviceFramework.Ef
 {
 	public class EntityFrameworkOptionsConfiguration
 	{
@@ -16,14 +16,14 @@ namespace MSFramework.Ef
 			var dict = section.Get<Dictionary<string, EntityFrameworkOptions>>();
 			if (dict == null || dict.Count == 0)
 			{
-				throw new MSFrameworkException("未能找到数据上下文配置");
+				throw new MicroserviceFrameworkException("未能找到数据上下文配置");
 			}
 
 			var repeated = dict.Values.GroupBy(m => m.DbContextType)
 				.FirstOrDefault(m => m.Count() > 1);
 			if (repeated != null)
 			{
-				throw new MSFrameworkException($"数据上下文配置中存在多个配置节点指向同一个上下文类型：{repeated.First().DbContextTypeName}");
+				throw new MicroserviceFrameworkException($"数据上下文配置中存在多个配置节点指向同一个上下文类型：{repeated.First().DbContextTypeName}");
 			}
 
 			_dict = dict;

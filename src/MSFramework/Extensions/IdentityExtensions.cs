@@ -1,7 +1,7 @@
 using System.Security.Claims;
 using System.Security.Principal;
 
-namespace MSFramework.Extensions
+namespace MicroserviceFramework.Extensions
 {
 	/// <summary>
 	/// <see cref="ClaimsIdentity"/>扩展操作类

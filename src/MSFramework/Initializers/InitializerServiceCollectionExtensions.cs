@@ -1,13 +1,13 @@
 using System;
 using System.Collections.Generic;
+using MicroserviceFramework.Reflection;
 using Microsoft.Extensions.DependencyInjection;
-using MSFramework.Reflection;
 
-namespace MSFramework.Initializers
+namespace MicroserviceFramework.Initializers
 {
 	public static class InitializerServiceCollectionExtensions
 	{
-		internal static MSFrameworkBuilder UseInitializer(this MSFrameworkBuilder builder)
+		internal static MicroserviceFrameworkBuilder UseInitializer(this MicroserviceFrameworkBuilder builder)
 		{
 			var assemblies = AssemblyFinder.GetAllList();
 			var types = new HashSet<Type>();
@@ -20,12 +20,12 @@ namespace MSFramework.Initializers
 			}
 
 			var initializerType = typeof(Initializer);
-			var notAllowAutoRegisterInitializerType = typeof(INotAutoRegisterInitializer);
+			var nonAutomaticInitializerType = typeof(INonAutomaticInitializer);
 			types.Remove(initializerType);
 			foreach (var type in types)
 			{
 				if (initializerType.IsAssignableFrom(type) &&
-				    !notAllowAutoRegisterInitializerType.IsAssignableFrom(type))
+				    !nonAutomaticInitializerType.IsAssignableFrom(type))
 				{
 					builder.Services.AddSingleton(initializerType, type);
 				}
@@ -34,7 +34,7 @@ namespace MSFramework.Initializers
 			return builder;
 		}
 
-		public static MSFrameworkBuilder AddInitializer<TInitializer>(this MSFrameworkBuilder builder)
+		public static MicroserviceFrameworkBuilder AddInitializer<TInitializer>(this MicroserviceFrameworkBuilder builder)
 			where TInitializer : Initializer
 		{
 			builder.Services.AddSingleton<TInitializer>();

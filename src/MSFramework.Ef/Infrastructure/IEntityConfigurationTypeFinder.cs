@@ -1,6 +1,6 @@
 using System;
 
-namespace MSFramework.Ef.Infrastructure
+namespace MicroserviceFramework.Ef.Infrastructure
 {
 	/// <summary>
 	/// 定义实体类配置类型查找器
@@ -8,7 +8,7 @@ namespace MSFramework.Ef.Infrastructure
 	public interface IEntityConfigurationTypeFinder
 	{
 		void Initialize();
-		
+
 		/// <summary>
 		/// 获取指定上下文类型的实体配置注册信息
 		/// </summary>
@@ -22,5 +22,11 @@ namespace MSFramework.Ef.Infrastructure
 		/// <param name="entityType">实体类型</param>
 		/// <returns>数据上下文类型</returns>
 		Type GetDbContextTypeForEntity(Type entityType);
+
+		/// <summary>
+		/// 判断实体有无配置到 DbContext
+		/// </summary>
+		/// <returns></returns>
+		bool HasDbContextForEntity<T>();
 	}
 }

@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace MSFramework.Domain
+namespace MicroserviceFramework.Domain
 {
 	/// <inheritdoc/>
 	[Serializable]

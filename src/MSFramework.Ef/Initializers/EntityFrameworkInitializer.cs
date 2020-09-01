@@ -1,16 +1,16 @@
 using System;
 using System.Linq;
 using System.Threading.Tasks;
+using MicroserviceFramework.Extensions;
+using MicroserviceFramework.Initializers;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using MSFramework.Extensions;
-using MSFramework.Initializers;
 
-namespace MSFramework.Ef.Initializers
+namespace MicroserviceFramework.Ef.Initializers
 {
-	public class EntityFrameworkInitializer : Initializer, INotAutoRegisterInitializer
+	public class EntityFrameworkInitializer : Initializer, INonAutomaticInitializer
 	{
 		public override int Order => int.MinValue;
 

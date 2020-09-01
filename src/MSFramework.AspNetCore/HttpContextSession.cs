@@ -1,10 +1,11 @@
 using System.Linq;
 using System.Security.Claims;
 using Microsoft.AspNetCore.Http;
+using ISession = MicroserviceFramework.Application.ISession;
 
-namespace MSFramework.AspNetCore
+namespace MicroserviceFramework.AspNetCore
 {
-	public class HttpContextSession : Application.ISession
+	public class HttpContextSession : ISession
 	{
 		private readonly IHttpContextAccessor _accessor;
 

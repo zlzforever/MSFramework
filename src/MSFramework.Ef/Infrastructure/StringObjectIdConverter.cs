@@ -1,10 +1,10 @@
 using System;
 using System.Linq.Expressions;
+using MicroserviceFramework.Shared;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Microsoft.EntityFrameworkCore.ValueGeneration;
-using MSFramework.Shared;
 
-namespace MSFramework.Ef.Infrastructure
+namespace MicroserviceFramework.Ef.Infrastructure
 {
 	public class StringObjectIdConverter<TModel, TProvider> : ValueConverter<TModel, TProvider>
 	{

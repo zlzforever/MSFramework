@@ -4,7 +4,7 @@ using System.Reflection;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 
-namespace MSFramework.Domain.Events
+namespace MicroserviceFramework.Domain.Events
 {
 	public static class ServiceCollectionExtensions
 	{

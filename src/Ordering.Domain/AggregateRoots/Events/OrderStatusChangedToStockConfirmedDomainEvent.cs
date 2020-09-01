@@ -1,5 +1,5 @@
-using MSFramework.Domain.Events;
-using MSFramework.Shared;
+using MicroserviceFramework.Domain.Events;
+using MicroserviceFramework.Shared;
 
 namespace Ordering.Domain.AggregateRoots.Events
 {

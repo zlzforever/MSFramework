@@ -1,5 +1,5 @@
 using System.Collections.Generic;
-using MSFramework.Domain;
+using MicroserviceFramework.Domain;
 
 namespace Ordering.Domain.AggregateRoots
 {

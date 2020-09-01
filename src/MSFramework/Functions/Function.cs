@@ -1,7 +1,7 @@
-using MSFramework.Domain;
-using MSFramework.Shared;
+using MicroserviceFramework.Domain;
+using MicroserviceFramework.Shared;
 
-namespace MSFramework.Functions
+namespace MicroserviceFramework.Functions
 {
 	public class Function : ModificationAggregateRoot
 	{

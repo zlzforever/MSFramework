@@ -1,8 +1,8 @@
 using System;
-using MSFramework.Shared;
+using MicroserviceFramework.Shared;
 using Newtonsoft.Json;
 
-namespace MSFramework.AspNetCore.Infrastructure
+namespace MicroserviceFramework.AspNetCore.Infrastructure
 {
 	public class ObjectIdConverter : JsonConverter<ObjectId>
 	{

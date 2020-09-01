@@ -4,7 +4,7 @@ using System.Runtime.CompilerServices;
 using System.Security;
 using System.Threading;
 
-namespace MSFramework.Shared
+namespace MicroserviceFramework.Shared
 {
 	/// <summary>
 	/// Copied from https://github.com/mongodb/mongo-csharp-driver/blob/master/src/MongoDB.Bson/ObjectModel/ObjectId.cs

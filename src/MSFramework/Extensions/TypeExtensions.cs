@@ -1,7 +1,7 @@
 using System;
 using System.Linq;
 
-namespace MSFramework.Extensions
+namespace MicroserviceFramework.Extensions
 {
 	public static class TypeExtensions
 	{

@@ -1,7 +1,7 @@
-using MSFramework.Domain;
-using MSFramework.Shared;
+using MicroserviceFramework.Domain;
+using MicroserviceFramework.Shared;
 
-namespace MSFramework.Audits
+namespace MicroserviceFramework.Audits
 {
 	/// <summary>
 	/// 实体属性审计信息

@@ -1,12 +1,13 @@
 using System;
 using System.Collections.Generic;
-using MSFramework.Application;
-using MSFramework.Shared;
+using MicroserviceFramework.Application;
+using MicroserviceFramework.Application.CQRS.Command;
+using MicroserviceFramework.Shared;
 using Ordering.Domain.AggregateRoots;
 
 namespace Ordering.Application.Commands
 {
-	public class CreateOrderCommand : IRequest<ObjectId>
+	public class CreateOrderCommand : ICommand<ObjectId>
 	{
 		public string UserId { get; set; }
 

@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace MSFramework.Domain
+namespace MicroserviceFramework.Domain
 {
 	/// <summary>
 	/// 工作单元管理器

@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using MSFramework.DependencyInjection;
-using MSFramework.Shared;
+using MicroserviceFramework.DependencyInjection;
+using MicroserviceFramework.Shared;
 using Ordering.Domain.AggregateRoots;
 
 namespace Ordering.Application.Queries

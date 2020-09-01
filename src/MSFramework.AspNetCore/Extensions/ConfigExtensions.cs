@@ -1,13 +1,13 @@
 ﻿using System;
 using System.Linq;
 using System.Reflection;
+using MicroserviceFramework.Application;
+using MicroserviceFramework.Extensions;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
-using MSFramework.Application;
-using MSFramework.Extensions;
 
-namespace MSFramework.AspNetCore.Extensions
+namespace MicroserviceFramework.AspNetCore.Extensions
 {
 	public static class ConfigExtensions
 	{

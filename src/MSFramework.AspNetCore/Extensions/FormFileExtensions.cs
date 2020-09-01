@@ -1,17 +1,21 @@
 using System;
 using System.IO;
 using System.Threading.Tasks;
+using MicroserviceFramework.Extensions;
 using Microsoft.AspNetCore.Http;
-using MSFramework.Extensions;
 
-namespace MSFramework.AspNetCore.Extensions
+namespace MicroserviceFramework.AspNetCore.Extensions
 {
 	public static class FormFileExtensions
 	{
 		public static async Task<(string OriginName, string NewPath)> SaveAsync(this IFormFile formFile,
 			string interval = "upload")
 		{
+#if NETSTANDARD2_1
+			await using var stream = new MemoryStream();
+#else
 			using var stream = new MemoryStream();
+#endif
 			await formFile.CopyToAsync(stream);
 			var bytes = stream.ToArray();
 
@@ -30,7 +34,11 @@ namespace MSFramework.AspNetCore.Extensions
 
 			if (!File.Exists(filePath))
 			{
+#if NETSTANDARD2_1
+				await File.WriteAllBytesAsync(filePath, bytes);
+#else
 				File.WriteAllBytes(filePath, bytes);
+#endif
 			}
 
 			return (formFile.FileName, $"{path}/{fileName}");

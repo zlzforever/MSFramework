@@ -1,10 +1,10 @@
 using System;
+using MicroserviceFramework.Domain;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
-using MSFramework.Domain;
 
-namespace MSFramework.Ef.Extensions
+namespace MicroserviceFramework.Ef.Extensions
 {
 	public static class PropertyBuilderExtensions
 	{
@@ -35,7 +35,7 @@ namespace MSFramework.Ef.Extensions
 			return builder;
 		}
 
-		public static PropertyBuilder<string> UseNotNullOrWhiteSpace(this PropertyBuilder<string> builder)
+		public static PropertyBuilder<string> UseNotNull(this PropertyBuilder<string> builder)
 		{
 			builder.HasConversion(new ValueConverter<string, string>(
 				v => v,

@@ -1,4 +1,4 @@
-namespace MSFramework.AspNetCore.AccessControl
+namespace MicroserviceFramework.AspNetCore.AccessControl
 {
 	public class ApiInfo
 	{

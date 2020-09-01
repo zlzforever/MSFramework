@@ -1,12 +1,13 @@
 using System;
 using System.Threading;
 using System.Threading.Tasks;
-using MSFramework.Application;
+using MicroserviceFramework.Application;
+using MicroserviceFramework.Application.CQRS.Command;
 
 namespace Ordering.Application.Commands
 {
 	public class TestCommand2Handler
-		: IRequestHandler<TestCommand2>
+		: ICommandHandler<TestCommand2>
 	{
 		public Task HandleAsync(TestCommand2 command, CancellationToken cancellationToken)
 		{

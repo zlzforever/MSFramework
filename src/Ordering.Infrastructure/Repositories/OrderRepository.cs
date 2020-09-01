@@ -1,8 +1,8 @@
 using System.Threading.Tasks;
+using MicroserviceFramework.Ef;
+using MicroserviceFramework.Ef.Repositories;
+using MicroserviceFramework.Shared;
 using Microsoft.EntityFrameworkCore;
-using MSFramework.Ef;
-using MSFramework.Ef.Repositories;
-using MSFramework.Shared;
 using Ordering.Domain.AggregateRoots;
 using Ordering.Domain.Repositories;
 

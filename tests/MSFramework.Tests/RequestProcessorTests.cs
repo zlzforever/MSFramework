@@ -1,12 +1,13 @@
 using System.Threading;
 using System.Threading.Tasks;
+using MicroserviceFramework.Application;
+using MicroserviceFramework.Application.CQRS.Command;
 using Microsoft.Extensions.DependencyInjection;
-using MSFramework.Application;
 using Xunit;
 
 namespace MSFramework.Tests
 {
-	public class Request1 : IRequest, IRequestHandler<Request1>
+	public class Request1 : ICommand, ICommandHandler<Request1>
 	{
 		public Task HandleAsync(Request1 request, CancellationToken cancellationToken = default)
 		{
@@ -14,7 +15,7 @@ namespace MSFramework.Tests
 		}
 	}
 
-	public class Request2 : IRequest<int>, IRequestHandler<Request2, int>
+	public class Request2 : ICommand<int>, ICommandHandler<Request2, int>
 	{
 		public Task<int> HandleAsync(Request2 request, CancellationToken cancellationToken = default)
 		{
@@ -28,11 +29,11 @@ namespace MSFramework.Tests
 		public async Task Test1()
 		{
 			var services = new ServiceCollection();
-			services.AddRequestProcessor(GetType().Assembly);
+			services.AddCQRS(GetType().Assembly);
 			var provider = services.BuildServiceProvider();
-			var processor = provider.GetRequiredService<IRequestProcessor>();
-			await processor.ProcessAsync(new Request1());
-			var result = await processor.ProcessAsync(new Request2());
+			var processor = provider.GetRequiredService<ICommandProcessor>();
+			await processor.ExecuteAsync(new Request1());
+			var result = await processor.ExecuteAsync(new Request2());
 			Assert.Equal(1, result);
 		}
 	}

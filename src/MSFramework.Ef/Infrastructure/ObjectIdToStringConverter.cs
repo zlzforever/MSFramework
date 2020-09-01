@@ -1,7 +1,7 @@
+using MicroserviceFramework.Shared;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
-using MSFramework.Shared;
 
-namespace MSFramework.Ef.Infrastructure
+namespace MicroserviceFramework.Ef.Infrastructure
 {
 	public class ObjectIdToStringConverter
 		: StringObjectIdConverter<ObjectId, string>

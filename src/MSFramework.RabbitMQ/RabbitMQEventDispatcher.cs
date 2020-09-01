@@ -2,19 +2,19 @@ using System;
 using System.Collections.Concurrent;
 using System.Threading.Tasks;
 using MessagePack;
-using MSFramework.Domain.Events;
+using MicroserviceFramework.Domain.Events;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
 
-namespace MSFramework.RabbitMQ
+namespace MicroserviceFramework.RabbitMQ
 {
-	public class RabbitMQEventDispatcher : EventDispatcher
+	public class RabbitMqEventDispatcher : EventDispatcher
 	{
 		private readonly IConnection _connection;
 		private readonly ConcurrentDictionary<string, IModel> _modelDict;
-		private readonly RabbitMQOptions _options;
+		private readonly RabbitMqOptions _options;
 
-		public RabbitMQEventDispatcher(RabbitMQOptions options, IEventHandlerTypeStore eventHandlerTypeStore,
+		public RabbitMqEventDispatcher(RabbitMqOptions options, IEventHandlerTypeStore eventHandlerTypeStore,
 			IHandlerFactory handlerFactory) : base(eventHandlerTypeStore, handlerFactory)
 
 		{

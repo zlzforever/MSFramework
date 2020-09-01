@@ -2,16 +2,16 @@ using System;
 using System.Collections.Generic;
 using System.Reflection;
 using System.Security.Claims;
+using MicroserviceFramework.AspNetCore.Extensions;
+using MicroserviceFramework.Audits;
+using MicroserviceFramework.Domain;
+using MicroserviceFramework.Extensions;
 using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using MSFramework.AspNetCore.Extensions;
-using MSFramework.Audits;
-using MSFramework.Domain;
-using MSFramework.Extensions;
 
-namespace MSFramework.AspNetCore.Filters
+namespace MicroserviceFramework.AspNetCore.Filters
 {
 	[AttributeUsage(AttributeTargets.Class | AttributeTargets.Method)]
 	public class Audit : ActionFilterAttribute
@@ -36,7 +36,7 @@ namespace MSFramework.AspNetCore.Filters
 			_auditService = scope.ServiceProvider.GetRequiredService<IAuditService>();
 			if (_auditService == null)
 			{
-				throw new MSFrameworkException("AuditService is not registered");
+				throw new MicroserviceFrameworkException("AuditService is not registered");
 			}
 
 			_auditUnitOfWorkManager = scope.ServiceProvider.GetService<IUnitOfWorkManager>();

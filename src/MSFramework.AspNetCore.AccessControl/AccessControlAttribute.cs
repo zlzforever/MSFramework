@@ -2,15 +2,15 @@
 using System.Net;
 using System.Reflection;
 using System.Threading.Tasks;
+using MicroserviceFramework.Application;
+using MicroserviceFramework.Shared;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Mvc.Controllers;
 using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using MSFramework.Application;
-using MSFramework.Shared;
 
-namespace MSFramework.AspNetCore.AccessControl
+namespace MicroserviceFramework.AspNetCore.AccessControl
 {
 	[AttributeUsage(AttributeTargets.Method)]
 	public class AccessControlAttribute : ActionFilterAttribute
@@ -90,7 +90,7 @@ namespace MSFramework.AspNetCore.AccessControl
 
 					if (string.IsNullOrWhiteSpace(applicationInfo.Name))
 					{
-						throw new MSFrameworkException("Application name is not config");
+						throw new MicroserviceFrameworkException("Application name is not config");
 					}
 
 					var tuple =
@@ -102,7 +102,7 @@ namespace MSFramework.AspNetCore.AccessControl
 						{
 							case HttpStatusCode.InternalServerError:
 							{
-								throw new MSFrameworkException("权限服务异常");
+								throw new MicroserviceFrameworkException("权限服务异常");
 							}
 							default:
 							{

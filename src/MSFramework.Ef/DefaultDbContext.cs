@@ -1,7 +1,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 
-namespace MSFramework.Ef
+namespace MicroserviceFramework.Ef
 {
 	/// <summary>
 	/// 默认EntityFramework数据上下文

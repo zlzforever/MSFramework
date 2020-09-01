@@ -1,6 +1,6 @@
 using System;
 
-namespace MSFramework.Ef
+namespace MicroserviceFramework.Ef
 {
 	public class EntityFrameworkOptions
 	{

@@ -1,7 +1,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 
-namespace MSFramework.Ef
+namespace MicroserviceFramework.Ef
 {
 	/// <summary>
 	/// 定义将实体配置类注册到上下文中

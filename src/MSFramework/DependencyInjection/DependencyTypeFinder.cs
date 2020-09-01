@@ -1,10 +1,10 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using MicroserviceFramework.Reflection;
 using Microsoft.Extensions.DependencyInjection;
-using MSFramework.Reflection;
 
-namespace MSFramework.DependencyInjection
+namespace MicroserviceFramework.DependencyInjection
 {
 	/// <summary>
 	/// <see cref="ServiceLifetime.Scoped"/>生命周期类型的服务映射查找器

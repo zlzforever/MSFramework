@@ -1,17 +1,17 @@
 ﻿using System;
+using MicroserviceFramework.Ef.Infrastructure;
+using MicroserviceFramework.Ef.Initializers;
+using MicroserviceFramework.Initializers;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Logging;
-using MSFramework.Ef.Infrastructure;
-using MSFramework.Ef.Initializers;
-using MSFramework.Initializers;
 
-namespace MSFramework.Ef
+namespace MicroserviceFramework.Ef
 {
 	public static class ServiceCollectionExtensions
 	{
-		public static MSFrameworkBuilder UseEntityFramework(this MSFrameworkBuilder builder,
+		public static MicroserviceFrameworkBuilder UseEntityFramework(this MicroserviceFrameworkBuilder builder,
 			Action<EntityFrameworkBuilder> configure)
 		{
 			var eBuilder = new EntityFrameworkBuilder(builder.Services);
@@ -22,6 +22,7 @@ namespace MSFramework.Ef
 
 		public static IServiceCollection UseEntityFramework(this IServiceCollection services)
 		{
+			services.AddMemoryCache();
 			services.TryAddSingleton(provider =>
 			{
 				var configuration = provider.GetRequiredService<IConfiguration>();

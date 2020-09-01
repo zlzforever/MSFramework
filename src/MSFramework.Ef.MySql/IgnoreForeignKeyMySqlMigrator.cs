@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore.Migrations.Operations;
 using Microsoft.EntityFrameworkCore.Storage;
 using Pomelo.EntityFrameworkCore.MySql.Migrations.Internal;
 
-namespace MSFramework.Ef.MySql
+namespace MicroserviceFramework.Ef.MySql
 {
 	public sealed class IgnoreForeignKeyMySqlMigrator : MySqlMigrator
 	{

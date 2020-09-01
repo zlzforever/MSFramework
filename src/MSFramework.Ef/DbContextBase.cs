@@ -3,18 +3,18 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using MicroserviceFramework.Application;
+using MicroserviceFramework.Audits;
+using MicroserviceFramework.Domain;
+using MicroserviceFramework.Domain.Events;
+using MicroserviceFramework.Ef.Extensions;
+using MicroserviceFramework.Ef.Infrastructure;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using MSFramework.Application;
-using MSFramework.Audits;
-using MSFramework.Domain;
-using MSFramework.Domain.Events;
-using MSFramework.Ef.Extensions;
-using MSFramework.Ef.Infrastructure;
 
-namespace MSFramework.Ef
+namespace MicroserviceFramework.Ef
 {
 	public abstract class DbContextBase : DbContext, IUnitOfWork
 	{

@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace MSFramework.Ef.Design
+namespace MicroserviceFramework.Ef.Design
 {
 	/// <summary>
 	/// 设计时数据上下文实例工厂基类，用于执行数据迁移

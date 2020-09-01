@@ -1,10 +1,10 @@
 using System.Linq;
 using System.Threading.Tasks;
+using MicroserviceFramework.Domain;
+using MicroserviceFramework.Shared;
 using Microsoft.EntityFrameworkCore;
-using MSFramework.Domain;
-using MSFramework.Shared;
 
-namespace MSFramework.Ef.Repositories
+namespace MicroserviceFramework.Ef.Repositories
 {
 	public abstract class EfRepository<TEntity> : EfRepository<TEntity, ObjectId>
 		, IRepository<TEntity>

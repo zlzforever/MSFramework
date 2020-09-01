@@ -1,8 +1,7 @@
-using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using MicroserviceFramework.Shared;
 using Microsoft.EntityFrameworkCore;
-using MSFramework.Shared;
 using Ordering.Domain.AggregateRoots;
 using Ordering.Infrastructure;
 

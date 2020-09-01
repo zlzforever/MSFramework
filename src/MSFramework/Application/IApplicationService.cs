@@ -1,6 +1,6 @@
-using MSFramework.DependencyInjection;
+using MicroserviceFramework.DependencyInjection;
 
-namespace MSFramework.Application
+namespace MicroserviceFramework.Application
 {
 	public interface IApplicationService : IScopeDependency
 	{

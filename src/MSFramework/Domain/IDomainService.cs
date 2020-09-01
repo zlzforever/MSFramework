@@ -1,6 +1,6 @@
-using MSFramework.DependencyInjection;
+using MicroserviceFramework.DependencyInjection;
 
-namespace MSFramework.Domain
+namespace MicroserviceFramework.Domain
 {
 	/// <summary>
 	/// This interface can be implemented by all domain services to identify them by convention.

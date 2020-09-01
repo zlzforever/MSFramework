@@ -1,4 +1,4 @@
-﻿using MSFramework.Application;
+﻿using MicroserviceFramework.Application;
 
 namespace MSFramework.AspNetCore.Test.Extensions
 {

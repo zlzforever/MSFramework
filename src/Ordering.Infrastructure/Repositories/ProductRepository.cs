@@ -1,9 +1,9 @@
 using System.Linq;
 using System.Threading.Tasks;
-using MSFramework.Ef;
-using MSFramework.Ef.Repositories;
-using MSFramework.Extensions;
-using MSFramework.Shared;
+using MicroserviceFramework.Ef;
+using MicroserviceFramework.Ef.Repositories;
+using MicroserviceFramework.Extensions;
+using MicroserviceFramework.Shared;
 using Ordering.Domain.AggregateRoots;
 using Ordering.Domain.Repositories;
 

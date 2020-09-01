@@ -1,6 +1,6 @@
-﻿using MSFramework.AspNetCore.Test.DataModel;
+﻿using MicroserviceFramework.Ef;
+using MSFramework.AspNetCore.Test.DataModel;
 using MSFramework.AspNetCore.Test.EfPostgreSqlTest.Infrastructure;
-using MSFramework.Ef;
 
 namespace MSFramework.AspNetCore.Test.EfPostgreSqlTest.EntityConfiguration
 {

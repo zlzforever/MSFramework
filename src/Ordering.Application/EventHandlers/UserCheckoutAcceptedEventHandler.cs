@@ -1,7 +1,7 @@
 using System.Threading.Tasks;
+using MicroserviceFramework.Application;
+using MicroserviceFramework.Domain.Events;
 using Microsoft.Extensions.Logging;
-using MSFramework.Application;
-using MSFramework.Domain.Events;
 using Ordering.Application.Events;
 
 namespace Ordering.Application.EventHandlers

@@ -4,7 +4,7 @@ using System.Diagnostics;
 using System.Linq;
 using JetBrains.Annotations;
 
-namespace MSFramework.Shared
+namespace MicroserviceFramework.Shared
 {
 	/// <summary>
 	/// 参数合法性检查类

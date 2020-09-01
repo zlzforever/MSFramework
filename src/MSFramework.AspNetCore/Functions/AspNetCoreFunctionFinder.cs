@@ -1,11 +1,11 @@
 using System;
 using System.Collections.Generic;
+using MicroserviceFramework.AspNetCore.Extensions;
+using MicroserviceFramework.Functions;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.Extensions.DependencyInjection;
-using MSFramework.AspNetCore.Extensions;
-using MSFramework.Functions;
 
-namespace MSFramework.AspNetCore.Functions
+namespace MicroserviceFramework.AspNetCore.Functions
 {
 	public class AspNetCoreFunctionFinder : IFunctionFinder
 	{
