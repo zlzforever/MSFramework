@@ -23,7 +23,7 @@ namespace MicroserviceFramework.RabbitMQ
 			}
 
 			builder.Services.AddSingleton(options);
-			builder.Services.AddScoped<IEventDispatcher, RabbitMqEventDispatcher>();
+			builder.Services.AddSingleton<IEventDispatcher, RabbitMqEventDispatcher>();
 			return builder;
 		}
 

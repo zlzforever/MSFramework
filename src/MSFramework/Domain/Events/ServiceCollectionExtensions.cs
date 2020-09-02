@@ -1,6 +1,7 @@
 using System;
 using System.Linq;
 using System.Reflection;
+using MicroserviceFramework.Extensions;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 
@@ -8,6 +9,8 @@ namespace MicroserviceFramework.Domain.Events
 {
 	public static class ServiceCollectionExtensions
 	{
+		private static readonly Type EventHandlerBaseType = typeof(IEventHandler<>);
+
 		public static IServiceCollection AddEventDispatcher(this IServiceCollection serviceCollection,
 			params Type[] types)
 		{
@@ -19,8 +22,7 @@ namespace MicroserviceFramework.Domain.Events
 		public static IServiceCollection AddEventDispatcher(this IServiceCollection serviceCollection,
 			params Assembly[] assemblies)
 		{
-			serviceCollection.TryAddScoped<IHandlerFactory, DependencyInjectionHandlerFactory>();
-			serviceCollection.TryAddScoped<IEventDispatcher, EventDispatcher>();
+			serviceCollection.TryAddSingleton<IEventDispatcher, EventDispatcher>();
 			serviceCollection.RegisterEventHandler(assemblies);
 			return serviceCollection;
 		}
@@ -30,17 +32,18 @@ namespace MicroserviceFramework.Domain.Events
 		{
 			var store = new EventHandlerTypeStore();
 			var types = assemblies.SelectMany(x => x.GetTypes());
-			var handlerInterfaceType = typeof(IEventHandler);
-			foreach (var handlerType in types)
+
+			foreach (var type in types)
 			{
-				if (handlerInterfaceType.IsAssignableFrom(handlerType))
+				var interfaces = type.GetInterfaces();
+				if (interfaces.Any(x => x.IsGenericType && x.GetGenericTypeDefinition() == EventHandlerBaseType))
 				{
-					var eventType = handlerType.GetInterface("IEventHandler`1")?.GenericTypeArguments
+					var eventType = type.GetInterface("IEventHandler`1")?.GenericTypeArguments
 						.SingleOrDefault();
 					if (eventType != null)
 					{
-						serviceCollection.TryAddScoped(handlerType);
-						store.Add(eventType, handlerType);
+						serviceCollection.TryAddScoped(type);
+						store.Add(eventType, type);
 					}
 				}
 			}

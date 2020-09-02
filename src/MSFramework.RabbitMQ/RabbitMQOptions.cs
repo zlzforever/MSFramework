@@ -11,5 +11,7 @@ namespace MicroserviceFramework.RabbitMQ
 		public string UserName { get; set; }
 
 		public string Password { get; set; }
+
+		public int RetryCount { get; set; } = 5;
 	}
 }

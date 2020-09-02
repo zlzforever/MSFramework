@@ -23,7 +23,10 @@ namespace MicroserviceFramework.AspNetCore
 			}
 
 			var httpContextAccessor = new HttpContextAccessor();
-			ServiceLocator.Provider = type => httpContextAccessor.HttpContext.RequestServices.GetService(type);
+			ServiceLocator.SetLocator(type =>
+			{
+				return httpContextAccessor.HttpContext.RequestServices.GetService(type);
+			});
 
 			builder.Services.TryAddSingleton<IHttpContextAccessor>(httpContextAccessor);
 			builder.Services.AddSingleton<IActionResultTypeMapper, ActionResultTypeMapper>();

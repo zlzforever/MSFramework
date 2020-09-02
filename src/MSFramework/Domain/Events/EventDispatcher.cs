@@ -1,17 +1,15 @@
 using System;
 using System.Threading.Tasks;
+using MicroserviceFramework.Shared;
 
 namespace MicroserviceFramework.Domain.Events
 {
 	public class EventDispatcher : IEventDispatcher
 	{
 		private readonly IEventHandlerTypeStore _eventHandlerTypeStore;
-		private readonly IHandlerFactory _handlerFactory;
 
-		public EventDispatcher(IEventHandlerTypeStore eventHandlerTypeStore,
-			IHandlerFactory handlerFactory)
+		public EventDispatcher(IEventHandlerTypeStore eventHandlerTypeStore)
 		{
-			_handlerFactory = handlerFactory;
 			_eventHandlerTypeStore = eventHandlerTypeStore ?? new EventHandlerTypeStore();
 		}
 
@@ -64,28 +62,20 @@ namespace MicroserviceFramework.Domain.Events
 			}
 
 			var eventType = @event.GetType();
-			var handlerTypes = _eventHandlerTypeStore.GetHandlerTypes(eventType);
-			foreach (var handlerType in handlerTypes)
+			var tuples = _eventHandlerTypeStore.GetHandlerTypes(eventType);
+			foreach (var tuple in tuples)
 			{
-				var methodInfo = handlerType.GetMethod("HandleAsync");
-				if (methodInfo != null)
+				var handler = ServiceLocator.Get(tuple.Key);
+				if (handler != null)
 				{
-					var handler = _handlerFactory.Create(handlerType);
-					if (handler != null)
+					if (tuple.Value.Invoke(handler, new object[] {@event}) is Task task)
 					{
-						if (methodInfo.Invoke(handler, new object[] {@event}) is Task task)
-						{
-							await task;
-						}
-						else
-						{
-							throw new ApplicationException($"Handle method is not async method");
-						}
+						await task;
 					}
-					else
-					{
-						throw new ApplicationException($"Create handler {handlerType} object failed");
-					}
+				}
+				else
+				{
+					throw new ApplicationException($"Create handler {tuple.Key} object failed");
 				}
 			}
 		}

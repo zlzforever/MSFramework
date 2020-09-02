@@ -13,6 +13,7 @@ using MicroserviceFramework.Shared;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Logging;
+
 // ReSharper disable InconsistentNaming
 
 namespace MicroserviceFramework
@@ -48,7 +49,8 @@ namespace MicroserviceFramework
 			return builder;
 		}
 
-		public static MicroserviceFrameworkBuilder UseEventDispatcher(this MicroserviceFrameworkBuilder builder, params Type[] eventTypes)
+		public static MicroserviceFrameworkBuilder UseEventDispatcher(this MicroserviceFrameworkBuilder builder,
+			params Type[] eventTypes)
 		{
 			var excludeAssembly = typeof(MicroserviceFrameworkBuilder).Assembly;
 			var assemblies = eventTypes.Select(x => x.Assembly).ToList();
@@ -68,7 +70,7 @@ namespace MicroserviceFramework
 			builder.Services.AddEventDispatcher(assemblies);
 			return builder;
 		}
-		
+
 		public static MicroserviceFrameworkBuilder UseCQRS(this MicroserviceFrameworkBuilder builder,
 			params Assembly[] assemblies)
 		{
@@ -81,7 +83,7 @@ namespace MicroserviceFramework
 		{
 			var builder = new MicroserviceFrameworkBuilder(services);
 			builderAction?.Invoke(builder);
-			
+
 			builder.Services.TryAddScoped<IUnitOfWorkManager, DefaultUnitOfWorkManager>();
 
 			// 如果你想换成消息队列，则重新注册一个对应的服务即可
@@ -115,6 +117,7 @@ namespace MicroserviceFramework
 
 		public static void UseMicroserviceFramework(this IServiceProvider applicationServices)
 		{
+			ServiceLocator.SetLocator(applicationServices.GetService);
 			InitializeAsync(applicationServices).GetAwaiter().GetResult();
 		}
 

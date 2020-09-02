@@ -14,9 +14,8 @@ namespace MicroserviceFramework.RabbitMQ
 		private readonly ConcurrentDictionary<string, IModel> _modelDict;
 		private readonly RabbitMqOptions _options;
 
-		public RabbitMqEventDispatcher(RabbitMqOptions options, IEventHandlerTypeStore eventHandlerTypeStore,
-			IHandlerFactory handlerFactory) : base(eventHandlerTypeStore, handlerFactory)
-
+		public RabbitMqEventDispatcher(RabbitMqOptions options, 
+			IEventHandlerTypeStore eventHandlerTypeStore) : base(eventHandlerTypeStore)
 		{
 			_options = options;
 			_modelDict = new ConcurrentDictionary<string, IModel>();
