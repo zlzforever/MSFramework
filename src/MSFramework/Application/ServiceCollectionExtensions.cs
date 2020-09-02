@@ -101,7 +101,7 @@ namespace MicroserviceFramework.Application
 
 			serviceCollection.TryAddSingleton(cache);
 			serviceCollection.TryAddScoped<ICommandProcessor, DefaultCommandProcessor>();
-
+			serviceCollection.TryAddScoped<IQueryProcessor, DefaultQueryProcessor>();
 			return serviceCollection;
 		}
 	}

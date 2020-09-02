@@ -17,7 +17,7 @@ namespace MicroserviceFramework.Application.CQRS.Query
 			_cache = _serviceProvider.GetRequiredService<HandlerTypeCache>();
 		}
 
-		public async Task ProcessAsync(IQuery request, CancellationToken cancellationToken = default)
+		public async Task QueryAsync(IQuery request, CancellationToken cancellationToken = default)
 		{
 			if (request == null)
 			{
@@ -36,7 +36,7 @@ namespace MicroserviceFramework.Application.CQRS.Query
 			}
 		}
 
-		public async Task<TResult> ProcessAsync<TResult>(IQuery<TResult> request,
+		public async Task<TResult> QueryAsync<TResult>(IQuery<TResult> request,
 			CancellationToken cancellationToken = default)
 		{
 			if (request == null)
