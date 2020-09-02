@@ -79,5 +79,9 @@ namespace MicroserviceFramework.Domain.Events
 				}
 			}
 		}
+
+		public virtual void Dispose()
+		{
+		}
 	}
 }

@@ -1,7 +1,6 @@
-﻿using System.Text;
-using MicroserviceFramework.Shared;
-using Microsoft.AspNetCore.Hosting;
+﻿using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Hosting;
+using MySql.Data.MySqlClient;
 using Serilog;
 using Serilog.Events;
 
@@ -11,6 +10,8 @@ namespace Ordering.API
 	{
 		public static void Main(string[] args)
 		{
+			var conn=new MySqlConnection();
+			 
 			Log.Logger = new LoggerConfiguration()
 				.MinimumLevel.Debug()
 				.MinimumLevel.Override("Microsoft.Hosting.Lifetime", LogEventLevel.Information)

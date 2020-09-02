@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using MicroserviceFramework.Application;
 using MicroserviceFramework.Application.CQRS.Command;
 using MicroserviceFramework.Shared;
 using Ordering.Domain.AggregateRoots;

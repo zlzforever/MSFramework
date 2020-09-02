@@ -1,4 +1,3 @@
-using MicroserviceFramework.Application;
 using MicroserviceFramework.Application.CQRS.Command;
 using MicroserviceFramework.Shared;
 

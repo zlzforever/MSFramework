@@ -1,29 +1,102 @@
 using System;
-using System.Collections.Concurrent;
+using System.Net.Sockets;
 using System.Threading.Tasks;
 using MessagePack;
 using MicroserviceFramework.Domain.Events;
+using Microsoft.Extensions.Logging;
+using Polly;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
+using RabbitMQ.Client.Exceptions;
 
 namespace MicroserviceFramework.RabbitMQ
 {
 	public class RabbitMqEventDispatcher : EventDispatcher
 	{
-		private readonly IConnection _connection;
-		private readonly ConcurrentDictionary<string, IModel> _modelDict;
 		private readonly RabbitMqOptions _options;
+		private readonly PersistentConnection _connection;
+		private IModel _consumerChannel;
+		private readonly ILogger _logger;
 
-		public RabbitMqEventDispatcher(RabbitMqOptions options, 
-			IEventHandlerTypeStore eventHandlerTypeStore) : base(eventHandlerTypeStore)
+		public RabbitMqEventDispatcher(RabbitMqOptions options,
+			IEventHandlerTypeStore eventHandlerTypeStore, ILoggerFactory loggerFactory) : base(eventHandlerTypeStore)
 		{
+			_logger = loggerFactory.CreateLogger<RabbitMqEventDispatcher>();
 			_options = options;
-			_modelDict = new ConcurrentDictionary<string, IModel>();
+			_connection = new PersistentConnection(CreateConnectionFactory(),
+				loggerFactory.CreateLogger<PersistentConnection>(), _options.RetryCount);
+			_consumerChannel = CreateConsumerChannel();
+		}
 
+		public override bool Register(Type eventType, Type handlerType)
+		{
+			var registered = base.Register(eventType, handlerType);
+			if (registered)
+			{
+				var eventName = GenerateEventName(eventType);
+				BindQueue(eventName);
+				return true;
+			}
+
+			return false;
+		}
+
+		public override async Task DispatchAsync(IEvent @event)
+		{
+			if (@event == null)
+			{
+				throw new ArgumentNullException(nameof(@event));
+			}
+
+			if (@event is IIntegrationEvent)
+			{
+				if (!_connection.IsConnected)
+				{
+					_connection.TryConnect();
+				}
+
+				var policy = Policy.Handle<BrokerUnreachableException>()
+					.Or<SocketException>()
+					.WaitAndRetry(_options.RetryCount, retryAttempt => TimeSpan.FromSeconds(Math.Pow(2, retryAttempt)),
+						(ex, time) =>
+						{
+							_logger.LogWarning(ex,
+								"Could not publish event: {EventId} after {Timeout}s ({ExceptionMessage})",
+								@event.EventId,
+								$"{time.TotalSeconds:n1}", ex.Message);
+						});
+				var eventType = @event.GetType();
+				var eventName = GenerateEventName(eventType);
+				var channel = _connection.CreateModel();
+
+				_logger.LogTrace("Declaring RabbitMQ exchange to publish event: {EventId}", @event.EventId);
+
+				channel.ExchangeDeclare(exchange: _options.Exchange, type: "direct");
+
+				var bytes = MessagePackSerializer.Typeless.Serialize(@event);
+
+				policy.Execute(() =>
+				{
+					var properties = channel.CreateBasicProperties();
+					properties.DeliveryMode = 2; // persistent
+
+					_logger.LogTrace("Publishing event to RabbitMQ: {EventId}", @event.EventId);
+
+					channel.BasicPublish(_options.Exchange, eventName, true, properties, bytes);
+					channel.Dispose();
+				});
+			}
+			else
+			{
+				await base.DispatchAsync(@event);
+			}
+		}
+
+		private IConnectionFactory CreateConnectionFactory()
+		{
 			var connectionFactory = new ConnectionFactory
 			{
 				HostName = _options.HostName,
-
 				DispatchConsumersAsync = true
 			};
 			if (_options.Port > 0)
@@ -41,86 +114,82 @@ namespace MicroserviceFramework.RabbitMQ
 				connectionFactory.Password = _options.Password;
 			}
 
-			_connection = connectionFactory.CreateConnection();
+			return connectionFactory;
 		}
 
-		public override bool Register(Type eventType, Type handlerType)
+		private IModel CreateConsumerChannel()
 		{
-			var registered = base.Register(eventType, handlerType);
-			if (registered)
+			if (!_connection.IsConnected)
 			{
-				var topic = GenerateTopic(eventType);
-
-				return RegisterRabbitMq(topic);
+				_connection.TryConnect();
 			}
 
-			return false;
+			_logger.LogTrace("Creating RabbitMQ consumer channel");
+
+			var channel = _connection.CreateModel();
+			channel.ExchangeDeclare(exchange: _options.Exchange, "direct");
+			channel.QueueDeclare(queue: _options.Queue, true, false, false, null);
+			channel.CallbackException += (sender, ea) =>
+			{
+				_logger.LogWarning(ea.Exception, "Recreating RabbitMQ consumer channel");
+
+				_consumerChannel.Dispose();
+				_consumerChannel = CreateConsumerChannel();
+				StartConsume();
+			};
+
+			return channel;
 		}
 
-		public override async Task DispatchAsync(IEvent @event)
+		private void StartConsume()
 		{
-			if (@event == null)
-			{
-				throw new ArgumentNullException(nameof(@event));
-			}
+			_logger.LogTrace("Starting RabbitMQ basic consume");
 
-			if (@event is IIntegrationEvent)
+			if (_consumerChannel != null)
 			{
-				var eventType = @event.GetType();
-				var topic = GenerateTopic(eventType);
-				if (_modelDict.TryGetValue(topic, out var channel))
+				var consumer = new AsyncEventingBasicConsumer(_consumerChannel);
+
+				consumer.Received += async (sender, args) =>
 				{
-					var bytes = MessagePackSerializer.Typeless.Serialize(@event);
-					channel.BasicPublish(_options.Exchange, topic, null, bytes);
-				}
-				else
-				{
-					throw new ApplicationException("Get channel failed");
-				}
+					var bytes = args.Body.ToArray();
+					var @event = MessagePackSerializer.Typeless.Deserialize(bytes) as IEvent;
+					await base.DispatchAsync(@event);
+
+					// Even on exception we take the message off the queue.
+					// in a REAL WORLD app this should be handled with a Dead Letter Exchange (DLX). 
+					// For more information see: https://www.rabbitmq.com/dlx.html
+					_consumerChannel.BasicAck(args.DeliveryTag, multiple: false);
+				};
+
+				_consumerChannel.BasicConsume(_options.Queue, false, consumer);
 			}
 			else
 			{
-				await base.DispatchAsync(@event);
+				_logger.LogError("StartBasicConsume can't call on _consumerChannel == null");
 			}
 		}
 
-		private string GenerateTopic(Type type)
+		private string GenerateEventName(Type type)
 		{
 			return type.FullName;
 		}
 
-		private bool RegisterRabbitMq(string topic)
+		private void BindQueue(string eventName)
 		{
-			lock (_modelDict)
+			if (!_connection.IsConnected)
 			{
-				if (!_modelDict.ContainsKey(topic))
-				{
-					var channel = _connection.CreateModel();
-					channel.QueueDeclare(topic, durable: true, exclusive: false, autoDelete: false,
-						arguments: null);
-					channel.ExchangeDeclare(exchange: _options.Exchange, type: "direct", durable: true);
-
-					var queue = channel.QueueDeclare().QueueName;
-					channel.QueueBind(queue: queue, _options.Exchange, routingKey: topic);
-
-					var consumer = new AsyncEventingBasicConsumer(channel);
-
-					consumer.Received += async (model, ea) =>
-					{
-						var bytes = ea.Body.ToArray();
-						var obj = MessagePackSerializer.Typeless.Deserialize(bytes) as IEvent;
-						await base.DispatchAsync(obj);
-						channel.BasicAck(deliveryTag: ea.DeliveryTag, multiple: false);
-					};
-
-					//7. 启动消费者
-					channel.BasicConsume(queue: queue, autoAck: false, consumer: consumer);
-
-					return _modelDict.TryAdd(topic, channel);
-				}
-
-				return true;
+				_connection.TryConnect();
 			}
+
+			using var channel = _connection.CreateModel();
+			channel.QueueBind(_options.Queue, _options.Exchange, eventName);
+		}
+
+		public override void Dispose()
+		{
+			base.Dispose();
+
+			_connection.Dispose();
 		}
 	}
 }

@@ -1,7 +1,6 @@
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using MicroserviceFramework.Application;
 using MicroserviceFramework.Application.CQRS.Command;
 using MicroserviceFramework.Shared;
 using Ordering.Domain.AggregateRoots;

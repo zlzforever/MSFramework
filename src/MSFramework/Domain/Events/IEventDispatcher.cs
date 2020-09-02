@@ -3,7 +3,7 @@ using System.Threading.Tasks;
 
 namespace MicroserviceFramework.Domain.Events
 {
-	public interface IEventDispatcher
+	public interface IEventDispatcher : IDisposable
 	{
 		bool Register<TEvent, TEventHandler>()
 			where TEvent : Event
@@ -13,7 +13,7 @@ namespace MicroserviceFramework.Domain.Events
 			where TEvent : Event;
 
 		bool Register(Type eventType, Type handlerType);
-		
+
 		Task DispatchAsync(IEvent @event);
 	}
 }

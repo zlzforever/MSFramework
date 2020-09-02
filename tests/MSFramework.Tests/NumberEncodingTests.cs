@@ -1,6 +1,5 @@
 using System;
 using MicroserviceFramework.Shared;
-using MicroserviceFramework.Utilities;
 using Xunit;
 
 namespace MSFramework.Tests

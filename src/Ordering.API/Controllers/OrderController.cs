@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using MicroserviceFramework.Application;
 using MicroserviceFramework.Application.CQRS.Command;
 using MicroserviceFramework.AspNetCore;
 using MicroserviceFramework.Shared;

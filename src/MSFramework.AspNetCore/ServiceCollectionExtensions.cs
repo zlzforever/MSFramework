@@ -1,4 +1,3 @@
-using MicroserviceFramework.Application;
 using MicroserviceFramework.AspNetCore.Functions;
 using MicroserviceFramework.AspNetCore.Infrastructure;
 using MicroserviceFramework.Functions;
