@@ -4,17 +4,17 @@
         <AssemblyName>MSFramework.Ef</AssemblyName>
         <RootNamespace>MicroserviceFramework.Ef</RootNamespace>
     </PropertyGroup>
-    <Import Project="../../package.props"/>
+    <Import Project="../../package.props" />
     <ItemGroup>
-        <ProjectReference Include="..\MSFramework\MSFramework.csproj"/>
+        <ProjectReference Include="..\MSFramework\MSFramework.csproj" />
     </ItemGroup>
 
     <ItemGroup>
-        <PackageReference Include="Microsoft.Extensions.Configuration.Binder" Version="3.1.7"/>
-        <PackageReference Include="Microsoft.EntityFrameworkCore" Version="3.1.7"/>
-        <PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" Version="3.1.7"/>
-        <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="3.1.7"/>
-        <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="3.1.7"/>
-        <PackageReference Include="Microsoft.EntityFrameworkCore.Proxies" Version="3.1.7"/>
+        <PackageReference Include="Microsoft.Extensions.Configuration.Binder" Version="3.1.8" />
+        <PackageReference Include="Microsoft.EntityFrameworkCore" Version="3.1.8" />
+        <PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" Version="3.1.8" />
+        <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="3.1.8" />
+        <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="3.1.8" />
+        <PackageReference Include="Microsoft.EntityFrameworkCore.Proxies" Version="3.1.8" />
     </ItemGroup>
 </Project>

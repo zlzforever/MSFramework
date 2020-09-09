@@ -5,12 +5,12 @@
         <AssemblyName>MSFramework.Migrator.MySql</AssemblyName>
         <RootNamespace>MicroserviceFramework.Migrator.MySql</RootNamespace>
     </PropertyGroup>
-    <Import Project="../../package.props"/>
+    <Import Project="../../package.props" />
     <ItemGroup>
-        <ProjectReference Include="..\MSFramework.Migrator\MSFramework.Migrator.csproj"/>
+        <ProjectReference Include="..\MSFramework.Migrator\MSFramework.Migrator.csproj" />
     </ItemGroup>
 
     <ItemGroup>
-        <PackageReference Include="MySqlConnector" Version="0.69.8"/>
+        <PackageReference Include="MySqlConnector" Version="0.69.9" />
     </ItemGroup>
 </Project>

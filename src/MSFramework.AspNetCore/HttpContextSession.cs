@@ -23,18 +23,18 @@ namespace MicroserviceFramework.AspNetCore
 					return null;
 				}
 
-				var userId = HttpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-				if (string.IsNullOrWhiteSpace(userId))
+				var value = HttpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+				if (string.IsNullOrWhiteSpace(value))
 				{
-					userId = HttpContext.User.FindFirst("sid")?.Value;
+					value = HttpContext.User.FindFirst("sid")?.Value;
 				}
 
-				if (string.IsNullOrWhiteSpace(userId))
+				if (string.IsNullOrWhiteSpace(value))
 				{
-					userId = HttpContext.User.FindFirst("sub")?.Value;
+					value = HttpContext.User.FindFirst("sub")?.Value;
 				}
 
-				return userId;
+				return value;
 			}
 		}
 
@@ -47,22 +47,57 @@ namespace MicroserviceFramework.AspNetCore
 					return null;
 				}
 
-				var userName = HttpContext.User.FindFirst(ClaimTypes.Name)?.Value;
-				if (string.IsNullOrWhiteSpace(userName))
+				var value = HttpContext.User.FindFirst(ClaimTypes.Name)?.Value;
+				if (string.IsNullOrWhiteSpace(value))
 				{
-					userName = HttpContext.User.FindFirst("name")?.Value;
+					value = HttpContext.User.FindFirst("name")?.Value;
 				}
 
-				return userName;
+				return value;
+			}
+		}
+
+		public string Email
+		{
+			get
+			{
+				if (HttpContext?.User == null)
+				{
+					return null;
+				}
+
+				var value = HttpContext.User.FindFirst(ClaimTypes.Email)?.Value;
+				if (string.IsNullOrWhiteSpace(value))
+				{
+					value = HttpContext.User.FindFirst("email")?.Value;
+				}
+
+				return value;
+			}
+		}
+
+		public string PhoneNumber
+		{
+			get
+			{
+				if (HttpContext?.User == null)
+				{
+					return null;
+				}
+
+				var value = HttpContext.User.FindFirst(ClaimTypes.MobilePhone)?.Value;
+				if (string.IsNullOrWhiteSpace(value))
+				{
+					value = HttpContext.User.FindFirst("phone_number")?.Value;
+				}
+
+				return value;
 			}
 		}
 
 		public string[] Roles
 		{
-			get
-			{
-				return HttpContext?.User?.FindAll(ClaimTypes.Role).Select(x => x.Value).ToArray();
-			}
+			get { return HttpContext?.User?.FindAll(ClaimTypes.Role).Select(x => x.Value).ToArray(); }
 		}
 
 		public HttpContext HttpContext => _accessor.HttpContext;
