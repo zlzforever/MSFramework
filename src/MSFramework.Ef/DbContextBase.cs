@@ -220,7 +220,7 @@ namespace MicroserviceFramework.Ef
 				if (events != null && events.Any())
 				{
 					domainEvents.AddRange(events);
-					domainEvents.Clear();
+					aggregateRoot.Entity.ClearDomainEvents();
 				}
 			}
 

@@ -35,16 +35,26 @@ namespace MicroserviceFramework.Domain.Events
 			foreach (var type in types)
 			{
 				var interfaces = type.GetInterfaces();
-				if (interfaces.Any(x => x.IsGenericType && x.GetGenericTypeDefinition() == EventHandlerBaseType))
+				var handlerTypes = interfaces
+					.Where(@interface => @interface.IsGenericType)
+					.Where(@interface => EventHandlerBaseType == @interface.GetGenericTypeDefinition())
+					.ToList();
+
+				if (handlerTypes.Count == 0)
 				{
-					var eventType = type.GetInterface("IEventHandler`1")?.GenericTypeArguments
-						.SingleOrDefault();
-					if (eventType != null)
-					{
-						serviceCollection.TryAddScoped(type);
-						store.Add(eventType, type);
-					}
+					continue;
 				}
+
+				if (handlerTypes.Count > 1)
+				{
+					throw new MicroserviceFrameworkException($"{type.FullName} should impl one handler");
+				}
+
+				var handlerType = handlerTypes.First();
+				var eventType = handlerType.GenericTypeArguments.First();
+
+				serviceCollection.TryAddScoped(type);
+				store.Add(eventType.Name, type);
 			}
 
 			serviceCollection.TryAddSingleton<IEventHandlerTypeStore>(store);

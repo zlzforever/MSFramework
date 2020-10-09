@@ -46,7 +46,7 @@ namespace MicroserviceFramework.DependencyInjection
 					.Where(x => !excludeTypes.Contains(x)).ToArray();
 				if (interfaceTypes.Length == 0)
 				{
-					services.TryAdd(new ServiceDescriptor(implementationType, implementationType, lifetime));
+					services.Add(new ServiceDescriptor(implementationType, implementationType, lifetime));
 					continue;
 				}
 
@@ -55,13 +55,13 @@ namespace MicroserviceFramework.DependencyInjection
 					var interfaceType = interfaceTypes[i];
 					if (lifetime == ServiceLifetime.Transient)
 					{
-						services.TryAddEnumerable(new ServiceDescriptor(interfaceType, implementationType, lifetime));
+						services.Add(new ServiceDescriptor(interfaceType, implementationType, lifetime));
 						continue;
 					}
 
 					if (i == 0)
 					{
-						services.TryAdd(new ServiceDescriptor(interfaceType, implementationType, lifetime));
+						services.Add(new ServiceDescriptor(interfaceType, implementationType, lifetime));
 					}
 					else
 					{

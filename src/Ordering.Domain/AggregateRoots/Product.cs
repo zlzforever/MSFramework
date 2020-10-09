@@ -1,14 +1,21 @@
 using MicroserviceFramework.Domain;
+using MicroserviceFramework.Domain.Events;
 using MicroserviceFramework.Shared;
 
 namespace Ordering.Domain.AggregateRoots
 {
+	public class ProjectCreateEvent : Event
+	{
+		
+	}
 	public class Product : AggregateRoot
 	{
 		public Product(string name, int price) : base(ObjectId.NewId())
 		{
 			Name = name;
 			Price = price;
+			
+			AddDomainEvent(new ProjectCreateEvent());
 		}
 
 		public string Name { get; private set; }

@@ -7,15 +7,15 @@ namespace MicroserviceFramework.Domain.Events
 {
 	public class EventHandlerTypeStore : IEventHandlerTypeStore
 	{
-		private readonly ConcurrentDictionary<Type, ConcurrentDictionary<Type, MethodInfo>> _eventHandlerTypesDict;
+		private readonly ConcurrentDictionary<string, ConcurrentDictionary<Type, MethodInfo>> _eventHandlerTypesDict;
 		private readonly Dictionary<Type, MethodInfo> _empty = new Dictionary<Type, MethodInfo>();
 
 		public EventHandlerTypeStore()
 		{
-			_eventHandlerTypesDict = new ConcurrentDictionary<Type, ConcurrentDictionary<Type, MethodInfo>>();
+			_eventHandlerTypesDict = new ConcurrentDictionary<string, ConcurrentDictionary<Type, MethodInfo>>();
 		}
 
-		public bool Add(Type eventType, Type handlerType)
+		public bool Add(string eventType, Type handlerType)
 		{
 			var methodInfo = handlerType.GetMethod("HandleAsync");
 			if (methodInfo == null)
@@ -33,7 +33,7 @@ namespace MicroserviceFramework.Domain.Events
 			       _eventHandlerTypesDict[eventType].TryAdd(handlerType, methodInfo);
 		}
 
-		public IReadOnlyDictionary<Type, MethodInfo> GetHandlerTypes(Type eventType)
+		public IReadOnlyDictionary<Type, MethodInfo> GetHandlerTypes(string eventType)
 		{
 			if (_eventHandlerTypesDict.TryGetValue(eventType, out var handlerTypes))
 			{

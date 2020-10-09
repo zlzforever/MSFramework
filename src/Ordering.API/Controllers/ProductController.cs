@@ -142,7 +142,8 @@ namespace Ordering.API.Controllers
 		[HttpPost]
 		public Product CreateAsync(CreateViewObject vo)
 		{
-			return _productRepository.Insert(new Product(vo.Name, new Random().Next(100, 10000)));
+			var prod = new Product(vo.Name, new Random().Next(100, 10000));
+			return _productRepository.Insert(prod);
 		}
 	}
 }

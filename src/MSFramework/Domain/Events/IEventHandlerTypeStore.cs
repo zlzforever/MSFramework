@@ -6,7 +6,7 @@ namespace MicroserviceFramework.Domain.Events
 {
 	public interface IEventHandlerTypeStore
 	{
-		bool Add(Type eventType, Type handlerType);
-		IReadOnlyDictionary<Type, MethodInfo> GetHandlerTypes(Type eventType);
+		bool Add(string eventType, Type handlerType);
+		IReadOnlyDictionary<Type, MethodInfo> GetHandlerTypes(string eventType);
 	}
 }

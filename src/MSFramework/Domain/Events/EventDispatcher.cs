@@ -45,7 +45,7 @@ namespace MicroserviceFramework.Domain.Events
 
 			if (handlerType.CanHandle(eventType))
 			{
-				_eventHandlerTypeStore.Add(eventType, handlerType);
+				_eventHandlerTypeStore.Add(eventType.Name, handlerType);
 				return true;
 			}
 			else
@@ -62,7 +62,7 @@ namespace MicroserviceFramework.Domain.Events
 			}
 
 			var eventType = @event.GetType();
-			var tuples = _eventHandlerTypeStore.GetHandlerTypes(eventType);
+			var tuples = _eventHandlerTypeStore.GetHandlerTypes(eventType.Name);
 			foreach (var tuple in tuples)
 			{
 				var handler = ServiceLocator.Get(tuple.Key);
