@@ -21,13 +21,11 @@ namespace MicroserviceFramework.AspNetCore
 				builder.Services.TryAddSingleton<IFunctionFinder, AspNetCoreFunctionFinder>();
 			}
 
-			var httpContextAccessor = new HttpContextAccessor();
-			ServiceLocator.SetLocator(type =>
-			{
-				return httpContextAccessor.HttpContext.RequestServices.GetService(type);
-			});
-
-			builder.Services.TryAddSingleton<IHttpContextAccessor>(httpContextAccessor);
+			// var httpContextAccessor = new HttpContextAccessor();
+			// ServiceLocator.SetLocator(type => httpContextAccessor.HttpContext.RequestServices.GetService(type));
+			//
+			// builder.Services.AddSingleton<IHttpContextAccessor>(httpContextAccessor);
+			
 			builder.Services.AddSingleton<IActionResultTypeMapper, ActionResultTypeMapper>();
 			builder.Services.TryAddScoped<ISession, HttpContextSession>();
 			return builder;

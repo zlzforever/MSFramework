@@ -19,7 +19,8 @@ namespace MicroserviceFramework.RabbitMQ
 		private readonly ILogger _logger;
 
 		public RabbitMqEventDispatcher(RabbitMqOptions options,
-			IEventHandlerTypeStore eventHandlerTypeStore, ILoggerFactory loggerFactory) : base(eventHandlerTypeStore)
+			IEventHandlerTypeStore eventHandlerTypeStore, IHandlerFactory handlerFactory, ILoggerFactory loggerFactory)
+			: base(eventHandlerTypeStore, handlerFactory)
 		{
 			_logger = loggerFactory.CreateLogger<RabbitMqEventDispatcher>();
 			_options = options;

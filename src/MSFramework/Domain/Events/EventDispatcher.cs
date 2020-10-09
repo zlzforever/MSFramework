@@ -7,9 +7,10 @@ namespace MicroserviceFramework.Domain.Events
 	public class EventDispatcher : IEventDispatcher
 	{
 		private readonly IEventHandlerTypeStore _eventHandlerTypeStore;
-
-		public EventDispatcher(IEventHandlerTypeStore eventHandlerTypeStore)
+		private readonly IHandlerFactory _handlerFactory;
+		public EventDispatcher(IEventHandlerTypeStore eventHandlerTypeStore, IHandlerFactory handlerFactory)
 		{
+			_handlerFactory = handlerFactory;
 			_eventHandlerTypeStore = eventHandlerTypeStore ?? new EventHandlerTypeStore();
 		}
 
@@ -65,7 +66,7 @@ namespace MicroserviceFramework.Domain.Events
 			var tuples = _eventHandlerTypeStore.GetHandlerTypes(eventType.Name);
 			foreach (var tuple in tuples)
 			{
-				var handler = ServiceLocator.Get(tuple.Key);
+				var handler = _handlerFactory.Create(tuple.Key);
 				if (handler != null)
 				{
 					if (tuple.Value.Invoke(handler, new object[] {@event}) is Task task)

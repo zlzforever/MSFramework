@@ -117,7 +117,7 @@ namespace MicroserviceFramework
 
 		public static void UseMicroserviceFramework(this IServiceProvider applicationServices)
 		{
-			ServiceLocator.SetLocator(applicationServices.GetService);
+			// ServiceLocator.SetLocator(applicationServices.GetService);
 			InitializeAsync(applicationServices).GetAwaiter().GetResult();
 		}
 
