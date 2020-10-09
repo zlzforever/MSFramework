@@ -21,7 +21,7 @@ namespace MicroserviceFramework.Domain.Events
 		public static IServiceCollection AddEventDispatcher(this IServiceCollection serviceCollection,
 			params Assembly[] assemblies)
 		{
-			serviceCollection.TryAddSingleton<IEventDispatcher, EventDispatcher>();
+			serviceCollection.TryAddScoped<IEventDispatcher, EventDispatcher>();
 			serviceCollection.TryAddScoped<IHandlerFactory, DependencyInjectionHandlerFactory>();
 			serviceCollection.RegisterEventHandler(assemblies);
 			return serviceCollection;

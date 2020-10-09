@@ -114,7 +114,12 @@ namespace MicroserviceFramework.Ef
 				var eventDispatcher = _serviceProvider.GetService<IEventDispatcher>();
 				if (eventDispatcher != null)
 				{
-					HandleDomainEvents();
+					var domainEvents = GetDomainEvents();
+
+					foreach (var @event in domainEvents)
+					{
+						eventDispatcher.DispatchAsync(@event).GetAwaiter().GetResult();
+					}
 				}
 
 				var effectCount = base.SaveChanges();
@@ -165,7 +170,16 @@ namespace MicroserviceFramework.Ef
 
 				ApplyConcepts();
 
-				HandleDomainEvents();
+				var eventDispatcher = _serviceProvider.GetService<IEventDispatcher>();
+				if (eventDispatcher != null)
+				{
+					var domainEvents = GetDomainEvents();
+
+					foreach (var @event in domainEvents)
+					{
+						await eventDispatcher.DispatchAsync(@event);
+					}
+				}
 
 				var effectedCount = await base.SaveChangesAsync(cancellationToken);
 				if (Database.CurrentTransaction != null)
@@ -183,22 +197,6 @@ namespace MicroserviceFramework.Ef
 				}
 
 				throw;
-			}
-		}
-
-		private void HandleDomainEvents()
-		{
-			var eventDispatcher = _serviceProvider.GetService<IEventDispatcher>();
-			if (eventDispatcher == null)
-			{
-				return;
-			}
-
-			var domainEvents = GetDomainEvents();
-
-			foreach (var @event in domainEvents)
-			{
-				eventDispatcher.DispatchAsync(@event);
 			}
 		}
 
