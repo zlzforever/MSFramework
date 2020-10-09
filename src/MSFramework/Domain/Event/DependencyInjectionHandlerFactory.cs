@@ -1,6 +1,6 @@
 using System;
 
-namespace MicroserviceFramework.Domain.Events
+namespace MicroserviceFramework.Domain.Event
 {
 	public class DependencyInjectionHandlerFactory : IHandlerFactory
 	{

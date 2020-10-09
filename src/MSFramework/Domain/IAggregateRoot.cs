@@ -1,5 +1,5 @@
 ﻿using System.Collections.Generic;
-using MicroserviceFramework.Domain.Events;
+using MicroserviceFramework.Domain.Event;
 
 namespace MicroserviceFramework.Domain
 {
@@ -18,11 +18,11 @@ namespace MicroserviceFramework.Domain
 	/// </summary>
 	public interface IAggregateRoot : IEntity
 	{
-		IReadOnlyCollection<IEvent> GetDomainEvents();
+		IReadOnlyCollection<DomainEvent> GetDomainEvents();
 
-		void AddDomainEvent(IEvent @event);
+		void AddDomainEvent(DomainEvent @event);
 
-		void RemoveDomainEvent(IEvent @event);
+		void RemoveDomainEvent(DomainEvent @event);
 
 		void ClearDomainEvents();
 	}

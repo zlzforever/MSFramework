@@ -1,8 +1,8 @@
-using MicroserviceFramework.Domain.Events;
+using MicroserviceFramework.Domain.Event;
 
 namespace Ordering.Domain.AggregateRoots.Events
 {
-	public class OrderStartedDomainEvent : Event
+	public class OrderStartedDomainEvent : DomainEvent
 	{
 		public string UserId { get; }
 

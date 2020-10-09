@@ -1,19 +1,19 @@
 using System;
 using System.Threading.Tasks;
 
-namespace MicroserviceFramework.Domain.Events
+namespace MicroserviceFramework.Domain.Event
 {
 	public interface IEventDispatcher : IDisposable
 	{
 		bool Register<TEvent, TEventHandler>()
-			where TEvent : Event
+			where TEvent : DomainEvent
 			where TEventHandler : IEventHandler<TEvent>;
 
 		bool Register<TEvent>(Type handlerType)
-			where TEvent : Event;
+			where TEvent : DomainEvent;
 
 		bool Register(Type eventType, Type handlerType);
 
-		Task DispatchAsync(IEvent @event);
+		Task DispatchAsync(DomainEvent @event);
 	}
 }

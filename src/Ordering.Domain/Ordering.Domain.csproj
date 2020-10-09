@@ -9,4 +9,8 @@
       <ProjectReference Include="..\MSFramework\MSFramework.csproj" />
     </ItemGroup>
 
+    <ItemGroup>
+      <Compile Remove="AggregateRoots\TrackedDictionary.cs" />
+    </ItemGroup>
+
 </Project>

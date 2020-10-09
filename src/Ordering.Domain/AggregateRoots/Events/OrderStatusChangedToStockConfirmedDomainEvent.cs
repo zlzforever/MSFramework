@@ -1,10 +1,10 @@
-using MicroserviceFramework.Domain.Events;
+using MicroserviceFramework.Domain.Event;
 using MicroserviceFramework.Shared;
 
 namespace Ordering.Domain.AggregateRoots.Events
 {
 	public class OrderStatusChangedToStockConfirmedDomainEvent
-		: Event
+		: DomainEvent
 	{
 		public ObjectId OrderId { get; }
 

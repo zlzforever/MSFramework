@@ -1,12 +1,13 @@
 using System.Threading.Tasks;
 using MicroserviceFramework.Application;
-using MicroserviceFramework.Domain.Events;
+using MicroserviceFramework.Domain.Event;
+using MicroserviceFramework.EventBus;
 using Microsoft.Extensions.Logging;
 using Ordering.Application.Events;
 
 namespace Ordering.Application.EventHandlers
 {
-	public class UserCheckoutAcceptedEventHandler : IEventHandler<UserCheckoutAcceptedEvent>
+	public class UserCheckoutAcceptedEventHandler : IIntegrationEventHandler<UserCheckoutAcceptedEvent>
 	{
 		private readonly ILogger _logger;
 		private readonly IEventDispatcher _mediator;

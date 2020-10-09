@@ -4,7 +4,7 @@ using System.Reflection;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 
-namespace MicroserviceFramework.Domain.Events
+namespace MicroserviceFramework.Domain.Event
 {
 	public static class ServiceCollectionExtensions
 	{
@@ -46,16 +46,17 @@ namespace MicroserviceFramework.Domain.Events
 					continue;
 				}
 
+				// 约束：一个事件处理器只能处理一个事件
 				if (handlerTypes.Count > 1)
 				{
 					throw new MicroserviceFrameworkException($"{type.FullName} should impl one handler");
 				}
 
-				var handlerType = handlerTypes.First();
-				var eventType = handlerType.GenericTypeArguments.First();
+				var handlerType = handlerTypes[0];
+				var eventType = handlerType.GenericTypeArguments[0];
 
 				serviceCollection.TryAddScoped(type);
-				store.Add(eventType.Name, type);
+				store.Add(eventType, type);
 			}
 
 			serviceCollection.TryAddSingleton<IEventHandlerTypeStore>(store);

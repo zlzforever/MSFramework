@@ -1,10 +1,10 @@
 using MicroserviceFramework.Domain;
-using MicroserviceFramework.Domain.Events;
+using MicroserviceFramework.Domain.Event;
 using MicroserviceFramework.Shared;
 
 namespace Ordering.Domain.AggregateRoots
 {
-	public class ProjectCreateEvent : Event
+	public class ProjectCreateEvent : DomainEvent
 	{
 		
 	}

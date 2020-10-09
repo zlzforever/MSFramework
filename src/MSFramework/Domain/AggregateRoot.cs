@@ -1,6 +1,6 @@
 using System;
 using System.Collections.Generic;
-using MicroserviceFramework.Domain.Events;
+using MicroserviceFramework.Domain.Event;
 using MicroserviceFramework.Shared;
 
 namespace MicroserviceFramework.Domain
@@ -18,17 +18,17 @@ namespace MicroserviceFramework.Domain
 		EntityBase<TKey>,
 		IAggregateRoot<TKey>
 	{
-		private List<IEvent> _domainEvents;
+		private List<DomainEvent> _domainEvents;
 
-		public IReadOnlyCollection<IEvent> GetDomainEvents() => _domainEvents?.AsReadOnly();
+		public IReadOnlyCollection<DomainEvent> GetDomainEvents() => _domainEvents?.AsReadOnly();
 
-		public void AddDomainEvent(IEvent @event)
+		public void AddDomainEvent(DomainEvent @event)
 		{
-			_domainEvents ??= new List<IEvent>();
+			_domainEvents ??= new List<DomainEvent>();
 			_domainEvents.Add(@event);
 		}
 
-		public void RemoveDomainEvent(IEvent @event)
+		public void RemoveDomainEvent(DomainEvent @event)
 		{
 			_domainEvents?.Remove(@event);
 		}

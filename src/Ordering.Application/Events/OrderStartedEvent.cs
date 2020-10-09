@@ -1,12 +1,12 @@
 using System;
-using MicroserviceFramework.Domain.Events;
+using MicroserviceFramework.EventBus;
 
 namespace Ordering.Application.Events
 {
 	/// <summary>
 	/// 发送到外部的领域事件
 	/// </summary>
-	public class OrderStartedEvent :  Event
+	public class OrderStartedEvent :  IntegrationEvent
 	{
 		public string UserId { get; }
 		

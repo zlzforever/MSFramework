@@ -75,7 +75,7 @@ namespace Ordering.API
 			{
 				builder.UseAutoMapper();
 				builder.UseDependencyInjectionScanner();
-				builder.UseEventDispatcher();
+				builder.UseEventBus();
 				builder.UseCQRS();
 				builder.UseBaseX();
 				//builder.UseAccessControl(Configuration);

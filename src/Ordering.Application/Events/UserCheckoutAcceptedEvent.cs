@@ -1,10 +1,10 @@
 using System;
 using System.Collections.Generic;
-using MicroserviceFramework.Domain.Events;
+using MicroserviceFramework.EventBus;
 
 namespace Ordering.Application.Events
 {
-	public class UserCheckoutAcceptedEvent : Event
+	public class UserCheckoutAcceptedEvent : IntegrationEvent
 	{
 		public class OrderItemDTO
 		{

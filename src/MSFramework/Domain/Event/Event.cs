@@ -1,9 +1,9 @@
 using System;
 using MicroserviceFramework.Shared;
 
-namespace MicroserviceFramework.Domain.Events
+namespace MicroserviceFramework.Domain.Event
 {
-	public abstract class Event : IEvent
+	public abstract class DomainEvent
 	{
 		/// <summary>
 		/// 事件源标识
@@ -20,11 +20,11 @@ namespace MicroserviceFramework.Domain.Events
 		/// </summary>
 		public object EventSource { get; private set; }
 
-		protected Event() : this(ObjectId.NewId(), DateTimeOffset.Now, null)
+		protected DomainEvent() : this(ObjectId.NewId(), DateTimeOffset.Now, null)
 		{
 		}
 
-		protected Event(ObjectId id, DateTimeOffset eventTime, object eventSource)
+		protected DomainEvent(ObjectId id, DateTimeOffset eventTime, object eventSource)
 		{
 			EventId = id;
 			EventTime = eventTime;

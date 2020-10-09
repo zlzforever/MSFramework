@@ -6,9 +6,11 @@ using System.Threading.Tasks;
 using MicroserviceFramework.Application;
 using MicroserviceFramework.Audits;
 using MicroserviceFramework.Domain;
-using MicroserviceFramework.Domain.Events;
+using MicroserviceFramework.Domain.Event;
+using MicroserviceFramework.EventBus;
 using MicroserviceFramework.Initializers;
 using MicroserviceFramework.Reflection;
+using MicroserviceFramework.Serialization;
 using MicroserviceFramework.Shared;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
@@ -20,13 +22,6 @@ namespace MicroserviceFramework
 {
 	public static class ServiceCollectionExtensions
 	{
-		public static MicroserviceFrameworkBuilder UseEventDispatcher(this MicroserviceFrameworkBuilder builder)
-		{
-			var assemblies = AssemblyFinder.GetAllList();
-			builder.UseEventDispatcher(assemblies.ToArray());
-			return builder;
-		}
-
 		public static MicroserviceFrameworkBuilder UseCQRS(this MicroserviceFrameworkBuilder builder)
 		{
 			var assemblies = AssemblyFinder.GetAllList();
@@ -49,32 +44,16 @@ namespace MicroserviceFramework
 			return builder;
 		}
 
-		public static MicroserviceFrameworkBuilder UseEventDispatcher(this MicroserviceFrameworkBuilder builder,
-			params Type[] eventTypes)
-		{
-			var excludeAssembly = typeof(MicroserviceFrameworkBuilder).Assembly;
-			var assemblies = eventTypes.Select(x => x.Assembly).ToList();
-
-			if (!assemblies.Contains(excludeAssembly))
-			{
-				assemblies.Add(excludeAssembly);
-			}
-
-			builder.UseEventDispatcher(assemblies.ToArray());
-			return builder;
-		}
-
-		public static MicroserviceFrameworkBuilder UseEventDispatcher(this MicroserviceFrameworkBuilder builder,
-			params Assembly[] assemblies)
-		{
-			builder.Services.AddEventDispatcher(assemblies);
-			return builder;
-		}
-
 		public static MicroserviceFrameworkBuilder UseCQRS(this MicroserviceFrameworkBuilder builder,
 			params Assembly[] assemblies)
 		{
 			builder.Services.AddCQRS(assemblies);
+			return builder;
+		}
+		
+		public static MicroserviceFrameworkBuilder UseEventBus(this MicroserviceFrameworkBuilder builder)
+		{
+			builder.Services.AddEventBus();
 			return builder;
 		}
 
@@ -88,6 +67,11 @@ namespace MicroserviceFramework
 
 			// 如果你想换成消息队列，则重新注册一个对应的服务即可
 			builder.Services.TryAddScoped<IAuditService, DefaultAuditService>();
+
+			var assemblies = AssemblyFinder.GetAllList();
+			services.AddEventDispatcher(assemblies.ToArray());
+
+			services.TryAddSingleton<ISerializer, NewtonsoftSerializer>();
 
 			builder.UseInitializer();
 		}

@@ -1,16 +1,39 @@
 using System;
 using System.Threading.Tasks;
-using MicroserviceFramework.Domain.Events;
+using MicroserviceFramework.DependencyInjection;
+using MicroserviceFramework.Domain.Event;
+using MicroserviceFramework.EventBus;
 using Ordering.Domain.AggregateRoots;
 
 namespace Ordering.Application.EventHandlers
 {
+	public class ProjectCreatedIntegrationEvent : IntegrationEvent
+	{
+	}
+
+	public class ProjectCreatedIntegrationEventHandler : IIntegrationEventHandler<ProjectCreatedIntegrationEvent>,
+		IScopeDependency
+	{
+		public Task HandleAsync(ProjectCreatedIntegrationEvent @event)
+		{
+			Console.WriteLine("Execute ProjectCreatedIntegrationEvent");
+			return Task.CompletedTask;
+		}
+	}
+
 	public class ProjectCreateEventHandler : IEventHandler<ProjectCreateEvent>
 	{
-		public Task HandleAsync(ProjectCreateEvent @event)
+		private readonly IEventBus _eventBus;
+
+		public ProjectCreateEventHandler(IEventBus eventBus)
 		{
-			Console.WriteLine("hi");
-			return Task.CompletedTask;
+			_eventBus = eventBus;
+		}
+
+		public async Task HandleAsync(ProjectCreateEvent @event)
+		{
+			Console.WriteLine("Execute ProjectCreateEvent");
+			await _eventBus.PublishAsync(new ProjectCreatedIntegrationEvent());
 		}
 	}
 }

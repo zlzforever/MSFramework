@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using MicroserviceFramework.Application;
 using MicroserviceFramework.Audits;
 using MicroserviceFramework.Domain;
-using MicroserviceFramework.Domain.Events;
+using MicroserviceFramework.Domain.Event;
 using MicroserviceFramework.Ef.Extensions;
 using MicroserviceFramework.Ef.Infrastructure;
 using Microsoft.EntityFrameworkCore;
@@ -200,7 +200,7 @@ namespace MicroserviceFramework.Ef
 			}
 		}
 
-		private IEnumerable<IEvent> GetDomainEvents()
+		private IEnumerable<DomainEvent> GetDomainEvents()
 		{
 			// Dispatch Domain Events collection. 
 			// Choices:
@@ -209,7 +209,7 @@ namespace MicroserviceFramework.Ef
 			// B) Right AFTER committing data (EF SaveChanges) into the DB will make multiple transactions. 
 			// You will need to handle eventual consistency and compensatory actions in case of failures in any of the Handlers. 
 
-			var domainEvents = new List<IEvent>();
+			var domainEvents = new List<DomainEvent>();
 
 			foreach (var aggregateRoot in ChangeTracker
 				.Entries<IAggregateRoot>())

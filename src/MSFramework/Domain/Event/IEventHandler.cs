@@ -1,9 +1,9 @@
 using System.Threading.Tasks;
 
-namespace MicroserviceFramework.Domain.Events
+namespace MicroserviceFramework.Domain.Event
 {
 	public interface IEventHandler<in TEvent>
-		where TEvent : class, IEvent
+		where TEvent : DomainEvent
 	{
 		Task HandleAsync(TEvent @event);
 	}

@@ -1,11 +1,11 @@
 using System.Collections.Generic;
-using MicroserviceFramework.Domain.Events;
+using MicroserviceFramework.Domain.Event;
 using MicroserviceFramework.Shared;
 
 namespace Ordering.Domain.AggregateRoots.Events
 {
 	public class OrderStatusChangedToPaidDomainEvent
-		: Event
+		: DomainEvent
 	{
 		public ObjectId OrderId { get; }
 		public IEnumerable<OrderItem> OrderItems { get; }

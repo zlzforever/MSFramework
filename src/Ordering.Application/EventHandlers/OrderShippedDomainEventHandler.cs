@@ -1,5 +1,5 @@
 using System.Threading.Tasks;
-using MicroserviceFramework.Domain.Events;
+using MicroserviceFramework.Domain.Event;
 using MicroserviceFramework.Ef;
 using Ordering.Domain.AggregateRoots.Events;
 
