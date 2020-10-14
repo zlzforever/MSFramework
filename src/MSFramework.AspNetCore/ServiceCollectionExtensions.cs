@@ -1,9 +1,7 @@
 using MicroserviceFramework.AspNetCore.Functions;
 using MicroserviceFramework.AspNetCore.Infrastructure;
 using MicroserviceFramework.Functions;
-using MicroserviceFramework.Shared;
 using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;

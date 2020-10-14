@@ -23,18 +23,7 @@ namespace MicroserviceFramework.Ef
 		public DbContextBase GetDbContext<TEntity>() where TEntity : class, IAggregateRoot
 		{
 			var dbContextType = _entityConfigurationTypeFinder.GetDbContextTypeForEntity(typeof(TEntity));
-			return GetDbContext(dbContextType);
-		}
-
-		/// <summary>
-		/// 通过数据上下文类型获取数据上下文对象
-		/// </summary>
-		/// <param name="dbContextType">数据上下文类型</param>
-		/// <returns>数据上下文</returns>
-		private DbContextBase GetDbContext(Type dbContextType)
-		{
-			var dbContext = (DbContextBase) _serviceProvider.GetRequiredService(dbContextType);
-			return dbContext;
+			return (DbContextBase) _serviceProvider.GetRequiredService(dbContextType);
 		}
 	}
 }

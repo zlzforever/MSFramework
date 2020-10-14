@@ -1,7 +1,6 @@
 ﻿using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Hosting;
 using MySql.Data.MySqlClient;
-using MySqlConnector;
 using Serilog;
 using Serilog.Events;
 

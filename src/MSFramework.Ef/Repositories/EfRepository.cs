@@ -18,13 +18,13 @@ namespace MicroserviceFramework.Ef.Repositories
 	public abstract class EfRepository<TEntity, TKey> : IRepository<TEntity, TKey>
 		where TEntity : class, IAggregateRoot<TKey>
 	{
-		public IQueryable<TEntity> CurrentSet { get; private set; }
+		public IQueryable<TEntity> AggregateRootSet { get; private set; }
 
 		protected EfRepository(DbContextFactory dbContextFactory)
 		{
 			DbContext = dbContextFactory.GetDbContext<TEntity>();
 			var isDeletionAuditedEntity = typeof(IDeletion).IsAssignableFrom(typeof(TEntity));
-			CurrentSet = isDeletionAuditedEntity
+			AggregateRootSet = isDeletionAuditedEntity
 				? DbContext.Set<TEntity>().Where(x => !((IDeletion) x).Deleted)
 				: DbContext.Set<TEntity>();
 		}
@@ -33,12 +33,14 @@ namespace MicroserviceFramework.Ef.Repositories
 
 		public virtual TEntity Get(TKey id)
 		{
-			return CurrentSet.FirstOrDefault(x => x.Id.Equals(id));
+			return AggregateRootSet
+				.FirstOrDefault(x => x.Id.Equals(id));
 		}
 
 		public virtual async Task<TEntity> GetAsync(TKey id)
 		{
-			return await CurrentSet.FirstOrDefaultAsync(x => x.Id.Equals(id));
+			return await AggregateRootSet
+				.FirstOrDefaultAsync(x => x.Id.Equals(id));
 		}
 
 		public virtual TEntity Insert(TEntity entity)
@@ -60,49 +62,33 @@ namespace MicroserviceFramework.Ef.Repositories
 
 		public virtual Task<TEntity> UpdateAsync(TEntity entity)
 		{
-			var entry = DbContext.Entry(entity);
-			entry.State = EntityState.Modified;
-			return Task.FromResult(entry.Entity);
+			return Task.FromResult(Update(entity));
 		}
 
-		public virtual TEntity Delete(TEntity entity)
+		public virtual void Delete(TEntity entity)
 		{
 			DbContext.Set<TEntity>().Remove(entity);
-			return entity;
 		}
 
-		public virtual Task<TEntity> DeleteAsync(TEntity entity)
+		public virtual Task DeleteAsync(TEntity entity)
 		{
-			DbContext.Set<TEntity>().Remove(entity);
-			return Task.FromResult(entity);
+			Delete(entity);
+			return Task.CompletedTask;
 		}
 
-		public virtual TEntity Delete(TKey id)
+		public virtual void Delete(TKey id)
 		{
 			var entity = Get(id);
 			if (entity != null)
 			{
 				DbContext.Set<TEntity>().Remove(entity);
-				return entity;
-			}
-			else
-			{
-				return null;
 			}
 		}
 
-		public virtual async Task<TEntity> DeleteAsync(TKey id)
+		public virtual Task DeleteAsync(TKey id)
 		{
-			var entity = await GetAsync(id);
-			if (entity != null)
-			{
-				DbContext.Set<TEntity>().Remove(entity);
-				return entity;
-			}
-			else
-			{
-				return null;
-			}
+			Delete(id);
+			return Task.CompletedTask;
 		}
 	}
 }

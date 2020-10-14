@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Reflection;
 using System.Security.Claims;
+using System.Threading.Tasks;
 using MicroserviceFramework.AspNetCore.Extensions;
 using MicroserviceFramework.Audits;
 using MicroserviceFramework.Domain;
@@ -13,35 +14,29 @@ using Microsoft.Extensions.Logging;
 
 namespace MicroserviceFramework.AspNetCore.Filters
 {
+	/// <summary>
+	/// todo: 审计是否应该和请求相同一个 scope
+	/// </summary>
 	[AttributeUsage(AttributeTargets.Class | AttributeTargets.Method)]
 	public class Audit : ActionFilterAttribute
 	{
-		private AuditOperation _auditedOperation;
-		private ILogger _logger;
-		private IAuditService _auditService;
-		private IUnitOfWorkManager _auditUnitOfWorkManager;
-
 		public Audit()
 		{
 			Order = FilterOrders.Audit;
 		}
 
-		public override void OnActionExecuting(ActionExecutingContext context)
+		public override async Task OnActionExecutionAsync(ActionExecutingContext context, ActionExecutionDelegate next)
 		{
-			var scope = context.HttpContext.RequestServices.CreateScope();
+			var logger = context.HttpContext.RequestServices.GetRequiredService<ILogger<Audit>>();
+			logger.LogDebug("Executing audit filter");
 
-			_logger = scope.ServiceProvider.GetRequiredService<ILogger<Audit>>();
-			_logger.LogDebug("Executing audit filter");
-
-			_auditService = scope.ServiceProvider.GetRequiredService<IAuditService>();
-			if (_auditService == null)
+			var auditService = context.HttpContext.RequestServices.GetRequiredService<IAuditService>();
+			if (auditService == null)
 			{
 				throw new MicroserviceFrameworkException("AuditService is not registered");
 			}
 
-			_auditUnitOfWorkManager = scope.ServiceProvider.GetService<IUnitOfWorkManager>();
-
-			var configuration = scope.ServiceProvider.GetRequiredService<IConfiguration>();
+			var configuration = context.HttpContext.RequestServices.GetRequiredService<IConfiguration>();
 			var applicationName = configuration["ApplicationName"];
 			applicationName = string.IsNullOrWhiteSpace(applicationName)
 				? Assembly.GetEntryAssembly()?.FullName
@@ -49,38 +44,35 @@ namespace MicroserviceFramework.AspNetCore.Filters
 			var path = context.ActionDescriptor.GetActionPath();
 			var ua = context.HttpContext.Request.Headers["User-Agent"].ToString();
 			var ip = context.GetRemoteIpAddress();
-			_auditedOperation = new AuditOperation(applicationName, path, ip, ua);
+			var auditedOperation = new AuditOperation(applicationName, path, ip, ua);
 			if (context.HttpContext.User?.Identity != null && context.HttpContext.User.Identity.IsAuthenticated &&
 			    context.HttpContext.User.Identity is ClaimsIdentity identity)
 			{
-				_auditedOperation.SetCreation(identity.GetUserId(), identity.GetUserName());
+				auditedOperation.SetCreation(identity.GetUserId(), identity.GetUserName());
 			}
 			else
 			{
-				_auditedOperation.SetCreation("Anonymous", "Anonymous");
+				auditedOperation.SetCreation("Anonymous", "Anonymous");
 			}
-		}
 
-		public override void OnActionExecuted(ActionExecutedContext context)
-		{
-			var currentUnitOfWorkManager = context.HttpContext.RequestServices.GetService<IUnitOfWorkManager>();
-			if (currentUnitOfWorkManager != null)
+			await base.OnActionExecutionAsync(context, next);
+
+			var uowManager = context.HttpContext.RequestServices.GetService<UnitOfWorkManager>();
+			if (uowManager != null)
 			{
 				var entities = new List<AuditEntity>();
-				foreach (var unitOfWork in currentUnitOfWorkManager.GetUnitOfWorks())
+				foreach (var unitOfWork in uowManager.GetUnitOfWorks())
 				{
 					entities.AddRange(unitOfWork.GetAuditEntities());
 				}
 
-				_auditedOperation.AddEntities(entities);
+				auditedOperation.AddEntities(entities);
 			}
 
-			_auditedOperation.End();
+			auditedOperation.End();
+			await auditService.SaveAsync(auditedOperation);
 
-			_auditService.Save(_auditedOperation);
-			_auditUnitOfWorkManager.Commit();
-
-			_logger.LogDebug("Executed audit filter");
+			logger.LogDebug("Executed audit filter");
 		}
 	}
 }

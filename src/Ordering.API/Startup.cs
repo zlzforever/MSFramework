@@ -35,14 +35,13 @@ namespace Ordering.API
 		public void ConfigureServices(IServiceCollection services)
 		{
 			Configuration.Print(x => Log.Logger.Information(x));
-
-
+			
 			services.AddControllers(x =>
 				{
-					x.Filters.UseUnitOfWork();
-					x.Filters.UseFunctionFilter();
-					x.Filters.UseAudit();
-					x.Filters.UseGlobalExceptionFilter();
+					x.Filters.AddUnitOfWork();
+					x.Filters.AddFunctionFilter();
+					x.Filters.AddAudit();
+					x.Filters.AddGlobalException();
 					x.ModelBinderProviders.Insert(0, new ObjectIdModelBinderProvider());
 				})
 				.ConfigureInvalidModelStateResponse()

@@ -1,3 +1,4 @@
+using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 
 namespace MicroserviceFramework.Audits
@@ -14,7 +15,7 @@ namespace MicroserviceFramework.Audits
 			_repository = repository;
 		}
 
-		public void Save(AuditOperation auditOperation)
+		public async Task SaveAsync(AuditOperation auditOperation)
 		{
 			if (_repository == null)
 			{
@@ -22,7 +23,7 @@ namespace MicroserviceFramework.Audits
 				return;
 			}
 
-			_repository.Insert(auditOperation);
+			await _repository.InsertAsync(auditOperation);
 		}
 	}
 }

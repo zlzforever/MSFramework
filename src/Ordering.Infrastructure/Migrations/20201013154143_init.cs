@@ -76,7 +76,8 @@ namespace Ordering.Infrastructure.Migrations
                 {
                     id = table.Column<string>(nullable: false),
                     name = table.Column<string>(maxLength: 256, nullable: true),
-                    price = table.Column<int>(nullable: false)
+                    price = table.Column<int>(nullable: false),
+                    concurrency_stamp = table.Column<string>(nullable: true)
                 },
                 constraints: table =>
                 {

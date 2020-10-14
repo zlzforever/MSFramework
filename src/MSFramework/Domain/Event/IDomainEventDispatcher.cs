@@ -3,11 +3,11 @@ using System.Threading.Tasks;
 
 namespace MicroserviceFramework.Domain.Event
 {
-	public interface IEventDispatcher : IDisposable
+	public interface IDomainEventDispatcher : IDisposable
 	{
 		bool Register<TEvent, TEventHandler>()
 			where TEvent : DomainEvent
-			where TEventHandler : IEventHandler<TEvent>;
+			where TEventHandler : IDomainEventHandler<TEvent>;
 
 		bool Register<TEvent>(Type handlerType)
 			where TEvent : DomainEvent;

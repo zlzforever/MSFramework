@@ -17,8 +17,8 @@ namespace MicroserviceFramework.EventBus
 			_eventHandlerTypesDict = new ConcurrentDictionary<string, HashSet<SubscriptionInfo>>();
 		}
 
-		public void Add<TEvent, TEventHandler>() where TEvent : IntegrationEvent
-			where TEventHandler : IIntegrationEventHandler<TEvent>
+		public void Add<TEvent, TEventHandler>() where TEvent : Event
+			where TEventHandler : IEventHandler<TEvent>
 		{
 			Add(typeof(TEvent), typeof(TEventHandler));
 		}
@@ -71,7 +71,7 @@ namespace MicroserviceFramework.EventBus
 			return type.Name;
 		}
 
-		public void Remove<T, TH>() where T : IntegrationEvent where TH : IIntegrationEventHandler<T>
+		public void Remove<T, TH>() where T : Event where TH : IEventHandler<T>
 		{
 			var eventName = GetEventKey<T>();
 			if (_eventHandlerTypesDict.TryGetValue(eventName, out var handlerTypes))

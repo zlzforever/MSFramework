@@ -5,7 +5,7 @@ using Ordering.Domain.AggregateRoots.Events;
 
 namespace Ordering.Application.EventHandlers
 {
-	public class OrderShippedDomainEventHandler : IEventHandler<OrderShippedDomainEvent>
+	public class OrderShippedDomainEventHandler : IDomainEventHandler<OrderShippedDomainEvent>
 	{
 		private readonly DbContextFactory _dbContextFactory;
 

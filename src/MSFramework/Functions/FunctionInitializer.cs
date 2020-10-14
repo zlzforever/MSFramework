@@ -78,7 +78,7 @@ namespace MicroserviceFramework.Functions
 				}
 			}
 
-			await serviceProvider.GetRequiredService<IUnitOfWorkManager>().CommitAsync();
+			await serviceProvider.GetRequiredService<UnitOfWorkManager>().CommitAsync();
 		}
 	}
 }

@@ -5,15 +5,15 @@ namespace MicroserviceFramework.EventBus
 {
 	public interface IEventBus
 	{
-		Task PublishAsync(IntegrationEvent @event);
+		Task PublishAsync(Event @event);
 
 		Task SubscribeAsync<T, TH>()
-			where T : IntegrationEvent
-			where TH : IIntegrationEventHandler<T>;
+			where T : Event
+			where TH : IEventHandler<T>;
 
 		Task SubscribeAsync(Type eventType, Type handlerType);
 		void Unsubscribe<T, TH>()
-			where TH : IIntegrationEventHandler<T>
-			where T : IntegrationEvent;
+			where TH : IEventHandler<T>
+			where T : Event;
 	}
 }

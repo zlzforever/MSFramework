@@ -107,7 +107,7 @@ namespace MicroserviceFramework.Ef.Infrastructure
 			if (!_entityMapDbContextDict.ContainsKey(entityType))
 			{
 				throw new MicroserviceFrameworkException(
-					"未发现任何数据上下文实体映射配置，请通过对各个实体继承基类“EntityTypeConfigurationBase<TEntity, TKey>”以使实体加载到上下文中");
+					"未发现任何数据上下文实体映射配置， 请通过对各个实体继承基类“EntityTypeConfigurationBase<TEntity, TKey>”以使实体加载到上下文中");
 			}
 
 			return _entityMapDbContextDict[entityType];

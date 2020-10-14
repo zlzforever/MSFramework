@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading;
 using System.Threading.Tasks;
 using MicroserviceFramework.Application;
 using MicroserviceFramework.Audits;
@@ -18,19 +17,20 @@ namespace MicroserviceFramework.Ef
 {
 	public abstract class DbContextBase : DbContext, IUnitOfWork
 	{
-		private ILogger _logger;
+		private readonly ILogger _logger;
 		private readonly IServiceProvider _serviceProvider;
+		private readonly UnitOfWorkManager _unitOfWorkManager;
 
 		/// <summary>
 		/// 初始化一个<see cref="DbContextBase"/>类型的新实例
 		/// </summary>
-		protected DbContextBase(DbContextOptions options, IServiceProvider serviceProvider)
+		protected DbContextBase(DbContextOptions options,
+			UnitOfWorkManager unitOfWorkManager, IServiceProvider serviceProvider)
 			: base(options)
 		{
 			_serviceProvider = serviceProvider;
-
-			var unitOfWorkManager = _serviceProvider.GetService<IUnitOfWorkManager>();
-			unitOfWorkManager?.Register(this);
+			_logger = serviceProvider.GetService<ILoggerFactory>().CreateLogger(GetType());
+			_unitOfWorkManager = unitOfWorkManager;
 		}
 
 		protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
@@ -49,6 +49,8 @@ namespace MicroserviceFramework.Ef
 			{
 				optionsBuilder.UseLazyLoadingProxies();
 			}
+
+			_unitOfWorkManager.Register(this);
 		}
 
 		/// <summary>
@@ -57,8 +59,6 @@ namespace MicroserviceFramework.Ef
 		/// <param name="modelBuilder">上下文数据模型构建器</param>
 		protected override void OnModelCreating(ModelBuilder modelBuilder)
 		{
-			_logger = _serviceProvider.GetService<ILoggerFactory>().CreateLogger(GetType());
-
 			//通过实体配置信息将实体注册到当前上下文
 			var contextType = GetType();
 			var registers = _serviceProvider.GetService<IEntityConfigurationTypeFinder>()
@@ -78,153 +78,6 @@ namespace MicroserviceFramework.Ef
 			}
 
 			_logger.LogInformation($"上下文 “{contextType}” 注册了 {registers.Length} 个实体类");
-		}
-
-		/// <summary>
-		///     将在此上下文中所做的所有更改保存到数据库中，同时自动开启事务或使用现有同连接事务
-		/// </summary>
-		/// <remarks>
-		///     此方法将自动调用 <see cref="M:Microsoft.EntityFrameworkCore.ChangeTracking.ChangeTracker.DetectChanges" /> 
-		///     若要在保存到基础数据库之前发现对实体实例的任何更改，请执行以下操作。这可以通过以下类型禁用
-		///     <see cref="P:Microsoft.EntityFrameworkCore.ChangeTracking.ChangeTracker.AutoDetectChangesEnabled" />.
-		/// </remarks>
-		/// <returns>
-		///     写入数据库的状态项的数目。
-		/// </returns>
-		/// <exception cref="T:Microsoft.EntityFrameworkCore.DbUpdateException">
-		///     保存到数据库时遇到错误。
-		/// </exception>
-		/// <exception cref="T:Microsoft.EntityFrameworkCore.DbUpdateConcurrencyException">
-		///     保存到数据库时会遇到并发冲突。
-		///     当在保存期间影响到意外数量的行时，就会发生并发冲突。
-		///     这通常是因为数据库中的数据在加载到内存后已经被修改。
-		/// </exception>
-		public override int SaveChanges()
-		{
-			try
-			{
-				var changed = ChangeTracker.Entries().Any();
-				if (!changed)
-				{
-					return 0;
-				}
-
-				ApplyConcepts();
-
-				var eventDispatcher = _serviceProvider.GetService<IEventDispatcher>();
-				if (eventDispatcher != null)
-				{
-					var domainEvents = GetDomainEvents();
-
-					foreach (var @event in domainEvents)
-					{
-						eventDispatcher.DispatchAsync(@event).GetAwaiter().GetResult();
-					}
-				}
-
-				var effectCount = base.SaveChanges();
-				Database.CurrentTransaction?.Commit();
-				return effectCount;
-			}
-			catch
-			{
-				Database.CurrentTransaction?.Rollback();
-				throw;
-			}
-		}
-
-		/// <summary>
-		///     异步地将此上下文中的所有更改保存到数据库中，同时自动开启事务或使用现有同连接事务
-		/// </summary>
-		/// <remarks>
-		///     <para>
-		///         此方法将自动调用 <see cref="M:Microsoft.EntityFrameworkCore.ChangeTracking.ChangeTracker.DetectChanges" /> 
-		///         若要在保存到基础数据库之前发现对实体实例的任何更改，请执行以下操作。这可以通过以下类型禁用
-		///         <see cref="P:Microsoft.EntityFrameworkCore.ChangeTracking.ChangeTracker.AutoDetectChangesEnabled" />.
-		///     </para>
-		///     <para>
-		///         不支持同一上下文实例上的多个活动操作。请使用“等待”确保在此上下文上调用其他方法之前任何异步操作都已完成。
-		///     </para>
-		/// </remarks>
-		/// <param name="cancellationToken">A <see cref="T:System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
-		/// <returns>
-		///     表示异步保存操作的任务。任务结果包含写入数据库的状态条目数。
-		/// </returns>
-		/// <exception cref="T:Microsoft.EntityFrameworkCore.DbUpdateException">
-		///     保存到数据库时遇到错误。
-		/// </exception>
-		/// <exception cref="T:Microsoft.EntityFrameworkCore.DbUpdateConcurrencyException">
-		///     保存到数据库时会遇到并发冲突。
-		///     当在保存期间影响到意外数量的行时，就会发生并发冲突。
-		///     这通常是因为数据库中的数据在加载到内存后已经被修改。
-		/// </exception>
-		public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = new CancellationToken())
-		{
-			try
-			{
-				var changed = ChangeTracker.Entries().Any();
-				if (!changed)
-				{
-					return 0;
-				}
-
-				ApplyConcepts();
-
-				var eventDispatcher = _serviceProvider.GetService<IEventDispatcher>();
-				if (eventDispatcher != null)
-				{
-					var domainEvents = GetDomainEvents();
-
-					foreach (var @event in domainEvents)
-					{
-						await eventDispatcher.DispatchAsync(@event);
-					}
-				}
-
-				var effectedCount = await base.SaveChangesAsync(cancellationToken);
-				if (Database.CurrentTransaction != null)
-				{
-					await Database.CurrentTransaction.CommitAsync(cancellationToken);
-				}
-
-				return effectedCount;
-			}
-			catch
-			{
-				if (Database.CurrentTransaction != null)
-				{
-					await Database.CurrentTransaction.RollbackAsync(cancellationToken);
-				}
-
-				throw;
-			}
-		}
-
-		private IEnumerable<DomainEvent> GetDomainEvents()
-		{
-			// Dispatch Domain Events collection. 
-			// Choices:
-			// A) Right BEFORE committing data (EF SaveChanges) into the DB will make a single transaction including  
-			// side effects from the domain event handlers which are using the same DbContext with "InstancePerLifetimeScope" or "scoped" lifetime
-			// B) Right AFTER committing data (EF SaveChanges) into the DB will make multiple transactions. 
-			// You will need to handle eventual consistency and compensatory actions in case of failures in any of the Handlers. 
-
-			var domainEvents = new List<DomainEvent>();
-
-			foreach (var aggregateRoot in ChangeTracker
-				.Entries<IAggregateRoot>())
-			{
-				var events = aggregateRoot.Entity.GetDomainEvents();
-				if (events != null && events.Any())
-				{
-					domainEvents.AddRange(events);
-					aggregateRoot.Entity.ClearDomainEvents();
-				}
-			}
-
-			// todo: make sure sort is correct
-			domainEvents.Sort((x, y) => x.EventTime > y.EventTime ? 0 : 1);
-			return domainEvents;
 		}
 
 		public IEnumerable<AuditEntity> GetAuditEntities()
@@ -255,22 +108,60 @@ namespace MicroserviceFramework.Ef
 			return entities;
 		}
 
-		public void Commit()
+		public async Task<int> CommitAsync()
 		{
-			SaveChanges();
-		}
+			try
+			{
+				var changed = ChangeTracker.Entries().Any();
+				if (!changed)
+				{
+					return 0;
+				}
 
-		public async Task CommitAsync()
-		{
-			await SaveChangesAsync();
+				ApplyConcepts();
+
+				var dispatcher = _serviceProvider.GetService<IDomainEventDispatcher>();
+				if (dispatcher != null)
+				{
+					var domainEvents = GetDomainEvents();
+
+					foreach (var @event in domainEvents)
+					{
+						await dispatcher.DispatchAsync(@event);
+					}
+				}
+
+				var effectedCount = await SaveChangesAsync();
+				if (Database.CurrentTransaction != null)
+				{
+					await Database.CurrentTransaction.CommitAsync();
+				}
+
+				return effectedCount;
+			}
+			catch
+			{
+				if (Database.CurrentTransaction != null)
+				{
+					await Database.CurrentTransaction.RollbackAsync();
+				}
+
+				throw;
+			}
 		}
 
 		protected void ApplyConcepts()
 		{
 			var session = _serviceProvider.GetService<ISession>();
 
-			var userId = session?.UserId;
-			var userName = session?.UserName;
+			string userId = null;
+			string userName = null;
+
+			if (session != null)
+			{
+				userId = session.UserId;
+				userName = session.UserName;
+			}
 
 			foreach (var entry in ChangeTracker.Entries())
 			{
@@ -383,6 +274,31 @@ namespace MicroserviceFramework.Ef
 
 				deletionAudited.Delete(userId, userName);
 			}
+		}
+
+		private IEnumerable<DomainEvent> GetDomainEvents()
+		{
+			// Dispatch Domain Events collection. 
+			// Choices:
+			// A) Right BEFORE committing data (EF SaveChanges) into the DB will make a single transaction including  
+			// side effects from the domain event handlers which are using the same DbContext with "InstancePerLifetimeScope" or "scoped" lifetime
+			// B) Right AFTER committing data (EF SaveChanges) into the DB will make multiple transactions. 
+			// You will need to handle eventual consistency and compensatory actions in case of failures in any of the Handlers. 
+
+			var domainEvents = new List<DomainEvent>();
+
+			foreach (var aggregateRoot in ChangeTracker
+				.Entries<IAggregateRoot>())
+			{
+				var events = aggregateRoot.Entity.GetDomainEvents();
+				if (events != null && events.Any())
+				{
+					domainEvents.AddRange(events);
+					aggregateRoot.Entity.ClearDomainEvents();
+				}
+			}
+
+			return domainEvents;
 		}
 	}
 }

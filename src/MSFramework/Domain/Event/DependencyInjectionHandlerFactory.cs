@@ -2,7 +2,7 @@ using System;
 
 namespace MicroserviceFramework.Domain.Event
 {
-	public class DependencyInjectionHandlerFactory : IHandlerFactory
+	public class DependencyInjectionHandlerFactory : IDomainHandlerFactory
 	{
 		private readonly IServiceProvider _serviceProvider;
 

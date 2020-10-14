@@ -63,13 +63,13 @@ namespace MicroserviceFramework
 			var builder = new MicroserviceFrameworkBuilder(services);
 			builderAction?.Invoke(builder);
 
-			builder.Services.TryAddScoped<IUnitOfWorkManager, DefaultUnitOfWorkManager>();
+			builder.Services.TryAddScoped<UnitOfWorkManager>();
 
 			// 如果你想换成消息队列，则重新注册一个对应的服务即可
 			builder.Services.TryAddScoped<IAuditService, DefaultAuditService>();
 
 			var assemblies = AssemblyFinder.GetAllList();
-			services.AddEventDispatcher(assemblies.ToArray());
+			services.AddDomainEventDispatcher(assemblies.ToArray());
 
 			services.TryAddSingleton<ISerializer, NewtonsoftSerializer>();
 

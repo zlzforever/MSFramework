@@ -76,7 +76,7 @@ namespace Ordering.API.Controllers
 		public List<AuditOperation> GetAudits()
 		{
 			Logger.LogInformation($"{Session.UserId}");
-			return ((EfRepository<AuditOperation>) _repository).CurrentSet.Include(x => x.Entities).ToList();
+			return ((EfRepository<AuditOperation>) _repository).AggregateRootSet.Include(x => x.Entities).ToList();
 		}
 
 		[HttpGet("getBaseValueType")]
@@ -136,7 +136,9 @@ namespace Ordering.API.Controllers
 		//[AccessControl("删除产品", "产品")]
 		public Product DeleteAsync(ObjectId productId)
 		{
-			return _productRepository.Delete(productId);
+			var product = _productRepository.Get(productId);
+			_productRepository.Delete(product);
+			return product;
 		}
 
 		[HttpPost]

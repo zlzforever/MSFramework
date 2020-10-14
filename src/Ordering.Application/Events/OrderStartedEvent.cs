@@ -6,7 +6,7 @@ namespace Ordering.Application.Events
 	/// <summary>
 	/// 发送到外部的领域事件
 	/// </summary>
-	public class OrderStartedEvent :  IntegrationEvent
+	public class OrderStartedEvent :  Event
 	{
 		public string UserId { get; }
 		

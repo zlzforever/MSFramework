@@ -7,14 +7,14 @@ using Ordering.Application.Events;
 
 namespace Ordering.Application.EventHandlers
 {
-	public class UserCheckoutAcceptedEventHandler : IIntegrationEventHandler<UserCheckoutAcceptedEvent>
+	public class UserCheckoutAcceptedEventHandler : IEventHandler<UserCheckoutAcceptedEvent>
 	{
 		private readonly ILogger _logger;
-		private readonly IEventDispatcher _mediator;
+		private readonly IDomainEventDispatcher _mediator;
 		private readonly ISession _session;
 
 		public UserCheckoutAcceptedEventHandler(ISession session,
-			IEventDispatcher mediator,
+			IDomainEventDispatcher mediator,
 			ILogger<UserCheckoutAcceptedEventHandler> logger)
 		{
 			_logger = logger;

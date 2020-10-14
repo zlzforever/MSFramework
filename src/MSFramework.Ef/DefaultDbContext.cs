@@ -1,4 +1,5 @@
 using System;
+using MicroserviceFramework.Domain;
 using Microsoft.EntityFrameworkCore;
 
 namespace MicroserviceFramework.Ef
@@ -8,11 +9,9 @@ namespace MicroserviceFramework.Ef
 	/// </summary>
 	public class DefaultDbContext : DbContextBase
 	{
-		/// <summary>
-		/// 初始化一个<see cref="DefaultDbContext"/>类型的新实例
-		/// </summary>
-		public DefaultDbContext(DbContextOptions options, IServiceProvider serviceProvider)
-			: base(options, serviceProvider)
+		public DefaultDbContext(DbContextOptions options,
+			UnitOfWorkManager unitOfWorkManager,
+			IServiceProvider serviceProvider) : base(options, unitOfWorkManager, serviceProvider)
 		{
 		}
 	}

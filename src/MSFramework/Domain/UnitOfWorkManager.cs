@@ -7,30 +7,19 @@ namespace MicroserviceFramework.Domain
 	/// <summary>
 	/// 工作单元管理器
 	/// </summary>
-	public class DefaultUnitOfWorkManager : IUnitOfWorkManager
+	public class UnitOfWorkManager
 	{
 		/// <summary>
 		/// 工作单元集合
 		/// </summary>
-		private readonly List<IUnitOfWork> _unitOfWorks;
-		
+		private readonly HashSet<IUnitOfWork> _unitOfWorks;
+
 		/// <summary>
 		/// 初始化工作单元管理器
 		/// </summary>
-		public DefaultUnitOfWorkManager()
+		public UnitOfWorkManager()
 		{
-			_unitOfWorks = new List<IUnitOfWork>();
-		}
-
-		/// <summary>
-		/// 提交
-		/// </summary>
-		public void Commit()
-		{
-			foreach (var unitOfWork in _unitOfWorks)
-			{
-				unitOfWork.Commit();
-			}
+			_unitOfWorks = new HashSet<IUnitOfWork>();
 		}
 
 		/// <summary>
@@ -55,15 +44,12 @@ namespace MicroserviceFramework.Domain
 				throw new ArgumentNullException(nameof(unitOfWork));
 			}
 
-			if (_unitOfWorks.Contains(unitOfWork) == false)
-			{
-				_unitOfWorks.Add(unitOfWork);
-			}
+			_unitOfWorks.Add(unitOfWork);
 		}
 
 		public IReadOnlyCollection<IUnitOfWork> GetUnitOfWorks()
 		{
-			return _unitOfWorks.AsReadOnly();
+			return _unitOfWorks;
 		}
 	}
 }

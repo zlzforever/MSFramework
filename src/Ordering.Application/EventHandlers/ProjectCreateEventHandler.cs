@@ -7,11 +7,11 @@ using Ordering.Domain.AggregateRoots;
 
 namespace Ordering.Application.EventHandlers
 {
-	public class ProjectCreatedIntegrationEvent : IntegrationEvent
+	public class ProjectCreatedIntegrationEvent : Event
 	{
 	}
 
-	public class ProjectCreatedIntegrationEventHandler : IIntegrationEventHandler<ProjectCreatedIntegrationEvent>,
+	public class ProjectCreatedIntegrationEventHandler : IEventHandler<ProjectCreatedIntegrationEvent>,
 		IScopeDependency
 	{
 		public Task HandleAsync(ProjectCreatedIntegrationEvent @event)
@@ -21,7 +21,7 @@ namespace Ordering.Application.EventHandlers
 		}
 	}
 
-	public class ProjectCreateEventHandler : IEventHandler<ProjectCreateEvent>
+	public class ProjectCreateEventHandler : IDomainEventHandler<ProjectCreateEvent>
 	{
 		private readonly IEventBus _eventBus;
 

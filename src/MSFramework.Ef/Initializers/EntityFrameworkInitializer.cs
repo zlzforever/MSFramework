@@ -10,7 +10,7 @@ using Microsoft.Extensions.Logging;
 
 namespace MicroserviceFramework.Ef.Initializers
 {
-	public class EntityFrameworkInitializer : Initializer, INonAutomaticInitializer
+	public class EntityFrameworkInitializer : Initializer, INotAutomaticRegisterInitializer
 	{
 		public override int Order => int.MinValue;
 

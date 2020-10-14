@@ -15,16 +15,14 @@ namespace MicroserviceFramework.Ef.Functions
 		private readonly TimeSpan _ttl = new TimeSpan(0, 5, 0);
 		private readonly IQueryable<Function> _currentSet;
 		private readonly DbContext _dbContext;
-		private readonly IEntityConfigurationTypeFinder _entityConfigurationTypeFinder;
 
 		public FunctionRepository(DbContextFactory dbContextFactory,
 			IMemoryCache cache,
 			IEntityConfigurationTypeFinder entityConfigurationTypeFinder)
 		{
 			_cache = cache;
-			_entityConfigurationTypeFinder = entityConfigurationTypeFinder;
 
-			if (!_entityConfigurationTypeFinder.HasDbContextForEntity<Function>())
+			if (!entityConfigurationTypeFinder.HasDbContextForEntity<Function>())
 			{
 				return;
 			}
@@ -38,7 +36,8 @@ namespace MicroserviceFramework.Ef.Functions
 			_cache.TryGetValue(code, out Function function);
 			if (function == null)
 			{
-				function = _currentSet.AsNoTracking()
+				function = _currentSet
+					.AsNoTracking()
 					.FirstOrDefault(x => x.Code == code);
 				_cache.Set(code, function, _ttl);
 			}

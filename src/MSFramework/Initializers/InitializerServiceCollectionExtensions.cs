@@ -20,7 +20,7 @@ namespace MicroserviceFramework.Initializers
 			}
 
 			var initializerType = typeof(Initializer);
-			var nonAutomaticInitializerType = typeof(INonAutomaticInitializer);
+			var nonAutomaticInitializerType = typeof(INotAutomaticRegisterInitializer);
 			types.Remove(initializerType);
 			foreach (var type in types)
 			{

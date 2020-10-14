@@ -8,21 +8,21 @@ namespace MicroserviceFramework.Domain.Event
 {
 	public static class ServiceCollectionExtensions
 	{
-		private static readonly Type EventHandlerBaseType = typeof(IEventHandler<>);
+		private static readonly Type EventHandlerBaseType = typeof(IDomainEventHandler<>);
 
-		public static IServiceCollection AddEventDispatcher(this IServiceCollection serviceCollection,
+		public static IServiceCollection AddDomainEventDispatcher(this IServiceCollection serviceCollection,
 			params Type[] types)
 		{
 			var assemblies = types.Select(x => x.Assembly).ToArray();
-			serviceCollection.AddEventDispatcher(assemblies);
+			serviceCollection.AddDomainEventDispatcher(assemblies);
 			return serviceCollection;
 		}
 
-		public static IServiceCollection AddEventDispatcher(this IServiceCollection serviceCollection,
+		public static IServiceCollection AddDomainEventDispatcher(this IServiceCollection serviceCollection,
 			params Assembly[] assemblies)
 		{
-			serviceCollection.TryAddScoped<IEventDispatcher, EventDispatcher>();
-			serviceCollection.TryAddScoped<IHandlerFactory, DependencyInjectionHandlerFactory>();
+			serviceCollection.TryAddScoped<IDomainEventDispatcher, DomainEventDispatcher>();
+			serviceCollection.TryAddScoped<IDomainHandlerFactory, DependencyInjectionHandlerFactory>();
 			serviceCollection.RegisterEventHandler(assemblies);
 			return serviceCollection;
 		}
@@ -30,7 +30,7 @@ namespace MicroserviceFramework.Domain.Event
 		private static void RegisterEventHandler(this IServiceCollection serviceCollection,
 			params Assembly[] assemblies)
 		{
-			var store = new EventHandlerTypeStore();
+			var store = new DomainEventHandlerTypeStore();
 			var types = assemblies.SelectMany(x => x.GetTypes());
 
 			foreach (var type in types)
@@ -59,7 +59,7 @@ namespace MicroserviceFramework.Domain.Event
 				store.Add(eventType, type);
 			}
 
-			serviceCollection.TryAddSingleton<IEventHandlerTypeStore>(store);
+			serviceCollection.TryAddSingleton<IDomainEventHandlerTypeStore>(store);
 		}
 	}
 }

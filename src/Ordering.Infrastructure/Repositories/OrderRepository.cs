@@ -17,7 +17,7 @@ namespace Ordering.Infrastructure.Repositories
 
 		public override Task<Order> GetAsync(ObjectId id)
 		{
-			return CurrentSet.Include(x => x.OrderItems).FirstOrDefaultAsync(x => x.Id == id);
+			return AggregateRootSet.Include(x => x.OrderItems).FirstOrDefaultAsync(x => x.Id == id);
 		}
 	}
 }

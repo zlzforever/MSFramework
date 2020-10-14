@@ -8,9 +8,7 @@ namespace MicroserviceFramework.Domain
 	public interface IUnitOfWork : IDisposable
 	{
 		IEnumerable<AuditEntity> GetAuditEntities();
-
-		void Commit();
-
-		Task CommitAsync();
+		
+		Task<int> CommitAsync();
 	}
 }

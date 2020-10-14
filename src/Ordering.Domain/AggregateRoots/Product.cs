@@ -8,7 +8,7 @@ namespace Ordering.Domain.AggregateRoots
 	{
 		
 	}
-	public class Product : AggregateRoot
+	public class Product : AggregateRoot, IOptimisticLock
 	{
 		public Product(string name, int price) : base(ObjectId.NewId())
 		{
@@ -26,5 +26,7 @@ namespace Ordering.Domain.AggregateRoots
 		{
 			return $"[ENTITY {GetType().Name}] Id = {Id}, Name = {Name}, Price = {Price}";
 		}
+
+		public string ConcurrencyStamp { get; set; }
 	}
 }

@@ -7,7 +7,7 @@ namespace MicroserviceFramework.EventBus
 	{
 		public static bool IsIntegrationEvent(this Type eventType)
 		{
-			return typeof(IntegrationEvent).IsAssignableFrom(eventType);
+			return typeof(Event).IsAssignableFrom(eventType);
 		}
 
 		public static bool CanHandle(this Type handlerType, Type eventType)

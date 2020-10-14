@@ -17,12 +17,12 @@ namespace Ordering.Infrastructure.Repositories
 
 		public Product GetFirst()
 		{
-			return CurrentSet.FirstOrDefault();
+			return AggregateRootSet.FirstOrDefault();
 		}
 
 		public async Task<PagedResult<Product>> PagedQueryAsync(int page, int limit)
 		{
-			return await CurrentSet.PagedQueryAsync(page, limit);
+			return await AggregateRootSet.PagedQueryAsync(page, limit);
 		}
 	}
 }

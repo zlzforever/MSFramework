@@ -4,20 +4,20 @@ using MicroserviceFramework.Shared;
 
 namespace MicroserviceFramework.Domain.Event
 {
-	public class EventDispatcher : IEventDispatcher
+	public class DomainEventDispatcher : IDomainEventDispatcher
 	{
-		private readonly IEventHandlerTypeStore _eventHandlerTypeStore;
-		private readonly IHandlerFactory _handlerFactory;
+		private readonly IDomainEventHandlerTypeStore _eventHandlerTypeStore;
+		private readonly IDomainHandlerFactory _handlerFactory;
 
-		public EventDispatcher(IEventHandlerTypeStore eventHandlerTypeStore, IHandlerFactory handlerFactory)
+		public DomainEventDispatcher(IDomainEventHandlerTypeStore eventHandlerTypeStore, IDomainHandlerFactory handlerFactory)
 		{
 			_handlerFactory = handlerFactory;
-			_eventHandlerTypeStore = eventHandlerTypeStore ?? new EventHandlerTypeStore();
+			_eventHandlerTypeStore = eventHandlerTypeStore ?? new DomainEventHandlerTypeStore();
 		}
 
 		public virtual bool Register<TEvent, TEventHandler>()
 			where TEvent : DomainEvent
-			where TEventHandler : IEventHandler<TEvent>
+			where TEventHandler : IDomainEventHandler<TEvent>
 		{
 			var handlerType = typeof(TEventHandler);
 			return Register<TEvent>(handlerType);

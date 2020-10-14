@@ -3,7 +3,7 @@ using MicroserviceFramework.Shared;
 
 namespace MicroserviceFramework.EventBus
 {
-	public class IntegrationEvent
+	public abstract class Event
 	{
 		/// <summary>
 		/// 事件源标识
@@ -15,14 +15,10 @@ namespace MicroserviceFramework.EventBus
 		/// </summary>
 		public DateTimeOffset EventTime { get; private set; }
 
-		public IntegrationEvent() : this(ObjectId.NewId(), DateTimeOffset.Now)
+		protected Event()
 		{
-		}
-
-		public IntegrationEvent(ObjectId id, DateTimeOffset eventTime)
-		{
-			EventId = id;
-			EventTime = eventTime;
+			EventId = ObjectId.NewId();
+			EventTime = DateTimeOffset.Now;
 		}
 
 		public override string ToString()

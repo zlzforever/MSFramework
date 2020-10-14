@@ -60,24 +60,24 @@ namespace MicroserviceFramework.Domain
 		/// Deletes an entity.
 		/// </summary>
 		/// <param name="entity">Entity to be deleted</param>
-		TEntity Delete(TEntity entity);
+		void Delete(TEntity entity);
 
 		/// <summary>
 		/// Deletes an entity.
 		/// </summary>
 		/// <param name="entity">Entity to be deleted</param>
-		Task<TEntity> DeleteAsync(TEntity entity);
+		Task DeleteAsync(TEntity entity);
 
 		/// <summary>
 		/// Deletes an entity by primary key.
 		/// </summary>
 		/// <param name="id">Primary key of the entity</param>
-		TEntity Delete(TKey id);
+		void Delete(TKey id);
 
 		/// <summary>
 		/// Deletes an entity by primary key.
 		/// </summary>
 		/// <param name="id">Primary key of the entity</param>
-		Task<TEntity> DeleteAsync(TKey id);
+		Task DeleteAsync(TKey id);
 	}
 }

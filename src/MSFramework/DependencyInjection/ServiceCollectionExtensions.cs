@@ -5,7 +5,6 @@ using MicroserviceFramework.Application;
 using MicroserviceFramework.Domain;
 using MicroserviceFramework.Extensions;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.DependencyInjection.Extensions;
 
 namespace MicroserviceFramework.DependencyInjection
 {

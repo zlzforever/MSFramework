@@ -2,7 +2,7 @@ using System;
 
 namespace MicroserviceFramework.EventBus
 {
-	public interface IIntegrationEventHandlerFactory
+	public interface IEventHandlerFactory
 	{
 		object Create(Type handlerType);
 	}

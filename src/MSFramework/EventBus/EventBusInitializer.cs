@@ -7,17 +7,13 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace MicroserviceFramework.EventBus
 {
-	public class EventBusInitializer : Initializer
+	public class EventBusInitializer : Initializer, INotAutomaticRegisterInitializer
 	{
-		private static readonly Type EventHandlerBaseType = typeof(IIntegrationEventHandler<>);
+		private static readonly Type EventHandlerBaseType = typeof(IEventHandler<>);
 
 		public override async Task InitializeAsync(IServiceProvider serviceProvider)
 		{
-			var eventBus = serviceProvider.GetService<IEventBus>();
-			if (eventBus == null)
-			{
-				return;
-			}
+			var eventBus = serviceProvider.GetRequiredService<IEventBus>();
 
 			var assemblies = AssemblyFinder.GetAllList();
 			var types = assemblies.SelectMany(x => x.GetTypes());

@@ -10,7 +10,7 @@ namespace MicroserviceFramework.EventBus
 	public class ChannelEventBus : IEventBus
 	{
 		private readonly ISubscriptionInfoStore _subscriptionInfoStore;
-		private readonly IIntegrationEventHandlerFactory _handlerFactory;
+		private readonly IEventHandlerFactory _handlerFactory;
 		private readonly ILogger<ChannelEventBus> _logger;
 
 		private readonly ConcurrentDictionary<string, Channel<string>> _channelDict =
@@ -20,7 +20,7 @@ namespace MicroserviceFramework.EventBus
 
 		public ChannelEventBus(ISubscriptionInfoStore subscriptionInfoStore,
 			ISerializer serializer,
-			IIntegrationEventHandlerFactory handlerFactory, ILogger<ChannelEventBus> logger)
+			IEventHandlerFactory handlerFactory, ILogger<ChannelEventBus> logger)
 		{
 			_subscriptionInfoStore = subscriptionInfoStore;
 			_serializer = serializer;
@@ -28,7 +28,7 @@ namespace MicroserviceFramework.EventBus
 			_logger = logger;
 		}
 
-		public virtual async Task PublishAsync(IntegrationEvent @event)
+		public virtual async Task PublishAsync(Event @event)
 		{
 			var eventName = @event.GetType().Name;
 			if (_channelDict.TryGetValue(eventName, out var channel))
@@ -38,7 +38,7 @@ namespace MicroserviceFramework.EventBus
 		}
 
 		public virtual async Task SubscribeAsync<T, TH>()
-			where T : IntegrationEvent where TH : IIntegrationEventHandler<T>
+			where T : Event where TH : IEventHandler<T>
 		{
 			await SubscribeAsync(typeof(T), typeof(TH));
 		}
@@ -66,41 +66,7 @@ namespace MicroserviceFramework.EventBus
 					while (await channel.Reader.WaitToReadAsync())
 					{
 						var json = await channel.Reader.ReadAsync();
-						Task.Factory.StartNew(async () =>
-							{
-								try
-								{
-									var subscriptionInfos = _subscriptionInfoStore.GetHandlers(eventName);
-									foreach (var subscriptionInfo in subscriptionInfos)
-									{
-										var @event = _serializer.Deserialize(json, subscriptionInfo.EventType);
-										if (@event == null)
-										{
-											_logger.LogWarning(
-												$"Create event {subscriptionInfo.EventType} failed");
-											continue;
-										}
-
-										var handler = _handlerFactory.Create(subscriptionInfo.HandlerType);
-										if (handler != null)
-										{
-											if (subscriptionInfo.Method.Invoke(handler, new[] {@event}) is Task task)
-											{
-												await task;
-											}
-										}
-										else
-										{
-											_logger.LogWarning(
-												$"Create handler {subscriptionInfo.HandlerType} failed");
-										}
-									}
-								}
-								catch (Exception e)
-								{
-									_logger.LogError(e.ToString());
-								}
-							})
+						Task.Factory.StartNew(async () => { await HandleEventAsync(eventName, json); })
 							.ConfigureAwait(false).GetAwaiter();
 					}
 				}, default, TaskCreationOptions.LongRunning, TaskScheduler.Default);
@@ -109,16 +75,50 @@ namespace MicroserviceFramework.EventBus
 			_subscriptionInfoStore.Add(eventType, handlerType);
 		}
 
-		public virtual void Unsubscribe<T, TH>() where T : IntegrationEvent where TH : IIntegrationEventHandler<T>
+		public virtual void Unsubscribe<T, TH>() where T : Event where TH : IEventHandler<T>
 		{
 			_subscriptionInfoStore.Remove<T, TH>();
 			var eventName = _subscriptionInfoStore.GetEventKey<T>();
-			if (_subscriptionInfoStore.GetHandlers(eventName).Count == 0)
+			if (_subscriptionInfoStore.GetHandlers(eventName).Count == 0 &&
+			    _channelDict.TryGetValue(eventName, out var channel))
 			{
-				if (_channelDict.TryGetValue(eventName, out var channel))
+				channel.Writer.Complete();
+			}
+		}
+
+		private async Task HandleEventAsync(string eventName, string json)
+		{
+			try
+			{
+				var subscriptionInfos = _subscriptionInfoStore.GetHandlers(eventName);
+				foreach (var subscriptionInfo in subscriptionInfos)
 				{
-					channel.Writer.Complete();
+					var @event = _serializer.Deserialize(json, subscriptionInfo.EventType);
+					if (@event == null)
+					{
+						_logger.LogWarning(
+							$"Create event {subscriptionInfo.EventType} failed");
+						continue;
+					}
+
+					var handler = _handlerFactory.Create(subscriptionInfo.HandlerType);
+					if (handler != null)
+					{
+						if (subscriptionInfo.Method.Invoke(handler, new[] {@event}) is Task task)
+						{
+							await task;
+						}
+					}
+					else
+					{
+						_logger.LogWarning(
+							$"Create handler {subscriptionInfo.HandlerType} failed");
+					}
 				}
+			}
+			catch (Exception e)
+			{
+				_logger.LogError(e.ToString());
 			}
 		}
 	}

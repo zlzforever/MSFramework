@@ -1,3 +1,4 @@
+using System.Threading.Tasks;
 using MicroserviceFramework.DependencyInjection;
 
 namespace MicroserviceFramework.Audits
@@ -9,6 +10,6 @@ namespace MicroserviceFramework.Audits
 		/// </summary>
 		/// <param name="auditOperation">操作审计数据</param>
 		/// <returns></returns>
-		void Save(AuditOperation auditOperation);
+		Task SaveAsync(AuditOperation auditOperation);
 	}
 }

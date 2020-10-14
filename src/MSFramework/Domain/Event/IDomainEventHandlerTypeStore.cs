@@ -3,9 +3,9 @@ using System.Collections.Generic;
 
 namespace MicroserviceFramework.Domain.Event
 {
-	public interface IEventHandlerTypeStore
+	public interface IDomainEventHandlerTypeStore
 	{
 		void Add(Type eventType, Type handlerType);
-		IReadOnlyCollection<HandlerInfo> GetHandlers(Type eventType);
+		IReadOnlyCollection<DomainEventHandlerInfo> GetHandlers(Type eventType);
 	}
 }
