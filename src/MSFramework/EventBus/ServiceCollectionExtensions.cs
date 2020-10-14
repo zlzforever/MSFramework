@@ -1,4 +1,3 @@
-using MicroserviceFramework.Initializers;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 
@@ -12,7 +11,7 @@ namespace MicroserviceFramework.EventBus
 			serviceCollection.TryAddSingleton<ISubscriptionInfoStore, SubscriptionInfoStore>();
 			serviceCollection
 				.TryAddSingleton<IEventHandlerFactory, DependencyInjectionEventHandlerFactory>();
-			serviceCollection.TryAddSingleton<Initializer, EventBusInitializer>();
+			serviceCollection.TryAddSingleton<Initializer.InitializerBase, EventHandlerRegister>();
 			return serviceCollection;
 		}
 	}

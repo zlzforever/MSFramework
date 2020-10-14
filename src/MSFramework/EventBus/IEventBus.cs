@@ -5,15 +5,38 @@ namespace MicroserviceFramework.EventBus
 {
 	public interface IEventBus
 	{
+		/// <summary>
+		/// 发布事件
+		/// </summary>
+		/// <param name="event"></param>
+		/// <returns></returns>
 		Task PublishAsync(Event @event);
 
-		Task SubscribeAsync<T, TH>()
-			where T : Event
-			where TH : IEventHandler<T>;
+		/// <summary>
+		/// 订阅事件
+		/// </summary>
+		/// <typeparam name="TEvent"></typeparam>
+		/// <typeparam name="TEventHandler"></typeparam>
+		/// <returns></returns>
+		Task SubscribeAsync<TEvent, TEventHandler>()
+			where TEvent : Event
+			where TEventHandler : IEventHandler<TEvent>;
 
+		/// <summary>
+		/// 订阅事件
+		/// </summary>
+		/// <param name="eventType"></param>
+		/// <param name="handlerType"></param>
+		/// <returns></returns>
 		Task SubscribeAsync(Type eventType, Type handlerType);
-		void Unsubscribe<T, TH>()
-			where TH : IEventHandler<T>
-			where T : Event;
+
+		/// <summary>
+		/// 取消订阅
+		/// </summary>
+		/// <typeparam name="TEvent"></typeparam>
+		/// <typeparam name="TEventHandler"></typeparam>
+		void Unsubscribe<TEvent, TEventHandler>()
+			where TEventHandler : IEventHandler<TEvent>
+			where TEvent : Event;
 	}
 }

@@ -5,13 +5,13 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Dapper;
-using MicroserviceFramework.Initializers;
+using MicroserviceFramework.Initializer;
 using MicroserviceFramework.Shared;
 using Microsoft.Extensions.Logging;
 
 namespace MicroserviceFramework.Migrator
 {
-	public abstract class Migrator : Initializer, INotAutomaticRegisterInitializer
+	public abstract class Migrator : Initializer.InitializerBase, INotAutomaticRegisterInitializer
 	{
 		protected readonly ILogger Logger;
 		protected readonly Type Type;

@@ -5,12 +5,14 @@ using MicroserviceFramework.Application;
 using MicroserviceFramework.Domain;
 using MicroserviceFramework.Extensions;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 
 namespace MicroserviceFramework.DependencyInjection
 {
 	public static class ServiceCollectionExtensions
 	{
-		public static MicroserviceFrameworkBuilder UseDependencyInjectionScanner(this MicroserviceFrameworkBuilder builder)
+		public static MicroserviceFrameworkBuilder UseDependencyInjectionScanner(
+			this MicroserviceFrameworkBuilder builder)
 		{
 			var dependencyTypeDict = DependencyTypeFinder.GetDependencyTypeDict();
 			foreach (var kv in dependencyTypeDict)
@@ -40,38 +42,40 @@ namespace MicroserviceFramework.DependencyInjection
 				}
 
 				var excludeTypes = new[] {typeof(IApplicationService), typeof(IDomainService)};
-				var interfaceTypes = implementationType.GetImplementedInterfaces(typeof(IDisposable),
+				var interfaceTypes = implementationType.GetImplementedInterfaces(
 						typeof(ITransientDependency), typeof(ISingletonDependency), typeof(IScopeDependency))
 					.Where(x => !excludeTypes.Contains(x)).ToArray();
+
 				if (interfaceTypes.Length == 0)
 				{
-					services.Add(new ServiceDescriptor(implementationType, implementationType, lifetime));
 					continue;
 				}
+
+				services.Add(new ServiceDescriptor(implementationType, implementationType, lifetime));
 
 				for (var i = 0; i < interfaceTypes.Length; i++)
 				{
 					var interfaceType = interfaceTypes[i];
+
+					// 瞬时生命周期每次获取对象都是新的，因此实现的接口每个注册一次即可
 					if (lifetime == ServiceLifetime.Transient)
 					{
-						services.Add(new ServiceDescriptor(interfaceType, implementationType, lifetime));
-						continue;
-					}
-
-					if (i == 0)
-					{
-						services.Add(new ServiceDescriptor(interfaceType, implementationType, lifetime));
+						services.Add(
+							new ServiceDescriptor(interfaceType, implementationType, ServiceLifetime.Transient));
 					}
 					else
 					{
-						//有多个接口时，后边的接口注册使用第一个接口的实例，保证同个实现类的多个接口获得同一个实例
-						var firstInterfaceType = interfaceTypes[0];
-						services.Add(new ServiceDescriptor(interfaceType,
-							provider =>
-							{
-								var service = provider.GetService(firstInterfaceType);
-								return service;
-							}, lifetime));
+						if (i == 0)
+						{
+							services.Add(new ServiceDescriptor(interfaceType, implementationType, lifetime));
+						}
+						else
+						{
+							//有多个接口时，后边的接口注册使用第一个接口的实例，保证同个实现类的多个接口获得同一个实例
+							var firstInterfaceType = interfaceTypes[0];
+							services.Add(new ServiceDescriptor(interfaceType,
+								provider => provider.GetService(firstInterfaceType), lifetime));
+						}
 					}
 				}
 			}

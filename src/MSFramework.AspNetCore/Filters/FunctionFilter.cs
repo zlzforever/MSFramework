@@ -1,5 +1,5 @@
 using MicroserviceFramework.AspNetCore.Extensions;
-using MicroserviceFramework.Functions;
+using MicroserviceFramework.Function;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.Extensions.DependencyInjection;
@@ -24,7 +24,7 @@ namespace MicroserviceFramework.AspNetCore.Filters
 			var provider = context.HttpContext.RequestServices;
 
 			var functionPath = context.ActionDescriptor.GetActionPath();
-			var repository = provider.GetService<IFunctionRepository>();
+			var repository = provider.GetService<IFunctionDefineRepository>();
 			if (repository == null || !repository.IsAvailable())
 			{
 				throw new MicroserviceFrameworkException("Function 仓储不可用");

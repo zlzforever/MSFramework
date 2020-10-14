@@ -14,6 +14,6 @@ namespace MicroserviceFramework.EventBus
 
 		string GetEventKey<T>();
 		string GetEventKey(Type type);
-		void Remove<T, TH>() where T : Event where TH : IEventHandler<T>;
+		void Remove<TEvent, TEventHandler>() where TEvent : Event where TEventHandler : IEventHandler<TEvent>;
 	}
 }

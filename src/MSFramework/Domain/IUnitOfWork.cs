@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using MicroserviceFramework.Audits;
+using MicroserviceFramework.Audit;
 
 namespace MicroserviceFramework.Domain
 {

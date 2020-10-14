@@ -1,7 +1,7 @@
 ﻿using System;
 using MicroserviceFramework.Ef.Infrastructure;
-using MicroserviceFramework.Ef.Initializers;
-using MicroserviceFramework.Initializers;
+using MicroserviceFramework.Ef.Initializer;
+using MicroserviceFramework.Initializer;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;

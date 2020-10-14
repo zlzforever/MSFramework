@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using MicroserviceFramework.Application;
-using MicroserviceFramework.Audits;
+using MicroserviceFramework.Audit;
 using MicroserviceFramework.Domain;
 using MicroserviceFramework.Domain.Event;
 using MicroserviceFramework.Ef.Extensions;

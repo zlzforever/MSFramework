@@ -2,7 +2,7 @@ using System;
 using System.Collections.Concurrent;
 using System.Threading.Channels;
 using System.Threading.Tasks;
-using MicroserviceFramework.Serialization;
+using MicroserviceFramework.Serializer;
 using Microsoft.Extensions.Logging;
 
 namespace MicroserviceFramework.EventBus
@@ -28,13 +28,15 @@ namespace MicroserviceFramework.EventBus
 			_logger = logger;
 		}
 
-		public virtual async Task PublishAsync(Event @event)
+		public virtual Task PublishAsync(Event @event)
 		{
 			var eventName = @event.GetType().Name;
 			if (_channelDict.TryGetValue(eventName, out var channel))
 			{
-				await channel.Writer.WriteAsync(_serializer.Serialize(@event));
+				channel.Writer.TryWrite(_serializer.Serialize(@event));
 			}
+
+			return Task.CompletedTask;
 		}
 
 		public virtual async Task SubscribeAsync<T, TH>()
@@ -45,9 +47,9 @@ namespace MicroserviceFramework.EventBus
 
 		public virtual async Task SubscribeAsync(Type eventType, Type handlerType)
 		{
-			if (!eventType.IsIntegrationEvent())
+			if (!eventType.IsEvent())
 			{
-				throw new MicroserviceFrameworkException($"{eventType} 不是一个集成事件");
+				throw new MicroserviceFrameworkException($"{eventType} 不是一个事件");
 			}
 
 			if (!handlerType.CanHandle(eventType))
@@ -69,16 +71,17 @@ namespace MicroserviceFramework.EventBus
 						Task.Factory.StartNew(async () => { await HandleEventAsync(eventName, json); })
 							.ConfigureAwait(false).GetAwaiter();
 					}
-				}, default, TaskCreationOptions.LongRunning, TaskScheduler.Default);
+				});
 			}
 
 			_subscriptionInfoStore.Add(eventType, handlerType);
 		}
 
-		public virtual void Unsubscribe<T, TH>() where T : Event where TH : IEventHandler<T>
+		public virtual void Unsubscribe<TEvent, TEventHandler>()
+			where TEvent : Event where TEventHandler : IEventHandler<TEvent>
 		{
-			_subscriptionInfoStore.Remove<T, TH>();
-			var eventName = _subscriptionInfoStore.GetEventKey<T>();
+			_subscriptionInfoStore.Remove<TEvent, TEventHandler>();
+			var eventName = _subscriptionInfoStore.GetEventKey<TEvent>();
 			if (_subscriptionInfoStore.GetHandlers(eventName).Count == 0 &&
 			    _channelDict.TryGetValue(eventName, out var channel))
 			{

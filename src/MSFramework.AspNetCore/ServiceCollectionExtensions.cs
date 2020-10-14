@@ -1,6 +1,6 @@
-using MicroserviceFramework.AspNetCore.Functions;
+using MicroserviceFramework.AspNetCore.Function;
 using MicroserviceFramework.AspNetCore.Infrastructure;
-using MicroserviceFramework.Functions;
+using MicroserviceFramework.Function;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.Extensions.DependencyInjection;
@@ -16,7 +16,7 @@ namespace MicroserviceFramework.AspNetCore
 		{
 			if (enableFunction)
 			{
-				builder.Services.TryAddSingleton<IFunctionFinder, AspNetCoreFunctionFinder>();
+				builder.Services.TryAddSingleton<IFunctionDefineFinder, AspNetCoreFunctionFinder>();
 			}
 
 

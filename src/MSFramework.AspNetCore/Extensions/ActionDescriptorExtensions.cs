@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
 using MicroserviceFramework.Extensions;
-using MicroserviceFramework.Functions;
+using MicroserviceFramework.Function;
 using Microsoft.AspNetCore.Mvc.Abstractions;
 using Microsoft.AspNetCore.Mvc.Controllers;
 using Microsoft.AspNetCore.Routing;
@@ -11,7 +11,7 @@ namespace MicroserviceFramework.AspNetCore.Extensions
 {
 	public static class ActionDescriptorExtensions
 	{
-		public static Function GetFunction(this ActionDescriptor actionDescriptor)
+		public static FunctionDefine GetFunction(this ActionDescriptor actionDescriptor)
 		{
 			var controllerAction = (ControllerActionDescriptor) actionDescriptor;
 			var functionPath = actionDescriptor.GetActionPath();
@@ -20,7 +20,7 @@ namespace MicroserviceFramework.AspNetCore.Extensions
 			var typeName = controllerAction.MethodInfo.DeclaringType?.FullName;
 			var name =string.IsNullOrWhiteSpace(typeName)?
 				$"{controllerAction.MethodInfo.Name}({parameters})":$"{typeName}.{controllerAction.MethodInfo.Name}({parameters})";
-			return new Function(name, functionPath, null);
+			return new FunctionDefine(name, functionPath, null);
 		}
 
 		public static string GetActionPath(this ActionDescriptor actionDescriptor)

@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using MicroserviceFramework;
 using MicroserviceFramework.AspNetCore;
 using MicroserviceFramework.AspNetCore.Mvc;
-using MicroserviceFramework.Audits;
+using MicroserviceFramework.Audit;
 using MicroserviceFramework.Domain;
 using MicroserviceFramework.Ef.Repositories;
 using MicroserviceFramework.Mapper;

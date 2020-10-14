@@ -4,17 +4,18 @@ using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
 using MicroserviceFramework.Application;
-using MicroserviceFramework.Audits;
+using MicroserviceFramework.Audit;
 using MicroserviceFramework.Domain;
 using MicroserviceFramework.Domain.Event;
 using MicroserviceFramework.EventBus;
-using MicroserviceFramework.Initializers;
+using MicroserviceFramework.Initializer;
 using MicroserviceFramework.Reflection;
-using MicroserviceFramework.Serialization;
+using MicroserviceFramework.Serializer;
 using MicroserviceFramework.Shared;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Logging;
+using Newtonsoft.Json;
 
 // ReSharper disable InconsistentNaming
 
@@ -50,7 +51,7 @@ namespace MicroserviceFramework
 			builder.Services.AddCQRS(assemblies);
 			return builder;
 		}
-		
+
 		public static MicroserviceFrameworkBuilder UseEventBus(this MicroserviceFrameworkBuilder builder)
 		{
 			builder.Services.AddEventBus();
@@ -71,9 +72,18 @@ namespace MicroserviceFramework
 			var assemblies = AssemblyFinder.GetAllList();
 			services.AddDomainEventDispatcher(assemblies.ToArray());
 
-			services.TryAddSingleton<ISerializer, NewtonsoftSerializer>();
-
 			builder.UseInitializer();
+		}
+
+		public static MicroserviceFrameworkBuilder UseNewtonsoftJson(this MicroserviceFrameworkBuilder builder,
+			Action<JsonSerializerSettings> configure = null)
+		{
+			var settings = new JsonSerializerSettings();
+			configure?.Invoke(settings);
+
+			builder.Services.TryAddSingleton(settings);
+			builder.Services.TryAddSingleton<ISerializer, NewtonsoftSerializer>();
+			return builder;
 		}
 
 		public static MicroserviceFrameworkBuilder UseBaseX(this MicroserviceFrameworkBuilder builder,
@@ -109,7 +119,7 @@ namespace MicroserviceFramework
 		{
 			using var scope = applicationServices.CreateScope();
 			var logger = scope.ServiceProvider.GetRequiredService<ILoggerFactory>().CreateLogger("Initializer");
-			var initializers = scope.ServiceProvider.GetServices<Initializer>().OrderBy(x => x.Order).ToList();
+			var initializers = scope.ServiceProvider.GetServices<Initializer.InitializerBase>().OrderBy(x => x.Order).ToList();
 			logger.LogInformation($"{string.Join(" -> ", initializers.Select(x => x.GetType().FullName))}");
 			foreach (var initializer in initializers)
 			{

@@ -4,7 +4,7 @@ using System.Reflection;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using MicroserviceFramework.AspNetCore.Extensions;
-using MicroserviceFramework.Audits;
+using MicroserviceFramework.Audit;
 using MicroserviceFramework.Domain;
 using MicroserviceFramework.Extensions;
 using Microsoft.AspNetCore.Mvc.Filters;

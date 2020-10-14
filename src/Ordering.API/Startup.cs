@@ -3,7 +3,7 @@ using MicroserviceFramework.AspNetCore;
 using MicroserviceFramework.AspNetCore.Extensions;
 using MicroserviceFramework.AspNetCore.Filters;
 using MicroserviceFramework.AspNetCore.Infrastructure;
-using MicroserviceFramework.Audits;
+using MicroserviceFramework.Audit;
 using MicroserviceFramework.AutoMapper;
 using MicroserviceFramework.DependencyInjection;
 using MicroserviceFramework.Ef;
@@ -72,6 +72,7 @@ namespace Ordering.API
 
 			services.AddMicroserviceFramework(builder =>
 			{
+				builder.UseNewtonsoftJson();
 				builder.UseAutoMapper();
 				builder.UseDependencyInjectionScanner();
 				builder.UseEventBus();

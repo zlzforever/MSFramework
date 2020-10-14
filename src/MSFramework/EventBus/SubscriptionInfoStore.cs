@@ -25,7 +25,7 @@ namespace MicroserviceFramework.EventBus
 
 		public void Add(Type eventType, Type handlerType)
 		{
-			if (!eventType.IsIntegrationEvent())
+			if (!eventType.IsEvent())
 			{
 				throw new MicroserviceFrameworkException($"{eventType} 不是一个集成事件");
 			}
@@ -71,19 +71,21 @@ namespace MicroserviceFramework.EventBus
 			return type.Name;
 		}
 
-		public void Remove<T, TH>() where T : Event where TH : IEventHandler<T>
+		public void Remove<TEvent, TEventHandler>() where TEvent : Event where TEventHandler : IEventHandler<TEvent>
 		{
-			var eventName = GetEventKey<T>();
+			var eventName = GetEventKey<TEvent>();
+			var eventHandlerType = typeof(TEventHandler);
 			if (_eventHandlerTypesDict.TryGetValue(eventName, out var handlerTypes))
 			{
-				var handlerType = handlerTypes.SingleOrDefault(x => x.HandlerType == typeof(TH));
+				var handlerType = handlerTypes
+					.SingleOrDefault(x => x.HandlerType == eventHandlerType);
 				if (handlerType != null)
 				{
 					handlerTypes.Remove(handlerType);
 				}
 			}
 
-			_eventTypes.Remove(typeof(T));
+			_eventTypes.Remove(typeof(TEvent));
 		}
 	}
 }
