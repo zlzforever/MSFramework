@@ -1,9 +1,12 @@
 using System;
+using System.Linq;
 using System.Threading.Tasks;
 using MicroserviceFramework.DependencyInjection;
+using MicroserviceFramework.Domain;
 using MicroserviceFramework.Domain.Event;
 using MicroserviceFramework.EventBus;
 using Ordering.Domain.AggregateRoots;
+using Ordering.Domain.Repositories;
 
 namespace Ordering.Application.EventHandlers
 {
@@ -14,10 +17,22 @@ namespace Ordering.Application.EventHandlers
 	public class ProjectCreatedIntegrationEventHandler : IEventHandler<ProjectCreatedIntegrationEvent>,
 		IScopeDependency
 	{
-		public Task HandleAsync(ProjectCreatedIntegrationEvent @event)
+		private readonly IProductRepository _productRepository;
+		private readonly UnitOfWorkManager _uowManager;
+
+		public ProjectCreatedIntegrationEventHandler(IProductRepository productRepository, UnitOfWorkManager uowManager)
 		{
-			Console.WriteLine("Execute ProjectCreatedIntegrationEvent");
-			return Task.CompletedTask;
+			_productRepository = productRepository;
+			_uowManager = uowManager;
+		}
+
+		public async Task HandleAsync(ProjectCreatedIntegrationEvent @event)
+		{
+			var result = await _productRepository.PagedQueryAsync(1, 10);
+			var product = result.Data.Last();
+			product.SetName(Guid.NewGuid().ToString());
+			await _productRepository.UpdateAsync(product);
+			await _uowManager.CommitAsync();
 		}
 	}
 

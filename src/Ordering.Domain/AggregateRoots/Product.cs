@@ -10,12 +10,20 @@ namespace Ordering.Domain.AggregateRoots
 
 	public class Product : AggregateRoot, IOptimisticLock
 	{
-		public Product(string name, int price) : base(ObjectId.NewId())
+		private Product(ObjectId id) : base(id)
 		{
-			Name = name;
-			Price = price;
+		}
 
-			AddDomainEvent(new ProjectCreateEvent());
+		public static Product Create(string name, int price)
+		{
+			var product = new Product(ObjectId.NewId())
+			{
+				Name = name,
+				Price = price
+			};
+
+			product.AddDomainEvent(new ProjectCreateEvent());
+			return product;
 		}
 
 		public string Name { get; private set; }
@@ -28,5 +36,10 @@ namespace Ordering.Domain.AggregateRoots
 		}
 
 		public string ConcurrencyStamp { get; set; }
+
+		public void SetName(string name)
+		{
+			Name = name;
+		}
 	}
 }
