@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using MicroserviceFramework.DependencyInjection;
 using MicroserviceFramework.Shared;
 using Microsoft.EntityFrameworkCore;
 using Ordering.Domain.AggregateRoots;
@@ -7,6 +8,10 @@ using Ordering.Infrastructure;
 
 namespace Ordering.Application.Queries
 {
+	public class PreBillLocker : IScopeDependency
+	{
+		
+	}
 	public class OrderingQuery : IOrderingQuery
 	{
 		private readonly DbSet<Order> _orderSet;

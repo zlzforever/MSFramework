@@ -5,7 +5,6 @@ using MicroserviceFramework.Application;
 using MicroserviceFramework.Domain;
 using MicroserviceFramework.Extensions;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.DependencyInjection.Extensions;
 
 namespace MicroserviceFramework.DependencyInjection
 {
@@ -41,17 +40,16 @@ namespace MicroserviceFramework.DependencyInjection
 					continue;
 				}
 
-				var excludeTypes = new[] {typeof(IApplicationService), typeof(IDomainService)};
+				services.Add(new ServiceDescriptor(implementationType, implementationType, lifetime));
+
 				var interfaceTypes = implementationType.GetImplementedInterfaces(
-						typeof(ITransientDependency), typeof(ISingletonDependency), typeof(IScopeDependency))
-					.Where(x => !excludeTypes.Contains(x)).ToArray();
+					typeof(ITransientDependency), typeof(ISingletonDependency), typeof(IScopeDependency),
+					typeof(IApplicationService), typeof(IDomainService), typeof(IRepository)).ToArray();
 
 				if (interfaceTypes.Length == 0)
 				{
 					continue;
 				}
-
-				services.Add(new ServiceDescriptor(implementationType, implementationType, lifetime));
 
 				for (var i = 0; i < interfaceTypes.Length; i++)
 				{
