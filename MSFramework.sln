@@ -68,6 +68,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MSFramework.Ef.PostgreSql",
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MSFramework.AspNetCore.Test", "tests\MSFramework.AspNetCore.Test\MSFramework.AspNetCore.Test.csproj", "{8D5AED8B-8168-47CB-9C09-B832D1C8311E}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MSFramework.EventBus", "src\MSFramework.EventBus\MSFramework.EventBus.csproj", "{62830065-7122-45AB-AF3E-3872987FD120}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -146,6 +148,10 @@ Global
 		{8D5AED8B-8168-47CB-9C09-B832D1C8311E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{8D5AED8B-8168-47CB-9C09-B832D1C8311E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{8D5AED8B-8168-47CB-9C09-B832D1C8311E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{62830065-7122-45AB-AF3E-3872987FD120}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{62830065-7122-45AB-AF3E-3872987FD120}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{62830065-7122-45AB-AF3E-3872987FD120}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{62830065-7122-45AB-AF3E-3872987FD120}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -174,6 +180,7 @@ Global
 		{C970D0A4-F33C-407D-AC8C-D503C16EE1A6} = {AFD16F00-F810-4A3C-BA74-59BBFBC2469D}
 		{570C8E10-B66E-4339-8D16-13B5E5D3CEE5} = {AFD16F00-F810-4A3C-BA74-59BBFBC2469D}
 		{8D5AED8B-8168-47CB-9C09-B832D1C8311E} = {0CEB99EE-969C-4A1D-841F-D22E4ADCC5F1}
+		{62830065-7122-45AB-AF3E-3872987FD120} = {AFD16F00-F810-4A3C-BA74-59BBFBC2469D}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {BE296FC5-5695-4FE5-9BAE-7168B9BACB47}

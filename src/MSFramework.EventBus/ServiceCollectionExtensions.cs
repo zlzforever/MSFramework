@@ -14,5 +14,12 @@ namespace MicroserviceFramework.EventBus
 			serviceCollection.TryAddSingleton<Initializer.InitializerBase, EventHandlerRegister>();
 			return serviceCollection;
 		}
+		
+		public static MicroserviceFrameworkBuilder UseEventBus(this MicroserviceFrameworkBuilder builder)
+		{
+			builder.Services.AddEventBus();
+			return builder;
+		}
+
 	}
 }

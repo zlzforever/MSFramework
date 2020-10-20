@@ -7,7 +7,6 @@ using MicroserviceFramework.Application;
 using MicroserviceFramework.Audit;
 using MicroserviceFramework.Domain;
 using MicroserviceFramework.Domain.Event;
-using MicroserviceFramework.EventBus;
 using MicroserviceFramework.Initializer;
 using MicroserviceFramework.Reflection;
 using MicroserviceFramework.Serializer;
@@ -51,13 +50,7 @@ namespace MicroserviceFramework
 			builder.Services.AddCQRS(assemblies);
 			return builder;
 		}
-
-		public static MicroserviceFrameworkBuilder UseEventBus(this MicroserviceFrameworkBuilder builder)
-		{
-			builder.Services.AddEventBus();
-			return builder;
-		}
-
+		
 		public static void AddMicroserviceFramework(this IServiceCollection services,
 			Action<MicroserviceFrameworkBuilder> builderAction = null)
 		{

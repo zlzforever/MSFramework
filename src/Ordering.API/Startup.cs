@@ -8,6 +8,7 @@ using MicroserviceFramework.AutoMapper;
 using MicroserviceFramework.DependencyInjection;
 using MicroserviceFramework.Ef;
 using MicroserviceFramework.Ef.MySql;
+using MicroserviceFramework.EventBus;
 using MicroserviceFramework.Extensions;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.Configuration;

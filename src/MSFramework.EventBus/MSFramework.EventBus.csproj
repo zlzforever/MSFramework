@@ -1,0 +1,14 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <PackageId>MSFramework.EventBus</PackageId>
+        <AssemblyName>MSFramework.EventBus</AssemblyName>
+        <RootNamespace>MicroserviceFramework.EventBus</RootNamespace>
+    </PropertyGroup>
+    <Import Project="../../package.props" />
+
+    <ItemGroup>
+      <ProjectReference Include="..\MSFramework\MSFramework.csproj" />
+    </ItemGroup>
+
+</Project>
