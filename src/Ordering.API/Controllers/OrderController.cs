@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using MicroserviceFramework.Application.CQRS.Command;
 using MicroserviceFramework.AspNetCore;
+using MicroserviceFramework.AspNetCore.AccessControl;
 using MicroserviceFramework.Shared;
 using Microsoft.AspNetCore.Mvc;
 using Ordering.Application.Commands;
@@ -52,8 +53,7 @@ namespace Ordering.API.Controllers
 
 		#region Command
 
-		[HttpPost("test-command1")]
-		//[AccessControl("test-command1")]
+		[HttpPost("test-command1"), AccessControl("test-command1")]
 		public async Task<string> TestCommand1Async([FromBody] TestCommand1 command)
 		{
 			var a = await _commandExecutor.ExecuteAsync(command, default);

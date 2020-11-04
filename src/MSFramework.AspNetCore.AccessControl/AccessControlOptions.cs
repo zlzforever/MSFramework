@@ -14,7 +14,7 @@ namespace MicroserviceFramework.AspNetCore.AccessControl
 		public string ServiceUrl => _configuration["AccessControl:ServiceUrl"];
 
 		public int CacheTTL => string.IsNullOrWhiteSpace(_configuration["AccessControl:CacheTTL"])
-			? 5
+			? 10
 			: int.Parse(_configuration["AccessControl:CacheTTL"]);
 
 		public string Authority => _configuration["AccessControl:Authority"];

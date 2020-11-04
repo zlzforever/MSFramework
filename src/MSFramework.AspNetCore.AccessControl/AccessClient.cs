@@ -39,7 +39,7 @@ namespace MicroserviceFramework.AspNetCore.AccessControl
 				var response = await client.SendAsync(httpRequestMessage);
 				var hasPermission = response.StatusCode == HttpStatusCode.OK;
 				var result = hasPermission ? (true, HttpStatusCode.OK) : (false, response.StatusCode);
-				entry.AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(_options.CacheTTL);
+				entry.AbsoluteExpirationRelativeToNow = TimeSpan.FromSeconds(_options.CacheTTL);
 				entry.Value = result;
 				return result;
 			});
@@ -54,15 +54,8 @@ namespace MicroserviceFramework.AspNetCore.AccessControl
 			var response = await client.SendAsync(httpRequestMessage);
 			response.EnsureSuccessStatusCode();
 			var str = await response.Content.ReadAsStringAsync();
-			var json = JObject.Parse(str);
-			if (json["success"].ToObject<bool>())
-			{
-				return json["data"].ToObject<Dictionary<string, List<ApiInfo>>>();
-			}
-			else
-			{
-				throw new MicroserviceFrameworkException("Query exist api-info failed");
-			}
+			var json = TryGetJObject(str);
+			return json["data"]?.ToObject<Dictionary<string, List<ApiInfo>>>();
 		}
 
 		public async Task CreateAsync(ApiInfo apiInfo)
@@ -83,10 +76,9 @@ namespace MicroserviceFramework.AspNetCore.AccessControl
 			response.EnsureSuccessStatusCode();
 			var str = await response.Content.ReadAsStringAsync();
 			var json = JObject.Parse(str);
-			if (!json["success"].ToObject<bool>())
+			if (json["success"]?.ToObject<bool>() == false)
 			{
-				var msg = json["message"].ToString();
-				throw new MicroserviceFrameworkException($"Create api-info failed: {msg}");
+				throw new MicroserviceFrameworkException($"Create api-info failed: {json["message"]}");
 			}
 		}
 
@@ -106,6 +98,24 @@ namespace MicroserviceFramework.AspNetCore.AccessControl
 			var httpRequestMessage = new HttpRequestMessage(new HttpMethod("PATCH"), url);
 			var response = await client.SendAsync(httpRequestMessage);
 			response.EnsureSuccessStatusCode();
+		}
+
+		private static JObject TryGetJObject(string json)
+		{
+			if (string.IsNullOrWhiteSpace(json))
+			{
+				throw new MicroserviceFrameworkException("Response is not correct");
+			}
+
+			var obj = JObject.Parse(json);
+			if (obj["success"]?.ToObject<bool>() == true)
+			{
+				return obj;
+			}
+			else
+			{
+				throw new MicroserviceFrameworkException("Request failed");
+			}
 		}
 	}
 }
