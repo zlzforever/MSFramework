@@ -28,6 +28,7 @@
         <ProjectReference Include="..\MSFramework.AutoMapper\MSFramework.AutoMapper.csproj" />
         <ProjectReference Include="..\MSFramework.Ef.SqlServer\MSFramework.Ef.SqlServer.csproj" />
         <ProjectReference Include="..\MSFramework.Migrator.MySql\MSFramework.Migrator.MySql.csproj" />
+        <ProjectReference Include="..\MSFramework.Newtonsoft\MSFramework.Newtonsoft.csproj" />
         <ProjectReference Include="..\MSFramework.RabbitMQ\MSFramework.RabbitMQ.csproj" />
         <ProjectReference Include="..\MSFramework\MSFramework.csproj" />
         <ProjectReference Include="..\Ordering.Application\Ordering.Application.csproj" />

@@ -1,5 +1,4 @@
 using System;
-using MicroserviceFramework.Shared;
 
 namespace MicroserviceFramework.EventBus
 {
@@ -8,7 +7,7 @@ namespace MicroserviceFramework.EventBus
 		/// <summary>
 		/// 事件源标识
 		/// </summary>
-		public ObjectId EventId { get; private set; }
+		public Guid EventId { get; private set; }
 
 		/// <summary>
 		/// 事件发生时间
@@ -17,7 +16,7 @@ namespace MicroserviceFramework.EventBus
 
 		protected Event()
 		{
-			EventId = ObjectId.NewId();
+			EventId = Guid.NewGuid();
 			EventTime = DateTimeOffset.Now;
 		}
 

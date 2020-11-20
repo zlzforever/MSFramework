@@ -1,17 +1,30 @@
-﻿using Microsoft.AspNetCore.Hosting;
+﻿using System;
+using System.IO;
+using System.Linq;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.Extensions.DependencyModel;
 using Microsoft.Extensions.Hosting;
-using MySql.Data.MySqlClient;
 using Serilog;
 using Serilog.Events;
 
 namespace Ordering.API
 {
+ 
+
 	public class Program
 	{
 		public static void Main(string[] args)
 		{
-			var conn=new MySqlConnection();
-			 
+	 
+			var defaultAsms = DependencyContext.Default.GetDefaultAssemblyNames()
+				.Select(x => x.Name).ToList();
+			defaultAsms.Sort();
+			File.WriteAllText("default.txt",
+				string.Join(Environment.NewLine, defaultAsms));
+			var asm1 = AppDomain.CurrentDomain.GetAssemblies().Select(x => x.GetName().Name).ToList();
+			asm1.Sort();
+			File.WriteAllText("asm1.txt",
+				string.Join(Environment.NewLine, asm1));
 			Log.Logger = new LoggerConfiguration()
 				.MinimumLevel.Debug()
 				.MinimumLevel.Override("Microsoft.Hosting.Lifetime", LogEventLevel.Information)

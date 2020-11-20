@@ -1,6 +1,3 @@
-using System;
-using System.Collections.Generic;
-using MicroserviceFramework.Reflection;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace MicroserviceFramework.Initializer
@@ -9,32 +6,26 @@ namespace MicroserviceFramework.Initializer
 	{
 		internal static MicroserviceFrameworkBuilder UseInitializer(this MicroserviceFrameworkBuilder builder)
 		{
-			var assemblies = AssemblyFinder.GetAllList();
-			var types = new HashSet<Type>();
-			foreach (var assembly in assemblies)
-			{
-				foreach (var type in assembly.GetTypes())
-				{
-					types.Add(type);
-				}
-			}
-
 			var initializerType = typeof(InitializerBase);
 			var nonAutomaticInitializerType = typeof(INotAutomaticRegisterInitializer);
-			types.Remove(initializerType);
-			foreach (var type in types)
+			MicroserviceFrameworkLoader.RegisterType += type =>
 			{
+				if (type.IsAbstract || type.IsInterface)
+				{
+					return;
+				}
+
 				if (initializerType.IsAssignableFrom(type) &&
 				    !nonAutomaticInitializerType.IsAssignableFrom(type))
 				{
 					builder.Services.AddSingleton(initializerType, type);
 				}
-			}
-
+			};
 			return builder;
 		}
 
-		public static MicroserviceFrameworkBuilder AddInitializer<TInitializer>(this MicroserviceFrameworkBuilder builder)
+		public static MicroserviceFrameworkBuilder AddInitializer<TInitializer>(
+			this MicroserviceFrameworkBuilder builder)
 			where TInitializer : InitializerBase
 		{
 			builder.Services.AddSingleton<TInitializer>();

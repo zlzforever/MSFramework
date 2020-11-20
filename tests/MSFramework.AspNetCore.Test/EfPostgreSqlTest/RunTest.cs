@@ -1,6 +1,5 @@
 ﻿using MicroserviceFramework;
 using MicroserviceFramework.AspNetCore;
-using MicroserviceFramework.DependencyInjection;
 using MicroserviceFramework.Ef;
 using MicroserviceFramework.Ef.PostgreSql;
 using Microsoft.AspNetCore.Hosting;
@@ -35,7 +34,6 @@ namespace MSFramework.AspNetCore.Test.EfPostgreSqlTest
 						var config = context.Configuration;
 						service.AddMicroserviceFramework(builder =>
 						{
-							builder.UseDependencyInjectionScanner();
 							builder.UseAspNetCore();
 							builder.UseEntityFramework(x => { x.AddNpgsql<TestDataContext>(config); });
 						});

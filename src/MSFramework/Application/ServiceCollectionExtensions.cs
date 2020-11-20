@@ -1,6 +1,4 @@
-using System;
 using System.Linq;
-using System.Reflection;
 using System.Threading;
 using MicroserviceFramework.Application.CQRS;
 using MicroserviceFramework.Application.CQRS.Command;
@@ -15,20 +13,9 @@ namespace MicroserviceFramework.Application
 {
 	public static class ServiceCollectionExtensions
 	{
-		public static IServiceCollection AddCQRS(this IServiceCollection serviceCollection,
-			params Type[] types)
+		public static IServiceCollection AddCQRS(this IServiceCollection serviceCollection)
 		{
-			var assemblies = types.Select(x => x.Assembly).ToArray();
-			serviceCollection.AddCQRS(assemblies);
-			return serviceCollection;
-		}
-
-		public static IServiceCollection AddCQRS(this IServiceCollection serviceCollection,
-			params Assembly[] assemblies)
-		{
-			var types = assemblies.SelectMany(x => x.GetTypes()).ToArray();
 			var cache = new HandlerTypeCache();
-
 			var handlerInterfaceTypes = new[]
 			{
 				typeof(ICommandHandler<>),
@@ -37,21 +24,21 @@ namespace MicroserviceFramework.Application
 				typeof(IQueryHandler<,>)
 			};
 
-			var singletonType = typeof(ISingletonDependency);
-			var transientType = typeof(ITransientDependency);
-			var scopeType = typeof(IScopeDependency);
-
-			foreach (var type in types)
+			MicroserviceFrameworkLoader.RegisterType += type =>
 			{
-				var interfaces = type.GetInterfaces();
-				var handlerTypes = interfaces
-					.Where(@interface => @interface.IsGenericType)
-					.Where(@interface => handlerInterfaceTypes.Any(x => x == @interface.GetGenericTypeDefinition()))
+				if (type.IsAbstract || type.IsInterface)
+				{
+					return;
+				}
+
+				var handlerTypes = type.GetInterfaces()
+					.Where(@interface => @interface.IsGenericType &&
+					                     handlerInterfaceTypes.Any(x => x == @interface.GetGenericTypeDefinition()))
 					.ToList();
 
 				if (handlerTypes.Count == 0)
 				{
-					continue;
+					return;
 				}
 
 				if (handlerTypes.Count > 1)
@@ -75,17 +62,10 @@ namespace MicroserviceFramework.Application
 
 				if (cache.TryAdd(requestType, (type, method)))
 				{
-					if (transientType.IsAssignableFrom(type))
+					var lifetime = LifetimeChecker.Get(type);
+					if (lifetime.HasValue)
 					{
-						serviceCollection.TryAddTransient(type);
-					}
-					else if (scopeType.IsAssignableFrom(type))
-					{
-						serviceCollection.TryAddScoped(type);
-					}
-					else if (singletonType.IsAssignableFrom(type))
-					{
-						serviceCollection.TryAddSingleton(type);
+						serviceCollection.Add(new ServiceDescriptor(type, lifetime.Value));
 					}
 					else
 					{
@@ -97,7 +77,7 @@ namespace MicroserviceFramework.Application
 					throw new MicroserviceFrameworkException(
 						$"Register {requestType.FullName} with handler {type.FullName} failed");
 				}
-			}
+			};
 
 			serviceCollection.TryAddSingleton(cache);
 			serviceCollection.TryAddScoped<ICommandProcessor, DefaultCommandProcessor>();

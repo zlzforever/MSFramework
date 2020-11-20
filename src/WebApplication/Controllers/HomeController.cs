@@ -1,6 +1,5 @@
 ﻿using System.Diagnostics;
 using Cerberus.AspNetCore.AccessControl;
-using MicroserviceFramework.AspNetCore.AccessControl;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;

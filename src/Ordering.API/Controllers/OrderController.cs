@@ -4,7 +4,6 @@ using System.Threading.Tasks;
 using Cerberus.AspNetCore.AccessControl;
 using MicroserviceFramework.Application.CQRS.Command;
 using MicroserviceFramework.AspNetCore;
-using MicroserviceFramework.AspNetCore.AccessControl;
 using MicroserviceFramework.Shared;
 using Microsoft.AspNetCore.Mvc;
 using Ordering.Application.Commands;

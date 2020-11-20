@@ -1,10 +1,5 @@
-using System;
-using System.Net.Http;
 using Cerberus.AspNetCore.AccessControl;
-using IdentityModel.Client;
 using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.DependencyInjection.Extensions;
 
 namespace MicroserviceFramework.AspNetCore.AccessControl
 {

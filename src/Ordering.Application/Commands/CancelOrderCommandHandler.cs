@@ -1,13 +1,12 @@
 using System.Threading;
 using System.Threading.Tasks;
 using MicroserviceFramework.Application.CQRS.Command;
-using MicroserviceFramework.DependencyInjection;
 using MicroserviceFramework.Shared;
 using Ordering.Domain.Repositories;
 
 namespace Ordering.Application.Commands
 {
-	public class CancelOrderCommandHandler : ICommandHandler<CancelOrderCommand, ObjectId>, IScopeDependency
+	public class CancelOrderCommandHandler : ICommandHandler<CancelOrderCommand, ObjectId>
 	{
 		private readonly IOrderingRepository _orderRepository;
 

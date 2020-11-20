@@ -1,8 +1,8 @@
 ﻿using System;
+using System.Linq;
 using System.Reflection;
 using AutoMapper;
 using MicroserviceFramework.Mapper;
-using MicroserviceFramework.Reflection;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace MicroserviceFramework.AutoMapper
@@ -11,8 +11,7 @@ namespace MicroserviceFramework.AutoMapper
 	{
 		public static MicroserviceFrameworkBuilder UseAutoMapper(this MicroserviceFrameworkBuilder builder)
 		{
-			var assemblies = AssemblyFinder.GetAllList();
-			return builder.UseAutoMapper(assemblies.ToArray());
+			return builder.UseAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 		}
 
 		public static MicroserviceFrameworkBuilder UseAutoMapper(this MicroserviceFrameworkBuilder builder,
@@ -26,9 +25,7 @@ namespace MicroserviceFramework.AutoMapper
 		public static MicroserviceFrameworkBuilder UseAutoMapper(this MicroserviceFrameworkBuilder builder,
 			params Type[] types)
 		{
-			builder.Services.AddScoped<IObjMapper, AutoMapperMapper>();
-			builder.Services.AddAutoMapper(types);
-			return builder;
+			return builder.UseAutoMapper(types.Select(x => x.Assembly).ToArray());
 		}
 	}
 }

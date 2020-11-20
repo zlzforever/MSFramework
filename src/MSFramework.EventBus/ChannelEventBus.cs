@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using MicroserviceFramework.Serializer;
 using Microsoft.Extensions.Logging;
 
+
 namespace MicroserviceFramework.EventBus
 {
 	public class ChannelEventBus : IEventBus
@@ -49,12 +50,12 @@ namespace MicroserviceFramework.EventBus
 		{
 			if (!eventType.IsEvent())
 			{
-				throw new MicroserviceFrameworkException($"{eventType} 不是一个事件");
+				throw new EventBusException($"{eventType} 不是一个事件");
 			}
 
 			if (!handlerType.CanHandle(eventType))
 			{
-				throw new MicroserviceFrameworkException($"{handlerType} 不能处理 {eventType}");
+				throw new EventBusException($"{handlerType} 不能处理 {eventType}");
 			}
 
 			var eventName = _subscriptionInfoStore.GetEventKey(eventType);

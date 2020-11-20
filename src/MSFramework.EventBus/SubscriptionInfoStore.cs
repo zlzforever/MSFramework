@@ -27,18 +27,18 @@ namespace MicroserviceFramework.EventBus
 		{
 			if (!eventType.IsEvent())
 			{
-				throw new MicroserviceFrameworkException($"{eventType} 不是一个集成事件");
+				throw new EventBusException($"{eventType} 不是一个集成事件");
 			}
 
 			if (!handlerType.CanHandle(eventType))
 			{
-				throw new MicroserviceFrameworkException($"{handlerType} 不能处理 {eventType}");
+				throw new EventBusException($"{handlerType} 不能处理 {eventType}");
 			}
 
 			var methodInfo = handlerType.GetMethod("HandleAsync");
 			if (methodInfo == null)
 			{
-				throw new MicroserviceFrameworkException($"在类型 {handlerType.FullName} 中找不到处理方法 HandleAsync");
+				throw new EventBusException($"在类型 {handlerType.FullName} 中找不到处理方法 HandleAsync");
 			}
 
 			var eventName = GetEventKey(eventType);

@@ -50,5 +50,9 @@ namespace Ordering.Application.EventHandlers
 			Console.WriteLine("Execute ProjectCreateEvent");
 			await _eventBus.PublishAsync(new ProjectCreatedIntegrationEvent());
 		}
+		
+		public void Dispose()
+		{
+		}
 	}
 }

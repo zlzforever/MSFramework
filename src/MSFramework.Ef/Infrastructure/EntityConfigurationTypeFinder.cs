@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using MicroserviceFramework.Reflection;
 using Microsoft.Extensions.Logging;
 
 namespace MicroserviceFramework.Ef.Infrastructure
@@ -30,7 +29,7 @@ namespace MicroserviceFramework.Ef.Infrastructure
 			var dict = _entityRegistersDict;
 			dict.Clear();
 
-			var assemblies = AssemblyFinder.GetAllList();
+			var assemblies =  AppDomain.CurrentDomain.GetAssemblies();
 			var types = assemblies.SelectMany(assembly => assembly.GetTypes()).Where(type =>
 					type.IsClass && !type.IsAbstract && typeof(IEntityRegister).IsAssignableFrom(type))
 				.Distinct()

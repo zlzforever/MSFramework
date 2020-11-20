@@ -1,52 +1,37 @@
 using System;
+using System.Collections.Concurrent;
+using System.Collections.Generic;
+using System.Reflection;
 using System.Threading.Tasks;
-using MicroserviceFramework.Shared;
+using MicroserviceFramework.Extensions;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace MicroserviceFramework.Domain.Event
 {
 	public class DomainEventDispatcher : IDomainEventDispatcher
 	{
-		private readonly IDomainEventHandlerTypeStore _eventHandlerTypeStore;
-		private readonly IDomainHandlerFactory _handlerFactory;
+		public static readonly Type EventHandlerBaseType;
 
-		public DomainEventDispatcher(IDomainEventHandlerTypeStore eventHandlerTypeStore, IDomainHandlerFactory handlerFactory)
+		private readonly IServiceProvider _serviceProvider;
+		private static readonly Dictionary<Type, (Type Interface, MethodInfo Method)> _cache;
+
+		static DomainEventDispatcher()
 		{
-			_handlerFactory = handlerFactory;
-			_eventHandlerTypeStore = eventHandlerTypeStore ?? new DomainEventHandlerTypeStore();
+			EventHandlerBaseType = typeof(IDomainEventHandler<>);
+			_cache = new Dictionary<Type, (Type, MethodInfo)>();
 		}
 
-		public virtual bool Register<TEvent, TEventHandler>()
-			where TEvent : DomainEvent
-			where TEventHandler : IDomainEventHandler<TEvent>
+		public static void Register(Type eventType, (Type Interface, MethodInfo Method) cacheItem)
 		{
-			var handlerType = typeof(TEventHandler);
-			return Register<TEvent>(handlerType);
+			if (!_cache.ContainsKey(eventType))
+			{
+				_cache.Add(eventType, cacheItem);
+			}
 		}
 
-		public virtual bool Register<TEvent>(Type handlerType) where TEvent : DomainEvent
+		public DomainEventDispatcher(IServiceProvider serviceProvider)
 		{
-			return Register(typeof(TEvent), handlerType);
-		}
-
-		public virtual bool Register(Type eventType, Type handlerType)
-		{
-			Check.NotNull(eventType, nameof(eventType));
-			Check.NotNull(handlerType, nameof(handlerType));
-
-			if (!eventType.IsEvent())
-			{
-				throw new ArgumentException("Event should inherit from Event and be a class ");
-			}
-
-			if (handlerType.CanHandle(eventType))
-			{
-				_eventHandlerTypeStore.Add(eventType, handlerType);
-				return true;
-			}
-			else
-			{
-				throw new ArgumentException($"Type {handlerType} is not a valid handler");
-			}
+			_serviceProvider = serviceProvider;
 		}
 
 		public virtual async Task DispatchAsync(DomainEvent @event)
@@ -57,20 +42,21 @@ namespace MicroserviceFramework.Domain.Event
 			}
 
 			var eventType = @event.GetType();
-			var handlerInfos = _eventHandlerTypeStore.GetHandlers(eventType);
-			foreach (var handlerInfo in handlerInfos)
+
+			var tuple = _cache.GetOrDefault(eventType);
+
+			if (tuple == default)
 			{
-				var handler = _handlerFactory.Create(handlerInfo.Type);
-				if (handler != null)
+				throw new MicroserviceFrameworkException("获取领域事件处理器缓存失败");
+			}
+
+			var handlers = _serviceProvider.GetServices(tuple.Interface);
+
+			foreach (var handler in handlers)
+			{
+				if (tuple.Method.Invoke(handler, new object[] {@event}) is Task task)
 				{
-					if (handlerInfo.Method.Invoke(handler, new object[] {@event}) is Task task)
-					{
-						await task;
-					}
-				}
-				else
-				{
-					throw new ApplicationException($"Create handler {handlerInfo.Type} object failed");
+					await task;
 				}
 			}
 		}

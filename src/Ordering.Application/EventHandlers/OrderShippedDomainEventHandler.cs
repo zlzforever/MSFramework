@@ -19,5 +19,9 @@ namespace Ordering.Application.EventHandlers
 			// todo
 			return Task.CompletedTask;
 		}
+
+		public void Dispose()
+		{
+		}
 	}
 }

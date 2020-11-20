@@ -2,7 +2,6 @@ using System;
 using System.Linq;
 using System.Threading.Tasks;
 using MicroserviceFramework.Initializer;
-using MicroserviceFramework.Reflection;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace MicroserviceFramework.EventBus
@@ -15,7 +14,7 @@ namespace MicroserviceFramework.EventBus
 		{
 			var eventBus = serviceProvider.GetRequiredService<IEventBus>();
 
-			var assemblies = AssemblyFinder.GetAllList();
+			var assemblies =  AppDomain.CurrentDomain.GetAssemblies();
 			var types = assemblies.SelectMany(x => x.GetTypes());
 
 			foreach (var type in types)
@@ -34,7 +33,7 @@ namespace MicroserviceFramework.EventBus
 				// 约束：一个事件处理器只能处理一个事件
 				if (handlerInterfaceTypes.Count > 1)
 				{
-					throw new MicroserviceFrameworkException($"{type.FullName} should impl one handler");
+					throw new EventBusException($"{type.FullName} should impl one handler");
 				}
 
 				var handlerInterfaceType = handlerInterfaceTypes[0];

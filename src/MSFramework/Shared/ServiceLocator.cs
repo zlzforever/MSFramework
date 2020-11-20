@@ -1,4 +1,6 @@
 // using System;
+// using MicroserviceFramework.DependencyInjection;
+// using Microsoft.Extensions.DependencyInjection;
 //
 // namespace MicroserviceFramework.Shared
 // {
@@ -7,32 +9,32 @@
 // 	/// 即如果使用如 BackgroundService 之类的无 scope 范围的，无法通过此获得对象
 // 	/// todo:
 // 	/// </summary>
-// 	public class ServiceLocator
+// 	public class ServiceLocator : IScopeDependency
 // 	{
-// 		private static Func<Type, object> _provider;
+// 		private readonly IServiceProvider _serviceProvider;
+// 		private static IServiceProvider _rootServiceProvider;
 //
-// 		public static void SetLocator(Func<Type, object> locator)
+// 		public ServiceLocator(IServiceProvider serviceProvider)
 // 		{
-// 			if (_provider == null)
-// 			{
-// 				_provider = locator;
-// 			}
+// 			_serviceProvider = serviceProvider;
 // 		}
 //
-// 		public static T Get<T>()
+// 		public ServiceLocator Root => new ServiceLocator(_rootServiceProvider);
+//
+// 		public static void SetLocator(IServiceProvider serviceProvider)
 // 		{
-// 			if (_provider == null)
+// 			_rootServiceProvider = serviceProvider;
+// 		}
+//
+// 		public T GetService<T>()
+// 		{
+// 			if (_serviceProvider == null)
 // 			{
 // 				throw new MicroserviceFrameworkException("服务定位没有准备好");
 // 			}
 //
-// 			var service = Get(typeof(T));
-// 			return service == null ? default : (T) service;
-// 		}
-//
-// 		public static object Get(Type type)
-// 		{
-// 			return _provider(type);
+// 			var service = _serviceProvider.GetService<T>();
+// 			return service == null ? default : service;
 // 		}
 // 	}
 // }

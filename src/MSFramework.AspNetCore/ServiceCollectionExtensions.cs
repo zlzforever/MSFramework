@@ -19,7 +19,6 @@ namespace MicroserviceFramework.AspNetCore
 				builder.Services.TryAddSingleton<IFunctionDefineFinder, AspNetCoreFunctionFinder>();
 			}
 
-
 			builder.Services.AddHttpContextAccessor();
 			builder.Services.AddSingleton<IActionResultTypeMapper, ActionResultTypeMapper>();
 			builder.Services.TryAddScoped<ISession, HttpContextSession>();

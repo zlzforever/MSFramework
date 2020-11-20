@@ -1,4 +1,7 @@
-﻿using MicroserviceFramework;
+﻿using System;
+using System.IO;
+using System.Linq;
+using MicroserviceFramework;
 using MicroserviceFramework.AspNetCore;
 using MicroserviceFramework.AspNetCore.AccessControl;
 using MicroserviceFramework.AspNetCore.Extensions;
@@ -6,11 +9,12 @@ using MicroserviceFramework.AspNetCore.Filters;
 using MicroserviceFramework.AspNetCore.Infrastructure;
 using MicroserviceFramework.Audit;
 using MicroserviceFramework.AutoMapper;
-using MicroserviceFramework.DependencyInjection;
+using MicroserviceFramework.Domain.Event;
 using MicroserviceFramework.Ef;
 using MicroserviceFramework.Ef.MySql;
 using MicroserviceFramework.EventBus;
 using MicroserviceFramework.Extensions;
+using MicroserviceFramework.Newtonsoft;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -37,7 +41,7 @@ namespace Ordering.API
 		public void ConfigureServices(IServiceCollection services)
 		{
 			Configuration.Print(x => Log.Logger.Information(x));
-			
+
 			services.AddControllers(x =>
 				{
 					x.Filters.AddUnitOfWork();
@@ -76,7 +80,6 @@ namespace Ordering.API
 			{
 				builder.UseNewtonsoftJson();
 				builder.UseAutoMapper();
-				builder.UseDependencyInjectionScanner();
 				builder.UseEventBus();
 				builder.UseCQRS();
 				builder.UseBaseX();
@@ -99,6 +102,10 @@ namespace Ordering.API
 		// This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
 		public void Configure(IApplicationBuilder app, IHostEnvironment env)
 		{
+			var dispatcher = app.ApplicationServices.CreateScope().ServiceProvider.GetService<IDomainEventDispatcher>();
+			dispatcher.DispatchAsync(new DomainEventSample1()).Wait();
+			dispatcher.DispatchAsync(new DomainEventSample2()).Wait();
+
 			if (env.IsDevelopment())
 			{
 				app.UseDeveloperExceptionPage();
@@ -127,6 +134,10 @@ namespace Ordering.API
 			//启用中间件服务对swagger-ui，指定Swagger JSON终结点
 			app.UseSwaggerUI(c => { c.SwaggerEndpoint("/swagger/v1.0/swagger.json", "Ordering API V1.0"); });
 
+			var asm2 = AppDomain.CurrentDomain.GetAssemblies().Select(x => x.GetName().Name).ToList();
+			asm2.Sort();
+			File.WriteAllText("asm2.txt",
+				string.Join(Environment.NewLine, asm2));
 			app.UseMicroserviceFramework();
 		}
 	}
