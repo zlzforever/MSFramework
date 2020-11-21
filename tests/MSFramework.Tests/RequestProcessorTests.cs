@@ -1,7 +1,7 @@
 using System.Threading;
 using System.Threading.Tasks;
 using MicroserviceFramework.Application;
-using MicroserviceFramework.Application.CQRS.Command;
+using MicroserviceFramework.Application.CQRS;
 using Microsoft.Extensions.DependencyInjection;
 using Xunit;
 
@@ -31,7 +31,7 @@ namespace MSFramework.Tests
 			var services = new ServiceCollection();
 			services.AddCQRS();
 			var provider = services.BuildServiceProvider();
-			var processor = provider.GetRequiredService<ICommandProcessor>();
+			var processor = provider.GetRequiredService<ICqrsProcessor>();
 			await processor.ExecuteAsync(new Request1());
 			var result = await processor.ExecuteAsync(new Request2());
 			Assert.Equal(1, result);

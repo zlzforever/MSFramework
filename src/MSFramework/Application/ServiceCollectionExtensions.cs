@@ -1,8 +1,7 @@
+using System;
 using System.Linq;
 using System.Threading;
 using MicroserviceFramework.Application.CQRS;
-using MicroserviceFramework.Application.CQRS.Command;
-using MicroserviceFramework.Application.CQRS.Query;
 using MicroserviceFramework.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
@@ -13,9 +12,9 @@ namespace MicroserviceFramework.Application
 {
 	public static class ServiceCollectionExtensions
 	{
+	
 		public static IServiceCollection AddCQRS(this IServiceCollection serviceCollection)
 		{
-			var cache = new HandlerTypeCache();
 			var handlerInterfaceTypes = new[]
 			{
 				typeof(ICommandHandler<>),
@@ -26,63 +25,54 @@ namespace MicroserviceFramework.Application
 
 			MicroserviceFrameworkLoader.RegisterType += type =>
 			{
-				if (type.IsAbstract || type.IsInterface)
+				foreach (var handlerInterfaceType in handlerInterfaceTypes)
 				{
-					return;
-				}
-
-				var handlerTypes = type.GetInterfaces()
-					.Where(@interface => @interface.IsGenericType &&
-					                     handlerInterfaceTypes.Any(x => x == @interface.GetGenericTypeDefinition()))
-					.ToList();
-
-				if (handlerTypes.Count == 0)
-				{
-					return;
-				}
-
-				if (handlerTypes.Count > 1)
-				{
-					throw new MicroserviceFrameworkException($"{type.FullName} should impl one handler");
-				}
-
-				var handlerType = handlerTypes.First();
-				var requestType = handlerType.GenericTypeArguments.First();
-
-				var method = type.GetMethods()
-					.FirstOrDefault(x =>
-						x.Name == "HandleAsync"
-						&& x.GetParameters().Length == 2
-						&& x.GetParameters()[0].ParameterType == requestType
-						&& x.GetParameters()[1].ParameterType == typeof(CancellationToken));
-				if (method == null)
-				{
-					throw new MicroserviceFrameworkException("找不到处理方法");
-				}
-
-				if (cache.TryAdd(requestType, (type, method)))
-				{
-					var lifetime = LifetimeChecker.Get(type);
-					if (lifetime.HasValue)
-					{
-						serviceCollection.Add(new ServiceDescriptor(type, lifetime.Value));
-					}
-					else
-					{
-						serviceCollection.TryAddScoped(type);
-					}
-				}
-				else
-				{
-					throw new MicroserviceFrameworkException(
-						$"Register {requestType.FullName} with handler {type.FullName} failed");
+					RegisterGenericType(serviceCollection, type, handlerInterfaceType);
 				}
 			};
 
-			serviceCollection.TryAddSingleton(cache);
-			serviceCollection.TryAddScoped<ICommandProcessor, DefaultCommandProcessor>();
-			serviceCollection.TryAddScoped<IQueryProcessor, DefaultQueryProcessor>();
+			serviceCollection.TryAddScoped<ICqrsProcessor, CqrsProcessor>();
+	 
 			return serviceCollection;
+		}
+
+		private static void RegisterGenericType(IServiceCollection serviceCollection, Type type,
+			Type genericTypeDefinition)
+		{
+			if (type.IsAbstract || type.IsInterface)
+			{
+				return;
+			}
+
+			var interfaces = type.GetInterfaces();
+			var handlerInterfaceTypes = interfaces
+				.Where(@interface => @interface.IsGenericType && genericTypeDefinition ==
+					@interface.GetGenericTypeDefinition())
+				.ToList();
+
+			if (handlerInterfaceTypes.Count == 0)
+			{
+				return;
+			}
+
+			var cancellationTokenType = typeof(CancellationToken);
+
+			foreach (var handlerInterfaceType in handlerInterfaceTypes)
+			{
+				var argumentType = handlerInterfaceType.GenericTypeArguments[0];
+				var handlerMethod = handlerInterfaceType.GetMethod("HandleAsync",
+					new[] {argumentType, cancellationTokenType});
+				CqrsProcessor.Register(argumentType, (handlerInterfaceType, handlerMethod));
+				var lifetime = LifetimeChecker.Get(type);
+				if (lifetime.HasValue)
+				{
+					serviceCollection.Add(new ServiceDescriptor(handlerInterfaceType, type, lifetime.Value));
+				}
+				else
+				{
+					serviceCollection.AddScoped(handlerInterfaceType, type);
+				}
+			}
 		}
 	}
 }

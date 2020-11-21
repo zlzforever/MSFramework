@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Cerberus.AspNetCore.AccessControl;
-using MicroserviceFramework.Application.CQRS.Command;
+using MicroserviceFramework.Application.CQRS;
 using MicroserviceFramework.AspNetCore;
 using MicroserviceFramework.Shared;
 using Microsoft.AspNetCore.Mvc;
@@ -10,7 +10,6 @@ using Ordering.Application.Commands;
 using Ordering.Application.Queries;
 using Ordering.Domain.AggregateRoots;
 using Ordering.Domain.Repositories;
-
 
 namespace Ordering.API.Controllers
 {
@@ -20,13 +19,13 @@ namespace Ordering.API.Controllers
 	{
 		private readonly IOrderingQuery _orderingQuery;
 		private readonly IOrderingRepository _orderRepository;
-		private readonly ICommandProcessor _commandExecutor;
+		private readonly ICqrsProcessor _cqrsProcessor;
 
 		public OrderController(IOrderingRepository orderRepository,
-			IOrderingQuery orderingQuery, ICommandProcessor commandExecutor)
+			IOrderingQuery orderingQuery, ICqrsProcessor commandExecutor)
 		{
 			_orderingQuery = orderingQuery;
-			_commandExecutor = commandExecutor;
+			_cqrsProcessor = commandExecutor;
 			_orderRepository = orderRepository;
 		}
 
@@ -56,7 +55,7 @@ namespace Ordering.API.Controllers
 		[HttpPost("test-command1"), AccessControl("test-command1")]
 		public async Task<string> TestCommand1Async([FromBody] TestCommand1 command)
 		{
-			var a = await _commandExecutor.ExecuteAsync(command, default);
+			var a = await _cqrsProcessor.ExecuteAsync(command, default);
 			return a;
 		}
 
@@ -64,7 +63,7 @@ namespace Ordering.API.Controllers
 		//[AccessControl("test-command2")]
 		public async Task TestCommand2Async([FromBody] TestCommand2 command)
 		{
-			await _commandExecutor.ExecuteAsync(command, default);
+			await _cqrsProcessor.ExecuteAsync(command, default);
 		}
 
 		/// <summary>
@@ -92,7 +91,7 @@ namespace Ordering.API.Controllers
 			}
 
 
-			return await _commandExecutor.ExecuteAsync(new CreateOrderCommand(items, "HELLO", "上海", "张扬路500号", "上海",
+			return await _cqrsProcessor.ExecuteAsync(new CreateOrderCommand(items, "HELLO", "上海", "张扬路500号", "上海",
 				"中国", "200000", "what?"));
 		}
 

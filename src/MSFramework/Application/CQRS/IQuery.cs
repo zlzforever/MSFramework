@@ -1,4 +1,4 @@
-namespace MicroserviceFramework.Application.CQRS.Query
+namespace MicroserviceFramework.Application.CQRS
 {
 	public interface IQuery
 	{

@@ -1,7 +1,7 @@
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace MicroserviceFramework.Application.CQRS.Command
+namespace MicroserviceFramework.Application.CQRS
 {
 	public interface ICommandHandler<in TCommand> where TCommand : ICommand
 	{

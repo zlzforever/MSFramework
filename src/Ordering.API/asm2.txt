@@ -182,6 +182,5 @@ System.Threading.Tasks.Extensions
 System.Threading.Thread
 System.Threading.ThreadPool
 System.Threading.Timer
-System.Transactions.Local
 System.Xml.ReaderWriter
 System.Xml.XDocument

@@ -1,4 +1,3 @@
-using System;
 using System.Linq;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
@@ -19,20 +18,19 @@ namespace MicroserviceFramework.Domain.Event
 				}
 
 				var interfaces = type.GetInterfaces();
-				var handlerTypes = interfaces
-					.Where(@interface => @interface.IsGenericType &&
-					                     DomainEventDispatcher.EventHandlerBaseType ==
-					                     @interface.GetGenericTypeDefinition()).ToList();
+				var handlerInterfaceTypes = interfaces
+					.Where(@interface => @interface.IsGenericType && DomainEventDispatcher.EventHandlerBaseType ==
+						@interface.GetGenericTypeDefinition())
+					.ToList();
 
-				if (handlerTypes.Count == 0)
+				if (handlerInterfaceTypes.Count == 0)
 				{
 					return;
 				}
 
-				foreach (var handlerType in handlerTypes)
+				foreach (var handlerInterfaceType in handlerInterfaceTypes)
 				{
-					var eventType = handlerType.GenericTypeArguments[0];
-					var handlerInterfaceType = DomainEventDispatcher.EventHandlerBaseType.MakeGenericType(eventType);
+					var eventType = handlerInterfaceType.GenericTypeArguments[0];
 					var handlerMethod = handlerInterfaceType.GetMethod("HandleAsync", new[] {eventType});
 					DomainEventDispatcher.Register(eventType, (handlerInterfaceType, handlerMethod));
 					serviceCollection.AddScoped(handlerInterfaceType, type);

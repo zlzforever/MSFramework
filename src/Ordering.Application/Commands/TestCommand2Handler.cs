@@ -1,7 +1,7 @@
 using System;
 using System.Threading;
 using System.Threading.Tasks;
-using MicroserviceFramework.Application.CQRS.Command;
+using MicroserviceFramework.Application.CQRS;
 
 namespace Ordering.Application.Commands
 {

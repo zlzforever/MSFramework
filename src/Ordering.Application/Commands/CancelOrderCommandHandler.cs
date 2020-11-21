@@ -1,6 +1,6 @@
 using System.Threading;
 using System.Threading.Tasks;
-using MicroserviceFramework.Application.CQRS.Command;
+using MicroserviceFramework.Application.CQRS;
 using MicroserviceFramework.Shared;
 using Ordering.Domain.Repositories;
 

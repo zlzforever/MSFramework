@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Reflection;
 using System.Threading.Tasks;
@@ -13,19 +12,24 @@ namespace MicroserviceFramework.Domain.Event
 		public static readonly Type EventHandlerBaseType;
 
 		private readonly IServiceProvider _serviceProvider;
-		private static readonly Dictionary<Type, (Type Interface, MethodInfo Method)> _cache;
+		private static readonly Dictionary<Type, (Type Interface, MethodInfo Method)> Cache;
 
 		static DomainEventDispatcher()
 		{
 			EventHandlerBaseType = typeof(IDomainEventHandler<>);
-			_cache = new Dictionary<Type, (Type, MethodInfo)>();
+			Cache = new Dictionary<Type, (Type, MethodInfo)>();
 		}
 
-		public static void Register(Type eventType, (Type Interface, MethodInfo Method) cacheItem)
+		public static bool Register(Type eventType, (Type Interface, MethodInfo Method) cacheItem)
 		{
-			if (!_cache.ContainsKey(eventType))
+			if (!Cache.ContainsKey(eventType))
 			{
-				_cache.Add(eventType, cacheItem);
+				Cache.Add(eventType, cacheItem);
+				return true;
+			}
+			else
+			{
+				return false;
 			}
 		}
 
@@ -43,11 +47,11 @@ namespace MicroserviceFramework.Domain.Event
 
 			var eventType = @event.GetType();
 
-			var tuple = _cache.GetOrDefault(eventType);
+			var tuple = Cache.GetOrDefault(eventType);
 
 			if (tuple == default)
 			{
-				throw new MicroserviceFrameworkException("获取领域事件处理器缓存失败");
+				return;
 			}
 
 			var handlers = _serviceProvider.GetServices(tuple.Interface);

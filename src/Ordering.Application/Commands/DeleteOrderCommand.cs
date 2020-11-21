@@ -1,4 +1,4 @@
-using MicroserviceFramework.Application.CQRS.Command;
+using MicroserviceFramework.Application.CQRS;
 using MicroserviceFramework.Shared;
 
 namespace Ordering.Application.Commands

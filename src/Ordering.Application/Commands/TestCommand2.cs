@@ -1,5 +1,5 @@
 using System.ComponentModel.DataAnnotations;
-using MicroserviceFramework.Application.CQRS.Command;
+using MicroserviceFramework.Application.CQRS;
 
 namespace Ordering.Application.Commands
 {
