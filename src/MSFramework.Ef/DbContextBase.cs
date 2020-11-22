@@ -37,7 +37,8 @@ namespace MicroserviceFramework.Ef
 		{
 			base.OnConfiguring(optionsBuilder);
 
-			var option = _serviceProvider.GetRequiredService<EntityFrameworkOptionsConfiguration>().Get(GetType());
+			var option = _serviceProvider
+				.GetRequiredService<EntityFrameworkOptionsConfiguration>().Get(GetType());
 			Database.AutoTransactionsEnabled = option.AutoTransactionsEnabled;
 
 			if (option.EnableSensitiveDataLogging)
@@ -61,7 +62,7 @@ namespace MicroserviceFramework.Ef
 		{
 			//通过实体配置信息将实体注册到当前上下文
 			var contextType = GetType();
-			var registers = _serviceProvider.GetService<IEntityConfigurationTypeFinder>()
+			var registers = _serviceProvider.GetRequiredService<IEntityConfigurationTypeFinder>()
 				.GetEntityRegisters(contextType);
 			foreach (var register in registers)
 			{
@@ -74,7 +75,7 @@ namespace MicroserviceFramework.Ef
 			var option = _serviceProvider.GetRequiredService<EntityFrameworkOptionsConfiguration>().Get(GetType());
 			if (option.UseUnixLikeName)
 			{
-				modelBuilder.UseUnixLikeName();
+				modelBuilder.UseUnderScoreCase();
 			}
 
 			_logger.LogInformation($"上下文 “{contextType}” 注册了 {registers.Length} 个实体类");

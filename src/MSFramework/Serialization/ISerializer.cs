@@ -1,6 +1,6 @@
 using System;
 
-namespace MicroserviceFramework.Serializer
+namespace MicroserviceFramework.Serialization
 {
 	public interface ISerializer
 	{

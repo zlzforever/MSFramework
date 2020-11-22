@@ -17,19 +17,25 @@ namespace MicroserviceFramework.Ef.Extensions
 			return builder;
 		}
 
-		public static PropertyBuilder<DateTimeOffset?> UseUnixTimeSeconds(this PropertyBuilder<DateTimeOffset?> builder)
+		public static PropertyBuilder<DateTimeOffset?> UseUnixTime(this PropertyBuilder<DateTimeOffset?> builder,
+			bool milliseconds = false)
 		{
 			builder.HasConversion(new ValueConverter<DateTimeOffset?, long?>(
-				v => v.HasValue ? v.Value.ToUnixTimeSeconds() : default,
+				v => v.HasValue
+					? milliseconds ? v.Value.ToUnixTimeMilliseconds() : v.Value.ToUnixTimeSeconds()
+					: default,
 				v => v.HasValue ? DateTimeOffset.FromUnixTimeSeconds(v.Value) : default));
 			builder.HasColumnType("int");
 			return builder;
 		}
 
-		public static PropertyBuilder<DateTimeOffset> UseUnixTimeSeconds(this PropertyBuilder<DateTimeOffset> builder)
+		public static PropertyBuilder<DateTimeOffset> UseUnixTime(this PropertyBuilder<DateTimeOffset> builder,
+			bool milliseconds = false)
 		{
 			builder.HasConversion(new ValueConverter<DateTimeOffset?, long?>(
-				v => v.HasValue ? v.Value.ToUnixTimeSeconds() : default,
+				v => v.HasValue
+					? milliseconds ? v.Value.ToUnixTimeMilliseconds() : v.Value.ToUnixTimeSeconds()
+					: default,
 				v => v.HasValue ? DateTimeOffset.FromUnixTimeSeconds(v.Value) : default));
 			builder.HasColumnType("int");
 			return builder;

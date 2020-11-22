@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace MicroserviceFramework.Application
+namespace MicroserviceFramework.Configuration
 {
 	/// <summary>
 	/// 配置模型标志

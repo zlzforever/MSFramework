@@ -10,7 +10,8 @@ using Microsoft.Extensions.Logging;
 
 namespace MicroserviceFramework.Ef.Initializer
 {
-	public class EntityFrameworkInitializer : InitializerBase, INotAutomaticRegisterInitializer
+	[NotRegister]
+	public class EntityFrameworkInitializer : InitializerBase
 	{
 		public override int Order => int.MinValue;
 
@@ -22,10 +23,6 @@ namespace MicroserviceFramework.Ef.Initializer
 				if (option.AutoMigrationEnabled)
 				{
 					var dbContext = (DbContextBase) serviceProvider.GetRequiredService(option.DbContextType);
-					if (dbContext == null)
-					{
-						continue;
-					}
 
 					if (dbContext.Database.ProviderName == "Microsoft.EntityFrameworkCore.InMemory")
 					{

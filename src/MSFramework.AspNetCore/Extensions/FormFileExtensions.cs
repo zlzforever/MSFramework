@@ -1,7 +1,7 @@
 using System;
 using System.IO;
 using System.Threading.Tasks;
-using MicroserviceFramework.Extensions;
+using MicroserviceFramework.Utilities;
 using Microsoft.AspNetCore.Http;
 
 namespace MicroserviceFramework.AspNetCore.Extensions
@@ -20,7 +20,7 @@ namespace MicroserviceFramework.AspNetCore.Extensions
 			var bytes = stream.ToArray();
 
 			var extension = Path.GetExtension(formFile.FileName);
-			var md5 = bytes.ComputeMD5();
+			var md5 = CryptographyUtilities.ToMd5(bytes);
 			var fileName = $"{md5}{extension}";
 			var date = $"{DateTime.Now:yyyMMdd}";
 			var path = $"{interval}/{date}";

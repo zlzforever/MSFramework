@@ -11,7 +11,8 @@ using Microsoft.Extensions.Logging;
 
 namespace MicroserviceFramework.Migrator
 {
-	public abstract class Migrator : Initializer.InitializerBase, INotAutomaticRegisterInitializer
+	[NotRegister]
+	public abstract class Migrator : InitializerBase
 	{
 		protected readonly ILogger Logger;
 		protected readonly Type Type;

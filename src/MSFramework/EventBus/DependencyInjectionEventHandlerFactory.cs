@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace MicroserviceFramework.EventBus
@@ -12,10 +13,9 @@ namespace MicroserviceFramework.EventBus
 			_serviceProvider = serviceProvider;
 		}
 
-		public object Create(Type handlerType)
+		public IEnumerable<object> Create(Type handlerType)
 		{
-			var scope = _serviceProvider.CreateScope();
-			return scope.ServiceProvider.GetService(handlerType);
+			return _serviceProvider.CreateScope().ServiceProvider.GetServices(handlerType);
 		}
 	}
 }

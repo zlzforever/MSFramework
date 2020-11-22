@@ -1,13 +1,17 @@
+using System;
+using System.Linq;
+using System.Reflection;
+using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 
 namespace MicroserviceFramework.Initializer
 {
-	public static class InitializerServiceCollectionExtensions
+	public static class ServiceCollectionExtensions
 	{
 		internal static MicroserviceFrameworkBuilder UseInitializer(this MicroserviceFrameworkBuilder builder)
 		{
 			var initializerType = typeof(InitializerBase);
-			var nonAutomaticInitializerType = typeof(INotAutomaticRegisterInitializer);
 			MicroserviceFrameworkLoader.RegisterType += type =>
 			{
 				if (type.IsAbstract || type.IsInterface)
@@ -16,7 +20,7 @@ namespace MicroserviceFramework.Initializer
 				}
 
 				if (initializerType.IsAssignableFrom(type) &&
-				    !nonAutomaticInitializerType.IsAssignableFrom(type))
+				    initializerType.GetCustomAttribute(typeof(NotRegisterAttribute)) == null)
 				{
 					builder.Services.AddSingleton(initializerType, type);
 				}
@@ -37,6 +41,19 @@ namespace MicroserviceFramework.Initializer
 		{
 			serviceCollection.AddSingleton<InitializerBase, TInitializer>();
 			return serviceCollection;
+		}
+
+		public static async Task UseInitializerAsync(this IServiceProvider applicationServices)
+		{
+			using var scope = applicationServices.CreateScope();
+			var logger = scope.ServiceProvider.GetRequiredService<ILoggerFactory>().CreateLogger("Initializer");
+			var initializers = scope.ServiceProvider.GetServices<InitializerBase>().OrderBy(x => x.Order)
+				.ToList();
+			logger.LogInformation($"{string.Join(" -> ", initializers.Select(x => x.GetType().FullName))}");
+			foreach (var initializer in initializers)
+			{
+				await initializer.InitializeAsync(scope.ServiceProvider);
+			}
 		}
 	}
 }

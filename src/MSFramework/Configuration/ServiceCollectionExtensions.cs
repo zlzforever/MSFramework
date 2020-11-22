@@ -1,15 +1,14 @@
-﻿using System;
+using System;
 using System.Linq;
 using System.Reflection;
-using MicroserviceFramework.Application;
 using MicroserviceFramework.Extensions;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 
-namespace MicroserviceFramework.AspNetCore.Extensions
+namespace MicroserviceFramework.Configuration
 {
-	public static class ConfigExtensions
+	public static class ServiceCollectionExtensions
 	{
 		public static IServiceCollection AddConfigType(this IServiceCollection services, Assembly assembly)
 		{
@@ -27,7 +26,7 @@ namespace MicroserviceFramework.AspNetCore.Extensions
 				var attribute = typeInfo.Attribute;
 				services.TryAdd(new ServiceDescriptor(type, provider =>
 				{
-					var configuration = provider.GetService<IConfiguration>();
+					var configuration = provider.GetRequiredService<IConfiguration>();
 					var constructor = type.GetConstructor(new[] {typeof(IConfiguration)});
 					var result = constructor == null
 						? Activator.CreateInstance(type)
@@ -39,7 +38,7 @@ namespace MicroserviceFramework.AspNetCore.Extensions
 					}
 					else
 					{
-						var section = provider.GetService<IConfiguration>().GetSection(attribute.SectionName);
+						var section = provider.GetRequiredService<IConfiguration>().GetSection(attribute.SectionName);
 						section.Bind(result);
 					}
 
@@ -48,6 +47,23 @@ namespace MicroserviceFramework.AspNetCore.Extensions
 			}
 
 			return services;
+		}
+
+		public static void Print(this IConfiguration configuration, Action<string> writer)
+		{
+			if (configuration == null || writer == null)
+			{
+				return;
+			}
+
+			writer("Configuration: ");
+			foreach (var kv in configuration.GetChildren())
+			{
+				if (!string.IsNullOrWhiteSpace(kv.Key))
+				{
+					writer($"{kv.Key} = {kv.Value}");
+				}
+			}
 		}
 	}
 }

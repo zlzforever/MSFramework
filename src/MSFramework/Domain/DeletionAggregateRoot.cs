@@ -39,10 +39,7 @@ namespace MicroserviceFramework.Domain
 			{
 				Deleted = true;
 
-				if (DeletionTime == default)
-				{
-					DeletionTime = deletionTime == default ? DateTimeOffset.Now : deletionTime;
-				}
+				DeletionTime ??= deletionTime == default ? DateTimeOffset.Now : deletionTime;
 
 				if (!string.IsNullOrWhiteSpace(userId) && string.IsNullOrWhiteSpace(DeletionUserId))
 				{

@@ -2,7 +2,7 @@
 using System.Linq;
 using System.Reflection;
 using AutoMapper;
-using MicroserviceFramework.Mapper;
+using MicroserviceFramework.ObjectMapper;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace MicroserviceFramework.AutoMapper

@@ -1,7 +1,15 @@
 ﻿using System;
+using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
+using MicroserviceFramework;
+using MicroserviceFramework.EventBus;
+using MicroserviceFramework.Shared;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyModel;
 using Microsoft.Extensions.Hosting;
 using Serilog;
@@ -9,13 +17,51 @@ using Serilog.Events;
 
 namespace Ordering.API
 {
- 
+	public class Event1 : EventBase
+	{
+		public int Order { get; set; }
+
+		public Event1(int i)
+		{
+			Order = i;
+		}
+	}
+
+	public class Event1Handler : IEventHandler<Event1>
+	{
+		public static List<int> Result = new List<int>();
+
+		public Task HandleAsync(Event1 @event)
+		{
+			Result.Add(@event.Order);
+			return Task.CompletedTask;
+		}
+
+		public void Dispose()
+		{
+			
+		}
+	}
 
 	public class Program
 	{
-		public static void Main(string[] args)
+		public static async Task Main(string[] args)
 		{
-	 
+			var serviceCollection = new ServiceCollection();
+			serviceCollection.AddLogging();
+
+			serviceCollection.AddMicroserviceFramework(builder => { builder.UseEventBus(); });
+
+			var provider = serviceCollection.BuildServiceProvider();
+			var eventBus = provider.GetRequiredService<IEventBus>();
+
+			for (var i = 0; i < 100; ++i)
+			{
+				await eventBus.PublishAsync(new Event1(i));
+			}
+
+			Thread.Sleep(1000);
+
 			var defaultAsms = DependencyContext.Default.GetDefaultAssemblyNames()
 				.Select(x => x.Name).ToList();
 			defaultAsms.Sort();

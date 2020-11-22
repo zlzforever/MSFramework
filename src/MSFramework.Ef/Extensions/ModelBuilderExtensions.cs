@@ -1,6 +1,6 @@
 using MicroserviceFramework.Ef.Infrastructure;
+using MicroserviceFramework.Extensions;
 using MicroserviceFramework.Shared;
-using MicroserviceFramework.Utilities;
 using Microsoft.EntityFrameworkCore;
 
 namespace MicroserviceFramework.Ef.Extensions
@@ -24,14 +24,14 @@ namespace MicroserviceFramework.Ef.Extensions
 			return modelBuilder;
 		}
 
-		public static ModelBuilder UseUnixLikeName(this ModelBuilder modelBuilder)
+		public static ModelBuilder UseUnderScoreCase(this ModelBuilder modelBuilder)
 		{
 			foreach (var entityType in modelBuilder.Model.GetEntityTypes())
 			{
 				if (!entityType.IsOwned())
 				{
 					var tableName = entityType.GetTableName();
-					entityType.SetTableName(StringUtilities.ToUnixLike(tableName));
+					entityType.SetTableName(tableName.ToUnderScoreCase());
 				}
 
 				var properties = entityType.GetProperties();
@@ -43,7 +43,7 @@ namespace MicroserviceFramework.Ef.Extensions
 						propertyName = propertyName.Substring(1, propertyName.Length - 1);
 					}
 
-					property.SetColumnName(StringUtilities.ToUnixLike(propertyName));
+					property.SetColumnName(propertyName.ToUnderScoreCase());
 				}
 			}
 

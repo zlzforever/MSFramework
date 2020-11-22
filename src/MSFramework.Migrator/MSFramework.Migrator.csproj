@@ -5,11 +5,11 @@
         <AssemblyName>MSFramework.Migrator</AssemblyName>
         <RootNamespace>MicroserviceFramework.Migrator</RootNamespace>
     </PropertyGroup>
-    <Import Project="../../package.props"/>
+    <Import Project="../../package.props" />
     <ItemGroup>
-        <ProjectReference Include="..\MSFramework\MSFramework.csproj"/>
+        <ProjectReference Include="..\MSFramework\MSFramework.csproj" />
     </ItemGroup>
     <ItemGroup>
-        <PackageReference Include="Dapper" Version="2.0.35"/>
+        <PackageReference Include="Dapper" Version="2.0.78" />
     </ItemGroup>
 </Project>

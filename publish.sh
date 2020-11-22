@@ -11,7 +11,6 @@ rm -rf src/MSFramework.Ef.SqlServer/bin/Release
 rm -rf src/MSFramework.Migrator/bin/Release
 rm -rf src/MSFramework.Migrator.MySql/bin/Release
 rm -rf src/MSFramework.RabbitMQ/bin/Release
-rm -rf src/MSFramework.EventBus/bin/Release
 dotnet build -c Release
 dotnet pack -c Release
 nuget push src/MSFramework/bin/Release/*.nupkg -Source $NUGET_SERVER
@@ -25,4 +24,3 @@ nuget push src/MSFramework.Ef.SqlServer/bin/Release/*.nupkg  -Source $NUGET_SERV
 nuget push src/MSFramework.Migrator/bin/Release/*.nupkg  -Source $NUGET_SERVER
 nuget push src/MSFramework.Migrator.MySql/bin/Release/*.nupkg  -Source $NUGET_SERVER
 nuget push src/MSFramework.RabbitMQ/bin/Release/*.nupkg  -Source $NUGET_SERVER
-nuget push src/MSFramework.EventBus/bin/Release/*.nupkg  -Source $NUGET_SERVER

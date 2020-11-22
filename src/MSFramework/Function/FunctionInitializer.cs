@@ -9,6 +9,7 @@ using Microsoft.Extensions.Logging;
 
 namespace MicroserviceFramework.Function
 {
+	[NotRegister]
 	public class FunctionInitializer : InitializerBase
 	{
 		public override async Task InitializeAsync(IServiceProvider serviceProvider)

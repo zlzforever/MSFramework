@@ -10,7 +10,7 @@ using Ordering.Domain.Repositories;
 
 namespace Ordering.Application.EventHandlers
 {
-	public class ProjectCreatedIntegrationEvent : Event
+	public class ProjectCreatedIntegrationEvent : EventBase
 	{
 	}
 
@@ -33,6 +33,10 @@ namespace Ordering.Application.EventHandlers
 			product.SetName(Guid.NewGuid().ToString());
 			await _productRepository.UpdateAsync(product);
 			await _uowManager.CommitAsync();
+		}
+
+		public void Dispose()
+		{
 		}
 	}
 

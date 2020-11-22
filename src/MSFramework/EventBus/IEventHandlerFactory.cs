@@ -1,9 +1,10 @@
 using System;
+using System.Collections.Generic;
 
 namespace MicroserviceFramework.EventBus
 {
 	public interface IEventHandlerFactory
 	{
-		object Create(Type handlerType);
+		IEnumerable<object> Create(Type handlerType);
 	}
 }

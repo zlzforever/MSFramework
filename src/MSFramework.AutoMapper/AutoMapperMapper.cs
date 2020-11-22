@@ -1,4 +1,4 @@
-using MicroserviceFramework.Mapper;
+using MicroserviceFramework.ObjectMapper;
 using IAutoMapper = AutoMapper.IMapper;
 
 namespace MicroserviceFramework.AutoMapper

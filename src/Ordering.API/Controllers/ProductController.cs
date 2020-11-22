@@ -9,7 +9,7 @@ using MicroserviceFramework.AspNetCore.Mvc;
 using MicroserviceFramework.Audit;
 using MicroserviceFramework.Domain;
 using MicroserviceFramework.Ef.Repositories;
-using MicroserviceFramework.Mapper;
+using MicroserviceFramework.ObjectMapper;
 using MicroserviceFramework.Shared;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;

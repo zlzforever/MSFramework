@@ -37,5 +37,9 @@ namespace Ordering.Application.EventHandlers
 			// 	@event.State, @event.Country, @event.ZipCode, @event.Description));
 			return Task.CompletedTask;
 		}
+
+		public void Dispose()
+		{
+		}
 	}
 }

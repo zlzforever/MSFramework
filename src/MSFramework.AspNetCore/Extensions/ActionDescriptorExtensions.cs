@@ -49,7 +49,6 @@ namespace MicroserviceFramework.AspNetCore.Extensions
 				var template = controllerAction.AttributeRouteInfo.Template.ToLower();
 				template = regex.Replace(template, "{arg}");
 				return $"{methods.ExpandAndToString()} {template}".ToLower();
-				;
 			}
 		}
 

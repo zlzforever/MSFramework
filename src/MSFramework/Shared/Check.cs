@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
-using JetBrains.Annotations;
 
 namespace MicroserviceFramework.Shared
 {
@@ -11,7 +10,7 @@ namespace MicroserviceFramework.Shared
 	/// </summary>
 	public static class Check
 	{
-		public static T NotNull<T>([NoEnumeration] T value, [InvokerParameterName] [NotNull] string parameterName)
+		public static T NotNull<T>(T value, string parameterName)
 		{
 #pragma warning disable IDE0041 // Use 'is null' check
 			if (ReferenceEquals(value, null))
@@ -25,9 +24,8 @@ namespace MicroserviceFramework.Shared
 			return value;
 		}
 
-		[ContractAnnotation("value:null => halt")]
 		public static IReadOnlyList<T> NotEmpty<T>(IReadOnlyList<T> value,
-			[InvokerParameterName] [NotNull] string parameterName)
+			string parameterName)
 		{
 			NotNull(value, parameterName);
 
@@ -41,8 +39,7 @@ namespace MicroserviceFramework.Shared
 			return value;
 		}
 
-		[ContractAnnotation("value:null => halt")]
-		public static string NotEmpty(string value, [InvokerParameterName] [NotNull] string parameterName)
+		public static string NotEmpty(string value, string parameterName)
 		{
 			Exception e = null;
 			if (value is null)
@@ -64,7 +61,7 @@ namespace MicroserviceFramework.Shared
 			return value;
 		}
 
-		public static string NullButNotEmpty(string value, [InvokerParameterName] [NotNull] string parameterName)
+		public static string NullButNotEmpty(string value, string parameterName)
 		{
 			if (!(value is null)
 			    && value.Length == 0)
@@ -78,7 +75,7 @@ namespace MicroserviceFramework.Shared
 		}
 
 		public static IReadOnlyList<T> HasNoNulls<T>(IReadOnlyList<T> value,
-			[InvokerParameterName] [NotNull] string parameterName)
+			string parameterName)
 			where T : class
 		{
 			NotNull(value, parameterName);
@@ -95,7 +92,7 @@ namespace MicroserviceFramework.Shared
 
 
 		public static IReadOnlyList<string> HasNoEmptyElements(IReadOnlyList<string> value,
-			[InvokerParameterName] [NotNull] string parameterName)
+			string parameterName)
 		{
 			NotNull(value, parameterName);
 

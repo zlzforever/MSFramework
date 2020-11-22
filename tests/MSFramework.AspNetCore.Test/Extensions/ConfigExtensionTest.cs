@@ -1,5 +1,5 @@
 ﻿using MicroserviceFramework.AspNetCore;
-using MicroserviceFramework.AspNetCore.Extensions;
+using MicroserviceFramework.Configuration;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.TestHost;
 using Microsoft.Extensions.Configuration;

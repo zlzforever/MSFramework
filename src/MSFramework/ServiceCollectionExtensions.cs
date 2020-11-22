@@ -1,17 +1,18 @@
 using System;
 using System.IO;
 using System.Linq;
-using System.Threading.Tasks;
+using System.Text.Json;
 using MicroserviceFramework.Application;
 using MicroserviceFramework.Audit;
 using MicroserviceFramework.DependencyInjection;
 using MicroserviceFramework.Domain;
 using MicroserviceFramework.Domain.Event;
+using MicroserviceFramework.EventBus;
 using MicroserviceFramework.Initializer;
+using MicroserviceFramework.Serialization;
 using MicroserviceFramework.Shared;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
-using Microsoft.Extensions.Logging;
 
 // ReSharper disable InconsistentNaming
 
@@ -19,9 +20,14 @@ namespace MicroserviceFramework
 {
 	public static class ServiceCollectionExtensions
 	{
-		public static MicroserviceFrameworkBuilder UseCQRS(this MicroserviceFrameworkBuilder builder)
+		public static MicroserviceFrameworkBuilder UseEventBus(this MicroserviceFrameworkBuilder builder)
 		{
-			builder.Services.AddCQRS();
+			builder.Services.AddEventBus();
+			return builder;
+		}
+		public static MicroserviceFrameworkBuilder UseCqrs(this MicroserviceFrameworkBuilder builder)
+		{
+			builder.Services.AddCqrs();
 			return builder;
 		}
 
@@ -31,6 +37,8 @@ namespace MicroserviceFramework
 			var builder = new MicroserviceFrameworkBuilder(services);
 			builderAction?.Invoke(builder);
 
+			services.AddSerializer();
+
 			MicroserviceFrameworkLoader.RegisterType += type =>
 			{
 				var lifetime = LifetimeChecker.Get(type);
@@ -39,7 +47,7 @@ namespace MicroserviceFramework
 					builder.Services.RegisterDependencyInjection(type, lifetime.Value);
 				}
 			};
-			
+
 			builder.Services.TryAddScoped<UnitOfWorkManager>();
 
 			// 如果你想换成消息队列，则重新注册一个对应的服务即可
@@ -50,6 +58,13 @@ namespace MicroserviceFramework
 			MicroserviceFrameworkLoader.RegisterTypes();
 
 			builder.UseInitializer();
+		}
+
+		public static MicroserviceFrameworkBuilder UseSerializer(this MicroserviceFrameworkBuilder builder,
+			Action<JsonSerializerOptions> configure = null)
+		{
+			builder.Services.AddSerializer(configure);
+			return builder;
 		}
 
 		public static MicroserviceFrameworkBuilder UseBaseX(this MicroserviceFrameworkBuilder builder,
@@ -77,20 +92,7 @@ namespace MicroserviceFramework
 
 		public static void UseMicroserviceFramework(this IServiceProvider applicationServices)
 		{
-			InitializeAsync(applicationServices).GetAwaiter().GetResult();
-		}
-
-		private static async Task InitializeAsync(IServiceProvider applicationServices)
-		{
-			using var scope = applicationServices.CreateScope();
-			var logger = scope.ServiceProvider.GetRequiredService<ILoggerFactory>().CreateLogger("Initializer");
-			var initializers = scope.ServiceProvider.GetServices<Initializer.InitializerBase>().OrderBy(x => x.Order)
-				.ToList();
-			logger.LogInformation($"{string.Join(" -> ", initializers.Select(x => x.GetType().FullName))}");
-			foreach (var initializer in initializers)
-			{
-				await initializer.InitializeAsync(scope.ServiceProvider);
-			}
+			applicationServices.UseInitializerAsync().GetAwaiter().GetResult();
 		}
 	}
 }

@@ -4,7 +4,7 @@ using MicroserviceFramework.EventBus;
 
 namespace Ordering.Application.Events
 {
-	public class UserCheckoutAcceptedEvent : Event
+	public class UserCheckoutAcceptedEvent : EventBase
 	{
 		public class OrderItemDTO
 		{

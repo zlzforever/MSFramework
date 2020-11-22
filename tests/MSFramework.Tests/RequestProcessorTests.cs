@@ -29,7 +29,7 @@ namespace MSFramework.Tests
 		public async Task Test1()
 		{
 			var services = new ServiceCollection();
-			services.AddCQRS();
+			services.AddCqrs();
 			var provider = services.BuildServiceProvider();
 			var processor = provider.GetRequiredService<ICqrsProcessor>();
 			await processor.ExecuteAsync(new Request1());

@@ -1,18 +1,19 @@
 using System.Collections.Generic;
 using System.Linq;
 
-namespace MicroserviceFramework.Utilities
+namespace MicroserviceFramework.Extensions
 {
-	public class StringUtilities
+	public static class StringExtensions
 	{
 		/// <summary>
+		/// 下划线命名法
 		/// todo: 优化
 		/// </summary>
-		/// <param name="str"></param>
+		/// <param name="value"></param>
 		/// <returns></returns>
-		public static string ToUnixLike(string str)
+		public static string ToUnderScoreCase(this string value)
 		{
-			var array = str.ToList();
+			var array = value.ToList();
 			if (char.IsUpper(array[0]))
 			{
 				array[0] = char.ToLower(array[0]);

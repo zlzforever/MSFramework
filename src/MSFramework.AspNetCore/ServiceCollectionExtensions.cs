@@ -12,11 +12,11 @@ namespace MicroserviceFramework.AspNetCore
 	public static class ServiceCollectionExtensions
 	{
 		public static MicroserviceFrameworkBuilder UseAspNetCore(this MicroserviceFrameworkBuilder builder,
-			bool enableFunction = true)
+			bool enableFunctionFeature = false)
 		{
-			if (enableFunction)
+			if (enableFunctionFeature)
 			{
-				builder.Services.TryAddSingleton<IFunctionDefineFinder, AspNetCoreFunctionFinder>();
+				builder.Services.AddFunction<AspNetCoreFunctionFinder>();
 			}
 
 			builder.Services.AddHttpContextAccessor();

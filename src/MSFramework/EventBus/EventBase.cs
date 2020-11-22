@@ -2,7 +2,7 @@ using System;
 
 namespace MicroserviceFramework.EventBus
 {
-	public abstract class Event
+	public abstract class EventBase
 	{
 		/// <summary>
 		/// 事件源标识
@@ -14,7 +14,7 @@ namespace MicroserviceFramework.EventBus
 		/// </summary>
 		public DateTimeOffset EventTime { get; private set; }
 
-		protected Event()
+		protected EventBase()
 		{
 			EventId = Guid.NewGuid();
 			EventTime = DateTimeOffset.Now;

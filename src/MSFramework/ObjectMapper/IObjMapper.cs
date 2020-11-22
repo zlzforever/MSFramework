@@ -1,4 +1,4 @@
-namespace MicroserviceFramework.Mapper
+namespace MicroserviceFramework.ObjectMapper
 {
 	public interface IObjMapper
 	{

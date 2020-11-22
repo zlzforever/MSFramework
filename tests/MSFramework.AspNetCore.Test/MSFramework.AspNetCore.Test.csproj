@@ -1,10 +1,10 @@
 <Project Sdk="Microsoft.NET.Sdk.Web">
 
     <PropertyGroup>
-        <TargetFramework>netcoreapp3.1</TargetFramework>
+        <TargetFramework>net5.0</TargetFramework>
     </PropertyGroup>
     <ItemGroup>
-        <PackageReference Include="Microsoft.AspNetCore.Mvc.Testing" Version="3.1.8" />
+        <PackageReference Include="Microsoft.AspNetCore.Mvc.Testing" Version="5.0.0" />
         <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.7.1" />
         <PackageReference Include="xunit" Version="2.4.1" />
         <PackageReference Include="xunit.runner.visualstudio" Version="2.4.3">
@@ -17,6 +17,7 @@
         <ProjectReference Include="..\..\src\MSFramework.Ef.MySql\MSFramework.Ef.MySql.csproj" />
         <ProjectReference Include="..\..\src\MSFramework.Ef.PostgreSql\MSFramework.Ef.PostgreSql.csproj" />
         <ProjectReference Include="..\..\src\MSFramework.Ef.SqlServer\MSFramework.Ef.SqlServer.csproj" />
+        <ProjectReference Include="..\..\src\MSFramework.Ef\MSFramework.Ef.csproj" />
         <ProjectReference Include="..\..\src\MSFramework.Migrator.MySql\MSFramework.Migrator.MySql.csproj" />
         <ProjectReference Include="..\..\src\MSFramework.Migrator\MSFramework.Migrator.csproj" />
     </ItemGroup>

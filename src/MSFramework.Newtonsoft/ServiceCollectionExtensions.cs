@@ -1,5 +1,5 @@
 using System;
-using MicroserviceFramework.Serializer;
+using MicroserviceFramework.Serialization;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Newtonsoft.Json;
 

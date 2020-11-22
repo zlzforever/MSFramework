@@ -6,14 +6,11 @@ using MicroserviceFramework.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 
-// ReSharper disable InconsistentNaming
-
 namespace MicroserviceFramework.Application
 {
 	public static class ServiceCollectionExtensions
 	{
-	
-		public static IServiceCollection AddCQRS(this IServiceCollection serviceCollection)
+		public static IServiceCollection AddCqrs(this IServiceCollection serviceCollection)
 		{
 			var handlerInterfaceTypes = new[]
 			{
@@ -32,7 +29,7 @@ namespace MicroserviceFramework.Application
 			};
 
 			serviceCollection.TryAddScoped<ICqrsProcessor, CqrsProcessor>();
-	 
+
 			return serviceCollection;
 		}
 
