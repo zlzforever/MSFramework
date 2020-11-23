@@ -2,7 +2,6 @@ using System;
 using System.Net.Sockets;
 using System.Text;
 using System.Threading.Tasks;
-using MessagePack;
 using MicroserviceFramework.EventBus;
 using MicroserviceFramework.Serialization;
 using MicroserviceFramework.Shared;
@@ -23,23 +22,19 @@ namespace MicroserviceFramework.RabbitMQ
 		private readonly ISerializer _serializer;
 		private readonly IEventHandlerFactory _eventHandlerFactory;
 
-		public RabbitMqEventBus(RabbitMqOptions options, IEventHandlerFactory handlerFactory,
+		public RabbitMqEventBus(RabbitMqOptions options, IConnectionFactory connectionFactory,
+			IEventHandlerFactory eventHandlerFactory,
 			ILoggerFactory loggerFactory, ISerializer serializer)
-
 		{
+			_options = options;
 			_logger = loggerFactory.CreateLogger<RabbitMqEventBus>();
 			_serializer = serializer;
-			_eventHandlerFactory = handlerFactory;
-			_options = options;
-			_connection = new PersistentConnection(CreateConnectionFactory(),
+			_eventHandlerFactory = eventHandlerFactory;
+			_connection = new PersistentConnection(connectionFactory,
 				loggerFactory.CreateLogger<PersistentConnection>(), _options.RetryCount);
 			_consumerChannel = CreateConsumerChannel();
-
-			foreach (var eventType in EventHandlerTypeCache.GetEventTypes())
-			{
-				SubscribeRabbitMq(eventType.Name);
-			}
-
+			
+			SubscribeAllEventTypes();
 			StartConsume();
 		}
 
@@ -70,7 +65,7 @@ namespace MicroserviceFramework.RabbitMQ
 
 			channel.ExchangeDeclare(exchange: _options.Exchange, type: "direct");
 
-			var bytes = MessagePackSerializer.Typeless.Serialize(@event);
+			var bytes = Encoding.UTF8.GetBytes(_serializer.Serialize(@event));
 
 			policy.Execute(() =>
 			{
@@ -84,31 +79,6 @@ namespace MicroserviceFramework.RabbitMQ
 			});
 
 			await Task.Yield();
-		}
-
-		private IConnectionFactory CreateConnectionFactory()
-		{
-			var connectionFactory = new ConnectionFactory
-			{
-				HostName = _options.HostName,
-				DispatchConsumersAsync = true
-			};
-			if (_options.Port > 0)
-			{
-				connectionFactory.Port = _options.Port;
-			}
-
-			if (!string.IsNullOrWhiteSpace(_options.UserName))
-			{
-				connectionFactory.UserName = _options.UserName;
-			}
-
-			if (!string.IsNullOrWhiteSpace(_options.Password))
-			{
-				connectionFactory.Password = _options.Password;
-			}
-
-			return connectionFactory;
 		}
 
 		private IModel CreateConsumerChannel()
@@ -129,6 +99,7 @@ namespace MicroserviceFramework.RabbitMQ
 
 				_consumerChannel.Dispose();
 				_consumerChannel = CreateConsumerChannel();
+				
 				StartConsume();
 			};
 
@@ -182,15 +153,19 @@ namespace MicroserviceFramework.RabbitMQ
 			}
 		}
 
-		private void SubscribeRabbitMq(string eventName)
+		private void SubscribeAllEventTypes()
 		{
 			if (!_connection.IsConnected)
 			{
 				_connection.TryConnect();
 			}
 
-			using var channel = _connection.CreateModel();
-			channel.QueueBind(_options.Queue, _options.Exchange, eventName);
+			foreach (var eventType in EventHandlerTypeCache.GetEventTypes())
+			{
+				var eventName = eventType.Name;
+				using var channel = _connection.CreateModel();
+				channel.QueueBind(_options.Queue, _options.Exchange, eventName);
+			}
 		}
 
 		public void Dispose()

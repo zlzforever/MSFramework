@@ -20,11 +20,6 @@ namespace MicroserviceFramework
 {
 	public static class ServiceCollectionExtensions
 	{
-		public static MicroserviceFrameworkBuilder UseEventBus(this MicroserviceFrameworkBuilder builder)
-		{
-			builder.Services.AddEventBus();
-			return builder;
-		}
 		public static MicroserviceFrameworkBuilder UseCqrs(this MicroserviceFrameworkBuilder builder)
 		{
 			builder.Services.AddCqrs();
@@ -37,8 +32,9 @@ namespace MicroserviceFramework
 			var builder = new MicroserviceFrameworkBuilder(services);
 			builderAction?.Invoke(builder);
 
-			services.AddSerializer();
-
+			builder.Services.AddSerializer();
+			builder.Services.AddEventBus();
+			
 			MicroserviceFrameworkLoader.RegisterType += type =>
 			{
 				var lifetime = LifetimeChecker.Get(type);
@@ -53,7 +49,7 @@ namespace MicroserviceFramework
 			// 如果你想换成消息队列，则重新注册一个对应的服务即可
 			builder.Services.TryAddScoped<IAuditService, DefaultAuditService>();
 
-			services.AddDomainEventDispatcher();
+			builder.Services.AddDomainEventDispatcher();
 
 			MicroserviceFrameworkLoader.RegisterTypes();
 

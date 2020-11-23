@@ -9,7 +9,6 @@
         <ProjectReference Include="..\MSFramework\MSFramework.csproj" />
     </ItemGroup>
     <ItemGroup>
-        <PackageReference Include="MessagePack" Version="2.2.60" />
         <PackageReference Include="Polly" Version="7.2.1" />
         <PackageReference Include="RabbitMQ.Client" Version="6.2.1" />
     </ItemGroup>

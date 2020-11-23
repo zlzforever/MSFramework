@@ -50,7 +50,7 @@ namespace Ordering.API
 			var serviceCollection = new ServiceCollection();
 			serviceCollection.AddLogging();
 
-			serviceCollection.AddMicroserviceFramework(builder => { builder.UseEventBus(); });
+			serviceCollection.AddMicroserviceFramework(builder => {   });
 
 			var provider = serviceCollection.BuildServiceProvider();
 			var eventBus = provider.GetRequiredService<IEventBus>();

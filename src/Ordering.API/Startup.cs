@@ -79,7 +79,6 @@ namespace Ordering.API
 			{
 				builder.UseNewtonsoftJson();
 				builder.UseAutoMapper();
-				builder.UseEventBus();
 				builder.UseCqrs();
 				builder.UseBaseX();
 				builder.UseAccessControl(Configuration);
