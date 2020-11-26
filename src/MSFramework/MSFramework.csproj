@@ -14,8 +14,7 @@
         <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="5.0.0" />
         <PackageReference Include="Microsoft.Extensions.DependencyModel" Version="5.0.0" />
         <PackageReference Include="DeepCopy" Version="1.0.3" />
-    </ItemGroup>
-    <ItemGroup>
-      <ProjectReference Include="..\MSFramework.EventBus\MSFramework.EventBus.csproj" />
+        <PackageReference Include="Microsoft.Extensions.Options" Version="5.0.0" />
+        <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="5.0.0" />
     </ItemGroup>
 </Project>

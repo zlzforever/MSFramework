@@ -164,7 +164,6 @@ MSFramework.AutoMapper
 MSFramework.Ef
 MSFramework.Ef.MySql
 MSFramework.Ef.SqlServer
-MSFramework.EventBus
 MSFramework.Migrator
 MSFramework.Migrator.MySql
 MSFramework.Newtonsoft

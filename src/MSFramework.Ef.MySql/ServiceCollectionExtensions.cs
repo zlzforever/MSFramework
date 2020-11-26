@@ -1,9 +1,9 @@
+
 using System;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Pomelo.EntityFrameworkCore.MySql.Storage;
+using Pomelo.EntityFrameworkCore.MySql.Infrastructure;
 
 namespace MicroserviceFramework.Ef.MySql
 {
@@ -50,10 +50,10 @@ namespace MicroserviceFramework.Ef.MySql
 
 				if (option.IgnoreForeignKey)
 				{
-					x.ReplaceService<IMigrator, IgnoreForeignKeyMySqlMigrator>();
+					// x.ReplaceService<IMigrator, IgnoreForeignKeyMySqlMigrator>();
 				}
 
-				x.UseMySql(option.ConnectionString, options =>
+				x.UseMySql(option.ConnectionString,  ServerVersion.AutoDetect(option.ConnectionString),options =>
 				{
 					options.MigrationsAssembly(entryAssemblyName);
 					options.CharSet(CharSet.Utf8Mb4);

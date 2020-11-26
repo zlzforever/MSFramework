@@ -26,10 +26,10 @@ namespace MSFramework.AspNetCore.Test.Extensions
 				{
 					// Add TestServer
 					webHost.UseTestServer().ConfigureAppConfiguration(i => { i.AddJsonFile("appsettings.json"); });
-					webHost.UseStartup<Startup>().ConfigureServices((context, service) =>
+					webHost.UseStartup<Startup>().ConfigureServices((context, service) => { }).Configure(builder =>
 					{
-						service.AddConfigType(GetType().Assembly);
-					}).Configure(builder => { builder.UseMicroserviceFramework(); });
+						builder.UseMicroserviceFramework();
+					});
 				});
 			var host = hostBuilder.Start();
 			_output.WriteLine("server is runing");

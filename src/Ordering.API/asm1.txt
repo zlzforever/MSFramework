@@ -10,7 +10,8 @@ Microsoft.Extensions.Hosting.Abstractions
 Microsoft.Extensions.Logging
 Microsoft.Extensions.Logging.Abstractions
 Microsoft.Extensions.Options
-Microsoft.Extensions.Primitives
+Mono.DebuggingHelp
+mscorlib
 MSFramework
 MSFramework.AspNetCore
 MSFramework.Ef

@@ -39,38 +39,13 @@ namespace Ordering.API
 
 		public void Dispose()
 		{
-			
 		}
 	}
 
 	public class Program
 	{
-		public static async Task Main(string[] args)
+		public static void Main(string[] args)
 		{
-			var serviceCollection = new ServiceCollection();
-			serviceCollection.AddLogging();
-
-			serviceCollection.AddMicroserviceFramework(builder => {   });
-
-			var provider = serviceCollection.BuildServiceProvider();
-			var eventBus = provider.GetRequiredService<IEventBus>();
-
-			for (var i = 0; i < 100; ++i)
-			{
-				await eventBus.PublishAsync(new Event1(i));
-			}
-
-			Thread.Sleep(1000);
-
-			var defaultAsms = DependencyContext.Default.GetDefaultAssemblyNames()
-				.Select(x => x.Name).ToList();
-			defaultAsms.Sort();
-			File.WriteAllText("default.txt",
-				string.Join(Environment.NewLine, defaultAsms));
-			var asm1 = AppDomain.CurrentDomain.GetAssemblies().Select(x => x.GetName().Name).ToList();
-			asm1.Sort();
-			File.WriteAllText("asm1.txt",
-				string.Join(Environment.NewLine, asm1));
 			Log.Logger = new LoggerConfiguration()
 				.MinimumLevel.Debug()
 				.MinimumLevel.Override("Microsoft.Hosting.Lifetime", LogEventLevel.Information)

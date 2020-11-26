@@ -17,7 +17,9 @@ using MicroserviceFramework.Newtonsoft;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Options;
 using Microsoft.OpenApi.Models;
 using Newtonsoft.Json.Serialization;
 using Ordering.Domain;
@@ -39,6 +41,8 @@ namespace Ordering.API
 		// This method gets called by the runtime. Use this method to add services to the container.
 		public void ConfigureServices(IServiceCollection services)
 		{
+			services.AddOptions(Configuration);
+			
 			Configuration.Print(x => Log.Logger.Information(x));
 
 			services.AddControllers(x =>
@@ -73,15 +77,13 @@ namespace Ordering.API
 			});
 			services.AddHealthChecks();
 
-			services.AddConfigType(typeof(AppOptions).Assembly);
-
 			services.AddMicroserviceFramework(builder =>
 			{
 				builder.UseNewtonsoftJson();
 				builder.UseAutoMapper();
 				builder.UseCqrs();
 				builder.UseBaseX();
-				builder.UseAccessControl(Configuration);
+				//builder.UseAccessControl(Configuration);
 				// builder.UseRabbitMQEventDispatcher(new RabbitMQOptions(), typeof(UserCheckoutAcceptedEvent));
 				// 启用审计服务
 				builder.UseAudit();

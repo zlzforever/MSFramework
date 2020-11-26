@@ -1,50 +1,74 @@
 using System;
-using System.Linq;
 using System.Reflection;
-using MicroserviceFramework.Extensions;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.DependencyInjection.Extensions;
+using Microsoft.Extensions.Options;
 
 namespace MicroserviceFramework.Configuration
 {
 	public static class ServiceCollectionExtensions
 	{
-		public static IServiceCollection AddConfigType(this IServiceCollection services, Assembly assembly)
+		private static IServiceCollection AddOptions(this IServiceCollection services, Type optionsType, string name,
+			IConfiguration config,
+			Action<BinderOptions> configureBinder)
 		{
-			var typeInfos = assembly.GetTypes()
-				.Where(type => type.GetCustomAttributes<ConfigTypeAttribute>().Any())
-				.Select(x => new
-				{
-					Type = x,
-					Attribute = x.GetCustomAttributes<ConfigTypeAttribute>().First()
-				}).ToArray();
-
-			foreach (var typeInfo in typeInfos)
+			if (!optionsType.IsClass)
 			{
-				var type = typeInfo.Type;
-				var attribute = typeInfo.Attribute;
-				services.TryAdd(new ServiceDescriptor(type, provider =>
-				{
-					var configuration = provider.GetRequiredService<IConfiguration>();
-					var constructor = type.GetConstructor(new[] {typeof(IConfiguration)});
-					var result = constructor == null
-						? Activator.CreateInstance(type)
-						: Activator.CreateInstance(type, configuration);
-
-					if (attribute.SectionName.IsNullOrEmpty())
-					{
-						configuration.Bind(result);
-					}
-					else
-					{
-						var section = provider.GetRequiredService<IConfiguration>().GetSection(attribute.SectionName);
-						section.Bind(result);
-					}
-
-					return result;
-				}, attribute.ReloadOnChange ? ServiceLifetime.Transient : ServiceLifetime.Singleton));
+				throw new ArgumentException("optionsType should be class");
 			}
+
+			if (services == null)
+			{
+				throw new ArgumentNullException(nameof(services));
+			}
+
+			if (config == null)
+			{
+				throw new ArgumentNullException(nameof(config));
+			}
+
+			services.AddOptions();
+
+			var configurationChangeTokenSourceType =
+				typeof(ConfigurationChangeTokenSource<>).MakeGenericType(optionsType);
+			var configurationChangeTokenSource =
+				Activator.CreateInstance(configurationChangeTokenSourceType, name, config);
+			if (configurationChangeTokenSource == null)
+			{
+				throw new ArgumentNullException(nameof(configurationChangeTokenSource));
+			}
+
+			services.AddSingleton(typeof(IOptionsChangeTokenSource<>).MakeGenericType(optionsType),
+				configurationChangeTokenSource);
+
+			var namedConfigureFromConfigurationOptionsType =
+				typeof(NamedConfigureFromConfigurationOptions<>).MakeGenericType(optionsType);
+			var namedConfigureFromConfigurationOptions =
+				Activator.CreateInstance(namedConfigureFromConfigurationOptionsType, name, config, configureBinder);
+			if (namedConfigureFromConfigurationOptions == null)
+			{
+				throw new ArgumentNullException(nameof(namedConfigureFromConfigurationOptions));
+			}
+
+			return services.AddSingleton(typeof(IConfigureOptions<>).MakeGenericType(optionsType),
+				namedConfigureFromConfigurationOptions);
+		}
+
+		public static IServiceCollection AddOptions(this IServiceCollection services, IConfiguration configuration)
+		{
+			MicroserviceFrameworkLoader.RegisterType += type =>
+			{
+				if (type.IsAbstract || type.IsInterface)
+				{
+					return;
+				}
+
+				var attribute = type.GetCustomAttribute<OptionsAttribute>();
+				if (attribute != null)
+				{
+					services.AddOptions(type, attribute.SectionName, configuration, _ => { });
+				}
+			};
 
 			return services;
 		}

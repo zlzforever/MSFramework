@@ -6,8 +6,7 @@
     </PropertyGroup>
     <Import Project="../../package.props" />
     <ItemGroup>
-        <PackageReference Include="Pomelo.EntityFrameworkCore.MySql" Version="3.1.2" />
-        <PackageReference Include="MySqlConnector" Version="0.69.9" />
+        <PackageReference Include="Pomelo.EntityFrameworkCore.MySql" Version="5.0.0-alpha.2" />
     </ItemGroup>
     <ItemGroup>
         <ProjectReference Include="..\MSFramework.Ef\MSFramework.Ef.csproj" />

@@ -7,7 +7,6 @@
 
     <ItemGroup>
       <ProjectReference Include="..\MSFramework.AspNetCore\MSFramework.AspNetCore.csproj" />
-      <ProjectReference Include="..\MSFramework.EventBus\MSFramework.EventBus.csproj" />
       <ProjectReference Include="..\Ordering.Domain\Ordering.Domain.csproj" />
       <ProjectReference Include="..\Ordering.Infrastructure\Ordering.Infrastructure.csproj" />
     </ItemGroup>
