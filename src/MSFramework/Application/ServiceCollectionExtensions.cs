@@ -41,8 +41,7 @@ namespace MicroserviceFramework.Application
 				return;
 			}
 
-			var interfaces = type.GetInterfaces();
-			var handlerInterfaceTypes = interfaces
+			var handlerInterfaceTypes = type.GetInterfaces()
 				.Where(@interface => @interface.IsGenericType && genericTypeDefinition ==
 					@interface.GetGenericTypeDefinition())
 				.ToList();

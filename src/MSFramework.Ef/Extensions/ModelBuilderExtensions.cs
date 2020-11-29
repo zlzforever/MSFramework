@@ -2,6 +2,9 @@ using MicroserviceFramework.Ef.Infrastructure;
 using MicroserviceFramework.Extensions;
 using MicroserviceFramework.Shared;
 using Microsoft.EntityFrameworkCore;
+#if !NETSTANDARD2_0
+using Microsoft.EntityFrameworkCore.Metadata;
+#endif
 
 namespace MicroserviceFramework.Ef.Extensions
 {
@@ -37,7 +40,14 @@ namespace MicroserviceFramework.Ef.Extensions
 				var properties = entityType.GetProperties();
 				foreach (var property in properties)
 				{
+#if NETSTANDARD2_0
 					var propertyName = property.GetColumnName();
+
+#else
+					var storeObjectIdentifier = StoreObjectIdentifier.Create(entityType, StoreObjectType.Table);
+					var propertyName = property.GetColumnName(storeObjectIdentifier.GetValueOrDefault());
+#endif
+
 					if (propertyName.StartsWith("_"))
 					{
 						propertyName = propertyName.Substring(1, propertyName.Length - 1);

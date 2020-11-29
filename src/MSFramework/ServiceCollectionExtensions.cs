@@ -11,8 +11,10 @@ using MicroserviceFramework.EventBus;
 using MicroserviceFramework.Initializer;
 using MicroserviceFramework.Serialization;
 using MicroserviceFramework.Shared;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
+using MicroserviceFramework.Configuration;
 
 // ReSharper disable InconsistentNaming
 
@@ -20,6 +22,13 @@ namespace MicroserviceFramework
 {
 	public static class ServiceCollectionExtensions
 	{
+		public static MicroserviceFrameworkBuilder AddOptions(this MicroserviceFrameworkBuilder builder,
+			IConfiguration configuration)
+		{
+			builder.Services.AddOptions(configuration);
+			return builder;
+		}
+
 		public static MicroserviceFrameworkBuilder UseCqrs(this MicroserviceFrameworkBuilder builder)
 		{
 			builder.Services.AddCqrs();
@@ -32,9 +41,6 @@ namespace MicroserviceFramework
 			var builder = new MicroserviceFrameworkBuilder(services);
 			builderAction?.Invoke(builder);
 
-			builder.Services.AddSerializer();
-			builder.Services.AddEventBus();
-			
 			MicroserviceFrameworkLoader.RegisterType += type =>
 			{
 				var lifetime = LifetimeChecker.Get(type);
@@ -43,17 +49,15 @@ namespace MicroserviceFramework
 					builder.Services.RegisterDependencyInjection(type, lifetime.Value);
 				}
 			};
-
+			builder.Services.AddDomainEventDispatcher();
+			builder.Services.AddSerializer();
+			builder.Services.AddEventBus();
+			builder.Services.AddInitializer();
 			builder.Services.TryAddScoped<UnitOfWorkManager>();
-
 			// 如果你想换成消息队列，则重新注册一个对应的服务即可
 			builder.Services.TryAddScoped<IAuditService, DefaultAuditService>();
 
-			builder.Services.AddDomainEventDispatcher();
-
 			MicroserviceFrameworkLoader.RegisterTypes();
-
-			builder.UseInitializer();
 		}
 
 		public static MicroserviceFrameworkBuilder UseSerializer(this MicroserviceFrameworkBuilder builder,

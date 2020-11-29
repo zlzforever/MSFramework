@@ -1,3 +1,12 @@
+using MicroserviceFramework;
+using MicroserviceFramework.AspNetCore;
+using MicroserviceFramework.AspNetCore.Filters;
+using MicroserviceFramework.AspNetCore.Infrastructure;
+using MicroserviceFramework.Audit;
+using MicroserviceFramework.AutoMapper;
+using MicroserviceFramework.Configuration;
+using MicroserviceFramework.Ef;
+using MicroserviceFramework.Ef.MySql;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
@@ -5,16 +14,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.OpenApi.Models;
-using MSFramework;
-using MSFramework.AspNetCore;
-using MSFramework.AspNetCore.Filters;
-using MSFramework.Audit;
-using MSFramework.AutoMapper;
-using MSFramework.DependencyInjection;
-using MSFramework.Ef;
-using MSFramework.Ef.MySql;
-using MSFramework.Extensions;
-using MSFramework.Migrator.MySql;
+using Newtonsoft.Json.Serialization;
 using Serilog;
 using Template.Domain;
 using Template.Infrastructure;
@@ -35,18 +35,29 @@ namespace Template.API
 		{
 			Configuration.Print(x => Log.Logger.Information(x));
 
+			services.AddOptions(Configuration);
+
 			// SwaggerUI require some service from views,
 			// if your project a pure api, please use AddControllers
 			services.AddControllers(x =>
 				{
-					x.Filters.UseUnitOfWork();
-					x.Filters.UseFunctionFilter();
-					x.Filters.UseAudit();
-					x.Filters.UseGlobalExceptionFilter();
-					x.Filters.UseInvalidModelStateFilter();
+					x.Filters.AddUnitOfWork();
+					x.Filters.AddFunctionFilter();
+					x.Filters.AddAudit();
+					x.Filters.AddGlobalException();
+					x.ModelBinderProviders.Insert(0, new ObjectIdModelBinderProvider());
 				})
-				.SetCompatibilityVersion(CompatibilityVersion.Version_3_0)
-				.AddNewtonsoftJson();
+				.ConfigureInvalidModelStateResponse()
+				.AddNewtonsoftJson(x =>
+				{
+					x.SerializerSettings.Converters.Add(new ObjectIdConverter());
+					x.SerializerSettings.Converters.Add(new EnumerationConverter());
+					x.SerializerSettings.ContractResolver = new CompositeContractResolver
+					{
+						new EnumerationContractResolver(),
+						new CamelCasePropertyNamesContractResolver()
+					};
+				});
 
 			services.AddHealthChecks();
 			services.AddSwaggerGen(c =>
@@ -54,6 +65,7 @@ namespace Template.API
 				c.SwaggerDoc("v1.0",
 					new OpenApiInfo {Version = "v1.0", Description = "Template API V1.0"});
 				c.CustomSchemaIds(x => x.FullName);
+				c.AddEnumerationDoc(typeof(TemplateOptions).Assembly).AddObjectIdDoc();
 			});
 
 			services.AddResponseCompression();
@@ -62,7 +74,7 @@ namespace Template.API
 			services.AddRouting(x => { x.LowercaseUrls = true; });
 
 #if !DEBUG
-			var options = new AppOptions(Configuration);
+			var options = new TemplateOptions(Configuration);
 			services.AddAuthentication("Bearer")
 				.AddIdentityServerAuthentication(x =>
 				{
@@ -76,23 +88,20 @@ namespace Template.API
 				});
 #endif
 
-			services.AddScoped<AppOptions>();
-			services.AddMSFramework(builder =>
+			services.AddMicroserviceFramework(builder =>
 			{
+				// builder.UseNewtonsoftJson();
 				builder.UseAutoMapper();
-				builder.UseDependencyInjectionScanner();
-				builder.UseEventDispatcher();
-				// builder.UseRabbitMQEventDispatcher(new RabbitMQOptions(), typeof(UserCheckoutAcceptedEvent));
+				builder.UseCqrs();
+				builder.UseBaseX();
+				//builder.UseAccessControl(Configuration);
 				// 启用审计服务
 				builder.UseAudit();
-				builder.UseMySqlMigrator(typeof(AppDbContext),
-					"Database='template';Data Source=localhost;User ID=root;Password=1qazZAQ!;Port=3306;");
-
 				builder.UseAspNetCore();
 				builder.UseEntityFramework(x =>
 				{
 					// 添加 MySql 支持
-					x.AddMySql<AppDbContext>(Configuration);
+					x.AddMySql<TemplateDbContext>(Configuration);
 				});
 			});
 		}
@@ -100,14 +109,6 @@ namespace Template.API
 		// This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
 		public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
 		{
-			// 必须放在 UseMSFramework 后面
-			var exit = Configuration["exit"] == "true";
-			if (exit)
-			{
-				app.ApplicationServices.GetRequiredService<IHostApplicationLifetime>().StopApplication();
-				return;
-			}
-
 			if (env.IsDevelopment())
 			{
 				app.UseDeveloperExceptionPage();
@@ -139,8 +140,15 @@ namespace Template.API
 
 			app.UseResponseCompression();
 			app.UseResponseCaching();
-			
-			app.UseMSFramework();
+
+			app.UseMicroserviceFramework();
+
+			// 必须放在 UseMSFramework 后面
+			var exit = Configuration["exit"] == "true";
+			if (exit)
+			{
+				app.ApplicationServices.GetRequiredService<IHostApplicationLifetime>().StopApplication();
+			}
 		}
 	}
 }

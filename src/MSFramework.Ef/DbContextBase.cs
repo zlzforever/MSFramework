@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 using MicroserviceFramework.Application;
 using MicroserviceFramework.Audit;
@@ -12,6 +13,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 
 namespace MicroserviceFramework.Ef
 {
@@ -38,17 +40,13 @@ namespace MicroserviceFramework.Ef
 			base.OnConfiguring(optionsBuilder);
 
 			var option = _serviceProvider
-				.GetRequiredService<EntityFrameworkOptionsConfiguration>().Get(GetType());
+				.GetRequiredService<IOptions<EntityFrameworkOptionsDictionary>>()
+				.Value.Get(GetType());
 			Database.AutoTransactionsEnabled = option.AutoTransactionsEnabled;
 
 			if (option.EnableSensitiveDataLogging)
 			{
 				optionsBuilder.EnableSensitiveDataLogging();
-			}
-
-			if (option.LazyLoadingProxiesEnabled)
-			{
-				optionsBuilder.UseLazyLoadingProxies();
 			}
 
 			_unitOfWorkManager.Register(this);
@@ -67,18 +65,20 @@ namespace MicroserviceFramework.Ef
 			foreach (var register in registers)
 			{
 				register.RegisterTo(modelBuilder);
-				_logger.LogDebug($"将实体类 “{register.EntityType}” 注册到上下文 “{contextType}” 中");
 			}
+
+			_logger.LogInformation(
+				$"将 {registers.Length} 个实体 {string.Join("、", registers.Select(x => x.EntityType))} 注册到上下文 {contextType} 中");
 
 			modelBuilder.UseObjectId();
 
-			var option = _serviceProvider.GetRequiredService<EntityFrameworkOptionsConfiguration>().Get(GetType());
+			var option = _serviceProvider.GetRequiredService<IOptions<EntityFrameworkOptionsDictionary>>()
+				.Value
+				.Get(GetType());
 			if (option.UseUnixLikeName)
 			{
 				modelBuilder.UseUnderScoreCase();
 			}
-
-			_logger.LogInformation($"上下文 “{contextType}” 注册了 {registers.Length} 个实体类");
 		}
 
 		public IEnumerable<AuditEntity> GetAuditEntities()

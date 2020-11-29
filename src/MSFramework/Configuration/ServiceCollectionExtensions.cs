@@ -8,7 +8,7 @@ namespace MicroserviceFramework.Configuration
 {
 	public static class ServiceCollectionExtensions
 	{
-		private static IServiceCollection AddOptions(this IServiceCollection services, Type optionsType, string name,
+		private static void AddOptions(this IServiceCollection services, Type optionsType,
 			IConfiguration config,
 			Action<BinderOptions> configureBinder)
 		{
@@ -27,12 +27,10 @@ namespace MicroserviceFramework.Configuration
 				throw new ArgumentNullException(nameof(config));
 			}
 
-			services.AddOptions();
-
 			var configurationChangeTokenSourceType =
 				typeof(ConfigurationChangeTokenSource<>).MakeGenericType(optionsType);
 			var configurationChangeTokenSource =
-				Activator.CreateInstance(configurationChangeTokenSourceType, name, config);
+				Activator.CreateInstance(configurationChangeTokenSourceType, string.Empty, config);
 			if (configurationChangeTokenSource == null)
 			{
 				throw new ArgumentNullException(nameof(configurationChangeTokenSource));
@@ -44,18 +42,21 @@ namespace MicroserviceFramework.Configuration
 			var namedConfigureFromConfigurationOptionsType =
 				typeof(NamedConfigureFromConfigurationOptions<>).MakeGenericType(optionsType);
 			var namedConfigureFromConfigurationOptions =
-				Activator.CreateInstance(namedConfigureFromConfigurationOptionsType, name, config, configureBinder);
+				Activator.CreateInstance(namedConfigureFromConfigurationOptionsType, string.Empty, config,
+					configureBinder);
 			if (namedConfigureFromConfigurationOptions == null)
 			{
 				throw new ArgumentNullException(nameof(namedConfigureFromConfigurationOptions));
 			}
 
-			return services.AddSingleton(typeof(IConfigureOptions<>).MakeGenericType(optionsType),
+			services.AddSingleton(typeof(IConfigureOptions<>).MakeGenericType(optionsType),
 				namedConfigureFromConfigurationOptions);
 		}
 
 		public static IServiceCollection AddOptions(this IServiceCollection services, IConfiguration configuration)
 		{
+			services.AddOptions();
+
 			MicroserviceFrameworkLoader.RegisterType += type =>
 			{
 				if (type.IsAbstract || type.IsInterface)
@@ -63,10 +64,13 @@ namespace MicroserviceFramework.Configuration
 					return;
 				}
 
-				var attribute = type.GetCustomAttribute<OptionsAttribute>();
+				var attribute = type.GetCustomAttribute<OptionsTypeAttribute>();
 				if (attribute != null)
 				{
-					services.AddOptions(type, attribute.SectionName, configuration, _ => { });
+					var section = string.IsNullOrWhiteSpace(attribute.SectionName)
+						? configuration
+						: configuration.GetSection(attribute.SectionName);
+					services.AddOptions(type, section, _ => { });
 				}
 			};
 

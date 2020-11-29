@@ -17,10 +17,10 @@ namespace MicroserviceFramework.Domain.Event
 					return;
 				}
 
-				var interfaces = type.GetInterfaces();
-				var handlerInterfaceTypes = interfaces
-					.Where(@interface => @interface.IsGenericType && DomainEventDispatcher.EventHandlerBaseType ==
-						@interface.GetGenericTypeDefinition())
+				var handlerInterfaceTypes = type.GetInterfaces()
+					.Where(@interface => @interface.IsGenericType &&
+					                     DomainEventDispatcher.EventHandlerBaseType ==
+					                     @interface.GetGenericTypeDefinition())
 					.ToList();
 
 				if (handlerInterfaceTypes.Count == 0)

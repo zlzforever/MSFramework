@@ -43,8 +43,8 @@ namespace MicroserviceFramework.Ef.PostgreSql
 				var dbContextType = typeof(TDbContext);
 				var entryAssemblyName = dbContextType.Assembly.GetName().Name;
 
-				var optionsConfiguration = new EntityFrameworkOptionsConfiguration(configuration);
-				var option = optionsConfiguration.Get(dbContextType);
+				var optionDict = configuration.GetSection("DbContexts").Get<EntityFrameworkOptionsDictionary>();
+				var option = optionDict.Get(dbContextType);
 
 				x.UseNpgsql(option.ConnectionString, options => { options.MigrationsAssembly(entryAssemblyName); });
 			});

@@ -9,7 +9,6 @@ namespace MicroserviceFramework.Ef
 		/// </summary>
 		public EntityFrameworkOptions()
 		{
-			LazyLoadingProxiesEnabled = false;
 			AutoMigrationEnabled = false;
 		}
 
@@ -34,21 +33,11 @@ namespace MicroserviceFramework.Ef
 		public bool AutoTransactionsEnabled { get; set; } = true;
 
 		/// <summary>
-		/// 获取或设置 是否启用延迟加载代理
-		/// </summary>
-		public bool LazyLoadingProxiesEnabled { get; set; }
-
-		/// <summary>
 		/// 获取或设置 是否自动迁移
 		/// </summary>
 		public bool AutoMigrationEnabled { get; set; }
 
 		public bool EnableSensitiveDataLogging { get; set; }
-
-		/// <summary>
-		/// 不创建实际的外键约束
-		/// </summary>
-		public bool IgnoreForeignKey { get; set; } = true;
 
 		/// <summary>
 		/// 使用 unix 风格的表名、列名

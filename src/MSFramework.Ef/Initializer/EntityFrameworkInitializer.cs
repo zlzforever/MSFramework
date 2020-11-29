@@ -7,6 +7,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 
 namespace MicroserviceFramework.Ef.Initializer
 {
@@ -17,8 +18,23 @@ namespace MicroserviceFramework.Ef.Initializer
 
 		public override async Task InitializeAsync(IServiceProvider serviceProvider)
 		{
-			var entityFrameworkOptionsStore = serviceProvider.GetRequiredService<EntityFrameworkOptionsConfiguration>();
-			foreach (var option in entityFrameworkOptionsStore.GetAllOptions())
+			var entityFrameworkOptionsDict =
+				serviceProvider.GetRequiredService<IOptions<EntityFrameworkOptionsDictionary>>().Value;
+
+			if (entityFrameworkOptionsDict.Count == 0)
+			{
+				throw new MicroserviceFrameworkException("未能找到数据上下文配置");
+			}
+
+			var repeated = entityFrameworkOptionsDict.Values.GroupBy(m => m.DbContextType)
+				.FirstOrDefault(m => m.Count() > 1);
+			if (repeated != null)
+			{
+				throw new MicroserviceFrameworkException(
+					$"数据上下文配置中存在多个配置节点指向同一个上下文类型：{repeated.First().DbContextTypeName}");
+			}
+
+			foreach (var option in entityFrameworkOptionsDict.GetAllOptions())
 			{
 				if (option.AutoMigrationEnabled)
 				{

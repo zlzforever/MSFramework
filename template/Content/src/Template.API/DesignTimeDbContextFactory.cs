@@ -1,11 +1,11 @@
 using System;
-using MSFramework.Ef.Design;
+using MicroserviceFramework.Ef.Design;
 using Template.Infrastructure;
 
 namespace Template.API
 {
 	public class DesignTimeDbContextFactory
-		: DesignTimeDbContextFactoryBase<AppDbContext>
+		: DesignTimeDbContextFactoryBase<TemplateDbContext>
 	{
 		protected override IServiceProvider GetServiceProvider()
 		{

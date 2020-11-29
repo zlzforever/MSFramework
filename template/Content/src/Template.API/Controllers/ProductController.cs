@@ -1,18 +1,17 @@
 using System;
 using System.Threading.Tasks;
+using MicroserviceFramework;
+using MicroserviceFramework.Application.CQRS;
+using MicroserviceFramework.AspNetCore;
+using MicroserviceFramework.AspNetCore.Mvc;
+using MicroserviceFramework.Shared;
 using Microsoft.AspNetCore.Mvc;
-using MSFramework;
-using MSFramework.AspNetCore;
-using MSFramework.AspNetCore.Api;
-using MSFramework.Common;
-using MSFramework.Mapper;
 #if !DEBUG
 using Microsoft.AspNetCore.Authorization;
 #endif
-using Template.API.ViewObject;
-using Template.Application.DTO;
-using Template.Application.Query;
-using Template.Application.Service;
+using Template.Application.Project.Commands;
+using Template.Application.Project.DTOs;
+using Template.Application.Project.Queries;
 
 namespace Template.API.Controllers
 {
@@ -23,40 +22,39 @@ namespace Template.API.Controllers
 #endif
 	public class ProductController : ApiControllerBase
 	{
-		private readonly IProductQuery _productQuery;
-		private readonly IProductService _productService;
-		private readonly IObjectMapper _mapper;
+		private readonly ICqrsProcessor _cqrsProcessor;
 
 		public ProductController(
-			IProductQuery productQuery,
-			IProductService productService,
-			IObjectMapper mapper)
+			ICqrsProcessor cqrsProcessor)
 		{
-			_productQuery = productQuery;
-			_productService = productService;
-			_mapper = mapper;
+			_cqrsProcessor = cqrsProcessor;
 		}
 
-		[HttpGet("q1")]
-		public async Task<PagedResult<ProductOut>> PagedQuery1Async(string keyword, int page, int limit)
+		[HttpGet]
+		public async Task<PagedResult<ProductOut>> PagedQuery1Async([FromRoute] PagedProductQuery query)
 		{
-			var @out = await _productQuery.PagedQueryAsync(keyword, page, limit);
-			return _mapper.Map<PagedResult<ProductOut>>(@out);
-		}
-
-		[HttpGet("q2")]
-		public async Task<Response<PagedResult<ProductOut>>> PagedQuery2Async(string keyword, int page, int limit)
-		{
-			var @out = await _productQuery.PagedQueryAsync(keyword, page, limit);
-			return new Response<PagedResult<ProductOut>>(@out);
+			var @out = await _cqrsProcessor.QueryAsync(query);
+			return @out;
 		}
 
 		[HttpPost]
-		public async Task<CreatProductOut> CreateAsync([FromBody] CreateProductViewObject vo)
+		public async Task<CreatProductOut> CreateAsync([FromBody] CreateProjectCommand command)
 		{
-			var @in = _mapper.Map<CreateProductIn>(vo);
-			var result = await _productService.CreateAsync(@in);
+			var result = await _cqrsProcessor.ExecuteAsync(command);
 			return result;
+		}
+
+		[HttpGet("getByName")]
+		public async Task<ProductOut> GetAsync([FromRoute] GetProductByNameQuery query)
+		{
+			return await _cqrsProcessor.QueryAsync(query);
+		}
+
+		[HttpDelete]
+		public async Task<Response> DeleteAsync([FromRoute] DeleteProjectCommand command)
+		{
+			await _cqrsProcessor.ExecuteAsync(command);
+			return Success();
 		}
 
 		[HttpGet("Error")]
@@ -68,25 +66,13 @@ namespace Template.API.Controllers
 		[HttpGet("MSFrameworkException")]
 		public void GetFrameworkException()
 		{
-			throw new MSFrameworkException(2, "i'm framework exception");
+			throw new MicroserviceFrameworkException(2, "i'm framework exception");
 		}
 
 		[HttpGet("Exception")]
 		public Response GetExceptionAsync()
 		{
 			throw new Exception("i'm framework exception");
-		}
-
-		[HttpGet("getByName")]
-		public async Task<ProductOut> GetAsync(string name)
-		{
-			return await _productQuery.GetByNameAsync(name);
-		}
-
-		[HttpDelete]
-		public async Task<ProductOut> DeleteAsync(Guid productId)
-		{
-			return await _productService.DeleteByIdAsync(productId);
 		}
 	}
 }

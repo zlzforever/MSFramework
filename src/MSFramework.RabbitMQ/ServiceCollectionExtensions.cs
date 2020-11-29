@@ -1,6 +1,4 @@
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using MicroserviceFramework.EventBus;
 using Microsoft.Extensions.DependencyInjection;
 using RabbitMQ.Client;

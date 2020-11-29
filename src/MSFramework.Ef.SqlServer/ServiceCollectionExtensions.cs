@@ -14,8 +14,8 @@ namespace MicroserviceFramework.Ef.SqlServer
 				var dbContextType = typeof(TDbContext);
 				var entryAssemblyName = dbContextType.Assembly.GetName().Name;
 
-				var store = new EntityFrameworkOptionsConfiguration(configuration);
-				var option = store.Get(dbContextType);
+				var optionDict = configuration.GetSection("DbContexts").Get<EntityFrameworkOptionsDictionary>();
+				var option = optionDict.Get(dbContextType);
 
 				x.UseSqlServer(option.ConnectionString, options => { options.MigrationsAssembly(entryAssemblyName); });
 			});

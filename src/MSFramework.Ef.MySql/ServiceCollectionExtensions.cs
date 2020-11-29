@@ -1,4 +1,3 @@
-
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -43,21 +42,23 @@ namespace MicroserviceFramework.Ef.MySql
 			var action = new Action<DbContextOptionsBuilder>(x =>
 			{
 				var dbContextType = typeof(TDbContext);
-				var optionsConfiguration = new EntityFrameworkOptionsConfiguration(configuration);
-				var option = optionsConfiguration.Get(dbContextType);
+				var optionDict = configuration.GetSection("DbContexts").Get<EntityFrameworkOptionsDictionary>();
+				var option = optionDict.Get(dbContextType);
 
 				var entryAssemblyName = dbContextType.Assembly.GetName().Name;
-
-				if (option.IgnoreForeignKey)
+#if NETSTANDARD2_0
+				x.UseMySql(option.ConnectionString, options =>
 				{
-					// x.ReplaceService<IMigrator, IgnoreForeignKeyMySqlMigrator>();
-				}
-
-				x.UseMySql(option.ConnectionString,  ServerVersion.AutoDetect(option.ConnectionString),options =>
+					options.MigrationsAssembly(entryAssemblyName);
+					options.CharSet(Pomelo.EntityFrameworkCore.MySql.Storage.CharSet.Utf8Mb4);
+				});
+#else
+				x.UseMySql(option.ConnectionString, ServerVersion.AutoDetect(option.ConnectionString), options =>
 				{
 					options.MigrationsAssembly(entryAssemblyName);
 					options.CharSet(CharSet.Utf8Mb4);
 				});
+#endif
 			});
 			services.AddDbContext<TDbContext>(action);
 			return services;

@@ -2,7 +2,7 @@
 
 namespace MSFramework.AspNetCore.Test.Extensions
 {
-	[Options()]
+	[OptionsType()]
 	public class TestConfigModel
 	{
 		public string Name { get; set; }

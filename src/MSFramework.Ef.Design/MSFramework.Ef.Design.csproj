@@ -1,0 +1,15 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <PackageId>MSFramework.Ef.Design</PackageId>
+        <AssemblyName>MSFramework.Ef.Design</AssemblyName>
+        <RootNamespace>MicroserviceFramework.Ef.Design</RootNamespace>
+    </PropertyGroup>
+    <Import Project="../../package.props"/>
+    <ItemGroup Condition="'$(TargetFramework)' == 'netstandard2.1'">
+        <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="5.0.0"/>
+    </ItemGroup>
+    <ItemGroup Condition="'$(TargetFramework)' == 'netstandard2.0'">
+        <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="3.1.10"/>
+    </ItemGroup>
+</Project>

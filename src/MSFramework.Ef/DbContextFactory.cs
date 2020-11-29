@@ -12,7 +12,8 @@ namespace MicroserviceFramework.Ef
 
 		public DbContextFactory(IServiceProvider serviceProvider)
 		{
-			_entityConfigurationTypeFinder = serviceProvider.GetRequiredService<IEntityConfigurationTypeFinder>();
+			_entityConfigurationTypeFinder = serviceProvider
+				.GetRequiredService<IEntityConfigurationTypeFinder>();
 			_serviceProvider = serviceProvider;
 		}
 
@@ -22,7 +23,8 @@ namespace MicroserviceFramework.Ef
 		/// <returns>实体所属上下文实例</returns>
 		public DbContextBase GetDbContext<TEntity>() where TEntity : class, IAggregateRoot
 		{
-			var dbContextType = _entityConfigurationTypeFinder.GetDbContextTypeForEntity(typeof(TEntity));
+			var dbContextType = _entityConfigurationTypeFinder
+				.GetDbContextTypeForEntity(typeof(TEntity));
 			return (DbContextBase) _serviceProvider.GetRequiredService(dbContextType);
 		}
 	}

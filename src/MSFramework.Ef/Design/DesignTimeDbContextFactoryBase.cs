@@ -19,7 +19,8 @@ namespace MicroserviceFramework.Ef.Design
 		public virtual TDbContext CreateDbContext(string[] args)
 		{
 			var services = GetServiceProvider();
-			return (TDbContext) services.CreateScope().ServiceProvider.GetRequiredService(typeof(TDbContext));
+			return (TDbContext) services.CreateScope()
+				.ServiceProvider.GetRequiredService(typeof(TDbContext));
 		}
 
 		protected abstract IServiceProvider GetServiceProvider();

@@ -18,7 +18,7 @@ namespace MicroserviceFramework.DependencyInjection
 
 			if (Singleton.IsAssignableFrom(type))
 			{
-				return ServiceLifetime.Scoped;
+				return ServiceLifetime.Singleton;
 			}
 
 			if (Scope.IsAssignableFrom(type))
@@ -28,7 +28,7 @@ namespace MicroserviceFramework.DependencyInjection
 
 			if (Transient.IsAssignableFrom(type))
 			{
-				return ServiceLifetime.Scoped;
+				return ServiceLifetime.Transient;
 			}
 
 			return null;

@@ -16,7 +16,7 @@ namespace MicroserviceFramework.Function
 		{
 			var logger = serviceProvider.GetRequiredService<ILogger<FunctionInitializer>>();
 			var repository = serviceProvider.GetService<IFunctionDefineRepository>();
-			if (!repository.IsAvailable())
+			if (repository == null || !repository.IsAvailable())
 			{
 				logger.LogInformation("Function 仓储不可用");
 				return;

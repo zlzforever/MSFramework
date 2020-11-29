@@ -5,13 +5,17 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="MSFramework.AutoMapper" Version="0.12.8-beta4" />
-        <PackageReference Include="MSFramework.AspNetCore" Version="0.12.8-beta4" />
-        <PackageReference Include="Dapper" Version="2.0.35" />
+        <PackageReference Include="MSFramework.AutoMapper" Version="0.13.7-beta2" />
+        <PackageReference Include="MSFramework.AspNetCore" Version="0.13.7-beta2" />
+        <PackageReference Include="Dapper" Version="2.0.78" />
     </ItemGroup>
 
     <ItemGroup>
       <ProjectReference Include="..\Template.Infrastructure\Template.Infrastructure.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Folder Include="DTO" />
     </ItemGroup>
 
 </Project>

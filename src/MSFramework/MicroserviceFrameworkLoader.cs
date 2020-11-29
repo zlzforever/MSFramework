@@ -1,10 +1,11 @@
 using System;
+using System.IO;
 using System.Linq;
 using System.Reflection;
 
 namespace MicroserviceFramework
 {
-	public class MicroserviceFrameworkLoader
+	public static class MicroserviceFrameworkLoader
 	{
 		public static event Action<Type> RegisterType;
 
@@ -19,7 +20,13 @@ namespace MicroserviceFramework
 			if (entryAssembly != null)
 			{
 				var pre = entryAssembly.GetName().Name.Split('.').FirstOrDefault();
-				AppDomain.CurrentDomain.Load($"{pre}.Application");
+				if (pre != "ReSharperTestRunner64" && pre != "ef")
+				{
+					if (File.Exists($"{pre}.Application.dll"))
+					{
+						AppDomain.CurrentDomain.Load($"{pre}.Application");
+					}
+				}
 			}
 
 			var assemblies = AppDomain.CurrentDomain.GetAssemblies();

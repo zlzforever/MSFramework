@@ -51,16 +51,14 @@ namespace Ordering.API.Controllers
 		private readonly IProductRepository _productRepository;
 		private readonly IRepository<AuditOperation> _repository;
 		private readonly IObjMapper _mapper;
-		private readonly ConfigTest _configTest;
 
-		public ProductController(IOptions<ConfigTest> configTest, IProductRepository productRepository,
+		public ProductController(IProductRepository productRepository,
 			IRepository<AuditOperation> repository,
 			IObjMapper mapper)
 		{
 			_productRepository = productRepository;
 			_repository = repository;
 			_mapper = mapper;
-			_configTest = configTest.Value;
 		}
 
 		[HttpGet("objectid")]

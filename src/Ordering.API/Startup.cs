@@ -3,26 +3,20 @@ using System.IO;
 using System.Linq;
 using MicroserviceFramework;
 using MicroserviceFramework.AspNetCore;
-using MicroserviceFramework.AspNetCore.AccessControl;
 using MicroserviceFramework.AspNetCore.Filters;
 using MicroserviceFramework.AspNetCore.Infrastructure;
 using MicroserviceFramework.Audit;
 using MicroserviceFramework.AutoMapper;
 using MicroserviceFramework.Configuration;
-using MicroserviceFramework.Domain.Event;
 using MicroserviceFramework.Ef;
 using MicroserviceFramework.Ef.MySql;
-using MicroserviceFramework.EventBus;
 using MicroserviceFramework.Newtonsoft;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Options;
 using Microsoft.OpenApi.Models;
 using Newtonsoft.Json.Serialization;
-using Ordering.Domain;
 using Ordering.Domain.AggregateRoots;
 using Ordering.Infrastructure;
 using Serilog;
@@ -42,7 +36,7 @@ namespace Ordering.API
 		public void ConfigureServices(IServiceCollection services)
 		{
 			services.AddOptions(Configuration);
-			
+
 			Configuration.Print(x => Log.Logger.Information(x));
 
 			services.AddControllers(x =>
@@ -102,10 +96,6 @@ namespace Ordering.API
 		// This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
 		public void Configure(IApplicationBuilder app, IHostEnvironment env)
 		{
-			var dispatcher = app.ApplicationServices.CreateScope().ServiceProvider.GetService<IDomainEventDispatcher>();
-			dispatcher.DispatchAsync(new DomainEventSample1()).Wait();
-			dispatcher.DispatchAsync(new DomainEventSample2()).Wait();
-
 			if (env.IsDevelopment())
 			{
 				app.UseDeveloperExceptionPage();
@@ -133,11 +123,7 @@ namespace Ordering.API
 			app.UseSwagger();
 			//启用中间件服务对swagger-ui，指定Swagger JSON终结点
 			app.UseSwaggerUI(c => { c.SwaggerEndpoint("/swagger/v1.0/swagger.json", "Ordering API V1.0"); });
-
-			var asm2 = AppDomain.CurrentDomain.GetAssemblies().Select(x => x.GetName().Name).ToList();
-			asm2.Sort();
-			File.WriteAllText("asm2.txt",
-				string.Join(Environment.NewLine, asm2));
+			
 			app.UseMicroserviceFramework();
 		}
 	}

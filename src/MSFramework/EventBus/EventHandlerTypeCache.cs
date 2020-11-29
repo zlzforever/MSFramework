@@ -22,19 +22,25 @@ namespace MicroserviceFramework.EventBus
 
 		public static void Register(Type eventType, Type handlerType, MethodInfo handlerMethod)
 		{
-			EventTypes.Add(eventType);
-			var name = eventType.Name;
-			if (!Cache.ContainsKey(name))
+			lock (Cache)
 			{
-				Cache[name] = new HashSet<HandlerInfo>();
-			}
+				EventTypes.Add(eventType);
+				var name = eventType.Name;
+				if (!Cache.ContainsKey(name))
+				{
+					Cache[name] = new HashSet<HandlerInfo>();
+				}
 
-			Cache[name].Add(new HandlerInfo(eventType, handlerType, handlerMethod));
+				Cache[name].Add(new HandlerInfo(eventType, handlerType, handlerMethod));
+			}
 		}
 
 		public static IReadOnlyCollection<HandlerInfo> GetOrDefault(string eventName)
 		{
-			return Cache.GetOrDefault(eventName);
+			lock (Cache)
+			{
+				return Cache.GetOrDefault(eventName);
+			}
 		}
 
 		public static IReadOnlyCollection<Type> GetEventTypes()

@@ -9,7 +9,7 @@ namespace MicroserviceFramework.Initializer
 {
 	public static class ServiceCollectionExtensions
 	{
-		internal static MicroserviceFrameworkBuilder UseInitializer(this MicroserviceFrameworkBuilder builder)
+		internal static IServiceCollection AddInitializer(this IServiceCollection services)
 		{
 			var initializerType = typeof(InitializerBase);
 			MicroserviceFrameworkLoader.RegisterType += type =>
@@ -20,12 +20,12 @@ namespace MicroserviceFramework.Initializer
 				}
 
 				if (initializerType.IsAssignableFrom(type) &&
-				    initializerType.GetCustomAttribute(typeof(NotRegisterAttribute)) == null)
+				    type.GetCustomAttribute(typeof(NotRegisterAttribute)) == null)
 				{
-					builder.Services.AddSingleton(initializerType, type);
+					services.AddSingleton(initializerType, type);
 				}
 			};
-			return builder;
+			return services;
 		}
 
 		public static MicroserviceFrameworkBuilder AddInitializer<TInitializer>(

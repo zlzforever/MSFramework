@@ -22,16 +22,14 @@ namespace MicroserviceFramework.Application.CQRS
 			_serviceProvider = serviceProvider;
 		}
 
-		public static bool Register(Type eventType, (Type Interface, MethodInfo Method) cacheItem)
+		public static void Register(Type eventType, (Type Interface, MethodInfo Method) cacheItem)
 		{
-			if (!Cache.ContainsKey(eventType))
+			lock (Cache)
 			{
-				Cache.Add(eventType, cacheItem);
-				return true;
-			}
-			else
-			{
-				return false;
+				if (!Cache.ContainsKey(eventType))
+				{
+					Cache.Add(eventType, cacheItem);
+				}
 			}
 		}
 

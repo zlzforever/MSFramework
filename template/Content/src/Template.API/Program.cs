@@ -20,7 +20,9 @@ namespace Template.API
 			Log.Logger = new LoggerConfiguration()
 				.MinimumLevel.Debug()
 				.MinimumLevel.Override("Microsoft.Hosting.Lifetime", LogEventLevel.Information)
+#if !DEBUG
 				.MinimumLevel.Override("Microsoft.EntityFrameworkCore.Database.Command", LogEventLevel.Information)
+#endif
 				.MinimumLevel.Override("Microsoft", LogEventLevel.Warning)
 				.MinimumLevel.Override("System", LogEventLevel.Warning)
 				.MinimumLevel.Override("Microsoft.AspNetCore.Authentication", LogEventLevel.Warning)
@@ -34,11 +36,11 @@ namespace Template.API
 
 		public static IHostBuilder CreateHostBuilder(string[] args) =>
 			Host.CreateDefaultBuilder(args)
+				.UseSerilog()
 				.ConfigureWebHostDefaults(webBuilder =>
 				{
+					webBuilder.UseUrls("http://localhost:5000");
 					webBuilder.UseStartup<Startup>();
-					webBuilder.UseUrls("http://+:8000");
-					webBuilder.UseSerilog();
 				});
 	}
 }
