@@ -24,7 +24,7 @@ namespace MicroserviceFramework.Ef.Extensions
 				v => v.HasValue
 					? milliseconds ? v.Value.ToUnixTimeMilliseconds() : v.Value.ToUnixTimeSeconds()
 					: default,
-				v => v.HasValue ? DateTimeOffset.FromUnixTimeSeconds(v.Value) : default));
+				v => v.HasValue ? DateTimeOffset.FromUnixTimeSeconds(v.Value).ToLocalTime() : default));
 			builder.HasColumnType("int");
 			return builder;
 		}
@@ -36,7 +36,7 @@ namespace MicroserviceFramework.Ef.Extensions
 				v => v.HasValue
 					? milliseconds ? v.Value.ToUnixTimeMilliseconds() : v.Value.ToUnixTimeSeconds()
 					: default,
-				v => v.HasValue ? DateTimeOffset.FromUnixTimeSeconds(v.Value) : default));
+				v => v.HasValue ? DateTimeOffset.FromUnixTimeSeconds(v.Value).ToLocalTime() : default));
 			builder.HasColumnType("int");
 			return builder;
 		}
