@@ -9,8 +9,6 @@ namespace MicroserviceFramework.AspNetCore.Filters
 {
 	public class FunctionFilter : ActionFilterAttribute
 	{
-		private ILogger _logger;
-
 		public FunctionFilter()
 		{
 			Order = FilterOrders.FunctionFilter;
@@ -18,9 +16,6 @@ namespace MicroserviceFramework.AspNetCore.Filters
 
 		public override void OnActionExecuting(ActionExecutingContext context)
 		{
-			_logger = context.HttpContext.RequestServices.GetRequiredService<ILogger<FunctionFilter>>();
-			_logger.LogDebug("Executing function filter");
-
 			var provider = context.HttpContext.RequestServices;
 
 			var functionPath = context.ActionDescriptor.GetActionPath();
@@ -39,7 +34,6 @@ namespace MicroserviceFramework.AspNetCore.Filters
 
 		public override void OnActionExecuted(ActionExecutedContext context)
 		{
-			_logger.LogDebug("Executed function filter");
 		}
 	}
 }

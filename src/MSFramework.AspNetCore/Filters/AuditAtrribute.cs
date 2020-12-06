@@ -10,7 +10,6 @@ using MicroserviceFramework.Extensions;
 using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
 
 namespace MicroserviceFramework.AspNetCore.Filters
 {
@@ -27,9 +26,6 @@ namespace MicroserviceFramework.AspNetCore.Filters
 
 		public override async Task OnActionExecutionAsync(ActionExecutingContext context, ActionExecutionDelegate next)
 		{
-			var logger = context.HttpContext.RequestServices.GetRequiredService<ILogger<Audit>>();
-			logger.LogDebug("Executing audit filter");
-
 			var auditService = context.HttpContext.RequestServices.GetRequiredService<IAuditService>();
 			if (auditService == null)
 			{
@@ -71,8 +67,6 @@ namespace MicroserviceFramework.AspNetCore.Filters
 
 			auditedOperation.End();
 			await auditService.SaveAsync(auditedOperation);
-
-			logger.LogDebug("Executed audit filter");
 		}
 	}
 }

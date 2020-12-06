@@ -29,8 +29,6 @@ namespace MicroserviceFramework.AspNetCore.Filters
 
 		public override async Task OnActionExecutionAsync(ActionExecutingContext context, ActionExecutionDelegate next)
 		{
-			_logger.LogDebug("Executing unit of work filter");
-
 			await base.OnActionExecutionAsync(context, next);
 
 			if (MethodDict.ContainsKey(context.HttpContext.Request.Method))
@@ -42,10 +40,6 @@ namespace MicroserviceFramework.AspNetCore.Filters
 				}
 
 				_logger.LogDebug("Executed unit of work filter");
-			}
-			else
-			{
-				_logger.LogDebug("Ignore execute unit of work filter");
 			}
 		}
 	}
