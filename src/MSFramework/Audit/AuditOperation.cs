@@ -18,6 +18,11 @@ namespace MicroserviceFramework.Audit
 		public string Path { get; private set; }
 
 		/// <summary>
+		/// 请求
+		/// </summary>
+		public string Url { get; private set; }
+
+		/// <summary>
 		/// 获取或设置 当前访问IP
 		/// </summary>
 		public string Ip { get; private set; }
@@ -41,11 +46,12 @@ namespace MicroserviceFramework.Audit
 			Entities = new List<AuditEntity>();
 		}
 
-		public AuditOperation(string applicationName, string path, string ip, string userAgent) : this()
+		public AuditOperation(string applicationName, string path, string url, string ip, string userAgent) : this()
 		{
 			ApplicationName = applicationName;
 			Path = path;
 			Ip = ip;
+			Url = url;
 			UserAgent = userAgent;
 		}
 
