@@ -42,6 +42,6 @@ namespace MicroserviceFramework.Ef
 		/// <summary>
 		/// 使用 unix 风格的表名、列名
 		/// </summary>
-		public bool UseUnixLikeName { get; set; } = true;
+		public bool UseUnderScoreCase { get; set; } = true;
 	}
 }

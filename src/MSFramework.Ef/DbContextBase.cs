@@ -75,7 +75,7 @@ namespace MicroserviceFramework.Ef
 			var option = _serviceProvider.GetRequiredService<IOptions<EntityFrameworkOptionsDictionary>>()
 				.Value
 				.Get(GetType());
-			if (option.UseUnixLikeName)
+			if (option.UseUnderScoreCase)
 			{
 				modelBuilder.UseUnderScoreCase();
 			}
