@@ -17,6 +17,12 @@ namespace MicroserviceFramework.AspNetCore.Filters
 
 		public async Task OnActionExecutionAsync(ActionExecutingContext context, ActionExecutionDelegate next)
 		{
+			if (context.HasAttribute<IgnoreLogFilter>())
+			{
+				await next();
+				return;
+			}
+
 			var userAgent = context.HttpContext.Request.Headers.GetOrDefault("User-Agent");
 			var ip = context.GetRemoteIpAddress();
 			_logger.LogInformation(

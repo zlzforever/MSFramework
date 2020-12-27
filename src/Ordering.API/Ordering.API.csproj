@@ -2,8 +2,6 @@
 
     <PropertyGroup>
         <TargetFramework>net5.0</TargetFramework>
-        <AspNetCoreHostingModel>InProcess</AspNetCoreHostingModel>
-        <IsPackable>true</IsPackable>
     </PropertyGroup>
 
     <ItemGroup>

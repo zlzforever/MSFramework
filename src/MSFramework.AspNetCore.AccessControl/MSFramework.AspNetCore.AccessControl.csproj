@@ -8,7 +8,7 @@
     <Import Project="../../package.props" />
 
     <ItemGroup>
-        <PackageReference Include="Cerberus.AspNetCore.AccessControl" Version="0.1.6" />
+        <PackageReference Include="Cerberus.AspNetCore.AccessControl" Version="0.1.7" />
     </ItemGroup>
 
     <ItemGroup>

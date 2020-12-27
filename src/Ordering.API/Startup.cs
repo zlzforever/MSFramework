@@ -12,11 +12,13 @@ using MicroserviceFramework.Ef;
 using MicroserviceFramework.Ef.MySql;
 using MicroserviceFramework.Newtonsoft;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.OpenApi.Models;
 using Newtonsoft.Json.Serialization;
+using Ordering.Application.Queries;
 using Ordering.Domain.AggregateRoots;
 using Ordering.Infrastructure;
 using Serilog;
@@ -27,6 +29,7 @@ namespace Ordering.API
 	{
 		public Startup(IConfiguration configuration)
 		{
+			var type = typeof(OrderingQuery);
 			Configuration = configuration;
 		}
 
@@ -38,6 +41,8 @@ namespace Ordering.API
 			services.AddOptions(Configuration);
 
 			Configuration.Print(x => Log.Logger.Information(x));
+
+			services.AddScoped<DbContext, OrderingContext>();
 
 			services.AddControllers(x =>
 				{
@@ -52,11 +57,11 @@ namespace Ordering.API
 				{
 					x.SerializerSettings.Converters.Add(new ObjectIdConverter());
 					x.SerializerSettings.Converters.Add(new EnumerationConverter());
-					x.SerializerSettings.ContractResolver = new CompositeContractResolver
-					{
-						new EnumerationContractResolver(),
-						new CamelCasePropertyNamesContractResolver()
-					};
+					// x.SerializerSettings.ContractResolver = new CompositeContractResolver
+					// {
+					// 	new EnumerationContractResolver(),
+					// 	new CamelCasePropertyNamesContractResolver()
+					// };
 				});
 
 			services.AddSwaggerGen(c =>
@@ -123,7 +128,7 @@ namespace Ordering.API
 			app.UseSwagger();
 			//启用中间件服务对swagger-ui，指定Swagger JSON终结点
 			app.UseSwaggerUI(c => { c.SwaggerEndpoint("/swagger/v1.0/swagger.json", "Ordering API V1.0"); });
-			
+
 			app.UseMicroserviceFramework();
 		}
 	}

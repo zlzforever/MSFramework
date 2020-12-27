@@ -4,8 +4,10 @@ using System.Threading.Tasks;
 using Cerberus.AspNetCore.AccessControl;
 using MicroserviceFramework.Application.CQRS;
 using MicroserviceFramework.AspNetCore;
+using MicroserviceFramework.AspNetCore.Filters;
 using MicroserviceFramework.Shared;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Ordering.Application.Commands;
 using Ordering.Application.Queries;
 using Ordering.Domain.AggregateRoots;
@@ -20,17 +22,20 @@ namespace Ordering.API.Controllers
 		private readonly IOrderingQuery _orderingQuery;
 		private readonly IOrderingRepository _orderRepository;
 		private readonly ICqrsProcessor _cqrsProcessor;
+		private readonly DbContext _dbContext;
 
 		public OrderController(IOrderingRepository orderRepository,
-			IOrderingQuery orderingQuery, ICqrsProcessor commandExecutor)
+			IOrderingQuery orderingQuery, ICqrsProcessor commandExecutor, DbContext dbContext)
 		{
 			_orderingQuery = orderingQuery;
 			_cqrsProcessor = commandExecutor;
+			_dbContext = dbContext;
 			_orderRepository = orderRepository;
 		}
 
 		//[AccessControl("TestCreate")]
 		[HttpPost("testCreate")]
+		[IgnoreAudit]
 		public async Task<IActionResult> TestCreate()
 		{
 			var order = new Order(
@@ -126,10 +131,9 @@ namespace Ordering.API.Controllers
 
 		[HttpGet()]
 		// [AccessControl("查看所有订单")]
-		public async Task<IActionResult> GetOrdersAsync()
+		public async Task<IEnumerable<Order>> GetOrdersAsync()
 		{
-			var order = await _orderingQuery.GetAllListAsync();
-			return Ok(order);
+			return await _dbContext.Set<Order>().AsNoTracking().ToListAsync();
 		}
 
 		#endregion

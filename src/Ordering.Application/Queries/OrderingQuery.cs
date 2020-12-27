@@ -16,7 +16,7 @@ namespace Ordering.Application.Queries
 	{
 		private readonly DbSet<Order> _orderSet;
 
-		public OrderingQuery(OrderingContext context)
+		public OrderingQuery(DbContext context)
 		{
 			_orderSet = context.Set<Order>();
 		}

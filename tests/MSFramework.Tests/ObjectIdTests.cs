@@ -20,8 +20,8 @@ namespace MSFramework.Tests
 			var id2 = new ObjectId(id1.ToString());
 			Assert.True(id1 == id2);
 			Assert.True(id1.Equals(id2));
-			Assert.True(id1 != null);
-			Assert.False(id1 == null);
+			Assert.True(id1 != default);
+			Assert.False(id1 == default);
 		}
 	}
 }

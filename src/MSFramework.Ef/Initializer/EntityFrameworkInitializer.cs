@@ -26,7 +26,8 @@ namespace MicroserviceFramework.Ef.Initializer
 				throw new MicroserviceFrameworkException("未能找到数据上下文配置");
 			}
 
-			var repeated = entityFrameworkOptionsDict.Values.GroupBy(m => m.DbContextType)
+			var repeated = entityFrameworkOptionsDict
+				.Values.GroupBy(m => m.DbContextType)
 				.FirstOrDefault(m => m.Count() > 1);
 			if (repeated != null)
 			{

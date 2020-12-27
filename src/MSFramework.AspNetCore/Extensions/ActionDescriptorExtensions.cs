@@ -1,10 +1,14 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Text.RegularExpressions;
+using MicroserviceFramework.AspNetCore.Filters;
 using MicroserviceFramework.Extensions;
 using MicroserviceFramework.Function;
 using Microsoft.AspNetCore.Mvc.Abstractions;
 using Microsoft.AspNetCore.Mvc.Controllers;
+using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.AspNetCore.Routing;
 
 namespace MicroserviceFramework.AspNetCore.Extensions
@@ -18,9 +22,17 @@ namespace MicroserviceFramework.AspNetCore.Extensions
 			var parameters = controllerAction.Parameters.Select(x => $"{x.ParameterType.Name} {x.Name}")
 				.ExpandAndToString();
 			var typeName = controllerAction.MethodInfo.DeclaringType?.FullName;
-			var name =string.IsNullOrWhiteSpace(typeName)?
-				$"{controllerAction.MethodInfo.Name}({parameters})":$"{typeName}.{controllerAction.MethodInfo.Name}({parameters})";
+			var name = string.IsNullOrWhiteSpace(typeName)
+				? $"{controllerAction.MethodInfo.Name}({parameters})"
+				: $"{typeName}.{controllerAction.MethodInfo.Name}({parameters})";
 			return new FunctionDefine(name, functionPath, null);
+		}
+
+		public static bool HasAttribute<T>(this ActionExecutingContext context) where T : Attribute
+		{
+			var controllerAction = (ControllerActionDescriptor) context.ActionDescriptor;
+			var ignoreAuditAttribute = controllerAction.MethodInfo.GetCustomAttribute<T>();
+			return ignoreAuditAttribute != null;
 		}
 
 		public static string GetActionPath(this ActionDescriptor actionDescriptor)

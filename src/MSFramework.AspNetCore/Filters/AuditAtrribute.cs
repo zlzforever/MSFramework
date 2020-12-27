@@ -27,6 +27,12 @@ namespace MicroserviceFramework.AspNetCore.Filters
 
 		public override async Task OnActionExecutionAsync(ActionExecutingContext context, ActionExecutionDelegate next)
 		{
+			if (context.HasAttribute<IgnoreAudit>())
+			{
+				await base.OnActionExecutionAsync(context, next);
+				return;
+			}
+
 			using var scope = context.HttpContext.RequestServices.CreateScope();
 			var serviceProvider = scope.ServiceProvider;
 
