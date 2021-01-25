@@ -62,6 +62,8 @@ namespace MicroserviceFramework.AspNetCore.Filters
 				auditedOperation.SetCreation("Anonymous", "Anonymous");
 			}
 
+			context.HttpContext.Items.Add("AuditOperation", auditedOperation);
+
 			await base.OnActionExecutionAsync(context, next);
 
 			// comment: 必须使用 HTTP request scope 的 uow manager 才能获取到审计对象

@@ -64,6 +64,15 @@ namespace MicroserviceFramework.Audit
 			}
 		}
 
+		public void AddEntities(params AuditEntity[] entities)
+		{
+			foreach (var entity in entities)
+			{
+				entity.Operation = this;
+				Entities.Add(entity);
+			}
+		}
+
 		public void End()
 		{
 			EndTime = DateTimeOffset.Now;

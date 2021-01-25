@@ -15,3 +15,5 @@ $ dotnet ef migrations add init -p ../Ordering.Infrastructure/Ordering.Infrastru
  若出现这样的情况，则是不正确的，聚合就是一个边界，在这个边界内的事件可以直接处理掉，只有通知别的边界（聚合）时才会发出事件。
  若是发生这种错误，会导致框架异常：DbContext1 add 聚合/实体，在别的地方又找到这个对象（要么因为没有提交查询不到，要么把 Added 状态改
  为 Modified 导致 Ef 的状态错误
+
+dotnet publish -c Release -r win-x64 -p:PublishSingleFile=true --self-contained true -p:IncludeNativeLibrariesForSelfExtract=true
