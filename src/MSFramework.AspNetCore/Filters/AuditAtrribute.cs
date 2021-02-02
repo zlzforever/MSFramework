@@ -22,7 +22,7 @@ namespace MicroserviceFramework.AspNetCore.Filters
 	{
 		public Audit()
 		{
-			Order = FilterOrders.Audit;
+			Order = Conts.Audit;
 		}
 
 		public override async Task OnActionExecutionAsync(ActionExecutingContext context, ActionExecutionDelegate next)
@@ -36,6 +36,7 @@ namespace MicroserviceFramework.AspNetCore.Filters
 			using var scope = context.HttpContext.RequestServices.CreateScope();
 			var serviceProvider = scope.ServiceProvider;
 
+			// 必须保证审计和业务用的是不同的 DbContext 不然，会导致数据异常入库
 			var auditService = serviceProvider.GetRequiredService<IAuditService>();
 			if (auditService == null)
 			{
@@ -67,16 +68,20 @@ namespace MicroserviceFramework.AspNetCore.Filters
 			await base.OnActionExecutionAsync(context, next);
 
 			// comment: 必须使用 HTTP request scope 的 uow manager 才能获取到审计对象
-			var uowManager = context.HttpContext.RequestServices.GetService<UnitOfWorkManager>();
-			if (uowManager != null)
+			// comment: 只有有变化的数据才会尝试获取变更对象
+			if (Conts.MethodDict.ContainsKey(context.HttpContext.Request.Method))
 			{
-				var entities = new List<AuditEntity>();
-				foreach (var unitOfWork in uowManager.GetUnitOfWorks())
+				var uowManager = context.HttpContext.RequestServices.GetService<UnitOfWorkManager>();
+				if (uowManager != null)
 				{
-					entities.AddRange(unitOfWork.GetAuditEntities());
-				}
+					var entities = new List<AuditEntity>();
+					foreach (var unitOfWork in uowManager.GetUnitOfWorks())
+					{
+						entities.AddRange(unitOfWork.GetAuditEntities());
+					}
 
-				auditedOperation.AddEntities(entities);
+					auditedOperation.AddEntities(entities);
+				}
 			}
 
 			auditedOperation.End();

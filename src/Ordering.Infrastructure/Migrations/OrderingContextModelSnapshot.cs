@@ -2,8 +2,6 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
-using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
-using Ordering.Infrastructure;
 
 namespace Ordering.Infrastructure.Migrations
 {
@@ -15,7 +13,7 @@ namespace Ordering.Infrastructure.Migrations
 #pragma warning disable 612, 618
             modelBuilder
                 .HasAnnotation("Relational:MaxIdentifierLength", 64)
-                .HasAnnotation("ProductVersion", "5.0.0");
+                .HasAnnotation("ProductVersion", "5.0.2");
 
             modelBuilder.Entity("MicroserviceFramework.Audit.AuditEntity", b =>
                 {
@@ -99,6 +97,10 @@ namespace Ordering.Infrastructure.Migrations
                         .HasMaxLength(255)
                         .HasColumnType("varchar(255) CHARACTER SET utf8mb4")
                         .HasColumnName("path");
+
+                    b.Property<string>("Url")
+                        .HasColumnType("longtext CHARACTER SET utf8mb4")
+                        .HasColumnName("url");
 
                     b.Property<string>("UserAgent")
                         .HasMaxLength(500)

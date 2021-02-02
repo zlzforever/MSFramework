@@ -14,7 +14,6 @@ using MicroserviceFramework.Shared;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
 using Ordering.Domain.AggregateRoots;
 using Ordering.Domain.Repositories;
 

@@ -1,20 +1,15 @@
+using System.Threading.Tasks;
 using MicroserviceFramework.AspNetCore.Extensions;
 using MicroserviceFramework.Function;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
 
 namespace MicroserviceFramework.AspNetCore.Filters
 {
-	public class FunctionFilter : ActionFilterAttribute
+	public class FunctionFilter : IAsyncActionFilter, IOrderedFilter
 	{
-		public FunctionFilter()
-		{
-			Order = FilterOrders.FunctionFilter;
-		}
-
-		public override void OnActionExecuting(ActionExecutingContext context)
+		public async Task OnActionExecutionAsync(ActionExecutingContext context, ActionExecutionDelegate next)
 		{
 			var provider = context.HttpContext.RequestServices;
 
@@ -30,10 +25,10 @@ namespace MicroserviceFramework.AspNetCore.Filters
 			{
 				context.Result = new NotFoundResult();
 			}
+
+			await next();
 		}
 
-		public override void OnActionExecuted(ActionExecutedContext context)
-		{
-		}
+		public int Order => Conts.FunctionFilter;
 	}
 }

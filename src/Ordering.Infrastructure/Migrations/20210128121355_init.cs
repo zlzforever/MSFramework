@@ -14,6 +14,7 @@ namespace Ordering.Infrastructure.Migrations
                     id = table.Column<string>(type: "varchar(36) CHARACTER SET utf8mb4", nullable: false),
                     application_name = table.Column<string>(type: "varchar(255) CHARACTER SET utf8mb4", maxLength: 255, nullable: true),
                     path = table.Column<string>(type: "varchar(255) CHARACTER SET utf8mb4", maxLength: 255, nullable: true),
+                    url = table.Column<string>(type: "longtext CHARACTER SET utf8mb4", nullable: true),
                     ip = table.Column<string>(type: "varchar(255) CHARACTER SET utf8mb4", maxLength: 255, nullable: true),
                     user_agent = table.Column<string>(type: "varchar(500) CHARACTER SET utf8mb4", maxLength: 500, nullable: true),
                     end_time = table.Column<DateTimeOffset>(type: "datetime(6)", nullable: false),

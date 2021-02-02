@@ -1,7 +1,4 @@
-﻿using System;
-using System.IO;
-using System.Linq;
-using MicroserviceFramework;
+﻿using MicroserviceFramework;
 using MicroserviceFramework.AspNetCore;
 using MicroserviceFramework.AspNetCore.Filters;
 using MicroserviceFramework.AspNetCore.Infrastructure;
@@ -17,7 +14,6 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.OpenApi.Models;
-using Newtonsoft.Json.Serialization;
 using Ordering.Application.Queries;
 using Ordering.Domain.AggregateRoots;
 using Ordering.Infrastructure;
@@ -46,8 +42,8 @@ namespace Ordering.API
 
 			services.AddControllers(x =>
 				{
+					x.Filters.Add<LogFilter>();
 					x.Filters.AddUnitOfWork();
-					x.Filters.AddFunctionFilter();
 					x.Filters.AddAudit();
 					x.Filters.AddGlobalException();
 					x.ModelBinderProviders.Insert(0, new ObjectIdModelBinderProvider());
@@ -78,10 +74,8 @@ namespace Ordering.API
 
 			services.AddMicroserviceFramework(builder =>
 			{
-				builder.UseNewtonsoftJson();
 				builder.UseAutoMapper();
 				builder.UseCqrs();
-				builder.UseBaseX();
 				//builder.UseAccessControl(Configuration);
 				// builder.UseRabbitMQEventDispatcher(new RabbitMQOptions(), typeof(UserCheckoutAcceptedEvent));
 				// 启用审计服务
@@ -90,6 +84,7 @@ namespace Ordering.API
 				// 	"Database='ordering';Data Source=localhost;User ID=root;Password=1qazZAQ!;Port=3306;");
 
 				builder.UseAspNetCore();
+				builder.UseNewtonsoftJson();
 				builder.UseEntityFramework(x =>
 				{
 					// 添加 MySql 支持
@@ -111,24 +106,27 @@ namespace Ordering.API
 				app.UseHsts();
 			}
 
+			app.UseHttpsRedirection();
 			app.UseRouting();
 			app.UseHealthChecks("/healthcheck");
-			app.UseHttpsRedirection();
-			app.UseAuthorization();
-			app.UseEndpoints(endpoints =>
-			{
-				endpoints.MapControllerRoute(
-					name: "default",
-					pattern: "{controller=Home}/{action=Index}/{id?}");
-				endpoints.MapAreaControllerRoute("aa", "admin",
-					"{area:exists}/{controller=Home}/{action=Index}/{id?}");
-			});
 
+			app.UseAuthentication();
+			app.UseAuthorization();
+			
 			//启用中间件服务生成Swagger作为JSON终结点
 			app.UseSwagger();
 			//启用中间件服务对swagger-ui，指定Swagger JSON终结点
 			app.UseSwaggerUI(c => { c.SwaggerEndpoint("/swagger/v1.0/swagger.json", "Ordering API V1.0"); });
 
+			
+			app.UseEndpoints(endpoints =>
+			{
+				endpoints.MapControllerRoute(
+						name: "default",
+						pattern: "{controller=Home}/{action=Index}/{id?}").RequireCors("cors")
+					;
+			});
+			
 			app.UseMicroserviceFramework();
 		}
 	}

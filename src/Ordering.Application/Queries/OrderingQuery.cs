@@ -4,7 +4,6 @@ using MicroserviceFramework.DependencyInjection;
 using MicroserviceFramework.Shared;
 using Microsoft.EntityFrameworkCore;
 using Ordering.Domain.AggregateRoots;
-using Ordering.Infrastructure;
 
 namespace Ordering.Application.Queries
 {

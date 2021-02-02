@@ -6,20 +6,20 @@ namespace MicroserviceFramework.AspNetCore.Filters
 	{
 		public static FilterCollection AddUnitOfWork(this FilterCollection filters)
 		{
-			filters.Add<UnitOfWork>(FilterOrders.UnitOfWork);
+			filters.Add<UnitOfWork>(Conts.UnitOfWork);
 			return filters;
 		}
 
 		public static FilterCollection AddFunctionFilter(this FilterCollection filters)
 		{
-			filters.Add<FunctionFilter>(FilterOrders.FunctionFilter);
+			filters.Add<FunctionFilter>(Conts.FunctionFilter);
 			return filters;
 		}
 
 		public static FilterCollection AddAudit(this FilterCollection filters)
 
 		{
-			filters.Add<Audit>(FilterOrders.Audit);
+			filters.Add<Audit>(Conts.Audit);
 			return filters;
 		}
 

@@ -34,7 +34,7 @@ namespace MicroserviceFramework.AspNetCore
 		[NonAction]
 		public virtual Response Success(string msg = null, object data = null)
 		{
-			return new Response(data, msg);
+			return new(data, msg);
 		}
 
 		[NonAction]
@@ -68,7 +68,8 @@ namespace MicroserviceFramework.AspNetCore
 				return;
 			}
 
-			OnActionExecuted(await next());
+			var result = await next();
+			OnActionExecuted(result);
 		}
 	}
 }
