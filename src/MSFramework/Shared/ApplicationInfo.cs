@@ -1,11 +1,10 @@
 using System.Reflection;
-using MicroserviceFramework.DependencyInjection;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
 
 namespace MicroserviceFramework.Shared
 {
-	public class ApplicationInfo : IScopeDependency
+	public class ApplicationInfo
 	{
 		private readonly IHostEnvironment _hostEnvironment;
 		private readonly IConfiguration _configuration;

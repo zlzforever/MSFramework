@@ -9,7 +9,6 @@ using MicroserviceFramework.AspNetCore.Mvc;
 using MicroserviceFramework.Audit;
 using MicroserviceFramework.Domain;
 using MicroserviceFramework.Ef.Repositories;
-using MicroserviceFramework.ObjectMapper;
 using MicroserviceFramework.Shared;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -49,11 +48,11 @@ namespace Ordering.API.Controllers
 	{
 		private readonly IProductRepository _productRepository;
 		private readonly IRepository<AuditOperation> _repository;
-		private readonly IObjMapper _mapper;
+		private readonly IObjectAssembler _mapper;
 
 		public ProductController(IProductRepository productRepository,
 			IRepository<AuditOperation> repository,
-			IObjMapper mapper)
+			IObjectAssembler mapper)
 		{
 			_productRepository = productRepository;
 			_repository = repository;
@@ -105,7 +104,7 @@ namespace Ordering.API.Controllers
 		public async Task<Response<PagedResult<ProductDTO>>> GetPagedQuery()
 		{
 			PagedResult<Product> a = await _productRepository.PagedQueryAsync(0, 10);
-			var b = _mapper.Map<PagedResult<ProductDTO>>(a);
+			var b = _mapper.To<PagedResult<ProductDTO>>(a);
 			return new Response<PagedResult<ProductDTO>>(b);
 		}
 

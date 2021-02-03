@@ -12,6 +12,8 @@ namespace MicroserviceFramework.Ef.Extensions
 			builder.Property(x => x.CreationTime).UseUnixTime();
 			builder.Property(x => x.CreationUserId).HasMaxLength(255);
 			builder.Property(x => x.CreationUserName).HasMaxLength(255);
+
+			builder.HasIndex(x => x.CreationTime);
 		}
 
 		public static void ConfigureModification<T>(this EntityTypeBuilder<T> builder)
@@ -20,6 +22,8 @@ namespace MicroserviceFramework.Ef.Extensions
 			builder.Property(x => x.ModificationTime).UseUnixTime();
 			builder.Property(x => x.ModificationUserId).HasMaxLength(255);
 			builder.Property(x => x.ModificationUserName).HasMaxLength(255);
+
+			builder.HasIndex(x => x.ModificationTime);
 		}
 
 		public static void ConfigureDeletion<T>(this EntityTypeBuilder<T> builder)
@@ -29,6 +33,8 @@ namespace MicroserviceFramework.Ef.Extensions
 			builder.Property(x => x.DeletionTime).UseUnixTime();
 			builder.Property(x => x.DeletionUserId).HasMaxLength(255);
 			builder.Property(x => x.DeletionUserName).HasMaxLength(255);
+
+			builder.HasIndex(x => x.DeletionTime);
 		}
 	}
 }

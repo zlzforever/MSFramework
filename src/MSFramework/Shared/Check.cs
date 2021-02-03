@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 
 namespace MicroserviceFramework.Shared
@@ -106,10 +105,7 @@ namespace MicroserviceFramework.Shared
 			return value;
 		}
 
-		[Conditional("DEBUG")]
-		public static void DebugAssert(
-			// todo: [System.Diagnostics.CodeAnalysis.DoesNotReturnIf(false)]
-			bool condition, string message)
+		public static void DebugAssert(bool condition, string message)
 		{
 			if (!condition)
 			{

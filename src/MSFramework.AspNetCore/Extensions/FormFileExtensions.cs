@@ -20,7 +20,7 @@ namespace MicroserviceFramework.AspNetCore.Extensions
 			var bytes = stream.ToArray();
 
 			var extension = Path.GetExtension(formFile.FileName);
-			var md5 = CryptographyUtilities.ToMd5(bytes);
+			var md5 = CryptographyUtilities.ComputeMD5(bytes);
 			var fileName = $"{md5}{extension}";
 			var date = $"{DateTime.Now:yyyMMdd}";
 			var path = $"{interval}/{date}";

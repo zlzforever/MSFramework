@@ -5,7 +5,7 @@ using MicroserviceFramework.Shared;
 
 namespace MicroserviceFramework.Utilities
 {
-	public class DirectoryUtilities
+	public static class DirectoryUtilities
 	{
 		/// <summary>
 		/// 创建文件夹，如果不存在
