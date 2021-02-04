@@ -4,17 +4,17 @@
         <AssemblyName>MSFramework.Ef</AssemblyName>
         <RootNamespace>MicroserviceFramework.Ef</RootNamespace>
     </PropertyGroup>
-    <Import Project="../../package.props"/>
+    <Import Project="../../package.props" />
     <ItemGroup>
-        <ProjectReference Include="..\MSFramework\MSFramework.csproj"/>
+        <ProjectReference Include="..\MSFramework\MSFramework.csproj" />
     </ItemGroup>
 
     <ItemGroup Condition="'$(TargetFramework)' == 'netstandard2.1'">
-        <PackageReference Include="Microsoft.EntityFrameworkCore" Version="5.0.2"/>
-        <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="5.0.2"/>
+        <PackageReference Include="Microsoft.EntityFrameworkCore" Version="5.0.2" />
+        <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="5.0.2" />
     </ItemGroup>
     <ItemGroup Condition="'$(TargetFramework)' == 'netstandard2.0'">
-        <PackageReference Include="Microsoft.EntityFrameworkCore" Version="3.1.10"/>
-        <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="3.1.10"/>
+        <PackageReference Include="Microsoft.EntityFrameworkCore" Version="3.1.10" />
+        <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="3.1.10" />
     </ItemGroup>
 </Project>

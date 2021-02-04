@@ -93,35 +93,35 @@ namespace Ordering.API.Controllers
 		}
 
 		[HttpGet("getFirst2")]
-		public Response<Product> GetFirst2()
+		public ApiResult<Product> GetFirst2()
 		{
 			var a = _productRepository.GetFirst();
-			return new Response<Product>(a);
+			return new ApiResult<Product>(a);
 		}
 
 		[HttpGet("getPagedQuery")]
 		//[AccessControl("查询产品", "产品")]
-		public async Task<Response<PagedResult<ProductDTO>>> GetPagedQuery()
+		public async Task<ApiResult<PagedResult<ProductDTO>>> GetPagedQuery()
 		{
-			PagedResult<Product> a = await _productRepository.PagedQueryAsync(0, 10);
+			var a = await _productRepository.PagedQueryAsync(0, 10);
 			var b = _mapper.To<PagedResult<ProductDTO>>(a);
-			return new Response<PagedResult<ProductDTO>>(b);
+			return new ApiResult<PagedResult<ProductDTO>>(b);
 		}
 
 		[HttpGet("getError")]
-		public Response GetErrorAsync()
+		public ApiResult GetErrorAsync()
 		{
-			return new ErrorResponse("I am an error response");
+			return Error("I am an error response");
 		}
 
 		[HttpGet("getMSFrameworkException")]
-		public Response GetMSFrameworkException()
+		public ApiResult GetMSFrameworkException()
 		{
 			throw new MicroserviceFrameworkException(2, "i'm framework exception");
 		}
 
 		[HttpGet("getException")]
-		public Response GetExceptionAsync()
+		public ApiResult GetExceptionAsync()
 		{
 			throw new Exception("i'm framework exception");
 		}

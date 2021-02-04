@@ -5,14 +5,14 @@
         <AssemblyName>MSFramework.AspNetCore.AccessControl</AssemblyName>
         <RootNamespace>MicroserviceFramework.AspNetCore.AccessControl</RootNamespace>
     </PropertyGroup>
-    <Import Project="../../package.props" />
+    <Import Project="../../package.props"/>
 
     <ItemGroup>
-        <PackageReference Include="Cerberus.AspNetCore.AccessControl" Version="0.2.3" />
+        <PackageReference Include="Cerberus.AspNetCore.AccessControl" Version="0.2.3"/>
     </ItemGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\MSFramework.AspNetCore\MSFramework.AspNetCore.csproj" />
+        <ProjectReference Include="..\MSFramework.AspNetCore\MSFramework.AspNetCore.csproj"/>
     </ItemGroup>
 
 </Project>

@@ -1,7 +1,6 @@
 ﻿using System.Threading.Tasks;
 using MicroserviceFramework;
 using MicroserviceFramework.AspNetCore;
-using MicroserviceFramework.Ef;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
@@ -10,7 +9,6 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
-using MSFramework.AspNetCore.Test.EfPostgreSqlTest.Infrastructure;
 using Xunit;
 using Xunit.Abstractions;
 

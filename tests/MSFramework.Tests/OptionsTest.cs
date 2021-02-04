@@ -40,11 +40,11 @@ namespace MSFramework.Tests
 			});
 			var serviceProvider = serviceCollection.BuildServiceProvider();
 			
-			var options = (serviceProvider.GetRequiredService<IOptions<MyOptions>>()).Value;
+			var options = serviceProvider.GetRequiredService<IOptions<MyOptions>>().Value;
 			Assert.Equal("lewis", options.Name);
 			Assert.Equal(10, options.Age);
 			
-			var person = (serviceProvider.GetRequiredService<IOptions<Person>>()).Value;
+			var person = serviceProvider.GetRequiredService<IOptions<Person>>().Value;
 			Assert.Equal("hi", person.Name);
 			Assert.Equal(12, person.Age);
 		}

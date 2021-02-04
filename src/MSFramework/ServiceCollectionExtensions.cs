@@ -51,6 +51,8 @@ namespace MicroserviceFramework
 			builder.Services.TryAddScoped<IAuditService, DefaultAuditService>();
 			builder.Services.TryAddSingleton<ApplicationInfo>();
 
+			ObjectId.AddTypeDescriptor();
+
 			MicroserviceFrameworkLoaderContext.Default.LoadTypes();
 		}
 

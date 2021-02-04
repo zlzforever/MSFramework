@@ -1,10 +1,11 @@
 ﻿{
-  "DbContexts": {
-    "TestDataContext": {
+  "DbContexts": [
+    {
       "DbContextTypeName": "MSFramework.AspNetCore.Test.EfPostgreSqlTest.Infrastructure.TestDataContext,MSFramework.AspNetCore.Test",
-      "AutoMigrationEnabled": false,
-      "UseTransaction": true,
+      "AutoMigrationEnabled": true,
+      "AutoTransactionsEnabled": false,
+      "UseUnderScoreCase": true,
       "ConnectionString": "Host=127.0.0.1;Database=test;Username=admin;Password=123456"
     }
-  }
+  ]
 }

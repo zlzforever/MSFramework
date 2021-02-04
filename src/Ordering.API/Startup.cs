@@ -1,13 +1,15 @@
 ﻿using MicroserviceFramework;
 using MicroserviceFramework.AspNetCore;
 using MicroserviceFramework.AspNetCore.Filters;
-using MicroserviceFramework.AspNetCore.Infrastructure;
+using MicroserviceFramework.AspNetCore.Mvc.ModelBinding;
+using MicroserviceFramework.AspNetCore.Swagger;
 using MicroserviceFramework.Audit;
 using MicroserviceFramework.AutoMapper;
 using MicroserviceFramework.Configuration;
 using MicroserviceFramework.Ef;
 using MicroserviceFramework.Ef.MySql;
 using MicroserviceFramework.Newtonsoft;
+using MicroserviceFramework.Serialization.Converters;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -49,26 +51,30 @@ namespace Ordering.API
 					x.ModelBinderProviders.Insert(0, new ObjectIdModelBinderProvider());
 				})
 				.ConfigureInvalidModelStateResponse()
-				.AddNewtonsoftJson(x =>
+				.AddJsonOptions(options =>
 				{
-					x.SerializerSettings.Converters.Add(new ObjectIdConverter());
-					x.SerializerSettings.Converters.Add(new EnumerationConverter());
-					// x.SerializerSettings.ContractResolver = new CompositeContractResolver
-					// {
-					// 	new EnumerationContractResolver(),
-					// 	new CamelCasePropertyNamesContractResolver()
-					// };
-				});
-
-			services.AddSwaggerGen(c =>
-			{
-				c.SwaggerDoc("v1.0", new OpenApiInfo {Version = "v1.0", Description = "Ordering API V1.0"});
-				c.CustomSchemaIds(type => type.FullName);
-				c.AddEnumerationDoc(typeof(Address).Assembly).AddObjectIdDoc();
-				// c.MapType<ObjectId>(() => new OpenApiSchema
+					options.JsonSerializerOptions.Converters.Add(new ObjectIdJsonConverter());
+					options.JsonSerializerOptions.Converters.Add(new EnumerationJsonConverterFactory());
+					options.JsonSerializerOptions.Converters.Add(new EnumerationJsonConverter());
+				})
+				// .AddNewtonsoftJson(x =>
 				// {
-				// 	//Type = "string", Default = new OpenApiString(ObjectId.Empty.ToString()),
-				// });
+				// 	x.SerializerSettings.Converters.Add(new ObjectIdConverter());
+				// 	x.SerializerSettings.Converters.Add(new EnumerationConverter());
+				// 	x.SerializerSettings.ContractResolver = new CompositeContractResolver
+				// 	{
+				// 		new EnumerationContractResolver(),
+				// 		new CamelCasePropertyNamesContractResolver()
+				// 	};
+				// })
+				;
+
+			services.AddSwaggerGen(x =>
+			{
+				x.SwaggerDoc("v1.0", new OpenApiInfo {Version = "v1.0", Description = "Ordering API V1.0"});
+				x.CustomSchemaIds(type => type.FullName);
+				x.MapEnumerationType(typeof(Address).Assembly);
+				x.MapObjectIdType();
 			});
 			services.AddHealthChecks();
 
@@ -112,13 +118,13 @@ namespace Ordering.API
 
 			app.UseAuthentication();
 			app.UseAuthorization();
-			
+
 			//启用中间件服务生成Swagger作为JSON终结点
 			app.UseSwagger();
 			//启用中间件服务对swagger-ui，指定Swagger JSON终结点
 			app.UseSwaggerUI(c => { c.SwaggerEndpoint("/swagger/v1.0/swagger.json", "Ordering API V1.0"); });
 
-			
+
 			app.UseEndpoints(endpoints =>
 			{
 				endpoints.MapControllerRoute(
@@ -126,7 +132,7 @@ namespace Ordering.API
 						"{controller=Home}/{action=Index}/{id?}").RequireCors("cors")
 					;
 			});
-			
+
 			app.UseMicroserviceFramework();
 		}
 	}

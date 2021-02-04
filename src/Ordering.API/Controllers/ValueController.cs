@@ -1,4 +1,3 @@
-using System.Threading.Tasks;
 using MicroserviceFramework.AspNetCore;
 using Microsoft.AspNetCore.Mvc;
 

@@ -1,5 +1,4 @@
 using MicroserviceFramework.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.Extensions.Logging;
 
@@ -21,12 +20,22 @@ namespace MicroserviceFramework.AspNetCore.Filters
 			if (context.Exception is MicroserviceFrameworkException e)
 			{
 				context.HttpContext.Response.StatusCode = 200;
-				context.Result = new JsonResult(new Response(null, e.Message, false, e.Code));
+				context.Result = new ApiResult(string.Empty)
+				{
+					Success = false,
+					Msg = e.Message,
+					Code = e.Code
+				};
 			}
 			else
 			{
-				context.HttpContext.Response.StatusCode = 400;
-				context.Result = new JsonResult(new Response(null, "服务出小差", false, 1));
+				context.HttpContext.Response.StatusCode = 500;
+				context.Result = new ApiResult(string.Empty)
+				{
+					Success = false,
+					Msg = "服务出小差",
+					Code = 500
+				};
 			}
 		}
 	}

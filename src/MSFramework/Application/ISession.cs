@@ -7,14 +7,11 @@ namespace MicroserviceFramework.Application
 	/// </summary>
 	public interface ISession
 	{
+		string TraceIdentifier { get; }
 		string UserId { get; }
-
 		string UserName { get; }
-
 		string Email { get; }
-
 		string PhoneNumber { get; }
-
 		HashSet<string> Roles { get; }
 	}
 }

@@ -1,11 +1,4 @@
-﻿using System;
-using System.Linq;
-using System.Reflection;
-using System.Runtime.Loader;
-using MicroserviceFramework.Utilities;
-using Microsoft.AspNetCore.Hosting;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.DependencyModel;
+﻿using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Hosting;
 using Serilog;
 using Serilog.Events;

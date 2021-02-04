@@ -54,6 +54,7 @@ namespace Ordering.Domain.AggregateRoots
 			Description = description;
 			OrderItems = orderItems;
 			CreationTime = DateTimeOffset.Now;
+			OrderStatus = OrderStatus.Submitted;
 
 			// Add the OrderStarterDomainEvent to the domain events collection 
 			// to be raised/dispatched when comitting changes into the Database [ After DbContext.SaveChanges() ]

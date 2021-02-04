@@ -94,6 +94,7 @@ namespace MicroserviceFramework.AspNetCore
 			});
 		}
 
+		public string TraceIdentifier => HttpContext.TraceIdentifier;
 		public string UserId => _userId.Value;
 
 		public string UserName => _userName.Value;

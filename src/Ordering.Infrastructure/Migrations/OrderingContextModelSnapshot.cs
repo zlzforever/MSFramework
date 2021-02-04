@@ -88,18 +88,19 @@ namespace Ordering.Infrastructure.Migrations
                         .HasColumnType("datetime(6)")
                         .HasColumnName("end_time");
 
+                    b.Property<string>("Function")
+                        .HasMaxLength(255)
+                        .HasColumnType("varchar(255) CHARACTER SET utf8mb4")
+                        .HasColumnName("path");
+
                     b.Property<string>("Ip")
                         .HasMaxLength(255)
                         .HasColumnType("varchar(255) CHARACTER SET utf8mb4")
                         .HasColumnName("ip");
 
-                    b.Property<string>("Path")
-                        .HasMaxLength(255)
-                        .HasColumnType("varchar(255) CHARACTER SET utf8mb4")
-                        .HasColumnName("path");
-
                     b.Property<string>("Url")
-                        .HasColumnType("longtext CHARACTER SET utf8mb4")
+                        .HasMaxLength(1024)
+                        .HasColumnType("varchar(1024) CHARACTER SET utf8mb4")
                         .HasColumnName("url");
 
                     b.Property<string>("UserAgent")
@@ -221,6 +222,10 @@ namespace Ordering.Infrastructure.Migrations
                     b.HasIndex("Code")
                         .IsUnique();
 
+                    b.HasIndex("CreationTime");
+
+                    b.HasIndex("ModificationTime");
+
                     b.HasIndex("Name");
 
                     b.ToTable("function");
@@ -244,8 +249,10 @@ namespace Ordering.Infrastructure.Migrations
                         .HasColumnType("tinyint(1)")
                         .HasColumnName("is_deleted");
 
-                    b.Property<int>("OrderStatus")
-                        .HasColumnType("int")
+                    b.Property<string>("OrderStatus")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("varchar(255) CHARACTER SET utf8mb4")
                         .HasColumnName("order_status");
 
                     b.Property<string>("UserId")

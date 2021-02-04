@@ -27,5 +27,15 @@ namespace MicroserviceFramework.Ef
 				.GetDbContextTypeForEntity(typeof(TEntity));
 			return (DbContextBase) _serviceProvider.GetRequiredService(dbContextType);
 		}
+
+		public DbContextBase GetDbContextOrDefault<TEntity>() where TEntity : class, IAggregateRoot
+		{
+			if (!_entityConfigurationTypeFinder.HasDbContextForEntity<TEntity>())
+			{
+				return null;
+			}
+
+			return GetDbContext<TEntity>();
+		}
 	}
 }

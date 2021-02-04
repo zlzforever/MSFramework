@@ -10,7 +10,7 @@ using MicroserviceFramework.Ef.Extensions;
 using MicroserviceFramework.Ef.Infrastructure;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
-using Microsoft.Extensions.DependencyInjection;
+using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
@@ -18,29 +18,33 @@ namespace MicroserviceFramework.Ef
 {
 	public abstract class DbContextBase : DbContext, IUnitOfWork
 	{
-		private readonly ILogger _logger;
-		private readonly IServiceProvider _serviceProvider;
+		private ILogger _logger;
+		private readonly ISession _session;
+		private readonly DbContextConfigurationCollection _entityFrameworkOptions;
+		private IEntityConfigurationTypeFinder _entityConfigurationTypeFinder;
+		private readonly IDomainEventDispatcher _domainEventDispatcher;
 		private readonly UnitOfWorkManager _unitOfWorkManager;
 
 		/// <summary>
 		/// 初始化一个<see cref="DbContextBase"/>类型的新实例
 		/// </summary>
 		protected DbContextBase(DbContextOptions options,
-			UnitOfWorkManager unitOfWorkManager, IServiceProvider serviceProvider)
+			IOptions<DbContextConfigurationCollection> entityFrameworkOptions,
+			UnitOfWorkManager unitOfWorkManager,
+			IDomainEventDispatcher domainEventDispatcher, ISession session)
 			: base(options)
 		{
-			_serviceProvider = serviceProvider;
-			_logger = serviceProvider.GetService<ILoggerFactory>().CreateLogger(GetType());
 			_unitOfWorkManager = unitOfWorkManager;
+			_domainEventDispatcher = domainEventDispatcher;
+			_entityFrameworkOptions = entityFrameworkOptions.Value;
+			_session = session;
 		}
 
 		protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
 		{
 			base.OnConfiguring(optionsBuilder);
 
-			var option = _serviceProvider
-				.GetRequiredService<IOptions<EntityFrameworkOptionsDictionary>>()
-				.Value.Get(GetType());
+			var option = _entityFrameworkOptions.Get(GetType());
 			Database.AutoTransactionsEnabled = option.AutoTransactionsEnabled;
 
 			if (option.EnableSensitiveDataLogging)
@@ -57,10 +61,14 @@ namespace MicroserviceFramework.Ef
 		/// <param name="modelBuilder">上下文数据模型构建器</param>
 		protected override void OnModelCreating(ModelBuilder modelBuilder)
 		{
+			_logger = this.GetService<ILoggerFactory>().CreateLogger(GetType());
+
+			_entityConfigurationTypeFinder = this.GetService<IEntityConfigurationTypeFinder>();
+
 			//通过实体配置信息将实体注册到当前上下文
 			var contextType = GetType();
-			var registers = _serviceProvider.GetRequiredService<IEntityConfigurationTypeFinder>()
-				.GetEntityRegisters(contextType);
+
+			var registers = _entityConfigurationTypeFinder.GetEntityRegisters(contextType);
 			foreach (var register in registers)
 			{
 				register.RegisterTo(modelBuilder);
@@ -71,9 +79,7 @@ namespace MicroserviceFramework.Ef
 
 			modelBuilder.UseObjectId();
 
-			var option = _serviceProvider.GetRequiredService<IOptions<EntityFrameworkOptionsDictionary>>()
-				.Value
-				.Get(GetType());
+			var option = _entityFrameworkOptions.Get(GetType());
 			if (option.UseUnderScoreCase)
 			{
 				modelBuilder.UseUnderScoreCase();
@@ -120,15 +126,11 @@ namespace MicroserviceFramework.Ef
 
 				ApplyConcepts();
 
-				var dispatcher = _serviceProvider.GetService<IDomainEventDispatcher>();
-				if (dispatcher != null)
-				{
-					var domainEvents = GetDomainEvents();
+				var domainEvents = GetDomainEvents();
 
-					foreach (var @event in domainEvents)
-					{
-						await dispatcher.DispatchAsync(@event);
-					}
+				foreach (var @event in domainEvents)
+				{
+					await _domainEventDispatcher.DispatchAsync(@event);
 				}
 
 				var effectedCount = await SaveChangesAsync();
@@ -154,16 +156,8 @@ namespace MicroserviceFramework.Ef
 
 		protected void ApplyConcepts()
 		{
-			var session = _serviceProvider.GetService<ISession>();
-
-			string userId = null;
-			string userName = null;
-
-			if (session != null)
-			{
-				userId = session.UserId;
-				userName = session.UserName;
-			}
+			var userId = _session.UserId;
+			var userName = _session.UserName;
 
 			foreach (var entry in ChangeTracker.Entries())
 			{

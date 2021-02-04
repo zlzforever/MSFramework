@@ -1,4 +1,5 @@
 using System;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Security;
@@ -25,12 +26,32 @@ namespace MicroserviceFramework.Shared
 		private readonly int _b;
 		private readonly int _c;
 
+		internal static void AddTypeDescriptor()
+		{
+			TypeDescriptor.AddAttributes(typeof(ObjectId), new TypeConverterAttribute(typeof(StringConverter)));
+		}
+
 		// constructors
 		/// <summary>
 		/// Initializes a new instance of the ObjectId class.
 		/// </summary>
 		/// <param name="bytes">The bytes.</param>
 		public ObjectId(byte[] bytes)
+		{
+			if (bytes == null)
+			{
+				throw new ArgumentNullException(nameof(bytes));
+			}
+
+			if (bytes.Length != 12)
+			{
+				throw new ArgumentException("Byte array must be 12 bytes long", nameof(bytes));
+			}
+
+			FromByteArray(bytes, 0, out _a, out _b, out _c);
+		}
+
+		public ObjectId(ReadOnlySpan<byte> bytes)
 		{
 			if (bytes == null)
 			{
@@ -231,8 +252,7 @@ namespace MicroserviceFramework.Shared
 			// don't throw ArgumentNullException if s is null
 			if (s != null && s.Length == 24)
 			{
-				byte[] bytes;
-				if (TryParseHexString(s, out bytes))
+				if (TryParseHexString(s, out var bytes))
 				{
 					objectId = new ObjectId(bytes);
 					return true;
@@ -376,6 +396,13 @@ namespace MicroserviceFramework.Shared
 			c = (bytes[offset + 8] << 24) | (bytes[offset + 9] << 16) | (bytes[offset + 10] << 8) | bytes[offset + 11];
 		}
 
+		private static void FromByteArray(ReadOnlySpan<byte> bytes, int offset, out int a, out int b, out int c)
+		{
+			a = (bytes[offset] << 24) | (bytes[offset + 1] << 16) | (bytes[offset + 2] << 8) | bytes[offset + 3];
+			b = (bytes[offset + 4] << 24) | (bytes[offset + 5] << 16) | (bytes[offset + 6] << 8) | bytes[offset + 7];
+			c = (bytes[offset + 8] << 24) | (bytes[offset + 9] << 16) | (bytes[offset + 10] << 8) | bytes[offset + 11];
+		}
+
 		// public methods
 		/// <summary>
 		/// Compares this ObjectId to another ObjectId.
@@ -460,8 +487,7 @@ namespace MicroserviceFramework.Shared
 				throw new ArgumentNullException(nameof(s));
 			}
 
-			byte[] bytes;
-			if (!TryParseHexString(s, out bytes))
+			if (!TryParseHexString(s, out var bytes))
 			{
 				throw new FormatException("String should contain only hexadecimal digits.");
 			}
@@ -489,11 +515,10 @@ namespace MicroserviceFramework.Shared
 			var i = 0;
 			var j = 0;
 
-			if ((s.Length % 2) == 1)
+			if (s.Length % 2 == 1)
 			{
 				// if s has an odd length assume an implied leading "0"
-				int y;
-				if (!TryParseHexChar(s[i++], out y))
+				if (!TryParseHexChar(s[i++], out var y))
 				{
 					return false;
 				}
@@ -503,13 +528,12 @@ namespace MicroserviceFramework.Shared
 
 			while (i < s.Length)
 			{
-				int x, y;
-				if (!TryParseHexChar(s[i++], out x))
+				if (!TryParseHexChar(s[i++], out var x))
 				{
 					return false;
 				}
 
-				if (!TryParseHexChar(s[i++], out y))
+				if (!TryParseHexChar(s[i++], out var y))
 				{
 					return false;
 				}
@@ -555,26 +579,26 @@ namespace MicroserviceFramework.Shared
 		{
 			if (destination == null)
 			{
-				throw new ArgumentNullException("destination");
+				throw new ArgumentNullException(nameof(destination));
 			}
 
 			if (offset + 12 > destination.Length)
 			{
-				throw new ArgumentException("Not enough room in destination buffer.", "offset");
+				throw new ArgumentException("Not enough room in destination buffer.", nameof(offset));
 			}
 
 			destination[offset + 0] = (byte) (_a >> 24);
 			destination[offset + 1] = (byte) (_a >> 16);
 			destination[offset + 2] = (byte) (_a >> 8);
-			destination[offset + 3] = (byte) (_a);
+			destination[offset + 3] = (byte) _a;
 			destination[offset + 4] = (byte) (_b >> 24);
 			destination[offset + 5] = (byte) (_b >> 16);
 			destination[offset + 6] = (byte) (_b >> 8);
-			destination[offset + 7] = (byte) (_b);
+			destination[offset + 7] = (byte) _b;
 			destination[offset + 8] = (byte) (_c >> 24);
 			destination[offset + 9] = (byte) (_c >> 16);
 			destination[offset + 10] = (byte) (_c >> 8);
-			destination[offset + 11] = (byte) (_c);
+			destination[offset + 11] = (byte) _c;
 		}
 
 		/// <summary>

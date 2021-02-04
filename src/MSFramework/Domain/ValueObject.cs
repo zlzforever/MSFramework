@@ -1,41 +1,54 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 
 namespace MicroserviceFramework.Domain
 {
-	//Inspired from https://docs.microsoft.com/en-us/dotnet/standard/microservices-architecture/microservice-ddd-cqrs-patterns/implement-value-objects
-
 	public abstract class ValueObject
 	{
+		private static bool EqualOperator(ValueObject left, ValueObject right)
+		{
+			if (ReferenceEquals(left, null) ^ ReferenceEquals(right, null))
+			{
+				return false;
+			}
+
+			return ReferenceEquals(left, null) || left.Equals(right);
+		}
+
+		public static bool operator ==(ValueObject left, ValueObject right)
+		{
+			return EqualOperator(left, right);
+		}
+
+		public static bool operator !=(ValueObject left, ValueObject right)
+		{
+			return !EqualOperator(left, right);
+		}
+
 		protected abstract IEnumerable<object> GetAtomicValues();
 
-		public bool ValueEquals(object obj)
+		public override bool Equals(object obj)
 		{
 			if (obj == null || obj.GetType() != GetType())
 			{
 				return false;
 			}
 
-			var other = (ValueObject)obj;
+			var other = (ValueObject) obj;
 
-			using var thisValues = GetAtomicValues().GetEnumerator();
-			using var otherValues = other.GetAtomicValues().GetEnumerator();
+			return GetAtomicValues().SequenceEqual(other.GetAtomicValues());
+		}
 
-			while (thisValues.MoveNext() && otherValues.MoveNext())
-			{
-				if (ReferenceEquals(thisValues.Current, null) ^
-				    ReferenceEquals(otherValues.Current, null))
-				{
-					return false;
-				}
+		public override int GetHashCode()
+		{
+			return GetAtomicValues()
+				.Select(x => x != null ? x.GetHashCode() : 0)
+				.Aggregate((x, y) => x ^ y);
+		}
 
-				if (thisValues.Current != null &&
-				    !thisValues.Current.Equals(otherValues.Current))
-				{
-					return false;
-				}
-			}
-
-			return !thisValues.MoveNext() && !otherValues.MoveNext();
+		public ValueObject Clone()
+		{
+			return MemberwiseClone() as ValueObject;
 		}
 	}
 }

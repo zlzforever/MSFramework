@@ -18,12 +18,12 @@
 
     <ItemGroup>
         <ProjectReference Include="..\MSFramework.AspNetCore.AccessControl\MSFramework.AspNetCore.AccessControl.csproj" />
+        <ProjectReference Include="..\MSFramework.AspNetCore.Swagger\MSFramework.AspNetCore.Swagger.csproj" />
         <ProjectReference Include="..\MSFramework.AspNetCore\MSFramework.AspNetCore.csproj" />
         <ProjectReference Include="..\MSFramework.AutoMapper\MSFramework.AutoMapper.csproj" />
         <ProjectReference Include="..\MSFramework.Ef.Design\MSFramework.Ef.Design.csproj" />
         <ProjectReference Include="..\MSFramework.Ef.SqlServer\MSFramework.Ef.SqlServer.csproj" />
         <ProjectReference Include="..\MSFramework.Ef\MSFramework.Ef.csproj" />
-        <ProjectReference Include="..\MSFramework.Migrator.MySql\MSFramework.Migrator.MySql.csproj" />
         <ProjectReference Include="..\MSFramework.Newtonsoft\MSFramework.Newtonsoft.csproj" />
         <ProjectReference Include="..\MSFramework.RabbitMQ\MSFramework.RabbitMQ.csproj" />
         <ProjectReference Include="..\MSFramework\MSFramework.csproj" />

@@ -2,7 +2,10 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+#if !NETSTANDARD2_0
 using Pomelo.EntityFrameworkCore.MySql.Infrastructure;
+
+#endif
 
 namespace MicroserviceFramework.Ef.MySql
 {
@@ -42,7 +45,7 @@ namespace MicroserviceFramework.Ef.MySql
 			var action = new Action<DbContextOptionsBuilder>(x =>
 			{
 				var dbContextType = typeof(TDbContext);
-				var optionDict = configuration.GetSection("DbContexts").Get<EntityFrameworkOptionsDictionary>();
+				var optionDict = configuration.GetSection("DbContexts").Get<DbContextConfigurationCollection>();
 				var option = optionDict.Get(dbContextType);
 
 				var entryAssemblyName = dbContextType.Assembly.GetName().Name;

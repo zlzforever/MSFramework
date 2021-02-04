@@ -1,6 +1,5 @@
 using System;
 using System.Linq;
-using System.Threading;
 using MicroserviceFramework.Application.CQRS;
 using MicroserviceFramework.DependencyInjection;
 using MicroserviceFramework.Utilities;

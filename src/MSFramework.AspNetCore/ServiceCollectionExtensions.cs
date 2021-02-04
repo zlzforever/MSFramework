@@ -1,8 +1,7 @@
-using MicroserviceFramework.AspNetCore.Function;
-using MicroserviceFramework.AspNetCore.Infrastructure;
-using MicroserviceFramework.Function;
+using MicroserviceFramework.AspNetCore.FeatureManagement;
+using MicroserviceFramework.AspNetCore.Mvc.ModelBinding;
+using MicroserviceFramework.FeatureManagement;
 using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using ISession = MicroserviceFramework.Application.ISession;
@@ -11,18 +10,16 @@ namespace MicroserviceFramework.AspNetCore
 {
 	public static class ServiceCollectionExtensions
 	{
-		public static MicroserviceFrameworkBuilder UseAspNetCore(this MicroserviceFrameworkBuilder builder,
-			bool enableFunctionFeature = false)
+		public static MicroserviceFrameworkBuilder UseAspNetCore(this MicroserviceFrameworkBuilder builder)
 		{
-			if (enableFunctionFeature)
-			{
-				builder.Services.AddFunction<AspNetCoreFunctionFinder>();
-			}
-
 			builder.Services.AddHttpContextAccessor();
-			builder.Services.AddSingleton<IActionResultTypeMapper, ActionResultTypeMapper>();
 			builder.Services.TryAddScoped<ISession, HttpContextSession>();
 			return builder;
+		}
+
+		public static void UseFeatureManagement(this MicroserviceFrameworkBuilder builder)
+		{
+			builder.Services.AddFunction<AspNetCoreFeatureFinder>();
 		}
 
 		public static void UseMicroserviceFramework(this IApplicationBuilder builder)

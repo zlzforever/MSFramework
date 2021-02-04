@@ -18,8 +18,6 @@
         <ProjectReference Include="..\..\src\MSFramework.Ef.PostgreSql\MSFramework.Ef.PostgreSql.csproj" />
         <ProjectReference Include="..\..\src\MSFramework.Ef.SqlServer\MSFramework.Ef.SqlServer.csproj" />
         <ProjectReference Include="..\..\src\MSFramework.Ef\MSFramework.Ef.csproj" />
-        <ProjectReference Include="..\..\src\MSFramework.Migrator.MySql\MSFramework.Migrator.MySql.csproj" />
-        <ProjectReference Include="..\..\src\MSFramework.Migrator\MSFramework.Migrator.csproj" />
     </ItemGroup>
     <ItemGroup>
       <Content Update="EfPostgreSqlTest.json">

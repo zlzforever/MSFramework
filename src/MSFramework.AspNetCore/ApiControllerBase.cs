@@ -11,9 +11,9 @@ namespace MicroserviceFramework.AspNetCore
 {
 	public abstract class ApiControllerBase : ControllerBase, IAsyncResultFilter, IActionFilter, IAsyncActionFilter
 	{
-		protected ISession Session { get; private set; }
+		protected ISession Session;
 
-		protected ILogger Logger { get; private set; }
+		protected ILogger Logger;
 
 		[NonAction]
 		public virtual Task OnResultExecutionAsync(ResultExecutingContext context, ResultExecutionDelegate next)
@@ -32,15 +32,22 @@ namespace MicroserviceFramework.AspNetCore
 		}
 
 		[NonAction]
-		public virtual Response Success(string msg = null, object data = null)
+		public virtual ApiResult Success(string msg = null, object data = null)
 		{
-			return new(data, msg);
+			return new(data)
+			{
+				Msg = msg
+			};
 		}
 
 		[NonAction]
-		public virtual Response Error(string msg = null, int code = 1)
+		public virtual ApiResult Error(string msg = null, int code = 1)
 		{
-			return new ErrorResponse(msg, code);
+			return new(null)
+			{
+				Code = code,
+				Msg = msg
+			};
 		}
 
 		[NonAction]

@@ -21,7 +21,7 @@ namespace MicroserviceFramework.Initializer
 				}
 
 				if (initializerType.IsAssignableFrom(type) &&
-				    type.GetCustomAttribute(typeof(NotRegisterAttribute)) == null)
+				    type.GetCustomAttribute(typeof(IgnoreRegisterAttribute)) == null)
 				{
 					ServiceCollectionUtilities.TryAdd(services,
 						new ServiceDescriptor(initializerType, type, ServiceLifetime.Singleton));

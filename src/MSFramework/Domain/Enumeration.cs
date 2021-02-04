@@ -69,6 +69,18 @@ namespace MicroserviceFramework.Domain
 			return matchingItem;
 		}
 
+		public static Enumeration Parse(Type type, string value)
+		{
+			var matchingItem = GetAll(type).FirstOrDefault(x => x.Id == value);
+
+			if (matchingItem == null)
+			{
+				throw new InvalidOperationException($"'{value}' is not a valid in {type}");
+			}
+
+			return matchingItem;
+		}
+
 		public int CompareTo(object other) => String.Compare(Id, ((Enumeration) other).Id, StringComparison.Ordinal);
 	}
 }

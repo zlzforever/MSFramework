@@ -11,23 +11,23 @@ using Microsoft.Extensions.Options;
 
 namespace MicroserviceFramework.Ef.Initializer
 {
-	[NotRegister]
+	[IgnoreRegister]
 	public class EntityFrameworkInitializer : InitializerBase
 	{
 		public override int Order => int.MinValue;
 
 		public override async Task InitializeAsync(IServiceProvider serviceProvider)
 		{
-			var entityFrameworkOptionsDict =
-				serviceProvider.GetRequiredService<IOptions<EntityFrameworkOptionsDictionary>>().Value;
+			var dbContextConfigurationCollection =
+				serviceProvider.GetRequiredService<IOptions<DbContextConfigurationCollection>>().Value;
 
-			if (entityFrameworkOptionsDict.Count == 0)
+			if (dbContextConfigurationCollection.Count == 0)
 			{
 				throw new MicroserviceFrameworkException("未能找到数据上下文配置");
 			}
 
-			var repeated = entityFrameworkOptionsDict
-				.Values.GroupBy(m => m.DbContextType)
+			var repeated = dbContextConfigurationCollection
+				.GroupBy(m => m.DbContextType)
 				.FirstOrDefault(m => m.Count() > 1);
 			if (repeated != null)
 			{
@@ -35,7 +35,7 @@ namespace MicroserviceFramework.Ef.Initializer
 					$"数据上下文配置中存在多个配置节点指向同一个上下文类型：{repeated.First().DbContextTypeName}");
 			}
 
-			foreach (var option in entityFrameworkOptionsDict.GetAllOptions())
+			foreach (var option in dbContextConfigurationCollection)
 			{
 				if (option.AutoMigrationEnabled)
 				{

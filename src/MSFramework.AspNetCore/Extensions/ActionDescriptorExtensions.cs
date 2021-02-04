@@ -4,7 +4,7 @@ using System.Linq;
 using System.Reflection;
 using System.Text.RegularExpressions;
 using MicroserviceFramework.Extensions;
-using MicroserviceFramework.Function;
+using MicroserviceFramework.FeatureManagement;
 using Microsoft.AspNetCore.Mvc.Abstractions;
 using Microsoft.AspNetCore.Mvc.Controllers;
 using Microsoft.AspNetCore.Mvc.Filters;
@@ -14,17 +14,10 @@ namespace MicroserviceFramework.AspNetCore.Extensions
 {
 	public static class ActionDescriptorExtensions
 	{
-		public static FunctionDefine GetFunction(this ActionDescriptor actionDescriptor)
+		public static Feature GetFeature(this ActionDescriptor actionDescriptor)
 		{
-			var controllerAction = (ControllerActionDescriptor) actionDescriptor;
-			var functionPath = actionDescriptor.GetActionPath();
-			var parameters = controllerAction.Parameters.Select(x => $"{x.ParameterType.Name} {x.Name}")
-				.ExpandAndToString();
-			var typeName = controllerAction.MethodInfo.DeclaringType?.FullName;
-			var name = string.IsNullOrWhiteSpace(typeName)
-				? $"{controllerAction.MethodInfo.Name}({parameters})"
-				: $"{typeName}.{controllerAction.MethodInfo.Name}({parameters})";
-			return new FunctionDefine(name, functionPath, null);
+			var path = actionDescriptor.GetActionPath();
+			return new Feature(path, null);
 		}
 
 		public static bool HasAttribute<T>(this ActionExecutingContext context) where T : Attribute

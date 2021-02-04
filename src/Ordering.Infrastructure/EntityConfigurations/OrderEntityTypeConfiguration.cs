@@ -1,5 +1,6 @@
 using System;
 using MicroserviceFramework.Ef;
+using MicroserviceFramework.Ef.Extensions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Ordering.Domain.AggregateRoots;
@@ -21,7 +22,7 @@ namespace Ordering.Infrastructure.EntityConfigurations
 			builder.Property<bool>("IsDeleted").IsRequired();
 			builder.Property<string>("UserId").IsRequired();
 			builder.Property<string>("Description").IsRequired(false);
-			builder.Property<OrderStatus>("OrderStatus").IsRequired();
+			builder.Property<OrderStatus>("OrderStatus").UseEnumeration().HasMaxLength(255).IsRequired();
 
 			var navigation = builder.Metadata.FindNavigation(nameof(Order.OrderItems));
 

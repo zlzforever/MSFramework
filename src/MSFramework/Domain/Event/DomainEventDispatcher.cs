@@ -1,10 +1,8 @@
 using System;
 using System.Collections.Concurrent;
-using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
-using MicroserviceFramework.Extensions;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace MicroserviceFramework.Domain.Event

@@ -28,7 +28,7 @@ namespace Ordering.Domain.AggregateRoots
 				throw new OrderingDomainException("Invalid number of units");
 			}
 
-			if ((unitPrice * units) < discount)
+			if (unitPrice * units < discount)
 			{
 				throw new OrderingDomainException("The total of order item is lower than applied discount");
 			}

@@ -10,9 +10,9 @@ namespace MicroserviceFramework.AspNetCore.Filters
 			return filters;
 		}
 
-		public static FilterCollection AddFunctionFilter(this FilterCollection filters)
+		public static FilterCollection AddFeatureFilter(this FilterCollection filters)
 		{
-			filters.Add<FunctionFilter>(Conts.FunctionFilter);
+			filters.Add<FeatureFilter>(Conts.FunctionFilter);
 			return filters;
 		}
 

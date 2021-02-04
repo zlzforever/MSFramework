@@ -24,6 +24,7 @@ namespace MicroserviceFramework.AspNetCore.Filters
 			}
 
 			var result = await next();
+			// 若有异常，不应该提交数据
 			if (result.Exception != null)
 			{
 				return;
