@@ -1,20 +1,23 @@
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
 using MicroserviceFramework.Extensions;
+using MicroserviceFramework.Shared;
 
 namespace MicroserviceFramework.Application.CQRS
 {
 	public class CqrsProcessor : ICqrsProcessor
 	{
 		private readonly IServiceProvider _serviceProvider;
-		private static readonly Dictionary<Type, (Type Interface, MethodInfo Method)> Cache;
+		private static readonly ConcurrentDictionary<Type, (Type Interface, MethodInfo Method)> Cache;
 
 		static CqrsProcessor()
 		{
-			Cache = new Dictionary<Type, (Type, MethodInfo)>();
+			Cache = new ConcurrentDictionary<Type, (Type, MethodInfo)>();
 		}
 
 		public CqrsProcessor(IServiceProvider serviceProvider)
@@ -22,61 +25,50 @@ namespace MicroserviceFramework.Application.CQRS
 			_serviceProvider = serviceProvider;
 		}
 
-		public static void Register(Type eventType, (Type Interface, MethodInfo Method) cacheItem)
+		public async Task QueryAsync(IQuery query, CancellationToken cancellationToken = default)
 		{
-			lock (Cache)
+			Check.NotNull(query, nameof(query));
+
+			var type = query.GetType();
+			var handlerInfo = Cache.GetOrAdd(type, x =>
 			{
-				if (!Cache.ContainsKey(eventType))
-				{
-					Cache.Add(eventType, cacheItem);
-				}
-			}
-		}
+				var handlerType = typeof(IQueryHandler<>).MakeGenericType(x);
+				var method = handlerType.GetMethods()[0];
+				return (handlerType, method);
+			});
 
-		public async Task QueryAsync(IQuery request, CancellationToken cancellationToken = default)
-		{
-			if (request == null)
+			var handler = _serviceProvider.GetService(handlerInfo.Interface);
+			if (handler == null)
 			{
-				throw new ArgumentNullException(nameof(request));
-			}
-
-			var requestType = request.GetType();
-
-			var tuple = Cache.GetOrDefault(requestType);
-
-			if (tuple == default)
-			{
-				throw new MicroserviceFrameworkException("获取处理器缓存失败");
+				throw new MicroserviceFrameworkException("创建处理器失败");
 			}
 
-			var handler = _serviceProvider.GetService(tuple.Interface);
-
-			if (tuple.Method.Invoke(handler, new object[] {request, cancellationToken}) is Task task)
+			if (handlerInfo.Method.Invoke(handler, new object[] {query, cancellationToken}) is Task task)
 			{
 				await task;
 			}
 		}
 
-		public async Task<TResponse> QueryAsync<TResponse>(IQuery<TResponse> request,
+		public async Task<TResponse> QueryAsync<TResponse>(IQuery<TResponse> query,
 			CancellationToken cancellationToken = default)
 		{
-			if (request == null)
+			Check.NotNull(query, nameof(query));
+
+			var type = query.GetType();
+			var handlerInfo = Cache.GetOrAdd(type, x =>
 			{
-				throw new ArgumentNullException(nameof(request));
+				var handlerType = typeof(IQueryHandler<,>).MakeGenericType(x, typeof(TResponse));
+				var method = handlerType.GetMethods()[0];
+				return (handlerType, method);
+			});
+
+			var handler = _serviceProvider.GetService(handlerInfo.Interface);
+			if (handler == null)
+			{
+				throw new MicroserviceFrameworkException("创建处理器失败");
 			}
 
-			var requestType = request.GetType();
-
-			var tuple = Cache.GetOrDefault(requestType);
-
-			if (tuple == default)
-			{
-				throw new MicroserviceFrameworkException("获取处理器缓存失败");
-			}
-
-			var handler = _serviceProvider.GetService(tuple.Interface);
-
-			if (tuple.Method.Invoke(handler, new object[] {request, cancellationToken}) is Task<TResponse> task)
+			if (handlerInfo.Method.Invoke(handler, new object[] {query, cancellationToken}) is Task<TResponse> task)
 			{
 				return await task;
 			}
@@ -93,18 +85,21 @@ namespace MicroserviceFramework.Application.CQRS
 				throw new ArgumentNullException(nameof(command));
 			}
 
-			var commandType = command.GetType();
-
-			var tuple = Cache.GetOrDefault(commandType);
-
-			if (tuple == default)
+			var type = command.GetType();
+			var handlerInfo = Cache.GetOrAdd(type, x =>
 			{
-				throw new MicroserviceFrameworkException("获取处理器缓存失败");
+				var handlerType = typeof(ICommandHandler<>).MakeGenericType(x);
+				var method = handlerType.GetMethods()[0];
+				return (handlerType, method);
+			});
+
+			var handler = _serviceProvider.GetService(handlerInfo.Interface);
+			if (handler == null)
+			{
+				throw new MicroserviceFrameworkException("创建处理器失败");
 			}
 
-			var handler = _serviceProvider.GetService(tuple.Interface);
-
-			if (tuple.Method.Invoke(handler, new object[] {command, cancellationToken}) is Task task)
+			if (handlerInfo.Method.Invoke(handler, new object[] {command, cancellationToken}) is Task task)
 			{
 				await task;
 			}
@@ -118,18 +113,21 @@ namespace MicroserviceFramework.Application.CQRS
 				throw new ArgumentNullException(nameof(command));
 			}
 
-			var commandType = command.GetType();
-
-			var tuple = Cache.GetOrDefault(commandType);
-
-			if (tuple == default)
+			var type = command.GetType();
+			var handlerInfo = Cache.GetOrAdd(type, x =>
 			{
-				throw new MicroserviceFrameworkException("获取处理器缓存失败");
+				var handlerType = typeof(ICommandHandler<,>).MakeGenericType(x, typeof(TResponse));
+				var method = handlerType.GetMethods()[0];
+				return (handlerType, method);
+			});
+
+			var handler = _serviceProvider.GetService(handlerInfo.Interface);
+			if (handler == null)
+			{
+				throw new MicroserviceFrameworkException("创建处理器失败");
 			}
 
-			var handler = _serviceProvider.GetService(tuple.Interface);
-
-			if (tuple.Method.Invoke(handler, new object[] {command, cancellationToken}) is Task<TResponse> task)
+			if (handlerInfo.Method.Invoke(handler, new object[] {command, cancellationToken}) is Task<TResponse> task)
 			{
 				return await task;
 			}

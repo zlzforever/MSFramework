@@ -33,7 +33,7 @@ namespace MicroserviceFramework.RabbitMQ
 			_connection = new PersistentConnection(connectionFactory,
 				loggerFactory.CreateLogger<PersistentConnection>(), _options.RetryCount);
 			_consumerChannel = CreateConsumerChannel();
-			
+
 			SubscribeAllEventTypes();
 			StartConsume();
 		}
@@ -63,7 +63,7 @@ namespace MicroserviceFramework.RabbitMQ
 
 			_logger.LogTrace("Declaring RabbitMQ exchange to publish event: {EventId}", @event.EventId);
 
-			channel.ExchangeDeclare(exchange: _options.Exchange, type: "direct");
+			channel.ExchangeDeclare(_options.Exchange, "direct");
 
 			var bytes = Encoding.UTF8.GetBytes(_serializer.Serialize(@event));
 
@@ -91,15 +91,15 @@ namespace MicroserviceFramework.RabbitMQ
 			_logger.LogTrace("Creating RabbitMQ consumer channel");
 
 			var channel = _connection.CreateModel();
-			channel.ExchangeDeclare(exchange: _options.Exchange, "direct");
-			channel.QueueDeclare(queue: _options.Queue, true, false, false, null);
-			channel.CallbackException += (sender, ea) =>
+			channel.ExchangeDeclare(_options.Exchange, "direct");
+			channel.QueueDeclare(_options.Queue, true, false, false, null);
+			channel.CallbackException += (_, ea) =>
 			{
 				_logger.LogWarning(ea.Exception, "Recreating RabbitMQ consumer channel");
 
 				_consumerChannel.Dispose();
 				_consumerChannel = CreateConsumerChannel();
-				
+
 				StartConsume();
 			};
 
@@ -114,7 +114,7 @@ namespace MicroserviceFramework.RabbitMQ
 			{
 				var consumer = new AsyncEventingBasicConsumer(_consumerChannel);
 
-				consumer.Received += async (sender, args) =>
+				consumer.Received += async (_, args) =>
 				{
 					var message = Encoding.UTF8.GetString(args.Body.ToArray());
 
@@ -124,13 +124,14 @@ namespace MicroserviceFramework.RabbitMQ
 						var handlerInfos = EventHandlerTypeCache.GetOrDefault(eventName);
 						foreach (var handlerInfo in handlerInfos)
 						{
-							var @event = _serializer.Deserialize(message, handlerInfo.EventType);
-							var handlers = _eventHandlerFactory.Create(handlerInfo.HandlerType);
+							var @event = _serializer.Deserialize(message, handlerInfo.Value.EventType);
+							var handlers = _eventHandlerFactory.Create(handlerInfo.Key);
 							foreach (var handler in handlers)
 							{
 								await Task.Yield();
-								await ((Task) handlerInfo.MethodInfo.Invoke(handler, new[] {@event})).ConfigureAwait(
-									false);
+								await ((Task) handlerInfo.Value.MethodInfo.Invoke(handler, new[] {@event}))
+									.ConfigureAwait(
+										false);
 							}
 						}
 					}
@@ -142,7 +143,7 @@ namespace MicroserviceFramework.RabbitMQ
 					// Even on exception we take the message off the queue.
 					// in a REAL WORLD app this should be handled with a Dead Letter Exchange (DLX). 
 					// For more information see: https://www.rabbitmq.com/dlx.html
-					_consumerChannel.BasicAck(args.DeliveryTag, multiple: false);
+					_consumerChannel.BasicAck(args.DeliveryTag, false);
 				};
 
 				_consumerChannel.BasicConsume(_options.Queue, false, consumer);

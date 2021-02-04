@@ -31,7 +31,7 @@ namespace Ordering.Application.Commands
 				new Address(command.Street, command.City, command.State, command.Country, command.ZipCode),
 				command.Description,
 				command.OrderItems.Select(x => x.ToOrderItem()).ToList());
-			await _orderRepository.InsertAsync(order);
+			await _orderRepository.AddAsync(order);
 			return order.Id;
 		}
 	}

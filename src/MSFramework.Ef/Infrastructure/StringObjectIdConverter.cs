@@ -14,7 +14,7 @@ namespace MicroserviceFramework.Ef.Infrastructure
 		///     any release. You should only use it directly in your code with extreme caution and knowing that
 		///     doing so can result in application failures when updating to a new Entity Framework Core release.
 		/// </summary>
-		protected static readonly ConverterMappingHints DefaultHints = new ConverterMappingHints(36,
+		protected static readonly ConverterMappingHints DefaultHints = new(36,
 			null, null, null,
 			(p, t) => (ValueGenerator) new ObjectIdValueGenerator());
 

@@ -13,8 +13,8 @@ namespace MicroserviceFramework.AspNetCore.Mvc
 		{
 		}
 
-		public static readonly Response Ok = new Response(null);
-		public static readonly Response Error = new Response(null, null, false, 1);
+		public static readonly Response Ok = new(null);
+		public static readonly Response Error = new(null, null, false, 1);
 	}
 
 	public class Response<T> : IResponse

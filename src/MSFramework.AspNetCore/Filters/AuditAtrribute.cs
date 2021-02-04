@@ -85,7 +85,7 @@ namespace MicroserviceFramework.AspNetCore.Filters
 			}
 
 			auditedOperation.End();
-			await auditService.SaveAsync(auditedOperation);
+			await auditService.AddAsync(auditedOperation);
 		}
 	}
 }

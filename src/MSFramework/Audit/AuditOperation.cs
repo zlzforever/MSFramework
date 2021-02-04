@@ -13,9 +13,9 @@ namespace MicroserviceFramework.Audit
 		public string ApplicationName { get; private set; }
 
 		/// <summary>
-		/// 获取或设置 执行的功能名
+		/// 获取或设置执行的功能名
 		/// </summary>
-		public string Path { get; private set; }
+		public string Function { get; private set; }
 
 		/// <summary>
 		/// 请求
@@ -49,7 +49,7 @@ namespace MicroserviceFramework.Audit
 		public AuditOperation(string applicationName, string path, string url, string ip, string userAgent) : this()
 		{
 			ApplicationName = applicationName;
-			Path = path;
+			Function = path;
 			Ip = ip;
 			Url = url;
 			UserAgent = userAgent;
@@ -89,7 +89,7 @@ namespace MicroserviceFramework.Audit
 		public override string ToString()
 		{
 			return
-				$"[ENTITY: {GetType().Name}] Id = {Id}; {{ 'ApplicationName': {ApplicationName}, 'Path': {Path}, 'Ip': {Ip}, 'UserAgent': {UserAgent}, 'EndedTime': {EndTime:yyyy-MM-dd HH:mm:ss}, 'Elapsed': {Elapsed} }}";
+				$"[ENTITY: {GetType().Name}] Id = {Id}; {{ 'ApplicationName': {ApplicationName}, 'Path': {Function}, 'Ip': {Ip}, 'UserAgent': {UserAgent}, 'EndedTime': {EndTime:yyyy-MM-dd HH:mm:ss}, 'Elapsed': {Elapsed} }}";
 		}
 	}
 }

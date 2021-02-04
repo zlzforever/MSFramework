@@ -12,7 +12,7 @@ namespace MicroserviceFramework.Ef.Function
 	public class FunctionRepository : IFunctionDefineRepository
 	{
 		private readonly IMemoryCache _cache;
-		private readonly TimeSpan _ttl = new TimeSpan(0, 5, 0);
+		private readonly TimeSpan _ttl = new(0, 5, 0);
 		private readonly IQueryable<FunctionDefine> _currentSet;
 		private readonly DbContext _dbContext;
 

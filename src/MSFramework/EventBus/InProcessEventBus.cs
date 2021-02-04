@@ -21,12 +21,12 @@ namespace MicroserviceFramework.EventBus
 			var handlerInfos = EventHandlerTypeCache.GetOrDefault(eventName);
 			foreach (var handlerInfo in handlerInfos)
 			{
-				var handlers = _handlerFactory.Create(handlerInfo.HandlerType);
+				var handlers = _handlerFactory.Create(handlerInfo.Key);
 
 				foreach (var handler in handlers)
 				{
 					await Task.Yield();
-					var task = (Task) handlerInfo.MethodInfo.Invoke(handler,
+					var task = (Task) handlerInfo.Value.MethodInfo.Invoke(handler,
 						new object[] {DeepCopy.DeepCopier.Copy(@event)});
 					await task.ConfigureAwait(false);
 				}

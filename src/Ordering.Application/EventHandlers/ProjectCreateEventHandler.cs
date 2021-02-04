@@ -31,7 +31,6 @@ namespace Ordering.Application.EventHandlers
 			var result = await _productRepository.PagedQueryAsync(1, 10);
 			var product = result.Data.Last();
 			product.SetName(Guid.NewGuid().ToString());
-			await _productRepository.UpdateAsync(product);
 			await _uowManager.CommitAsync();
 		}
 

@@ -122,8 +122,8 @@ namespace Ordering.API
 			app.UseEndpoints(endpoints =>
 			{
 				endpoints.MapControllerRoute(
-						name: "default",
-						pattern: "{controller=Home}/{action=Index}/{id?}").RequireCors("cors")
+						"default",
+						"{controller=Home}/{action=Index}/{id?}").RequireCors("cors")
 					;
 			});
 			

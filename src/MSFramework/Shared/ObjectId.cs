@@ -18,7 +18,7 @@ namespace MicroserviceFramework.Shared
 		private static readonly ObjectId EmptyInstance = default;
 		private static readonly long Random = CalculateRandomValue();
 		private static int _staticIncrement = new Random().Next();
-		private static readonly DateTime UnixEpoch = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
+		private static readonly DateTime UnixEpoch = new(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
 
 		// private fields
 		private readonly int _a;

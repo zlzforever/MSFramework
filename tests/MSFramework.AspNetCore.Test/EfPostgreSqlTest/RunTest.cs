@@ -1,10 +1,14 @@
-﻿using MicroserviceFramework;
+﻿using System.Threading.Tasks;
+using MicroserviceFramework;
 using MicroserviceFramework.AspNetCore;
 using MicroserviceFramework.Ef;
 using MicroserviceFramework.Ef.PostgreSql;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.TestHost;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using MSFramework.AspNetCore.Test.EfPostgreSqlTest.Infrastructure;
 using Xunit;
@@ -22,25 +26,55 @@ namespace MSFramework.AspNetCore.Test.EfPostgreSqlTest
 		}
 
 		[Fact]
-		public void Run_When_AddMSFramework_WithEfNpgsql()
+		public async Task Run_When_AddMSFramework_WithEfNpgsql()
 		{
-			var hostBuilder = new HostBuilder()
-				.ConfigureWebHost(webHost =>
+			using var host = await new HostBuilder()
+				.ConfigureWebHost(webBuilder =>
 				{
-					// Add TestServer
-					webHost.UseTestServer().ConfigureAppConfiguration(i => { i.AddJsonFile("EfPostgreSqlTest.json"); });
-					webHost.UseStartup<Startup>().ConfigureServices((context, service) =>
-					{
-						var config = context.Configuration;
-						service.AddMicroserviceFramework(builder =>
+					webBuilder
+						.UseTestServer()
+						.ConfigureAppConfiguration(builder =>
 						{
-							builder.UseAspNetCore();
-							builder.UseEntityFramework(x => { x.AddNpgsql<TestDataContext>(config); });
+							//
+							builder.AddJsonFile("EfPostgreSqlTest.json");
+						})
+						.ConfigureServices((context, services) =>
+						{
+							services.AddMvc();
+							services.AddMicroserviceFramework(x =>
+							{
+								//
+								x.AddOptions(context.Configuration);
+							});
+							services.AddRouting(x => { x.LowercaseUrls = true; });
+							services.AddMicroserviceFramework(builder =>
+							{
+								builder.UseAspNetCore();
+								builder.UseEntityFramework(x =>
+								{
+									//
+									x.AddNpgsql<TestDataContext>(context.Configuration);
+								});
+							});
+						})
+						.Configure(app =>
+						{
+							app.UseRouting();
+
+							app.UseEndpoints(endpoints =>
+							{
+								endpoints.MapGet("/",
+									async context => { await context.Response.WriteAsync("Hello World!"); });
+							});
+
+							app.UseMicroserviceFramework();
 						});
-					}).Configure(builder => { builder.UseMicroserviceFramework(); });
-				});
-			var host = hostBuilder.Start();
-			_output.WriteLine("server is runing");
+				})
+				.StartAsync();
+			_output.WriteLine("server is running");
+
+			var dbContext = host.Services.CreateScope().ServiceProvider.GetRequiredService<TestDataContext>();
+			Assert.NotNull(dbContext);
 		}
 	}
 }

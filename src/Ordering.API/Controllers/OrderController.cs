@@ -45,10 +45,10 @@ namespace Ordering.API.Controllers
 				"Description",
 				new List<OrderItem>
 				{
-					new OrderItem(Guid.NewGuid(),
+					new(Guid.NewGuid(),
 						"testProduct", 10, 0, "")
 				});
-			await _orderRepository.InsertAsync(order);
+			await _orderRepository.AddAsync(order);
 			// var order = await _orderRepository.GetAsync(Guid.Parse("35a00497-cbb0-4311-af5d-ab6b01281569"));
 			// order.AddOrderItem(Guid.NewGuid(),
 			// 	"testProduct", 10, 0, "");
@@ -129,7 +129,7 @@ namespace Ordering.API.Controllers
 			return Ok(order);
 		}
 
-		[HttpGet()]
+		[HttpGet]
 		// [AccessControl("查看所有订单")]
 		public async Task<IEnumerable<Order>> GetOrdersAsync()
 		{

@@ -150,6 +150,8 @@ namespace MicroserviceFramework.Ef
 			}
 		}
 
+		public Guid Id => ContextId.InstanceId;
+
 		protected void ApplyConcepts()
 		{
 			var session = _serviceProvider.GetService<ISession>();

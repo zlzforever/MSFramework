@@ -4,7 +4,7 @@ using MSFramework.AspNetCore.Test.EfPostgreSqlTest.Infrastructure;
 
 namespace MSFramework.AspNetCore.Test.EfPostgreSqlTest.EntityConfiguration
 {
-	public class TestDataConfiguration: EntityTypeConfigurationBase<TestData, TestDataContext>
+	public class TestDataConfiguration : EntityTypeConfigurationBase<TestData, TestDataContext>
 	{
 	}
 }

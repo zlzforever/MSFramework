@@ -2,6 +2,7 @@ using System;
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
+using MicroserviceFramework.Utilities;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
@@ -12,7 +13,7 @@ namespace MicroserviceFramework.Initializer
 		internal static IServiceCollection AddInitializer(this IServiceCollection services)
 		{
 			var initializerType = typeof(InitializerBase);
-			MicroserviceFrameworkLoader.RegisterType += type =>
+			MicroserviceFrameworkLoaderContext.Default.ResolveType += type =>
 			{
 				if (type.IsAbstract || type.IsInterface)
 				{
@@ -22,7 +23,8 @@ namespace MicroserviceFramework.Initializer
 				if (initializerType.IsAssignableFrom(type) &&
 				    type.GetCustomAttribute(typeof(NotRegisterAttribute)) == null)
 				{
-					services.AddSingleton(initializerType, type);
+					ServiceCollectionUtilities.TryAdd(services,
+						new ServiceDescriptor(initializerType, type, ServiceLifetime.Singleton));
 				}
 			};
 			return services;

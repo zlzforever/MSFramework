@@ -1,6 +1,6 @@
 ﻿{
   "DbContexts": {
-    "TestOrderingContext": {
+    "TestDataContext": {
       "DbContextTypeName": "MSFramework.AspNetCore.Test.EfPostgreSqlTest.Infrastructure.TestDataContext,MSFramework.AspNetCore.Test",
       "AutoMigrationEnabled": false,
       "UseTransaction": true,

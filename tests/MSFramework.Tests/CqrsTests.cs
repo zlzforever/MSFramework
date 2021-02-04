@@ -65,6 +65,8 @@ namespace MSFramework.Tests
 
 	public class Query1Handler1 : IQueryHandler<Query1>
 	{
+		public int Order => 1;
+
 		public Task HandleAsync(Query1 query, CancellationToken cancellationToken = default)
 		{
 			Query1.Count += 1;
@@ -74,6 +76,8 @@ namespace MSFramework.Tests
 
 	public class Query1Handler2 : IQueryHandler<Query1>
 	{
+		public int Order => 2;
+
 		public Task HandleAsync(Query1 query, CancellationToken cancellationToken = default)
 		{
 			Query1.Count += 1;

@@ -1,5 +1,7 @@
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
 using MicroserviceFramework.Extensions;
@@ -12,23 +14,12 @@ namespace MicroserviceFramework.Domain.Event
 		public static readonly Type EventHandlerBaseType;
 
 		private readonly IServiceProvider _serviceProvider;
-		private static readonly Dictionary<Type, (Type Interface, MethodInfo Method)> Cache;
+		private static readonly ConcurrentDictionary<Type, (Type Interface, MethodInfo Method)> Cache;
 
 		static DomainEventDispatcher()
 		{
 			EventHandlerBaseType = typeof(IDomainEventHandler<>);
-			Cache = new Dictionary<Type, (Type, MethodInfo)>();
-		}
-
-		public static void Register(Type eventType, (Type Interface, MethodInfo Method) cacheItem)
-		{
-			lock (Cache)
-			{
-				if (!Cache.ContainsKey(eventType))
-				{
-					Cache.Add(eventType, cacheItem);
-				}
-			}
+			Cache = new ConcurrentDictionary<Type, (Type, MethodInfo)>();
 		}
 
 		public DomainEventDispatcher(IServiceProvider serviceProvider)
@@ -45,18 +36,18 @@ namespace MicroserviceFramework.Domain.Event
 
 			var eventType = @event.GetType();
 
-			var tuple = Cache.GetOrDefault(eventType);
-
-			if (tuple == default)
+			var handlerInfo = Cache.GetOrAdd(eventType, x =>
 			{
-				return;
-			}
+				var handlerType = EventHandlerBaseType.MakeGenericType(x);
+				var method = handlerType.GetMethods()[0];
+				return (handlerType, method);
+			});
 
-			var handlers = _serviceProvider.GetServices(tuple.Interface);
+			var handlers = _serviceProvider.GetServices(handlerInfo.Interface).Where(x => x != null);
 
 			foreach (var handler in handlers)
 			{
-				if (tuple.Method.Invoke(handler, new object[] {@event}) is Task task)
+				if (handlerInfo.Method.Invoke(handler, new object[] {@event}) is Task task)
 				{
 					await task;
 				}

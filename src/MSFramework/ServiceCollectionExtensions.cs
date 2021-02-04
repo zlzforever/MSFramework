@@ -41,23 +41,17 @@ namespace MicroserviceFramework
 			var builder = new MicroserviceFrameworkBuilder(services);
 			builderAction?.Invoke(builder);
 
-			MicroserviceFrameworkLoader.RegisterType += type =>
-			{
-				var lifetime = LifetimeChecker.Get(type);
-				if (lifetime.HasValue)
-				{
-					builder.Services.RegisterDependencyInjection(type, lifetime.Value);
-				}
-			};
-			builder.Services.AddDomainEventDispatcher();
+			builder.Services.AddDependencyInjectionLoader();
+			builder.Services.AddDomainEvent();
 			builder.Services.AddSerializer();
 			builder.Services.AddEventBus();
 			builder.Services.AddInitializer();
 			builder.Services.TryAddScoped<UnitOfWorkManager>();
 			// 如果你想换成消息队列，则重新注册一个对应的服务即可
 			builder.Services.TryAddScoped<IAuditService, DefaultAuditService>();
-			builder.Services.TryAddScoped<ApplicationInfo>();
-			MicroserviceFrameworkLoader.RegisterTypes();
+			builder.Services.TryAddSingleton<ApplicationInfo>();
+
+			MicroserviceFrameworkLoaderContext.Default.LoadTypes();
 		}
 
 		public static MicroserviceFrameworkBuilder UseSerializer(this MicroserviceFrameworkBuilder builder,

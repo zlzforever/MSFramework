@@ -11,7 +11,7 @@ namespace MicroserviceFramework.Serialization
 		{
 			var options = new JsonSerializerOptions();
 			configure?.Invoke(options);
-			serviceCollection.AddSingleton<ISerializer>(provider => new DefaultSerializer(options));
+			serviceCollection.AddSingleton<ISerializer>(_ => new DefaultSerializer(options));
 			return serviceCollection;
 		}
 	}

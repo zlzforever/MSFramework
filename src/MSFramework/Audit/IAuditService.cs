@@ -10,6 +10,6 @@ namespace MicroserviceFramework.Audit
 		/// </summary>
 		/// <param name="auditOperation">操作审计数据</param>
 		/// <returns></returns>
-		Task SaveAsync(AuditOperation auditOperation);
+		Task AddAsync(AuditOperation auditOperation);
 	}
 }

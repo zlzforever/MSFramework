@@ -22,7 +22,7 @@ namespace MSFramework.Tests
 
 		public class Event1Handler : IEventHandler<Event1>
 		{
-			public static ConcurrentBag<int> Result = new ConcurrentBag<int>();
+			public static ConcurrentBag<int> Result = new();
 
 			public Task HandleAsync(Event1 @event)
 			{

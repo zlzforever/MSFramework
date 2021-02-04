@@ -4,6 +4,9 @@ using Microsoft.Extensions.Logging;
 
 namespace MicroserviceFramework.Audit
 {
+	/// <summary>
+	/// IAuditService 不能和 HttpContext 为同一个 Scope，不然此处的 UOW save 会导致业务数据保存
+	/// </summary>
 	public class DefaultAuditService : IAuditService
 	{
 		private readonly IAuditRepository _repository;
@@ -18,7 +21,7 @@ namespace MicroserviceFramework.Audit
 			_repository = repository;
 		}
 
-		public async Task SaveAsync(AuditOperation auditOperation)
+		public async Task AddAsync(AuditOperation auditOperation)
 		{
 			if (_repository == null)
 			{
@@ -26,7 +29,7 @@ namespace MicroserviceFramework.Audit
 				return;
 			}
 
-			await _repository.InsertAsync(auditOperation);
+			await _repository.AddAsync(auditOperation);
 			await _unitOfWorkManager.CommitAsync();
 		}
 	}

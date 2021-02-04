@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Reflection;
 using MicroserviceFramework.Extensions;
@@ -11,41 +12,47 @@ namespace MicroserviceFramework.EventBus
 	/// </summary>
 	public class EventHandlerTypeCache
 	{
-		private static readonly Dictionary<string, HashSet<HandlerInfo>> Cache;
-		private static readonly HashSet<Type> EventTypes;
+		/// <summary>
+		/// KEY: 事件名
+		/// Value->Key: 事件处理器的类型
+		/// Value->Value: 事件处理器的方法
+		/// </summary>
+		private static readonly
+			ConcurrentDictionary<string, ConcurrentDictionary<Type, (Type EventType, MethodInfo MethodInfo)>> Cache;
+
+		private static readonly ConcurrentDictionary<Type, object> EventTypes;
 
 		static EventHandlerTypeCache()
 		{
-			Cache = new Dictionary<string, HashSet<HandlerInfo>>();
-			EventTypes = new HashSet<Type>();
+			Cache =
+				new ConcurrentDictionary<string, ConcurrentDictionary<Type, (Type EventType, MethodInfo MethodInfo)>>();
+			EventTypes = new ConcurrentDictionary<Type, object>();
 		}
 
 		public static void Register(Type eventType, Type handlerType, MethodInfo handlerMethod)
 		{
-			lock (Cache)
+			EventTypes.TryAdd(eventType, null);
+			var name = eventType.Name;
+			Cache.AddOrUpdate(name, _ =>
 			{
-				EventTypes.Add(eventType);
-				var name = eventType.Name;
-				if (!Cache.ContainsKey(name))
-				{
-					Cache[name] = new HashSet<HandlerInfo>();
-				}
-
-				Cache[name].Add(new HandlerInfo(eventType, handlerType, handlerMethod));
-			}
+				var dict = new ConcurrentDictionary<Type, (Type EventType, MethodInfo MethodInfo)>();
+				dict.TryAdd(handlerType, (eventType, handlerMethod));
+				return dict;
+			}, (_, x) =>
+			{
+				x.TryAdd(handlerType, (eventType, handlerMethod));
+				return x;
+			});
 		}
 
-		public static IReadOnlyCollection<HandlerInfo> GetOrDefault(string eventName)
+		public static ConcurrentDictionary<Type, (Type EventType, MethodInfo MethodInfo)> GetOrDefault(string eventName)
 		{
-			lock (Cache)
-			{
-				return Cache.GetOrDefault(eventName);
-			}
+			return Cache.GetOrDefault(eventName);
 		}
 
-		public static IReadOnlyCollection<Type> GetEventTypes()
+		public static ICollection<Type> GetEventTypes()
 		{
-			return EventTypes;
+			return EventTypes.Keys;
 		}
 	}
 }

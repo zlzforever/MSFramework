@@ -3,13 +3,13 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace MicroserviceFramework.DependencyInjection
 {
-	public class LifetimeChecker
+	public static class LifetimeUtilities
 	{
 		private static readonly Type Scope = typeof(IScopeDependency);
 		private static readonly Type Singleton = typeof(ISingletonDependency);
 		private static readonly Type Transient = typeof(ITransientDependency);
 
-		public static ServiceLifetime? Get(Type type)
+		public static ServiceLifetime? GetLifetime(Type type)
 		{
 			if (type.IsAbstract || type.IsInterface)
 			{

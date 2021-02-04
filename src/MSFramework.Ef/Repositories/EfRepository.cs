@@ -43,12 +43,12 @@ namespace MicroserviceFramework.Ef.Repositories
 				.FirstOrDefaultAsync(x => x.Id.Equals(id));
 		}
 
-		public virtual TEntity Insert(TEntity entity)
+		public virtual TEntity Add(TEntity entity)
 		{
 			return DbContext.Set<TEntity>().Add(entity).Entity;
 		}
 
-		public virtual async Task<TEntity> InsertAsync(TEntity entity)
+		public virtual async Task<TEntity> AddAsync(TEntity entity)
 		{
 			return (await DbContext.Set<TEntity>().AddAsync(entity)).Entity;
 		}

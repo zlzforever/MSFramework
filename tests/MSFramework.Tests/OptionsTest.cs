@@ -14,7 +14,7 @@ namespace MSFramework.Tests
 		public int Age { get; set; }
 	}
 
-	[OptionsType(sectionName: "Person")]
+	[OptionsType("Person")]
 	public class Person
 	{
 		public string Name { get; set; }

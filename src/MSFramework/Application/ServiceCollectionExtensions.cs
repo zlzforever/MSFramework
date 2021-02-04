@@ -3,6 +3,7 @@ using System.Linq;
 using System.Threading;
 using MicroserviceFramework.Application.CQRS;
 using MicroserviceFramework.DependencyInjection;
+using MicroserviceFramework.Utilities;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 
@@ -20,7 +21,7 @@ namespace MicroserviceFramework.Application
 				typeof(IQueryHandler<,>)
 			};
 
-			MicroserviceFrameworkLoader.RegisterType += type =>
+			MicroserviceFrameworkLoaderContext.Default.ResolveType += type =>
 			{
 				foreach (var handlerInterfaceType in handlerInterfaceTypes)
 				{
@@ -50,24 +51,13 @@ namespace MicroserviceFramework.Application
 			{
 				return;
 			}
-
-			var cancellationTokenType = typeof(CancellationToken);
-
+			
 			foreach (var handlerInterfaceType in handlerInterfaceTypes)
 			{
-				var argumentType = handlerInterfaceType.GenericTypeArguments[0];
-				var handlerMethod = handlerInterfaceType.GetMethod("HandleAsync",
-					new[] {argumentType, cancellationTokenType});
-				CqrsProcessor.Register(argumentType, (handlerInterfaceType, handlerMethod));
-				var lifetime = LifetimeChecker.Get(type);
-				if (lifetime.HasValue)
-				{
-					serviceCollection.Add(new ServiceDescriptor(handlerInterfaceType, type, lifetime.Value));
-				}
-				else
-				{
-					serviceCollection.AddScoped(handlerInterfaceType, type);
-				}
+				var lifetime = LifetimeUtilities.GetLifetime(type);
+				ServiceCollectionUtilities.TryAdd(serviceCollection,
+					new ServiceDescriptor(handlerInterfaceType, type,
+						lifetime ?? ServiceLifetime.Scoped));
 			}
 		}
 	}

@@ -1,4 +1,5 @@
 using System.Linq;
+using MicroserviceFramework.Utilities;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 
@@ -6,11 +7,11 @@ namespace MicroserviceFramework.Domain.Event
 {
 	public static class ServiceCollectionExtensions
 	{
-		public static IServiceCollection AddDomainEventDispatcher(this IServiceCollection serviceCollection)
+		public static IServiceCollection AddDomainEvent(this IServiceCollection serviceCollection)
 		{
 			serviceCollection.TryAddScoped<IDomainEventDispatcher, DomainEventDispatcher>();
 
-			MicroserviceFrameworkLoader.RegisterType += type =>
+			MicroserviceFrameworkLoaderContext.Default.ResolveType += type =>
 			{
 				if (type.IsAbstract || type.IsInterface)
 				{
@@ -30,10 +31,8 @@ namespace MicroserviceFramework.Domain.Event
 
 				foreach (var handlerInterfaceType in handlerInterfaceTypes)
 				{
-					var eventType = handlerInterfaceType.GenericTypeArguments[0];
-					var handlerMethod = handlerInterfaceType.GetMethod("HandleAsync", new[] {eventType});
-					DomainEventDispatcher.Register(eventType, (handlerInterfaceType, handlerMethod));
-					serviceCollection.AddScoped(handlerInterfaceType, type);
+					ServiceCollectionUtilities.TryAdd(serviceCollection,
+						new ServiceDescriptor(handlerInterfaceType, type, ServiceLifetime.Scoped));
 				}
 			};
 			return serviceCollection;

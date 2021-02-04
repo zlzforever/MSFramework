@@ -5,9 +5,9 @@ namespace MicroserviceFramework.Application.CQRS
 {
 	public interface ICqrsProcessor
 	{
-		Task QueryAsync(IQuery request, CancellationToken cancellationToken = default);
+		Task QueryAsync(IQuery query, CancellationToken cancellationToken = default);
 
-		Task<TResponse> QueryAsync<TResponse>(IQuery<TResponse> request, CancellationToken cancellationToken = default);
+		Task<TResponse> QueryAsync<TResponse>(IQuery<TResponse> query, CancellationToken cancellationToken = default);
 
 		Task ExecuteAsync(ICommand command, CancellationToken cancellationToken = default);
 

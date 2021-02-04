@@ -7,10 +7,10 @@ namespace MicroserviceFramework.Audit
 	/// </summary>
 	public class OperationType : Enumeration
 	{
-		public static OperationType Query = new OperationType(nameof(Query), nameof(Query));
-		public static OperationType Add = new OperationType(nameof(Add), nameof(Add));
-		public static OperationType Modify = new OperationType(nameof(Modify), nameof(Modify));
-		public static OperationType Delete = new OperationType(nameof(Delete), nameof(Delete));
+		public static OperationType Query = new(nameof(Query), nameof(Query));
+		public static OperationType Add = new(nameof(Add), nameof(Add));
+		public static OperationType Modify = new(nameof(Modify), nameof(Modify));
+		public static OperationType Delete = new(nameof(Delete), nameof(Delete));
 
 		public OperationType(string id, string name) : base(id, name)
 		{

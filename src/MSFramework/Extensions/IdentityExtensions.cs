@@ -13,7 +13,7 @@ namespace MicroserviceFramework.Extensions
 		/// </summary>
 		public static string GetUserId(this IIdentity identity)
 		{
-			if (identity == null || !(identity is ClaimsIdentity claimsIdentity))
+			if (identity is not ClaimsIdentity claimsIdentity)
 			{
 				return null;
 			}
@@ -26,7 +26,7 @@ namespace MicroserviceFramework.Extensions
 		/// </summary>
 		public static string GetUserName(this IIdentity identity)
 		{
-			if (identity == null || !(identity is ClaimsIdentity claimsIdentity))
+			if (identity is not ClaimsIdentity claimsIdentity)
 			{
 				return null;
 			}
@@ -39,7 +39,7 @@ namespace MicroserviceFramework.Extensions
 		/// </summary>
 		public static string GetEmail(this IIdentity identity)
 		{
-			if (identity == null || !(identity is ClaimsIdentity claimsIdentity))
+			if (identity is not ClaimsIdentity claimsIdentity)
 			{
 				return null;
 			}

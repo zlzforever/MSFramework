@@ -1,5 +1,6 @@
 using System;
 using System.Linq;
+using MicroserviceFramework.Utilities;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 
@@ -15,7 +16,7 @@ namespace MicroserviceFramework.EventBus
 			serviceCollection
 				.TryAddSingleton<IEventHandlerFactory, DependencyInjectionEventHandlerFactory>();
 
-			MicroserviceFrameworkLoader.RegisterType += type =>
+			MicroserviceFrameworkLoaderContext.Default.ResolveType += type =>
 			{
 				var interfaces = type.GetInterfaces();
 				var handlerInterfaceTypes = interfaces
@@ -33,7 +34,8 @@ namespace MicroserviceFramework.EventBus
 					var eventType = handlerInterfaceType.GenericTypeArguments[0];
 					var handlerMethod = handlerInterfaceType.GetMethod("HandleAsync", new[] {eventType});
 					EventHandlerTypeCache.Register(eventType, handlerInterfaceType, handlerMethod);
-					serviceCollection.AddScoped(handlerInterfaceType, type);
+					ServiceCollectionUtilities.TryAdd(serviceCollection,
+						new ServiceDescriptor(handlerInterfaceType, type, ServiceLifetime.Scoped));
 				}
 			};
 

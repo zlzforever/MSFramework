@@ -8,8 +8,6 @@ rm -rf src/MSFramework.Ef/bin/Release
 rm -rf src/MSFramework.Ef.MySql/bin/Release
 rm -rf src/MSFramework.Ef.PostgreSql/bin/Release
 rm -rf src/MSFramework.Ef.SqlServer/bin/Release
-rm -rf src/MSFramework.Migrator/bin/Release
-rm -rf src/MSFramework.Migrator.MySql/bin/Release
 rm -rf src/MSFramework.RabbitMQ/bin/Release
 rm -rf src/MSFramework.Ef.Design/bin/Release
 dotnet build -c Release
@@ -22,7 +20,5 @@ nuget push src/MSFramework.Ef/bin/Release/*.nupkg  -Source $NUGET_SERVER
 nuget push src/MSFramework.Ef.MySql/bin/Release/*.nupkg  -Source $NUGET_SERVER
 nuget push src/MSFramework.Ef.PostgreSql/bin/Release/*.nupkg  -Source  $NUGET_SERVER
 nuget push src/MSFramework.Ef.SqlServer/bin/Release/*.nupkg  -Source $NUGET_SERVER
-nuget push src/MSFramework.Migrator/bin/Release/*.nupkg  -Source $NUGET_SERVER
-nuget push src/MSFramework.Migrator.MySql/bin/Release/*.nupkg  -Source $NUGET_SERVER
 nuget push src/MSFramework.RabbitMQ/bin/Release/*.nupkg  -Source $NUGET_SERVER
 nuget push src/MSFramework.Ef.Design/bin/Release/*.nupkg  -Source $NUGET_SERVER

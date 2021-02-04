@@ -21,7 +21,7 @@ namespace MSFramework.Tests
 
 	public class Initializer2 : InitializerBase
 	{
-		public static readonly List<string> Orders = new List<string>();
+		public static readonly List<string> Orders = new();
 		public override int Order => 100;
 
 		public override Task InitializeAsync(IServiceProvider serviceProvider)
@@ -44,7 +44,7 @@ namespace MSFramework.Tests
 
 	public class Initializer4 : InitializerBase
 	{
-		public static readonly List<string> Orders = new List<string>();
+		public static readonly List<string> Orders = new();
 		public override int Order => 200;
 
 		public override Task InitializeAsync(IServiceProvider serviceProvider)
@@ -77,6 +77,7 @@ namespace MSFramework.Tests
 			var serviceProvider = serviceCollection.BuildServiceProvider();
 			serviceProvider.UseMicroserviceFramework();
 
+			// 此处等于 2 的原因是先执行了 InitializerOrderTest，所以测试用例
 			Assert.Equal(2, Initializer1.Count);
 		}
 
@@ -92,7 +93,7 @@ namespace MSFramework.Tests
 
 			Assert.Equal("Initializer2", Initializer2.Orders[0]);
 			Assert.Equal("Initializer3", Initializer2.Orders[1]);
-			
+
 			Assert.Equal("Initializer5", Initializer4.Orders[0]);
 			Assert.Equal("Initializer4", Initializer4.Orders[1]);
 		}

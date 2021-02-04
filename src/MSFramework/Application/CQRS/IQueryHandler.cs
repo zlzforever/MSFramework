@@ -3,13 +3,13 @@ using System.Threading.Tasks;
 
 namespace MicroserviceFramework.Application.CQRS
 {
-	public interface IQueryHandler<in TRequest> where TRequest : IQuery
+	public interface IQueryHandler<in TQuery> where TQuery : IQuery
 	{
-		Task HandleAsync(TRequest query, CancellationToken cancellationToken = default);
+		Task HandleAsync(TQuery query, CancellationToken cancellationToken = default);
 	}
 
-	public interface IQueryHandler<in TRequest, TResponse> where TRequest : IQuery<TResponse>
+	public interface IQueryHandler<in TQuery, TResponse> where TQuery : IQuery<TResponse>
 	{
-		Task<TResponse> HandleAsync(TRequest query, CancellationToken cancellationToken = default);
+		Task<TResponse> HandleAsync(TQuery query, CancellationToken cancellationToken = default);
 	}
 }

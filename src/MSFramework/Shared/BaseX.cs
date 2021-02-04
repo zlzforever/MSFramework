@@ -22,7 +22,7 @@ namespace MicroserviceFramework.Shared
 
 		internal static string GetRandomCodes()
 		{
-			return new string("0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz".Shuffle().ToArray());
+			return new("0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz".Shuffle().ToArray());
 		}
 
 		static BaseX()

@@ -1,8 +1,16 @@
-﻿using MicroserviceFramework.AspNetCore;
+﻿using System.Threading.Tasks;
+using MicroserviceFramework;
+using MicroserviceFramework.AspNetCore;
+using MicroserviceFramework.Ef;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.TestHost;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Options;
+using MSFramework.AspNetCore.Test.EfPostgreSqlTest.Infrastructure;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -18,23 +26,49 @@ namespace MSFramework.AspNetCore.Test.Extensions
 		}
 
 		[Fact]
-		public void AddConfigModel()
+		public async Task AddConfigModel()
 		{
-			var hostBuilder = new HostBuilder()
-				.ConfigureWebHost(webHost =>
+			using var host = await new HostBuilder()
+				.ConfigureWebHost(webBuilder =>
 				{
-					// Add TestServer
-					webHost.UseTestServer().ConfigureAppConfiguration(i => { i.AddJsonFile("appsettings.json"); });
-					webHost.UseStartup<Startup>().ConfigureServices((context, service) => { }).Configure(builder =>
-					{
-						builder.UseMicroserviceFramework();
-					});
-				});
-			var host = hostBuilder.Start();
-			_output.WriteLine("server is runing");
-			var testConfigModel = (TestConfigModel) host.Services.GetService(typeof(TestConfigModel));
-			Assert.Equal("joe", testConfigModel.Name);
-			Assert.Equal(170, testConfigModel.Height);
+					webBuilder
+						.UseTestServer()
+						.ConfigureAppConfiguration(builder =>
+						{
+							//
+							builder.AddJsonFile("appsettings.json");
+						})
+						.ConfigureServices((context, services) =>
+						{
+							services.AddMvc();
+							services.AddMicroserviceFramework(x =>
+							{
+								//
+								x.AddOptions(context.Configuration);
+							});
+							services.AddRouting(x => { x.LowercaseUrls = true; });
+							services.AddMicroserviceFramework(builder => { builder.UseAspNetCore(); });
+						})
+						.Configure(app =>
+						{
+							app.UseRouting();
+
+							app.UseEndpoints(endpoints =>
+							{
+								endpoints.MapGet("/",
+									async context => { await context.Response.WriteAsync("Hello World!"); });
+							});
+
+							app.UseMicroserviceFramework();
+						});
+				})
+				.StartAsync();
+
+			_output.WriteLine("server is running");
+			var options = host.Services.GetService<IOptions<TestConfigModel>>();
+			Assert.NotNull(options);
+			Assert.Equal("joe", options.Value.Name);
+			Assert.Equal(170, options.Value.Height);
 		}
 	}
 }

@@ -17,7 +17,7 @@ namespace MicroserviceFramework.RabbitMQ
 		IConnection _connection;
 		bool _disposed;
 
-		object sync_root = new object();
+		object sync_root = new();
 
 		public PersistentConnection(IConnectionFactory connectionFactory,
 			ILogger<PersistentConnection> logger, int retryCount = 5)

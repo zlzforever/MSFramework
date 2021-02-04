@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using MicroserviceFramework.Extensions;
 
 namespace MicroserviceFramework.Domain
 {
@@ -12,14 +13,14 @@ namespace MicroserviceFramework.Domain
 		/// <summary>
 		/// 工作单元集合
 		/// </summary>
-		private readonly HashSet<IUnitOfWork> _unitOfWorks;
+		private readonly Dictionary<Guid, IUnitOfWork> _unitOfWorks;
 
 		/// <summary>
 		/// 初始化工作单元管理器
 		/// </summary>
 		public UnitOfWorkManager()
 		{
-			_unitOfWorks = new HashSet<IUnitOfWork>();
+			_unitOfWorks = new Dictionary<Guid, IUnitOfWork>();
 		}
 
 		/// <summary>
@@ -29,7 +30,7 @@ namespace MicroserviceFramework.Domain
 		{
 			foreach (var unitOfWork in _unitOfWorks)
 			{
-				await unitOfWork.CommitAsync();
+				await unitOfWork.Value.CommitAsync();
 			}
 		}
 
@@ -44,12 +45,12 @@ namespace MicroserviceFramework.Domain
 				throw new ArgumentNullException(nameof(unitOfWork));
 			}
 
-			_unitOfWorks.Add(unitOfWork);
+			_unitOfWorks.GetOrAdd(unitOfWork.Id, unitOfWork);
 		}
 
 		public IReadOnlyCollection<IUnitOfWork> GetUnitOfWorks()
 		{
-			return _unitOfWorks;
+			return _unitOfWorks.Values;
 		}
 	}
 }

@@ -14,7 +14,7 @@ namespace MicroserviceFramework.Configuration
 		{
 			if (!optionsType.IsClass)
 			{
-				throw new ArgumentException("optionsType should be class");
+				throw new ArgumentException("options type should be class");
 			}
 
 			if (services == null)
@@ -57,7 +57,7 @@ namespace MicroserviceFramework.Configuration
 		{
 			services.AddOptions();
 
-			MicroserviceFrameworkLoader.RegisterType += type =>
+			MicroserviceFrameworkLoaderContext.Default.ResolveType += type =>
 			{
 				if (type.IsAbstract || type.IsInterface)
 				{
@@ -67,31 +67,14 @@ namespace MicroserviceFramework.Configuration
 				var attribute = type.GetCustomAttribute<OptionsTypeAttribute>();
 				if (attribute != null)
 				{
-					var section = string.IsNullOrWhiteSpace(attribute.SectionName)
+					var section = string.IsNullOrWhiteSpace(attribute.Section)
 						? configuration
-						: configuration.GetSection(attribute.SectionName);
+						: configuration.GetSection(attribute.Section);
 					services.AddOptions(type, section, _ => { });
 				}
 			};
 
 			return services;
-		}
-
-		public static void Print(this IConfiguration configuration, Action<string> writer)
-		{
-			if (configuration == null || writer == null)
-			{
-				return;
-			}
-
-			writer("Configuration: ");
-			foreach (var kv in configuration.GetChildren())
-			{
-				if (!string.IsNullOrWhiteSpace(kv.Key))
-				{
-					writer($"{kv.Key} = {kv.Value}");
-				}
-			}
 		}
 	}
 }
