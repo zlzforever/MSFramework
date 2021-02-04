@@ -1,6 +1,8 @@
 # MSFramework
 A micro service template
 
+[![Build Status](https://dev.azure.com/zlzforever/cerberus/_apis/build/status/zlzforever.MSFramework?branchName=master)](https://dev.azure.com/zlzforever/cerberus/_build/latest?definitionId=10&branchName=master)
+
 ### Add EF migrations 
 
 ```
