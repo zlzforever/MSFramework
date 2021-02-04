@@ -12,6 +12,7 @@ using Ordering.Application.Commands;
 using Ordering.Application.Queries;
 using Ordering.Domain.AggregateRoots;
 using Ordering.Domain.Repositories;
+using Ordering.Infrastructure;
 
 namespace Ordering.API.Controllers
 {
@@ -22,10 +23,10 @@ namespace Ordering.API.Controllers
 		private readonly IOrderingQuery _orderingQuery;
 		private readonly IOrderingRepository _orderRepository;
 		private readonly ICqrsProcessor _cqrsProcessor;
-		private readonly DbContext _dbContext;
+		private readonly OrderingContext _dbContext;
 
 		public OrderController(IOrderingRepository orderRepository,
-			IOrderingQuery orderingQuery, ICqrsProcessor commandExecutor, DbContext dbContext)
+			IOrderingQuery orderingQuery, ICqrsProcessor commandExecutor, OrderingContext dbContext)
 		{
 			_orderingQuery = orderingQuery;
 			_cqrsProcessor = commandExecutor;

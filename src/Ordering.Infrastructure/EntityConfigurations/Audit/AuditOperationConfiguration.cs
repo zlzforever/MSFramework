@@ -19,7 +19,7 @@ namespace Ordering.Infrastructure.EntityConfigurations.Audit
 
 			builder.Property(x => x.Id).HasColumnName("id");
 			builder.Property(x => x.Ip).HasColumnName("ip").HasMaxLength(255);
-			builder.Property(x => x.Function).HasColumnName("path").HasMaxLength(255);
+			builder.Property(x => x.Feature).HasColumnName("path").HasMaxLength(255);
 			builder.Property(x => x.ApplicationName).HasColumnName("application_name").HasMaxLength(255);
 			builder.Property(x => x.UserAgent).HasColumnName("user_agent").HasMaxLength(500);
 			builder.Property(x => x.Url).HasMaxLength(1024);

@@ -39,9 +39,7 @@ namespace Ordering.API
 			services.AddOptions(Configuration);
 
 			Configuration.Print(x => Log.Logger.Information(x));
-
-			services.AddScoped<DbContext, OrderingContext>();
-
+			
 			services.AddControllers(x =>
 				{
 					x.Filters.Add<LogFilter>();
