@@ -15,3 +15,10 @@ variables:
 steps:
 - script: dotnet build --configuration $(buildConfiguration)
   displayName: 'dotnet build $(buildConfiguration)'
+
+- script: dotnet test tests/MSFramework.AspNetCore.Test/MSFramework.AspNetCore.Test.csproj -c release -v n
+  displayName: 'run aspnetcore tests'
+
+- script: dotnet test tests/MSFramework.Tests/MSFramework.Tests.csproj -c release -v n
+  displayName: 'run msframework tests'
+
