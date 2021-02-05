@@ -11,6 +11,8 @@ namespace MicroserviceFramework.Ef
 		{
 			AutoMigrationEnabled = false;
 			AutoTransactionsEnabled = true;
+			EnableSensitiveDataLogging = false;
+			UseUnderScoreCase = true;
 		}
 
 		/// <summary>
@@ -41,8 +43,11 @@ namespace MicroserviceFramework.Ef
 		/// <summary>
 		/// 使用 unix 风格的表名、列名
 		/// </summary>
-		public bool UseUnderScoreCase { get; set; } = true;
+		public bool UseUnderScoreCase { get; set; }
 
+		/// <summary>
+		/// 是否开启敏感信息日志
+		/// </summary>
 		public bool EnableSensitiveDataLogging { get; set; }
 	}
 }

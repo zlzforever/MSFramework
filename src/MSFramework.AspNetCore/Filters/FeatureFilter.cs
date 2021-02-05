@@ -13,17 +13,18 @@ namespace MicroserviceFramework.AspNetCore.Filters
 		{
 			var provider = context.HttpContext.RequestServices;
 
-			var functionPath = context.ActionDescriptor.GetActionPath();
+			var featureName = context.ActionDescriptor.GetFeature().Name;
 			var repository = provider.GetService<IFeatureRepository>();
 			if (repository == null || !repository.IsAvailable())
 			{
 				throw new MicroserviceFrameworkException("Feature 仓储不可用");
 			}
 
-			var function = repository.GetByName(functionPath);
-			if (function is not {Enabled: true})
+			var feature = repository.GetByName(featureName);
+			if (feature is not {Enabled: true})
 			{
 				context.Result = new NotFoundResult();
+				return;
 			}
 
 			await next();

@@ -2,6 +2,7 @@ using MicroserviceFramework.AspNetCore.FeatureManagement;
 using MicroserviceFramework.AspNetCore.Infrastructure;
 using MicroserviceFramework.AspNetCore.Mvc.ModelBinding;
 using MicroserviceFramework.FeatureManagement;
+using MicroserviceFramework.Utilities;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.Extensions.DependencyInjection;
@@ -16,7 +17,7 @@ namespace MicroserviceFramework.AspNetCore
 		{
 			builder.Services.AddHttpContextAccessor();
 			builder.Services.AddSingleton<IActionResultTypeMapper, ActionResultTypeMapper>();
-			builder.Services.TryAddScoped<ISession, HttpContextSession>();
+			builder.Services.TryAddScoped<ISession, HttpSession>();
 			return builder;
 		}
 
@@ -36,6 +37,13 @@ namespace MicroserviceFramework.AspNetCore
 			{
 				x.InvalidModelStateResponseFactory = InvalidModelStateResponseFactory.Instance;
 			});
+			return builder;
+		}
+
+		public static MicroserviceFrameworkBuilder UseAssemblyScanPrefix(this MicroserviceFrameworkBuilder builder,
+			params string[] prefixs)
+		{
+			RuntimeUtilities.StartsWith.AddRange(prefixs);
 			return builder;
 		}
 	}

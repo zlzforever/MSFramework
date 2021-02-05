@@ -13,7 +13,7 @@ namespace Ordering.Infrastructure.Migrations
                 {
                     id = table.Column<string>(type: "varchar(36) CHARACTER SET utf8mb4", nullable: false),
                     application_name = table.Column<string>(type: "varchar(255) CHARACTER SET utf8mb4", maxLength: 255, nullable: true),
-                    path = table.Column<string>(type: "varchar(255) CHARACTER SET utf8mb4", maxLength: 255, nullable: true),
+                    feature = table.Column<string>(type: "varchar(255) CHARACTER SET utf8mb4", maxLength: 255, nullable: true),
                     url = table.Column<string>(type: "varchar(1024) CHARACTER SET utf8mb4", maxLength: 1024, nullable: true),
                     ip = table.Column<string>(type: "varchar(255) CHARACTER SET utf8mb4", maxLength: 255, nullable: true),
                     user_agent = table.Column<string>(type: "varchar(500) CHARACTER SET utf8mb4", maxLength: 500, nullable: true),
@@ -29,25 +29,20 @@ namespace Ordering.Infrastructure.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "function",
+                name: "feature",
                 columns: table => new
                 {
                     id = table.Column<string>(type: "varchar(36) CHARACTER SET utf8mb4", nullable: false),
                     enabled = table.Column<bool>(type: "tinyint(1)", nullable: false),
                     name = table.Column<string>(type: "varchar(255) CHARACTER SET utf8mb4", maxLength: 255, nullable: true),
-                    code = table.Column<string>(type: "varchar(255) CHARACTER SET utf8mb4", maxLength: 255, nullable: true),
                     description = table.Column<string>(type: "varchar(2000) CHARACTER SET utf8mb4", maxLength: 2000, nullable: true),
                     expired = table.Column<bool>(type: "tinyint(1)", nullable: false),
-                    creation_time = table.Column<long>(type: "int", nullable: true),
-                    creation_user_id = table.Column<string>(type: "varchar(255) CHARACTER SET utf8mb4", maxLength: 255, nullable: true),
-                    creation_user_name = table.Column<string>(type: "varchar(255) CHARACTER SET utf8mb4", maxLength: 255, nullable: true),
-                    modification_user_id = table.Column<string>(type: "varchar(255) CHARACTER SET utf8mb4", maxLength: 255, nullable: true),
-                    modification_user_name = table.Column<string>(type: "varchar(255) CHARACTER SET utf8mb4", maxLength: 255, nullable: true),
+                    creation_time = table.Column<long>(type: "int", nullable: false),
                     modification_time = table.Column<long>(type: "int", nullable: true)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_function", x => x.id);
+                    table.PrimaryKey("PK_feature", x => x.id);
                 });
 
             migrationBuilder.CreateTable(
@@ -91,7 +86,7 @@ namespace Ordering.Infrastructure.Migrations
                 {
                     id = table.Column<string>(type: "varchar(36) CHARACTER SET utf8mb4", nullable: false),
                     operation_id = table.Column<string>(type: "varchar(36) CHARACTER SET utf8mb4", nullable: true),
-                    type_name = table.Column<string>(type: "varchar(255) CHARACTER SET utf8mb4", maxLength: 255, nullable: true),
+                    type = table.Column<string>(type: "varchar(255) CHARACTER SET utf8mb4", maxLength: 255, nullable: true),
                     entity_id = table.Column<string>(type: "varchar(255) CHARACTER SET utf8mb4", maxLength: 255, nullable: true),
                     operation_type = table.Column<string>(type: "varchar(255) CHARACTER SET utf8mb4", maxLength: 255, nullable: true),
                     audit_operation_id = table.Column<string>(type: "varchar(36) CHARACTER SET utf8mb4", nullable: true)
@@ -177,25 +172,10 @@ namespace Ordering.Infrastructure.Migrations
                 column: "entity_id");
 
             migrationBuilder.CreateIndex(
-                name: "IX_function_code",
-                table: "function",
-                column: "code",
+                name: "IX_feature_name",
+                table: "feature",
+                column: "name",
                 unique: true);
-
-            migrationBuilder.CreateIndex(
-                name: "IX_function_creation_time",
-                table: "function",
-                column: "creation_time");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_function_modification_time",
-                table: "function",
-                column: "modification_time");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_function_name",
-                table: "function",
-                column: "name");
 
             migrationBuilder.CreateIndex(
                 name: "IX_order_item_order_id",
@@ -209,7 +189,7 @@ namespace Ordering.Infrastructure.Migrations
                 name: "audit_property");
 
             migrationBuilder.DropTable(
-                name: "function");
+                name: "feature");
 
             migrationBuilder.DropTable(
                 name: "order_item");

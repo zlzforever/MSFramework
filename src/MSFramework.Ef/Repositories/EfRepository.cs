@@ -18,7 +18,7 @@ namespace MicroserviceFramework.Ef.Repositories
 	public abstract class EfRepository<TEntity, TKey> : IRepository<TEntity, TKey>
 		where TEntity : class, IAggregateRoot<TKey>
 	{
-		public IQueryable<TEntity> AggregateRootSet { get; private set; }
+		public IQueryable<TEntity> AggregateRootSet { get; }
 
 		protected EfRepository(DbContextFactory dbContextFactory)
 		{
@@ -53,18 +53,6 @@ namespace MicroserviceFramework.Ef.Repositories
 			return (await DbContext.Set<TEntity>().AddAsync(entity)).Entity;
 		}
 
-		public virtual TEntity Update(TEntity entity)
-		{
-			var entry = DbContext.Entry(entity);
-			entry.State = EntityState.Modified;
-			return entry.Entity;
-		}
-
-		public virtual Task<TEntity> UpdateAsync(TEntity entity)
-		{
-			return Task.FromResult(Update(entity));
-		}
-
 		public virtual void Delete(TEntity entity)
 		{
 			DbContext.Set<TEntity>().Remove(entity);
@@ -81,14 +69,17 @@ namespace MicroserviceFramework.Ef.Repositories
 			var entity = Get(id);
 			if (entity != null)
 			{
-				DbContext.Set<TEntity>().Remove(entity);
+				Delete(entity);
 			}
 		}
 
-		public virtual Task DeleteAsync(TKey id)
+		public virtual async Task DeleteAsync(TKey id)
 		{
-			Delete(id);
-			return Task.CompletedTask;
+			var entity = await GetAsync(id);
+			if (entity != null)
+			{
+				Delete(entity);
+			}
 		}
 	}
 }

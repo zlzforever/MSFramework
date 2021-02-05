@@ -4,7 +4,7 @@ using MicroserviceFramework.FeatureManagement;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
-namespace Ordering.Infrastructure.EntityConfigurations.Audit
+namespace Ordering.Infrastructure.EntityConfigurations.FeatureManagement
 {
 	public class FeatureTypeConfiguration : EntityTypeConfigurationBase<Feature, OrderingContext>
 	{
@@ -12,13 +12,13 @@ namespace Ordering.Infrastructure.EntityConfigurations.Audit
 		{
 			base.Configure(builder);
 
-			builder.ToTable("function");
+			builder.ToTable("feature");
 
-			builder.Property(x => x.Id).HasColumnName("id");
-			builder.Property(x => x.Name).HasColumnName("name").HasMaxLength(255);
-			builder.Property(x => x.Description).HasColumnName("description").HasMaxLength(2000);
-			builder.Property(x => x.Enabled).HasColumnName("enabled");
-			builder.Property(x => x.Expired).HasColumnName("expired");
+			builder.Property(x => x.Id);
+			builder.Property(x => x.Name).HasMaxLength(255);
+			builder.Property(x => x.Description).HasMaxLength(1024);
+			builder.Property(x => x.Enabled);
+			builder.Property(x => x.Expired);
 			builder.Property(x => x.ModificationTime).UseUnixTime();
 			builder.Property(x => x.CreationTime).UseUnixTime();
 			

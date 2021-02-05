@@ -16,10 +16,10 @@ namespace Ordering.Infrastructure.EntityConfigurations.Audit
 
 			builder.HasMany(x => x.Properties).WithOne().HasForeignKey("audit_entity_id");
 
-			builder.Property(x => x.Id).HasColumnName("id");
-			builder.Property(x => x.EntityId).HasColumnName("entity_id").HasMaxLength(255);
-			builder.Property(x => x.Type).HasColumnName("type_name").HasMaxLength(255);
-			builder.Property(e => e.OperationType).HasColumnName("operation_type").HasMaxLength(255).UseEnumeration();
+			builder.Property(x => x.Id);
+			builder.Property(x => x.EntityId).HasMaxLength(255);
+			builder.Property(x => x.Type).HasMaxLength(255);
+			builder.Property(e => e.OperationType).HasMaxLength(255).UseEnumeration();
 
 			builder.HasIndex(m => m.EntityId);
 		}

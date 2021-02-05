@@ -22,16 +22,15 @@ namespace MicroserviceFramework.AspNetCore.Infrastructure
 		public IActionResult Convert(object value, Type returnType)
 		{
 			if (returnType == null)
-				throw new ArgumentNullException(nameof(returnType));
-			switch (value)
 			{
-				case IConvertToActionResult convertToActionResult:
-					return convertToActionResult.Convert();
-				default:
-				{
-					return new ApiResult(value);
-				}
+				throw new ArgumentNullException(nameof(returnType));
 			}
+
+			return value switch
+			{
+				IConvertToActionResult convertToActionResult => convertToActionResult.Convert(),
+				_ => new ApiResult(value)
+			};
 		}
 	}
 }

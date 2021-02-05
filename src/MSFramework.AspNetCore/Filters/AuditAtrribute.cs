@@ -48,11 +48,12 @@ namespace MicroserviceFramework.AspNetCore.Filters
 			applicationName = string.IsNullOrWhiteSpace(applicationName)
 				? Assembly.GetEntryAssembly()?.FullName
 				: applicationName;
-			var path = context.ActionDescriptor.GetActionPath();
+			var feature = context.ActionDescriptor.GetFeature().Description;
 			var ua = context.HttpContext.Request.Headers["User-Agent"].ToString();
 			var ip = context.GetRemoteIpAddress();
 			var url = context.HttpContext.Request.GetDisplayUrl();
-			var auditedOperation = new AuditOperation(applicationName, path, url, ip, ua);
+			var auditedOperation = new AuditOperation(applicationName, feature,
+				$"{context.HttpContext.Request.Method} {url}", ip, ua);
 			if (context.HttpContext.User?.Identity != null && context.HttpContext.User.Identity.IsAuthenticated &&
 			    context.HttpContext.User.Identity is ClaimsIdentity identity)
 			{
@@ -60,7 +61,7 @@ namespace MicroserviceFramework.AspNetCore.Filters
 			}
 			else
 			{
-				auditedOperation.SetCreation("Anonymous", "Anonymous");
+				auditedOperation.SetCreation(string.Empty, string.Empty);
 			}
 
 			context.HttpContext.Items.Add("AuditOperation", auditedOperation);

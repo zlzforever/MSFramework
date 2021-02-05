@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Microsoft.Extensions.Logging;
+using MicroserviceFramework.Utilities;
 
 namespace MicroserviceFramework.Ef.Infrastructure
 {
@@ -14,12 +14,6 @@ namespace MicroserviceFramework.Ef.Infrastructure
 			= new Dictionary<Type, IEntityRegister[]>();
 
 		private readonly IDictionary<Type, Type> _entityMapDbContextDict = new Dictionary<Type, Type>();
-		private readonly ILogger _logger;
-
-		public EntityConfigurationTypeFinder(ILogger<EntityConfigurationTypeFinder> logger)
-		{
-			_logger = logger;
-		}
 
 		/// <summary>
 		/// 初始化
@@ -29,14 +23,13 @@ namespace MicroserviceFramework.Ef.Infrastructure
 			var dict = _entityRegistersDict;
 			dict.Clear();
 
-			var assemblies =  AppDomain.CurrentDomain.GetAssemblies();
+			var assemblies = RuntimeUtilities.GetAllAssemblies();
 			var types = assemblies.SelectMany(assembly => assembly.GetTypes()).Where(type =>
 					type.IsClass && !type.IsAbstract && typeof(IEntityRegister).IsAssignableFrom(type))
 				.Distinct()
 				.ToList();
 			if (types.Count == 0)
 			{
-				_logger.LogWarning("There is no any entity register");
 				return;
 			}
 

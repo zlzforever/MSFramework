@@ -1,7 +1,6 @@
 using MicroserviceFramework.Application;
 using MicroserviceFramework.Domain;
 using MicroserviceFramework.Domain.Event;
-using MicroserviceFramework.EventBus;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 

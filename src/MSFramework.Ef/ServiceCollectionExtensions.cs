@@ -4,7 +4,6 @@ using MicroserviceFramework.Ef.Initializer;
 using MicroserviceFramework.Initializer;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
-using Microsoft.Extensions.Logging;
 
 namespace MicroserviceFramework.Ef
 {
@@ -22,11 +21,10 @@ namespace MicroserviceFramework.Ef
 		public static IServiceCollection UseEntityFramework(this IServiceCollection services)
 		{
 			services.AddMemoryCache();
-			services.TryAddSingleton<IEntityConfigurationTypeFinder>(provider =>
+			services.TryAddSingleton<IEntityConfigurationTypeFinder>(_ =>
 			{
 				var finder =
-					new EntityConfigurationTypeFinder(provider
-						.GetRequiredService<ILogger<EntityConfigurationTypeFinder>>());
+					new EntityConfigurationTypeFinder();
 				((IEntityConfigurationTypeFinder) finder).Initialize();
 				return finder;
 			});

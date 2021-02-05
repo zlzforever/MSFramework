@@ -23,7 +23,8 @@ namespace MicroserviceFramework.AspNetCore.FeatureManagement
 			var features = new List<Feature>();
 			foreach (var actionDescriptor in actionDescriptorCollectionProvider.ActionDescriptors.Items)
 			{
-				features.Add(actionDescriptor.GetFeature());
+				var (name, description) = actionDescriptor.GetFeature();
+				features.Add(new Feature(name, description));
 			}
 
 			return features;

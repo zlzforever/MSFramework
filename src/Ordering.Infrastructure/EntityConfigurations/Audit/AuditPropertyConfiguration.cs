@@ -14,11 +14,11 @@ namespace Ordering.Infrastructure.EntityConfigurations.Audit
 
 			builder.ToTable("audit_property");
 			
-			builder.Property(x => x.Id).HasColumnName("id");
-			builder.Property(x => x.Name).HasColumnName("name").HasMaxLength(255);
-			builder.Property(x => x.Type).HasColumnName("type").HasMaxLength(255);
-			builder.Property(x => x.NewValue).HasColumnName("new_value");
-			builder.Property(x => x.OriginalValue).HasColumnName("original_value");
+			builder.Property(x => x.Id);
+			builder.Property(x => x.Name).HasMaxLength(255);
+			builder.Property(x => x.Type).HasMaxLength(255);
+			builder.Property(x => x.NewValue);
+			builder.Property(x => x.OriginalValue);
 		}
 	}
 }

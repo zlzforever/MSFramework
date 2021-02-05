@@ -9,7 +9,7 @@ using Ordering.Infrastructure;
 namespace Ordering.Infrastructure.Migrations
 {
     [DbContext(typeof(OrderingContext))]
-    [Migration("20210204090540_init")]
+    [Migration("20210205130241_init")]
     partial class init
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -42,7 +42,7 @@ namespace Ordering.Infrastructure.Migrations
                     b.Property<string>("Type")
                         .HasMaxLength(255)
                         .HasColumnType("varchar(255) CHARACTER SET utf8mb4")
-                        .HasColumnName("type_name");
+                        .HasColumnName("type");
 
                     b.Property<string>("audit_operation_id")
                         .HasColumnType("varchar(36) CHARACTER SET utf8mb4")
@@ -92,10 +92,10 @@ namespace Ordering.Infrastructure.Migrations
                         .HasColumnType("datetime(6)")
                         .HasColumnName("end_time");
 
-                    b.Property<string>("Function")
+                    b.Property<string>("Feature")
                         .HasMaxLength(255)
                         .HasColumnType("varchar(255) CHARACTER SET utf8mb4")
-                        .HasColumnName("path");
+                        .HasColumnName("feature");
 
                     b.Property<string>("Ip")
                         .HasMaxLength(255)
@@ -164,30 +164,15 @@ namespace Ordering.Infrastructure.Migrations
                     b.ToTable("audit_property");
                 });
 
-            modelBuilder.Entity("MicroserviceFramework.Function.FunctionDefine", b =>
+            modelBuilder.Entity("MicroserviceFramework.FeatureManagement.Feature", b =>
                 {
                     b.Property<string>("Id")
                         .HasColumnType("varchar(36) CHARACTER SET utf8mb4")
                         .HasColumnName("id");
 
-                    b.Property<string>("Code")
-                        .HasMaxLength(255)
-                        .HasColumnType("varchar(255) CHARACTER SET utf8mb4")
-                        .HasColumnName("code");
-
-                    b.Property<long?>("CreationTime")
+                    b.Property<long>("CreationTime")
                         .HasColumnType("int")
                         .HasColumnName("creation_time");
-
-                    b.Property<string>("CreationUserId")
-                        .HasMaxLength(255)
-                        .HasColumnType("varchar(255) CHARACTER SET utf8mb4")
-                        .HasColumnName("creation_user_id");
-
-                    b.Property<string>("CreationUserName")
-                        .HasMaxLength(255)
-                        .HasColumnType("varchar(255) CHARACTER SET utf8mb4")
-                        .HasColumnName("creation_user_name");
 
                     b.Property<string>("Description")
                         .HasMaxLength(2000)
@@ -206,16 +191,6 @@ namespace Ordering.Infrastructure.Migrations
                         .HasColumnType("int")
                         .HasColumnName("modification_time");
 
-                    b.Property<string>("ModificationUserId")
-                        .HasMaxLength(255)
-                        .HasColumnType("varchar(255) CHARACTER SET utf8mb4")
-                        .HasColumnName("modification_user_id");
-
-                    b.Property<string>("ModificationUserName")
-                        .HasMaxLength(255)
-                        .HasColumnType("varchar(255) CHARACTER SET utf8mb4")
-                        .HasColumnName("modification_user_name");
-
                     b.Property<string>("Name")
                         .HasMaxLength(255)
                         .HasColumnType("varchar(255) CHARACTER SET utf8mb4")
@@ -223,16 +198,10 @@ namespace Ordering.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("Code")
+                    b.HasIndex("Name")
                         .IsUnique();
 
-                    b.HasIndex("CreationTime");
-
-                    b.HasIndex("ModificationTime");
-
-                    b.HasIndex("Name");
-
-                    b.ToTable("function");
+                    b.ToTable("feature");
                 });
 
             modelBuilder.Entity("Ordering.Domain.AggregateRoots.Order", b =>

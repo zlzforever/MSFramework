@@ -11,7 +11,6 @@ using MicroserviceFramework.Ef.MySql;
 using MicroserviceFramework.Newtonsoft;
 using MicroserviceFramework.Serialization.Converters;
 using Microsoft.AspNetCore.Builder;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -39,12 +38,12 @@ namespace Ordering.API
 			services.AddOptions(Configuration);
 
 			Configuration.Print(x => Log.Logger.Information(x));
-			
 			services.AddControllers(x =>
 				{
 					x.Filters.Add<LogFilter>();
 					x.Filters.AddUnitOfWork();
 					x.Filters.AddAudit();
+					x.Filters.AddFeatureFilter();
 					x.Filters.AddGlobalException();
 					x.ModelBinderProviders.Insert(0, new ObjectIdModelBinderProvider());
 				})
@@ -78,8 +77,10 @@ namespace Ordering.API
 
 			services.AddMicroserviceFramework(builder =>
 			{
+				builder.UseAssemblyScanPrefix("Ordering");
 				builder.UseAutoMapper();
 				builder.UseCqrs();
+				builder.UseFeatureManagement();
 				//builder.UseAccessControl(Configuration);
 				// builder.UseRabbitMQEventDispatcher(new RabbitMQOptions(), typeof(UserCheckoutAcceptedEvent));
 				// 启用审计服务

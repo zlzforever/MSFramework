@@ -1,5 +1,6 @@
 using System;
 using System.Linq;
+using MicroserviceFramework.Utilities;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 
@@ -11,13 +12,11 @@ namespace MicroserviceFramework.AspNetCore.Mvc.ModelBinding
 		{
 			var errors = context.ModelState.Where(x =>
 					x.Value.ValidationState == ModelValidationState.Invalid)
-				.Select(x =>
-					new
-					{
-						name = x.Key,
-						messages = x.Value.Errors.Where(z => !string.IsNullOrWhiteSpace(z.ErrorMessage))
-							.Select(y => y.ErrorMessage)
-					});
+				.ToDictionary(
+					x => StringUtilities.ToCamelCase(x.Key),
+					x =>
+						x.Value.Errors.Where(z => !string.IsNullOrWhiteSpace(z.ErrorMessage))
+							.Select(y => y.ErrorMessage));
 
 			return new ApiResult(new
 			{

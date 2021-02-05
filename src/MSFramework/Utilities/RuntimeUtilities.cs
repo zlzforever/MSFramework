@@ -11,24 +11,24 @@ namespace MicroserviceFramework.Utilities
 		private static readonly Lazy<List<Assembly>> Assemblies;
 		private static readonly Lazy<List<Type>> Types;
 
+		public static readonly List<string> StartsWith;
+
 		static RuntimeUtilities()
 		{
+			StartsWith = new List<string>
+			{
+				"MSFramework"
+			};
 			Assemblies = new Lazy<List<Assembly>>(() =>
 			{
 				var list = new List<Assembly>();
 				var libraries = DependencyContext.Default.CompileLibraries
-					.Where(x => x.Type == "project" || x.Name.StartsWith("MSFramework"));
+					.Where(x => x.Type == "project"
+					            || StartsWith.Any(y => x.Name.StartsWith(y)));
 				foreach (var lib in libraries)
 				{
-					try
-					{
-						var assembly = AppDomain.CurrentDomain.Load(new AssemblyName(lib.Name));
-						list.Add(assembly);
-					}
-					catch (Exception)
-					{
-						// ignored
-					}
+					var assembly = AppDomain.CurrentDomain.Load(new AssemblyName(lib.Name));
+					list.Add(assembly);
 				}
 
 				return list;
@@ -49,21 +49,6 @@ namespace MicroserviceFramework.Utilities
 		public static IList<Type> GetAllTypes()
 		{
 			return Types.Value;
-		}
-
-		public static Type GetImplementType(string typeName, Type baseInterfaceType)
-		{
-			return GetAllTypes().FirstOrDefault(t =>
-			{
-				if (t.Name == typeName &&
-				    t.GetTypeInfo().GetInterfaces().Any(b => b.Name == baseInterfaceType.Name))
-				{
-					var typeInfo = t.GetTypeInfo();
-					return typeInfo.IsClass && !typeInfo.IsAbstract && !typeInfo.IsGenericType;
-				}
-
-				return false;
-			});
 		}
 	}
 }
