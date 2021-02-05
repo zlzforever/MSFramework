@@ -32,8 +32,58 @@ namespace MSFramework.Tests
 
 			public void Dispose()
 			{
-				
 			}
+		}
+
+		[Event]
+		public class Event2
+		{
+			/// <summary>
+			/// 事件源标识
+			/// </summary>
+			public string EventId { get; }
+
+			/// <summary>
+			/// 事件发生时间
+			/// </summary>
+			public long EventTime { get; }
+		}
+
+		public class Event2Handler : IEventHandler<Event2>
+		{
+			private static readonly object Locker = new object();
+			public static int Count;
+
+			public Task HandleAsync(Event2 @event)
+			{
+				lock (Locker)
+				{
+					Count += 1;
+				}
+
+				return Task.CompletedTask;
+			}
+
+			public void Dispose()
+			{
+			}
+		}
+
+		[Fact]
+		public async Task PubDynamicEvent()
+		{
+			var serviceCollection = new ServiceCollection();
+			serviceCollection.AddLogging();
+			serviceCollection.AddEventBus();
+			serviceCollection.AddMicroserviceFramework();
+
+			var provider = serviceCollection.BuildServiceProvider();
+			var eventBus = provider.GetRequiredService<IEventBus>();
+
+			await eventBus.PublishAsync(new Event2());
+
+			Assert.Equal(1, Event2Handler.Count);
+			Thread.Sleep(1000);
 		}
 
 		[Fact]

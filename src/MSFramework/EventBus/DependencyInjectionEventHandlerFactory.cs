@@ -15,7 +15,8 @@ namespace MicroserviceFramework.EventBus
 
 		public IEnumerable<object> Create(Type handlerType)
 		{
-			return _serviceProvider.CreateScope().ServiceProvider.GetServices(handlerType);
+			using var scope = _serviceProvider.CreateScope();
+			return scope.ServiceProvider.GetServices(handlerType);
 		}
 	}
 }

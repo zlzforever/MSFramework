@@ -1,6 +1,7 @@
 using MicroserviceFramework.Application;
 using MicroserviceFramework.Domain;
 using MicroserviceFramework.Domain.Event;
+using MicroserviceFramework.EventBus;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 
@@ -13,8 +14,8 @@ namespace MicroserviceFramework.Ef
 	{
 		public DefaultDbContext(DbContextOptions options,
 			IOptions<DbContextConfigurationCollection> entityFrameworkOptions, UnitOfWorkManager unitOfWorkManager,
-			IDomainEventDispatcher domainEventDispatcher, ISession session) : base(options, entityFrameworkOptions,
-			unitOfWorkManager, domainEventDispatcher, session)
+			IDomainEventDispatcher domainEventDispatcher, ISession session) : base(options,
+			entityFrameworkOptions, unitOfWorkManager, domainEventDispatcher, session)
 		{
 		}
 	}

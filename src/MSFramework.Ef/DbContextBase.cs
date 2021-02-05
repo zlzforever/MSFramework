@@ -8,6 +8,7 @@ using MicroserviceFramework.Domain;
 using MicroserviceFramework.Domain.Event;
 using MicroserviceFramework.Ef.Extensions;
 using MicroserviceFramework.Ef.Infrastructure;
+using MicroserviceFramework.EventBus;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.EntityFrameworkCore.Infrastructure;
@@ -24,6 +25,7 @@ namespace MicroserviceFramework.Ef
 		private IEntityConfigurationTypeFinder _entityConfigurationTypeFinder;
 		private readonly IDomainEventDispatcher _domainEventDispatcher;
 		private readonly UnitOfWorkManager _unitOfWorkManager;
+		private IEventBus _eventBus;
 
 		/// <summary>
 		/// 初始化一个<see cref="DbContextBase"/>类型的新实例
@@ -31,7 +33,8 @@ namespace MicroserviceFramework.Ef
 		protected DbContextBase(DbContextOptions options,
 			IOptions<DbContextConfigurationCollection> entityFrameworkOptions,
 			UnitOfWorkManager unitOfWorkManager,
-			IDomainEventDispatcher domainEventDispatcher, ISession session)
+			IDomainEventDispatcher domainEventDispatcher,
+			ISession session)
 			: base(options)
 		{
 			_unitOfWorkManager = unitOfWorkManager;
@@ -62,8 +65,8 @@ namespace MicroserviceFramework.Ef
 		protected override void OnModelCreating(ModelBuilder modelBuilder)
 		{
 			_logger = this.GetService<ILoggerFactory>().CreateLogger(GetType());
-
 			_entityConfigurationTypeFinder = this.GetService<IEntityConfigurationTypeFinder>();
+			_eventBus = this.GetService<IEventBus>();
 
 			//通过实体配置信息将实体注册到当前上下文
 			var contextType = GetType();
@@ -118,25 +121,39 @@ namespace MicroserviceFramework.Ef
 		{
 			try
 			{
-				var changed = ChangeTracker.Entries().Any();
-				if (!changed)
+				// 若是有领域事件则分发出去
+				// 领域事件可能导致别聚合调用当前 DbContext 并改变状态，或者添加新的事件
+				List<DomainEvent> domainEvents;
+				// 缓存所有事件，在完成数据库提交后，进行事件的分发
+				var events = new List<object>();
+				do
 				{
-					return 0;
+					domainEvents = GetDomainEvents();
+					foreach (var @event in domainEvents)
+					{
+						await _domainEventDispatcher.DispatchAsync(@event);
+						events.Add(@event);
+					}
+				} while (domainEvents.Count > 0);
+
+				var effectedCount = 0;
+				if (ChangeTracker.Entries().Any())
+				{
+					ApplyConcepts();
+					effectedCount = await SaveChangesAsync();
+					if (Database.CurrentTransaction != null)
+					{
+						await Database.CurrentTransaction.CommitAsync();
+					}
 				}
 
-				ApplyConcepts();
-
-				var domainEvents = GetDomainEvents();
-
-				foreach (var @event in domainEvents)
+				if (_eventBus != null)
 				{
-					await _domainEventDispatcher.DispatchAsync(@event);
-				}
-
-				var effectedCount = await SaveChangesAsync();
-				if (Database.CurrentTransaction != null)
-				{
-					await Database.CurrentTransaction.CommitAsync();
+					// 集成事件应该在聚合变更完全提交到数据库后才能发布
+					foreach (var @event in events)
+					{
+						await _eventBus.PublishIfEventAsync(@event);
+					}
 				}
 
 				return effectedCount;
@@ -272,7 +289,7 @@ namespace MicroserviceFramework.Ef
 			}
 		}
 
-		private IEnumerable<DomainEvent> GetDomainEvents()
+		private List<DomainEvent> GetDomainEvents()
 		{
 			// Dispatch Domain Events collection. 
 			// Choices:

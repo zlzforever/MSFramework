@@ -38,10 +38,52 @@ namespace MicroserviceFramework.RabbitMQ
 			StartConsume();
 		}
 
-		public async Task PublishAsync(EventBase @event)
+		public async Task PublishAsync(dynamic @event)
 		{
 			Check.NotNull(@event, nameof(@event));
 
+			var type = @event.GetType();
+			if (!type.IsEvent())
+			{
+				throw new MicroserviceFrameworkException($"类型 {type} 不是事件");
+			}
+
+			var eventKey = GetEventKey(type);
+			await PublishAsync(eventKey, @event);
+		}
+
+		protected virtual string GetEventKey(Type type)
+		{
+			return type.Name;
+		}
+
+		public async Task PublishAsync<TEvent>(TEvent @event) where TEvent : EventBase
+		{
+			Check.NotNull(@event, nameof(@event));
+			var eventKey = GetEventKey(typeof(TEvent));
+			await PublishAsync(eventKey, @event);
+		}
+
+		public async Task<bool> PublishIfEventAsync(dynamic @event)
+		{
+			if (@event == null)
+			{
+				return false;
+			}
+
+			var type = (Type) @event.GetType();
+			if (!type.IsEvent())
+			{
+				return false;
+			}
+
+			var eventKey = GetEventKey(type);
+			await PublishAsync(eventKey, @event);
+			return true;
+		}
+
+		private async Task PublishAsync(string eventKey, dynamic @event)
+		{
 			if (!_connection.IsConnected)
 			{
 				_connection.TryConnect();
@@ -53,15 +95,12 @@ namespace MicroserviceFramework.RabbitMQ
 					(ex, time) =>
 					{
 						_logger.LogWarning(ex,
-							"Could not publish event: {EventId} after {Timeout}s ({ExceptionMessage})",
-							@event.EventId,
-							$"{time.TotalSeconds:n1}", ex.Message);
+							$"Could not publish event: {@event.EventId} after {time.TotalSeconds:n1}s ({ex.Message})");
 					});
 
-			var eventName = @event.GetType().Name;
 			var channel = _connection.CreateModel();
 
-			_logger.LogTrace("Declaring RabbitMQ exchange to publish event: {EventId}", @event.EventId);
+			_logger.LogTrace($"Declaring RabbitMQ exchange to publish event: {@event.EventId}");
 
 			channel.ExchangeDeclare(_options.Exchange, "direct");
 
@@ -72,9 +111,9 @@ namespace MicroserviceFramework.RabbitMQ
 				var properties = channel.CreateBasicProperties();
 				properties.DeliveryMode = 2; // persistent
 
-				_logger.LogTrace("Publishing event to RabbitMQ: {EventId}", @event.EventId);
+				_logger.LogTrace($"Publishing event to RabbitMQ: {@event.EventId}");
 
-				channel.BasicPublish(_options.Exchange, eventName, true, properties, bytes);
+				channel.BasicPublish(_options.Exchange, eventKey, true, properties, bytes);
 				channel.Dispose();
 			});
 
