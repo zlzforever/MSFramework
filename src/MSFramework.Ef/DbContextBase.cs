@@ -137,9 +137,9 @@ namespace MicroserviceFramework.Ef
 				} while (domainEvents.Count > 0);
 
 				var effectedCount = 0;
-				if (ChangeTracker.Entries().Any())
+				var changed = ApplyConcepts();
+				if (changed)
 				{
-					ApplyConcepts();
 					effectedCount = await SaveChangesAsync();
 					if (Database.CurrentTransaction != null)
 					{
@@ -171,10 +171,11 @@ namespace MicroserviceFramework.Ef
 
 		public Guid Id => ContextId.InstanceId;
 
-		protected void ApplyConcepts()
+		protected bool ApplyConcepts()
 		{
 			var userId = _session.UserId;
 			var userName = _session.UserName;
+			var changed = false;
 
 			foreach (var entry in ChangeTracker.Entries())
 			{
@@ -182,15 +183,20 @@ namespace MicroserviceFramework.Ef
 				{
 					case EntityState.Added:
 						ApplyConceptsForAddedEntity(entry, userId, userName);
+						changed = true;
 						break;
 					case EntityState.Modified:
 						ApplyConceptsForModifiedEntity(entry, userId, userName);
+						changed = true;
 						break;
 					case EntityState.Deleted:
 						ApplyConceptsForDeletedEntity(entry, userId, userName);
+						changed = true;
 						break;
 				}
 			}
+
+			return changed;
 		}
 
 		protected virtual AuditEntity GetAuditEntity(EntityEntry entry, OperationType operationType)

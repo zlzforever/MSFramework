@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
 using MicroserviceFramework.Domain;
+using MicroserviceFramework.Domain.Event;
 using MicroserviceFramework.Shared;
 using Ordering.Domain.AggregateRoots.Events;
 
@@ -124,6 +125,15 @@ namespace Ordering.Domain.AggregateRoots
 				Description =
 					"The payment was performed at a simulated \"American Bank checking bank account ending on XX35071\"";
 			}
+		}
+
+		public void AddEvent()
+		{
+			AddDomainEvent(new EmptyEvent());
+		}
+
+		public class EmptyEvent : DomainEvent
+		{
 		}
 
 		public void SetShippedStatus()

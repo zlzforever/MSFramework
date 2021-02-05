@@ -5,6 +5,7 @@ using Cerberus.AspNetCore.AccessControl;
 using MicroserviceFramework.Application.CQRS;
 using MicroserviceFramework.AspNetCore;
 using MicroserviceFramework.AspNetCore.Filters;
+using MicroserviceFramework.Domain;
 using MicroserviceFramework.Shared;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -24,13 +25,16 @@ namespace Ordering.API.Controllers
 		private readonly IOrderingRepository _orderRepository;
 		private readonly ICqrsProcessor _cqrsProcessor;
 		private readonly OrderingContext _dbContext;
+		private readonly UnitOfWorkManager _unitOfWorkManager;
 
 		public OrderController(IOrderingRepository orderRepository,
-			IOrderingQuery orderingQuery, ICqrsProcessor commandExecutor, OrderingContext dbContext)
+			IOrderingQuery orderingQuery, ICqrsProcessor commandExecutor, OrderingContext dbContext,
+			UnitOfWorkManager unitOfWorkManager)
 		{
 			_orderingQuery = orderingQuery;
 			_cqrsProcessor = commandExecutor;
 			_dbContext = dbContext;
+			_unitOfWorkManager = unitOfWorkManager;
 			_orderRepository = orderRepository;
 		}
 
@@ -133,6 +137,9 @@ namespace Ordering.API.Controllers
 		// [AccessControl("查看所有订单")]
 		public async Task<IEnumerable<Order>> GetOrdersAsync()
 		{
+			var order = await _dbContext.Set<Order>().FirstAsync();
+			order.AddEvent();
+			await _unitOfWorkManager.CommitAsync();
 			return await _dbContext.Set<Order>().AsNoTracking().ToListAsync();
 		}
 
