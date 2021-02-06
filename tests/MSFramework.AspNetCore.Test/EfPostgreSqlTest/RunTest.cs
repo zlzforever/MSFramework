@@ -44,7 +44,7 @@ namespace MSFramework.AspNetCore.Test.EfPostgreSqlTest
 							services.AddMicroserviceFramework(x =>
 							{
 								//
-								x.AddOptions(context.Configuration);
+								x.UseOptions(context.Configuration);
 							});
 							services.AddRouting(x => { x.LowercaseUrls = true; });
 							services.AddMicroserviceFramework(builder =>

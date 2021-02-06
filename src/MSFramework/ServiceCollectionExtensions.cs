@@ -22,7 +22,7 @@ namespace MicroserviceFramework
 {
 	public static class ServiceCollectionExtensions
 	{
-		public static MicroserviceFrameworkBuilder AddOptions(this MicroserviceFrameworkBuilder builder,
+		public static MicroserviceFrameworkBuilder UseOptions(this MicroserviceFrameworkBuilder builder,
 			IConfiguration configuration)
 		{
 			builder.Services.AddOptions(configuration);

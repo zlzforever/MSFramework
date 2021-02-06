@@ -42,7 +42,7 @@ namespace MSFramework.AspNetCore.Test.Extensions
 							services.AddMicroserviceFramework(x =>
 							{
 								//
-								x.AddOptions(context.Configuration);
+								x.UseOptions(context.Configuration);
 							});
 							services.AddRouting(x => { x.LowercaseUrls = true; });
 							services.AddMicroserviceFramework(builder => { builder.UseAspNetCore(); });

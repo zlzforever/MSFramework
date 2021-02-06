@@ -1,3 +1,5 @@
+using System;
+using System.Text.Json;
 using MicroserviceFramework.AspNetCore.FeatureManagement;
 using MicroserviceFramework.AspNetCore.Infrastructure;
 using MicroserviceFramework.AspNetCore.Mvc.ModelBinding;
@@ -7,6 +9,7 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
+using Microsoft.Extensions.Options;
 using ISession = MicroserviceFramework.Application.ISession;
 
 namespace MicroserviceFramework.AspNetCore
@@ -18,6 +21,20 @@ namespace MicroserviceFramework.AspNetCore
 			builder.Services.AddHttpContextAccessor();
 			builder.Services.AddSingleton<IActionResultTypeMapper, ActionResultTypeMapper>();
 			builder.Services.TryAddScoped<ISession, HttpSession>();
+
+			builder.Services.AddSingleton<JsonSerializerOptions>(x =>
+			{
+				var jsonOptionsType =
+					Type.GetType("Microsoft.AspNetCore.Mvc.JsonOptions, Microsoft.AspNetCore.Mvc.Core");
+				if (jsonOptionsType == null)
+				{
+					throw new MicroserviceFrameworkException("Type Microsoft.AspNetCore.Mvc.JsonOptions is missing");
+				}
+
+				var type = typeof(IOptions<>).MakeGenericType(jsonOptionsType);
+
+				return ((dynamic) x.GetRequiredService(type)).Value.JsonSerializerOptions;
+			});
 			return builder;
 		}
 

@@ -22,7 +22,7 @@ namespace MSFramework.AspNetCore.Test
 		public void ConfigureServices(IServiceCollection services)
 		{
 			services.AddMvc();
-			services.AddMicroserviceFramework(x => { x.AddOptions(_configuration); });
+			services.AddMicroserviceFramework(x => { x.UseOptions(_configuration); });
 			services.AddRouting(x => { x.LowercaseUrls = true; });
 		}
 

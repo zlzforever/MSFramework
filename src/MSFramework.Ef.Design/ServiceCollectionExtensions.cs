@@ -1,17 +1,17 @@
-using Microsoft.EntityFrameworkCore.Design;
 using Microsoft.EntityFrameworkCore.Migrations.Design;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 
 namespace MicroserviceFramework.Ef.Design
 {
-	public abstract class AbstractDesignTimeServices : IDesignTimeServices
+	public static class ServiceCollectionExtensions
 	{
-		public void ConfigureDesignTimeServices(IServiceCollection serviceCollection)
+		public static IServiceCollection ClearForeignKeys(this IServiceCollection serviceCollection)
 		{
 			serviceCollection.RemoveAll<ICSharpMigrationOperationGenerator>();
 			serviceCollection
 				.AddSingleton<ICSharpMigrationOperationGenerator, ClearForeignKeysCSharpMigrationOperationGenerator>();
+			return serviceCollection;
 		}
 	}
 }

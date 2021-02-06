@@ -9,7 +9,7 @@ using Ordering.Infrastructure;
 namespace Ordering.Infrastructure.Migrations
 {
     [DbContext(typeof(OrderingContext))]
-    [Migration("20210205130241_init")]
+    [Migration("20210205161550_init")]
     partial class init
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -93,8 +93,8 @@ namespace Ordering.Infrastructure.Migrations
                         .HasColumnName("end_time");
 
                     b.Property<string>("Feature")
-                        .HasMaxLength(255)
-                        .HasColumnType("varchar(255) CHARACTER SET utf8mb4")
+                        .HasMaxLength(1024)
+                        .HasColumnType("varchar(1024) CHARACTER SET utf8mb4")
                         .HasColumnName("feature");
 
                     b.Property<string>("Ip")
@@ -108,8 +108,8 @@ namespace Ordering.Infrastructure.Migrations
                         .HasColumnName("url");
 
                     b.Property<string>("UserAgent")
-                        .HasMaxLength(500)
-                        .HasColumnType("varchar(500) CHARACTER SET utf8mb4")
+                        .HasMaxLength(1024)
+                        .HasColumnType("varchar(1024) CHARACTER SET utf8mb4")
                         .HasColumnName("user_agent");
 
                     b.HasKey("Id");
@@ -175,8 +175,8 @@ namespace Ordering.Infrastructure.Migrations
                         .HasColumnName("creation_time");
 
                     b.Property<string>("Description")
-                        .HasMaxLength(2000)
-                        .HasColumnType("varchar(2000) CHARACTER SET utf8mb4")
+                        .HasMaxLength(1024)
+                        .HasColumnType("varchar(1024) CHARACTER SET utf8mb4")
                         .HasColumnName("description");
 
                     b.Property<bool>("Enabled")

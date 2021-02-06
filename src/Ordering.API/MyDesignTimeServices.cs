@@ -1,9 +1,9 @@
-using MicroserviceFramework.Ef.Design;
-
-
-namespace Ordering.API
-{
-	public class MyDesignTimeServices : AbstractDesignTimeServices
-	{
-	}
-}
+// using MicroserviceFramework.Ef.Design;
+//
+//
+// namespace Ordering.API
+// {
+// 	public class MyDesignTimeServices : AbstractDesignTimeServices
+// 	{
+// 	}
+// }

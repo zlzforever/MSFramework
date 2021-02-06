@@ -13,10 +13,10 @@ namespace Ordering.Infrastructure.Migrations
                 {
                     id = table.Column<string>(type: "varchar(36) CHARACTER SET utf8mb4", nullable: false),
                     application_name = table.Column<string>(type: "varchar(255) CHARACTER SET utf8mb4", maxLength: 255, nullable: true),
-                    feature = table.Column<string>(type: "varchar(255) CHARACTER SET utf8mb4", maxLength: 255, nullable: true),
+                    feature = table.Column<string>(type: "varchar(1024) CHARACTER SET utf8mb4", maxLength: 1024, nullable: true),
                     url = table.Column<string>(type: "varchar(1024) CHARACTER SET utf8mb4", maxLength: 1024, nullable: true),
                     ip = table.Column<string>(type: "varchar(255) CHARACTER SET utf8mb4", maxLength: 255, nullable: true),
-                    user_agent = table.Column<string>(type: "varchar(500) CHARACTER SET utf8mb4", maxLength: 500, nullable: true),
+                    user_agent = table.Column<string>(type: "varchar(1024) CHARACTER SET utf8mb4", maxLength: 1024, nullable: true),
                     end_time = table.Column<DateTimeOffset>(type: "datetime(6)", nullable: false),
                     elapsed = table.Column<int>(type: "int", nullable: false),
                     creation_time = table.Column<long>(type: "int", nullable: true),
@@ -35,7 +35,7 @@ namespace Ordering.Infrastructure.Migrations
                     id = table.Column<string>(type: "varchar(36) CHARACTER SET utf8mb4", nullable: false),
                     enabled = table.Column<bool>(type: "tinyint(1)", nullable: false),
                     name = table.Column<string>(type: "varchar(255) CHARACTER SET utf8mb4", maxLength: 255, nullable: true),
-                    description = table.Column<string>(type: "varchar(2000) CHARACTER SET utf8mb4", maxLength: 2000, nullable: true),
+                    description = table.Column<string>(type: "varchar(1024) CHARACTER SET utf8mb4", maxLength: 1024, nullable: true),
                     expired = table.Column<bool>(type: "tinyint(1)", nullable: false),
                     creation_time = table.Column<long>(type: "int", nullable: false),
                     modification_time = table.Column<long>(type: "int", nullable: true)

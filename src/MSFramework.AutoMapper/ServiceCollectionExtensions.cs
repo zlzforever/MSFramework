@@ -3,6 +3,7 @@ using System.Linq;
 using System.Reflection;
 using AutoMapper;
 using MicroserviceFramework.Domain;
+using MicroserviceFramework.Utilities;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace MicroserviceFramework.AutoMapper
@@ -11,7 +12,7 @@ namespace MicroserviceFramework.AutoMapper
 	{
 		public static MicroserviceFrameworkBuilder UseAutoMapper(this MicroserviceFrameworkBuilder builder)
 		{
-			return builder.UseAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
+			return builder.UseAutoMapper(RuntimeUtilities.GetAllAssemblies());
 		}
 
 		public static MicroserviceFrameworkBuilder UseAutoMapper(this MicroserviceFrameworkBuilder builder,

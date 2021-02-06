@@ -5,11 +5,11 @@
         <AssemblyName>MSFramework.Ef.Design</AssemblyName>
         <RootNamespace>MicroserviceFramework.Ef.Design</RootNamespace>
     </PropertyGroup>
-    <Import Project="../../package.props"/>
+    <Import Project="../../package.props" />
     <ItemGroup Condition="'$(TargetFramework)' == 'netstandard2.1'">
-        <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="5.0.2"/>
+        <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="5.0.2" />
     </ItemGroup>
     <ItemGroup Condition="'$(TargetFramework)' == 'netstandard2.0'">
-        <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="3.1.10"/>
+        <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="3.1.10" />
     </ItemGroup>
 </Project>

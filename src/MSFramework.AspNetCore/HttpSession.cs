@@ -9,26 +9,27 @@ namespace MicroserviceFramework.AspNetCore
 {
 	public class HttpSession : ISession
 	{
-		private readonly IHttpContextAccessor _accessor;
+		private static readonly HashSet<string> EmptyRoles = new();
 
 		public HttpSession(IHttpContextAccessor accessor)
 		{
-			if (_accessor == null)
+			if (accessor?.HttpContext == null)
 			{
 				return;
 			}
 
-			_accessor = accessor;
-			UserId = _accessor.HttpContext.User.GetValue(ClaimTypes.NameIdentifier, "sid", "sub");
-			UserName = _accessor.HttpContext.User.GetValue(ClaimTypes.Name, "name");
-			Email = _accessor.HttpContext.User.GetValue(ClaimTypes.Email, "email");
-			PhoneNumber = _accessor.HttpContext.User.GetValue(ClaimTypes.MobilePhone, "phone_number");
+			HttpContext = accessor.HttpContext;
+			UserId = HttpContext.User.GetValue(ClaimTypes.NameIdentifier, "sid", "sub");
+			UserName = HttpContext.User.GetValue(ClaimTypes.Name, "name");
+			Email = HttpContext.User.GetValue(ClaimTypes.Email, "email");
+			PhoneNumber = HttpContext.User.GetValue(ClaimTypes.MobilePhone, "phone_number");
+			TraceIdentifier = HttpContext.TraceIdentifier;
 
-			var roles = _accessor.HttpContext?.User?.FindAll(ClaimTypes.Role).Select(x => x.Value).ToArray();
-			Roles = roles == null ? new HashSet<string>() : new HashSet<string>(roles);
+			var roles = HttpContext?.User?.FindAll(ClaimTypes.Role).Select(x => x.Value).ToArray();
+			Roles = roles == null ? EmptyRoles : new HashSet<string>(roles);
 		}
 
-		public string TraceIdentifier => HttpContext.TraceIdentifier;
+		public string TraceIdentifier { get; }
 
 		public string UserId { get; }
 
@@ -40,6 +41,6 @@ namespace MicroserviceFramework.AspNetCore
 
 		public HashSet<string> Roles { get; }
 
-		public HttpContext HttpContext => _accessor.HttpContext;
+		public HttpContext HttpContext { get; }
 	}
 }
