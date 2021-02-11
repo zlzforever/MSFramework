@@ -1,9 +1,8 @@
-using System.Collections.Generic;
 using MicroserviceFramework.Domain;
 
 namespace Ordering.Domain.AggregateRoots
 {
-	public class Address : ValueObject
+	public class Address : ValueObject<Address>
 	{
 		public string Street { get; private set; }
 		public string City { get; private set; }
@@ -22,16 +21,6 @@ namespace Ordering.Domain.AggregateRoots
 			State = state;
 			Country = country;
 			ZipCode = zipcode;
-		}
-
-		protected override IEnumerable<object> GetAtomicValues()
-		{
-			// Using a yield return statement to return each element one at a time
-			yield return Street;
-			yield return City;
-			yield return State;
-			yield return Country;
-			yield return ZipCode;
 		}
 	}
 }

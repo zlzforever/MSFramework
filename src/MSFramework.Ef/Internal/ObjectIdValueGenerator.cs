@@ -2,9 +2,9 @@ using MicroserviceFramework.Shared;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.EntityFrameworkCore.ValueGeneration;
 
-namespace MicroserviceFramework.Ef.Infrastructure
+namespace MicroserviceFramework.Ef.Internal
 {
-	public class ObjectIdValueGenerator : ValueGenerator<ObjectId>
+	internal class ObjectIdValueGenerator : ValueGenerator<ObjectId>
 	{
 		public override ObjectId Next(EntityEntry entry)
 		{

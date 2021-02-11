@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using MicroserviceFramework.Domain;
 using Xunit;
 
@@ -7,7 +6,17 @@ namespace MSFramework.Tests
 {
 	public class ValueObjectTests
 	{
-		public class Address : ValueObject
+		public class V1 : ValueObject<V1>
+		{
+			public string V { get; private set; }
+
+			public V1(string v)
+			{
+				V = v;
+			}
+		}
+
+		public class Address : ValueObject<Address>
 		{
 			public String Street { get; private set; }
 			public String City { get; private set; }
@@ -15,9 +24,6 @@ namespace MSFramework.Tests
 			public String Country { get; private set; }
 			public String ZipCode { get; private set; }
 
-			public Address()
-			{
-			}
 
 			public Address(string street, string city, string state, string country, string zipcode)
 			{
@@ -26,16 +32,6 @@ namespace MSFramework.Tests
 				State = state;
 				Country = country;
 				ZipCode = zipcode;
-			}
-
-			protected override IEnumerable<object> GetAtomicValues()
-			{
-				// Using a yield return statement to return each element one at a time
-				yield return Street;
-				yield return City;
-				yield return State;
-				yield return Country;
-				yield return ZipCode;
 			}
 		}
 
@@ -62,6 +58,15 @@ namespace MSFramework.Tests
 			var address1 = new Address("a", "b", "c", "d", "e");
 			var address2 = address1.Clone();
 			Assert.True(address1 == address2);
+		}
+
+		[Fact]
+		public void ValueObjectToString()
+		{
+			var v1 = new V1("a").ToString();
+			var v2 = new Address("a", "b", "c", "d", "f").ToString();
+			Assert.Equal("a", v1);
+			Assert.Equal("Address [Street: \"a\" | City: \"b\" | State: \"c\" | Country: \"d\" | ZipCode: \"f\"]", v2);
 		}
 	}
 }

@@ -23,14 +23,14 @@ namespace MicroserviceFramework.Domain
 		/// </summary>
 		/// <param name="id">Primary key of the entity to get</param>
 		/// <returns>Entity</returns>
-		TEntity Get(TKey id);
+		TEntity Find(TKey id);
 
 		/// <summary>
 		/// Gets an entity with given primary key.
 		/// </summary>
 		/// <param name="id">Primary key of the entity to get</param>
 		/// <returns>Entity</returns>
-		Task<TEntity> GetAsync(TKey id);
+		Task<TEntity> FindAsync(TKey id);
 
 		/// <summary>
 		/// Inserts a new entity.

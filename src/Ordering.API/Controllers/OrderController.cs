@@ -25,11 +25,11 @@ namespace Ordering.API.Controllers
 		private readonly IOrderingRepository _orderRepository;
 		private readonly ICqrsProcessor _cqrsProcessor;
 		private readonly OrderingContext _dbContext;
-		private readonly UnitOfWorkManager _unitOfWorkManager;
+		private readonly IUnitOfWork _unitOfWorkManager;
 
 		public OrderController(IOrderingRepository orderRepository,
 			IOrderingQuery orderingQuery, ICqrsProcessor commandExecutor, OrderingContext dbContext,
-			UnitOfWorkManager unitOfWorkManager)
+			IUnitOfWork unitOfWorkManager)
 		{
 			_orderingQuery = orderingQuery;
 			_cqrsProcessor = commandExecutor;
@@ -40,7 +40,6 @@ namespace Ordering.API.Controllers
 
 		//[AccessControl("TestCreate")]
 		[HttpPost("testCreate")]
-		[IgnoreAudit]
 		public async Task<IActionResult> TestCreate()
 		{
 			var order = new Order(
@@ -62,6 +61,7 @@ namespace Ordering.API.Controllers
 
 		#region Command
 
+		[IgnoreAudit]
 		[HttpPost("test-command1"), AccessControl("test-command1")]
 		public async Task<string> TestCommand1Async([FromBody] TestCommand1 command)
 		{

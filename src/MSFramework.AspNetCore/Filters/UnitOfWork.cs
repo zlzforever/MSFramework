@@ -32,10 +32,10 @@ namespace MicroserviceFramework.AspNetCore.Filters
 
 			if (Conts.MethodDict.ContainsKey(context.HttpContext.Request.Method))
 			{
-				var uowManager = context.HttpContext.RequestServices.GetService<UnitOfWorkManager>();
-				if (uowManager != null)
+				var unitOfWork = context.HttpContext.RequestServices.GetService<IUnitOfWork>();
+				if (unitOfWork != null)
 				{
-					await uowManager.CommitAsync();
+					await unitOfWork.CommitAsync();
 				}
 
 				_logger.LogDebug("Executed unit of work filter");

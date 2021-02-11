@@ -9,7 +9,7 @@ using Ordering.Infrastructure;
 namespace Ordering.Infrastructure.Migrations
 {
     [DbContext(typeof(OrderingContext))]
-    [Migration("20210205161550_init")]
+    [Migration("20210211082412_init")]
     partial class init
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)

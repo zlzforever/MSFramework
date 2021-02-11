@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using System.Reflection;
 using System.Security.Claims;
 using System.Threading.Tasks;
@@ -72,16 +71,10 @@ namespace MicroserviceFramework.AspNetCore.Filters
 			// comment: 只有有变化的数据才会尝试获取变更对象
 			if (Conts.MethodDict.ContainsKey(context.HttpContext.Request.Method))
 			{
-				var uowManager = context.HttpContext.RequestServices.GetService<UnitOfWorkManager>();
-				if (uowManager != null)
+				var unitOfWork = context.HttpContext.RequestServices.GetService<IUnitOfWork>();
+				if (unitOfWork != null)
 				{
-					var entities = new List<AuditEntity>();
-					foreach (var unitOfWork in uowManager.GetUnitOfWorks())
-					{
-						entities.AddRange(unitOfWork.GetAuditEntities());
-					}
-
-					auditedOperation.AddEntities(entities);
+					auditedOperation.AddEntities(unitOfWork.GetAuditEntities());
 				}
 			}
 

@@ -26,21 +26,17 @@ namespace MicroserviceFramework.Application.CQRS
 		{
 			Check.NotNull(query, nameof(query));
 
-			var type = query.GetType();
-			var handlerInfo = Cache.GetOrAdd(type, x =>
-			{
-				var handlerType = typeof(IQueryHandler<>).MakeGenericType(x);
-				var method = handlerType.GetMethods()[0];
-				return (handlerType, method);
-			});
+			var queryType = query.GetType();
 
-			var handler = _serviceProvider.GetService(handlerInfo.Interface);
+			var (@interface, method) = Cache.GetOrAdd(queryType, type => Create(typeof(IQueryHandler<>), type));
+
+			var handler = _serviceProvider.GetService(@interface);
 			if (handler == null)
 			{
-				throw new MicroserviceFrameworkException("创建处理器失败");
+				throw new MicroserviceFrameworkException("创建查询处理器失败");
 			}
 
-			if (handlerInfo.Method.Invoke(handler, new object[] {query, cancellationToken}) is Task task)
+			if (method.Invoke(handler, new object[] {query, cancellationToken}) is Task task)
 			{
 				await task;
 			}
@@ -51,28 +47,21 @@ namespace MicroserviceFramework.Application.CQRS
 		{
 			Check.NotNull(query, nameof(query));
 
-			var type = query.GetType();
-			var handlerInfo = Cache.GetOrAdd(type, x =>
-			{
-				var handlerType = typeof(IQueryHandler<,>).MakeGenericType(x, typeof(TResponse));
-				var method = handlerType.GetMethods()[0];
-				return (handlerType, method);
-			});
-
-			var handler = _serviceProvider.GetService(handlerInfo.Interface);
+			var queryType = query.GetType();
+			var (@interface, method) =
+				Cache.GetOrAdd(queryType, type => Create(typeof(IQueryHandler<,>), type, typeof(TResponse)));
+			var handler = _serviceProvider.GetService(@interface);
 			if (handler == null)
 			{
-				throw new MicroserviceFrameworkException("创建处理器失败");
+				throw new MicroserviceFrameworkException("创建查询处理器失败");
 			}
 
-			if (handlerInfo.Method.Invoke(handler, new object[] {query, cancellationToken}) is Task<TResponse> task)
+			if (method.Invoke(handler, new object[] {query, cancellationToken}) is Task<TResponse> task)
 			{
 				return await task;
 			}
-			else
-			{
-				return default;
-			}
+
+			return default;
 		}
 
 		public async Task ExecuteAsync(ICommand command, CancellationToken cancellationToken = default)
@@ -82,21 +71,15 @@ namespace MicroserviceFramework.Application.CQRS
 				throw new ArgumentNullException(nameof(command));
 			}
 
-			var type = command.GetType();
-			var handlerInfo = Cache.GetOrAdd(type, x =>
-			{
-				var handlerType = typeof(ICommandHandler<>).MakeGenericType(x);
-				var method = handlerType.GetMethods()[0];
-				return (handlerType, method);
-			});
-
-			var handler = _serviceProvider.GetService(handlerInfo.Interface);
+			var commandType = command.GetType();
+			var (@interface, method) = Cache.GetOrAdd(commandType, type => Create(typeof(ICommandHandler<>), type));
+			var handler = _serviceProvider.GetService(@interface);
 			if (handler == null)
 			{
-				throw new MicroserviceFrameworkException("创建处理器失败");
+				throw new MicroserviceFrameworkException("创建命令处理器失败");
 			}
 
-			if (handlerInfo.Method.Invoke(handler, new object[] {command, cancellationToken}) is Task task)
+			if (method.Invoke(handler, new object[] {command, cancellationToken}) is Task task)
 			{
 				await task;
 			}
@@ -110,28 +93,28 @@ namespace MicroserviceFramework.Application.CQRS
 				throw new ArgumentNullException(nameof(command));
 			}
 
-			var type = command.GetType();
-			var handlerInfo = Cache.GetOrAdd(type, x =>
-			{
-				var handlerType = typeof(ICommandHandler<,>).MakeGenericType(x, typeof(TResponse));
-				var method = handlerType.GetMethods()[0];
-				return (handlerType, method);
-			});
-
-			var handler = _serviceProvider.GetService(handlerInfo.Interface);
+			var commandType = command.GetType();
+			var (@interface, method) = Cache.GetOrAdd(commandType,
+				type => Create(typeof(ICommandHandler<,>), type, typeof(TResponse)));
+			var handler = _serviceProvider.GetService(@interface);
 			if (handler == null)
 			{
-				throw new MicroserviceFrameworkException("创建处理器失败");
+				throw new MicroserviceFrameworkException("创建命令处理器失败");
 			}
 
-			if (handlerInfo.Method.Invoke(handler, new object[] {command, cancellationToken}) is Task<TResponse> task)
+			if (method.Invoke(handler, new object[] {command, cancellationToken}) is Task<TResponse> task)
 			{
 				return await task;
 			}
-			else
-			{
-				return default;
-			}
+
+			return default;
+		}
+
+		private static (Type HandlerType, MethodInfo MethodInfo) Create(Type type, params Type[] typeArguments)
+		{
+			var handlerType = type.MakeGenericType(typeArguments);
+			var method = handlerType.GetMethods()[0];
+			return (handlerType, method);
 		}
 	}
 }

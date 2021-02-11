@@ -11,8 +11,8 @@ namespace Ordering.Infrastructure.EntityConfigurations
 		{
 			base.Configure(builder);
 
-			builder.HasKey(o => o.Id);
-
+			builder.Property(x => x.Id).ValueGeneratedNever();
+			
 			builder.Property<decimal>("Discount")
 				.IsRequired();
 

@@ -1,4 +1,4 @@
-using MicroserviceFramework.Ef.Infrastructure;
+using MicroserviceFramework.Ef.Internal;
 using MicroserviceFramework.Extensions;
 using MicroserviceFramework.Shared;
 using Microsoft.EntityFrameworkCore;

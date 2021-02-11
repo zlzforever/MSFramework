@@ -1,7 +1,7 @@
 using MicroserviceFramework.Application;
-using MicroserviceFramework.Domain;
 using MicroserviceFramework.Domain.Event;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
 namespace MicroserviceFramework.Ef
@@ -12,9 +12,9 @@ namespace MicroserviceFramework.Ef
 	public class DefaultDbContext : DbContextBase
 	{
 		public DefaultDbContext(DbContextOptions options,
-			IOptions<DbContextConfigurationCollection> entityFrameworkOptions, UnitOfWorkManager unitOfWorkManager,
-			IDomainEventDispatcher domainEventDispatcher, ISession session) : base(options,
-			entityFrameworkOptions, unitOfWorkManager, domainEventDispatcher, session)
+			IOptions<DbContextConfigurationCollection> entityFrameworkOptions,
+			IDomainEventDispatcher domainEventDispatcher, ISession session, ILoggerFactory loggerFactory) : base(
+			options, entityFrameworkOptions, domainEventDispatcher, session, loggerFactory)
 		{
 		}
 	}

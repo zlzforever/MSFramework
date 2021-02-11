@@ -1,13 +1,12 @@
-using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 using MicroserviceFramework.Application;
 using MicroserviceFramework.Audit;
 using MicroserviceFramework.Domain;
 using MicroserviceFramework.Domain.Event;
 using MicroserviceFramework.Ef.Extensions;
-using MicroserviceFramework.Ef.Infrastructure;
 using MicroserviceFramework.EventBus;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
@@ -17,14 +16,14 @@ using Microsoft.Extensions.Options;
 
 namespace MicroserviceFramework.Ef
 {
-	public abstract class DbContextBase : DbContext, IUnitOfWork
+	public abstract class DbContextBase : DbContext
 	{
-		private ILogger _logger;
+		private readonly ILoggerFactory _loggerFactory;
+		private readonly ILogger _logger;
 		private readonly ISession _session;
 		private readonly DbContextConfigurationCollection _entityFrameworkOptions;
 		private IEntityConfigurationTypeFinder _entityConfigurationTypeFinder;
 		private readonly IDomainEventDispatcher _domainEventDispatcher;
-		private readonly UnitOfWorkManager _unitOfWorkManager;
 		private IEventBus _eventBus;
 
 		/// <summary>
@@ -32,15 +31,15 @@ namespace MicroserviceFramework.Ef
 		/// </summary>
 		protected DbContextBase(DbContextOptions options,
 			IOptions<DbContextConfigurationCollection> entityFrameworkOptions,
-			UnitOfWorkManager unitOfWorkManager,
 			IDomainEventDispatcher domainEventDispatcher,
-			ISession session)
+			ISession session, ILoggerFactory loggerFactory)
 			: base(options)
 		{
-			_unitOfWorkManager = unitOfWorkManager;
 			_domainEventDispatcher = domainEventDispatcher;
 			_entityFrameworkOptions = entityFrameworkOptions.Value;
 			_session = session;
+			_loggerFactory = loggerFactory;
+			_logger = loggerFactory.CreateLogger(GetType());
 		}
 
 		protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
@@ -55,7 +54,7 @@ namespace MicroserviceFramework.Ef
 				optionsBuilder.EnableSensitiveDataLogging();
 			}
 
-			_unitOfWorkManager.Register(this);
+			optionsBuilder.UseLoggerFactory(_loggerFactory);
 		}
 
 		/// <summary>
@@ -64,21 +63,26 @@ namespace MicroserviceFramework.Ef
 		/// <param name="modelBuilder">上下文数据模型构建器</param>
 		protected override void OnModelCreating(ModelBuilder modelBuilder)
 		{
-			_logger = this.GetService<ILoggerFactory>().CreateLogger(GetType());
 			_entityConfigurationTypeFinder = this.GetService<IEntityConfigurationTypeFinder>();
 			_eventBus = this.GetService<IEventBus>();
 
 			//通过实体配置信息将实体注册到当前上下文
 			var contextType = GetType();
 
-			var registers = _entityConfigurationTypeFinder.GetEntityRegisters(contextType);
-			foreach (var register in registers)
+			var entityTypeConfigurations = _entityConfigurationTypeFinder.GetEntityTypeConfigurations(contextType);
+			var count = 0;
+			var stringBuilder = new StringBuilder();
+			foreach (var entityTypeConfiguration in entityTypeConfigurations)
 			{
-				register.RegisterTo(modelBuilder);
+				entityTypeConfiguration.Value.MethodInfo.Invoke(modelBuilder,
+					new[] {entityTypeConfiguration.Value.EntityTypeConfiguration});
+
+				stringBuilder.Append($"、{entityTypeConfiguration.Value.EntityType.FullName}");
+				count++;
 			}
 
 			_logger.LogInformation(
-				$"将 {registers.Length} 个实体 {string.Join("、", registers.Select(x => x.EntityType))} 注册到上下文 {contextType} 中");
+				$"将 {count} 个实体 {stringBuilder} 注册到上下文 {contextType} 中");
 
 			modelBuilder.UseObjectId();
 
@@ -168,8 +172,6 @@ namespace MicroserviceFramework.Ef
 				throw;
 			}
 		}
-
-		public Guid Id => ContextId.InstanceId;
 
 		protected bool ApplyConcepts()
 		{

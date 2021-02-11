@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Linq;
 using System.Reflection;
-using AutoMapper;
 using MicroserviceFramework.Domain;
 using MicroserviceFramework.Utilities;
 using Microsoft.Extensions.DependencyInjection;

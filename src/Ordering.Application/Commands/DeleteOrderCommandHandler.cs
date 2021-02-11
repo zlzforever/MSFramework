@@ -23,7 +23,7 @@ namespace Ordering.Application.Commands
 		/// <returns></returns>
 		public async Task HandleAsync(DeleteOrderCommand command, CancellationToken cancellationToken)
 		{
-			var order = await _orderRepository.GetAsync(command.OrderId);
+			var order = await _orderRepository.FindAsync(command.OrderId);
 			if (order == null)
 			{
 				return;

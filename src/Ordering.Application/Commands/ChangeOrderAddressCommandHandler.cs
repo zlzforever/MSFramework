@@ -23,7 +23,7 @@ namespace Ordering.Application.Commands
 		/// <returns></returns>
 		public async Task HandleAsync(ChangeOrderAddressCommand command, CancellationToken cancellationToken)
 		{
-			var order = await _orderRepository.GetAsync(command.OrderId);
+			var order = await _orderRepository.FindAsync(command.OrderId);
 			order?.ChangeAddress(command.NewAddress);
 		}
 	}

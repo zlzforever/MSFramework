@@ -17,7 +17,7 @@ namespace Ordering.Application.Commands
 
 		public async Task<ObjectId> HandleAsync(CancelOrderCommand request, CancellationToken cancellationToken)
 		{
-			var order = await _orderRepository.GetAsync(request.OrderId);
+			var order = await _orderRepository.FindAsync(request.OrderId);
 
 			order.SetCancelledStatus();
 			return ObjectId.NewId();

@@ -11,6 +11,7 @@ namespace MicroserviceFramework.Application.CQRS
 
 		Task ExecuteAsync(ICommand command, CancellationToken cancellationToken = default);
 
-		Task<TResponse> ExecuteAsync<TResponse>(ICommand<TResponse> command, CancellationToken cancellationToken = default);
+		Task<TResponse> ExecuteAsync<TResponse>(ICommand<TResponse> command,
+			CancellationToken cancellationToken = default);
 	}
 }

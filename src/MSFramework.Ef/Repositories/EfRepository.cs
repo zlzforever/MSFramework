@@ -31,13 +31,13 @@ namespace MicroserviceFramework.Ef.Repositories
 
 		protected DbContextBase DbContext { get; }
 
-		public virtual TEntity Get(TKey id)
+		public virtual TEntity Find(TKey id)
 		{
 			return AggregateRootSet
 				.FirstOrDefault(x => x.Id.Equals(id));
 		}
 
-		public virtual async Task<TEntity> GetAsync(TKey id)
+		public virtual async Task<TEntity> FindAsync(TKey id)
 		{
 			return await AggregateRootSet
 				.FirstOrDefaultAsync(x => x.Id.Equals(id));
@@ -66,7 +66,7 @@ namespace MicroserviceFramework.Ef.Repositories
 
 		public virtual void Delete(TKey id)
 		{
-			var entity = Get(id);
+			var entity = Find(id);
 			if (entity != null)
 			{
 				Delete(entity);
@@ -75,7 +75,7 @@ namespace MicroserviceFramework.Ef.Repositories
 
 		public virtual async Task DeleteAsync(TKey id)
 		{
-			var entity = await GetAsync(id);
+			var entity = await FindAsync(id);
 			if (entity != null)
 			{
 				Delete(entity);

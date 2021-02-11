@@ -70,7 +70,7 @@ namespace MicroserviceFramework.FeatureManagement
 				}
 			}
 
-			await serviceProvider.GetRequiredService<UnitOfWorkManager>().CommitAsync();
+			await serviceProvider.GetRequiredService<IUnitOfWork>().CommitAsync();
 		}
 	}
 }

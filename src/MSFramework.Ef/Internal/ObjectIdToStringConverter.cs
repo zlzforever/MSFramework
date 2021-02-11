@@ -3,9 +3,9 @@ using System.Linq.Expressions;
 using MicroserviceFramework.Shared;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
-namespace MicroserviceFramework.Ef.Infrastructure
+namespace MicroserviceFramework.Ef.Internal
 {
-	public class ObjectIdToStringConverter
+	internal class ObjectIdToStringConverter
 		: ValueConverter<ObjectId, string>
 	{
 		private new static Expression<Func<ObjectId, string>> ToString()

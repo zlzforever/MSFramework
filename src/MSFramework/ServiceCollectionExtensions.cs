@@ -5,7 +5,6 @@ using System.Text.Json;
 using MicroserviceFramework.Application;
 using MicroserviceFramework.Audit;
 using MicroserviceFramework.DependencyInjection;
-using MicroserviceFramework.Domain;
 using MicroserviceFramework.Domain.Event;
 using MicroserviceFramework.EventBus;
 using MicroserviceFramework.Initializer;
@@ -46,7 +45,7 @@ namespace MicroserviceFramework
 			builder.Services.AddSerializer();
 			builder.Services.AddEventBus();
 			builder.Services.AddInitializer();
-			builder.Services.TryAddScoped<UnitOfWorkManager>();
+			// builder.Services.TryAddScoped<UnitOfWorkManager>();
 			// 如果你想换成消息队列，则重新注册一个对应的服务即可
 			builder.Services.TryAddScoped<IAuditService, DefaultAuditService>();
 			builder.Services.TryAddSingleton<ApplicationInfo>();

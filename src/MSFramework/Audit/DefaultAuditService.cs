@@ -11,13 +11,13 @@ namespace MicroserviceFramework.Audit
 	{
 		private readonly IAuditRepository _repository;
 		private readonly ILogger<DefaultAuditService> _logger;
-		private readonly UnitOfWorkManager _unitOfWorkManager;
+		private readonly IUnitOfWork _unitOfWork;
 
 		public DefaultAuditService(IAuditRepository repository,
-			ILogger<DefaultAuditService> logger, UnitOfWorkManager unitOfWorkManager)
+			ILogger<DefaultAuditService> logger, IUnitOfWork unitOfWork)
 		{
 			_logger = logger;
-			_unitOfWorkManager = unitOfWorkManager;
+			_unitOfWork = unitOfWork;
 			_repository = repository;
 		}
 
@@ -30,7 +30,7 @@ namespace MicroserviceFramework.Audit
 			}
 
 			await _repository.AddAsync(auditOperation);
-			await _unitOfWorkManager.CommitAsync();
+			await _unitOfWork.CommitAsync();
 		}
 	}
 }

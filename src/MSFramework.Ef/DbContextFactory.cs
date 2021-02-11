@@ -1,6 +1,6 @@
 using System;
+using System.Collections.Generic;
 using MicroserviceFramework.Domain;
-using MicroserviceFramework.Ef.Infrastructure;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace MicroserviceFramework.Ef
@@ -26,6 +26,18 @@ namespace MicroserviceFramework.Ef
 			var dbContextType = _entityConfigurationTypeFinder
 				.GetDbContextTypeForEntity(typeof(TEntity));
 			return (DbContextBase) _serviceProvider.GetRequiredService(dbContextType);
+		}
+
+		public IEnumerable<DbContextBase> GetAllDbContexts()
+		{
+			foreach (var dbContextType in _entityConfigurationTypeFinder.GetAllDbContextTypes())
+			{
+				var dbContext = _serviceProvider.GetService(dbContextType);
+				if (dbContext != null)
+				{
+					yield return (DbContextBase) dbContext;
+				}
+			}
 		}
 
 		public DbContextBase GetDbContextOrDefault<TEntity>() where TEntity : class, IAggregateRoot

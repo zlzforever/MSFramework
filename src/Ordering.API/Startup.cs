@@ -9,7 +9,6 @@ using MicroserviceFramework.Configuration;
 using MicroserviceFramework.Ef;
 using MicroserviceFramework.Ef.MySql;
 using MicroserviceFramework.Newtonsoft;
-using MicroserviceFramework.Serialization;
 using MicroserviceFramework.Serialization.Converters;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.Configuration;

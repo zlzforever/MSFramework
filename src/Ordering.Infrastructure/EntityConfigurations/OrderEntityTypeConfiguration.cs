@@ -13,7 +13,7 @@ namespace Ordering.Infrastructure.EntityConfigurations
 		{
 			base.Configure(builder);
 
-			builder.HasKey(o => o.Id);
+			builder.Property(x => x.Id).ValueGeneratedNever();
 
 			//Address value object persisted as owned entity type supported since EF Core 2.0
 			builder.OwnsOne(o => o.Address);

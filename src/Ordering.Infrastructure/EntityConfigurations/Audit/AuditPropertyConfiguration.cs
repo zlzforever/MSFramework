@@ -14,7 +14,7 @@ namespace Ordering.Infrastructure.EntityConfigurations.Audit
 
 			builder.ToTable("audit_property");
 			
-			builder.Property(x => x.Id);
+			builder.Property(x => x.Id).ValueGeneratedNever();
 			builder.Property(x => x.Name).HasMaxLength(255);
 			builder.Property(x => x.Type).HasMaxLength(255);
 			builder.Property(x => x.NewValue);

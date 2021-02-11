@@ -6,8 +6,8 @@ namespace MicroserviceFramework.Ef.Extensions
 {
 	public static class EntityTypeBuilderExtensions
 	{
-		public static void ConfigureCreation<T>(this EntityTypeBuilder<T> builder)
-			where T : class, ICreation
+		public static void ConfigureCreation<TEntity>(this EntityTypeBuilder<TEntity> builder)
+			where TEntity : class, ICreation
 		{
 			builder.Property(x => x.CreationTime).UseUnixTime();
 			builder.Property(x => x.CreationUserId).HasMaxLength(255);
@@ -16,8 +16,8 @@ namespace MicroserviceFramework.Ef.Extensions
 			builder.HasIndex(x => x.CreationTime);
 		}
 
-		public static void ConfigureModification<T>(this EntityTypeBuilder<T> builder)
-			where T : class, IModification
+		public static void ConfigureModification<TEntity>(this EntityTypeBuilder<TEntity> builder)
+			where TEntity : class, IModification
 		{
 			builder.Property(x => x.ModificationTime).UseUnixTime();
 			builder.Property(x => x.ModificationUserId).HasMaxLength(255);
@@ -26,8 +26,8 @@ namespace MicroserviceFramework.Ef.Extensions
 			builder.HasIndex(x => x.ModificationTime);
 		}
 
-		public static void ConfigureDeletion<T>(this EntityTypeBuilder<T> builder)
-			where T : class, IDeletion
+		public static void ConfigureDeletion<TEntity>(this EntityTypeBuilder<TEntity> builder)
+			where TEntity : class, IDeletion
 		{
 			builder.Property(x => x.Deleted).HasDefaultValue(false);
 			builder.Property(x => x.DeletionTime).UseUnixTime();

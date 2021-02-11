@@ -129,14 +129,14 @@ namespace Ordering.API.Controllers
 		[HttpGet]
 		public Product GetAsync(ObjectId productId)
 		{
-			return _productRepository.Get(productId);
+			return _productRepository.Find(productId);
 		}
 
 		[HttpDelete]
 		//[AccessControl("删除产品", "产品")]
 		public Product DeleteAsync(ObjectId productId)
 		{
-			var product = _productRepository.Get(productId);
+			var product = _productRepository.Find(productId);
 			_productRepository.Delete(product);
 			return product;
 		}

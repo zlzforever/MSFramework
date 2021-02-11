@@ -32,7 +32,7 @@ namespace MicroserviceFramework.Ef.Initializer
 			if (repeated != null)
 			{
 				throw new MicroserviceFrameworkException(
-					$"数据上下文配置中存在多个配置节点指向同一个上下文类型：{repeated.First().DbContextTypeName}");
+					$"数据上下文配置中存在多个配置节点指向同一个上下文类型： {repeated.First().DbContextTypeName}");
 			}
 
 			foreach (var option in dbContextConfigurationCollection)
@@ -52,7 +52,7 @@ namespace MicroserviceFramework.Ef.Initializer
 						await dbContext.Database.MigrateAsync();
 						ILogger logger = dbContext.GetService<ILoggerFactory>()
 							.CreateLogger<EntityFrameworkInitializer>();
-						logger.LogInformation($"已提交 {migrations.Length} 条挂起的迁移记录：{migrations.ExpandAndToString()}");
+						logger.LogInformation($"已提交 {migrations.Length} 条挂起的迁移记录： {migrations.ExpandAndToString()}");
 					}
 				}
 			}

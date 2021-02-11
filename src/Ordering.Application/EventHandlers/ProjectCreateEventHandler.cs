@@ -18,9 +18,9 @@ namespace Ordering.Application.EventHandlers
 		IScopeDependency
 	{
 		private readonly IProductRepository _productRepository;
-		private readonly UnitOfWorkManager _uowManager;
+		private readonly IUnitOfWork _uowManager;
 
-		public ProjectCreatedIntegrationEventHandler(IProductRepository productRepository, UnitOfWorkManager uowManager)
+		public ProjectCreatedIntegrationEventHandler(IProductRepository productRepository, IUnitOfWork uowManager)
 		{
 			_productRepository = productRepository;
 			_uowManager = uowManager;
@@ -53,7 +53,7 @@ namespace Ordering.Application.EventHandlers
 			Console.WriteLine("Execute ProjectCreateEvent");
 			await _eventBus.PublishAsync(new ProjectCreatedIntegrationEvent());
 		}
-		
+
 		public void Dispose()
 		{
 		}
