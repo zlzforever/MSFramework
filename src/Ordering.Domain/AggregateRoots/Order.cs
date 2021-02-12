@@ -10,7 +10,7 @@ using Ordering.Domain.AggregateRoots.Events;
 namespace Ordering.Domain.AggregateRoots
 {
 	[Description("订单表")]
-	public class Order : AggregateRoot
+	public class Order : AggregateRoot<ObjectId>
 	{
 		// DDD Patterns comment
 		// Using a private collection field, better for DDD Aggregate's encapsulation

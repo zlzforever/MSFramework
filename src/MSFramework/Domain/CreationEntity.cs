@@ -11,7 +11,7 @@ namespace MicroserviceFramework.Domain
 	}
 
 	public abstract class CreationEntity<TKey> :
-		EntityBase<TKey>, ICreation
+		EntityBase<TKey>, ICreation where TKey : IEquatable<TKey>
 	{
 		/// <summary>
 		/// 创建时间

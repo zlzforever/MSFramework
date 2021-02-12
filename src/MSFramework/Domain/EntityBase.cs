@@ -1,25 +1,14 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Reflection;
+using MicroserviceFramework.Domain.Event;
 
 namespace MicroserviceFramework.Domain
 {
-	/// <inheritdoc/>
-	[Serializable]
-	public abstract class EntityBase : IEntity
-	{
-		/// <inheritdoc/>
-		public override string ToString()
-		{
-			return $"[ENTITY: {GetType().Name}] Keys = {string.Join(", ", GetKeys())}";
-		}
-
-		public abstract object[] GetKeys();
-	}
-
 	/// <inheritdoc cref="IEntity{TKey}" />
 	[Serializable]
-	public abstract class EntityBase<TKey> : EntityBase, IEntity<TKey>, IComparable<EntityBase<TKey>>
+	public abstract class EntityBase<TKey> : EntityBase, IEntity<TKey> where TKey : IEquatable<TKey>
 	{
-		private int? _hashCodeCache;
 		private TKey _id;
 
 		/// <inheritdoc/>
@@ -38,45 +27,67 @@ namespace MicroserviceFramework.Domain
 			Id = id;
 		}
 
-		public bool IsTransient()
+		public static bool operator ==(EntityBase<TKey> left, EntityBase<TKey> right)
 		{
-			return EntityHelper.HasDefaultId(this);
+			if (Equals(left, null))
+			{
+				return Equals(right, null);
+			}
+
+			return left.Equals(right);
+		}
+
+		public static bool operator !=(EntityBase<TKey> left, EntityBase<TKey> right)
+		{
+			return !(left == right);
+		}
+
+		public bool Equals(TKey other)
+		{
+			return !Equals(null, other) && Equals(Id, other);
 		}
 
 		public override bool Equals(object obj)
 		{
-			if (!(obj is EntityBase<TKey>))
+			if (obj == null || !(obj is EntityBase<TKey>))
 			{
 				return false;
 			}
 
+			//Same instances must be considered as equal
 			if (ReferenceEquals(this, obj))
 			{
 				return true;
 			}
 
-			if (GetType() != obj.GetType())
+			//Transient objects are not considered as equal
+			var other = (EntityBase<TKey>) obj;
+			if (EntityHelper.HasDefaultId(this) && EntityHelper.HasDefaultId(other))
 			{
 				return false;
 			}
 
-			var item = (EntityBase<TKey>) obj;
-
-			if (item.IsTransient() || IsTransient())
+			//Must have a IS-A relation of types or must be same type
+			var typeOfThis = GetType().GetTypeInfo();
+			var typeOfOther = other.GetType().GetTypeInfo();
+			if (!typeOfThis.IsAssignableFrom(typeOfOther) && !typeOfOther.IsAssignableFrom(typeOfThis))
 			{
 				return false;
 			}
-			else
-			{
-				return item.Id.Equals(Id);
-			}
+
+			//Different tenants may have an entity with same Id.
+			// if (this is IMultiTenant && other is IMultiTenant &&
+			//     this.As<IMultiTenant>().TenantId != other.As<IMultiTenant>().TenantId)
+			// {
+			// 	return false;
+			// }
+
+			return Id.Equals(other.Id);
 		}
 
-		public override int GetHashCode() => ComputeHashCode();
-
-		public override object[] GetKeys()
+		public override int GetHashCode()
 		{
-			return new object[] {Id};
+			return Id == null ? 0 : Id.GetHashCode();
 		}
 
 		/// <inheritdoc/>
@@ -84,23 +95,29 @@ namespace MicroserviceFramework.Domain
 		{
 			return $"[ENTITY: {GetType().Name}] Id = {Id}";
 		}
+	}
 
-		private int ComputeHashCode()
+	public abstract class EntityBase
+	{
+		private readonly List<DomainEvent> _domainEvents;
+
+		public IReadOnlyCollection<DomainEvent> GetDomainEvents() => _domainEvents.AsReadOnly();
+
+		protected EntityBase()
 		{
-			if (!IsTransient())
-			{
-				_hashCodeCache ??= Id.GetHashCode() ^ 31;
-				return _hashCodeCache.Value;
-			}
-			else
-			{
-				return base.GetHashCode();
-			}
+			_domainEvents = new List<DomainEvent>();
 		}
 
-		public int CompareTo(EntityBase<TKey> other)
+		public void AddDomainEvent(DomainEvent @event)
 		{
-			throw new NotImplementedException();
+			_domainEvents.Add(@event);
 		}
+
+		public void RemoveDomainEvent(DomainEvent @event)
+		{
+			_domainEvents.Remove(@event);
+		}
+
+		public void ClearDomainEvents() => _domainEvents.Clear();
 	}
 }

@@ -10,7 +10,7 @@ namespace MicroserviceFramework.Domain
 		}
 	}
 
-	public abstract class DeletionAggregateRoot<TKey> : ModificationAggregateRoot<TKey>, IDeletion
+	public abstract class DeletionAggregateRoot<TKey> : ModificationAggregateRoot<TKey>, IDeletion where TKey : IEquatable<TKey>
 	{
 		/// <summary>
 		/// 是否已经删除

@@ -309,7 +309,7 @@ namespace MicroserviceFramework.Ef
 			var domainEvents = new List<DomainEvent>();
 
 			foreach (var aggregateRoot in ChangeTracker
-				.Entries<IAggregateRoot>())
+				.Entries<EntityBase>())
 			{
 				var events = aggregateRoot.Entity.GetDomainEvents();
 				if (events != null && events.Any())

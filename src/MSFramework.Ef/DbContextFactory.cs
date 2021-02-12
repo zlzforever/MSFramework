@@ -21,7 +21,7 @@ namespace MicroserviceFramework.Ef
 		/// 获取指定数据实体的上下文类型
 		/// </summary>
 		/// <returns>实体所属上下文实例</returns>
-		public DbContextBase GetDbContext<TEntity>() where TEntity : class, IAggregateRoot
+		public DbContextBase GetDbContext<TEntity>()
 		{
 			var dbContextType = _entityConfigurationTypeFinder
 				.GetDbContextTypeForEntity(typeof(TEntity));
@@ -40,7 +40,7 @@ namespace MicroserviceFramework.Ef
 			}
 		}
 
-		public DbContextBase GetDbContextOrDefault<TEntity>() where TEntity : class, IAggregateRoot
+		public DbContextBase GetDbContextOrDefault<TEntity>()
 		{
 			if (!_entityConfigurationTypeFinder.HasDbContextForEntity<TEntity>())
 			{

@@ -10,7 +10,7 @@ namespace MicroserviceFramework.Domain
 		}
 	}
 
-	public abstract class DeletionEntity<TKey> : ModificationEntity<TKey>, IDeletion
+	public abstract class DeletionEntity<TKey> : ModificationEntity<TKey>, IDeletion where TKey : IEquatable<TKey>
 	{
 		/// <summary>
 		/// 是否已经删除

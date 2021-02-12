@@ -10,7 +10,7 @@ namespace MicroserviceFramework.Domain
 		}
 	}
 
-	public abstract class CreationAggregateRoot<TKey> : AggregateRoot<TKey>, ICreation
+	public abstract class CreationAggregateRoot<TKey> : AggregateRoot<TKey>, ICreation where TKey : IEquatable<TKey>
 	{
 		/// <summary>
 		/// 创建时间

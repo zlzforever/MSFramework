@@ -34,26 +34,22 @@ namespace MicroserviceFramework.Domain.Event
 
 			var eventType = @event.GetType();
 
-			var handlerInfo = Cache.GetOrAdd(eventType, x =>
+			var (@interface, methodInfo) = Cache.GetOrAdd(eventType, x =>
 			{
 				var handlerType = EventHandlerBaseType.MakeGenericType(x);
 				var method = handlerType.GetMethods()[0];
 				return (handlerType, method);
 			});
 
-			var handlers = _serviceProvider.GetServices(handlerInfo.Interface).Where(x => x != null);
+			var handlers = _serviceProvider.GetServices(@interface).Where(x => x != null);
 
 			foreach (var handler in handlers)
 			{
-				if (handlerInfo.Method.Invoke(handler, new object[] {@event}) is Task task)
+				if (methodInfo.Invoke(handler, new object[] {@event}) is Task task)
 				{
 					await task;
 				}
 			}
-		}
-
-		public virtual void Dispose()
-		{
 		}
 	}
 }

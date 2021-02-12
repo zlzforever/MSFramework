@@ -4,7 +4,7 @@ using MicroserviceFramework.Shared;
 
 namespace MicroserviceFramework.FeatureManagement
 {
-	public class Feature : AggregateRoot
+	public class Feature : AggregateRoot<ObjectId>
 	{
 		public bool Enabled { get; private set; }
 

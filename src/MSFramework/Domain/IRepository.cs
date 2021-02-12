@@ -1,22 +1,23 @@
+using System;
 using System.Threading.Tasks;
 using MicroserviceFramework.Shared;
 
 namespace MicroserviceFramework.Domain
 {
-	/// <summary>
-	/// Just to mark a class as repository.
-	/// </summary>
-	public interface IRepository
-	{
-	}
+	// /// <summary>
+	// /// Just to mark a class as repository.
+	// /// </summary>
+	// public interface IRepository
+	// {
+	// }
 
 	public interface IRepository<TEntity> : IRepository<TEntity, ObjectId>
-		where TEntity : IAggregateRoot
+		where TEntity : IAggregateRoot<ObjectId>
 	{
 	}
 
-	public interface IRepository<TEntity, in TKey> : IRepository
-		where TEntity : IAggregateRoot
+	public interface IRepository<TEntity, in TKey>
+		where TEntity : IAggregateRoot<TKey> where TKey : IEquatable<TKey>
 	{
 		/// <summary>
 		/// Gets an entity with given primary key.

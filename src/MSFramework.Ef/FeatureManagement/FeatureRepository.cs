@@ -1,14 +1,14 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
+using MicroserviceFramework.Ef.Repositories;
 using MicroserviceFramework.FeatureManagement;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Memory;
 
 namespace MicroserviceFramework.Ef.FeatureManagement
 {
-	public class FeatureRepository : IFeatureRepository
+	public class FeatureRepository : EfRepository<Feature>, IFeatureRepository
 	{
 		private readonly IMemoryCache _cache;
 		private readonly TimeSpan _ttl = new(0, 5, 0);
@@ -16,7 +16,7 @@ namespace MicroserviceFramework.Ef.FeatureManagement
 		private readonly bool _isAvailable;
 
 		public FeatureRepository(DbContextFactory dbContextFactory,
-			IMemoryCache cache)
+			IMemoryCache cache) : base(dbContextFactory)
 		{
 			_cache = cache;
 			_dbContext = dbContextFactory.GetDbContextOrDefault<Feature>();
@@ -40,11 +40,6 @@ namespace MicroserviceFramework.Ef.FeatureManagement
 		public IEnumerable<Feature> GetAllList()
 		{
 			return _dbContext.Set<Feature>().AsNoTracking();
-		}
-
-		public async Task AddAsync(Feature entity)
-		{
-			await _dbContext.Set<Feature>().AddAsync(entity);
 		}
 
 		public bool IsAvailable()

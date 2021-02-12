@@ -48,7 +48,6 @@ namespace MicroserviceFramework.DependencyInjection
 				typeof(IScopeDependency),
 				typeof(IApplicationService),
 				typeof(IDomainService),
-				typeof(IRepository),
 				typeof(ISession),
 				typeof(ICommand),
 				typeof(ICommand<>),

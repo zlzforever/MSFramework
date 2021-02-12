@@ -8,7 +8,7 @@ namespace Ordering.Domain.AggregateRoots
 	{
 	}
 
-	public class Product : AggregateRoot, IOptimisticLock
+	public class Product : AggregateRoot<ObjectId>, IOptimisticLock
 	{
 		private Product(ObjectId id) : base(id)
 		{

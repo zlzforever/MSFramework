@@ -11,7 +11,7 @@ namespace MicroserviceFramework.Domain
 	}
 
 	public abstract class ModificationAggregateRoot<TKey> : CreationAggregateRoot<TKey>,
-		IModification
+		IModification where TKey : IEquatable<TKey>
 	{
 		/// <summary>
 		/// Last modifier user for this entity.

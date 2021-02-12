@@ -1,3 +1,4 @@
+using System;
 using System.Linq;
 using System.Threading.Tasks;
 using MicroserviceFramework.Domain;
@@ -16,7 +17,7 @@ namespace MicroserviceFramework.Ef.Repositories
 	}
 
 	public abstract class EfRepository<TEntity, TKey> : IRepository<TEntity, TKey>
-		where TEntity : class, IAggregateRoot<TKey>
+		where TEntity : class, IAggregateRoot<TKey> where TKey : IEquatable<TKey>
 	{
 		public IQueryable<TEntity> AggregateRootSet { get; }
 

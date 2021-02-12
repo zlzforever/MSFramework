@@ -9,7 +9,7 @@ namespace MicroserviceFramework.Domain
 	/// </summary>
 	public static class EntityHelper
 	{
-		public static bool HasDefaultId<TKey>(IEntity<TKey> entity)
+		public static bool HasDefaultId<TKey>(IEntity<TKey> entity) where TKey : IEquatable<TKey>
 		{
 			if (EqualityComparer<TKey>.Default.Equals(entity.Id, default))
 			{
