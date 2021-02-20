@@ -2,7 +2,7 @@ using System;
 using MicroserviceFramework.Serialization;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Newtonsoft.Json;
-
+ 
 namespace MicroserviceFramework.Newtonsoft
 {
 	public static class ServiceCollectionExtensions
@@ -15,6 +15,7 @@ namespace MicroserviceFramework.Newtonsoft
 
 			builder.Services.TryAddSingleton(settings);
 			builder.Services.TryAddSingleton<ISerializer, NewtonsoftSerializer>();
+
 			return builder;
 		}
 	}

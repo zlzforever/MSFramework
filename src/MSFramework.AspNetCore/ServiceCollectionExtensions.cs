@@ -1,8 +1,10 @@
 using System;
 using System.Text.Json;
+using MicroserviceFramework.AspNetCore.DependencyInjection;
 using MicroserviceFramework.AspNetCore.FeatureManagement;
 using MicroserviceFramework.AspNetCore.Infrastructure;
 using MicroserviceFramework.AspNetCore.Mvc.ModelBinding;
+using MicroserviceFramework.DependencyInjection;
 using MicroserviceFramework.FeatureManagement;
 using MicroserviceFramework.Utilities;
 using Microsoft.AspNetCore.Builder;
@@ -20,6 +22,7 @@ namespace MicroserviceFramework.AspNetCore
 		{
 			builder.Services.AddHttpContextAccessor();
 			builder.Services.AddSingleton<IActionResultTypeMapper, ActionResultTypeMapper>();
+			builder.Services.AddSingleton<IScopedServiceResolver, ScopedServiceResolver>();
 			builder.Services.TryAddScoped<ISession, HttpSession>();
 
 			builder.Services.AddSingleton<JsonSerializerOptions>(x =>

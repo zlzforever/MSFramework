@@ -37,13 +37,13 @@ namespace MicroserviceFramework.Domain
 		/// Inserts a new entity.
 		/// </summary>
 		/// <param name="entity">Inserted entity</param>
-		TEntity Add(TEntity entity);
+		void Add(TEntity entity);
 
 		/// <summary>
 		/// Inserts a new entity.
 		/// </summary>
 		/// <param name="entity">Inserted entity</param>
-		Task<TEntity> AddAsync(TEntity entity);
+		Task AddAsync(TEntity entity);
 
 		/// <summary>
 		/// Deletes an entity.

@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Hosting;
+﻿using System.ComponentModel.DataAnnotations;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.Extensions.Hosting;
 using Serilog;
@@ -22,7 +23,8 @@ namespace Ordering.API
 	{
 		public static void Main(string[] args)
 		{
-			var a = typeof(ActionFilterAttribute).Assembly;
+			
+			var a = typeof(StringLengthAttribute).Assembly;
 			Log.Logger = new LoggerConfiguration()
 				.MinimumLevel.Debug()
 				.MinimumLevel.Override("Microsoft.Hosting.Lifetime", LogEventLevel.Information)

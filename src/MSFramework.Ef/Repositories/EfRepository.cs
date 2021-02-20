@@ -44,14 +44,14 @@ namespace MicroserviceFramework.Ef.Repositories
 				.FirstOrDefaultAsync(x => x.Id.Equals(id));
 		}
 
-		public virtual TEntity Add(TEntity entity)
+		public virtual void Add(TEntity entity)
 		{
-			return DbContext.Set<TEntity>().Add(entity).Entity;
+			DbContext.Set<TEntity>().Add(entity);
 		}
 
-		public virtual async Task<TEntity> AddAsync(TEntity entity)
+		public virtual async Task AddAsync(TEntity entity)
 		{
-			return (await DbContext.Set<TEntity>().AddAsync(entity)).Entity;
+			await DbContext.Set<TEntity>().AddAsync(entity);
 		}
 
 		public virtual void Delete(TEntity entity)

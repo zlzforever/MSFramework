@@ -39,7 +39,8 @@ namespace Ordering.API.Controllers
 		}
 
 		//[AccessControl("TestCreate")]
-		[HttpPost("testCreate")]
+		[Route("testCreate")]
+		[HttpPost]
 		public async Task<IActionResult> TestCreate()
 		{
 			var order = new Order(

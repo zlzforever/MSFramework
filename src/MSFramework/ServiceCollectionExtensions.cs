@@ -1,6 +1,7 @@
 using System;
 using System.IO;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text.Json;
 using MicroserviceFramework.Application;
 using MicroserviceFramework.Audit;
@@ -14,6 +15,9 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using MicroserviceFramework.Configuration;
+
+[assembly: InternalsVisibleTo("MSFramework.Newtonsoft")]
+[assembly: InternalsVisibleTo("MSFramework.AspNetCore")]
 
 // ReSharper disable InconsistentNaming
 
@@ -87,6 +91,8 @@ namespace MicroserviceFramework
 
 		public static void UseMicroserviceFramework(this IServiceProvider applicationServices)
 		{
+			ServiceLocator.ServiceProvider = applicationServices;
+
 			applicationServices.UseInitializerAsync().GetAwaiter().GetResult();
 		}
 	}

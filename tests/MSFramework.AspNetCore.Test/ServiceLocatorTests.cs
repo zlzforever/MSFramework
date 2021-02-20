@@ -1,8 +1,10 @@
-﻿using System.Threading.Tasks;
+using System.Threading.Tasks;
 using MicroserviceFramework;
 using MicroserviceFramework.AspNetCore;
+using MicroserviceFramework.DependencyInjection;
 using MicroserviceFramework.Ef;
 using MicroserviceFramework.Ef.PostgreSql;
+using MicroserviceFramework.Shared;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
@@ -14,19 +16,29 @@ using MSFramework.AspNetCore.Test.EfPostgreSqlTest.Infrastructure;
 using Xunit;
 using Xunit.Abstractions;
 
-namespace MSFramework.AspNetCore.Test.EfPostgreSqlTest
+namespace MSFramework.AspNetCore.Test
 {
-	public class RunTest
+	public class ServiceLocatorTests
 	{
 		private readonly ITestOutputHelper _output;
 
-		public RunTest(ITestOutputHelper output)
+		public ServiceLocatorTests(ITestOutputHelper output)
 		{
 			_output = output;
 		}
 
+		class A
+		{
+			public string TraceIdentifier { get; }
+
+			public A()
+			{
+				TraceIdentifier = ObjectId.NewId().ToString();
+			}
+		}
+
 		[Fact]
-		public async Task Run_When_AddMSFramework_WithEfNpgsql()
+		public async Task Scoped()
 		{
 			using var host = await new HostBuilder()
 				.ConfigureWebHost(webBuilder =>
@@ -41,18 +53,13 @@ namespace MSFramework.AspNetCore.Test.EfPostgreSqlTest
 						.ConfigureServices((context, services) =>
 						{
 							services.AddMvc();
-
 							services.AddRouting(x => { x.LowercaseUrls = true; });
 							services.AddMicroserviceFramework(builder =>
 							{
 								builder.UseOptions(context.Configuration);
 								builder.UseAspNetCore();
-								builder.UseEntityFramework(x =>
-								{
-									//
-									x.AddNpgsql<TestDataContext>(context.Configuration);
-								});
 							});
+							services.AddScoped<A>();
 						})
 						.Configure(app =>
 						{
@@ -61,7 +68,13 @@ namespace MSFramework.AspNetCore.Test.EfPostgreSqlTest
 							app.UseEndpoints(endpoints =>
 							{
 								endpoints.MapGet("/",
-									async context => { await context.Response.WriteAsync("Hello World!"); });
+									async context =>
+									{
+										var session1 = context.RequestServices.GetRequiredService<A>();
+										var session2 = ServiceLocator.GetService<A>();
+										await context.Response.WriteAsync(
+											session1.TraceIdentifier == session2.TraceIdentifier ? "ok" : "");
+									});
 							});
 
 							app.UseMicroserviceFramework();
@@ -70,8 +83,9 @@ namespace MSFramework.AspNetCore.Test.EfPostgreSqlTest
 				.StartAsync();
 			_output.WriteLine("server is running");
 
-			var dbContext = host.Services.CreateScope().ServiceProvider.GetRequiredService<TestDataContext>();
-			Assert.NotNull(dbContext);
+			var result = await host.GetTestClient().GetStringAsync("/");
+
+			Assert.Equal("ok", result);
 		}
 	}
 }
