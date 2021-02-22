@@ -10,8 +10,7 @@ namespace MicroserviceFramework.Serialization.Converters
 		public override ObjectId Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
 		{
 			System.Diagnostics.Debug.Assert(typeToConvert == typeof(ObjectId));
-
-			return new ObjectId(reader.ValueSpan);
+			return reader.ValueSpan.Length == 0 ? ObjectId.Empty : new ObjectId(reader.ValueSpan);
 		}
 
 		public override void Write(Utf8JsonWriter writer, ObjectId value, JsonSerializerOptions options)

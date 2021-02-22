@@ -20,6 +20,11 @@ namespace MicroserviceFramework.Newtonsoft.Converters
 				throw new JsonSerializationException($"Expected String but got {reader.TokenType}.");
 			}
 
+			if (reader.Value == null || (string) reader.Value == string.Empty)
+			{
+				return ObjectId.Empty;
+			}
+
 			return new ObjectId((string) reader.Value);
 		}
 	}
