@@ -18,14 +18,11 @@ namespace MicroserviceFramework.AspNetCore.Mvc.ModelBinding
 						x.Value.Errors.Where(z => !string.IsNullOrWhiteSpace(z.ErrorMessage))
 							.Select(y => y.ErrorMessage));
 
-			return new ApiResult(new
+			return new ApiResult(errors)
 			{
-				success = false,
-				code = 1,
-				msg = "数据校验不通过",
-				errors
-			})
-			{
+				Code = 1,
+				Success = false,
+				Msg = "数据校验不通过",
 				StatusCode = 200
 			};
 		};
