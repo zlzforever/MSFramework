@@ -42,14 +42,12 @@ namespace MicroserviceFramework
 			Action<MicroserviceFrameworkBuilder> builderAction = null)
 		{
 			var builder = new MicroserviceFrameworkBuilder(services);
-			builderAction?.Invoke(builder);
-
+			
 			builder.Services.AddDependencyInjectionLoader();
 			builder.Services.AddDomainEvent();
 			builder.Services.AddSerializer();
 			builder.Services.AddEventBus();
 			builder.Services.AddInitializer();
-			// builder.Services.TryAddScoped<UnitOfWorkManager>();
 			// 如果你想换成消息队列，则重新注册一个对应的服务即可
 			builder.Services.TryAddScoped<IAuditService, DefaultAuditService>();
 			builder.Services.TryAddSingleton<ApplicationInfo>();
@@ -57,6 +55,9 @@ namespace MicroserviceFramework
 			ObjectId.AddTypeDescriptor();
 
 			MicroserviceFrameworkLoaderContext.Default.LoadTypes();
+
+			// 放到后面，加载优先级更高
+			builderAction?.Invoke(builder);
 		}
 
 		public static MicroserviceFrameworkBuilder UseSerializer(this MicroserviceFrameworkBuilder builder,

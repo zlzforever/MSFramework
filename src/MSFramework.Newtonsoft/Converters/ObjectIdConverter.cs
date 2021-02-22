@@ -15,6 +15,11 @@ namespace MicroserviceFramework.Newtonsoft.Converters
 			bool hasExistingValue,
 			JsonSerializer serializer)
 		{
+			if (reader.TokenType == JsonToken.Null)
+			{
+				return ObjectId.Empty;
+			}
+
 			if (reader.TokenType != JsonToken.String)
 			{
 				throw new JsonSerializationException($"Expected String but got {reader.TokenType}.");

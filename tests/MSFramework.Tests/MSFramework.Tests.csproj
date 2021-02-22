@@ -21,6 +21,7 @@
     </ItemGroup>
 
     <ItemGroup>
+      <ProjectReference Include="..\..\src\MSFramework.Newtonsoft\MSFramework.Newtonsoft.csproj" />
       <ProjectReference Include="..\..\src\MSFramework\MSFramework.csproj" />
     </ItemGroup>
 
