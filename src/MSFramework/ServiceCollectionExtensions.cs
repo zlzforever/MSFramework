@@ -54,10 +54,11 @@ namespace MicroserviceFramework
 
 			ObjectId.AddTypeDescriptor();
 
-			MicroserviceFrameworkLoaderContext.Default.LoadTypes();
-
 			// 放到后面，加载优先级更高
 			builderAction?.Invoke(builder);
+			
+			// 请保证这在最后，不然类型扫描事件的注册会晚于扫描
+			MicroserviceFrameworkLoaderContext.Default.LoadTypes();
 		}
 
 		public static MicroserviceFrameworkBuilder UseSerializer(this MicroserviceFrameworkBuilder builder,
