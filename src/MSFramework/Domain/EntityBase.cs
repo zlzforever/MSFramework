@@ -58,10 +58,6 @@ namespace MicroserviceFramework.Domain
 			return new object[] {Id};
 		}
 
-		protected EntityBase() : this(default)
-		{
-		}
-
 		protected EntityBase(TKey id)
 		{
 			Id = id;
