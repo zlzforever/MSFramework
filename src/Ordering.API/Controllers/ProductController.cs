@@ -76,7 +76,7 @@ namespace Ordering.API.Controllers
 		public List<AuditOperation> GetAudits()
 		{
 			Logger.LogInformation($"{Session.UserId}");
-			return ((EfRepository<AuditOperation>) _repository).AggregateRootSet.Include(x => x.Entities).ToList();
+			return ((EfRepository<AuditOperation>) _repository).Store.Include(x => x.Entities).ToList();
 		}
 
 		[HttpGet("getBaseValueType")]

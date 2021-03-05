@@ -2,6 +2,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+
 #if !NETSTANDARD2_0
 using Pomelo.EntityFrameworkCore.MySql.Infrastructure;
 
@@ -52,12 +53,14 @@ namespace MicroserviceFramework.Ef.MySql
 #if NETSTANDARD2_0
 				x.UseMySql(option.ConnectionString, options =>
 				{
+					options.MaxBatchSize(option.MaxBatchSize);
 					options.MigrationsAssembly(entryAssemblyName);
 					options.CharSet(Pomelo.EntityFrameworkCore.MySql.Storage.CharSet.Utf8Mb4);
 				});
 #else
 				x.UseMySql(option.ConnectionString, ServerVersion.AutoDetect(option.ConnectionString), options =>
 				{
+					options.MaxBatchSize(option.MaxBatchSize);
 					options.MigrationsAssembly(entryAssemblyName);
 					options.CharSet(CharSet.Utf8Mb4);
 				});

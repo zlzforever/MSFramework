@@ -2,47 +2,22 @@ using System;
 using System.Linq;
 using System.Threading.Tasks;
 using MicroserviceFramework.Domain;
-using MicroserviceFramework.Shared;
 using Microsoft.EntityFrameworkCore;
 
 namespace MicroserviceFramework.Ef.Repositories
 {
-	public abstract class EfRepository<TEntity> : EfRepository<TEntity, ObjectId>
-		, IRepository<TEntity>
-		where TEntity : class, IAggregateRoot<ObjectId>
+	public abstract class EfRepository<TEntity> : IRepository<TEntity>
+		where TEntity : class, IAggregateRoot
 	{
-		protected EfRepository(DbContextFactory dbContextFactory) : base(dbContextFactory)
-		{
-		}
-	}
-
-	public abstract class EfRepository<TEntity, TKey> : IRepository<TEntity, TKey>
-		where TEntity : class, IAggregateRoot<TKey> where TKey : IEquatable<TKey>
-	{
-		public IQueryable<TEntity> AggregateRootSet { get; }
+		public IQueryable<TEntity> Store { get; }
 
 		protected EfRepository(DbContextFactory dbContextFactory)
 		{
 			DbContext = dbContextFactory.GetDbContext<TEntity>();
-			var isDeletionAuditedEntity = typeof(IDeletion).IsAssignableFrom(typeof(TEntity));
-			AggregateRootSet = isDeletionAuditedEntity
-				? DbContext.Set<TEntity>().Where(x => !((IDeletion) x).Deleted)
-				: DbContext.Set<TEntity>();
+			Store = DbContext.Set<TEntity>();
 		}
 
 		protected DbContextBase DbContext { get; }
-
-		public virtual TEntity Find(TKey id)
-		{
-			return AggregateRootSet
-				.FirstOrDefault(x => x.Id.Equals(id));
-		}
-
-		public virtual async Task<TEntity> FindAsync(TKey id)
-		{
-			return await AggregateRootSet
-				.FirstOrDefaultAsync(x => x.Id.Equals(id));
-		}
 
 		public virtual void Add(TEntity entity)
 		{
@@ -64,6 +39,22 @@ namespace MicroserviceFramework.Ef.Repositories
 			Delete(entity);
 			return Task.CompletedTask;
 		}
+	}
+
+	public abstract class EfRepository<TEntity, TKey> : EfRepository<TEntity>, IRepository<TEntity, TKey>
+		where TEntity : class, IAggregateRoot<TKey> where TKey : IEquatable<TKey>
+	{
+		public virtual TEntity Find(TKey id)
+		{
+			return Store
+				.FirstOrDefault(x => x.Id.Equals(id));
+		}
+
+		public virtual async Task<TEntity> FindAsync(TKey id)
+		{
+			return await Store
+				.FirstOrDefaultAsync(x => x.Id.Equals(id));
+		}
 
 		public virtual void Delete(TKey id)
 		{
@@ -79,8 +70,12 @@ namespace MicroserviceFramework.Ef.Repositories
 			var entity = await FindAsync(id);
 			if (entity != null)
 			{
-				Delete(entity);
+				await DeleteAsync(entity);
 			}
+		}
+
+		protected EfRepository(DbContextFactory dbContextFactory) : base(dbContextFactory)
+		{
 		}
 	}
 }

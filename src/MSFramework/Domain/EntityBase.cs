@@ -2,9 +2,44 @@
 using System.Collections.Generic;
 using System.Reflection;
 using MicroserviceFramework.Domain.Event;
+using MicroserviceFramework.Extensions;
 
 namespace MicroserviceFramework.Domain
 {
+	/// <inheritdoc/>
+	[Serializable]
+	public abstract class EntityBase : IEntity
+	{
+		private readonly List<DomainEvent> _domainEvents;
+
+		public IReadOnlyCollection<DomainEvent> GetDomainEvents() => _domainEvents.AsReadOnly();
+
+		protected EntityBase()
+		{
+			_domainEvents = new List<DomainEvent>();
+		}
+
+		public void AddDomainEvent(DomainEvent @event)
+		{
+			_domainEvents.Add(@event);
+		}
+
+		public void RemoveDomainEvent(DomainEvent @event)
+		{
+			_domainEvents.Remove(@event);
+		}
+
+		public void ClearDomainEvents() => _domainEvents.Clear();
+
+		/// <inheritdoc/>
+		public override string ToString()
+		{
+			return $"[ENTITY: {GetType().Name}] Keys = {GetKeys().ExpandAndToString(", ")}";
+		}
+
+		public abstract object[] GetKeys();
+	}
+
 	/// <inheritdoc cref="IEntity{TKey}" />
 	[Serializable]
 	public abstract class EntityBase<TKey> : EntityBase, IEntity<TKey> where TKey : IEquatable<TKey>
@@ -16,6 +51,11 @@ namespace MicroserviceFramework.Domain
 		{
 			get => _id;
 			protected set => _id = value;
+		}
+
+		public override object[] GetKeys()
+		{
+			return new object[] {Id};
 		}
 
 		protected EntityBase() : this(default)
@@ -95,29 +135,5 @@ namespace MicroserviceFramework.Domain
 		{
 			return $"[ENTITY: {GetType().Name}] Id = {Id}";
 		}
-	}
-
-	public abstract class EntityBase
-	{
-		private readonly List<DomainEvent> _domainEvents;
-
-		public IReadOnlyCollection<DomainEvent> GetDomainEvents() => _domainEvents.AsReadOnly();
-
-		protected EntityBase()
-		{
-			_domainEvents = new List<DomainEvent>();
-		}
-
-		public void AddDomainEvent(DomainEvent @event)
-		{
-			_domainEvents.Add(@event);
-		}
-
-		public void RemoveDomainEvent(DomainEvent @event)
-		{
-			_domainEvents.Remove(@event);
-		}
-
-		public void ClearDomainEvents() => _domainEvents.Clear();
 	}
 }

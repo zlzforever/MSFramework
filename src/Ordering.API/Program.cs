@@ -1,24 +1,11 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.Extensions.Hosting;
 using Serilog;
 using Serilog.Events;
 
 namespace Ordering.API
 {
-	interface IA
-	{
-	}
-
-	class A : IA
-	{
-	}
-
-	class B : IA
-	{
-	}
-
 	public class Program
 	{
 		public static void Main(string[] args)

@@ -1,5 +1,4 @@
-﻿using System.Collections.Concurrent;
-using MicroserviceFramework;
+﻿using MicroserviceFramework;
 using MicroserviceFramework.AspNetCore;
 using MicroserviceFramework.AspNetCore.Filters;
 using MicroserviceFramework.AspNetCore.Mvc.ModelBinding;
@@ -16,7 +15,6 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.OpenApi.Models;
-using Ordering.Application.Queries;
 using Ordering.Domain.AggregateRoots;
 using Ordering.Infrastructure;
 using Serilog;
@@ -27,10 +25,6 @@ namespace Ordering.API
 	{
 		public Startup(IConfiguration configuration)
 		{
-			ConcurrentBag<int> a = new ConcurrentBag<int>();
-			a.Clear();
-			;
-			var type = typeof(OrderingQuery);
 			Configuration = configuration;
 		}
 
@@ -118,13 +112,13 @@ namespace Ordering.API
 			app.Use(async (context, next) =>
 			{
 				var branchVer = context.Request.Query["branch"];
-			 
+
 
 				// Do work that doesn't write to the Response.
 				await next();
 				// Do other work that doesn't write to the Response.
 			});
-			
+
 			app.UseHttpsRedirection();
 			app.UseRouting();
 			app.UseHealthChecks("/healthcheck");

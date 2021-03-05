@@ -30,6 +30,8 @@ namespace MicroserviceFramework.Ef
 		/// </summary>
 		public string ConnectionString { get; set; }
 
+		public int MaxBatchSize { get; set; } = 100;
+
 		/// <summary>
 		/// 启用事务
 		/// </summary>

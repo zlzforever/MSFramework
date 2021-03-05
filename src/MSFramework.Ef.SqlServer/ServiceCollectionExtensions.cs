@@ -17,7 +17,11 @@ namespace MicroserviceFramework.Ef.SqlServer
 				var optionDict = configuration.GetSection("DbContexts").Get<DbContextConfigurationCollection>();
 				var option = optionDict.Get(dbContextType);
 
-				x.UseSqlServer(option.ConnectionString, options => { options.MigrationsAssembly(entryAssemblyName); });
+				x.UseSqlServer(option.ConnectionString, options =>
+				{
+					options.MaxBatchSize(option.MaxBatchSize);
+					options.MigrationsAssembly(entryAssemblyName);
+				});
 			});
 			return builder;
 		}

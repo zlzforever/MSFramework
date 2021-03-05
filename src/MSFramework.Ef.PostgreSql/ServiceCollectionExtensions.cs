@@ -46,7 +46,11 @@ namespace MicroserviceFramework.Ef.PostgreSql
 				var optionDict = configuration.GetSection("DbContexts").Get<DbContextConfigurationCollection>();
 				var option = optionDict.Get(dbContextType);
 
-				x.UseNpgsql(option.ConnectionString, options => { options.MigrationsAssembly(entryAssemblyName); });
+				x.UseNpgsql(option.ConnectionString, options =>
+				{
+					options.MaxBatchSize(option.MaxBatchSize);
+					options.MigrationsAssembly(entryAssemblyName);
+				});
 			});
 
 			services.AddDbContext<TDbContext>(action);

@@ -1,4 +1,5 @@
 using MicroserviceFramework.Domain;
+using MicroserviceFramework.Ef.Extensions;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace MicroserviceFramework.Ef
@@ -31,6 +32,11 @@ namespace MicroserviceFramework.Ef
 			// {
 			// 	builder.Property("Id").ValueGeneratedNever();
 			// }
+
+			if (typeof(IDeletion).IsAssignableFrom(builder.Metadata.ClrType))
+			{
+				builder.Metadata.AddSoftDeleteQueryFilter();
+			}
 
 			if (typeof(IOptimisticLock).IsAssignableFrom(typeof(TEntity)))
 			{

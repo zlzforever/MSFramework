@@ -9,7 +9,7 @@ using Ordering.Domain.Repositories;
 namespace Ordering.Infrastructure.Repositories
 {
 	public class OrderRepository
-		: EfRepository<Order>, IOrderingRepository
+		: EfRepository<Order, ObjectId>, IOrderingRepository
 	{
 		public OrderRepository(DbContextFactory context) : base(context)
 		{
@@ -17,7 +17,7 @@ namespace Ordering.Infrastructure.Repositories
 
 		public override Task<Order> FindAsync(ObjectId id)
 		{
-			return AggregateRootSet.Include(x => x.OrderItems).FirstOrDefaultAsync(x => x.Id == id);
+			return Store.Include(x => x.OrderItems).FirstOrDefaultAsync(x => x.Id == id);
 		}
 	}
 }

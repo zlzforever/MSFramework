@@ -1,11 +1,11 @@
 using System.Collections.Generic;
-using System.Threading.Tasks;
 using MicroserviceFramework.DependencyInjection;
 using MicroserviceFramework.Domain;
+using MicroserviceFramework.Shared;
 
 namespace MicroserviceFramework.FeatureManagement
 {
-	public interface IFeatureRepository : IRepository<Feature>, IScopeDependency
+	public interface IFeatureRepository : IRepository<Feature, ObjectId>, IScopeDependency
 	{
 		Feature GetByName(string name);
 

@@ -9,7 +9,7 @@ using Ordering.Domain.Repositories;
 
 namespace Ordering.Infrastructure.Repositories
 {
-	public class ProductRepository : EfRepository<Product>, IProductRepository
+	public class ProductRepository : EfRepository<Product, ObjectId>, IProductRepository
 	{
 		public ProductRepository(DbContextFactory dbContextFactory) : base(dbContextFactory)
 		{
@@ -17,12 +17,12 @@ namespace Ordering.Infrastructure.Repositories
 
 		public Product GetFirst()
 		{
-			return AggregateRootSet.FirstOrDefault();
+			return Store.FirstOrDefault();
 		}
 
 		public async Task<PagedResult<Product>> PagedQueryAsync(int page, int limit)
 		{
-			return await AggregateRootSet.PagedQueryAsync(page, limit);
+			return await Store.PagedQueryAsync(page, limit);
 		}
 	}
 }

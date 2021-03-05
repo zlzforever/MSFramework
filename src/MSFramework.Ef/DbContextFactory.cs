@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using MicroserviceFramework.Domain;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace MicroserviceFramework.Ef
