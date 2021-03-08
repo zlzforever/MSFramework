@@ -25,6 +25,7 @@ namespace MicroserviceFramework.Utilities
 			{
 				throw new Exception("Cannot perform DeepCopy: Ancestry conflict detected");
 			}
+
 			// Go through the Directories and recursively call the DeepCopy Method for each one
 			foreach (var dir in source.GetDirectories())
 			{
@@ -56,7 +57,7 @@ namespace MicroserviceFramework.Utilities
 		/// <returns> 是否成功 </returns>
 		public static bool Delete(string directory, bool isDeleteRoot = true)
 		{
-			Check.NotEmpty(directory, nameof(directory));
+			Check.NotNullOrWhiteSpace(directory, nameof(directory));
 			var flag = false;
 			var dirPathInfo = new DirectoryInfo(directory);
 			if (dirPathInfo.Exists)

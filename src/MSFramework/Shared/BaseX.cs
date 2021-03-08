@@ -72,7 +72,7 @@ namespace MicroserviceFramework.Shared
 
 		public static int ToInt32(string str)
 		{
-			Check.NotEmpty(str, nameof(str));
+			Check.NotNullOrWhiteSpace(str, nameof(str));
 
 			int res = default;
 			var r = 0;
@@ -106,7 +106,7 @@ namespace MicroserviceFramework.Shared
 		/// <exception cref="MicroserviceFrameworkException"></exception>
 		public static long ToInt64(string str)
 		{
-			Check.NotEmpty(str, nameof(str));
+			Check.NotNullOrWhiteSpace(str, nameof(str));
 
 			long res = default;
 			long r = 0;

@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using MicroserviceFramework.Extensions;
 
 namespace MicroserviceFramework.Shared
 {
@@ -11,106 +12,52 @@ namespace MicroserviceFramework.Shared
 	{
 		public static T NotNull<T>(T value, string parameterName)
 		{
-#pragma warning disable IDE0041 // Use 'is null' check
-			if (ReferenceEquals(value, null))
-#pragma warning restore IDE0041 // Use 'is null' check
+			if (value == null)
 			{
-				NotEmpty(parameterName, nameof(parameterName));
-
 				throw new ArgumentNullException(parameterName);
 			}
 
 			return value;
 		}
 
-		public static IReadOnlyList<T> NotEmpty<T>(IReadOnlyList<T> value,
-			string parameterName)
+		public static T NotNull<T>(T value, string parameterName, string message)
 		{
-			NotNull(value, parameterName);
-
-			if (value.Count == 0)
+			if (value == null)
 			{
-				NotEmpty(parameterName, nameof(parameterName));
-
-				throw new ArgumentException($"Collection is empty {parameterName}");
+				throw new ArgumentNullException(parameterName, message);
 			}
 
 			return value;
 		}
 
-		public static string NotEmpty(string value, string parameterName)
+		public static string NotNullOrWhiteSpace(string value, string parameterName)
 		{
-			Exception e = null;
-			if (value is null)
+			if (string.IsNullOrWhiteSpace(value))
 			{
-				e = new ArgumentNullException(parameterName);
-			}
-			else if (value.Trim().Length == 0)
-			{
-				e = new ArgumentException($"Argument is empty {parameterName}");
-			}
-
-			if (e != null)
-			{
-				NotEmpty(parameterName, nameof(parameterName));
-
-				throw e;
+				throw new ArgumentException($"{parameterName} can not be null, empty or white space!", parameterName);
 			}
 
 			return value;
 		}
 
-		public static string NullButNotEmpty(string value, string parameterName)
+		public static string NotNullOrEmpty(string value, string parameterName)
 		{
-			if (!(value is null)
-			    && value.Length == 0)
+			if (string.IsNullOrEmpty(value))
 			{
-				NotEmpty(parameterName, nameof(parameterName));
-
-				throw new ArgumentException($"Argument is empty {parameterName}");
+				throw new ArgumentException($"{parameterName} can not be null or empty!", parameterName);
 			}
 
 			return value;
 		}
-
-		public static IReadOnlyList<T> HasNoNulls<T>(IReadOnlyList<T> value,
-			string parameterName)
-			where T : class
+		
+		public static ICollection<T> NotNullOrEmpty<T>(ICollection<T> value, string parameterName)
 		{
-			NotNull(value, parameterName);
-
-			if (value.Any(e => e == null))
+			if (value.IsNullOrEmpty())
 			{
-				NotEmpty(parameterName, nameof(parameterName));
-
-				throw new ArgumentException(parameterName);
+				throw new ArgumentException(parameterName + " can not be null or empty!", parameterName);
 			}
 
 			return value;
-		}
-
-
-		public static IReadOnlyList<string> HasNoEmptyElements(IReadOnlyList<string> value,
-			string parameterName)
-		{
-			NotNull(value, parameterName);
-
-			if (value.Any(string.IsNullOrWhiteSpace))
-			{
-				NotEmpty(parameterName, nameof(parameterName));
-
-				throw new ArgumentException($"Has no empty elements in {parameterName}");
-			}
-
-			return value;
-		}
-
-		public static void DebugAssert(bool condition, string message)
-		{
-			if (!condition)
-			{
-				throw new Exception($"Check.DebugAssert failed: {message}");
-			}
 		}
 	}
 }

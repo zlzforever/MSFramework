@@ -40,7 +40,7 @@ namespace MicroserviceFramework.Ef
 
 			if (typeof(IOptimisticLock).IsAssignableFrom(typeof(TEntity)))
 			{
-				builder.Property("ConcurrencyStamp").IsConcurrencyToken();
+				builder.Property("ConcurrencyStamp").IsRequired().HasMaxLength(36).IsConcurrencyToken();
 			}
 		}
 
