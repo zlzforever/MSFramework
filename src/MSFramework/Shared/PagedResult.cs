@@ -9,7 +9,7 @@ namespace MicroserviceFramework.Shared
 		/// <summary>
 		/// 总计
 		/// </summary>
-		public int Count { get; private set; }
+		public int Total { get; private set; }
 
 		/// <summary>
 		/// 当前页数 
@@ -25,7 +25,7 @@ namespace MicroserviceFramework.Shared
 		{
 			Page = page;
 			Limit = limit;
-			Count = count;
+			Total = count;
 			Data = data;
 		}
 	}
