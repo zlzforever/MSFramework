@@ -51,5 +51,10 @@ namespace MicroserviceFramework.Ef
 		/// 是否开启敏感信息日志
 		/// </summary>
 		public bool EnableSensitiveDataLogging { get; set; }
+		
+		/// <summary>
+		/// 数据库前缀
+		/// </summary>
+		public string TablePrefix { get; set; }
 	}
 }

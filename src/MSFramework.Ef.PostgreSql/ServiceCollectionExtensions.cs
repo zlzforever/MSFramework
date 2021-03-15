@@ -48,6 +48,7 @@ namespace MicroserviceFramework.Ef.PostgreSql
 
 				x.UseNpgsql(option.ConnectionString, options =>
 				{
+					options.MigrationsHistoryTable(option.TablePrefix + "migrations_history");
 					options.MaxBatchSize(option.MaxBatchSize);
 					options.MigrationsAssembly(entryAssemblyName);
 				});

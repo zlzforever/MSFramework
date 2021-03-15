@@ -91,6 +91,15 @@ namespace MicroserviceFramework.Ef
 			{
 				modelBuilder.UseUnderScoreCase();
 			}
+
+			var tablePrefix = option.TablePrefix?.Trim();
+			if (!string.IsNullOrWhiteSpace(tablePrefix))
+			{
+				foreach (var entity in modelBuilder.Model.GetEntityTypes())
+				{
+					entity.SetTableName(tablePrefix + entity.GetTableName());
+				}
+			}
 		}
 
 		public IEnumerable<AuditEntity> GetAuditEntities()

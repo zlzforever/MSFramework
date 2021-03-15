@@ -3,8 +3,8 @@
         <TargetFrameworks>netstandard2.1;netstandard2.0</TargetFrameworks>
         <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
         <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
-        <Version>0.14.2-beta5</Version>
-        <FileVersion>0.14.2.5</FileVersion>
+        <Version>0.14.3-beta1</Version>
+        <FileVersion>0.14.3.1</FileVersion>
         <Authors>zlzforever@163.com;</Authors>
         <Copyright>Copyright 2019 Lewis Zou</Copyright>
         <Description>MSFramework is a lightweight DDD framework</Description>

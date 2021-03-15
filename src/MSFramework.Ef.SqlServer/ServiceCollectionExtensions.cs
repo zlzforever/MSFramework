@@ -19,6 +19,7 @@ namespace MicroserviceFramework.Ef.SqlServer
 
 				x.UseSqlServer(option.ConnectionString, options =>
 				{
+					options.MigrationsHistoryTable(option.TablePrefix + "migrations_history");
 					options.MaxBatchSize(option.MaxBatchSize);
 					options.MigrationsAssembly(entryAssemblyName);
 				});
