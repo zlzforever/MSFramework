@@ -33,11 +33,6 @@ namespace MicroserviceFramework.Ef
 			// 	builder.Property("Id").ValueGeneratedNever();
 			// }
 
-			if (typeof(IDeletion).IsAssignableFrom(builder.Metadata.ClrType))
-			{
-				builder.Metadata.AddSoftDeleteQueryFilter();
-			}
-
 			if (typeof(IOptimisticLock).IsAssignableFrom(typeof(TEntity)))
 			{
 				builder.Property("ConcurrencyStamp").IsRequired().HasMaxLength(36).IsConcurrencyToken();

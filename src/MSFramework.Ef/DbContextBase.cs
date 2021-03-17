@@ -93,11 +93,17 @@ namespace MicroserviceFramework.Ef
 			}
 
 			var tablePrefix = option.TablePrefix?.Trim();
-			if (!string.IsNullOrWhiteSpace(tablePrefix))
+
+			foreach (var entity in modelBuilder.Model.GetEntityTypes())
 			{
-				foreach (var entity in modelBuilder.Model.GetEntityTypes())
+				if (!string.IsNullOrWhiteSpace(tablePrefix))
 				{
 					entity.SetTableName(tablePrefix + entity.GetTableName());
+				}
+
+				if (typeof(IDeletion).IsAssignableFrom(entity.ClrType))
+				{
+					entity.AddSoftDeleteQueryFilter();
 				}
 			}
 		}
