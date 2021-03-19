@@ -33,10 +33,7 @@ namespace MicroserviceFramework.Ef
 			// 	builder.Property("Id").ValueGeneratedNever();
 			// }
 
-			if (typeof(IOptimisticLock).IsAssignableFrom(typeof(TEntity)))
-			{
-				builder.Property("ConcurrencyStamp").IsRequired().HasMaxLength(36).IsConcurrencyToken();
-			}
+
 		}
 
 		public override string ToString()

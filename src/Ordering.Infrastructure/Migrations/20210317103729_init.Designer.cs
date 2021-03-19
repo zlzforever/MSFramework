@@ -9,7 +9,7 @@ using Ordering.Infrastructure;
 namespace Ordering.Infrastructure.Migrations
 {
     [DbContext(typeof(OrderingContext))]
-    [Migration("20210211082412_init")]
+    [Migration("20210317103729_init")]
     partial class init
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -17,7 +17,7 @@ namespace Ordering.Infrastructure.Migrations
 #pragma warning disable 612, 618
             modelBuilder
                 .HasAnnotation("Relational:MaxIdentifierLength", 64)
-                .HasAnnotation("ProductVersion", "5.0.2");
+                .HasAnnotation("ProductVersion", "5.0.4");
 
             modelBuilder.Entity("MicroserviceFramework.Audit.AuditEntity", b =>
                 {
@@ -56,7 +56,7 @@ namespace Ordering.Infrastructure.Migrations
 
                     b.HasIndex("audit_operation_id");
 
-                    b.ToTable("audit_entity");
+                    b.ToTable("ms_audit_entity");
                 });
 
             modelBuilder.Entity("MicroserviceFramework.Audit.AuditOperation", b =>
@@ -120,7 +120,7 @@ namespace Ordering.Infrastructure.Migrations
 
                     b.HasIndex("EndTime");
 
-                    b.ToTable("audit_operation");
+                    b.ToTable("ms_audit_operation");
                 });
 
             modelBuilder.Entity("MicroserviceFramework.Audit.AuditProperty", b =>
@@ -161,7 +161,7 @@ namespace Ordering.Infrastructure.Migrations
 
                     b.HasIndex("audit_entity_id");
 
-                    b.ToTable("audit_property");
+                    b.ToTable("ms_audit_property");
                 });
 
             modelBuilder.Entity("MicroserviceFramework.FeatureManagement.Feature", b =>
@@ -201,7 +201,7 @@ namespace Ordering.Infrastructure.Migrations
                     b.HasIndex("Name")
                         .IsUnique();
 
-                    b.ToTable("feature");
+                    b.ToTable("ms_feature");
                 });
 
             modelBuilder.Entity("Ordering.Domain.AggregateRoots.Order", b =>
@@ -209,6 +209,13 @@ namespace Ordering.Infrastructure.Migrations
                     b.Property<string>("Id")
                         .HasColumnType("varchar(36) CHARACTER SET utf8mb4")
                         .HasColumnName("id");
+
+                    b.Property<string>("ConcurrencyStamp")
+                        .IsConcurrencyToken()
+                        .IsRequired()
+                        .HasMaxLength(36)
+                        .HasColumnType("varchar(36) CHARACTER SET utf8mb4")
+                        .HasColumnName("concurrency_stamp");
 
                     b.Property<DateTimeOffset>("CreationTime")
                         .HasColumnType("datetime(6)")
@@ -235,7 +242,7 @@ namespace Ordering.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("order");
+                    b.ToTable("ms_order");
                 });
 
             modelBuilder.Entity("Ordering.Domain.AggregateRoots.OrderItem", b =>
@@ -277,7 +284,7 @@ namespace Ordering.Infrastructure.Migrations
 
                     b.HasIndex("OrderId");
 
-                    b.ToTable("order_item");
+                    b.ToTable("ms_order_item");
                 });
 
             modelBuilder.Entity("Ordering.Domain.AggregateRoots.Product", b =>
@@ -288,7 +295,9 @@ namespace Ordering.Infrastructure.Migrations
 
                     b.Property<string>("ConcurrencyStamp")
                         .IsConcurrencyToken()
-                        .HasColumnType("longtext CHARACTER SET utf8mb4")
+                        .IsRequired()
+                        .HasMaxLength(36)
+                        .HasColumnType("varchar(36) CHARACTER SET utf8mb4")
                         .HasColumnName("concurrency_stamp");
 
                     b.Property<string>("Name")
@@ -302,7 +311,7 @@ namespace Ordering.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("product");
+                    b.ToTable("ms_product");
                 });
 
             modelBuilder.Entity("MicroserviceFramework.Audit.AuditEntity", b =>
@@ -361,7 +370,7 @@ namespace Ordering.Infrastructure.Migrations
 
                             b1.HasKey("OrderId");
 
-                            b1.ToTable("order");
+                            b1.ToTable("ms_order");
 
                             b1.WithOwner()
                                 .HasForeignKey("OrderId");

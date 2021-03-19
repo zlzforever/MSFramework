@@ -20,7 +20,7 @@ namespace Ordering.Infrastructure.EntityConfigurations
 
 			builder.Property<DateTimeOffset>("CreationTime").IsRequired();
 			builder.Property<bool>("IsDeleted").IsRequired();
-			builder.Property<string>("UserId").IsRequired();
+			builder.Property<string>("UserId").HasMaxLength(255).IsRequired();
 			builder.Property<string>("Description").IsRequired(false);
 			builder.Property<OrderStatus>("OrderStatus").UseEnumeration().HasMaxLength(255).IsRequired();
 

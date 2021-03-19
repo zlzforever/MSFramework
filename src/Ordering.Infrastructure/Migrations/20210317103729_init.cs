@@ -8,7 +8,7 @@ namespace Ordering.Infrastructure.Migrations
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.CreateTable(
-                name: "audit_operation",
+                name: "ms_audit_operation",
                 columns: table => new
                 {
                     id = table.Column<string>(type: "varchar(36) CHARACTER SET utf8mb4", nullable: false),
@@ -25,11 +25,11 @@ namespace Ordering.Infrastructure.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_audit_operation", x => x.id);
+                    table.PrimaryKey("PK_ms_audit_operation", x => x.id);
                 });
 
             migrationBuilder.CreateTable(
-                name: "feature",
+                name: "ms_feature",
                 columns: table => new
                 {
                     id = table.Column<string>(type: "varchar(36) CHARACTER SET utf8mb4", nullable: false),
@@ -42,11 +42,11 @@ namespace Ordering.Infrastructure.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_feature", x => x.id);
+                    table.PrimaryKey("PK_ms_feature", x => x.id);
                 });
 
             migrationBuilder.CreateTable(
-                name: "order",
+                name: "ms_order",
                 columns: table => new
                 {
                     id = table.Column<string>(type: "varchar(36) CHARACTER SET utf8mb4", nullable: false),
@@ -59,29 +59,30 @@ namespace Ordering.Infrastructure.Migrations
                     order_status = table.Column<string>(type: "varchar(255) CHARACTER SET utf8mb4", maxLength: 255, nullable: false),
                     user_id = table.Column<string>(type: "longtext CHARACTER SET utf8mb4", nullable: false),
                     description = table.Column<string>(type: "longtext CHARACTER SET utf8mb4", nullable: true),
+                    concurrency_stamp = table.Column<string>(type: "varchar(36) CHARACTER SET utf8mb4", maxLength: 36, nullable: false),
                     is_deleted = table.Column<bool>(type: "tinyint(1)", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_order", x => x.id);
+                    table.PrimaryKey("PK_ms_order", x => x.id);
                 });
 
             migrationBuilder.CreateTable(
-                name: "product",
+                name: "ms_product",
                 columns: table => new
                 {
                     id = table.Column<string>(type: "varchar(36) CHARACTER SET utf8mb4", nullable: false),
                     name = table.Column<string>(type: "varchar(256) CHARACTER SET utf8mb4", maxLength: 256, nullable: true),
                     price = table.Column<int>(type: "int", nullable: false),
-                    concurrency_stamp = table.Column<string>(type: "longtext CHARACTER SET utf8mb4", nullable: true)
+                    concurrency_stamp = table.Column<string>(type: "varchar(36) CHARACTER SET utf8mb4", maxLength: 36, nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_product", x => x.id);
+                    table.PrimaryKey("PK_ms_product", x => x.id);
                 });
 
             migrationBuilder.CreateTable(
-                name: "audit_entity",
+                name: "ms_audit_entity",
                 columns: table => new
                 {
                     id = table.Column<string>(type: "varchar(36) CHARACTER SET utf8mb4", nullable: false),
@@ -93,11 +94,11 @@ namespace Ordering.Infrastructure.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_audit_entity", x => x.id);
+                    table.PrimaryKey("PK_ms_audit_entity", x => x.id);
                 });
 
             migrationBuilder.CreateTable(
-                name: "order_item",
+                name: "ms_order_item",
                 columns: table => new
                 {
                     id = table.Column<string>(type: "varchar(36) CHARACTER SET utf8mb4", nullable: false),
@@ -111,11 +112,11 @@ namespace Ordering.Infrastructure.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_order_item", x => x.id);
+                    table.PrimaryKey("PK_ms_order_item", x => x.id);
                 });
 
             migrationBuilder.CreateTable(
-                name: "audit_property",
+                name: "ms_audit_property",
                 columns: table => new
                 {
                     id = table.Column<string>(type: "varchar(36) CHARACTER SET utf8mb4", nullable: false),
@@ -128,83 +129,83 @@ namespace Ordering.Infrastructure.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_audit_property", x => x.id);
+                    table.PrimaryKey("PK_ms_audit_property", x => x.id);
                 });
 
             migrationBuilder.CreateIndex(
-                name: "IX_audit_entity_audit_operation_id",
-                table: "audit_entity",
+                name: "IX_ms_audit_entity_audit_operation_id",
+                table: "ms_audit_entity",
                 column: "audit_operation_id");
 
             migrationBuilder.CreateIndex(
-                name: "IX_audit_entity_entity_id",
-                table: "audit_entity",
+                name: "IX_ms_audit_entity_entity_id",
+                table: "ms_audit_entity",
                 column: "entity_id");
 
             migrationBuilder.CreateIndex(
-                name: "IX_audit_entity_operation_id",
-                table: "audit_entity",
+                name: "IX_ms_audit_entity_operation_id",
+                table: "ms_audit_entity",
                 column: "operation_id");
 
             migrationBuilder.CreateIndex(
-                name: "IX_audit_operation_creation_time",
-                table: "audit_operation",
+                name: "IX_ms_audit_operation_creation_time",
+                table: "ms_audit_operation",
                 column: "creation_time");
 
             migrationBuilder.CreateIndex(
-                name: "IX_audit_operation_creation_user_id",
-                table: "audit_operation",
+                name: "IX_ms_audit_operation_creation_user_id",
+                table: "ms_audit_operation",
                 column: "creation_user_id");
 
             migrationBuilder.CreateIndex(
-                name: "IX_audit_operation_end_time",
-                table: "audit_operation",
+                name: "IX_ms_audit_operation_end_time",
+                table: "ms_audit_operation",
                 column: "end_time");
 
             migrationBuilder.CreateIndex(
-                name: "IX_audit_property_audit_entity_id",
-                table: "audit_property",
+                name: "IX_ms_audit_property_audit_entity_id",
+                table: "ms_audit_property",
                 column: "audit_entity_id");
 
             migrationBuilder.CreateIndex(
-                name: "IX_audit_property_entity_id",
-                table: "audit_property",
+                name: "IX_ms_audit_property_entity_id",
+                table: "ms_audit_property",
                 column: "entity_id");
 
             migrationBuilder.CreateIndex(
-                name: "IX_feature_name",
-                table: "feature",
+                name: "IX_ms_feature_name",
+                table: "ms_feature",
                 column: "name",
                 unique: true);
 
             migrationBuilder.CreateIndex(
-                name: "IX_order_item_order_id",
-                table: "order_item",
+                name: "IX_ms_order_item_order_id",
+                table: "ms_order_item",
                 column: "order_id");
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "audit_property");
+                name: "ms_audit_property");
 
             migrationBuilder.DropTable(
-                name: "feature");
+                name: "ms_feature");
 
             migrationBuilder.DropTable(
-                name: "order_item");
+                name: "ms_order_item");
 
             migrationBuilder.DropTable(
-                name: "product");
+                name: "ms_product");
 
             migrationBuilder.DropTable(
-                name: "audit_entity");
+                name: "ms_audit_entity");
 
             migrationBuilder.DropTable(
-                name: "order");
+                name: "ms_order");
 
             migrationBuilder.DropTable(
-                name: "audit_operation");
+                name: "ms_audit_operation");
         }
     }
 }

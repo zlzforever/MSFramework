@@ -30,6 +30,9 @@ namespace MicroserviceFramework.Ef
 		/// </summary>
 		public string ConnectionString { get; set; }
 
+		/// <summary>
+		/// 批量提交
+		/// </summary>
 		public int MaxBatchSize { get; set; } = 100;
 
 		/// <summary>
@@ -51,7 +54,7 @@ namespace MicroserviceFramework.Ef
 		/// 是否开启敏感信息日志
 		/// </summary>
 		public bool EnableSensitiveDataLogging { get; set; }
-		
+
 		/// <summary>
 		/// 数据库前缀
 		/// </summary>

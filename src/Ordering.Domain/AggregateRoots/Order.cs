@@ -10,7 +10,7 @@ using Ordering.Domain.AggregateRoots.Events;
 namespace Ordering.Domain.AggregateRoots
 {
 	[Description("订单表")]
-	public class Order : AggregateRoot<ObjectId>
+	public class Order : AggregateRoot<ObjectId>, IOptimisticLock
 	{
 		// DDD Patterns comment
 		// Using a private collection field, better for DDD Aggregate's encapsulation
@@ -181,5 +181,7 @@ namespace Ordering.Domain.AggregateRoots
 			throw new OrderingDomainException(
 				$"Is not possible to change the order status from {OrderStatus} to {orderStatusToChange}.");
 		}
+
+		public string ConcurrencyStamp { get; set; }
 	}
 }

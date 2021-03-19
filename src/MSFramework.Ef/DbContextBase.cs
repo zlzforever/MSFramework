@@ -7,12 +7,19 @@ using MicroserviceFramework.Audit;
 using MicroserviceFramework.Domain;
 using MicroserviceFramework.Domain.Event;
 using MicroserviceFramework.Ef.Extensions;
+using MicroserviceFramework.Ef.Internal;
 using MicroserviceFramework.EventBus;
+using MicroserviceFramework.Extensions;
+using MicroserviceFramework.Shared;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+
+#if !NETSTANDARD2_0
+using Microsoft.EntityFrameworkCore.Metadata;
+#endif
 
 namespace MicroserviceFramework.Ef
 {
@@ -84,26 +91,67 @@ namespace MicroserviceFramework.Ef
 			_logger.LogInformation(
 				$"将 {count} 个实体 {stringBuilder} 注册到上下文 {contextType} 中");
 
-			modelBuilder.UseObjectId();
-
 			var option = _entityFrameworkOptions.Get(GetType());
-			if (option.UseUnderScoreCase)
-			{
-				modelBuilder.UseUnderScoreCase();
-			}
 
 			var tablePrefix = option.TablePrefix?.Trim();
 
-			foreach (var entity in modelBuilder.Model.GetEntityTypes())
+			foreach (var entityType in modelBuilder.Model.GetEntityTypes())
 			{
-				if (!string.IsNullOrWhiteSpace(tablePrefix))
+				if (!entityType.IsOwned())
 				{
-					entity.SetTableName(tablePrefix + entity.GetTableName());
+					var tableName = entityType.GetTableName();
+
+					if (option.UseUnderScoreCase)
+					{
+						tableName = tableName.ToUnderScoreCase();
+					}
+
+					if (!string.IsNullOrWhiteSpace(tablePrefix))
+					{
+						tableName = tablePrefix + tableName;
+					}
+
+					entityType.SetTableName(tableName);
 				}
 
-				if (typeof(IDeletion).IsAssignableFrom(entity.ClrType))
+				if (typeof(IDeletion).IsAssignableFrom(entityType.ClrType))
 				{
-					entity.AddSoftDeleteQueryFilter();
+					entityType.AddSoftDeleteQueryFilter();
+				}
+
+				var properties = entityType.GetProperties();
+				foreach (var property in properties)
+				{
+					if (typeof(IOptimisticLock).IsAssignableFrom(entityType.ClrType) &&
+					    property.Name == "ConcurrencyStamp")
+					{
+						property.SetMaxLength(36);
+						property.IsConcurrencyToken = true;
+						property.IsNullable = false;
+					}
+
+					if (option.UseUnderScoreCase)
+					{
+#if NETSTANDARD2_0
+						var propertyName = property.GetColumnName();
+
+#else
+					var storeObjectIdentifier = StoreObjectIdentifier.Create(entityType, StoreObjectType.Table);
+					var propertyName = property.GetColumnName(storeObjectIdentifier.GetValueOrDefault());
+#endif
+
+						if (propertyName.StartsWith("_"))
+						{
+							propertyName = propertyName.Substring(1, propertyName.Length - 1);
+						}
+
+						property.SetColumnName(propertyName.ToUnderScoreCase());
+					}
+
+					if (property.ClrType == typeof(ObjectId))
+					{
+						property.SetValueConverter(new ObjectIdToStringConverter());
+					}
 				}
 			}
 		}
