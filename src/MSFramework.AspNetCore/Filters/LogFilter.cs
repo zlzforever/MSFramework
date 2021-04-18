@@ -1,4 +1,5 @@
 using System.Threading.Tasks;
+using MicroserviceFramework.Application;
 using MicroserviceFramework.AspNetCore.Extensions;
 using MicroserviceFramework.Extensions;
 using Microsoft.AspNetCore.Mvc.Filters;
@@ -9,10 +10,12 @@ namespace MicroserviceFramework.AspNetCore.Filters
 	public class LogFilter : IAsyncActionFilter
 	{
 		private readonly ILogger<LogFilter> _logger;
+		private readonly ISession _session;
 
-		public LogFilter(ILogger<LogFilter> logger)
+		public LogFilter(ILogger<LogFilter> logger, ISession session)
 		{
 			_logger = logger;
+			_session = session;
 		}
 
 		public async Task OnActionExecutionAsync(ActionExecutingContext context, ActionExecutionDelegate next)
@@ -26,7 +29,7 @@ namespace MicroserviceFramework.AspNetCore.Filters
 			var userAgent = context.HttpContext.Request.Headers.GetOrDefault("User-Agent");
 			var ip = context.GetRemoteIpAddress();
 			_logger.LogInformation(
-				$"{ip} -- {context.HttpContext.Request.Method.ToUpper()} \"{context.HttpContext.Request.Path}{context.HttpContext.Request.QueryString}\" \"{userAgent}\"");
+				$"{ip} -- {_session.UserId} -- {context.HttpContext.Request.Method.ToUpper()} \"{context.HttpContext.Request.Path}{context.HttpContext.Request.QueryString}\" \"{userAgent}\"");
 			await next();
 		}
 	}
