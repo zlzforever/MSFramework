@@ -15,9 +15,7 @@ namespace MicroserviceFramework.AspNetCore.Filters
 
 		public void OnException(ExceptionContext context)
 		{
-			_logger.LogError(context.Exception.ToString());
-
-			if (context.Exception is MicroserviceFrameworkException e)
+			if (context.Exception is MicroserviceFrameworkFriendlyException e)
 			{
 				context.HttpContext.Response.StatusCode = 200;
 				context.Result = new ApiResult(string.Empty)
@@ -29,11 +27,13 @@ namespace MicroserviceFramework.AspNetCore.Filters
 			}
 			else
 			{
+				_logger.LogError(context.Exception.ToString());
+
 				context.HttpContext.Response.StatusCode = 500;
 				context.Result = new ApiResult(string.Empty)
 				{
 					Success = false,
-					Msg = "服务出小差",
+					Msg = "系统内部错误",
 					Code = 500
 				};
 			}
