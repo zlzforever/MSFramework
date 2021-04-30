@@ -15,14 +15,24 @@ namespace MicroserviceFramework.AspNetCore.Filters
 
 		public void OnException(ExceptionContext context)
 		{
-			if (context.Exception is MicroserviceFrameworkFriendlyException e)
+			if (context.Exception is MicroserviceFrameworkFriendlyException e1)
 			{
 				context.HttpContext.Response.StatusCode = 200;
 				context.Result = new ApiResult(string.Empty)
 				{
 					Success = false,
-					Msg = e.Message,
-					Code = e.Code
+					Msg = e1.Message,
+					Code = e1.Code
+				};
+			}
+			else if (context.Exception.InnerException is MicroserviceFrameworkFriendlyException e2)
+			{
+				context.HttpContext.Response.StatusCode = 200;
+				context.Result = new ApiResult(string.Empty)
+				{
+					Success = false,
+					Msg = e2.Message,
+					Code = e2.Code
 				};
 			}
 			else
