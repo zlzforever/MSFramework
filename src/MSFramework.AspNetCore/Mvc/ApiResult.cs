@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Net;
 using System.Reflection;
 using System.Text.Json;
@@ -91,6 +92,8 @@ namespace MicroserviceFramework.AspNetCore.Mvc
 		/// </para>
 		/// </summary>
 		public object SerializerSettings { get; set; }
+
+		public Dictionary<string, IEnumerable<string>> Errors { get; set; }
 
 		/// <summary>
 		/// Gets or sets the HTTP status code.
