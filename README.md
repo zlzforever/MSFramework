@@ -3,6 +3,21 @@ A micro service template
 
 [![Build Status](https://dev.azure.com/zlzforever/cerberus/_apis/build/status/zlzforever.MSFramework?branchName=master)](https://dev.azure.com/zlzforever/cerberus/_build/latest?definitionId=10&branchName=master)
 
+
+## Deploy Seq
+
+```
+PH=$(echo '1qazZAQ!' | docker run --rm -i datalust/seq config hash)
+docker run \
+  --name seq \
+  -d \
+  --restart unless-stopped \
+  -e ACCEPT_EULA=Y \
+  -e SEQ_FIRSTRUN_ADMINPASSWORDHASH="$PH" \
+  -p 5340:80 \
+  -p 5341:5341 \
+  datalust/seq
+```
 ### Add EF migrations 
 
 ```

@@ -3,10 +3,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using MicroserviceFramework.Domain;
-using MicroserviceFramework.Shared;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.OpenApi.Any;
 using Microsoft.OpenApi.Models;
+using MongoDB.Bson;
 using Swashbuckle.AspNetCore.SwaggerGen;
 
 namespace MicroserviceFramework.AspNetCore.Swagger

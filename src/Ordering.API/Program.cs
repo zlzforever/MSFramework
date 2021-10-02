@@ -1,5 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
-using Microsoft.AspNetCore.Hosting;
+﻿using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Hosting;
 using Serilog;
 using Serilog.Events;
@@ -10,8 +9,6 @@ namespace Ordering.API
 	{
 		public static void Main(string[] args)
 		{
-			
-			var a = typeof(StringLengthAttribute).Assembly;
 			Log.Logger = new LoggerConfiguration()
 				.MinimumLevel.Debug()
 				.MinimumLevel.Override("Microsoft.Hosting.Lifetime", LogEventLevel.Information)
@@ -22,11 +19,11 @@ namespace Ordering.API
 				.MinimumLevel.Override("System", LogEventLevel.Warning)
 				.MinimumLevel.Override("Microsoft.AspNetCore.Authentication", LogEventLevel.Warning)
 				.Enrich.FromLogContext()
-				.WriteTo.Console().WriteTo.RollingFile("order.log")
+				.WriteTo.Console()
+				.WriteTo.Seq("http://localhost:5341", apiKey: "VrKfUYKzcVH4b1dW72KL")
 				.CreateLogger();
 			CreateHostBuilder(args).Build().Run();
 		}
-
 
 		public static IHostBuilder CreateHostBuilder(string[] args) =>
 			Host.CreateDefaultBuilder(args)

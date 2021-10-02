@@ -12,15 +12,15 @@ namespace MicroserviceFramework.Audit
 		/// <typeparam name="TAuditService"></typeparam>
 		/// <returns></returns>
 		public static MicroserviceFrameworkBuilder UseAudit<TAuditService>(this MicroserviceFrameworkBuilder builder)
-			where TAuditService : class, IAuditService
+			where TAuditService : class, IAuditStore
 		{
-			builder.Services.TryAddScoped<IAuditService, TAuditService>();
+			builder.Services.TryAddScoped<IAuditStore, TAuditService>();
 			return builder;
 		}
 
 		public static MicroserviceFrameworkBuilder UseAudit(this MicroserviceFrameworkBuilder builder)
 		{
-			builder.UseAudit<DefaultAuditService>();
+			builder.UseAudit<LoggerAuditStore>();
 			return builder;
 		}
 

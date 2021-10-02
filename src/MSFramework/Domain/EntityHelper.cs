@@ -1,6 +1,6 @@
 using System;
 using System.Collections.Generic;
-using MicroserviceFramework.Shared;
+using MongoDB.Bson;
 
 namespace MicroserviceFramework.Domain
 {

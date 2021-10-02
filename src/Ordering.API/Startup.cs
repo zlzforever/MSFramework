@@ -7,7 +7,7 @@ using MicroserviceFramework.Audit;
 using MicroserviceFramework.AutoMapper;
 using MicroserviceFramework.Configuration;
 using MicroserviceFramework.Ef;
-using MicroserviceFramework.Ef.MySql;
+using MicroserviceFramework.Ef.PostgreSql;
 using MicroserviceFramework.Newtonsoft;
 using MicroserviceFramework.Serialization.Converters;
 using Microsoft.AspNetCore.Builder;
@@ -17,7 +17,6 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.OpenApi.Models;
 using Ordering.Domain.AggregateRoots;
 using Ordering.Infrastructure;
-using Serilog;
 
 namespace Ordering.API
 {
@@ -35,13 +34,11 @@ namespace Ordering.API
 		{
 			services.AddOptions(Configuration);
 
-			Configuration.Print(x => Log.Logger.Information(x));
 			services.AddControllers(x =>
 				{
 					x.Filters.Add<LogFilter>();
 					x.Filters.AddUnitOfWork();
 					x.Filters.AddAudit();
-					x.Filters.AddFeatureFilter();
 					x.Filters.AddGlobalException();
 					x.ModelBinderProviders.Insert(0, new ObjectIdModelBinderProvider());
 				})
@@ -66,10 +63,10 @@ namespace Ordering.API
 
 			services.AddSwaggerGen(x =>
 			{
-				x.SwaggerDoc("v1.0", new OpenApiInfo {Version = "v1.0", Description = "Ordering API V1.0"});
+				x.SwaggerDoc("v1.0", new OpenApiInfo { Version = "v1.0", Description = "Ordering API V1.0" });
 				x.CustomSchemaIds(type => type.FullName);
 				x.MapEnumerationType(typeof(Address).Assembly);
-				x.MapObjectIdType();
+				//x.MapObjectIdType();
 			});
 			services.AddHealthChecks();
 
@@ -78,7 +75,6 @@ namespace Ordering.API
 				builder.UseAssemblyScanPrefix("Ordering");
 				builder.UseAutoMapper();
 				builder.UseCqrs();
-				builder.UseFeatureManagement();
 				//builder.UseAccessControl(Configuration);
 				// builder.UseRabbitMQEventDispatcher(new RabbitMQOptions(), typeof(UserCheckoutAcceptedEvent));
 				// 启用审计服务
@@ -91,7 +87,7 @@ namespace Ordering.API
 				builder.UseEntityFramework(x =>
 				{
 					// 添加 MySql 支持
-					x.AddMySql<OrderingContext>(Configuration);
+					x.AddNpgsql<OrderingContext>(Configuration);
 				});
 			});
 		}

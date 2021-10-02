@@ -1,7 +1,7 @@
 using System.Threading;
 using System.Threading.Tasks;
 using MicroserviceFramework.Application.CQRS;
-using MicroserviceFramework.Shared;
+using MongoDB.Bson;
 using Ordering.Domain.Repositories;
 
 namespace Ordering.Application.Commands
@@ -20,7 +20,7 @@ namespace Ordering.Application.Commands
 			var order = await _orderRepository.FindAsync(request.OrderId);
 
 			order.SetCancelledStatus();
-			return ObjectId.NewId();
+			return ObjectId.GenerateNewId();
 		}
 	}
 }

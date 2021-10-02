@@ -1,7 +1,7 @@
 using System;
 using System.Linq.Expressions;
-using MicroserviceFramework.Shared;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
+using MongoDB.Bson;
 
 namespace MicroserviceFramework.Ef.Internal
 {

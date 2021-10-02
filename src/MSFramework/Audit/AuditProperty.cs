@@ -1,5 +1,6 @@
+using System.Text.Json.Serialization;
 using MicroserviceFramework.Domain;
-using MicroserviceFramework.Shared;
+using MongoDB.Bson;
 
 namespace MicroserviceFramework.Audit
 {
@@ -8,7 +9,7 @@ namespace MicroserviceFramework.Audit
 	/// </summary>
 	public class AuditProperty : EntityBase<ObjectId>
 	{
-		private AuditProperty() : base(ObjectId.NewId())
+		private AuditProperty() : base(ObjectId.GenerateNewId())
 		{
 		}
 
@@ -24,6 +25,7 @@ namespace MicroserviceFramework.Audit
 		/// <summary>
 		/// 所属实体
 		/// </summary>
+		[JsonIgnore]
 		public virtual AuditEntity Entity { get; internal set; }
 
 		/// <summary>

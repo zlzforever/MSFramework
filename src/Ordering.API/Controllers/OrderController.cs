@@ -1,14 +1,13 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using Cerberus.AspNetCore.AccessControl;
 using MicroserviceFramework.Application.CQRS;
 using MicroserviceFramework.AspNetCore;
 using MicroserviceFramework.AspNetCore.Filters;
 using MicroserviceFramework.Domain;
-using MicroserviceFramework.Shared;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using MongoDB.Bson;
 using Ordering.Application.Commands;
 using Ordering.Application.Queries;
 using Ordering.Domain.AggregateRoots;
@@ -37,7 +36,7 @@ namespace Ordering.API.Controllers
 			_unitOfWorkManager = unitOfWorkManager;
 			_orderRepository = orderRepository;
 		}
-
+		
 		//[AccessControl("TestCreate")]
 		[Route("testCreate")]
 		[HttpPost]
@@ -63,7 +62,7 @@ namespace Ordering.API.Controllers
 		#region Command
 
 		[IgnoreAudit]
-		[HttpPost("test-command1"), AccessControl("test-command1")]
+		[HttpPost("test-command1")]
 		public async Task<string> TestCommand1Async([FromBody] TestCommand1 command)
 		{
 			var a = await _cqrsProcessor.ExecuteAsync(command, default);

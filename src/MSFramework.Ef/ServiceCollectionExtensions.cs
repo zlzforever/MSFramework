@@ -1,8 +1,6 @@
 ﻿using System;
 using MicroserviceFramework.Domain;
-using MicroserviceFramework.Ef.Initializer;
 using MicroserviceFramework.Ef.Internal;
-using MicroserviceFramework.Initializer;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 
@@ -25,7 +23,6 @@ namespace MicroserviceFramework.Ef
 			services.TryAddSingleton<IEntityConfigurationTypeFinder, EntityConfigurationTypeFinder>();
 			services.TryAddScoped<DbContextFactory>();
 			services.TryAddScoped<IUnitOfWork, EfUnitOfWork>();
-			services.AddInitializer<EntityFrameworkInitializer>();
 			return services;
 		}
 	}

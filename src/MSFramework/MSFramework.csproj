@@ -15,6 +15,7 @@
         <PackageReference Include="Microsoft.Extensions.DependencyModel" Version="5.0.0" />
         <PackageReference Include="DeepCopy" Version="1.0.3" />
         <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="5.0.0" />
+        <PackageReference Include="MongoDB.Bson" Version="2.13.1" />
         <PackageReference Include="System.Threading.Tasks.Dataflow" Version="5.0.0" />
     </ItemGroup>
 </Project>

@@ -13,6 +13,7 @@ using MicroserviceFramework.Shared;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using MongoDB.Bson;
 using Ordering.Domain.AggregateRoots;
 using Ordering.Domain.Repositories;
 
@@ -47,22 +48,19 @@ namespace Ordering.API.Controllers
 	public class ProductController : ApiControllerBase
 	{
 		private readonly IProductRepository _productRepository;
-		private readonly IRepository<AuditOperation> _repository;
 		private readonly IObjectAssembler _mapper;
 
 		public ProductController(IProductRepository productRepository,
-			IRepository<AuditOperation> repository,
 			IObjectAssembler mapper)
 		{
 			_productRepository = productRepository;
-			_repository = repository;
 			_mapper = mapper;
 		}
 
 		[HttpGet("objectid")]
 		public ObjectId Get()
 		{
-			return ObjectId.NewId();
+			return ObjectId.GenerateNewId();
 		}
 
 		[HttpPost("objectid/{id}")]
@@ -71,13 +69,7 @@ namespace Ordering.API.Controllers
 			body.Id = id;
 			return body;
 		}
-
-		[HttpGet("getAudits")]
-		public List<AuditOperation> GetAudits()
-		{
-			Logger.LogInformation($"{Session.UserId}");
-			return ((EfRepository<AuditOperation>) _repository).Store.Include(x => x.Entities).ToList();
-		}
+ 
 
 		[HttpGet("getBaseValueType")]
 		public int GetBaseValueType()

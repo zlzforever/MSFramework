@@ -4,48 +4,50 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
+using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using Ordering.Infrastructure;
 
 namespace Ordering.Infrastructure.Migrations
 {
     [DbContext(typeof(OrderingContext))]
-    [Migration("20210317103729_init")]
+    [Migration("20210930111710_init")]
     partial class init
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("Relational:MaxIdentifierLength", 64)
-                .HasAnnotation("ProductVersion", "5.0.4");
+                .HasAnnotation("Relational:MaxIdentifierLength", 63)
+                .HasAnnotation("ProductVersion", "5.0.10")
+                .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
 
             modelBuilder.Entity("MicroserviceFramework.Audit.AuditEntity", b =>
                 {
                     b.Property<string>("Id")
-                        .HasColumnType("varchar(36) CHARACTER SET utf8mb4")
+                        .HasColumnType("character varying(36)")
                         .HasColumnName("id");
 
                     b.Property<string>("EntityId")
                         .HasMaxLength(255)
-                        .HasColumnType("varchar(255) CHARACTER SET utf8mb4")
+                        .HasColumnType("character varying(255)")
                         .HasColumnName("entity_id");
 
                     b.Property<string>("OperationId")
-                        .HasColumnType("varchar(36) CHARACTER SET utf8mb4")
+                        .HasColumnType("character varying(36)")
                         .HasColumnName("operation_id");
 
                     b.Property<string>("OperationType")
                         .HasMaxLength(255)
-                        .HasColumnType("varchar(255) CHARACTER SET utf8mb4")
+                        .HasColumnType("character varying(255)")
                         .HasColumnName("operation_type");
 
                     b.Property<string>("Type")
                         .HasMaxLength(255)
-                        .HasColumnType("varchar(255) CHARACTER SET utf8mb4")
+                        .HasColumnType("character varying(255)")
                         .HasColumnName("type");
 
                     b.Property<string>("audit_operation_id")
-                        .HasColumnType("varchar(36) CHARACTER SET utf8mb4")
+                        .HasColumnType("character varying(36)")
                         .HasColumnName("audit_operation_id");
 
                     b.HasKey("Id");
@@ -56,18 +58,18 @@ namespace Ordering.Infrastructure.Migrations
 
                     b.HasIndex("audit_operation_id");
 
-                    b.ToTable("ms_audit_entity");
+                    b.ToTable("audit_entity");
                 });
 
             modelBuilder.Entity("MicroserviceFramework.Audit.AuditOperation", b =>
                 {
                     b.Property<string>("Id")
-                        .HasColumnType("varchar(36) CHARACTER SET utf8mb4")
+                        .HasColumnType("character varying(36)")
                         .HasColumnName("id");
 
                     b.Property<string>("ApplicationName")
                         .HasMaxLength(255)
-                        .HasColumnType("varchar(255) CHARACTER SET utf8mb4")
+                        .HasColumnType("character varying(255)")
                         .HasColumnName("application_name");
 
                     b.Property<long?>("CreationTime")
@@ -76,40 +78,40 @@ namespace Ordering.Infrastructure.Migrations
 
                     b.Property<string>("CreationUserId")
                         .HasMaxLength(255)
-                        .HasColumnType("varchar(255) CHARACTER SET utf8mb4")
+                        .HasColumnType("character varying(255)")
                         .HasColumnName("creation_user_id");
 
                     b.Property<string>("CreationUserName")
                         .HasMaxLength(255)
-                        .HasColumnType("varchar(255) CHARACTER SET utf8mb4")
+                        .HasColumnType("character varying(255)")
                         .HasColumnName("creation_user_name");
 
                     b.Property<int>("Elapsed")
-                        .HasColumnType("int")
+                        .HasColumnType("integer")
                         .HasColumnName("elapsed");
 
                     b.Property<DateTimeOffset>("EndTime")
-                        .HasColumnType("datetime(6)")
+                        .HasColumnType("timestamp with time zone")
                         .HasColumnName("end_time");
 
                     b.Property<string>("Feature")
                         .HasMaxLength(1024)
-                        .HasColumnType("varchar(1024) CHARACTER SET utf8mb4")
+                        .HasColumnType("character varying(1024)")
                         .HasColumnName("feature");
 
                     b.Property<string>("Ip")
                         .HasMaxLength(255)
-                        .HasColumnType("varchar(255) CHARACTER SET utf8mb4")
+                        .HasColumnType("character varying(255)")
                         .HasColumnName("ip");
 
                     b.Property<string>("Url")
                         .HasMaxLength(1024)
-                        .HasColumnType("varchar(1024) CHARACTER SET utf8mb4")
+                        .HasColumnType("character varying(1024)")
                         .HasColumnName("url");
 
                     b.Property<string>("UserAgent")
                         .HasMaxLength(1024)
-                        .HasColumnType("varchar(1024) CHARACTER SET utf8mb4")
+                        .HasColumnType("character varying(1024)")
                         .HasColumnName("user_agent");
 
                     b.HasKey("Id");
@@ -120,39 +122,39 @@ namespace Ordering.Infrastructure.Migrations
 
                     b.HasIndex("EndTime");
 
-                    b.ToTable("ms_audit_operation");
+                    b.ToTable("audit_operation");
                 });
 
             modelBuilder.Entity("MicroserviceFramework.Audit.AuditProperty", b =>
                 {
                     b.Property<string>("Id")
-                        .HasColumnType("varchar(36) CHARACTER SET utf8mb4")
+                        .HasColumnType("character varying(36)")
                         .HasColumnName("id");
 
                     b.Property<string>("EntityId")
-                        .HasColumnType("varchar(36) CHARACTER SET utf8mb4")
+                        .HasColumnType("character varying(36)")
                         .HasColumnName("entity_id");
 
                     b.Property<string>("Name")
                         .HasMaxLength(255)
-                        .HasColumnType("varchar(255) CHARACTER SET utf8mb4")
+                        .HasColumnType("character varying(255)")
                         .HasColumnName("name");
 
                     b.Property<string>("NewValue")
-                        .HasColumnType("longtext CHARACTER SET utf8mb4")
+                        .HasColumnType("text")
                         .HasColumnName("new_value");
 
                     b.Property<string>("OriginalValue")
-                        .HasColumnType("longtext CHARACTER SET utf8mb4")
+                        .HasColumnType("text")
                         .HasColumnName("original_value");
 
                     b.Property<string>("Type")
                         .HasMaxLength(255)
-                        .HasColumnType("varchar(255) CHARACTER SET utf8mb4")
+                        .HasColumnType("character varying(255)")
                         .HasColumnName("type");
 
                     b.Property<string>("audit_entity_id")
-                        .HasColumnType("varchar(36) CHARACTER SET utf8mb4")
+                        .HasColumnType("character varying(36)")
                         .HasColumnName("audit_entity_id");
 
                     b.HasKey("Id");
@@ -161,13 +163,13 @@ namespace Ordering.Infrastructure.Migrations
 
                     b.HasIndex("audit_entity_id");
 
-                    b.ToTable("ms_audit_property");
+                    b.ToTable("audit_property");
                 });
 
             modelBuilder.Entity("MicroserviceFramework.FeatureManagement.Feature", b =>
                 {
                     b.Property<string>("Id")
-                        .HasColumnType("varchar(36) CHARACTER SET utf8mb4")
+                        .HasColumnType("character varying(36)")
                         .HasColumnName("id");
 
                     b.Property<long>("CreationTime")
@@ -176,15 +178,15 @@ namespace Ordering.Infrastructure.Migrations
 
                     b.Property<string>("Description")
                         .HasMaxLength(1024)
-                        .HasColumnType("varchar(1024) CHARACTER SET utf8mb4")
+                        .HasColumnType("character varying(1024)")
                         .HasColumnName("description");
 
                     b.Property<bool>("Enabled")
-                        .HasColumnType("tinyint(1)")
+                        .HasColumnType("boolean")
                         .HasColumnName("enabled");
 
                     b.Property<bool>("Expired")
-                        .HasColumnType("tinyint(1)")
+                        .HasColumnType("boolean")
                         .HasColumnName("expired");
 
                     b.Property<long?>("ModificationTime")
@@ -193,7 +195,7 @@ namespace Ordering.Infrastructure.Migrations
 
                     b.Property<string>("Name")
                         .HasMaxLength(255)
-                        .HasColumnType("varchar(255) CHARACTER SET utf8mb4")
+                        .HasColumnType("character varying(255)")
                         .HasColumnName("name");
 
                     b.HasKey("Id");
@@ -201,117 +203,118 @@ namespace Ordering.Infrastructure.Migrations
                     b.HasIndex("Name")
                         .IsUnique();
 
-                    b.ToTable("ms_feature");
+                    b.ToTable("feature");
                 });
 
             modelBuilder.Entity("Ordering.Domain.AggregateRoots.Order", b =>
                 {
                     b.Property<string>("Id")
-                        .HasColumnType("varchar(36) CHARACTER SET utf8mb4")
+                        .HasColumnType("character varying(36)")
                         .HasColumnName("id");
 
                     b.Property<string>("ConcurrencyStamp")
                         .IsConcurrencyToken()
                         .IsRequired()
                         .HasMaxLength(36)
-                        .HasColumnType("varchar(36) CHARACTER SET utf8mb4")
+                        .HasColumnType("character varying(36)")
                         .HasColumnName("concurrency_stamp");
 
                     b.Property<DateTimeOffset>("CreationTime")
-                        .HasColumnType("datetime(6)")
+                        .HasColumnType("timestamp with time zone")
                         .HasColumnName("creation_time");
 
                     b.Property<string>("Description")
-                        .HasColumnType("longtext CHARACTER SET utf8mb4")
+                        .HasColumnType("text")
                         .HasColumnName("description");
 
                     b.Property<bool>("IsDeleted")
-                        .HasColumnType("tinyint(1)")
+                        .HasColumnType("boolean")
                         .HasColumnName("is_deleted");
 
                     b.Property<string>("OrderStatus")
                         .IsRequired()
                         .HasMaxLength(255)
-                        .HasColumnType("varchar(255) CHARACTER SET utf8mb4")
+                        .HasColumnType("character varying(255)")
                         .HasColumnName("order_status");
 
                     b.Property<string>("UserId")
                         .IsRequired()
-                        .HasColumnType("longtext CHARACTER SET utf8mb4")
+                        .HasMaxLength(255)
+                        .HasColumnType("character varying(255)")
                         .HasColumnName("user_id");
 
                     b.HasKey("Id");
 
-                    b.ToTable("ms_order");
+                    b.ToTable("order");
                 });
 
             modelBuilder.Entity("Ordering.Domain.AggregateRoots.OrderItem", b =>
                 {
                     b.Property<string>("Id")
-                        .HasColumnType("varchar(36) CHARACTER SET utf8mb4")
+                        .HasColumnType("character varying(36)")
                         .HasColumnName("id");
 
                     b.Property<decimal>("Discount")
-                        .HasColumnType("decimal(65,30)")
+                        .HasColumnType("numeric")
                         .HasColumnName("discount");
 
                     b.Property<string>("OrderId")
-                        .HasColumnType("varchar(36) CHARACTER SET utf8mb4")
+                        .HasColumnType("character varying(36)")
                         .HasColumnName("order_id");
 
                     b.Property<string>("PictureUrl")
-                        .HasColumnType("longtext CHARACTER SET utf8mb4")
+                        .HasColumnType("text")
                         .HasColumnName("picture_url");
 
                     b.Property<Guid>("ProductId")
-                        .HasColumnType("char(36)")
+                        .HasColumnType("uuid")
                         .HasColumnName("product_id");
 
                     b.Property<string>("ProductName")
                         .IsRequired()
-                        .HasColumnType("longtext CHARACTER SET utf8mb4")
+                        .HasColumnType("text")
                         .HasColumnName("product_name");
 
                     b.Property<decimal>("UnitPrice")
-                        .HasColumnType("decimal(65,30)")
+                        .HasColumnType("numeric")
                         .HasColumnName("unit_price");
 
                     b.Property<int>("Units")
-                        .HasColumnType("int")
+                        .HasColumnType("integer")
                         .HasColumnName("units");
 
                     b.HasKey("Id");
 
                     b.HasIndex("OrderId");
 
-                    b.ToTable("ms_order_item");
+                    b.ToTable("order_item");
                 });
 
             modelBuilder.Entity("Ordering.Domain.AggregateRoots.Product", b =>
                 {
                     b.Property<string>("Id")
-                        .HasColumnType("varchar(36) CHARACTER SET utf8mb4")
+                        .HasColumnType("character varying(36)")
                         .HasColumnName("id");
 
                     b.Property<string>("ConcurrencyStamp")
                         .IsConcurrencyToken()
                         .IsRequired()
                         .HasMaxLength(36)
-                        .HasColumnType("varchar(36) CHARACTER SET utf8mb4")
+                        .HasColumnType("character varying(36)")
                         .HasColumnName("concurrency_stamp");
 
                     b.Property<string>("Name")
                         .HasMaxLength(256)
-                        .HasColumnType("varchar(256) CHARACTER SET utf8mb4")
+                        .HasColumnType("character varying(256)")
                         .HasColumnName("name");
 
                     b.Property<int>("Price")
-                        .HasColumnType("int")
+                        .HasColumnType("integer")
                         .HasColumnName("price");
 
                     b.HasKey("Id");
 
-                    b.ToTable("ms_product");
+                    b.ToTable("product");
                 });
 
             modelBuilder.Entity("MicroserviceFramework.Audit.AuditEntity", b =>
@@ -345,32 +348,32 @@ namespace Ordering.Infrastructure.Migrations
                     b.OwnsOne("Ordering.Domain.AggregateRoots.Address", "Address", b1 =>
                         {
                             b1.Property<string>("OrderId")
-                                .HasColumnType("varchar(36) CHARACTER SET utf8mb4")
+                                .HasColumnType("character varying(36)")
                                 .HasColumnName("id");
 
                             b1.Property<string>("City")
-                                .HasColumnType("longtext CHARACTER SET utf8mb4")
+                                .HasColumnType("text")
                                 .HasColumnName("address_city");
 
                             b1.Property<string>("Country")
-                                .HasColumnType("longtext CHARACTER SET utf8mb4")
+                                .HasColumnType("text")
                                 .HasColumnName("address_country");
 
                             b1.Property<string>("State")
-                                .HasColumnType("longtext CHARACTER SET utf8mb4")
+                                .HasColumnType("text")
                                 .HasColumnName("address_state");
 
                             b1.Property<string>("Street")
-                                .HasColumnType("longtext CHARACTER SET utf8mb4")
+                                .HasColumnType("text")
                                 .HasColumnName("address_street");
 
                             b1.Property<string>("ZipCode")
-                                .HasColumnType("longtext CHARACTER SET utf8mb4")
+                                .HasColumnType("text")
                                 .HasColumnName("address_zip_code");
 
                             b1.HasKey("OrderId");
 
-                            b1.ToTable("ms_order");
+                            b1.ToTable("order");
 
                             b1.WithOwner()
                                 .HasForeignKey("OrderId");

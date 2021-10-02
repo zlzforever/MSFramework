@@ -28,7 +28,7 @@ namespace Ordering.Infrastructure.EntityConfigurations.Audit
 			builder.ConfigureCreation();
 
 			builder.HasIndex(x => x.CreationTime);
-			builder.HasIndex(x => x.CreationUserId);
+			builder.HasIndex(x => x.CreatorId);
 			builder.HasIndex(x => x.EndTime);
 		}
 	}

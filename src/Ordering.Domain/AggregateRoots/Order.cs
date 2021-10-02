@@ -4,7 +4,7 @@ using System.ComponentModel;
 using System.Linq;
 using MicroserviceFramework.Domain;
 using MicroserviceFramework.Domain.Event;
-using MicroserviceFramework.Shared;
+using MongoDB.Bson;
 using Ordering.Domain.AggregateRoots.Events;
 
 namespace Ordering.Domain.AggregateRoots
@@ -39,7 +39,7 @@ namespace Ordering.Domain.AggregateRoots
 
 		public string Description { get; private set; }
 
-		private Order() : base(ObjectId.NewId())
+		private Order() : base(ObjectId.GenerateNewId())
 		{
 		}
 

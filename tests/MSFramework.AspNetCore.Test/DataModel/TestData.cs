@@ -1,11 +1,11 @@
 ﻿using MicroserviceFramework.Domain;
-using MicroserviceFramework.Shared;
+using MongoDB.Bson;
 
 namespace MSFramework.AspNetCore.Test.DataModel
 {
 	public class TestData: ModificationAggregateRoot
 	{
-		public TestData() : base(ObjectId.NewId())
+		public TestData() : base(ObjectId.GenerateNewId())
 		{
 		}
 	}

@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 using MicroserviceFramework.Domain;
-using MicroserviceFramework.Shared;
+using MongoDB.Bson;
 
 namespace MicroserviceFramework.Audit
 {
@@ -16,7 +16,7 @@ namespace MicroserviceFramework.Audit
 		/// 获取或设置执行的功能名
 		/// </summary>
 		public string Feature { get; private set; }
-
+		
 		/// <summary>
 		/// 请求
 		/// </summary>
@@ -41,7 +41,7 @@ namespace MicroserviceFramework.Audit
 
 		public int Elapsed { get; private set; }
 
-		private AuditOperation() : base(ObjectId.NewId())
+		private AuditOperation() : base(ObjectId.GenerateNewId())
 		{
 			Entities = new List<AuditEntity>();
 		}

@@ -6,20 +6,21 @@
 
     <ItemGroup>
         <PackageReference Include="Microsoft.AspNetCore.Mvc.Core" Version="2.2.5" />
-        <PackageReference Include="Serilog.AspNetCore" Version="4.0.0" />
+        <PackageReference Include="Serilog.AspNetCore" Version="4.1.0" />
         <PackageReference Include="Serilog.Sinks.PeriodicBatching" Version="2.3.0" />
-        <PackageReference Include="Serilog.Sinks.Console" Version="3.1.1" />
+        <PackageReference Include="Serilog.Sinks.Console" Version="4.0.0" />
         <PackageReference Include="Serilog.Sinks.RollingFile" Version="3.3.0" />
-        <PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="5.0.4" />
+        <PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="5.0.10" />
+        <PackageReference Include="Serilog.Sinks.Seq" Version="5.0.1" />
         <PackageReference Include="xunit.assert" Version="2.4.1" />
     </ItemGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\MSFramework.AspNetCore.AccessControl\MSFramework.AspNetCore.AccessControl.csproj" />
         <ProjectReference Include="..\MSFramework.AspNetCore.Swagger\MSFramework.AspNetCore.Swagger.csproj" />
         <ProjectReference Include="..\MSFramework.AspNetCore\MSFramework.AspNetCore.csproj" />
         <ProjectReference Include="..\MSFramework.AutoMapper\MSFramework.AutoMapper.csproj" />
         <ProjectReference Include="..\MSFramework.Ef.Design\MSFramework.Ef.Design.csproj" />
+        <ProjectReference Include="..\MSFramework.Ef.PostgreSql\MSFramework.Ef.PostgreSql.csproj" />
         <ProjectReference Include="..\MSFramework.Ef.SqlServer\MSFramework.Ef.SqlServer.csproj" />
         <ProjectReference Include="..\MSFramework.Ef\MSFramework.Ef.csproj" />
         <ProjectReference Include="..\MSFramework.Newtonsoft\MSFramework.Newtonsoft.csproj" />
@@ -29,16 +30,6 @@
         <ProjectReference Include="..\Ordering.Domain\Ordering.Domain.csproj" />
         <ProjectReference Include="..\Ordering.Infrastructure\Ordering.Infrastructure.csproj" />
         <ProjectReference Include="..\MSFramework.Ef.MySql\MSFramework.Ef.MySql.csproj" />
-    </ItemGroup>
-
-    <ItemGroup>
-        <Content Update="appsettings.json">
-            <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
-            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-        </Content>
-        <Content Update="appsettings.Development.json">
-            <DependentUpon>appsettings.json</DependentUpon>
-        </Content>
     </ItemGroup>
 
 </Project>

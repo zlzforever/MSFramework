@@ -1,5 +1,5 @@
 using System;
-using MicroserviceFramework.Shared;
+using MongoDB.Bson;
 
 namespace MicroserviceFramework.Domain
 {
@@ -20,14 +20,9 @@ namespace MicroserviceFramework.Domain
 		/// <summary>
 		/// 创建用户标识
 		/// </summary>
-		public string CreationUserId { get; private set; }
+		public string CreatorId { get; private set; }
 
-		/// <summary>
-		/// 创建用户名称
-		/// </summary>
-		public string CreationUserName { get; private set; }
-
-		public virtual void SetCreation(string userId, string userName, DateTimeOffset creationTime = default)
+		public virtual void SetCreation(string userId, DateTimeOffset creationTime = default)
 		{
 			// 创建只能一次操作，因此如果已经有值，不能再做设置
 			if (CreationTime == default)
@@ -35,14 +30,9 @@ namespace MicroserviceFramework.Domain
 				CreationTime = creationTime == default ? DateTimeOffset.Now : creationTime;
 			}
 
-			if (!string.IsNullOrWhiteSpace(userId) && string.IsNullOrWhiteSpace(CreationUserId))
+			if (!string.IsNullOrWhiteSpace(userId) && string.IsNullOrWhiteSpace(CreatorId))
 			{
-				CreationUserId = userId;
-			}
-
-			if (!string.IsNullOrWhiteSpace(userName) && string.IsNullOrWhiteSpace(CreationUserName))
-			{
-				CreationUserName = userName;
+				CreatorId = userId;
 			}
 		}
 

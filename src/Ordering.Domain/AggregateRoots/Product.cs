@@ -1,6 +1,6 @@
 using MicroserviceFramework.Domain;
 using MicroserviceFramework.Domain.Event;
-using MicroserviceFramework.Shared;
+using MongoDB.Bson;
 
 namespace Ordering.Domain.AggregateRoots
 {
@@ -16,7 +16,7 @@ namespace Ordering.Domain.AggregateRoots
 
 		public static Product Create(string name, int price)
 		{
-			var product = new Product(ObjectId.NewId())
+			var product = new Product(ObjectId.GenerateNewId())
 			{
 				Name = name,
 				Price = price

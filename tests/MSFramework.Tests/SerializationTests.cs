@@ -2,8 +2,7 @@ using System.Text.Json;
 using MicroserviceFramework.Domain;
 using MicroserviceFramework.Newtonsoft;
 using MicroserviceFramework.Serialization;
-using MicroserviceFramework.Serialization.Converters;
-using MicroserviceFramework.Shared;
+using MongoDB.Bson;
 using Newtonsoft.Json;
 using Xunit;
 
@@ -31,10 +30,10 @@ namespace MSFramework.Tests
 		public void DeserializeNullToObjectId1()
 		{
 			var options = new JsonSerializerOptions();
-			options.Converters.Add(new ObjectIdJsonConverter());
+			// options.Converters.Add(new ObjectIdJsonConverter());
 			var serializer = new DefaultSerializer(options);
 
-			serializer.Serialize(new {id = ObjectId.NewId()});
+			serializer.Serialize(new {id = ObjectId.GenerateNewId()});
 
 			var json = "{\"id\":null}";
 			var obj = serializer.Deserialize<Obj>(json);
@@ -62,7 +61,7 @@ namespace MSFramework.Tests
 			options.Converters.Add(new MicroserviceFramework.Newtonsoft.Converters.EnumerationConverter());
 			var serializer = new NewtonsoftSerializer(options);
 			
-			serializer.Serialize(new {id = ObjectId.NewId()});
+			serializer.Serialize(new {id = ObjectId.GenerateNewId()});
 
 			var json = "{\"id\":null}";
 			var obj = serializer.Deserialize<Obj>(json);

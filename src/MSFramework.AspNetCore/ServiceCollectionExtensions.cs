@@ -1,11 +1,9 @@
 using System;
 using System.Text.Json;
 using MicroserviceFramework.AspNetCore.DependencyInjection;
-using MicroserviceFramework.AspNetCore.FeatureManagement;
 using MicroserviceFramework.AspNetCore.Infrastructure;
 using MicroserviceFramework.AspNetCore.Mvc.ModelBinding;
 using MicroserviceFramework.DependencyInjection;
-using MicroserviceFramework.FeatureManagement;
 using MicroserviceFramework.Utilities;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
@@ -40,12 +38,7 @@ namespace MicroserviceFramework.AspNetCore
 			});
 			return builder;
 		}
-
-		public static void UseFeatureManagement(this MicroserviceFrameworkBuilder builder)
-		{
-			builder.Services.AddFunction<AspNetCoreFeatureFinder>();
-		}
-
+		
 		public static void UseMicroserviceFramework(this IApplicationBuilder builder)
 		{
 			builder.ApplicationServices.UseMicroserviceFramework();
@@ -61,9 +54,9 @@ namespace MicroserviceFramework.AspNetCore
 		}
 
 		public static MicroserviceFrameworkBuilder UseAssemblyScanPrefix(this MicroserviceFrameworkBuilder builder,
-			params string[] prefixs)
+			params string[] prefixes)
 		{
-			RuntimeUtilities.StartsWith.AddRange(prefixs);
+			RuntimeUtilities.StartsWith.AddRange(prefixes);
 			return builder;
 		}
 	}

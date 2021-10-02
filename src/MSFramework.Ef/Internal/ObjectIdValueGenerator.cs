@@ -1,6 +1,6 @@
-using MicroserviceFramework.Shared;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.EntityFrameworkCore.ValueGeneration;
+using MongoDB.Bson;
 
 namespace MicroserviceFramework.Ef.Internal
 {
@@ -8,7 +8,7 @@ namespace MicroserviceFramework.Ef.Internal
 	{
 		public override ObjectId Next(EntityEntry entry)
 		{
-			return ObjectId.NewId();
+			return ObjectId.GenerateNewId();
 		}
 
 		public override bool GeneratesTemporaryValues => false;

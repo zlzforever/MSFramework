@@ -1,9 +1,8 @@
 using System.Threading.Tasks;
-using MicroserviceFramework.DependencyInjection;
 
 namespace MicroserviceFramework.Audit
 {
-	public interface IAuditService : IScopeDependency
+	public interface IAuditStore
 	{
 		/// <summary>
 		/// 异步保存实体审计数据

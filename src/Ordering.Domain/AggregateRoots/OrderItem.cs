@@ -1,6 +1,6 @@
 ﻿using System;
 using MicroserviceFramework.Domain;
-using MicroserviceFramework.Shared;
+using MongoDB.Bson;
 
 namespace Ordering.Domain.AggregateRoots
 {
@@ -16,7 +16,7 @@ namespace Ordering.Domain.AggregateRoots
 		public int Units { get; private set; }
 		public Guid ProductId { get; private set; }
 
-		private OrderItem() : base(ObjectId.NewId())
+		private OrderItem() : base(ObjectId.GenerateNewId())
 		{
 		}
 

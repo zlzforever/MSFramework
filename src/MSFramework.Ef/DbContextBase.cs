@@ -10,12 +10,12 @@ using MicroserviceFramework.Ef.Extensions;
 using MicroserviceFramework.Ef.Internal;
 using MicroserviceFramework.EventBus;
 using MicroserviceFramework.Extensions;
-using MicroserviceFramework.Shared;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using MongoDB.Bson;
 
 #if !NETSTANDARD2_0
 using Microsoft.EntityFrameworkCore.Metadata;
@@ -82,7 +82,7 @@ namespace MicroserviceFramework.Ef
 			foreach (var entityTypeConfiguration in entityTypeConfigurations)
 			{
 				entityTypeConfiguration.Value.MethodInfo.Invoke(modelBuilder,
-					new[] {entityTypeConfiguration.Value.EntityTypeConfiguration});
+					new[] { entityTypeConfiguration.Value.EntityTypeConfiguration });
 
 				stringBuilder.Append($"、{entityTypeConfiguration.Value.EntityType.FullName}");
 				count++;
@@ -239,7 +239,6 @@ namespace MicroserviceFramework.Ef
 		protected bool ApplyConcepts()
 		{
 			var userId = _session.UserId;
-			var userName = _session.UserName;
 			var changed = false;
 
 			foreach (var entry in ChangeTracker.Entries())
@@ -247,15 +246,15 @@ namespace MicroserviceFramework.Ef
 				switch (entry.State)
 				{
 					case EntityState.Added:
-						ApplyConceptsForAddedEntity(entry, userId, userName);
+						ApplyConceptsForAddedEntity(entry, userId);
 						changed = true;
 						break;
 					case EntityState.Modified:
-						ApplyConceptsForModifiedEntity(entry, userId, userName);
+						ApplyConceptsForModifiedEntity(entry, userId);
 						changed = true;
 						break;
 					case EntityState.Deleted:
-						ApplyConceptsForDeletedEntity(entry, userId, userName);
+						ApplyConceptsForDeletedEntity(entry, userId);
 						changed = true;
 						break;
 				}
@@ -333,30 +332,30 @@ namespace MicroserviceFramework.Ef
 			return auditedEntity;
 		}
 
-		protected virtual void ApplyConceptsForAddedEntity(EntityEntry entry, string userId, string userName)
+		protected virtual void ApplyConceptsForAddedEntity(EntityEntry entry, string userId)
 		{
 			if (entry.Entity is ICreation creationAudited)
 			{
-				creationAudited.SetCreation(userId, userName);
+				creationAudited.SetCreation(userId);
 			}
 		}
 
-		protected virtual void ApplyConceptsForModifiedEntity(EntityEntry entry, string userId, string userName)
+		protected virtual void ApplyConceptsForModifiedEntity(EntityEntry entry, string userId)
 		{
 			if (entry.Entity is IModification creationAudited)
 			{
-				creationAudited.SetModification(userId, userName);
+				creationAudited.SetModification(userId);
 			}
 		}
 
-		protected virtual void ApplyConceptsForDeletedEntity(EntityEntry entry, string userId, string userName)
+		protected virtual void ApplyConceptsForDeletedEntity(EntityEntry entry, string userId)
 		{
 			if (entry.Entity is IDeletion deletionAudited)
 			{
 				entry.Reload();
 				entry.State = EntityState.Modified;
 
-				deletionAudited.Delete(userId, userName);
+				deletionAudited.Delete(userId);
 			}
 		}
 

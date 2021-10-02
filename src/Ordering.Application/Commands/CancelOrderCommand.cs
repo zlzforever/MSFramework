@@ -1,5 +1,5 @@
 using MicroserviceFramework.Application.CQRS;
-using MicroserviceFramework.Shared;
+using MongoDB.Bson;
 
 namespace Ordering.Application.Commands
 {

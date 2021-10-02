@@ -1,5 +1,5 @@
 using System;
-using MicroserviceFramework.Shared;
+using MongoDB.Bson;
 
 namespace MicroserviceFramework.Domain
 {
@@ -16,31 +16,21 @@ namespace MicroserviceFramework.Domain
 		/// <summary>
 		/// Last modifier user for this entity.
 		/// </summary>
-		public string ModificationUserId { get; private set; }
-
-		/// <summary>
-		/// Last modifier user for this entity.
-		/// </summary>
-		public string ModificationUserName { get; private set; }
+		public string LastModifierId { get; private set; }
 
 		/// <summary>
 		/// The last modified time for this entity.
 		/// </summary>
-		public DateTimeOffset? ModificationTime { get; private set; }
+		public DateTimeOffset? LastModificationTime { get; private set; }
 
-		public virtual void SetModification(string userId, string userName,
+		public virtual void SetModification(string userId,
 			DateTimeOffset lastModificationTime = default)
 		{
-			ModificationTime = lastModificationTime == default ? DateTimeOffset.Now : lastModificationTime;
+			LastModificationTime = lastModificationTime == default ? DateTimeOffset.Now : lastModificationTime;
 
 			if (!string.IsNullOrWhiteSpace(userId))
 			{
-				ModificationUserId = userId;
-			}
-
-			if (!string.IsNullOrWhiteSpace(userName))
-			{
-				ModificationUserName = userName;
+				LastModifierId = userId;
 			}
 		}
 

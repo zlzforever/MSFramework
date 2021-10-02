@@ -7,18 +7,13 @@ namespace MicroserviceFramework.Domain
 		/// <summary>
 		/// Last modifier user for this entity.
 		/// </summary>
-		string ModificationUserId { get; }
-
-		/// <summary>
-		/// Last modifier user for this entity.
-		/// </summary>
-		string ModificationUserName { get; }
+		string LastModifierId { get; }
 
 		/// <summary>
 		/// The last modified time for this entity.
 		/// </summary>
-		DateTimeOffset? ModificationTime { get; }
+		DateTimeOffset? LastModificationTime { get; }
 
-		void SetModification(string userId, string userName, DateTimeOffset modificationTime = default);
+		void SetModification(string userId, DateTimeOffset modificationTime = default);
 	}
 }

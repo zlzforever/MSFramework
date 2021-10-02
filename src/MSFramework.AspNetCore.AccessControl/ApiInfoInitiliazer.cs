@@ -1,14 +1,21 @@
 using System;
+using System.Threading;
 using System.Threading.Tasks;
-using MicroserviceFramework.Initializer;
 
 namespace MicroserviceFramework.AspNetCore.AccessControl
 {
 	public class ApiInfoInitializer : InitializerBase
 	{
-		public override async Task InitializeAsync(IServiceProvider serviceProvider)
+		private readonly IServiceProvider _serviceProvider;
+
+		public ApiInfoInitializer(IServiceProvider serviceProvider)
 		{
-			await new Cerberus.AspNetCore.AccessControl.ApiInfoInitializer().InitializeAsync(serviceProvider);
+			_serviceProvider = serviceProvider;
+		}
+
+		public override async Task StartAsync(CancellationToken cancellationToken)
+		{
+			await new Cerberus.AspNetCore.AccessControl.ApiInfoInitializer().InitializeAsync(_serviceProvider);
 		}
 	}
 }

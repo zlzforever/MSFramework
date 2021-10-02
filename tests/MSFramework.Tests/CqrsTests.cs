@@ -85,8 +85,17 @@ namespace MSFramework.Tests
 		}
 	}
 
+	public class CommandHandler1<TCommand> : ICommandHandler<TCommand> where TCommand : ICommand
+	{
+		public virtual Task HandleAsync(TCommand command, CancellationToken cancellationToken = default)
+		{
+			return Task.CompletedTask;
+		}
+	}
+
 	public class CqrsTests
 	{
+
 		[Fact]
 		public async Task CommandWithoutResponseTest()
 		{

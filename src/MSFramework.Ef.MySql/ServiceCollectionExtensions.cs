@@ -4,7 +4,6 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
 #if !NETSTANDARD2_0
-using Pomelo.EntityFrameworkCore.MySql.Infrastructure;
 
 #endif
 
@@ -64,7 +63,6 @@ namespace MicroserviceFramework.Ef.MySql
 					options.MigrationsHistoryTable(option.TablePrefix + "migrations_history");
 					options.MaxBatchSize(option.MaxBatchSize);
 					options.MigrationsAssembly(entryAssemblyName);
-					options.CharSet(CharSet.Utf8Mb4);
 				});
 #endif
 			});

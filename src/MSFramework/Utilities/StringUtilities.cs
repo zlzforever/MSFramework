@@ -4,7 +4,7 @@ namespace MicroserviceFramework.Utilities
 	{
 		public static unsafe string ToCamelCase(string value)
 		{
-			if (string.IsNullOrWhiteSpace(value))
+			if (string.IsNullOrWhiteSpace(value) || value.Length < 2)
 			{
 				return value;
 			}

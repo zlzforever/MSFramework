@@ -1,5 +1,5 @@
-using MicroserviceFramework.Shared;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
+using MongoDB.Bson;
 
 namespace MicroserviceFramework.AspNetCore.Mvc.ModelBinding
 {

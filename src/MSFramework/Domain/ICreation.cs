@@ -12,13 +12,8 @@ namespace MicroserviceFramework.Domain
 		/// <summary>
 		/// 创建用户标识
 		/// </summary>
-		string CreationUserId { get; }
+		string CreatorId { get; }
 
-		/// <summary>
-		/// 创建用户名称
-		/// </summary>
-		string CreationUserName { get; }
-
-		void SetCreation(string userId, string userName, DateTimeOffset creationTime = default);
+		void SetCreation(string userId, DateTimeOffset creationTime = default);
 	}
 }

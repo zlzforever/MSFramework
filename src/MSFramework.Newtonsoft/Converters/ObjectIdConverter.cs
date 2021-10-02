@@ -1,5 +1,5 @@
 using System;
-using MicroserviceFramework.Shared;
+using MongoDB.Bson;
 using Newtonsoft.Json;
 
 namespace MicroserviceFramework.Newtonsoft.Converters

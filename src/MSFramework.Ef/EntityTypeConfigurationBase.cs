@@ -1,5 +1,3 @@
-using MicroserviceFramework.Domain;
-using MicroserviceFramework.Ef.Extensions;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace MicroserviceFramework.Ef

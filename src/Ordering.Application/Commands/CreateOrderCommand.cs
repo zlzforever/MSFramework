@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 using MicroserviceFramework.Application.CQRS;
-using MicroserviceFramework.Shared;
+using MongoDB.Bson;
 using Ordering.Domain.AggregateRoots;
 
 namespace Ordering.Application.Commands

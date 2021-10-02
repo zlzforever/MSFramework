@@ -1,5 +1,5 @@
 using System;
-using MicroserviceFramework.Shared;
+using MongoDB.Bson;
 
 namespace MicroserviceFramework.EventBus
 {
@@ -17,7 +17,7 @@ namespace MicroserviceFramework.EventBus
 
 		protected EventBase()
 		{
-			EventId = ObjectId.NewId().ToString();
+			EventId = ObjectId.GenerateNewId().ToString();
 			EventTime = DateTimeOffset.Now.ToUnixTimeMilliseconds();
 		}
 

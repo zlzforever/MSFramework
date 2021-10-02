@@ -23,7 +23,7 @@ namespace MicroserviceFramework.Ef.Extensions
 		private static LambdaExpression GetSoftDeleteFilter<TEntity>()
 			where TEntity : class, IDeletion
 		{
-			Expression<Func<TEntity, bool>> filter = x => !x.Deleted;
+			Expression<Func<TEntity, bool>> filter = x => !x.IsDeleted;
 			return filter;
 		}
 	}

@@ -1,17 +1,24 @@
 using System;
+using System.Threading;
 using System.Threading.Tasks;
 using MicroserviceFramework.EventBus;
-using MicroserviceFramework.Initializer;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace MicroserviceFramework.RabbitMQ
 {
 	public class RabbitMqEventBusInitializer : InitializerBase
 	{
-		public override async Task InitializeAsync(IServiceProvider serviceProvider)
+		private readonly IServiceProvider _serviceProvider;
+
+		public RabbitMqEventBusInitializer(IServiceProvider serviceProvider)
 		{
-			serviceProvider.GetRequiredService<IEventBus>();
-			await Task.CompletedTask;
+			_serviceProvider = serviceProvider;
+		}
+
+		public override Task StartAsync(CancellationToken cancellationToken)
+		{
+			_serviceProvider.GetRequiredService<IEventBus>();
+			return Task.CompletedTask;
 		}
 	}
 }

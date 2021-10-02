@@ -1,5 +1,5 @@
 using System;
-using MicroserviceFramework.Shared;
+using MongoDB.Bson;
 
 namespace MicroserviceFramework.Domain.Event
 {
@@ -20,7 +20,7 @@ namespace MicroserviceFramework.Domain.Event
 
 		protected DomainEvent()
 		{
-			EventId = ObjectId.NewId().ToString();
+			EventId = ObjectId.GenerateNewId().ToString();
 			EventTime = DateTimeOffset.Now.ToUnixTimeMilliseconds();
 		}
 

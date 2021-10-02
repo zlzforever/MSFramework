@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 using MicroserviceFramework.Domain.Event;
-using MicroserviceFramework.Shared;
+using MongoDB.Bson;
 
 namespace Ordering.Domain.AggregateRoots.Events
 {
