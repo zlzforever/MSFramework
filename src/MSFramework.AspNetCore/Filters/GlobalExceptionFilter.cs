@@ -37,8 +37,6 @@ namespace MicroserviceFramework.AspNetCore.Filters
 			}
 			else
 			{
-				_logger.LogError(context.Exception.ToString());
-
 				context.HttpContext.Response.StatusCode = 500;
 				context.Result = new ApiResult(string.Empty)
 				{
@@ -47,6 +45,8 @@ namespace MicroserviceFramework.AspNetCore.Filters
 					Code = 500
 				};
 			}
+
+			_logger.LogError(context.Exception.ToString());
 		}
 	}
 }
