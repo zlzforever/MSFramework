@@ -74,7 +74,6 @@ namespace Ordering.API
 			{
 				builder.UseAssemblyScanPrefix("Ordering");
 				builder.UseAutoMapper();
-				builder.UseCqrs();
 				//builder.UseAccessControl(Configuration);
 				// builder.UseRabbitMQEventDispatcher(new RabbitMQOptions(), typeof(UserCheckoutAcceptedEvent));
 				// 启用审计服务

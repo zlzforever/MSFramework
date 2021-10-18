@@ -59,7 +59,6 @@ namespace MicroserviceFramework.DependencyInjection
 				return;
 			}
 
-
 			for (var i = 0; i < interfaceTypes.Length; i++)
 			{
 				var interfaceType = interfaceTypes[i];

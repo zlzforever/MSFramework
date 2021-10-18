@@ -36,7 +36,6 @@ namespace MSFramework.Tests
 			serviceCollection.AddMicroserviceFramework(x =>
 			{
 				x.UseOptions(configuration);
-				x.UseCqrs();
 			});
 			var serviceProvider = serviceCollection.BuildServiceProvider();
 			

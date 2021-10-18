@@ -102,8 +102,6 @@ namespace MSFramework.Tests
 			var serviceCollection = new ServiceCollection();
 			serviceCollection.AddMicroserviceFramework(x =>
 			{
-				//
-				x.UseCqrs();
 			});
 			var serviceProvider = serviceCollection.BuildServiceProvider();
 			var cqrsProcessor = serviceProvider.GetRequiredService<ICqrsProcessor>();
@@ -122,7 +120,6 @@ namespace MSFramework.Tests
 			serviceCollection.AddMicroserviceFramework(x =>
 			{
 				//
-				x.UseCqrs();
 			});
 			var serviceProvider = serviceCollection.BuildServiceProvider();
 			var cqrsProcessor = serviceProvider.GetRequiredService<ICqrsProcessor>();
@@ -142,7 +139,6 @@ namespace MSFramework.Tests
 			serviceCollection.AddMicroserviceFramework(x =>
 			{
 				//
-				x.UseCqrs();
 			});
 			var serviceProvider = serviceCollection.BuildServiceProvider();
 			var cqrsProcessor = serviceProvider.GetRequiredService<ICqrsProcessor>();
@@ -161,7 +157,6 @@ namespace MSFramework.Tests
 			serviceCollection.AddMicroserviceFramework(x =>
 			{
 				//
-				x.UseCqrs();
 			});
 			var serviceProvider = serviceCollection.BuildServiceProvider();
 			var cqrsProcessor = serviceProvider.GetRequiredService<ICqrsProcessor>();

@@ -3,11 +3,11 @@ using MicroserviceFramework.Audit;
 
 namespace MicroserviceFramework.Ef.Audit
 {
-	public class AuditStore : IAuditStore
+	public class EfAuditStore : IAuditStore
 	{
 		private readonly DbContextBase _dbContext;
 
-		public AuditStore(DbContextFactory dbContextFactory)
+		public EfAuditStore(DbContextFactory dbContextFactory)
 		{
 			_dbContext = dbContextFactory.GetDbContext<AuditOperation>();
 		}

@@ -3,6 +3,7 @@ using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text.Json;
 using MicroserviceFramework.Application;
+using MicroserviceFramework.Application.CQRS;
 using MicroserviceFramework.Audit;
 using MicroserviceFramework.DependencyInjection;
 using MicroserviceFramework.Domain.Event;
@@ -31,13 +32,7 @@ namespace MicroserviceFramework
 			builder.Services.AddOptions(configuration);
 			return builder;
 		}
-
-		public static MicroserviceFrameworkBuilder UseCqrs(this MicroserviceFrameworkBuilder builder)
-		{
-			builder.Services.AddCqrs();
-			return builder;
-		}
-
+		
 		public static void AddMicroserviceFramework(this IServiceCollection services,
 			Action<MicroserviceFrameworkBuilder> builderAction = null)
 		{
@@ -51,7 +46,7 @@ namespace MicroserviceFramework
 			builder.Services.TryAddScoped<IAuditStore, LoggerAuditStore>();
 			builder.Services.TryAddSingleton<ApplicationInfo>();
 
-			// ObjectId.AddTypeDescriptor();
+			builder.Services.TryAddScoped<ICqrsProcessor, CqrsProcessor>();
 
 			// 放到后面，加载优先级更高
 			builderAction?.Invoke(builder);

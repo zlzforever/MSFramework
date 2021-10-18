@@ -10,29 +10,6 @@ namespace MicroserviceFramework.Application
 {
 	public static class ServiceCollectionExtensions
 	{
-		public static IServiceCollection AddCqrs(this IServiceCollection serviceCollection)
-		{
-			// var handlerInterfaceTypes = new[]
-			// {
-			// 	typeof(ICommandHandler<>),
-			// 	typeof(ICommandHandler<,>),
-			// 	typeof(IQueryHandler<>),
-			// 	typeof(IQueryHandler<,>)
-			// };
-			//
-			// MicroserviceFrameworkLoaderContext.Default.ResolveType += type =>
-			// {
-			// 	foreach (var handlerInterfaceType in handlerInterfaceTypes)
-			// 	{
-			// 		RegisterGenericType(serviceCollection, type, handlerInterfaceType);
-			// 	}
-			// };
-
-			serviceCollection.TryAddScoped<ICqrsProcessor, CqrsProcessor>();
-
-			return serviceCollection;
-		}
-
 		private static void RegisterGenericType(IServiceCollection serviceCollection, Type type,
 			Type genericTypeDefinition)
 		{

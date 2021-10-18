@@ -5,10 +5,6 @@ namespace MicroserviceFramework.DependencyInjection
 {
 	public static class LifetimeUtilities
 	{
-		private static readonly Type Scope = typeof(IScopeDependency);
-		private static readonly Type Singleton = typeof(ISingletonDependency);
-		private static readonly Type Transient = typeof(ITransientDependency);
-
 		public static ServiceLifetime? GetLifetime(Type type)
 		{
 			if (type.IsAbstract || type.IsInterface)
@@ -16,17 +12,17 @@ namespace MicroserviceFramework.DependencyInjection
 				return null;
 			}
 
-			if (Singleton.IsAssignableFrom(type))
+			if (typeof(ISingletonDependency).IsAssignableFrom(type))
 			{
 				return ServiceLifetime.Singleton;
 			}
 
-			if (Scope.IsAssignableFrom(type))
+			if (typeof(IScopeDependency).IsAssignableFrom(type))
 			{
 				return ServiceLifetime.Scoped;
 			}
 
-			if (Transient.IsAssignableFrom(type))
+			if (typeof(ITransientDependency).IsAssignableFrom(type))
 			{
 				return ServiceLifetime.Transient;
 			}

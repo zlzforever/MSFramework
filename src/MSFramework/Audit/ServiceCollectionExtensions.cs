@@ -1,3 +1,5 @@
+using System;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 
 namespace MicroserviceFramework.Audit
@@ -23,16 +25,5 @@ namespace MicroserviceFramework.Audit
 			builder.UseAudit<LoggerAuditStore>();
 			return builder;
 		}
-
-		// public static bool IsAuditEnabled(this IServiceProvider serviceProvider)
-		// {
-		// 	var auditService = serviceProvider.GetService<IAuditService>();
-		// 	if (auditService == null)
-		// 	{
-		// 		return false;
-		// 	}
-		//
-		// 	return auditService.Enabled;
-		// }
 	}
 }
