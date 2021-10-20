@@ -1,12 +1,12 @@
 using System;
 using System.Collections.Generic;
-using MicroserviceFramework.Application.CQRS;
+using MicroserviceFramework.Mediator;
 using MongoDB.Bson;
 using Ordering.Domain.AggregateRoots;
 
 namespace Ordering.Application.Commands
 {
-	public class CreateOrderCommand : ICommand<ObjectId>
+	public class CreateOrderCommand : IRequest<ObjectId>
 	{
 		public string UserId { get; set; }
 

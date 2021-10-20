@@ -1,14 +1,14 @@
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using MicroserviceFramework.Application.CQRS;
+using MicroserviceFramework.Mediator;
 using MongoDB.Bson;
 using Ordering.Domain.AggregateRoots;
 using Ordering.Domain.Repositories;
 
 namespace Ordering.Application.Commands
 {
-	public class CreateOrderCommandHandler : ICommandHandler<CreateOrderCommand, ObjectId>
+	public class CreateOrderCommandHandler : IRequestHandler<CreateOrderCommand, ObjectId>
 	{
 		private readonly IOrderingRepository _orderRepository;
 

@@ -1,9 +1,9 @@
 using System;
 using System.Linq;
 using MicroserviceFramework.Application;
-using MicroserviceFramework.Application.CQRS;
 using MicroserviceFramework.Domain;
 using MicroserviceFramework.Extensions;
+using MicroserviceFramework.Mediator;
 using MicroserviceFramework.Utilities;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -49,10 +49,8 @@ namespace MicroserviceFramework.DependencyInjection
 				typeof(IApplicationService),
 				typeof(IDomainService),
 				typeof(ISession),
-				typeof(ICommand),
-				typeof(ICommand<>),
-				typeof(IQuery),
-				typeof(IQuery<>)).ToArray();
+				typeof(IRequest),
+				typeof(IRequest<>)).ToArray();
 
 			if (interfaceTypes.Length == 0)
 			{

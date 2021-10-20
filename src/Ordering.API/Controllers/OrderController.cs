@@ -1,10 +1,10 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using MicroserviceFramework.Application.CQRS;
 using MicroserviceFramework.AspNetCore;
 using MicroserviceFramework.AspNetCore.Filters;
 using MicroserviceFramework.Domain;
+using MicroserviceFramework.Mediator;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using MongoDB.Bson;
@@ -22,12 +22,12 @@ namespace Ordering.API.Controllers
 	{
 		private readonly IOrderingQuery _orderingQuery;
 		private readonly IOrderingRepository _orderRepository;
-		private readonly ICqrsProcessor _cqrsProcessor;
+		private readonly IMediator _cqrsProcessor;
 		private readonly OrderingContext _dbContext;
 		private readonly IUnitOfWork _unitOfWorkManager;
 
 		public OrderController(IOrderingRepository orderRepository,
-			IOrderingQuery orderingQuery, ICqrsProcessor commandExecutor, OrderingContext dbContext,
+			IOrderingQuery orderingQuery, IMediator commandExecutor, OrderingContext dbContext,
 			IUnitOfWork unitOfWorkManager)
 		{
 			_orderingQuery = orderingQuery;
@@ -65,7 +65,7 @@ namespace Ordering.API.Controllers
 		[HttpPost("test-command1")]
 		public async Task<string> TestCommand1Async([FromBody] TestCommand1 command)
 		{
-			var a = await _cqrsProcessor.ExecuteAsync(command, default);
+			var a = await _cqrsProcessor.SendAsync(command, default);
 			return a;
 		}
 
@@ -73,7 +73,7 @@ namespace Ordering.API.Controllers
 		//[AccessControl("test-command2")]
 		public async Task TestCommand2Async([FromBody] TestCommand2 command)
 		{
-			await _cqrsProcessor.ExecuteAsync(command, default);
+			await _cqrsProcessor.SendAsync(command, default);
 		}
 
 		/// <summary>
@@ -100,7 +100,7 @@ namespace Ordering.API.Controllers
 				});
 			}
 
-			return await _cqrsProcessor.ExecuteAsync(new CreateOrderCommand(items, "HELLO", "上海", "张扬路500号", "上海",
+			return await _cqrsProcessor.SendAsync(new CreateOrderCommand(items, "HELLO", "上海", "张扬路500号", "上海",
 				"中国", "200000", "what?"));
 		}
 

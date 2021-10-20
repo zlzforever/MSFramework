@@ -4,7 +4,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 
-namespace MicroserviceFramework.Configuration
+namespace MicroserviceFramework.Extensions.Options
 {
 	public static class ServiceCollectionExtensions
 	{

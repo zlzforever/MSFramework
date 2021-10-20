@@ -1,11 +1,11 @@
 using System.Threading;
 using System.Threading.Tasks;
-using MicroserviceFramework.Application.CQRS;
+using MicroserviceFramework.Mediator;
 using Ordering.Domain.Repositories;
 
 namespace Ordering.Application.Commands
 {
-	public class DeleteOrderCommandHandler : ICommandHandler<DeleteOrderCommand>
+	public class DeleteOrderCommandHandler : IRequestHandler<DeleteOrderCommand>
 	{
 		private readonly IOrderingRepository _orderRepository;
 

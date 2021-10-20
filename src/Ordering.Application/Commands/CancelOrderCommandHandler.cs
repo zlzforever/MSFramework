@@ -1,12 +1,12 @@
 using System.Threading;
 using System.Threading.Tasks;
-using MicroserviceFramework.Application.CQRS;
+using MicroserviceFramework.Mediator;
 using MongoDB.Bson;
 using Ordering.Domain.Repositories;
 
 namespace Ordering.Application.Commands
 {
-	public class CancelOrderCommandHandler : ICommandHandler<CancelOrderCommand, ObjectId>
+	public class CancelOrderCommandHandler : IRequestHandler<CancelOrderCommand, ObjectId>
 	{
 		private readonly IOrderingRepository _orderRepository;
 

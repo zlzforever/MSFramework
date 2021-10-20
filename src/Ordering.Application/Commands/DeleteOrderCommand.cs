@@ -1,9 +1,9 @@
-using MicroserviceFramework.Application.CQRS;
+using MicroserviceFramework.Mediator;
 using MongoDB.Bson;
 
 namespace Ordering.Application.Commands
 {
-	public class DeleteOrderCommand : ICommand
+	public class DeleteOrderCommand : IRequest
 	{
 		public ObjectId OrderId { get; private set; }
 

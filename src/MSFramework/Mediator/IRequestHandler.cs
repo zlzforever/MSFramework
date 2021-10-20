@@ -2,14 +2,14 @@ using System.Threading;
 using System.Threading.Tasks;
 using MicroserviceFramework.DependencyInjection;
 
-namespace MicroserviceFramework.Application.CQRS
+namespace MicroserviceFramework.Mediator
 {
-	public interface IQueryHandler<in TQuery> : IScopeDependency where TQuery : IQuery
+	public interface IRequestHandler<in TQuery> : IScopeDependency where TQuery : IRequest
 	{
 		Task HandleAsync(TQuery query, CancellationToken cancellationToken = default);
 	}
 
-	public interface IQueryHandler<in TQuery, TResponse> : IScopeDependency where TQuery : IQuery<TResponse>
+	public interface IRequestHandler<in TQuery, TResponse> : IScopeDependency where TQuery : IRequest<TResponse>
 	{
 		Task<TResponse> HandleAsync(TQuery query, CancellationToken cancellationToken = default);
 	}

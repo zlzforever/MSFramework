@@ -3,17 +3,17 @@ using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text.Json;
 using MicroserviceFramework.Application;
-using MicroserviceFramework.Application.CQRS;
 using MicroserviceFramework.Audit;
 using MicroserviceFramework.DependencyInjection;
 using MicroserviceFramework.Domain.Event;
 using MicroserviceFramework.EventBus;
+using MicroserviceFramework.Extensions.Options;
+using MicroserviceFramework.Mediator;
 using MicroserviceFramework.Serialization;
 using MicroserviceFramework.Shared;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
-using MicroserviceFramework.Configuration;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 
@@ -46,7 +46,7 @@ namespace MicroserviceFramework
 			builder.Services.TryAddScoped<IAuditStore, LoggerAuditStore>();
 			builder.Services.TryAddSingleton<ApplicationInfo>();
 
-			builder.Services.TryAddScoped<ICqrsProcessor, CqrsProcessor>();
+			builder.Services.TryAddScoped<IMediator, Mediator.Mediator>();
 
 			// 放到后面，加载优先级更高
 			builderAction?.Invoke(builder);
