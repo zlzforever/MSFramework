@@ -3,7 +3,6 @@ using System.Linq;
 using System.Threading.Tasks;
 using MicroserviceFramework.DependencyInjection;
 using MicroserviceFramework.Domain;
-using MicroserviceFramework.Domain.Event;
 using MicroserviceFramework.EventBus;
 using Ordering.Domain.AggregateRoots;
 using Ordering.Domain.Repositories;

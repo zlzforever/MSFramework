@@ -1,5 +1,4 @@
 using MicroserviceFramework.Domain;
-using MicroserviceFramework.Domain.Event;
 using MongoDB.Bson;
 
 namespace Ordering.Domain.AggregateRoots

@@ -77,7 +77,7 @@ namespace Ordering.API
 				//builder.UseAccessControl(Configuration);
 				// builder.UseRabbitMQEventDispatcher(new RabbitMQOptions(), typeof(UserCheckoutAcceptedEvent));
 				// 启用审计服务
-				builder.UseAudit();
+				builder.UseAuditStore();
 				// builder.UseMySqlMigrator(typeof(OrderingContext),
 				// 	"Database='ordering';Data Source=localhost;User ID=root;Password=1qazZAQ!;Port=3306;");
 

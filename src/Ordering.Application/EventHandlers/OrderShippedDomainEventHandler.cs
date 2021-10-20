@@ -1,11 +1,11 @@
 using System.Threading.Tasks;
-using MicroserviceFramework.Domain.Event;
 using MicroserviceFramework.Ef;
+using MicroserviceFramework.Mediator;
 using Ordering.Domain.AggregateRoots.Events;
 
 namespace Ordering.Application.EventHandlers
 {
-	public class OrderShippedDomainEventHandler : IDomainEventHandler<OrderShippedDomainEvent>
+	public class OrderShippedDomainEventHandler : IMessageHandler<OrderShippedDomainEvent>
 	{
 		private readonly DbContextFactory _dbContextFactory;
 

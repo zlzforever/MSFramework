@@ -1,25 +1,57 @@
 using System.Threading.Tasks;
 using MicroserviceFramework;
-using MicroserviceFramework.Domain.Event;
+using MicroserviceFramework.Domain;
+using MicroserviceFramework.Mediator;
 using Microsoft.Extensions.DependencyInjection;
 using Xunit;
 
 namespace MSFramework.Tests
 {
-	public class Event1 : DomainEvent
+	public class Event4 : DomainEvent
 	{
 		public static int Count;
+	}
+
+	public class Event1Handler : IDomainEventHandler<Event4>
+	{
+		public Task HandleAsync(Event4 @event)
+		{
+			Event4.Count += 1;
+			return Task.CompletedTask;
+		}
+
+		public void Dispose()
+		{
+		}
 	}
 
 	public class Event2 : DomainEvent
 	{
 	}
 
-	public class Event1Handler : IDomainEventHandler<Event1>
+	public class Event3 : DomainEvent
 	{
-		public Task HandleAsync(Event1 @event)
+		public static int Count;
+	}
+
+	public class Event31Handler : IDomainEventHandler<Event3>
+	{
+		public Task HandleAsync(Event3 @event)
 		{
-			Event1.Count += 1;
+			Event3.Count += 1;
+			return Task.CompletedTask;
+		}
+
+		public void Dispose()
+		{
+		}
+	}
+
+	public class Event32Handler : IDomainEventHandler<Event3>
+	{
+		public Task HandleAsync(Event3 @event)
+		{
+			Event3.Count += 1;
 			return Task.CompletedTask;
 		}
 
@@ -31,19 +63,35 @@ namespace MSFramework.Tests
 	public class DomainEventTests
 	{
 		[Fact]
-		public async Task DispatchTests()
+		public async Task DispatchTo1HandlerTests()
+		{
+			var serviceCollection = new ServiceCollection();
+			serviceCollection.AddMicroserviceFramework(
+				x => { });
+			var serviceProvider = serviceCollection.BuildServiceProvider();
+			
+			var mediator = serviceProvider.GetRequiredService<IMediator>();
+			await mediator.PublishAsync(new Event4());
+			Assert.Equal(1, Event4.Count);
+
+			await mediator.PublishAsync(new Event4());
+			Assert.Equal(2, Event4.Count);
+		}
+
+		[Fact]
+		public async Task DispatchToMultiHandlerTests()
 		{
 			var serviceCollection = new ServiceCollection();
 			serviceCollection.AddMicroserviceFramework(
 				x => { });
 
 			var serviceProvider = serviceCollection.BuildServiceProvider();
-			var eventDispatcher = serviceProvider.GetRequiredService<IDomainEventDispatcher>();
-			await eventDispatcher.DispatchAsync(new Event1());
-			Assert.Equal(1, Event1.Count);
+			var mediator = serviceProvider.GetRequiredService<IMediator>();
+			await mediator.PublishAsync(new Event3());
+			Assert.Equal(2, Event3.Count);
 
-			await eventDispatcher.DispatchAsync(new Event1());
-			Assert.Equal(2, Event1.Count);
+			await mediator.PublishAsync(new Event3());
+			Assert.Equal(4, Event3.Count);
 		}
 
 		[Fact]
@@ -54,8 +102,8 @@ namespace MSFramework.Tests
 				x => { });
 
 			var serviceProvider = serviceCollection.BuildServiceProvider();
-			var eventDispatcher = serviceProvider.GetRequiredService<IDomainEventDispatcher>();
-			await eventDispatcher.DispatchAsync(new Event2());
+			var mediator = serviceProvider.GetRequiredService<IMediator>();
+			await mediator.PublishAsync(new Event2());
 		}
 	}
 }

@@ -23,15 +23,15 @@
     </PropertyGroup>
     
     <ItemGroup>
-        <None Include="..\..\LICENSE" Pack="true" PackagePath=""/>
+        <None Include="..\..\LICENSE" Pack="true" PackagePath="" />
     </ItemGroup>
 
     <ItemGroup>
-        <PackageReference Include="Cerberus.AspNetCore.AccessControl" Version="0.2.8"/>
+        <PackageReference Include="Cerberus.AspNetCore.AccessControl" Version="0.3.5" />
     </ItemGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\MSFramework\MSFramework.csproj"/>
+        <ProjectReference Include="..\MSFramework\MSFramework.csproj" />
     </ItemGroup>
 
 

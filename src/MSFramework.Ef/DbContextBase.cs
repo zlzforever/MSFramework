@@ -5,11 +5,11 @@ using System.Threading.Tasks;
 using MicroserviceFramework.Application;
 using MicroserviceFramework.Audit;
 using MicroserviceFramework.Domain;
-using MicroserviceFramework.Domain.Event;
 using MicroserviceFramework.Ef.Extensions;
 using MicroserviceFramework.Ef.Internal;
 using MicroserviceFramework.EventBus;
 using MicroserviceFramework.Extensions;
+using MicroserviceFramework.Mediator;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.EntityFrameworkCore.Infrastructure;
@@ -30,7 +30,7 @@ namespace MicroserviceFramework.Ef
 		private readonly ISession _session;
 		private readonly DbContextConfigurationCollection _entityFrameworkOptions;
 		private IEntityConfigurationTypeFinder _entityConfigurationTypeFinder;
-		private readonly IDomainEventDispatcher _domainEventDispatcher;
+		private readonly IMediator _domainEventDispatcher;
 		private IEventBus _eventBus;
 
 		/// <summary>
@@ -38,7 +38,7 @@ namespace MicroserviceFramework.Ef
 		/// </summary>
 		protected DbContextBase(DbContextOptions options,
 			IOptions<DbContextConfigurationCollection> entityFrameworkOptions,
-			IDomainEventDispatcher domainEventDispatcher,
+			IMediator domainEventDispatcher,
 			ISession session, ILoggerFactory loggerFactory)
 			: base(options)
 		{
@@ -198,7 +198,7 @@ namespace MicroserviceFramework.Ef
 					domainEvents = GetDomainEvents();
 					foreach (var @event in domainEvents)
 					{
-						await _domainEventDispatcher.DispatchAsync(@event);
+						await _domainEventDispatcher.PublishAsync(@event);
 						events.Add(@event);
 					}
 				} while (domainEvents.Count > 0);

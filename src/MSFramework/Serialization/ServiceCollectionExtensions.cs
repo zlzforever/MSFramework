@@ -1,6 +1,7 @@
 using System;
 using System.Text.Json;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 
 namespace MicroserviceFramework.Serialization
 {
@@ -11,8 +12,8 @@ namespace MicroserviceFramework.Serialization
 		{
 			var options = new JsonSerializerOptions();
 			configure?.Invoke(options);
-			serviceCollection.AddSingleton(options);
-			serviceCollection.AddSingleton<ISerializer, DefaultSerializer>();
+			serviceCollection.TryAddSingleton(options);
+			serviceCollection.TryAddSingleton<ISerializer, DefaultSerializer>();
 			return serviceCollection;
 		}
 	}

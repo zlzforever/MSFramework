@@ -1,17 +1,25 @@
 using System;
+using System.Collections.Concurrent;
 using MicroserviceFramework.Utilities;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace MicroserviceFramework
 {
 	public class MicroserviceFrameworkLoaderContext
 	{
-		public static readonly MicroserviceFrameworkLoaderContext Default = new();
+		private static readonly ConcurrentDictionary<IServiceCollection, MicroserviceFrameworkLoaderContext> Contexts =
+			new();
 
 		private MicroserviceFrameworkLoaderContext()
 		{
 		}
 
 		public event Action<Type> ResolveType;
+
+		public static MicroserviceFrameworkLoaderContext Get(IServiceCollection serviceCollection)
+		{
+			return Contexts.GetOrAdd(serviceCollection, _ => new MicroserviceFrameworkLoaderContext());
+		}
 
 		public void LoadTypes()
 		{

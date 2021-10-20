@@ -1,4 +1,4 @@
-using MicroserviceFramework.Domain.Event;
+using MicroserviceFramework.Domain;
 
 namespace Ordering.Domain.AggregateRoots.Events
 {

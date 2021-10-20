@@ -1,7 +1,7 @@
 using System.Threading.Tasks;
 using MicroserviceFramework.Application;
-using MicroserviceFramework.Domain.Event;
 using MicroserviceFramework.EventBus;
+using MicroserviceFramework.Mediator;
 using Microsoft.Extensions.Logging;
 using Ordering.Application.Events;
 
@@ -10,11 +10,11 @@ namespace Ordering.Application.EventHandlers
 	public class UserCheckoutAcceptedEventHandler : IEventHandler<UserCheckoutAcceptedEvent>
 	{
 		private readonly ILogger _logger;
-		private readonly IDomainEventDispatcher _mediator;
+		private readonly IMediator _mediator;
 		private readonly ISession _session;
 
 		public UserCheckoutAcceptedEventHandler(ISession session,
-			IDomainEventDispatcher mediator,
+			IMediator mediator,
 			ILogger<UserCheckoutAcceptedEventHandler> logger)
 		{
 			_logger = logger;

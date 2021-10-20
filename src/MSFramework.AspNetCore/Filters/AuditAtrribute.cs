@@ -1,5 +1,4 @@
 using System;
-using System.Reflection;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using MicroserviceFramework.AspNetCore.Extensions;
@@ -9,7 +8,6 @@ using MicroserviceFramework.Extensions;
 using MicroserviceFramework.Shared;
 using Microsoft.AspNetCore.Http.Extensions;
 using Microsoft.AspNetCore.Mvc.Filters;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace MicroserviceFramework.AspNetCore.Filters

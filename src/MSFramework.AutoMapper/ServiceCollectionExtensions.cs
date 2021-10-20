@@ -4,6 +4,7 @@ using System.Reflection;
 using MicroserviceFramework.Domain;
 using MicroserviceFramework.Utilities;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 
 namespace MicroserviceFramework.AutoMapper
 {
@@ -17,7 +18,7 @@ namespace MicroserviceFramework.AutoMapper
 		public static MicroserviceFrameworkBuilder UseAutoMapper(this MicroserviceFrameworkBuilder builder,
 			params Assembly[] assemblies)
 		{
-			builder.Services.AddScoped<IObjectAssembler, AutoMapperObjectAssembler>();
+			builder.Services.TryAddScoped<IObjectAssembler, AutoMapperObjectAssembler>();
 			builder.Services.AddAutoMapper(assemblies);
 			return builder;
 		}

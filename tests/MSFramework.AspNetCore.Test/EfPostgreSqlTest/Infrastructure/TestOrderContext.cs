@@ -1,6 +1,6 @@
 ﻿using MicroserviceFramework.Application;
-using MicroserviceFramework.Domain.Event;
 using MicroserviceFramework.Ef;
+using MicroserviceFramework.Mediator;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -11,7 +11,7 @@ namespace MSFramework.AspNetCore.Test.EfPostgreSqlTest.Infrastructure
 	{
 		public TestDataContext(DbContextOptions options,
 			IOptions<DbContextConfigurationCollection> entityFrameworkOptions,
-			IDomainEventDispatcher domainEventDispatcher, ISession session, ILoggerFactory loggerFactory) : base(
+			IMediator domainEventDispatcher, ISession session, ILoggerFactory loggerFactory) : base(
 			options, entityFrameworkOptions, domainEventDispatcher, session, loggerFactory)
 		{
 		}

@@ -2,6 +2,8 @@ using System.Security.Cryptography;
 using System.Text;
 using MicroserviceFramework.Shared;
 
+// ReSharper disable InconsistentNaming
+
 namespace MicroserviceFramework.Utilities
 {
 	public static class CryptographyUtilities
@@ -39,7 +41,7 @@ namespace MicroserviceFramework.Utilities
 		/// <summary>
 		/// 获取字符串的SHA1哈希值，默认编码为<see cref="Encoding.UTF8"/>
 		/// </summary>
-		public static string ComputeSha1(string value, Encoding encoding = null)
+		public static string ComputeSHA1(string value, Encoding encoding = null)
 		{
 			Check.NotNull(value, nameof(value));
 
@@ -59,7 +61,7 @@ namespace MicroserviceFramework.Utilities
 		/// <summary>
 		/// 获取字符串的Sha256哈希值，默认编码为<see cref="Encoding.UTF8"/>
 		/// </summary>
-		public static string ComputeSha256(string value, Encoding encoding = null)
+		public static string ComputeSHA256(string value, Encoding encoding = null)
 		{
 			Check.NotNull(value, nameof(value));
 
@@ -79,7 +81,7 @@ namespace MicroserviceFramework.Utilities
 		/// <summary>
 		/// 获取字符串的Sha512哈希值，默认编码为<see cref="Encoding.UTF8"/>
 		/// </summary>
-		public static string ComputeSha512(string value, Encoding encoding = null)
+		public static string ComputeSHA512(string value, Encoding encoding = null)
 		{
 			Check.NotNull(value, nameof(value));
 

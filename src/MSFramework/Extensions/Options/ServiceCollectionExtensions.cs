@@ -57,7 +57,7 @@ namespace MicroserviceFramework.Extensions.Options
 		{
 			services.AddOptions();
 
-			MicroserviceFrameworkLoaderContext.Default.ResolveType += type =>
+			MicroserviceFrameworkLoaderContext.Get(services).ResolveType += type =>
 			{
 				if (type.IsAbstract || type.IsInterface)
 				{

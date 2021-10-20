@@ -13,7 +13,7 @@ namespace MicroserviceFramework.DependencyInjection
 	{
 		public static void AddDependencyInjectionLoader(this IServiceCollection services)
 		{
-			MicroserviceFrameworkLoaderContext.Default.ResolveType += type =>
+			MicroserviceFrameworkLoaderContext.Get(services).ResolveType += type =>
 			{
 				var lifetime = LifetimeUtilities.GetLifetime(type);
 				if (lifetime.HasValue)

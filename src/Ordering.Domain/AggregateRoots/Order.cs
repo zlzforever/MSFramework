@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
 using MicroserviceFramework.Domain;
-using MicroserviceFramework.Domain.Event;
 using MongoDB.Bson;
 using Ordering.Domain.AggregateRoots.Events;
 

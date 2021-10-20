@@ -16,7 +16,7 @@ namespace MicroserviceFramework.EventBus
 			serviceCollection
 				.TryAddSingleton<IEventHandlerFactory, DependencyInjectionEventHandlerFactory>();
 
-			MicroserviceFrameworkLoaderContext.Default.ResolveType += type =>
+			MicroserviceFrameworkLoaderContext.Get(serviceCollection).ResolveType += type =>
 			{
 				var interfaces = type.GetInterfaces();
 				var handlerInterfaceTypes = interfaces
