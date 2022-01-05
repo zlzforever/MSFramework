@@ -1,20 +1,23 @@
 ﻿using MicroserviceFramework.Domain;
-using MicroserviceFramework.Shared;
+using MongoDB.Bson;
 using Template.Domain.Aggregates.Project.Events;
 
 namespace Template.Domain.Aggregates.Project
 {
 	public class Product : ModificationAggregateRoot
 	{
-		private Product() : base(ObjectId.NewId())
+		private Product() : base(ObjectId.GenerateNewId())
 		{
 		}
 
-		public Product(string name, int price, ProductType productType) : this()
+		public static Product New(string name, int price, ProductType productType)
 		{
-			Name = name;
-			Price = price;
-			ProductType = productType;
+			return new Product
+			{
+				Name = name,
+				Price = price,
+				ProductType = productType,
+			};
 		}
 
 		public string Name { get; private set; }

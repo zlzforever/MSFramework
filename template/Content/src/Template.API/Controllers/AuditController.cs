@@ -3,7 +3,9 @@ using System.Linq;
 using MicroserviceFramework.AspNetCore;
 using MicroserviceFramework.Audit;
 using MicroserviceFramework.Domain;
+using MicroserviceFramework.Ef;
 using MicroserviceFramework.Ef.Repositories;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 #if !DEBUG
@@ -13,24 +15,28 @@ using Microsoft.AspNetCore.Authorization;
 
 namespace Template.API.Controllers
 {
+	/// <summary>
+	/// FOR TEST
+	/// </summary>
 	[Route("api/v1.0/audit")]
 	[ApiController]
-#if !DEBUG
-	[Authorize]
-#endif
+	[AllowAnonymous]
 	public class AuditController : ApiControllerBase
 	{
-		private readonly IRepository<AuditOperation> _repository;
+		private readonly DbContextFactory _dbContextFactory;
+		private readonly IAuditStore _auditStore;
 
-		public AuditController(IRepository<AuditOperation> repository)
+		public AuditController(DbContextFactory dbContextFactory, IAuditStore auditStore)
 		{
-			_repository = repository;
+			_dbContextFactory = dbContextFactory;
+			_auditStore = auditStore;
 		}
 
 		[HttpGet("GetAudits")]
 		public List<AuditOperation> GetAudits()
 		{
-			return ((EfRepository<AuditOperation>) _repository).AggregateRootSet
+			var dbContext = _dbContextFactory.GetDbContext<AuditOperation>();
+			return dbContext.Set<AuditOperation>()
 				.Include(x => x.Entities).ToList();
 		}
 

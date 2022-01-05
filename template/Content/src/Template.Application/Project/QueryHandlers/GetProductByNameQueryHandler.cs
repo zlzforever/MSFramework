@@ -1,33 +1,32 @@
 using System.Threading;
 using System.Threading.Tasks;
-using MicroserviceFramework.Application.CQRS;
-using MicroserviceFramework.ObjectMapper;
+using MicroserviceFramework.Domain;
+using MicroserviceFramework.Mediator;
 using Microsoft.EntityFrameworkCore;
-using Template.Application.Project.DTOs;
 using Template.Domain.Aggregates.Project;
 using Template.Infrastructure;
 
-namespace Template.Application.Project.Queries
+namespace Template.Application.Project.QueryHandlers
 {
-	public class GetProductByNameQueryHandler : IQueryHandler<GetProductByNameQuery, ProductOut>
+	public class GetProductByNameQueryHandler : IRequestHandler<Queries.V10.GetProductByNameQuery, Dtos.V10.ProductOut>
 	{
 		private readonly TemplateDbContext _dbContext;
-		private readonly IObjMapper _mapper;
+		private readonly IObjectAssembler _objectAssembler;
 
 		public GetProductByNameQueryHandler(
 			TemplateDbContext dbContext,
-			IObjMapper mapper)
+			IObjectAssembler objectAssembler)
 		{
 			_dbContext = dbContext;
-			_mapper = mapper;
+			_objectAssembler = objectAssembler;
 		}
 
-		public async Task<ProductOut> HandleAsync(GetProductByNameQuery query,
+		public async Task<Dtos.V10.ProductOut> HandleAsync(Queries.V10.GetProductByNameQuery query,
 			CancellationToken cancellationToken = new CancellationToken())
 		{
 			var product = await _dbContext.Set<Product>()
 				.FirstOrDefaultAsync(x => x.Name == query.Name, cancellationToken: cancellationToken);
-			return _mapper.Map<ProductOut>(product);
+			return _objectAssembler.To<Dtos.V10.ProductOut>(product);
 		}
 	}
 }

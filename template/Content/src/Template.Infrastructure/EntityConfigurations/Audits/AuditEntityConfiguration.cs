@@ -6,22 +6,22 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace Template.Infrastructure.EntityConfigurations.Audits
 {
-    public class AuditEntityConfiguration : EntityTypeConfigurationBase<AuditEntity, TemplateDbContext>
-    {
-        public override void Configure(EntityTypeBuilder<AuditEntity> builder)
-        {
-            base.Configure(builder);
+	public class AuditEntityConfiguration : EntityTypeConfigurationBase<AuditEntity, TemplateDbContext>
+	{
+		public override void Configure(EntityTypeBuilder<AuditEntity> builder)
+		{
+			base.Configure(builder);
 
-            builder.ToTable("audit_entity");
+			builder.ToTable("audit_entity");
 
-            builder.HasMany(x => x.Properties).WithOne().HasForeignKey("audit_entity_id");
+			builder.HasMany(x => x.Properties).WithOne().HasForeignKey("audit_entity_id");
 
-            builder.Property(x => x.Id) ;
-            builder.Property(x => x.EntityId).HasMaxLength(255);
-            builder.Property(x => x.Type).HasMaxLength(255);
-            builder.Property(e => e.OperationType).HasMaxLength(255).UseEnumeration();
+			builder.Property(x => x.Id).ValueGeneratedNever();
+			builder.Property(x => x.EntityId).HasMaxLength(255);
+			builder.Property(x => x.Type).HasMaxLength(255);
+			builder.Property(e => e.OperationType).HasMaxLength(255).UseEnumeration();
 
-            builder.HasIndex(m => m.EntityId);
-        }
-    }
+			builder.HasIndex(m => m.EntityId);
+		}
+	}
 }

@@ -1,3 +1,4 @@
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 
 namespace MicroserviceFramework.Audit
@@ -14,7 +15,7 @@ namespace MicroserviceFramework.Audit
 		public static MicroserviceFrameworkBuilder UseAuditStore<TAuditService>(this MicroserviceFrameworkBuilder builder)
 			where TAuditService : class, IAuditStore
 		{
-			builder.Services.TryAddScoped<IAuditStore, TAuditService>();
+			builder.Services.AddScoped<IAuditStore, TAuditService>();
 			return builder;
 		}
 

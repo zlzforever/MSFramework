@@ -1,39 +1,57 @@
-image: zlzforever/docker:18.09
+image: docker:latest
+
 variables:
-  # When using dind, it's wise to use the overlayfs driver for
-  # improved performance.
-  DOCKER_DRIVER: overlay2
+  # Use TLS https://docs.gitlab.com/ee/ci/docker/using_docker_build.html#tls-enabled
+  API_IMAGE: $DOCKER_REGISTRY/api:$CI_COMMIT_REF_SLUG-$CI_COMMIT_SHORT_SHA
+  API_LATEST_IMAGE: $DOCKER_REGISTRY/api:$CI_COMMIT_REF_SLUG
+  API_RELEASE_IMAGE: $DOCKER_REGISTRY/api:$CI_COMMIT_SHORT_SHA
+  API_RELEASE_LATEST_IMAGE: $DOCKER_REGISTRY/api
+
+
 before_script:
-  - docker login -u {user} -p {password} registry-docker.zlzforever.com
-  - docker pull registry-docker.zlzforever.com/dotnetsdk-yarn:latest
+  - echo $API_IMAGE
+  - docker login -u $CI_REGISTRY_USER -p $CI_TOKEN $CI_REGISTRY
+
 stages:
-  - Build
-  - Staging
-  - Production
+  - build
+  # - test
+  - staging
+  - publish
+
 build:
-  only:
-    - dev
-  stage: Build
+  stage: build
   script:
-    - docker build .
-stagging:
+    - docker build -f Dockerfile --target build --pull  .
+
+# api-test:
+#   stage: test
+#   only:
+#     - staging
+#     - master
+#     - /^release-.*$/
+#   script:
+#     - docker build --pull -f Dockerfile --target api-test .
+
+staging:
   only:
     - staging
-  stage: Staging
+  stage: staging
   script:
-    - app=template
-    - docker build -t $app .
-    - tag=$(date +%Y%m%d)
-    - docker tag $app registry-docker.pamirs.com/$app:$tag
-    - docker push registry-docker.pamirs.com/$app:$tag
-    - curl -X POST -F token=a7617dce0e0b27bb5abf224add3009 -F ref=$app http://c.pamirs.com/api/v4/projects/12/trigger/pipeline
-production:
+    - docker build -f Dockerfile --pull --target bch-api -t $API_IMAGE .
+    - docker tag $API_IMAGE $API_LATEST_IMAGE
+    - docker push $API_IMAGE
+    - docker push $API_LATEST_IMAGE
+
+publish:
   only:
-    - master
-  stage: Production
+    - /^release-.*$/      # tag 分支 commit 之后触发
+    - triggers  # API 触发
+    - schedules # 每日构建触发
+  stage: publish
   script:
-    - app=template
-    - docker build -t $app .
-    - docker tag $app registry-docker.pamirs.com/$app:latest
-    - docker push registry-docker.pamirs.com/$app:latest
-    - curl -X POST -F token=fffefb3edc3365ff9910f472377a44 -F ref=$app http://c.pamirs.com/api/v4/projects/42/trigger/pipeline
+    - docker build -f Dockerfile --pull --target bch-api -t $API_RELEASE_IMAGE .
+    - docker tag $API_RELEASE_IMAGE $API_RELEASE_LATEST_IMAGE
+    - docker push $API_RELEASE_IMAGE
+    - docker push $API_RELEASE_LATEST_IMAGE
+
+

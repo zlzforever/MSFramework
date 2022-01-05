@@ -1,21 +1,12 @@
-using Microsoft.Extensions.Configuration;
+using MicroserviceFramework.Extensions.Options;
 
 namespace Template.Domain
 {
+	[OptionsType]
 	public class TemplateOptions
 	{
-		private readonly IConfiguration _configuration;
-
-		public TemplateOptions(IConfiguration configuration)
-		{
-			_configuration = configuration;
-		}
-
-		public string ApiName => _configuration["ApiName"];
-		public string ApiSecret => _configuration["ApiSecret"];
-		public string Authority => _configuration["Authority"];
-		public bool RequireHttpsMetadata => bool.Parse(_configuration["RequireHttpsMetadata"]);
-
-		public string DefaultConnectionString => _configuration["DbContexts:AppDbContext:ConnectionString"];
+		public string ApiName { get; set; }
+		public string Authority { get; set; }
+		public bool RequireHttpsMetadata { get; set; }
 	}
 }

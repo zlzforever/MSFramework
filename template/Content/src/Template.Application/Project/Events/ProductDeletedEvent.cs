@@ -1,5 +1,5 @@
 using MicroserviceFramework.EventBus;
-using MicroserviceFramework.Shared;
+using MongoDB.Bson;
 
 namespace Template.Application.Project.Events
 {

@@ -17,17 +17,18 @@ namespace Template.Infrastructure.EntityConfigurations.Audits
 
 			builder.HasMany(x => x.Entities).WithOne().HasForeignKey("audit_operation_id");
 
-			builder.Property(x => x.Id);
+			builder.Property(x => x.Id).ValueGeneratedNever();
 			builder.Property(x => x.Ip).HasMaxLength(255);
-			builder.Property(x => x.Path).HasMaxLength(255);
+			builder.Property(x => x.Feature).HasMaxLength(1024);
 			builder.Property(x => x.ApplicationName).HasMaxLength(255);
-			builder.Property(x => x.UserAgent).HasMaxLength(500);
+			builder.Property(x => x.UserAgent).HasMaxLength(1024);
+			builder.Property(x => x.Url).HasMaxLength(1024);
 			builder.Property(x => x.Elapsed);
-			builder.Property(x => x.EndTime).UseUnixTime();
+			builder.Property(x => x.EndTime);
 			builder.ConfigureCreation();
 
 			builder.HasIndex(x => x.CreationTime);
-			builder.HasIndex(x => x.CreationUserId);
+			builder.HasIndex(x => x.CreatorId);
 			builder.HasIndex(x => x.EndTime);
 		}
 	}

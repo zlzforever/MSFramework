@@ -7,8 +7,8 @@ namespace Template.Application.Project.DTOs
 	{
 		public AutoMapperProfile()
 		{
-			CreateMap<Product, ProductOut>();
-			CreateMap<Product, CreatProductOut>();
+			CreateMap<Product, Dtos.V10.ProductOut>();
+			CreateMap<Product, Dtos.V10.CreatProductOut>();
 		}
 	}
 }

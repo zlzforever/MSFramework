@@ -1,11 +1,13 @@
+using System.Threading.Tasks;
 using MicroserviceFramework.DependencyInjection;
 using MicroserviceFramework.Domain;
+using MongoDB.Bson;
 using Template.Domain.Aggregates.Project;
 
 namespace Template.Domain.Repositories
 {
-	public interface IProductRepository : IRepository<Product>, IScopeDependency
+	public interface IProductRepository : IRepository<Product, ObjectId>, IScopeDependency
 	{
-		Product GetByName(string name);
+		Task<Product> GetByNameAsync(string name);
 	}
 }

@@ -1,5 +1,5 @@
-using MicroserviceFramework.Domain.Event;
-using MicroserviceFramework.Shared;
+using MicroserviceFramework.Domain;
+using MongoDB.Bson;
 
 namespace Template.Domain.Aggregates.Project.Events
 {

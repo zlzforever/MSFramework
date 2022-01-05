@@ -1,5 +1,5 @@
 using System.Threading.Tasks;
-using MicroserviceFramework.Domain.Event;
+using MicroserviceFramework.Domain;
 using Template.Domain.Aggregates.Project.Events;
 
 namespace Template.Application.Project.DomainEventHandlers

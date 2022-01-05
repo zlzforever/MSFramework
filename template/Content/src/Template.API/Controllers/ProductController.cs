@@ -1,17 +1,15 @@
 using System;
 using System.Threading.Tasks;
 using MicroserviceFramework;
-using MicroserviceFramework.Application.CQRS;
 using MicroserviceFramework.AspNetCore;
 using MicroserviceFramework.AspNetCore.Mvc;
+using MicroserviceFramework.Mediator;
 using MicroserviceFramework.Shared;
 using Microsoft.AspNetCore.Mvc;
+using Template.Application.Project;
 #if !DEBUG
 using Microsoft.AspNetCore.Authorization;
 #endif
-using Template.Application.Project.Commands;
-using Template.Application.Project.DTOs;
-using Template.Application.Project.Queries;
 
 namespace Template.API.Controllers
 {
@@ -22,45 +20,46 @@ namespace Template.API.Controllers
 #endif
 	public class ProductController : ApiControllerBase
 	{
-		private readonly ICqrsProcessor _cqrsProcessor;
+		private readonly IMediator _mediator;
 
 		public ProductController(
-			ICqrsProcessor cqrsProcessor)
+			IMediator mediator)
 		{
-			_cqrsProcessor = cqrsProcessor;
+			_mediator = mediator;
 		}
 
 		[HttpGet]
-		public async Task<PagedResult<ProductOut>> PagedQuery1Async([FromRoute] PagedProductQuery query)
+		public async Task<PagedResult<Dtos.V10.ProductOut>> PagedQuery1Async(
+			[FromRoute] Queries.V10.PagedProductQuery query)
 		{
-			var @out = await _cqrsProcessor.QueryAsync(query);
+			var @out = await _mediator.SendAsync(query);
 			return @out;
 		}
 
 		[HttpPost]
-		public async Task<CreatProductOut> CreateAsync([FromBody] CreateProjectCommand command)
+		public async Task<Dtos.V10.CreatProductOut> CreateAsync([FromBody] Commands.V10.CreateProjectCommand command)
 		{
-			var result = await _cqrsProcessor.ExecuteAsync(command);
-			return result;
+			var @out = await _mediator.SendAsync(command);
+			return @out;
 		}
 
 		[HttpGet("getByName")]
-		public async Task<ProductOut> GetAsync([FromRoute] GetProductByNameQuery query)
+		public async Task<Dtos.V10.ProductOut> GetAsync([FromRoute] Queries.V10.GetProductByNameQuery query)
 		{
-			return await _cqrsProcessor.QueryAsync(query);
+			return await _mediator.SendAsync(query);
 		}
 
 		[HttpDelete]
-		public async Task<Response> DeleteAsync([FromRoute] DeleteProjectCommand command)
+		public async Task<ApiResult> DeleteAsync([FromRoute] Commands.V10.DeleteProjectCommand command)
 		{
-			await _cqrsProcessor.ExecuteAsync(command);
+			await _mediator.SendAsync(command);
 			return Success();
 		}
 
 		[HttpGet("Error")]
-		public Response GetErrorAsync()
+		public ApiResult GetErrorAsync()
 		{
-			return new ErrorResponse("I am an error response");
+			return new ApiResult("I am an error response");
 		}
 
 		[HttpGet("MSFrameworkException")]
@@ -70,7 +69,7 @@ namespace Template.API.Controllers
 		}
 
 		[HttpGet("Exception")]
-		public Response GetExceptionAsync()
+		public ApiResult GetExceptionAsync()
 		{
 			throw new Exception("i'm framework exception");
 		}

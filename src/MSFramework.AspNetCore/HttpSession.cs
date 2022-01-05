@@ -19,14 +19,22 @@ namespace MicroserviceFramework.AspNetCore
 			}
 
 			HttpContext = accessor.HttpContext;
+			TraceIdentifier = HttpContext.TraceIdentifier;
+
+			if (accessor.HttpContext.User == null)
+			{
+				return;
+			}
+
 			UserId = HttpContext.User.GetValue(ClaimTypes.NameIdentifier, "sid", "sub");
 			UserName = HttpContext.User.GetValue(ClaimTypes.Name, "name");
 			Email = HttpContext.User.GetValue(ClaimTypes.Email, "email");
 			PhoneNumber = HttpContext.User.GetValue(ClaimTypes.MobilePhone, "phone_number");
-			TraceIdentifier = HttpContext.TraceIdentifier;
 
-			var roles = HttpContext?.User?.FindAll(ClaimTypes.Role).Select(x => x.Value).ToArray();
-			Roles = roles == null ? EmptyRoles : new HashSet<string>(roles);
+			var roles1 = HttpContext.User.FindAll(ClaimTypes.Role).Select(x => x.Value).ToList();
+			var roles2 = HttpContext.User.FindAll("role").Select(x => x.Value).ToList();
+			roles1.AddRange(roles2);
+			Roles = roles1.Count == 0 ? EmptyRoles : new HashSet<string>(roles1);
 		}
 
 		public string TraceIdentifier { get; }
