@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Hosting;
+using Newtonsoft.Json;
 using Serilog;
 using Serilog.Events;
 
@@ -22,6 +23,7 @@ namespace Ordering.API
 				.WriteTo.Console()
 				.WriteTo.Seq("http://localhost:5341", apiKey: "VrKfUYKzcVH4b1dW72KL")
 				.CreateLogger();
+
 			CreateHostBuilder(args).Build().Run();
 		}
 

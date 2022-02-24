@@ -2,7 +2,6 @@ using System;
 using System.Linq.Expressions;
 using System.Reflection;
 using MicroserviceFramework.Domain;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata;
 
 namespace MicroserviceFramework.Ef.Extensions

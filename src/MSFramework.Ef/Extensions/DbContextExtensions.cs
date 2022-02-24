@@ -1,9 +1,8 @@
-#if NETSTANDARD2_1
 using Microsoft.EntityFrameworkCore;
 
 namespace MicroserviceFramework.Ef.Extensions
 {
-	public static class DbContextExtensoins
+	public static class DbContextExtensions
 	{
 		public static string GetTableName<TEntity>(this DbContext dbContext) where TEntity : class
 		{
@@ -12,4 +11,3 @@ namespace MicroserviceFramework.Ef.Extensions
 		}
 	}
 }
-#endif

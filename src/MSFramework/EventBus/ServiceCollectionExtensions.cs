@@ -10,13 +10,13 @@ namespace MicroserviceFramework.EventBus
 	{
 		private static readonly Type EventHandlerBaseType = typeof(IEventHandler<>);
 
-		public static IServiceCollection AddEventBus(this IServiceCollection serviceCollection)
+		public static MicroserviceFrameworkBuilder UseEventBus(this MicroserviceFrameworkBuilder builder)
 		{
-			serviceCollection.TryAddSingleton<IEventBus, InProcessEventBus>();
-			serviceCollection
+			builder.Services.TryAddSingleton<IEventBus, InProcessEventBus>();
+			builder.Services
 				.TryAddSingleton<IEventHandlerFactory, DependencyInjectionEventHandlerFactory>();
 
-			MicroserviceFrameworkLoaderContext.Get(serviceCollection).ResolveType += type =>
+			MicroserviceFrameworkLoaderContext.Get(builder.Services).ResolveType += type =>
 			{
 				var interfaces = type.GetInterfaces();
 				var handlerInterfaceTypes = interfaces
@@ -37,17 +37,17 @@ namespace MicroserviceFramework.EventBus
 						throw new MicroserviceFrameworkException($"{eventType} 不是合法的事件类型");
 					}
 
-					var handlerMethod = handlerInterfaceType.GetMethod("HandleAsync", new[] {eventType});
+					var handlerMethod = handlerInterfaceType.GetMethod("HandleAsync", new[] { eventType });
 
 					// 消息队列，得知道系统实现了哪些 EventHandler 才去监听对应的 Topic，所以必须先注册监听。
 					EventHandlerTypeCache.Register(eventType, handlerInterfaceType, handlerMethod);
 					// 每次收到的消息都是独立的 Scope
-					ServiceCollectionUtilities.TryAdd(serviceCollection,
+					ServiceCollectionUtilities.TryAdd(builder.Services,
 						new ServiceDescriptor(handlerInterfaceType, type, ServiceLifetime.Scoped));
 				}
 			};
 
-			return serviceCollection;
+			return builder;
 		}
 	}
 }

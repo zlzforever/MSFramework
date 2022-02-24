@@ -17,7 +17,8 @@ namespace MicroserviceFramework.Utilities
 		{
 			StartsWith = new List<string>
 			{
-				"MSFramework"
+				"MSFramework",
+				"Newtonsoft.Json"
 			};
 			Assemblies = new Lazy<Assembly[]>(() =>
 			{

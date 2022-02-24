@@ -1,9 +1,5 @@
 ﻿using System.Collections.Generic;
-#if NETSTANDARD2_0
-using Microsoft.EntityFrameworkCore.Internal;
-#else
 using Microsoft.EntityFrameworkCore.Infrastructure;
-#endif
 using Microsoft.EntityFrameworkCore.Migrations.Design;
 using Microsoft.EntityFrameworkCore.Migrations.Operations;
 

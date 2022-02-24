@@ -30,6 +30,7 @@ namespace Ordering.Application.Queries
 		{
 			var order = await _orderSet
 				.Include(x=>x.OrderItems)
+				.AsNoTracking()
 				.FirstOrDefaultAsync(x => x.Id == orderId);
 			return order;
 		}

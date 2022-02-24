@@ -32,7 +32,8 @@ namespace MicroserviceFramework.AspNetCore.Filters
 			}
 
 			// 必须保证审计和业务用的是不同的 DbContext 不然，会导致数据异常入库
-			var auditStore = context.HttpContext.RequestServices.GetRequiredService<IAuditStore>();
+			using var scope = context.HttpContext.RequestServices.CreateScope();
+			var auditStore = scope.ServiceProvider.GetService<IAuditStore>();
 			if (auditStore == null)
 			{
 				throw new MicroserviceFrameworkException("AuditStore is not registered");
@@ -72,6 +73,7 @@ namespace MicroserviceFramework.AspNetCore.Filters
 
 			auditedOperation.End();
 			await auditStore.AddAsync(auditedOperation);
+			await auditStore.FlushAsync();
 		}
 	}
 }

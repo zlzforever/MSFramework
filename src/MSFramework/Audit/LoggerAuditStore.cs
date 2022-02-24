@@ -21,5 +21,14 @@ namespace MicroserviceFramework.Audit
 			_logger.LogInformation(System.Text.Json.JsonSerializer.Serialize(auditOperation));
 			return Task.CompletedTask;
 		}
+
+		public Task FlushAsync()
+		{
+			return Task.CompletedTask;
+		}
+
+		public void Dispose()
+		{
+		}
 	}
 }

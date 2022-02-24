@@ -1,20 +1,21 @@
-using System;
 using MicroserviceFramework.Serialization;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Newtonsoft.Json;
- 
+
 namespace MicroserviceFramework.Newtonsoft
 {
 	public static class ServiceCollectionExtensions
 	{
-		public static MicroserviceFrameworkBuilder UseNewtonsoftJson(this MicroserviceFrameworkBuilder builder,
-			Action<JsonSerializerSettings> configure = null)
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="builder"></param>
+		/// <returns></returns>
+		public static MicroserviceFrameworkBuilder UseNewtonsoftSerializer(this MicroserviceFrameworkBuilder builder)
 		{
-			var settings = new JsonSerializerSettings();
-			configure?.Invoke(settings);
-
-			builder.Services.TryAddSingleton(settings);
-			builder.Services.TryAddSingleton<ISerializer, NewtonsoftSerializer>();
+			builder.Services.TryAddSingleton(new JsonSerializerSettings());
+			builder.Services.AddSingleton<ISerializer, NewtonsoftSerializer>();
 
 			return builder;
 		}

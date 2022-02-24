@@ -74,8 +74,7 @@ namespace MSFramework.Tests
 		{
 			var serviceCollection = new ServiceCollection();
 			serviceCollection.AddLogging();
-			serviceCollection.AddEventBus();
-			serviceCollection.AddMicroserviceFramework();
+			serviceCollection.AddMicroserviceFramework(x => { x.UseEventBus(); });
 
 			var provider = serviceCollection.BuildServiceProvider();
 			var eventBus = provider.GetRequiredService<IEventBus>();
@@ -91,8 +90,7 @@ namespace MSFramework.Tests
 		{
 			var serviceCollection = new ServiceCollection();
 			serviceCollection.AddLogging();
-			serviceCollection.AddEventBus();
-			serviceCollection.AddMicroserviceFramework();
+			serviceCollection.AddMicroserviceFramework(x => { x.UseEventBus(); });
 
 			var provider = serviceCollection.BuildServiceProvider();
 			var eventBus = provider.GetRequiredService<IEventBus>();

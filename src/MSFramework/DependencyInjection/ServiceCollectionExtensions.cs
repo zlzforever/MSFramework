@@ -11,16 +11,19 @@ namespace MicroserviceFramework.DependencyInjection
 {
 	public static class ServiceCollectionExtensions
 	{
-		public static void AddDependencyInjectionLoader(this IServiceCollection services)
+		public static MicroserviceFrameworkBuilder UseDependencyInjectionLoader(
+			this MicroserviceFrameworkBuilder builder)
 		{
-			MicroserviceFrameworkLoaderContext.Get(services).ResolveType += type =>
+			MicroserviceFrameworkLoaderContext.Get(builder.Services).ResolveType += type =>
 			{
 				var lifetime = LifetimeUtilities.GetLifetime(type);
 				if (lifetime.HasValue)
 				{
-					services.RegisterDependencyInjection(type, lifetime.Value);
+					builder.Services.RegisterDependencyInjection(type, lifetime.Value);
 				}
 			};
+
+			return builder;
 		}
 
 		/// <summary>

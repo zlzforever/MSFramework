@@ -1,5 +1,4 @@
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.DependencyInjection.Extensions;
 
 namespace MicroserviceFramework.Audit
 {
@@ -10,12 +9,12 @@ namespace MicroserviceFramework.Audit
 		/// 或者审计领域独享一个 DbContext 
 		/// </summary>
 		/// <param name="builder"></param>
-		/// <typeparam name="TAuditService"></typeparam>
+		/// <typeparam name="TAuditStore"></typeparam>
 		/// <returns></returns>
-		public static MicroserviceFrameworkBuilder UseAuditStore<TAuditService>(this MicroserviceFrameworkBuilder builder)
-			where TAuditService : class, IAuditStore
+		public static MicroserviceFrameworkBuilder UseAuditStore<TAuditStore>(this MicroserviceFrameworkBuilder builder)
+			where TAuditStore : class, IAuditStore
 		{
-			builder.Services.AddScoped<IAuditStore, TAuditService>();
+			builder.Services.AddScoped<IAuditStore, TAuditStore>();
 			return builder;
 		}
 

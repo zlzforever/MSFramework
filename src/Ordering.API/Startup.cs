@@ -1,14 +1,18 @@
-﻿using MicroserviceFramework;
+﻿using System.Text.Json;
+using MicroserviceFramework;
 using MicroserviceFramework.AspNetCore;
 using MicroserviceFramework.AspNetCore.Filters;
 using MicroserviceFramework.AspNetCore.Mvc.ModelBinding;
 using MicroserviceFramework.AspNetCore.Swagger;
 using MicroserviceFramework.Audit;
 using MicroserviceFramework.AutoMapper;
+using MicroserviceFramework.DependencyInjection;
 using MicroserviceFramework.Ef;
 using MicroserviceFramework.Ef.PostgreSql;
+using MicroserviceFramework.EventBus;
 using MicroserviceFramework.Extensions.Options;
-using MicroserviceFramework.Newtonsoft;
+using MicroserviceFramework.Mediator;
+using MicroserviceFramework.Serialization;
 using MicroserviceFramework.Serialization.Converters;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.Configuration;
@@ -48,6 +52,7 @@ namespace Ordering.API
 					options.JsonSerializerOptions.Converters.Add(new ObjectIdJsonConverter());
 					options.JsonSerializerOptions.Converters.Add(new EnumerationJsonConverterFactory());
 					options.JsonSerializerOptions.Converters.Add(new EnumerationJsonConverter());
+					options.JsonSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
 				})
 				// .AddNewtonsoftJson(x =>
 				// {
@@ -73,7 +78,12 @@ namespace Ordering.API
 			services.AddMicroserviceFramework(builder =>
 			{
 				builder.UseAssemblyScanPrefix("Ordering");
+				builder.UseDependencyInjectionLoader();
 				builder.UseAutoMapper();
+				builder.UseDefaultSerializer();
+				builder.UseMediator();
+				builder.UseEventBus();
+ 
 				//builder.UseAccessControl(Configuration);
 				// builder.UseRabbitMQEventDispatcher(new RabbitMQOptions(), typeof(UserCheckoutAcceptedEvent));
 				// 启用审计服务
@@ -82,7 +92,8 @@ namespace Ordering.API
 				// 	"Database='ordering';Data Source=localhost;User ID=root;Password=1qazZAQ!;Port=3306;");
 
 				builder.UseAspNetCore();
-				builder.UseNewtonsoftJson();
+				// builder.UseNewtonsoftSerializer();
+
 				builder.UseEntityFramework(x =>
 				{
 					// 添加 MySql 支持
@@ -94,6 +105,8 @@ namespace Ordering.API
 		// This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
 		public void Configure(IApplicationBuilder app, IHostEnvironment env)
 		{
+			app.ApplicationServices.CreateScope().ServiceProvider.GetService<ISerializer>();
+
 			if (env.IsDevelopment())
 			{
 				app.UseDeveloperExceptionPage();
@@ -106,9 +119,6 @@ namespace Ordering.API
 
 			app.Use(async (context, next) =>
 			{
-				var branchVer = context.Request.Query["branch"];
-
-
 				// Do work that doesn't write to the Response.
 				await next();
 				// Do other work that doesn't write to the Response.

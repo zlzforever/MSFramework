@@ -1,11 +1,11 @@
 using System;
-using System.Text.Json;
 using MicroserviceFramework.AspNetCore.DependencyInjection;
 using MicroserviceFramework.AspNetCore.Infrastructure;
 using MicroserviceFramework.AspNetCore.Mvc.ModelBinding;
 using MicroserviceFramework.DependencyInjection;
 using MicroserviceFramework.Utilities;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
@@ -16,6 +16,11 @@ namespace MicroserviceFramework.AspNetCore
 {
 	public static class ServiceCollectionExtensions
 	{
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="builder"></param>
+		/// <returns></returns>
 		public static MicroserviceFrameworkBuilder UseAspNetCore(this MicroserviceFrameworkBuilder builder)
 		{
 			builder.Services.AddHttpContextAccessor();
@@ -23,22 +28,25 @@ namespace MicroserviceFramework.AspNetCore
 			builder.Services.AddSingleton<IScopedServiceResolver, ScopedServiceResolver>();
 			builder.Services.TryAddScoped<ISession, HttpSession>();
 
-			builder.Services.AddSingleton<JsonSerializerOptions>(x =>
+			builder.Services.AddSingleton(
+				x => x.GetRequiredService<IOptions<JsonOptions>>().Value.JsonSerializerOptions);
+
+			var jsonSerializerSettingsType = Type.GetType("Newtonsoft.Json.JsonSerializerSettings, Newtonsoft.Json");
+			var jsonOptionsType =
+				Type.GetType(
+					"Microsoft.AspNetCore.Mvc.MvcNewtonsoftJsonOptions, Microsoft.AspNetCore.Mvc.NewtonsoftJson");
+			if (jsonSerializerSettingsType != null && jsonOptionsType != null)
 			{
-				var jsonOptionsType =
-					Type.GetType("Microsoft.AspNetCore.Mvc.JsonOptions, Microsoft.AspNetCore.Mvc.Core");
-				if (jsonOptionsType == null)
+				builder.Services.AddSingleton(jsonSerializerSettingsType, (x) =>
 				{
-					throw new MicroserviceFrameworkException("Type Microsoft.AspNetCore.Mvc.JsonOptions is missing");
-				}
+					var type = typeof(IOptions<>).MakeGenericType(jsonOptionsType);
+					return ((dynamic)x.GetRequiredService(type)).Value.SerializerSettings;
+				});
+			}
 
-				var type = typeof(IOptions<>).MakeGenericType(jsonOptionsType);
-
-				return ((dynamic) x.GetRequiredService(type)).Value.JsonSerializerOptions;
-			});
 			return builder;
 		}
-		
+
 		public static void UseMicroserviceFramework(this IApplicationBuilder builder)
 		{
 			builder.ApplicationServices.UseMicroserviceFramework();

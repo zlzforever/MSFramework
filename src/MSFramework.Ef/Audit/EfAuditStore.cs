@@ -16,5 +16,15 @@ namespace MicroserviceFramework.Ef.Audit
 		{
 			await _dbContext.AddAsync(auditOperation);
 		}
+
+		public async Task FlushAsync()
+		{
+			await _dbContext.CommitAsync();
+		}
+
+		public void Dispose()
+		{
+			_dbContext?.Dispose();
+		}
 	}
 }
