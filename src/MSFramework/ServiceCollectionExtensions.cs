@@ -55,9 +55,6 @@ namespace MicroserviceFramework
 			}
 
 			var logger = loggerFactory.CreateLogger("UseMicroserviceFramework");
-			var root = (IConfigurationRoot)configuration;
-
-			logger.LogInformation(root.GetDebugView());
 
 			var initializers = applicationServices.GetServices<IHostedService>().Where(x => x is InitializerBase)
 				.ToList();

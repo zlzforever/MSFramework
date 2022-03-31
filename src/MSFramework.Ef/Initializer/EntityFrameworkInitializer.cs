@@ -26,6 +26,7 @@ namespace MicroserviceFramework.Ef.Initializer
 		{
 			try
 			{
+				_logger.LogInformation("Start initialize ef...");
 				using var scope = _serviceProvider.CreateScope();
 
 				var dbContextConfigurationCollection =
@@ -49,6 +50,8 @@ namespace MicroserviceFramework.Ef.Initializer
 				{
 					if (option.AutoMigrationEnabled)
 					{
+						_logger.LogInformation($"Auto migrate is enabled in {option.DbContextTypeName}.");
+
 						var dbContext = (DbContextBase)scope.ServiceProvider.GetRequiredService(option.DbContextType);
 
 						if (dbContext.Database.ProviderName == "Microsoft.EntityFrameworkCore.InMemory")
@@ -56,19 +59,37 @@ namespace MicroserviceFramework.Ef.Initializer
 							continue;
 						}
 
+						ILogger logger = dbContext.GetService<ILoggerFactory>()
+							.CreateLogger<EntityFrameworkInitializer>();
+
+						var appliedMigrations =
+							(await dbContext.Database.GetAppliedMigrationsAsync(cancellationToken: cancellationToken))
+							.ToList();
+						logger.LogInformation(
+							$"Applied {appliedMigrations.Count} migrations： {appliedMigrations.ExpandAndToString()}.");
+
 						var migrations =
 							(await dbContext.Database.GetPendingMigrationsAsync(cancellationToken: cancellationToken))
 							.ToArray();
 						if (migrations.Length > 0)
 						{
 							await dbContext.Database.MigrateAsync(cancellationToken: cancellationToken);
-							ILogger logger = dbContext.GetService<ILoggerFactory>()
-								.CreateLogger<EntityFrameworkInitializer>();
+
 							logger.LogInformation(
-								$"已提交 {migrations.Length} 条挂起的迁移记录： {migrations.ExpandAndToString()}");
+								$"Migrate {migrations.Length}： {migrations.ExpandAndToString()}.");
+						}
+						else
+						{
+							_logger.LogInformation($"There is no pending migration in {option.DbContextTypeName}.");
 						}
 					}
+					else
+					{
+						_logger.LogInformation($"Auto migrate is disabled in {option.DbContextTypeName}.");
+					}
 				}
+
+				_logger.LogInformation("Initialize ef complete");
 			}
 			catch (Exception e)
 			{
