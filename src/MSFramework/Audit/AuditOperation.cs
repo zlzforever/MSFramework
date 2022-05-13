@@ -8,24 +8,34 @@ namespace MicroserviceFramework.Audit
 	public class AuditOperation : CreationAggregateRoot<ObjectId>
 	{
 		/// <summary>
-		/// 应用名称
-		/// </summary>
-		public string ApplicationName { get; private set; }
-
-		/// <summary>
-		/// 获取或设置执行的功能名
-		/// </summary>
-		public string Feature { get; private set; }
-		
-		/// <summary>
 		/// 请求
 		/// </summary>
 		public string Url { get; private set; }
 
 		/// <summary>
-		/// 获取或设置 当前访问IP
+		/// 图片上传的 IP
 		/// </summary>
-		public string Ip { get; private set; }
+		public string IP { get; private set; }
+
+		/// <summary>
+		/// 图片上传的设备 ID
+		/// </summary>
+		public string DeviceId { get; private set; }
+
+		/// <summary>
+		/// 图片上传的设备型号
+		/// </summary>
+		public string DeviceModel { get; private set; }
+
+		/// <summary>
+		/// 经度
+		/// </summary>
+		public double? Lat { get; private set; }
+
+		/// <summary>
+		/// 纬度
+		/// </summary>
+		public double? Lng { get; private set; }
 
 		/// <summary>
 		/// 获取或设置 当前访问UserAgent
@@ -46,13 +56,16 @@ namespace MicroserviceFramework.Audit
 			Entities = new List<AuditEntity>();
 		}
 
-		public AuditOperation(string applicationName, string feature, string url, string ip, string userAgent) : this()
+		public AuditOperation(string url, string userAgent, string ip, string deviceModel, string deviceId, double? lat,
+			double? lng) : this()
 		{
-			ApplicationName = applicationName;
-			Feature = feature;
-			Ip = ip;
+			IP = ip;
 			Url = url;
 			UserAgent = userAgent;
+			DeviceModel = deviceModel;
+			DeviceId = deviceId;
+			Lat = lat;
+			Lng = lng;
 		}
 
 		public void AddEntities(IEnumerable<AuditEntity> entities)
@@ -82,14 +95,14 @@ namespace MicroserviceFramework.Audit
 			}
 			else
 			{
-				Elapsed = (int) (EndTime - CreationTime.Value).TotalMilliseconds;
+				Elapsed = (int)(EndTime - CreationTime.Value).TotalMilliseconds;
 			}
 		}
 
 		public override string ToString()
 		{
 			return
-				$"[ENTITY: {GetType().Name}] Id = {Id}; {{ 'ApplicationName': {ApplicationName}, 'Feature': {Feature}, 'Ip': {Ip}, 'UserAgent': {UserAgent}, 'EndedTime': {EndTime:yyyy-MM-dd HH:mm:ss}, 'Elapsed': {Elapsed} }}";
+				$"[ENTITY: {GetType().Name}] Id = {Id}; {{ 'Ip': {IP}, 'UserAgent': {UserAgent}, 'EndedTime': {EndTime:yyyy-MM-dd HH:mm:ss}, 'Elapsed': {Elapsed} }}";
 		}
 	}
 }

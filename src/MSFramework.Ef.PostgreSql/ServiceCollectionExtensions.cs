@@ -46,19 +46,24 @@ namespace MicroserviceFramework.Ef.PostgreSql
 			var action = new Action<DbContextOptionsBuilder>(x =>
 			{
 				var dbContextType = typeof(TDbContext);
-				var entryAssemblyName = dbContextType.Assembly.GetName().Name;
 
 				var optionDict = configuration.GetSection("DbContexts").Get<DbContextConfigurationCollection>();
 				var option = optionDict.Get(dbContextType);
+				var entryAssemblyName = !string.IsNullOrWhiteSpace(option.MigrationsAssembly)
+					? option.MigrationsAssembly
+					: dbContextType.Assembly.GetName().Name;
 
 				x.UseNpgsql(option.ConnectionString, options =>
 				{
-					options.MigrationsHistoryTable(option.TablePrefix + "migrations_history");
+					configure?.Invoke(options);
+
+					var migrationsHistoryTable = string.IsNullOrWhiteSpace(option.TablePrefix)
+						? "__ef_migrations_history"
+						: $"{option.TablePrefix}migrations_history";
+					options.MigrationsHistoryTable(migrationsHistoryTable);
 					options.MaxBatchSize(option.MaxBatchSize);
 					options.MigrationsAssembly(entryAssemblyName);
 					options.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery);
-
-					configure?.Invoke(options);
 				});
 			});
 

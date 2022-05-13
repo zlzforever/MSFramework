@@ -10,6 +10,7 @@ namespace MicroserviceFramework.AspNetCore
 	public class HttpSession : ISession
 	{
 		private static readonly HashSet<string> EmptyRoles = new();
+		private readonly List<string> _subjects;
 
 		public HttpSession(IHttpContextAccessor accessor)
 		{
@@ -21,11 +22,6 @@ namespace MicroserviceFramework.AspNetCore
 			HttpContext = accessor.HttpContext;
 			TraceIdentifier = HttpContext.TraceIdentifier;
 
-			if (accessor.HttpContext.User == null)
-			{
-				return;
-			}
-
 			UserId = HttpContext.User.GetValue(ClaimTypes.NameIdentifier, "sid", "sub");
 			UserName = HttpContext.User.GetValue(ClaimTypes.Name, "name");
 			Email = HttpContext.User.GetValue(ClaimTypes.Email, "email");
@@ -35,6 +31,9 @@ namespace MicroserviceFramework.AspNetCore
 			var roles2 = HttpContext.User.FindAll("role").Select(x => x.Value).ToList();
 			roles1.AddRange(roles2);
 			Roles = roles1.Count == 0 ? EmptyRoles : new HashSet<string>(roles1);
+
+			_subjects = new List<string> { UserId };
+			_subjects.AddRange(Roles);
 		}
 
 		public string TraceIdentifier { get; }
@@ -48,6 +47,11 @@ namespace MicroserviceFramework.AspNetCore
 		public string PhoneNumber { get; }
 
 		public HashSet<string> Roles { get; }
+
+		public List<string> GetSubjects()
+		{
+			return _subjects;
+		}
 
 		public HttpContext HttpContext { get; }
 	}

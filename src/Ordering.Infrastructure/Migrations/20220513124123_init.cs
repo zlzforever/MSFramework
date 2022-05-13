@@ -1,6 +1,8 @@
 ﻿using System;
 using Microsoft.EntityFrameworkCore.Migrations;
 
+#nullable disable
+
 namespace Ordering.Infrastructure.Migrations
 {
     public partial class init : Migration
@@ -11,17 +13,18 @@ namespace Ordering.Infrastructure.Migrations
                 name: "audit_operation",
                 columns: table => new
                 {
-                    id = table.Column<string>(type: "character varying(36)", nullable: false),
-                    application_name = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: true),
-                    feature = table.Column<string>(type: "character varying(1024)", maxLength: 1024, nullable: true),
+                    id = table.Column<string>(type: "character varying(36)", maxLength: 36, nullable: false),
                     url = table.Column<string>(type: "character varying(1024)", maxLength: 1024, nullable: true),
-                    ip = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: true),
+                    i_p = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: true),
+                    device_id = table.Column<string>(type: "character varying(36)", maxLength: 36, nullable: true),
+                    device_model = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: true),
+                    lat = table.Column<double>(type: "double precision", nullable: true),
+                    lng = table.Column<double>(type: "double precision", nullable: true),
                     user_agent = table.Column<string>(type: "character varying(1024)", maxLength: 1024, nullable: true),
-                    end_time = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
+                    end_time = table.Column<long>(type: "bigint", nullable: false, defaultValue: 0L),
                     elapsed = table.Column<int>(type: "integer", nullable: false),
-                    creation_time = table.Column<long>(type: "int", nullable: true),
-                    creation_user_id = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: true),
-                    creation_user_name = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: true)
+                    creation_time = table.Column<long>(type: "bigint", nullable: true),
+                    creator_id = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: true)
                 },
                 constraints: table =>
                 {
@@ -29,27 +32,10 @@ namespace Ordering.Infrastructure.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "feature",
-                columns: table => new
-                {
-                    id = table.Column<string>(type: "character varying(36)", nullable: false),
-                    enabled = table.Column<bool>(type: "boolean", nullable: false),
-                    name = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: true),
-                    description = table.Column<string>(type: "character varying(1024)", maxLength: 1024, nullable: true),
-                    expired = table.Column<bool>(type: "boolean", nullable: false),
-                    creation_time = table.Column<long>(type: "int", nullable: false),
-                    modification_time = table.Column<long>(type: "int", nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_feature", x => x.id);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "order",
                 columns: table => new
                 {
-                    id = table.Column<string>(type: "character varying(36)", nullable: false),
+                    id = table.Column<string>(type: "character varying(36)", maxLength: 36, nullable: false),
                     creation_time = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
                     address_street = table.Column<string>(type: "text", nullable: true),
                     address_city = table.Column<string>(type: "text", nullable: true),
@@ -71,7 +57,7 @@ namespace Ordering.Infrastructure.Migrations
                 name: "product",
                 columns: table => new
                 {
-                    id = table.Column<string>(type: "character varying(36)", nullable: false),
+                    id = table.Column<string>(type: "character varying(36)", maxLength: 36, nullable: false),
                     name = table.Column<string>(type: "character varying(256)", maxLength: 256, nullable: true),
                     price = table.Column<int>(type: "integer", nullable: false),
                     concurrency_stamp = table.Column<string>(type: "character varying(36)", maxLength: 36, nullable: false)
@@ -85,7 +71,7 @@ namespace Ordering.Infrastructure.Migrations
                 name: "audit_entity",
                 columns: table => new
                 {
-                    id = table.Column<string>(type: "character varying(36)", nullable: false),
+                    id = table.Column<string>(type: "character varying(36)", maxLength: 36, nullable: false),
                     operation_id = table.Column<string>(type: "character varying(36)", nullable: true),
                     type = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: true),
                     entity_id = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: true),
@@ -95,13 +81,23 @@ namespace Ordering.Infrastructure.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_audit_entity", x => x.id);
+                    table.ForeignKey(
+                        name: "FK_audit_entity_audit_operation_audit_operation_id",
+                        column: x => x.audit_operation_id,
+                        principalTable: "audit_operation",
+                        principalColumn: "id");
+                    table.ForeignKey(
+                        name: "FK_audit_entity_audit_operation_operation_id",
+                        column: x => x.operation_id,
+                        principalTable: "audit_operation",
+                        principalColumn: "id");
                 });
 
             migrationBuilder.CreateTable(
                 name: "order_item",
                 columns: table => new
                 {
-                    id = table.Column<string>(type: "character varying(36)", nullable: false),
+                    id = table.Column<string>(type: "character varying(36)", maxLength: 36, nullable: false),
                     product_name = table.Column<string>(type: "text", nullable: false),
                     picture_url = table.Column<string>(type: "text", nullable: true),
                     unit_price = table.Column<decimal>(type: "numeric", nullable: false),
@@ -113,13 +109,18 @@ namespace Ordering.Infrastructure.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_order_item", x => x.id);
+                    table.ForeignKey(
+                        name: "FK_order_item_order_order_id",
+                        column: x => x.order_id,
+                        principalTable: "order",
+                        principalColumn: "id");
                 });
 
             migrationBuilder.CreateTable(
                 name: "audit_property",
                 columns: table => new
                 {
-                    id = table.Column<string>(type: "character varying(36)", nullable: false),
+                    id = table.Column<string>(type: "character varying(36)", maxLength: 36, nullable: false),
                     entity_id = table.Column<string>(type: "character varying(36)", nullable: true),
                     name = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: true),
                     type = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: true),
@@ -130,6 +131,16 @@ namespace Ordering.Infrastructure.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_audit_property", x => x.id);
+                    table.ForeignKey(
+                        name: "FK_audit_property_audit_entity_audit_entity_id",
+                        column: x => x.audit_entity_id,
+                        principalTable: "audit_entity",
+                        principalColumn: "id");
+                    table.ForeignKey(
+                        name: "FK_audit_property_audit_entity_entity_id",
+                        column: x => x.entity_id,
+                        principalTable: "audit_entity",
+                        principalColumn: "id");
                 });
 
             migrationBuilder.CreateIndex(
@@ -153,9 +164,9 @@ namespace Ordering.Infrastructure.Migrations
                 column: "creation_time");
 
             migrationBuilder.CreateIndex(
-                name: "IX_audit_operation_creation_user_id",
+                name: "IX_audit_operation_creator_id",
                 table: "audit_operation",
-                column: "creation_user_id");
+                column: "creator_id");
 
             migrationBuilder.CreateIndex(
                 name: "IX_audit_operation_end_time",
@@ -173,12 +184,6 @@ namespace Ordering.Infrastructure.Migrations
                 column: "entity_id");
 
             migrationBuilder.CreateIndex(
-                name: "IX_feature_name",
-                table: "feature",
-                column: "name",
-                unique: true);
-
-            migrationBuilder.CreateIndex(
                 name: "IX_order_item_order_id",
                 table: "order_item",
                 column: "order_id");
@@ -188,9 +193,6 @@ namespace Ordering.Infrastructure.Migrations
         {
             migrationBuilder.DropTable(
                 name: "audit_property");
-
-            migrationBuilder.DropTable(
-                name: "feature");
 
             migrationBuilder.DropTable(
                 name: "order_item");

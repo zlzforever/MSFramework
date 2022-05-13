@@ -30,11 +30,7 @@ namespace MicroserviceFramework.AspNetCore.Extensions
 
 			if (!File.Exists(filePath))
 			{
-#if NETSTANDARD2_1
 				await File.WriteAllBytesAsync(filePath, bytes);
-#else
-				File.WriteAllBytes(filePath, bytes);
-#endif
 			}
 
 			return (formFile.FileName, $"{path}/{fileName}");

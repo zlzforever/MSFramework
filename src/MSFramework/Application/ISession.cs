@@ -13,5 +13,6 @@ namespace MicroserviceFramework.Application
 		string Email { get; }
 		string PhoneNumber { get; }
 		HashSet<string> Roles { get; }
+		List<string> GetSubjects();
 	}
 }

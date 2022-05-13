@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace MicroserviceFramework.Extensions.Options
+namespace MicroserviceFramework.Options
 {
 	/// <summary>
 	/// 配置模型标志

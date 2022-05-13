@@ -22,5 +22,28 @@ namespace MicroserviceFramework.Extensions
 
 			return interfaceTypes;
 		}
+
+		public static void SetProperty(this object obj, string propertyName, dynamic value)
+		{
+			if (obj == null)
+			{
+				return;
+			}
+
+			var property = obj.GetType().GetProperty(propertyName);
+			if (property == null)
+			{
+				return;
+			}
+
+			if (property.CanWrite)
+			{
+				property.SetValue(obj, value);
+			}
+			else
+			{
+				throw new NotSupportedException($"{propertyName} 没有 setter");
+			}
+		}
 	}
 }

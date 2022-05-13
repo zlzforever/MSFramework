@@ -46,7 +46,7 @@ namespace MicroserviceFramework.AspNetCore.Mvc
 
 			ActionResultExecutorType = typeof(IActionResultExecutor<>).MakeGenericType(ApiResultType);
 			ExecuteMethodInfo =
-				ActionResultExecutorType.GetMethod("ExecuteAsync", new[] {typeof(ActionContext), ApiResultType});
+				ActionResultExecutorType.GetMethod("ExecuteAsync", new[] { typeof(ActionContext), ApiResultType });
 		}
 
 		/// <summary>
@@ -129,18 +129,24 @@ namespace MicroserviceFramework.AspNetCore.Mvc
 			}
 
 			var executor = context.HttpContext.RequestServices.GetRequiredService(ActionResultExecutorType);
-			var result = (dynamic) Activator.CreateInstance(ApiResultType, new
+			var result = Activator.CreateInstance(ApiResultType, new
 			{
 				Success,
 				Code,
 				Msg,
 				Data = Value
 			});
-			result.StatusCode = StatusCode;
-			result.ContentType = ContentType;
-			result.SerializerSettings = SerializerSettings;
+			if (result == null)
+			{
+				return (Task)ExecuteMethodInfo.Invoke(executor, new[] { context, result });
+			}
 
-			return (Task) ExecuteMethodInfo.Invoke(executor, new[] {context, result});
+			var d = (dynamic)result;
+			d.StatusCode = StatusCode;
+			d.ContentType = ContentType;
+			d.SerializerSettings = SerializerSettings;
+
+			return (Task)ExecuteMethodInfo.Invoke(executor, new[] { context, result });
 		}
 	}
 }

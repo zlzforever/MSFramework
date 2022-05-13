@@ -59,5 +59,9 @@ namespace MicroserviceFramework.Ef
 		/// 数据库前缀
 		/// </summary>
 		public string TablePrefix { get; set; }
+
+		public string MigrationsAssembly { get; set; }
+		
+		public string Database { get; set; }
 	}
 }

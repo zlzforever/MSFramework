@@ -3,6 +3,9 @@ using MicroserviceFramework.Audit;
 
 namespace MicroserviceFramework.Ef.Audit
 {
+	/// <summary>
+	/// EF audit store 不应该和业务共用同一个 Scope 的 db context
+	/// </summary>
 	public class EfAuditStore : IAuditStore
 	{
 		private readonly DbContextBase _dbContext;

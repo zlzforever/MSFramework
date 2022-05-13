@@ -2,18 +2,20 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using Ordering.Infrastructure;
 
 #nullable disable
 
-namespace Ordering.Infrastructure.Migrations
+namespace Ordering.Ef.Migration.MySql.Migrations
 {
     [DbContext(typeof(OrderingContext))]
-    partial class OrderingContextModelSnapshot : ModelSnapshot
+    [Migration("20220511082938_init")]
+    partial class init
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -25,7 +27,6 @@ namespace Ordering.Infrastructure.Migrations
             modelBuilder.Entity("MicroserviceFramework.Audit.AuditEntity", b =>
                 {
                     b.Property<string>("Id")
-                        .HasMaxLength(36)
                         .HasColumnType("character varying(36)")
                         .HasColumnName("id");
 
@@ -66,12 +67,11 @@ namespace Ordering.Infrastructure.Migrations
             modelBuilder.Entity("MicroserviceFramework.Audit.AuditOperation", b =>
                 {
                     b.Property<string>("Id")
-                        .HasMaxLength(36)
                         .HasColumnType("character varying(36)")
                         .HasColumnName("id");
 
                     b.Property<long?>("CreationTime")
-                        .HasColumnType("bigint")
+                        .HasColumnType("int")
                         .HasColumnName("creation_time");
 
                     b.Property<string>("CreatorId")
@@ -93,10 +93,8 @@ namespace Ordering.Infrastructure.Migrations
                         .HasColumnType("integer")
                         .HasColumnName("elapsed");
 
-                    b.Property<long>("EndTime")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint")
-                        .HasDefaultValue(0L)
+                    b.Property<DateTimeOffset>("EndTime")
+                        .HasColumnType("timestamp with time zone")
                         .HasColumnName("end_time");
 
                     b.Property<string>("IP")
@@ -136,7 +134,6 @@ namespace Ordering.Infrastructure.Migrations
             modelBuilder.Entity("MicroserviceFramework.Audit.AuditProperty", b =>
                 {
                     b.Property<string>("Id")
-                        .HasMaxLength(36)
                         .HasColumnType("character varying(36)")
                         .HasColumnName("id");
 
@@ -178,7 +175,6 @@ namespace Ordering.Infrastructure.Migrations
             modelBuilder.Entity("Ordering.Domain.AggregateRoots.Order", b =>
                 {
                     b.Property<string>("Id")
-                        .HasMaxLength(36)
                         .HasColumnType("character varying(36)")
                         .HasColumnName("id");
 
@@ -221,7 +217,6 @@ namespace Ordering.Infrastructure.Migrations
             modelBuilder.Entity("Ordering.Domain.AggregateRoots.OrderItem", b =>
                 {
                     b.Property<string>("Id")
-                        .HasMaxLength(36)
                         .HasColumnType("character varying(36)")
                         .HasColumnName("id");
 
@@ -264,7 +259,6 @@ namespace Ordering.Infrastructure.Migrations
             modelBuilder.Entity("Ordering.Domain.AggregateRoots.Product", b =>
                 {
                     b.Property<string>("Id")
-                        .HasMaxLength(36)
                         .HasColumnType("character varying(36)")
                         .HasColumnName("id");
 

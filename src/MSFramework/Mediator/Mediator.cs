@@ -19,7 +19,7 @@ namespace MicroserviceFramework.Mediator
 		}
 
 		/// <summary>
-		/// 只能有一个响应
+		/// 单个响应
 		/// </summary>
 		/// <param name="request"></param>
 		/// <param name="cancellationToken"></param>
@@ -48,6 +48,14 @@ namespace MicroserviceFramework.Mediator
 			}
 		}
 
+		/// <summary>
+		/// 单个响应
+		/// </summary>
+		/// <param name="request"></param>
+		/// <param name="cancellationToken"></param>
+		/// <typeparam name="TResponse"></typeparam>
+		/// <returns></returns>
+		/// <exception cref="MicroserviceFrameworkException"></exception>
 		public async Task<TResponse> SendAsync<TResponse>(IRequest<TResponse> request,
 			CancellationToken cancellationToken = default)
 		{
@@ -73,7 +81,11 @@ namespace MicroserviceFramework.Mediator
 			return default;
 		}
 
-
+		/// <summary>
+		/// 多个响应
+		/// </summary>
+		/// <param name="message"></param>
+		/// <param name="cancellationToken"></param>
 		public async Task PublishAsync(IMessage message, CancellationToken cancellationToken = default)
 		{
 			if (message == null)
@@ -87,10 +99,6 @@ namespace MicroserviceFramework.Mediator
 				_mediatorTypeMapper.Get(messageType, type => Create(typeof(IMessageHandler<>), type));
 
 			var handlers = _serviceProvider.GetServices(@interface).Where(x => x != null);
-
-			if (messageType.Name == "Event4")
-			{
-			}
 
 			foreach (var handler in handlers)
 			{

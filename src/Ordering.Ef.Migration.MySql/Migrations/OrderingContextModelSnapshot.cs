@@ -8,7 +8,7 @@ using Ordering.Infrastructure;
 
 #nullable disable
 
-namespace Ordering.Infrastructure.Migrations
+namespace Ordering.Ef.Migration.MySql.Migrations
 {
     [DbContext(typeof(OrderingContext))]
     partial class OrderingContextModelSnapshot : ModelSnapshot
@@ -25,7 +25,6 @@ namespace Ordering.Infrastructure.Migrations
             modelBuilder.Entity("MicroserviceFramework.Audit.AuditEntity", b =>
                 {
                     b.Property<string>("Id")
-                        .HasMaxLength(36)
                         .HasColumnType("character varying(36)")
                         .HasColumnName("id");
 
@@ -66,12 +65,11 @@ namespace Ordering.Infrastructure.Migrations
             modelBuilder.Entity("MicroserviceFramework.Audit.AuditOperation", b =>
                 {
                     b.Property<string>("Id")
-                        .HasMaxLength(36)
                         .HasColumnType("character varying(36)")
                         .HasColumnName("id");
 
                     b.Property<long?>("CreationTime")
-                        .HasColumnType("bigint")
+                        .HasColumnType("int")
                         .HasColumnName("creation_time");
 
                     b.Property<string>("CreatorId")
@@ -93,10 +91,8 @@ namespace Ordering.Infrastructure.Migrations
                         .HasColumnType("integer")
                         .HasColumnName("elapsed");
 
-                    b.Property<long>("EndTime")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint")
-                        .HasDefaultValue(0L)
+                    b.Property<DateTimeOffset>("EndTime")
+                        .HasColumnType("timestamp with time zone")
                         .HasColumnName("end_time");
 
                     b.Property<string>("IP")
@@ -136,7 +132,6 @@ namespace Ordering.Infrastructure.Migrations
             modelBuilder.Entity("MicroserviceFramework.Audit.AuditProperty", b =>
                 {
                     b.Property<string>("Id")
-                        .HasMaxLength(36)
                         .HasColumnType("character varying(36)")
                         .HasColumnName("id");
 
@@ -178,7 +173,6 @@ namespace Ordering.Infrastructure.Migrations
             modelBuilder.Entity("Ordering.Domain.AggregateRoots.Order", b =>
                 {
                     b.Property<string>("Id")
-                        .HasMaxLength(36)
                         .HasColumnType("character varying(36)")
                         .HasColumnName("id");
 
@@ -221,7 +215,6 @@ namespace Ordering.Infrastructure.Migrations
             modelBuilder.Entity("Ordering.Domain.AggregateRoots.OrderItem", b =>
                 {
                     b.Property<string>("Id")
-                        .HasMaxLength(36)
                         .HasColumnType("character varying(36)")
                         .HasColumnName("id");
 
@@ -264,7 +257,6 @@ namespace Ordering.Infrastructure.Migrations
             modelBuilder.Entity("Ordering.Domain.AggregateRoots.Product", b =>
                 {
                     b.Property<string>("Id")
-                        .HasMaxLength(36)
                         .HasColumnType("character varying(36)")
                         .HasColumnName("id");
 

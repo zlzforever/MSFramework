@@ -7,9 +7,9 @@ namespace MicroserviceFramework.Domain
 {
 	public abstract class Enumeration : IComparable
 	{
-		public string Name { get; }
+		public string Name { get; private set; }
 
-		public string Id { get; }
+		public string Id { get; private set; }
 
 		protected Enumeration(string id, string name)
 		{
@@ -29,7 +29,7 @@ namespace MicroserviceFramework.Domain
 		{
 			return type
 				.GetFields(BindingFlags.Public | BindingFlags.Static | BindingFlags.DeclaredOnly)
-				.Where(i => i.FieldType.IsSubclassOf(typeof(Enumeration))).Select(f => (Enumeration) f.GetValue(null));
+				.Where(i => i.FieldType.IsSubclassOf(typeof(Enumeration))).Select(f => (Enumeration)f.GetValue(null));
 		}
 
 		public override bool Equals(object obj)
@@ -81,6 +81,6 @@ namespace MicroserviceFramework.Domain
 			return matchingItem;
 		}
 
-		public int CompareTo(object other) => String.Compare(Id, ((Enumeration) other).Id, StringComparison.Ordinal);
+		public int CompareTo(object other) => String.Compare(Id, ((Enumeration)other).Id, StringComparison.Ordinal);
 	}
 }

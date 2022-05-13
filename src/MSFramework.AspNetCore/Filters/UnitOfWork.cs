@@ -18,11 +18,6 @@ namespace MicroserviceFramework.AspNetCore.Filters
 
 		public async Task OnActionExecutionAsync(ActionExecutingContext context, ActionExecutionDelegate next)
 		{
-			if (context.HasAttribute<IgnoreUnitOfWork>())
-			{
-				return;
-			}
-
 			var result = await next();
 			// 若有异常，不应该提交数据
 			if (result.Exception != null)
@@ -30,7 +25,7 @@ namespace MicroserviceFramework.AspNetCore.Filters
 				return;
 			}
 
-			if (Conts.MethodDict.ContainsKey(context.HttpContext.Request.Method))
+			if (!context.HasAttribute<IgnoreUnitOfWork>())
 			{
 				var unitOfWork = context.HttpContext.RequestServices.GetService<IUnitOfWork>();
 				if (unitOfWork != null)

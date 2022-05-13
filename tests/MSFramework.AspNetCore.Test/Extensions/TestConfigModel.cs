@@ -1,4 +1,4 @@
-﻿using MicroserviceFramework.Extensions.Options;
+﻿using MicroserviceFramework.Options;
 
 namespace MSFramework.AspNetCore.Test.Extensions
 {

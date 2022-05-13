@@ -132,15 +132,9 @@ namespace MicroserviceFramework.Ef
 
 					if (option.UseUnderScoreCase)
 					{
-#if NETSTANDARD2_0
-						var propertyName = property.GetColumnName();
-
-#else
-					var storeObjectIdentifier = StoreObjectIdentifier.Create(entityType, StoreObjectType.Table);
-					var propertyName = property.GetColumnName(storeObjectIdentifier.GetValueOrDefault());
-#endif
-
-						if (propertyName.StartsWith("_"))
+						var storeObjectIdentifier = StoreObjectIdentifier.Create(entityType, StoreObjectType.Table);
+						var propertyName = property.GetColumnName(storeObjectIdentifier.GetValueOrDefault());
+						if (!string.IsNullOrEmpty(propertyName) && propertyName.StartsWith("_"))
 						{
 							propertyName = propertyName.Substring(1, propertyName.Length - 1);
 						}
@@ -161,19 +155,13 @@ namespace MicroserviceFramework.Ef
 			var entities = new List<AuditEntity>();
 			foreach (var entry in ChangeTracker.Entries())
 			{
-				AuditEntity auditEntity = null;
-				switch (entry.State)
+				var auditEntity = entry.State switch
 				{
-					case EntityState.Added:
-						auditEntity = GetAuditEntity(entry, OperationType.Add);
-						break;
-					case EntityState.Modified:
-						auditEntity = GetAuditEntity(entry, OperationType.Modify);
-						break;
-					case EntityState.Deleted:
-						auditEntity = GetAuditEntity(entry, OperationType.Delete);
-						break;
-				}
+					EntityState.Added => GetAuditEntity(entry, OperationType.Add),
+					EntityState.Modified => GetAuditEntity(entry, OperationType.Modify),
+					EntityState.Deleted => GetAuditEntity(entry, OperationType.Delete),
+					_ => null
+				};
 
 				if (auditEntity != null)
 				{
@@ -246,15 +234,15 @@ namespace MicroserviceFramework.Ef
 				switch (entry.State)
 				{
 					case EntityState.Added:
-						ApplyConceptsForAddedEntity(entry, userId);
+						ApplyConceptsForAddedEntity(entry, userId, _session.UserName);
 						changed = true;
 						break;
 					case EntityState.Modified:
-						ApplyConceptsForModifiedEntity(entry, userId);
+						ApplyConceptsForModifiedEntity(entry, userId, _session.UserName);
 						changed = true;
 						break;
 					case EntityState.Deleted:
-						ApplyConceptsForDeletedEntity(entry, userId);
+						ApplyConceptsForDeletedEntity(entry, userId, _session.UserName);
 						changed = true;
 						break;
 				}
@@ -332,30 +320,45 @@ namespace MicroserviceFramework.Ef
 			return auditedEntity;
 		}
 
-		protected virtual void ApplyConceptsForAddedEntity(EntityEntry entry, string userId)
+		protected virtual void ApplyConceptsForAddedEntity(EntityEntry entry, string userId, string userName)
 		{
-			if (entry.Entity is ICreation creationAudited)
+			if (entry.Entity is ICreation entity)
 			{
-				creationAudited.SetCreation(userId);
+				entity.SetCreation(userId);
+			}
+
+			if (entry.Entity is IHasCreatorName setter)
+			{
+				setter.SetProperty(nameof(IHasCreatorName.CreatorName), userName);
 			}
 		}
 
-		protected virtual void ApplyConceptsForModifiedEntity(EntityEntry entry, string userId)
+		protected virtual void ApplyConceptsForModifiedEntity(EntityEntry entry, string userId, string userName)
 		{
-			if (entry.Entity is IModification creationAudited)
+			if (entry.Entity is IModification entity)
 			{
-				creationAudited.SetModification(userId);
+				entity.SetModification(userId);
+			}
+
+			if (entry.Entity is IHasLastModifierName setter)
+			{
+				setter.SetProperty(nameof(IHasLastModifierName.LastModifierName), userName);
 			}
 		}
 
-		protected virtual void ApplyConceptsForDeletedEntity(EntityEntry entry, string userId)
+		protected virtual void ApplyConceptsForDeletedEntity(EntityEntry entry, string userId, string userName)
 		{
-			if (entry.Entity is IDeletion deletionAudited)
+			if (entry.Entity is IDeletion entity)
 			{
 				entry.Reload();
 				entry.State = EntityState.Modified;
 
-				deletionAudited.Delete(userId);
+				entity.Delete(userId);
+			}
+
+			if (entry.Entity is IHasDeleterName setter)
+			{
+				setter.SetProperty(nameof(IHasDeleterName.DeleterName), userName);
 			}
 		}
 
@@ -371,7 +374,7 @@ namespace MicroserviceFramework.Ef
 			var domainEvents = new List<DomainEvent>();
 
 			foreach (var aggregateRoot in ChangeTracker
-				.Entries<EntityBase>())
+				         .Entries<EntityBase>())
 			{
 				var events = aggregateRoot.Entity.GetDomainEvents();
 				if (events != null && events.Any())

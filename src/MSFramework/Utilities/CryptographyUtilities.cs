@@ -28,7 +28,7 @@ namespace MicroserviceFramework.Utilities
 		{
 			Check.NotNull(bytes, nameof(bytes));
 			var builder = new StringBuilder();
-			var hash = new MD5CryptoServiceProvider();
+			var hash = MD5.Create();
 			bytes = hash.ComputeHash(bytes);
 			foreach (var b in bytes)
 			{
@@ -46,13 +46,13 @@ namespace MicroserviceFramework.Utilities
 			Check.NotNull(value, nameof(value));
 
 			var builder = new StringBuilder();
-			var hash = new SHA1Managed();
+			var hash = SHA1.Create();
 			encoding ??= Encoding.UTF8;
 
 			var bytes = hash.ComputeHash(encoding.GetBytes(value));
 			foreach (var b in bytes)
 			{
-				builder.AppendFormat("{0:x2}", b);
+				builder.Append($"{b:x2}");
 			}
 
 			return builder.ToString();
@@ -66,7 +66,7 @@ namespace MicroserviceFramework.Utilities
 			Check.NotNull(value, nameof(value));
 
 			var builder = new StringBuilder();
-			var hash = new SHA256Managed();
+			var hash = SHA256.Create();
 			encoding ??= Encoding.UTF8;
 
 			var bytes = hash.ComputeHash(encoding.GetBytes(value));
@@ -86,13 +86,13 @@ namespace MicroserviceFramework.Utilities
 			Check.NotNull(value, nameof(value));
 
 			var builder = new StringBuilder();
-			var hash = new SHA512Managed();
+			var hash = SHA512.Create();
 			encoding ??= Encoding.UTF8;
 
 			var bytes = hash.ComputeHash(encoding.GetBytes(value));
 			foreach (var b in bytes)
 			{
-				builder.AppendFormat("{0:x2}", b);
+				builder.Append($"{b:x2}");
 			}
 
 			return builder.ToString();

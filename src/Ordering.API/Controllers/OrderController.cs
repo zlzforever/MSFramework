@@ -60,8 +60,7 @@ namespace Ordering.API.Controllers
 		}
 
 		#region Command
-
-		[IgnoreAudit]
+		
 		[HttpPost("test-command1")]
 		public async Task<string> TestCommand1Async([FromBody] TestCommand1 command)
 		{

@@ -49,7 +49,6 @@ namespace MicroserviceFramework.DependencyInjection
 				typeof(ITransientDependency),
 				typeof(ISingletonDependency),
 				typeof(IScopeDependency),
-				typeof(IApplicationService),
 				typeof(IDomainService),
 				typeof(ISession),
 				typeof(IRequest),

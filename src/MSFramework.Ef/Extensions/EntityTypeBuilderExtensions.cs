@@ -9,7 +9,7 @@ namespace MicroserviceFramework.Ef.Extensions
 		public static void ConfigureConcurrencyStamp<TEntity>(this EntityTypeBuilder<TEntity> b)
 			where TEntity : class, IOptimisticLock
 		{
-			b.Property(x => x.ConcurrencyStamp).IsConcurrencyToken().HasMaxLength(40);
+			b.Property(x => x.ConcurrencyStamp).IsConcurrencyToken().HasMaxLength(36);
 		}
 
 		public static void ConfigureCreation<TEntity>(this EntityTypeBuilder<TEntity> builder)

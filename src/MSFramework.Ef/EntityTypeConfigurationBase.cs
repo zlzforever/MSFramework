@@ -23,15 +23,14 @@ namespace MicroserviceFramework.Ef
 		/// <param name="builder">实体类型创建器</param>
 		public virtual void Configure(EntityTypeBuilder<TEntity> builder)
 		{
-			// builder.HasKey("Id");
-			//
-			// var primaryKeyType = builder.Property("Id").Metadata.ClrType;
-			// if (primaryKeyType == Consts.Types.String || primaryKeyType == Consts.Types.Guid)
-			// {
-			// 	builder.Property("Id").ValueGeneratedNever();
-			// }
+			var propertyBuilder = builder.Property("Id");
 
-
+			var primaryKeyType = propertyBuilder.Metadata.ClrType;
+			if (primaryKeyType == Consts.Types.String || primaryKeyType == Consts.Types.Guid ||
+			    primaryKeyType == Consts.Types.ObjectId)
+			{
+				builder.Property("Id").ValueGeneratedNever().HasMaxLength(36);
+			}
 		}
 
 		public override string ToString()

@@ -20,19 +20,5 @@ namespace MicroserviceFramework.AspNetCore.Extensions
 			var ignoreAuditAttribute = controllerAction.MethodInfo.GetCustomAttribute<T>();
 			return ignoreAuditAttribute != null;
 		}
-
-		public static (string Name, string Description) GetFeature(this ActionDescriptor actionDescriptor)
-		{
-			var controllerAction = (ControllerActionDescriptor) actionDescriptor;
-			return FeatureCache.GetOrAdd(controllerAction.MethodInfo, info =>
-			{
-				var action = info.Name;
-				var parameters = info.GetParameters().ExpandAndToString(x =>
-					$"{x.ParameterType.FullName}");
-				// todo: 从 Attribute 上获取 Feature 信息
-				var description = $"{controllerAction.ControllerTypeInfo.FullName}.{action}({parameters})";
-				return (CryptographyUtilities.ComputeMD5(description), description);
-			});
-		}
 	}
 }

@@ -6,6 +6,10 @@
 
     <ItemGroup>
         <PackageReference Include="Microsoft.AspNetCore.Mvc.Core" Version="2.2.5" />
+        <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="6.0.5">
+          <PrivateAssets>all</PrivateAssets>
+          <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+        </PackageReference>
         <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
         <PackageReference Include="Serilog.AspNetCore" Version="5.0.0" />
         <PackageReference Include="Serilog.Sinks.PeriodicBatching" Version="2.3.1" />
@@ -30,6 +34,7 @@
         <ProjectReference Include="..\MSFramework\MSFramework.csproj" />
         <ProjectReference Include="..\Ordering.Application\Ordering.Application.csproj" />
         <ProjectReference Include="..\Ordering.Domain\Ordering.Domain.csproj" />
+        <ProjectReference Include="..\Ordering.Ef.Migration.MySql\Ordering.Ef.Migration.MySql.csproj" />
         <ProjectReference Include="..\Ordering.Infrastructure\Ordering.Infrastructure.csproj" />
         <ProjectReference Include="..\MSFramework.Ef.MySql\MSFramework.Ef.MySql.csproj" />
     </ItemGroup>

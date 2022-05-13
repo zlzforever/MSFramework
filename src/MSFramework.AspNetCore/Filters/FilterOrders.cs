@@ -7,7 +7,6 @@ namespace MicroserviceFramework.AspNetCore.Filters
 	/// </summary>
 	public static class Conts
 	{
-		public const int FunctionFilter = 0;
 		public const int UnitOfWork = 1000;
 		public const int Audit = 2000;
 

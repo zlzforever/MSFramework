@@ -22,7 +22,7 @@ docker run \
 
 ```
 $ cd src/Ordering.Api
-$ dotnet ef migrations add init -p ../Ordering.Infrastructure/Ordering.Infrastructure.csproj
+$ dotnet ef migrations add init222 -p ../Ordering.Infrastructure/Ordering.Infrastructure.csproj
 ```
  
  

@@ -11,11 +11,11 @@ namespace MicroserviceFramework.AspNetCore.Mvc.ModelBinding
 		public static readonly Func<ActionContext, IActionResult> Instance = context =>
 		{
 			var errors = context.ModelState.Where(x =>
-					x.Value.ValidationState == ModelValidationState.Invalid)
+					x.Value is { ValidationState: ModelValidationState.Invalid })
 				.ToDictionary(
 					x => StringUtilities.ToCamelCase(x.Key),
 					x =>
-						x.Value.Errors.Where(z => !string.IsNullOrWhiteSpace(z.ErrorMessage))
+						x.Value?.Errors.Where(z => !string.IsNullOrWhiteSpace(z.ErrorMessage))
 							.Select(y => y.ErrorMessage));
 
 			return new ApiResult(null)

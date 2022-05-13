@@ -7,18 +7,6 @@ namespace MicroserviceFramework.Utilities
 {
 	public static class DirectoryUtilities
 	{
-		/// <summary>
-		/// 创建文件夹，如果不存在
-		/// </summary>
-		/// <param name="directory">要创建的文件夹路径</param>
-		public static void Create(string directory)
-		{
-			if (!Directory.Exists(directory))
-			{
-				Directory.CreateDirectory(directory);
-			}
-		}
-
 		public static void Copy(DirectoryInfo source, DirectoryInfo target, string excludePattern)
 		{
 			if (target.FullName.Contains(source.FullName))

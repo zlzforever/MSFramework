@@ -7,23 +7,27 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using Ordering.Infrastructure;
 
+#nullable disable
+
 namespace Ordering.Infrastructure.Migrations
 {
     [DbContext(typeof(OrderingContext))]
-    [Migration("20210930111710_init")]
+    [Migration("20220513124123_init")]
     partial class init
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("Relational:MaxIdentifierLength", 63)
-                .HasAnnotation("ProductVersion", "5.0.10")
-                .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
+                .HasAnnotation("ProductVersion", "6.0.5")
+                .HasAnnotation("Relational:MaxIdentifierLength", 63);
+
+            NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
             modelBuilder.Entity("MicroserviceFramework.Audit.AuditEntity", b =>
                 {
                     b.Property<string>("Id")
+                        .HasMaxLength(36)
                         .HasColumnType("character varying(36)")
                         .HasColumnName("id");
 
@@ -58,51 +62,57 @@ namespace Ordering.Infrastructure.Migrations
 
                     b.HasIndex("audit_operation_id");
 
-                    b.ToTable("audit_entity");
+                    b.ToTable("audit_entity", (string)null);
                 });
 
             modelBuilder.Entity("MicroserviceFramework.Audit.AuditOperation", b =>
                 {
                     b.Property<string>("Id")
+                        .HasMaxLength(36)
                         .HasColumnType("character varying(36)")
                         .HasColumnName("id");
 
-                    b.Property<string>("ApplicationName")
-                        .HasMaxLength(255)
-                        .HasColumnType("character varying(255)")
-                        .HasColumnName("application_name");
-
                     b.Property<long?>("CreationTime")
-                        .HasColumnType("int")
+                        .HasColumnType("bigint")
                         .HasColumnName("creation_time");
 
-                    b.Property<string>("CreationUserId")
+                    b.Property<string>("CreatorId")
                         .HasMaxLength(255)
                         .HasColumnType("character varying(255)")
-                        .HasColumnName("creation_user_id");
+                        .HasColumnName("creator_id");
 
-                    b.Property<string>("CreationUserName")
-                        .HasMaxLength(255)
-                        .HasColumnType("character varying(255)")
-                        .HasColumnName("creation_user_name");
+                    b.Property<string>("DeviceId")
+                        .HasMaxLength(36)
+                        .HasColumnType("character varying(36)")
+                        .HasColumnName("device_id");
+
+                    b.Property<string>("DeviceModel")
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)")
+                        .HasColumnName("device_model");
 
                     b.Property<int>("Elapsed")
                         .HasColumnType("integer")
                         .HasColumnName("elapsed");
 
-                    b.Property<DateTimeOffset>("EndTime")
-                        .HasColumnType("timestamp with time zone")
+                    b.Property<long>("EndTime")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint")
+                        .HasDefaultValue(0L)
                         .HasColumnName("end_time");
 
-                    b.Property<string>("Feature")
-                        .HasMaxLength(1024)
-                        .HasColumnType("character varying(1024)")
-                        .HasColumnName("feature");
-
-                    b.Property<string>("Ip")
+                    b.Property<string>("IP")
                         .HasMaxLength(255)
                         .HasColumnType("character varying(255)")
-                        .HasColumnName("ip");
+                        .HasColumnName("i_p");
+
+                    b.Property<double?>("Lat")
+                        .HasColumnType("double precision")
+                        .HasColumnName("lat");
+
+                    b.Property<double?>("Lng")
+                        .HasColumnType("double precision")
+                        .HasColumnName("lng");
 
                     b.Property<string>("Url")
                         .HasMaxLength(1024)
@@ -118,16 +128,17 @@ namespace Ordering.Infrastructure.Migrations
 
                     b.HasIndex("CreationTime");
 
-                    b.HasIndex("CreationUserId");
+                    b.HasIndex("CreatorId");
 
                     b.HasIndex("EndTime");
 
-                    b.ToTable("audit_operation");
+                    b.ToTable("audit_operation", (string)null);
                 });
 
             modelBuilder.Entity("MicroserviceFramework.Audit.AuditProperty", b =>
                 {
                     b.Property<string>("Id")
+                        .HasMaxLength(36)
                         .HasColumnType("character varying(36)")
                         .HasColumnName("id");
 
@@ -163,52 +174,13 @@ namespace Ordering.Infrastructure.Migrations
 
                     b.HasIndex("audit_entity_id");
 
-                    b.ToTable("audit_property");
-                });
-
-            modelBuilder.Entity("MicroserviceFramework.FeatureManagement.Feature", b =>
-                {
-                    b.Property<string>("Id")
-                        .HasColumnType("character varying(36)")
-                        .HasColumnName("id");
-
-                    b.Property<long>("CreationTime")
-                        .HasColumnType("int")
-                        .HasColumnName("creation_time");
-
-                    b.Property<string>("Description")
-                        .HasMaxLength(1024)
-                        .HasColumnType("character varying(1024)")
-                        .HasColumnName("description");
-
-                    b.Property<bool>("Enabled")
-                        .HasColumnType("boolean")
-                        .HasColumnName("enabled");
-
-                    b.Property<bool>("Expired")
-                        .HasColumnType("boolean")
-                        .HasColumnName("expired");
-
-                    b.Property<long?>("ModificationTime")
-                        .HasColumnType("int")
-                        .HasColumnName("modification_time");
-
-                    b.Property<string>("Name")
-                        .HasMaxLength(255)
-                        .HasColumnType("character varying(255)")
-                        .HasColumnName("name");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("Name")
-                        .IsUnique();
-
-                    b.ToTable("feature");
+                    b.ToTable("audit_property", (string)null);
                 });
 
             modelBuilder.Entity("Ordering.Domain.AggregateRoots.Order", b =>
                 {
                     b.Property<string>("Id")
+                        .HasMaxLength(36)
                         .HasColumnType("character varying(36)")
                         .HasColumnName("id");
 
@@ -251,6 +223,7 @@ namespace Ordering.Infrastructure.Migrations
             modelBuilder.Entity("Ordering.Domain.AggregateRoots.OrderItem", b =>
                 {
                     b.Property<string>("Id")
+                        .HasMaxLength(36)
                         .HasColumnType("character varying(36)")
                         .HasColumnName("id");
 
@@ -293,6 +266,7 @@ namespace Ordering.Infrastructure.Migrations
             modelBuilder.Entity("Ordering.Domain.AggregateRoots.Product", b =>
                 {
                     b.Property<string>("Id")
+                        .HasMaxLength(36)
                         .HasColumnType("character varying(36)")
                         .HasColumnName("id");
 

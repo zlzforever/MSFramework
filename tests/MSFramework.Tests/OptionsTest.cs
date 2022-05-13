@@ -1,5 +1,5 @@
 using MicroserviceFramework;
-using MicroserviceFramework.Extensions.Options;
+using MicroserviceFramework.Options;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;

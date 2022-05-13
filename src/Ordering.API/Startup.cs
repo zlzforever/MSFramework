@@ -10,8 +10,8 @@ using MicroserviceFramework.DependencyInjection;
 using MicroserviceFramework.Ef;
 using MicroserviceFramework.Ef.PostgreSql;
 using MicroserviceFramework.EventBus;
-using MicroserviceFramework.Extensions.Options;
 using MicroserviceFramework.Mediator;
+using MicroserviceFramework.Options;
 using MicroserviceFramework.Serialization;
 using MicroserviceFramework.Serialization.Converters;
 using Microsoft.AspNetCore.Builder;
@@ -40,7 +40,6 @@ namespace Ordering.API
 
 			services.AddControllers(x =>
 				{
-					x.Filters.Add<LogFilter>();
 					x.Filters.AddUnitOfWork();
 					x.Filters.AddAudit();
 					x.Filters.AddGlobalException();

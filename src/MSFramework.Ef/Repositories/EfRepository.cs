@@ -46,14 +46,12 @@ namespace MicroserviceFramework.Ef.Repositories
 	{
 		public virtual TEntity Find(TKey id)
 		{
-			return Store
-				.FirstOrDefault(x => x.Id.Equals(id));
+			return DbContext.Set<TEntity>().Find(id);
 		}
 
 		public virtual async Task<TEntity> FindAsync(TKey id)
 		{
-			return await Store
-				.FirstOrDefaultAsync(x => x.Id.Equals(id));
+			return await DbContext.Set<TEntity>().FindAsync(id);
 		}
 
 		public virtual void Delete(TKey id)
