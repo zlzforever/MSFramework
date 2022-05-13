@@ -5,11 +5,11 @@
         <AssemblyName>MSFramework.Ef.PostgreSql</AssemblyName>
         <RootNamespace>MicroserviceFramework.Ef.PostgreSql</RootNamespace>
     </PropertyGroup>
-    <Import Project="../../package.props"/>
+    <Import Project="../../package.props" />
     <ItemGroup>
-        <ProjectReference Include="..\MSFramework.Ef\MSFramework.Ef.csproj"/>
+        <ProjectReference Include="..\MSFramework.Ef\MSFramework.Ef.csproj" />
     </ItemGroup>
     <ItemGroup>
-        <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="6.0.3"/>
+        <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="6.0.4" />
     </ItemGroup>
 </Project>

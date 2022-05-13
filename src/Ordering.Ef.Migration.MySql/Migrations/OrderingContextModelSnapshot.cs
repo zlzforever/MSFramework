@@ -25,6 +25,7 @@ namespace Ordering.Ef.Migration.MySql.Migrations
             modelBuilder.Entity("MicroserviceFramework.Audit.AuditEntity", b =>
                 {
                     b.Property<string>("Id")
+                        .HasMaxLength(36)
                         .HasColumnType("character varying(36)")
                         .HasColumnName("id");
 
@@ -65,11 +66,12 @@ namespace Ordering.Ef.Migration.MySql.Migrations
             modelBuilder.Entity("MicroserviceFramework.Audit.AuditOperation", b =>
                 {
                     b.Property<string>("Id")
+                        .HasMaxLength(36)
                         .HasColumnType("character varying(36)")
                         .HasColumnName("id");
 
                     b.Property<long?>("CreationTime")
-                        .HasColumnType("int")
+                        .HasColumnType("bigint")
                         .HasColumnName("creation_time");
 
                     b.Property<string>("CreatorId")
@@ -91,8 +93,10 @@ namespace Ordering.Ef.Migration.MySql.Migrations
                         .HasColumnType("integer")
                         .HasColumnName("elapsed");
 
-                    b.Property<DateTimeOffset>("EndTime")
-                        .HasColumnType("timestamp with time zone")
+                    b.Property<long>("EndTime")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint")
+                        .HasDefaultValue(0L)
                         .HasColumnName("end_time");
 
                     b.Property<string>("IP")
@@ -132,6 +136,7 @@ namespace Ordering.Ef.Migration.MySql.Migrations
             modelBuilder.Entity("MicroserviceFramework.Audit.AuditProperty", b =>
                 {
                     b.Property<string>("Id")
+                        .HasMaxLength(36)
                         .HasColumnType("character varying(36)")
                         .HasColumnName("id");
 
@@ -173,6 +178,7 @@ namespace Ordering.Ef.Migration.MySql.Migrations
             modelBuilder.Entity("Ordering.Domain.AggregateRoots.Order", b =>
                 {
                     b.Property<string>("Id")
+                        .HasMaxLength(36)
                         .HasColumnType("character varying(36)")
                         .HasColumnName("id");
 
@@ -215,6 +221,7 @@ namespace Ordering.Ef.Migration.MySql.Migrations
             modelBuilder.Entity("Ordering.Domain.AggregateRoots.OrderItem", b =>
                 {
                     b.Property<string>("Id")
+                        .HasMaxLength(36)
                         .HasColumnType("character varying(36)")
                         .HasColumnName("id");
 
@@ -257,6 +264,7 @@ namespace Ordering.Ef.Migration.MySql.Migrations
             modelBuilder.Entity("Ordering.Domain.AggregateRoots.Product", b =>
                 {
                     b.Property<string>("Id")
+                        .HasMaxLength(36)
                         .HasColumnType("character varying(36)")
                         .HasColumnName("id");
 
