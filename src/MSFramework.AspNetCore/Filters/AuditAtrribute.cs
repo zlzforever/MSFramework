@@ -26,10 +26,11 @@ namespace MicroserviceFramework.AspNetCore.Filters
 		{
 			IAuditStore auditStore = null;
 			AuditOperation auditedOperation = null;
+			// 必须保证审计和业务用的是不同的 DbContext 不然，会导致数据异常入库
+			using var scope = context.HttpContext.RequestServices.CreateScope();
+
 			if (Conts.MethodDict.ContainsKey(context.HttpContext.Request.Method))
 			{
-				// 必须保证审计和业务用的是不同的 DbContext 不然，会导致数据异常入库
-				using var scope = context.HttpContext.RequestServices.CreateScope();
 				auditStore = scope.ServiceProvider.GetService<IAuditStore>();
 				if (auditStore == null)
 				{
@@ -44,7 +45,9 @@ namespace MicroserviceFramework.AspNetCore.Filters
 				var lat = context.HttpContext.Request.Query["lat"].ToString();
 				var lng = context.HttpContext.Request.Query["lng"].ToString();
 				auditedOperation = new AuditOperation(
-					$"{context.HttpContext.Request.Method} {url}", ua, ip, deviceModel, deviceId,
+					$"{context.HttpContext.Request.Method} {url}", ua, ip,
+					string.IsNullOrEmpty(deviceModel) ? null : deviceModel,
+					string.IsNullOrEmpty(deviceId) ? null : deviceId,
 					double.TryParse(lat, out var a) ? a : null, double.TryParse(lng, out var n) ? n : null);
 
 				auditedOperation.SetCreation(

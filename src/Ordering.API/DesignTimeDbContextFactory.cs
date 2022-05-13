@@ -10,7 +10,7 @@ namespace Ordering.API
 	{
 		protected override IServiceProvider GetServiceProvider()
 		{
-			return Program.CreateHostBuilder(new string[0]).Build().Services;
+			return Program.CreateHostBuilder(Array.Empty<string>()).Build().Services;
 		}
 
 		public override void ConfigureDesignTimeServices(IServiceCollection serviceCollection)

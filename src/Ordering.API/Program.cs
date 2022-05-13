@@ -1,6 +1,8 @@
-﻿using Microsoft.AspNetCore.Hosting;
+﻿using MicroserviceFramework.Extensions;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Hosting;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Serialization;
 using Serilog;
 using Serilog.Events;
 
@@ -21,9 +23,8 @@ namespace Ordering.API
 				.MinimumLevel.Override("Microsoft.AspNetCore.Authentication", LogEventLevel.Warning)
 				.Enrich.FromLogContext()
 				.WriteTo.Console()
-				.WriteTo.Seq("http://localhost:5341", apiKey: "VrKfUYKzcVH4b1dW72KL")
+				// .WriteTo.Seq("http://localhost:5341", apiKey: "VrKfUYKzcVH4b1dW72KL")
 				.CreateLogger();
-
 			CreateHostBuilder(args).Build().Run();
 		}
 

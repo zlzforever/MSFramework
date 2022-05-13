@@ -103,7 +103,7 @@ namespace MicroserviceFramework.Ef
 
 					if (option.UseUnderScoreCase)
 					{
-						tableName = tableName.ToUnderScoreCase();
+						tableName = tableName.ToSnakeCase();
 					}
 
 					if (!string.IsNullOrWhiteSpace(tablePrefix))
@@ -119,15 +119,16 @@ namespace MicroserviceFramework.Ef
 					entityType.AddSoftDeleteQueryFilter();
 				}
 
+				var optimisticLockTable = typeof(IOptimisticLock).IsAssignableFrom(entityType.ClrType);
 				var properties = entityType.GetProperties();
 				foreach (var property in properties)
 				{
-					if (typeof(IOptimisticLock).IsAssignableFrom(entityType.ClrType) &&
+					if (optimisticLockTable &&
 					    property.Name == "ConcurrencyStamp")
 					{
 						property.SetMaxLength(36);
 						property.IsConcurrencyToken = true;
-						property.IsNullable = false;
+						property.IsNullable = true;
 					}
 
 					if (option.UseUnderScoreCase)
@@ -139,7 +140,7 @@ namespace MicroserviceFramework.Ef
 							propertyName = propertyName.Substring(1, propertyName.Length - 1);
 						}
 
-						property.SetColumnName(propertyName.ToUnderScoreCase());
+						property.SetColumnName(propertyName.ToSnakeCase());
 					}
 
 					if (property.ClrType == typeof(ObjectId))

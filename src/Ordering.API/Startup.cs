@@ -8,6 +8,8 @@ using MicroserviceFramework.Audit;
 using MicroserviceFramework.AutoMapper;
 using MicroserviceFramework.DependencyInjection;
 using MicroserviceFramework.Ef;
+using MicroserviceFramework.Ef.Audit;
+using MicroserviceFramework.Ef.MySql;
 using MicroserviceFramework.Ef.PostgreSql;
 using MicroserviceFramework.EventBus;
 using MicroserviceFramework.Mediator;
@@ -70,7 +72,7 @@ namespace Ordering.API
 				x.SwaggerDoc("v1.0", new OpenApiInfo { Version = "v1.0", Description = "Ordering API V1.0" });
 				x.CustomSchemaIds(type => type.FullName);
 				x.MapEnumerationType(typeof(Address).Assembly);
-				//x.MapObjectIdType();
+				x.MapObjectIdType();
 			});
 			services.AddHealthChecks();
 
@@ -82,11 +84,11 @@ namespace Ordering.API
 				builder.UseDefaultSerializer();
 				builder.UseMediator();
 				builder.UseEventBus();
- 
+
 				//builder.UseAccessControl(Configuration);
 				// builder.UseRabbitMQEventDispatcher(new RabbitMQOptions(), typeof(UserCheckoutAcceptedEvent));
 				// 启用审计服务
-				builder.UseAuditStore();
+				builder.UseAuditStore<EfAuditStore>();
 				// builder.UseMySqlMigrator(typeof(OrderingContext),
 				// 	"Database='ordering';Data Source=localhost;User ID=root;Password=1qazZAQ!;Port=3306;");
 
@@ -96,7 +98,7 @@ namespace Ordering.API
 				builder.UseEntityFramework(x =>
 				{
 					// 添加 MySql 支持
-					x.AddNpgsql<OrderingContext>(Configuration);
+					x.AddMySql<OrderingContext>(Configuration);
 				});
 			});
 		}
@@ -104,8 +106,6 @@ namespace Ordering.API
 		// This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
 		public void Configure(IApplicationBuilder app, IHostEnvironment env)
 		{
-			app.ApplicationServices.CreateScope().ServiceProvider.GetService<ISerializer>();
-
 			if (env.IsDevelopment())
 			{
 				app.UseDeveloperExceptionPage();
@@ -115,13 +115,6 @@ namespace Ordering.API
 				// The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
 				app.UseHsts();
 			}
-
-			app.Use(async (context, next) =>
-			{
-				// Do work that doesn't write to the Response.
-				await next();
-				// Do other work that doesn't write to the Response.
-			});
 
 			app.UseHttpsRedirection();
 			app.UseRouting();
@@ -133,11 +126,12 @@ namespace Ordering.API
 			//启用中间件服务生成Swagger作为JSON终结点
 			app.UseSwagger();
 			//启用中间件服务对swagger-ui，指定Swagger JSON终结点
-			app.UseSwaggerUI(c => { c.SwaggerEndpoint("/swagger/v1.0/swagger.json", "Ordering API V1.0"); });
+			app.UseSwaggerUI(c => { c.SwaggerEndpoint("v1/swagger.json", "Ordering API V1.0"); });
 
 
 			app.UseEndpoints(endpoints =>
 			{
+				endpoints.MapSwagger();
 				endpoints.MapControllerRoute(
 						"default",
 						"{controller=Home}/{action=Index}/{id?}").RequireCors("cors")

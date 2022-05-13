@@ -3,7 +3,6 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
-using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using Ordering.Infrastructure;
 
 #nullable disable
@@ -18,38 +17,36 @@ namespace Ordering.Ef.Migration.MySql.Migrations
 #pragma warning disable 612, 618
             modelBuilder
                 .HasAnnotation("ProductVersion", "6.0.5")
-                .HasAnnotation("Relational:MaxIdentifierLength", 63);
-
-            NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
+                .HasAnnotation("Relational:MaxIdentifierLength", 64);
 
             modelBuilder.Entity("MicroserviceFramework.Audit.AuditEntity", b =>
                 {
                     b.Property<string>("Id")
                         .HasMaxLength(36)
-                        .HasColumnType("character varying(36)")
+                        .HasColumnType("varchar(36)")
                         .HasColumnName("id");
 
                     b.Property<string>("EntityId")
                         .HasMaxLength(255)
-                        .HasColumnType("character varying(255)")
+                        .HasColumnType("varchar(255)")
                         .HasColumnName("entity_id");
 
                     b.Property<string>("OperationId")
-                        .HasColumnType("character varying(36)")
+                        .HasColumnType("varchar(36)")
                         .HasColumnName("operation_id");
 
                     b.Property<string>("OperationType")
                         .HasMaxLength(255)
-                        .HasColumnType("character varying(255)")
+                        .HasColumnType("varchar(255)")
                         .HasColumnName("operation_type");
 
                     b.Property<string>("Type")
                         .HasMaxLength(255)
-                        .HasColumnType("character varying(255)")
+                        .HasColumnType("varchar(255)")
                         .HasColumnName("type");
 
                     b.Property<string>("audit_operation_id")
-                        .HasColumnType("character varying(36)")
+                        .HasColumnType("varchar(36)")
                         .HasColumnName("audit_operation_id");
 
                     b.HasKey("Id");
@@ -67,7 +64,7 @@ namespace Ordering.Ef.Migration.MySql.Migrations
                 {
                     b.Property<string>("Id")
                         .HasMaxLength(36)
-                        .HasColumnType("character varying(36)")
+                        .HasColumnType("varchar(36)")
                         .HasColumnName("id");
 
                     b.Property<long?>("CreationTime")
@@ -76,21 +73,21 @@ namespace Ordering.Ef.Migration.MySql.Migrations
 
                     b.Property<string>("CreatorId")
                         .HasMaxLength(255)
-                        .HasColumnType("character varying(255)")
+                        .HasColumnType("varchar(255)")
                         .HasColumnName("creator_id");
 
                     b.Property<string>("DeviceId")
                         .HasMaxLength(36)
-                        .HasColumnType("character varying(36)")
+                        .HasColumnType("varchar(36)")
                         .HasColumnName("device_id");
 
                     b.Property<string>("DeviceModel")
                         .HasMaxLength(50)
-                        .HasColumnType("character varying(50)")
+                        .HasColumnType("varchar(50)")
                         .HasColumnName("device_model");
 
                     b.Property<int>("Elapsed")
-                        .HasColumnType("integer")
+                        .HasColumnType("int")
                         .HasColumnName("elapsed");
 
                     b.Property<long>("EndTime")
@@ -101,25 +98,25 @@ namespace Ordering.Ef.Migration.MySql.Migrations
 
                     b.Property<string>("IP")
                         .HasMaxLength(255)
-                        .HasColumnType("character varying(255)")
-                        .HasColumnName("i_p");
+                        .HasColumnType("varchar(255)")
+                        .HasColumnName("ip");
 
                     b.Property<double?>("Lat")
-                        .HasColumnType("double precision")
+                        .HasColumnType("double")
                         .HasColumnName("lat");
 
                     b.Property<double?>("Lng")
-                        .HasColumnType("double precision")
+                        .HasColumnType("double")
                         .HasColumnName("lng");
 
                     b.Property<string>("Url")
                         .HasMaxLength(1024)
-                        .HasColumnType("character varying(1024)")
+                        .HasColumnType("varchar(1024)")
                         .HasColumnName("url");
 
                     b.Property<string>("UserAgent")
                         .HasMaxLength(1024)
-                        .HasColumnType("character varying(1024)")
+                        .HasColumnType("varchar(1024)")
                         .HasColumnName("user_agent");
 
                     b.HasKey("Id");
@@ -137,33 +134,33 @@ namespace Ordering.Ef.Migration.MySql.Migrations
                 {
                     b.Property<string>("Id")
                         .HasMaxLength(36)
-                        .HasColumnType("character varying(36)")
+                        .HasColumnType("varchar(36)")
                         .HasColumnName("id");
 
                     b.Property<string>("EntityId")
-                        .HasColumnType("character varying(36)")
+                        .HasColumnType("varchar(36)")
                         .HasColumnName("entity_id");
 
                     b.Property<string>("Name")
                         .HasMaxLength(255)
-                        .HasColumnType("character varying(255)")
+                        .HasColumnType("varchar(255)")
                         .HasColumnName("name");
 
                     b.Property<string>("NewValue")
-                        .HasColumnType("text")
+                        .HasColumnType("longtext")
                         .HasColumnName("new_value");
 
                     b.Property<string>("OriginalValue")
-                        .HasColumnType("text")
+                        .HasColumnType("longtext")
                         .HasColumnName("original_value");
 
                     b.Property<string>("Type")
                         .HasMaxLength(255)
-                        .HasColumnType("character varying(255)")
+                        .HasColumnType("varchar(255)")
                         .HasColumnName("type");
 
                     b.Property<string>("audit_entity_id")
-                        .HasColumnType("character varying(36)")
+                        .HasColumnType("varchar(36)")
                         .HasColumnName("audit_entity_id");
 
                     b.HasKey("Id");
@@ -179,38 +176,37 @@ namespace Ordering.Ef.Migration.MySql.Migrations
                 {
                     b.Property<string>("Id")
                         .HasMaxLength(36)
-                        .HasColumnType("character varying(36)")
+                        .HasColumnType("varchar(36)")
                         .HasColumnName("id");
 
                     b.Property<string>("ConcurrencyStamp")
                         .IsConcurrencyToken()
-                        .IsRequired()
                         .HasMaxLength(36)
-                        .HasColumnType("character varying(36)")
+                        .HasColumnType("varchar(36)")
                         .HasColumnName("concurrency_stamp");
 
                     b.Property<DateTimeOffset>("CreationTime")
-                        .HasColumnType("timestamp with time zone")
+                        .HasColumnType("datetime(6)")
                         .HasColumnName("creation_time");
 
                     b.Property<string>("Description")
-                        .HasColumnType("text")
+                        .HasColumnType("longtext")
                         .HasColumnName("description");
 
                     b.Property<bool>("IsDeleted")
-                        .HasColumnType("boolean")
+                        .HasColumnType("tinyint(1)")
                         .HasColumnName("is_deleted");
 
                     b.Property<string>("OrderStatus")
                         .IsRequired()
                         .HasMaxLength(255)
-                        .HasColumnType("character varying(255)")
+                        .HasColumnType("varchar(255)")
                         .HasColumnName("order_status");
 
                     b.Property<string>("UserId")
                         .IsRequired()
                         .HasMaxLength(255)
-                        .HasColumnType("character varying(255)")
+                        .HasColumnType("varchar(255)")
                         .HasColumnName("user_id");
 
                     b.HasKey("Id");
@@ -222,36 +218,36 @@ namespace Ordering.Ef.Migration.MySql.Migrations
                 {
                     b.Property<string>("Id")
                         .HasMaxLength(36)
-                        .HasColumnType("character varying(36)")
+                        .HasColumnType("varchar(36)")
                         .HasColumnName("id");
 
                     b.Property<decimal>("Discount")
-                        .HasColumnType("numeric")
+                        .HasColumnType("decimal(65,30)")
                         .HasColumnName("discount");
 
                     b.Property<string>("OrderId")
-                        .HasColumnType("character varying(36)")
+                        .HasColumnType("varchar(36)")
                         .HasColumnName("order_id");
 
                     b.Property<string>("PictureUrl")
-                        .HasColumnType("text")
+                        .HasColumnType("longtext")
                         .HasColumnName("picture_url");
 
                     b.Property<Guid>("ProductId")
-                        .HasColumnType("uuid")
+                        .HasColumnType("char(36)")
                         .HasColumnName("product_id");
 
                     b.Property<string>("ProductName")
                         .IsRequired()
-                        .HasColumnType("text")
+                        .HasColumnType("longtext")
                         .HasColumnName("product_name");
 
                     b.Property<decimal>("UnitPrice")
-                        .HasColumnType("numeric")
+                        .HasColumnType("decimal(65,30)")
                         .HasColumnName("unit_price");
 
                     b.Property<int>("Units")
-                        .HasColumnType("integer")
+                        .HasColumnType("int")
                         .HasColumnName("units");
 
                     b.HasKey("Id");
@@ -265,23 +261,22 @@ namespace Ordering.Ef.Migration.MySql.Migrations
                 {
                     b.Property<string>("Id")
                         .HasMaxLength(36)
-                        .HasColumnType("character varying(36)")
+                        .HasColumnType("varchar(36)")
                         .HasColumnName("id");
 
                     b.Property<string>("ConcurrencyStamp")
                         .IsConcurrencyToken()
-                        .IsRequired()
                         .HasMaxLength(36)
-                        .HasColumnType("character varying(36)")
+                        .HasColumnType("varchar(36)")
                         .HasColumnName("concurrency_stamp");
 
                     b.Property<string>("Name")
                         .HasMaxLength(256)
-                        .HasColumnType("character varying(256)")
+                        .HasColumnType("varchar(256)")
                         .HasColumnName("name");
 
                     b.Property<int>("Price")
-                        .HasColumnType("integer")
+                        .HasColumnType("int")
                         .HasColumnName("price");
 
                     b.HasKey("Id");
@@ -320,27 +315,27 @@ namespace Ordering.Ef.Migration.MySql.Migrations
                     b.OwnsOne("Ordering.Domain.AggregateRoots.Address", "Address", b1 =>
                         {
                             b1.Property<string>("OrderId")
-                                .HasColumnType("character varying(36)")
+                                .HasColumnType("varchar(36)")
                                 .HasColumnName("id");
 
                             b1.Property<string>("City")
-                                .HasColumnType("text")
+                                .HasColumnType("longtext")
                                 .HasColumnName("address_city");
 
                             b1.Property<string>("Country")
-                                .HasColumnType("text")
+                                .HasColumnType("longtext")
                                 .HasColumnName("address_country");
 
                             b1.Property<string>("State")
-                                .HasColumnType("text")
+                                .HasColumnType("longtext")
                                 .HasColumnName("address_state");
 
                             b1.Property<string>("Street")
-                                .HasColumnType("text")
+                                .HasColumnType("longtext")
                                 .HasColumnName("address_street");
 
                             b1.Property<string>("ZipCode")
-                                .HasColumnType("text")
+                                .HasColumnType("longtext")
                                 .HasColumnName("address_zip_code");
 
                             b1.HasKey("OrderId");
