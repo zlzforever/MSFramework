@@ -17,7 +17,6 @@ namespace MicroserviceFramework.AspNetCore.Mvc.ModelBinding
 					x =>
 						x.Value?.Errors.Where(z => !string.IsNullOrWhiteSpace(z.ErrorMessage))
 							.Select(y => y.ErrorMessage));
-
 			return new ApiResult(null)
 			{
 				Code = 1,

@@ -129,11 +129,13 @@ namespace MicroserviceFramework.AspNetCore.Mvc
 			}
 
 			var executor = context.HttpContext.RequestServices.GetRequiredService(ActionResultExecutorType);
+
 			var result = Activator.CreateInstance(ApiResultType, new
 			{
 				Success,
 				Code,
 				Msg,
+				Errors,
 				Data = Value
 			});
 			if (result == null)

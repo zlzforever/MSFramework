@@ -15,7 +15,6 @@
         <PackageReference Include="Serilog.Sinks.PeriodicBatching" Version="2.3.1" />
         <PackageReference Include="Serilog.Sinks.Console" Version="4.0.1" />
         <PackageReference Include="Serilog.Sinks.RollingFile" Version="3.3.0" />
-        <PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="6.0.5" />
         <PackageReference Include="Serilog.Sinks.Seq" Version="5.1.1" />
         <PackageReference Include="xunit.assert" Version="2.4.1" />
         <PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="5.0.9" />

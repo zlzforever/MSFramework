@@ -13,8 +13,8 @@ namespace MicroserviceFramework.EventBus
 		public static MicroserviceFrameworkBuilder UseEventBus(this MicroserviceFrameworkBuilder builder)
 		{
 			builder.Services.TryAddSingleton<IEventBus, InProcessEventBus>();
-			builder.Services
-				.TryAddSingleton<IEventHandlerFactory, DependencyInjectionEventHandlerFactory>();
+			// builder.Services
+			// 	.TryAddSingleton<IEventHandlerFactory, DependencyInjectionEventHandlerFactory>();
 
 			MicroserviceFrameworkLoaderContext.Get(builder.Services).ResolveType += type =>
 			{

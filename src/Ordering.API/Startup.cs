@@ -126,12 +126,12 @@ namespace Ordering.API
 			//启用中间件服务生成Swagger作为JSON终结点
 			app.UseSwagger();
 			//启用中间件服务对swagger-ui，指定Swagger JSON终结点
-			app.UseSwaggerUI(c => { c.SwaggerEndpoint("v1/swagger.json", "Ordering API V1.0"); });
+			app.UseSwaggerUI(c => { c.SwaggerEndpoint("/swagger/v1.0/swagger.json", "Ordering API V1.0"); });
 
 
 			app.UseEndpoints(endpoints =>
 			{
-				endpoints.MapSwagger();
+				// endpoints.MapSwagger();
 				endpoints.MapControllerRoute(
 						"default",
 						"{controller=Home}/{action=Index}/{id?}").RequireCors("cors")

@@ -1,3 +1,4 @@
+using System.IO;
 using System.Security.Cryptography;
 using System.Text;
 using MicroserviceFramework.Shared;
@@ -19,6 +20,19 @@ namespace MicroserviceFramework.Utilities
 
 			var bytes = encoding.GetBytes(value);
 			return ComputeMD5(bytes);
+		}
+
+		public static string ComputeMD5(Stream stream)
+		{
+			var builder = new StringBuilder();
+			var hash = MD5.Create();
+			var bytes = hash.ComputeHash(stream);
+			foreach (var b in bytes)
+			{
+				builder.AppendFormat("{0:x2}", b);
+			}
+
+			return builder.ToString();
 		}
 
 		/// <summary>

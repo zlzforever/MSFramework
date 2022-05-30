@@ -1,24 +1,26 @@
 using System;
+using System.Linq;
 using System.Threading.Tasks;
 using MicroserviceFramework.Shared;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace MicroserviceFramework.EventBus
 {
 	public class InProcessEventBus : IEventBus
 	{
-		private readonly IEventHandlerFactory _handlerFactory;
+		private readonly IServiceProvider _serviceProvider;
 
 		public InProcessEventBus(
-			IEventHandlerFactory handlerFactory)
+			IServiceProvider serviceProvider)
 		{
-			_handlerFactory = handlerFactory;
+			_serviceProvider = serviceProvider;
 		}
 
 		public virtual async Task PublishAsync(dynamic @event)
 		{
 			Check.NotNull(@event, nameof(@event));
 
-			var type = (Type) @event.GetType();
+			var type = (Type)@event.GetType();
 			if (!type.IsEvent())
 			{
 				throw new MicroserviceFrameworkException($"类型 {type} 不是事件");
@@ -67,14 +69,19 @@ namespace MicroserviceFramework.EventBus
 			var handlerInfos = EventHandlerTypeCache.GetOrDefault(eventKey);
 			foreach (var handlerInfo in handlerInfos)
 			{
-				var handlers = _handlerFactory.Create(handlerInfo.Key);
+				// TODO: 每次执行是单独的 scope
+				await using var scope = _serviceProvider.CreateAsyncScope();
+				var handlers = scope.ServiceProvider.GetServices(handlerInfo.Key).ToList();
 
 				foreach (var handler in handlers)
 				{
 					await Task.Yield();
-					var task = (Task) handlerInfo.Value.MethodInfo.Invoke(handler,
-						new[] {DeepCopy.DeepCopier.Copy(@event)});
-					await task.ConfigureAwait(false);
+
+					if (handlerInfo.Value.MethodInfo.Invoke(handler,
+						    new[] { DeepCopy.DeepCopier.Copy(@event) }) is Task task)
+					{
+						await task.ConfigureAwait(false);
+					}
 				}
 			}
 		}

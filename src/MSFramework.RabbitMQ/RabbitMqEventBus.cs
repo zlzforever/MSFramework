@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using MicroserviceFramework.EventBus;
 using MicroserviceFramework.Serialization;
 using MicroserviceFramework.Shared;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Polly;
 using RabbitMQ.Client;
@@ -20,16 +21,16 @@ namespace MicroserviceFramework.RabbitMQ
 		private IModel _consumerChannel;
 		private readonly ILogger _logger;
 		private readonly ISerializer _serializer;
-		private readonly IEventHandlerFactory _eventHandlerFactory;
+		private readonly IServiceProvider _serviceProvider;
 
 		public RabbitMqEventBus(RabbitMqOptions options, IConnectionFactory connectionFactory,
-			IEventHandlerFactory eventHandlerFactory,
+			IServiceProvider serviceProvider,
 			ILoggerFactory loggerFactory, ISerializer serializer)
 		{
 			_options = options;
 			_logger = loggerFactory.CreateLogger<RabbitMqEventBus>();
 			_serializer = serializer;
-			_eventHandlerFactory = eventHandlerFactory;
+			_serviceProvider = serviceProvider;
 			_connection = new PersistentConnection(connectionFactory,
 				loggerFactory.CreateLogger<PersistentConnection>(), _options.RetryCount);
 			_consumerChannel = CreateConsumerChannel();
@@ -71,7 +72,7 @@ namespace MicroserviceFramework.RabbitMQ
 				return false;
 			}
 
-			var type = (Type) @event.GetType();
+			var type = (Type)@event.GetType();
 			if (!type.IsEvent())
 			{
 				return false;
@@ -164,13 +165,22 @@ namespace MicroserviceFramework.RabbitMQ
 						foreach (var handlerInfo in handlerInfos)
 						{
 							var @event = _serializer.Deserialize(message, handlerInfo.Value.EventType);
-							var handlers = _eventHandlerFactory.Create(handlerInfo.Key);
+							await using var scope = _serviceProvider.CreateAsyncScope();
+							var handlers = scope.ServiceProvider.GetServices(handlerInfo.Key);
 							foreach (var handler in handlers)
 							{
+								if (handler == null)
+								{
+									continue;
+								}
+
 								await Task.Yield();
-								await ((Task) handlerInfo.Value.MethodInfo.Invoke(handler, new[] {@event}))
-									.ConfigureAwait(
-										false);
+
+								var task = handlerInfo.Value.MethodInfo.Invoke(handler, new[] { @event }) as Task;
+								if (task != null)
+								{
+									await task.ConfigureAwait(false);
+								}
 							}
 						}
 					}
