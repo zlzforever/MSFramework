@@ -22,16 +22,20 @@ namespace MicroserviceFramework.EventBus
 					return true;
 				}
 
-				return type.GetCustomAttribute<EventAttribute>() != null &&
-				       type.GetProperty("EventId") != null &&
-				       type.GetProperty("EventTime") != null;
+				return type.GetCustomAttribute<EventAttribute>() != null;
 			});
 		}
 
-		public static MethodInfo GetHandlerMethod(this Type handlerType, Type eventType)
+		public static string GetEventName(this Type type)
 		{
-			var type = typeof(IEventHandler<>).MakeGenericType(eventType);
-			return type.IsAssignableFrom(handlerType) ? type.GetMethod("HandleAsync", new[] {eventType}) : null;
+			var attribute = type.GetCustomAttribute<EventAttribute>();
+			return attribute != null ? attribute.Name : type.FullName;
 		}
+
+		// public static MethodInfo GetHandlerMethod(this Type handlerType, Type eventType)
+		// {
+		// 	var type = typeof(IEventHandler<>).MakeGenericType(eventType);
+		// 	return type.IsAssignableFrom(handlerType) ? type.GetMethod("HandleAsync", new[] { eventType }) : null;
+		// }
 	}
 }

@@ -29,10 +29,12 @@ namespace MicroserviceFramework.EventBus
 			EventTypes = new ConcurrentDictionary<Type, object>();
 		}
 
-		public static void Register(Type eventType, Type handlerType, MethodInfo handlerMethod)
+		public static void Register(Type eventType, Type handlerType)
 		{
+			var handlerMethod = handlerType.GetMethod("HandleAsync", new[] { eventType });
+
 			EventTypes.TryAdd(eventType, null);
-			var name = eventType.Name;
+			var name = eventType.FullName;
 			Cache.AddOrUpdate(name, _ =>
 			{
 				var dict = new ConcurrentDictionary<Type, (Type EventType, MethodInfo MethodInfo)>();

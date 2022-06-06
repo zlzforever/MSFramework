@@ -30,19 +30,19 @@ namespace MicroserviceFramework.Ef
 		private readonly ISession _session;
 		private readonly DbContextConfigurationCollection _entityFrameworkOptions;
 		private IEntityConfigurationTypeFinder _entityConfigurationTypeFinder;
-		private readonly IMediator _domainEventDispatcher;
-		private IEventBus _eventBus;
+
+		private readonly IMediator _mediator;
 
 		/// <summary>
 		/// 初始化一个<see cref="DbContextBase"/>类型的新实例
 		/// </summary>
 		protected DbContextBase(DbContextOptions options,
 			IOptions<DbContextConfigurationCollection> entityFrameworkOptions,
-			IMediator domainEventDispatcher,
+			IMediator mediator,
 			ISession session, ILoggerFactory loggerFactory)
 			: base(options)
 		{
-			_domainEventDispatcher = domainEventDispatcher;
+			_mediator = mediator;
 			_entityFrameworkOptions = entityFrameworkOptions.Value;
 			_session = session;
 			_loggerFactory = loggerFactory;
@@ -71,7 +71,6 @@ namespace MicroserviceFramework.Ef
 		protected override void OnModelCreating(ModelBuilder modelBuilder)
 		{
 			_entityConfigurationTypeFinder = this.GetService<IEntityConfigurationTypeFinder>();
-			_eventBus = this.GetService<IEventBus>();
 
 			//通过实体配置信息将实体注册到当前上下文
 			var contextType = GetType();
@@ -180,36 +179,26 @@ namespace MicroserviceFramework.Ef
 				// 若是有领域事件则分发出去
 				// 领域事件可能导致别聚合调用当前 DbContext 并改变状态，或者添加新的事件
 				List<DomainEvent> domainEvents;
-				// 缓存所有事件，在完成数据库提交后，进行事件的分发
-				var events = new List<object>();
 				do
 				{
 					domainEvents = GetDomainEvents();
 					foreach (var @event in domainEvents)
 					{
-						await _domainEventDispatcher.PublishAsync(@event);
-						events.Add(@event);
+						await _mediator.PublishAsync(@event);
 					}
 				} while (domainEvents.Count > 0);
 
 				var effectedCount = 0;
 				var changed = ApplyConcepts();
-				if (changed)
+				if (!changed)
 				{
-					effectedCount = await SaveChangesAsync();
-					if (Database.CurrentTransaction != null)
-					{
-						await Database.CurrentTransaction.CommitAsync();
-					}
+					return effectedCount;
 				}
 
-				if (_eventBus != null)
+				effectedCount = await SaveChangesAsync();
+				if (Database.CurrentTransaction != null)
 				{
-					// 集成事件应该在聚合变更完全提交到数据库后才能发布
-					foreach (var @event in events)
-					{
-						await _eventBus.PublishIfEventAsync(@event);
-					}
+					await Database.CurrentTransaction.CommitAsync();
 				}
 
 				return effectedCount;

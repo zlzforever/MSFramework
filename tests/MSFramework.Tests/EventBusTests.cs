@@ -35,19 +35,19 @@ namespace MSFramework.Tests
 			}
 		}
 
-		[Event]
-		public class Event2
-		{
-			/// <summary>
-			/// 事件源标识
-			/// </summary>
-			public string EventId { get; }
-
-			/// <summary>
-			/// 事件发生时间
-			/// </summary>
-			public long EventTime { get; }
-		}
+		// [Event]
+		// public class Event2
+		// {
+		// 	/// <summary>
+		// 	/// 事件源标识
+		// 	/// </summary>
+		// 	public string EventId { get; }
+		//
+		// 	/// <summary>
+		// 	/// 事件发生时间
+		// 	/// </summary>
+		// 	public long EventTime { get; }
+		// }
 
 		public class Event2Handler : IEventHandler<Event2>
 		{
@@ -69,21 +69,21 @@ namespace MSFramework.Tests
 			}
 		}
 
-		[Fact]
-		public async Task PubDynamicEvent()
-		{
-			var serviceCollection = new ServiceCollection();
-			serviceCollection.AddLogging();
-			serviceCollection.AddMicroserviceFramework(x => { x.UseEventBus(); });
-
-			var provider = serviceCollection.BuildServiceProvider();
-			var eventBus = provider.GetRequiredService<IEventBus>();
-
-			await eventBus.PublishAsync(new Event2());
-
-			Assert.Equal(1, Event2Handler.Count);
-			Thread.Sleep(1000);
-		}
+		// [Fact]
+		// public async Task PubDynamicEvent()
+		// {
+		// 	var serviceCollection = new ServiceCollection();
+		// 	serviceCollection.AddLogging();
+		// 	serviceCollection.AddMicroserviceFramework(x => { x.UseEventBus(); });
+		//
+		// 	var provider = serviceCollection.BuildServiceProvider();
+		// 	var eventBus = provider.GetRequiredService<IEventBus>();
+		//
+		// 	await eventBus.PublishAsync(new Event2());
+		//
+		// 	Assert.Equal(1, Event2Handler.Count);
+		// 	Thread.Sleep(1000);
+		// }
 
 		[Fact]
 		public async Task PubSub()

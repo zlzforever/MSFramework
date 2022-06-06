@@ -10,63 +10,37 @@ namespace MicroserviceFramework.EventBus
 	{
 		private readonly IServiceProvider _serviceProvider;
 
-		public InProcessEventBus(
-			IServiceProvider serviceProvider)
+		public InProcessEventBus(IServiceProvider serviceProvider)
 		{
 			_serviceProvider = serviceProvider;
 		}
 
-		public virtual async Task PublishAsync(dynamic @event)
+		public virtual async Task PublishAsync(object @event)
 		{
 			Check.NotNull(@event, nameof(@event));
 
-			var type = (Type)@event.GetType();
+			var type = @event.GetType();
 			if (!type.IsEvent())
 			{
 				throw new MicroserviceFrameworkException($"类型 {type} 不是事件");
 			}
 
-			var eventKey = GetEventKey(type);
-			await PublishAsync(eventKey, @event);
+			await PublishAsync(type.GetEventName(), @event);
 		}
 
 		public async Task PublishAsync<TEvent>(TEvent @event) where TEvent : EventBase
 		{
 			Check.NotNull(@event, nameof(@event));
-			var eventKey = GetEventKey(typeof(TEvent));
-			await PublishAsync(eventKey, @event);
-		}
-
-		public async Task<bool> PublishIfEventAsync(dynamic @event)
-		{
-			if (@event == null)
-			{
-				return false;
-			}
-
-			var type = @event.GetType();
-			if (!type.IsEvent())
-			{
-				return false;
-			}
-
-			var eventKey = GetEventKey(type);
-			await PublishAsync(eventKey, @event);
-			return true;
+			await PublishAsync(@event.GetType().GetEventName(), @event);
 		}
 
 		public void Dispose()
 		{
 		}
 
-		protected virtual string GetEventKey(Type type)
+		private async Task PublishAsync(string eventName, object @event)
 		{
-			return type.Name;
-		}
-
-		private async Task PublishAsync(string eventKey, object @event)
-		{
-			var handlerInfos = EventHandlerTypeCache.GetOrDefault(eventKey);
+			var handlerInfos = EventHandlerTypeCache.GetOrDefault(eventName);
 			foreach (var handlerInfo in handlerInfos)
 			{
 				// TODO: 每次执行是单独的 scope
