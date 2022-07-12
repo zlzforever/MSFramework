@@ -31,16 +31,18 @@ namespace MicroserviceFramework.Domain
 		public virtual void Delete(string userId, DateTimeOffset deletionTime = default)
 		{
 			// 删除只能一次操作，因此如果已经有值，不能再做设置
-			if (!IsDeleted)
+			if (IsDeleted)
 			{
-				IsDeleted = true;
+				return;
+			}
 
-				DeletionTime ??= deletionTime == default ? DateTimeOffset.Now : deletionTime;
+			IsDeleted = true;
 
-				if (!string.IsNullOrWhiteSpace(userId) && string.IsNullOrWhiteSpace(DeleterId))
-				{
-					DeleterId = userId;
-				}
+			DeletionTime ??= deletionTime == default ? DateTimeOffset.Now : deletionTime;
+
+			if (!string.IsNullOrWhiteSpace(userId) && string.IsNullOrWhiteSpace(DeleterId))
+			{
+				DeleterId = userId;
 			}
 		}
 

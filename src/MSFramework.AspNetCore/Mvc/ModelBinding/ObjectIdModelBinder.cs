@@ -9,9 +9,9 @@ namespace MicroserviceFramework.AspNetCore.Mvc.ModelBinding
 		public Task BindModelAsync(ModelBindingContext bindingContext)
 		{
 			var value = bindingContext.ValueProvider.GetValue(bindingContext.FieldName).FirstValue;
-			bindingContext.Result = string.IsNullOrWhiteSpace(value)
+			bindingContext.Result = !ObjectId.TryParse(value, out var id) && id != ObjectId.Empty
 				? ModelBindingResult.Failed()
-				: ModelBindingResult.Success(new ObjectId(value));
+				: ModelBindingResult.Success(id);
 
 			return Task.CompletedTask;
 		}

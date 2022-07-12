@@ -23,7 +23,7 @@ namespace MicroserviceFramework.Audit
 		/// 所属的操作
 		/// </summary>
 		[JsonIgnore]
-		public AuditOperation Operation { get; internal set; }
+		public virtual AuditOperation Operation { get; internal set; }
 
 		/// <summary>
 		/// 获取或设置 类型名称

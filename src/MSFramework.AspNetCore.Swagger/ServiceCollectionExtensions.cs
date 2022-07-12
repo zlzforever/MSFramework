@@ -6,7 +6,6 @@ using MicroserviceFramework.Domain;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.OpenApi.Any;
 using Microsoft.OpenApi.Models;
-using MongoDB.Bson;
 using Swashbuckle.AspNetCore.SwaggerGen;
 
 namespace MicroserviceFramework.AspNetCore.Swagger
@@ -25,18 +24,16 @@ namespace MicroserviceFramework.AspNetCore.Swagger
 					enumDoc.Add(new OpenApiString(enumeration.Id));
 				}
 
-				options.MapType(enumType, () => new OpenApiSchema {Type = "enum", Enum = enumDoc});
+				options.MapType(enumType, () => new OpenApiSchema { Type = "enum", Enum = enumDoc });
 			}
 
 			return options;
 		}
 
-		public static SwaggerGenOptions MapObjectIdType(this SwaggerGenOptions options)
+		public static SwaggerGenOptions SupportObjectId(this SwaggerGenOptions options)
 		{
-			options.MapType<ObjectId>(() => new OpenApiSchema
-			{
-				Type = "string", Default = new OpenApiString(ObjectId.Empty.ToString())
-			});
+			options.SchemaFilter<ObjectIdSchemaFilter>();
+			options.OperationFilter<ObjectIdOperationFilter>();
 			return options;
 		}
 
@@ -44,7 +41,7 @@ namespace MicroserviceFramework.AspNetCore.Swagger
 		{
 			return type
 				.GetFields(BindingFlags.Public | BindingFlags.Static | BindingFlags.DeclaredOnly)
-				.Where(i => i.FieldType.IsSubclassOf(typeof(Enumeration))).Select(f => (Enumeration) f.GetValue(null));
+				.Where(i => i.FieldType.IsSubclassOf(typeof(Enumeration))).Select(f => (Enumeration)f.GetValue(null));
 		}
 	}
 }

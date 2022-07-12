@@ -3,9 +3,9 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
-namespace Ordering.Ef.Migration.MySql.Migrations
+namespace Ordering.Infrastructure.Migrations
 {
-    public partial class init : Microsoft.EntityFrameworkCore.Migrations.Migration
+    public partial class init : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
@@ -48,7 +48,6 @@ namespace Ordering.Ef.Migration.MySql.Migrations
                 {
                     id = table.Column<string>(type: "varchar(36)", maxLength: 36, nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
-                    creation_time = table.Column<DateTimeOffset>(type: "datetime(6)", nullable: false),
                     address_street = table.Column<string>(type: "longtext", nullable: true)
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     address_city = table.Column<string>(type: "longtext", nullable: true)
@@ -59,15 +58,17 @@ namespace Ordering.Ef.Migration.MySql.Migrations
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     address_zip_code = table.Column<string>(type: "longtext", nullable: true)
                         .Annotation("MySql:CharSet", "utf8mb4"),
-                    order_status = table.Column<string>(type: "varchar(255)", maxLength: 255, nullable: false)
+                    status = table.Column<string>(type: "varchar(255)", maxLength: 255, nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
-                    user_id = table.Column<string>(type: "varchar(255)", maxLength: 255, nullable: false)
+                    buyer_id = table.Column<string>(type: "varchar(36)", maxLength: 36, nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     description = table.Column<string>(type: "longtext", nullable: true)
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     concurrency_stamp = table.Column<string>(type: "varchar(36)", maxLength: 36, nullable: true)
                         .Annotation("MySql:CharSet", "utf8mb4"),
-                    is_deleted = table.Column<bool>(type: "tinyint(1)", nullable: false)
+                    creation_time = table.Column<DateTimeOffset>(type: "datetime(6)", nullable: true),
+                    creator_id = table.Column<string>(type: "longtext", nullable: true)
+                        .Annotation("MySql:CharSet", "utf8mb4")
                 },
                 constraints: table =>
                 {
@@ -106,18 +107,11 @@ namespace Ordering.Ef.Migration.MySql.Migrations
                     entity_id = table.Column<string>(type: "varchar(255)", maxLength: 255, nullable: true)
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     operation_type = table.Column<string>(type: "varchar(255)", maxLength: 255, nullable: true)
-                        .Annotation("MySql:CharSet", "utf8mb4"),
-                    audit_operation_id = table.Column<string>(type: "varchar(36)", nullable: true)
                         .Annotation("MySql:CharSet", "utf8mb4")
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_audit_entity", x => x.id);
-                    table.ForeignKey(
-                        name: "FK_audit_entity_audit_operation_audit_operation_id",
-                        column: x => x.audit_operation_id,
-                        principalTable: "audit_operation",
-                        principalColumn: "id");
                     table.ForeignKey(
                         name: "FK_audit_entity_audit_operation_operation_id",
                         column: x => x.operation_id,
@@ -169,18 +163,11 @@ namespace Ordering.Ef.Migration.MySql.Migrations
                     original_value = table.Column<string>(type: "longtext", nullable: true)
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     new_value = table.Column<string>(type: "longtext", nullable: true)
-                        .Annotation("MySql:CharSet", "utf8mb4"),
-                    audit_entity_id = table.Column<string>(type: "varchar(36)", nullable: true)
                         .Annotation("MySql:CharSet", "utf8mb4")
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_audit_property", x => x.id);
-                    table.ForeignKey(
-                        name: "FK_audit_property_audit_entity_audit_entity_id",
-                        column: x => x.audit_entity_id,
-                        principalTable: "audit_entity",
-                        principalColumn: "id");
                     table.ForeignKey(
                         name: "FK_audit_property_audit_entity_entity_id",
                         column: x => x.entity_id,
@@ -188,11 +175,6 @@ namespace Ordering.Ef.Migration.MySql.Migrations
                         principalColumn: "id");
                 })
                 .Annotation("MySql:CharSet", "utf8mb4");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_audit_entity_audit_operation_id",
-                table: "audit_entity",
-                column: "audit_operation_id");
 
             migrationBuilder.CreateIndex(
                 name: "IX_audit_entity_entity_id",
@@ -218,11 +200,6 @@ namespace Ordering.Ef.Migration.MySql.Migrations
                 name: "IX_audit_operation_end_time",
                 table: "audit_operation",
                 column: "end_time");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_audit_property_audit_entity_id",
-                table: "audit_property",
-                column: "audit_entity_id");
 
             migrationBuilder.CreateIndex(
                 name: "IX_audit_property_entity_id",

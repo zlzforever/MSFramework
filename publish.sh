@@ -14,15 +14,15 @@ rm -rf src/MSFramework.AspNetCore.Swagger/bin/Release
 rm -rf src/MSFramework.Newtonsoft/bin/Release
 dotnet build -c Release
 dotnet pack -c Release
-nuget push src/MSFramework/bin/Release/*.nupkg -Source $NUGET_SERVER
-nuget push src/MSFramework.AspNetCore/bin/Release/*.nupkg  -Source $NUGET_SERVER
-nuget push src/MSFramework.AspNetCore.AccessControl/bin/Release/*.nupkg  -Source $NUGET_SERVER
-nuget push src/MSFramework.AutoMapper/bin/Release/*.nupkg  -Source $NUGET_SERVER
-nuget push src/MSFramework.Ef/bin/Release/*.nupkg  -Source $NUGET_SERVER
-nuget push src/MSFramework.Ef.MySql/bin/Release/*.nupkg  -Source $NUGET_SERVER
-nuget push src/MSFramework.Ef.PostgreSql/bin/Release/*.nupkg  -Source  $NUGET_SERVER
-nuget push src/MSFramework.Ef.SqlServer/bin/Release/*.nupkg  -Source $NUGET_SERVER
-nuget push src/MSFramework.RabbitMQ/bin/Release/*.nupkg  -Source $NUGET_SERVER
-nuget push src/MSFramework.Ef.Design/bin/Release/*.nupkg  -Source $NUGET_SERVER
-nuget push src/MSFramework.AspNetCore.Swagger/bin/Release/*.nupkg  -Source $NUGET_SERVER
-nuget push src/MSFramework.Newtonsoft/bin/Release/*.nupkg  -Source $NUGET_SERVER
+dotnet nuget push src/MSFramework/bin/Release/*.nupkg -s $NUGET_SERVER -k $NUGET_KEY --skip-duplicate
+dotnet nuget push src/MSFramework.AspNetCore/bin/Release/*.nupkg  -s $NUGET_SERVER -k $NUGET_KEY --skip-duplicate
+dotnet nuget push src/MSFramework.AspNetCore.AccessControl/bin/Release/*.nupkg  -s $NUGET_SERVER -k $NUGET_KEY --skip-duplicate
+dotnet nuget push src/MSFramework.AutoMapper/bin/Release/*.nupkg  -s $NUGET_SERVER -k $NUGET_KEY --skip-duplicate
+dotnet nuget push src/MSFramework.Ef/bin/Release/*.nupkg  -s $NUGET_SERVER -k $NUGET_KEY --skip-duplicate
+dotnet nuget push src/MSFramework.Ef.MySql/bin/Release/*.nupkg  -s $NUGET_SERVER -k $NUGET_KEY --skip-duplicate
+dotnet nuget push src/MSFramework.Ef.PostgreSql/bin/Release/*.nupkg  -s  $NUGET_SERVER -k $NUGET_KEY --skip-duplicate
+dotnet nuget push src/MSFramework.Ef.SqlServer/bin/Release/*.nupkg  -s $NUGET_SERVER -k $NUGET_KEY --skip-duplicate
+dotnet nuget push src/MSFramework.RabbitMQ/bin/Release/*.nupkg  -s $NUGET_SERVER -k $NUGET_KEY --skip-duplicate
+dotnet nuget push src/MSFramework.Ef.Design/bin/Release/*.nupkg  -s $NUGET_SERVER -k $NUGET_KEY --skip-duplicate
+dotnet nuget push src/MSFramework.AspNetCore.Swagger/bin/Release/*.nupkg  -s $NUGET_SERVER -k $NUGET_KEY --skip-duplicate
+dotnet nuget push src/MSFramework.Newtonsoft/bin/Release/*.nupkg  -s $NUGET_SERVER -k $NUGET_KEY --skip-duplicate

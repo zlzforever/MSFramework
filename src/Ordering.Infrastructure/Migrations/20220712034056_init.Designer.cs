@@ -8,10 +8,10 @@ using Ordering.Infrastructure;
 
 #nullable disable
 
-namespace Ordering.Ef.Migration.MySql.Migrations
+namespace Ordering.Infrastructure.Migrations
 {
     [DbContext(typeof(OrderingContext))]
-    [Migration("20220513150213_init")]
+    [Migration("20220712034056_init")]
     partial class init
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -47,17 +47,11 @@ namespace Ordering.Ef.Migration.MySql.Migrations
                         .HasColumnType("varchar(255)")
                         .HasColumnName("type");
 
-                    b.Property<string>("audit_operation_id")
-                        .HasColumnType("varchar(36)")
-                        .HasColumnName("audit_operation_id");
-
                     b.HasKey("Id");
 
                     b.HasIndex("EntityId");
 
                     b.HasIndex("OperationId");
-
-                    b.HasIndex("audit_operation_id");
 
                     b.ToTable("audit_entity", (string)null);
                 });
@@ -161,15 +155,9 @@ namespace Ordering.Ef.Migration.MySql.Migrations
                         .HasColumnType("varchar(255)")
                         .HasColumnName("type");
 
-                    b.Property<string>("audit_entity_id")
-                        .HasColumnType("varchar(36)")
-                        .HasColumnName("audit_entity_id");
-
                     b.HasKey("Id");
 
                     b.HasIndex("EntityId");
-
-                    b.HasIndex("audit_entity_id");
 
                     b.ToTable("audit_property", (string)null);
                 });
@@ -181,35 +169,35 @@ namespace Ordering.Ef.Migration.MySql.Migrations
                         .HasColumnType("varchar(36)")
                         .HasColumnName("id");
 
+                    b.Property<string>("BuyerId")
+                        .IsRequired()
+                        .HasMaxLength(36)
+                        .HasColumnType("varchar(36)")
+                        .HasColumnName("buyer_id");
+
                     b.Property<string>("ConcurrencyStamp")
                         .IsConcurrencyToken()
                         .HasMaxLength(36)
                         .HasColumnType("varchar(36)")
                         .HasColumnName("concurrency_stamp");
 
-                    b.Property<DateTimeOffset>("CreationTime")
+                    b.Property<DateTimeOffset?>("CreationTime")
                         .HasColumnType("datetime(6)")
                         .HasColumnName("creation_time");
+
+                    b.Property<string>("CreatorId")
+                        .HasColumnType("longtext")
+                        .HasColumnName("creator_id");
 
                     b.Property<string>("Description")
                         .HasColumnType("longtext")
                         .HasColumnName("description");
 
-                    b.Property<bool>("IsDeleted")
-                        .HasColumnType("tinyint(1)")
-                        .HasColumnName("is_deleted");
-
-                    b.Property<string>("OrderStatus")
+                    b.Property<string>("Status")
                         .IsRequired()
                         .HasMaxLength(255)
                         .HasColumnType("varchar(255)")
-                        .HasColumnName("order_status");
-
-                    b.Property<string>("UserId")
-                        .IsRequired()
-                        .HasMaxLength(255)
-                        .HasColumnType("varchar(255)")
-                        .HasColumnName("user_id");
+                        .HasColumnName("status");
 
                     b.HasKey("Id");
 
@@ -289,12 +277,8 @@ namespace Ordering.Ef.Migration.MySql.Migrations
             modelBuilder.Entity("MicroserviceFramework.Audit.AuditEntity", b =>
                 {
                     b.HasOne("MicroserviceFramework.Audit.AuditOperation", "Operation")
-                        .WithMany()
-                        .HasForeignKey("OperationId");
-
-                    b.HasOne("MicroserviceFramework.Audit.AuditOperation", null)
                         .WithMany("Entities")
-                        .HasForeignKey("audit_operation_id");
+                        .HasForeignKey("OperationId");
 
                     b.Navigation("Operation");
                 });
@@ -302,12 +286,8 @@ namespace Ordering.Ef.Migration.MySql.Migrations
             modelBuilder.Entity("MicroserviceFramework.Audit.AuditProperty", b =>
                 {
                     b.HasOne("MicroserviceFramework.Audit.AuditEntity", "Entity")
-                        .WithMany()
-                        .HasForeignKey("EntityId");
-
-                    b.HasOne("MicroserviceFramework.Audit.AuditEntity", null)
                         .WithMany("Properties")
-                        .HasForeignKey("audit_entity_id");
+                        .HasForeignKey("EntityId");
 
                     b.Navigation("Entity");
                 });
@@ -321,6 +301,7 @@ namespace Ordering.Ef.Migration.MySql.Migrations
                                 .HasColumnName("id");
 
                             b1.Property<string>("City")
+                                .IsRequired()
                                 .HasColumnType("longtext")
                                 .HasColumnName("address_city");
 
@@ -354,7 +335,7 @@ namespace Ordering.Ef.Migration.MySql.Migrations
             modelBuilder.Entity("Ordering.Domain.AggregateRoots.OrderItem", b =>
                 {
                     b.HasOne("Ordering.Domain.AggregateRoots.Order", null)
-                        .WithMany("OrderItems")
+                        .WithMany("Items")
                         .HasForeignKey("OrderId");
                 });
 
@@ -370,7 +351,7 @@ namespace Ordering.Ef.Migration.MySql.Migrations
 
             modelBuilder.Entity("Ordering.Domain.AggregateRoots.Order", b =>
                 {
-                    b.Navigation("OrderItems");
+                    b.Navigation("Items");
                 });
 #pragma warning restore 612, 618
         }

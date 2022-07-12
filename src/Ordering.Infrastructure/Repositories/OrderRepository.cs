@@ -1,7 +1,5 @@
-using System.Threading.Tasks;
 using MicroserviceFramework.Ef;
 using MicroserviceFramework.Ef.Repositories;
-using Microsoft.EntityFrameworkCore;
 using MongoDB.Bson;
 using Ordering.Domain.AggregateRoots;
 using Ordering.Domain.Repositories;
@@ -15,9 +13,6 @@ namespace Ordering.Infrastructure.Repositories
 		{
 		}
 
-		public override Task<Order> FindAsync(ObjectId id)
-		{
-			return Store.Include(x => x.OrderItems).FirstOrDefaultAsync(x => x.Id == id);
-		}
+		protected override NavigationLoader NavigationLoader => NavigationLoader.Load;
 	}
 }

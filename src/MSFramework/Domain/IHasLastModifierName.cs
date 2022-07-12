@@ -1,6 +1,3 @@
-using System;
-using MicroserviceFramework.Extensions;
-
 namespace MicroserviceFramework.Domain;
 
 public interface IHasLastModifierName

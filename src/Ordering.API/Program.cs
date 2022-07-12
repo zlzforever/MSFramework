@@ -1,8 +1,5 @@
-﻿using MicroserviceFramework.Extensions;
-using Microsoft.AspNetCore.Hosting;
+﻿using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Hosting;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Serialization;
 using Serilog;
 using Serilog.Events;
 
@@ -13,17 +10,14 @@ namespace Ordering.API
 		public static void Main(string[] args)
 		{
 			Log.Logger = new LoggerConfiguration()
-				.MinimumLevel.Debug()
+				.MinimumLevel.Information()
 				.MinimumLevel.Override("Microsoft.Hosting.Lifetime", LogEventLevel.Information)
-#if !DEBUG
-				.MinimumLevel.Override("Microsoft.EntityFrameworkCore.Database.Command", LogEventLevel.Information)
-#endif
+				.MinimumLevel.Override("Microsoft.EntityFrameworkCore", LogEventLevel.Information)
 				.MinimumLevel.Override("Microsoft", LogEventLevel.Warning)
 				.MinimumLevel.Override("System", LogEventLevel.Warning)
 				.MinimumLevel.Override("Microsoft.AspNetCore.Authentication", LogEventLevel.Warning)
 				.Enrich.FromLogContext()
-				.WriteTo.Console()
-				// .WriteTo.Seq("http://localhost:5341", apiKey: "VrKfUYKzcVH4b1dW72KL")
+				.WriteTo.Console().WriteTo.RollingFile("logs/ordering.log")
 				.CreateLogger();
 			CreateHostBuilder(args).Build().Run();
 		}

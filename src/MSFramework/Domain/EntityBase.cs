@@ -84,19 +84,18 @@ namespace MicroserviceFramework.Domain
 
 		public override bool Equals(object obj)
 		{
-			if (obj == null || !(obj is EntityBase<TKey>))
+			if (obj is not EntityBase<TKey> other)
 			{
 				return false;
 			}
 
 			//Same instances must be considered as equal
-			if (ReferenceEquals(this, obj))
+			if (ReferenceEquals(this, other))
 			{
 				return true;
 			}
 
 			//Transient objects are not considered as equal
-			var other = (EntityBase<TKey>) obj;
 			if (EntityHelper.HasDefaultId(this) && EntityHelper.HasDefaultId(other))
 			{
 				return false;

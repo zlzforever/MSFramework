@@ -1,8 +1,8 @@
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Threading.Tasks;
 using MicroserviceFramework.AspNetCore;
-using MicroserviceFramework.AspNetCore.Filters;
 using MicroserviceFramework.Domain;
 using MicroserviceFramework.Mediator;
 using Microsoft.AspNetCore.Mvc;
@@ -36,21 +36,20 @@ namespace Ordering.API.Controllers
 			_unitOfWorkManager = unitOfWorkManager;
 			_orderRepository = orderRepository;
 		}
-		
+
 		//[AccessControl("TestCreate")]
 		[Route("testCreate")]
 		[HttpPost]
 		public async Task<IActionResult> TestCreate()
 		{
-			var order = new Order(
+			var order = Order.Create(
 				"testUSer",
 				new Address("Street", "City", "State", "Country", "ZipCode"),
-				"Description",
-				new List<OrderItem>
-				{
-					new(Guid.NewGuid(),
-						"testProduct", 10, 0, "")
-				});
+				"Description");
+			order.AddItem(Guid.NewGuid(),
+				"testProduct1", 10, 0, "");
+			order.AddItem(Guid.NewGuid(),
+				"testProduct2", 10, 0, "");
 			await _orderRepository.AddAsync(order);
 			// var order = await _orderRepository.GetAsync(Guid.Parse("35a00497-cbb0-4311-af5d-ab6b01281569"));
 			// order.AddOrderItem(Guid.NewGuid(),
@@ -60,7 +59,7 @@ namespace Ordering.API.Controllers
 		}
 
 		#region Command
-		
+
 		[HttpPost("test-command1")]
 		public async Task<string> TestCommand1Async([FromBody] TestCommand1 command)
 		{
@@ -105,9 +104,9 @@ namespace Ordering.API.Controllers
 
 		[HttpDelete("{orderId}")]
 		//[AccessControl("删除订单")]
-		public IActionResult DeleteOrderAsync([FromRoute] ObjectId orderId)
+		public async Task<IActionResult> DeleteOrderAsync([FromRoute] ObjectId orderId)
 		{
-			// return await _mediator.Send(new DeleteOrderCommand(orderId));
+			await _cqrsProcessor.SendAsync(new DeleteOrderCommand(orderId));
 			return Ok();
 		}
 
@@ -126,7 +125,7 @@ namespace Ordering.API.Controllers
 
 		[HttpGet("{orderId}")]
 		//[AccessControl("查看订单")]
-		public async Task<IActionResult> GetOrderAsync([FromRoute] ObjectId orderId)
+		public async Task<IActionResult> GetOrderAsync([FromRoute, Required] ObjectId orderId)
 		{
 			var order = await _orderingQuery.GetAsync(orderId);
 			return Ok(order);

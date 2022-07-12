@@ -7,7 +7,6 @@ using MicroserviceFramework.Audit;
 using MicroserviceFramework.Domain;
 using MicroserviceFramework.Ef.Extensions;
 using MicroserviceFramework.Ef.Internal;
-using MicroserviceFramework.EventBus;
 using MicroserviceFramework.Extensions;
 using MicroserviceFramework.Mediator;
 using Microsoft.EntityFrameworkCore;

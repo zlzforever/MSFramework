@@ -14,7 +14,7 @@ namespace Ordering.Infrastructure.EntityConfigurations.Audit
 
 			builder.ToTable("audit_entity");
 
-			builder.HasMany(x => x.Properties).WithOne().HasForeignKey("audit_entity_id");
+			builder.HasMany(x => x.Properties).WithOne(x => x.Entity);
 
 			builder.Property(x => x.Id).ValueGeneratedNever();
 			builder.Property(x => x.EntityId).HasMaxLength(255);

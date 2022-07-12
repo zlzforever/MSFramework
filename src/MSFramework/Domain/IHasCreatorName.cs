@@ -1,5 +1,3 @@
-using System;
-
 namespace MicroserviceFramework.Domain;
 
 public interface IHasCreatorName

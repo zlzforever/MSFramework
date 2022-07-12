@@ -15,7 +15,7 @@ namespace Ordering.Infrastructure.EntityConfigurations.Audit
 
 			builder.ToTable("audit_operation");
 
-			builder.HasMany(x => x.Entities).WithOne().HasForeignKey("audit_operation_id");
+			builder.HasMany(x => x.Entities).WithOne(x => x.Operation);
 
 			builder.Property(x => x.Id).ValueGeneratedNever();
 			builder.Property(x => x.IP).HasMaxLength(255);

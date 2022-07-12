@@ -22,7 +22,8 @@ docker run \
 
 ```
 $ cd src/Ordering.Api
-$ dotnet ef migrations add init -p ../Ordering.Ef.Migration.MySql
+$ dotnet ef migrations add init -p ../Ordering.Infrastructure
+dotnet ef migrations add init2 -p ../Ordering.Infrastructure
 ```
  
  

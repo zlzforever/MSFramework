@@ -6,11 +6,16 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\MSFramework\MSFramework.csproj" />
+        <ProjectReference Include="..\MSFramework\MSFramework.csproj" />
     </ItemGroup>
 
     <ItemGroup>
-      <Compile Remove="AggregateRoots\TrackedDictionary.cs" />
+        <Compile Remove="AggregateRoots\TrackedDictionary.cs" />
     </ItemGroup>
+    <ItemGroup>
+        <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleToAttribute">
+            <_Parameter1>Ordering.Infrastructure</_Parameter1>
+        </AssemblyAttribute>
 
+    </ItemGroup>
 </Project>

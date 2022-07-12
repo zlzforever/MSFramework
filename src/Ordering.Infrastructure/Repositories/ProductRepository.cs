@@ -18,12 +18,12 @@ namespace Ordering.Infrastructure.Repositories
 
 		public Product GetFirst()
 		{
-			return Store.FirstOrDefault();
+			return DbSet.FirstOrDefault();
 		}
 
 		public async Task<PagedResult<Product>> PagedQueryAsync(int page, int limit)
 		{
-			return await Store.PagedQueryAsync(page, limit);
+			return await DbSet.PagedQueryAsync(page, limit);
 		}
 	}
 }

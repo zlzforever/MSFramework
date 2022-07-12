@@ -9,18 +9,15 @@ using Ordering.Domain.AggregateRoots.Events;
 namespace Ordering.Domain.AggregateRoots
 {
 	[Description("订单表")]
-	public class Order : AggregateRoot<ObjectId>, IOptimisticLock
+	public class Order : CreationAggregateRoot, IOptimisticLock
 	{
 		// DDD Patterns comment
 		// Using a private collection field, better for DDD Aggregate's encapsulation
-		// so OrderItems cannot be added from "outside the AggregateRoot" directly to the collection,
+		// so Items cannot be added from "outside the AggregateRoot" directly to the collection,
 		// but only through the method OrderAggrergateRoot.AddOrderItem() which includes behaviour.
-		public virtual ICollection<OrderItem> OrderItems { get; private set; } = new List<OrderItem>();
+		private List<OrderItem> _items;
 
-		// DDD Patterns comment
-		// Using private fields, allowed since EF Core 1.1, is a much better encapsulation
-		// aligned with DDD Aggregates and Domain Entities (Instead of properties and property collections)
-		public DateTimeOffset CreationTime { get; private set; }
+		public virtual IReadOnlyCollection<OrderItem> Items => _items;
 
 		/// <summary>
 		/// Address is a Value Object pattern example persisted as EF Core 2.0 owned entity
@@ -32,29 +29,35 @@ namespace Ordering.Domain.AggregateRoots
 		/// 
 		/// </summary>
 		[Description("状态")]
-		public OrderStatus OrderStatus { get; private set; }
+		public OrderStatus Status { get; private set; }
 
-		public string UserId { get; private set; }
+		public string BuyerId { get; private set; }
 
 		public string Description { get; private set; }
 
-		private Order() : base(ObjectId.GenerateNewId())
+		private Order(ObjectId id) : base(id)
 		{
+			_items = new List<OrderItem>();
 		}
 
-		public Order(
+		// private Order(ILazyLoader lazyLoader, ObjectId id) : this(id)
+		// {
+		// 	_lazyLoader = lazyLoader;
+		// 	_lazyLoader.Load(this, ref Items);
+		// }
+
+		private Order(
 			string userId,
 			Address address,
-			string description,
-			List<OrderItem> orderItems
-		) : this()
+			string description
+		) : this(ObjectId.GenerateNewId())
 		{
 			Address = address;
-			UserId = userId;
+			BuyerId = userId;
 			Description = description;
-			OrderItems = orderItems;
-			CreationTime = DateTimeOffset.Now;
-			OrderStatus = OrderStatus.Submitted;
+
+
+			Status = OrderStatus.Submitted;
 
 			// Add the OrderStarterDomainEvent to the domain events collection 
 			// to be raised/dispatched when comitting changes into the Database [ After DbContext.SaveChanges() ]
@@ -63,10 +66,20 @@ namespace Ordering.Domain.AggregateRoots
 			AddDomainEvent(orderStartedDomainEvent);
 		}
 
-		public void AddOrderItem(Guid productId, string productName, decimal unitPrice, decimal discount,
+		public static Order Create(string buyerId,
+			Address address,
+			string description)
+		{
+			return new Order(buyerId,
+					address,
+					description)
+				;
+		}
+
+		public void AddItem(Guid productId, string productName, decimal unitPrice, decimal discount,
 			string pictureUrl, int units = 1)
 		{
-			var existingOrderForProduct = OrderItems
+			var existingOrderForProduct = Items
 				.SingleOrDefault(o => o.ProductId == productId);
 
 			if (existingOrderForProduct != null)
@@ -85,7 +98,7 @@ namespace Ordering.Domain.AggregateRoots
 				//add validated new order item
 
 				var orderItem = new OrderItem(productId, productName, unitPrice, discount, pictureUrl, units);
-				OrderItems.Add(orderItem);
+				_items.Add(orderItem);
 			}
 		}
 
@@ -96,31 +109,31 @@ namespace Ordering.Domain.AggregateRoots
 
 		public void SetAwaitingValidationStatus()
 		{
-			if (OrderStatus == OrderStatus.Submitted)
+			if (Status == OrderStatus.Submitted)
 			{
-				AddDomainEvent(new OrderStatusChangedToAwaitingValidationDomainEvent(Id, OrderItems));
-				OrderStatus = OrderStatus.AwaitingValidation;
+				AddDomainEvent(new OrderStatusChangedToAwaitingValidationDomainEvent(Id, Items));
+				Status = OrderStatus.AwaitingValidation;
 			}
 		}
 
 		public void SetStockConfirmedStatus()
 		{
-			if (OrderStatus == OrderStatus.AwaitingValidation)
+			if (Status == OrderStatus.AwaitingValidation)
 			{
 				AddDomainEvent(new OrderStatusChangedToStockConfirmedDomainEvent(Id));
 
-				OrderStatus = OrderStatus.StockConfirmed;
+				Status = OrderStatus.StockConfirmed;
 				Description = "All the items were confirmed with available stock.";
 			}
 		}
 
 		public void SetPaidStatus()
 		{
-			if (OrderStatus == OrderStatus.StockConfirmed)
+			if (Status == OrderStatus.StockConfirmed)
 			{
-				AddDomainEvent(new OrderStatusChangedToPaidDomainEvent(Id, OrderItems));
+				AddDomainEvent(new OrderStatusChangedToPaidDomainEvent(Id, Items));
 
-				OrderStatus = OrderStatus.Paid;
+				Status = OrderStatus.Paid;
 				Description =
 					"The payment was performed at a simulated \"American Bank checking bank account ending on XX35071\"";
 			}
@@ -137,36 +150,36 @@ namespace Ordering.Domain.AggregateRoots
 
 		public void SetShippedStatus()
 		{
-			if (OrderStatus != OrderStatus.Paid)
+			if (Status != OrderStatus.Paid)
 			{
 				StatusChangeException(OrderStatus.Shipped);
 			}
 
-			OrderStatus = OrderStatus.Shipped;
+			Status = OrderStatus.Shipped;
 			Description = "The order was shipped.";
 			AddDomainEvent(new OrderShippedDomainEvent(this));
 		}
 
 		public void SetCancelledStatus()
 		{
-			if (OrderStatus == OrderStatus.Paid ||
-			    OrderStatus == OrderStatus.Shipped)
+			if (Status == OrderStatus.Paid ||
+			    Status == OrderStatus.Shipped)
 			{
 				StatusChangeException(OrderStatus.Cancelled);
 			}
 
-			OrderStatus = OrderStatus.Cancelled;
+			Status = OrderStatus.Cancelled;
 			Description = $"The order was cancelled.";
 			AddDomainEvent(new OrderCancelledDomainEvent(this));
 		}
 
 		public void SetCancelledStatusWhenStockIsRejected(IEnumerable<Guid> orderStockRejectedItems)
 		{
-			if (OrderStatus == OrderStatus.AwaitingValidation)
+			if (Status == OrderStatus.AwaitingValidation)
 			{
-				OrderStatus = OrderStatus.Cancelled;
+				Status = OrderStatus.Cancelled;
 
-				var itemsStockRejectedProductNames = OrderItems
+				var itemsStockRejectedProductNames = Items
 					.Where(c => orderStockRejectedItems.Contains(c.ProductId))
 					.Select(c => c.ProductName);
 
@@ -178,7 +191,7 @@ namespace Ordering.Domain.AggregateRoots
 		private void StatusChangeException(OrderStatus orderStatusToChange)
 		{
 			throw new OrderingDomainException(
-				$"Is not possible to change the order status from {OrderStatus} to {orderStatusToChange}.");
+				$"Is not possible to change the order status from {Status} to {orderStatusToChange}.");
 		}
 
 		public string ConcurrencyStamp { get; set; }

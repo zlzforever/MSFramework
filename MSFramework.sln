@@ -65,10 +65,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MSFramework.AspNetCore.Swag
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MSFramework.AspNetCore.AccessControl", "src\MSFramework.AspNetCore.AccessControl\MSFramework.AspNetCore.AccessControl.csproj", "{5B925151-F428-47DB-A528-75508CA3AF22}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Ordering.Ef.Migration.MySql", "src\Ordering.Ef.Migration.MySql\Ordering.Ef.Migration.MySql.csproj", "{621201DE-9654-4D7C-9323-326075DAD58B}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Ordering.Ef.Migration.Postgre", "src\Ordering.Ef.Migration.Postgre\Ordering.Ef.Migration.Postgre.csproj", "{DE51AD4B-76B0-4A2E-9546-625F9BF1EAF5}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -147,14 +143,6 @@ Global
 		{5B925151-F428-47DB-A528-75508CA3AF22}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{5B925151-F428-47DB-A528-75508CA3AF22}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{5B925151-F428-47DB-A528-75508CA3AF22}.Release|Any CPU.Build.0 = Release|Any CPU
-		{621201DE-9654-4D7C-9323-326075DAD58B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{621201DE-9654-4D7C-9323-326075DAD58B}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{621201DE-9654-4D7C-9323-326075DAD58B}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{621201DE-9654-4D7C-9323-326075DAD58B}.Release|Any CPU.Build.0 = Release|Any CPU
-		{DE51AD4B-76B0-4A2E-9546-625F9BF1EAF5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{DE51AD4B-76B0-4A2E-9546-625F9BF1EAF5}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{DE51AD4B-76B0-4A2E-9546-625F9BF1EAF5}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{DE51AD4B-76B0-4A2E-9546-625F9BF1EAF5}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -181,8 +169,6 @@ Global
 		{3871A6FD-C712-45FC-B59B-2245DC755246} = {AFD16F00-F810-4A3C-BA74-59BBFBC2469D}
 		{3F82B810-5872-4B96-9DD1-103B76357ED0} = {AFD16F00-F810-4A3C-BA74-59BBFBC2469D}
 		{5B925151-F428-47DB-A528-75508CA3AF22} = {AFD16F00-F810-4A3C-BA74-59BBFBC2469D}
-		{621201DE-9654-4D7C-9323-326075DAD58B} = {47747049-F28E-4474-B09F-E98147F91C83}
-		{DE51AD4B-76B0-4A2E-9546-625F9BF1EAF5} = {47747049-F28E-4474-B09F-E98147F91C83}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {BE296FC5-5695-4FE5-9BAE-7168B9BACB47}

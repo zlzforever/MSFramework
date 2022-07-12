@@ -5,6 +5,7 @@ namespace Ordering.Domain.AggregateRoots
 	public class Address : ValueObject<Address>
 	{
 		public string Street { get; private set; }
+
 		public string City { get; private set; }
 		public string State { get; private set; }
 		public string Country { get; private set; }

@@ -1,4 +1,3 @@
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using MicroserviceFramework.Mediator;
@@ -26,11 +25,20 @@ namespace Ordering.Application.Commands
 		/// <returns></returns>
 		public async Task<ObjectId> HandleAsync(CreateOrderCommand command, CancellationToken cancellationToken)
 		{
-			var order = new Order(
+			var order = Order.Create(
 				command.UserId,
 				new Address(command.Street, command.City, command.State, command.Country, command.ZipCode),
-				command.Description,
-				command.OrderItems.Select(x => x.ToOrderItem()).ToList());
+				command.Description
+			);
+
+			// await _orderRepository.LoadAsync(order, x => x.Items);
+			
+			foreach (var item in command.OrderItems)
+			{
+				order.AddItem(item.ProductId, item.ProductName, item.UnitPrice, item.Discount,
+					item.PictureUrl, item.Units);
+			}
+
 			await _orderRepository.AddAsync(order);
 			return order.Id;
 		}

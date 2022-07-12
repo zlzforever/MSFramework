@@ -10,7 +10,6 @@ using MicroserviceFramework.DependencyInjection;
 using MicroserviceFramework.Ef;
 using MicroserviceFramework.Ef.Audit;
 using MicroserviceFramework.Ef.MySql;
-using MicroserviceFramework.Ef.PostgreSql;
 using MicroserviceFramework.EventBus;
 using MicroserviceFramework.Mediator;
 using MicroserviceFramework.Options;
@@ -72,7 +71,7 @@ namespace Ordering.API
 				x.SwaggerDoc("v1.0", new OpenApiInfo { Version = "v1.0", Description = "Ordering API V1.0" });
 				x.CustomSchemaIds(type => type.FullName);
 				x.MapEnumerationType(typeof(Address).Assembly);
-				x.MapObjectIdType();
+				x.SupportObjectId();
 			});
 			services.AddHealthChecks();
 
