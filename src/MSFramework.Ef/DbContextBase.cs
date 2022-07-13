@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -12,13 +13,11 @@ using MicroserviceFramework.Mediator;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using MongoDB.Bson;
 
-#if !NETSTANDARD2_0
-using Microsoft.EntityFrameworkCore.Metadata;
-#endif
 
 namespace MicroserviceFramework.Ef
 {
@@ -213,7 +212,7 @@ namespace MicroserviceFramework.Ef
 			}
 		}
 
-		protected bool ApplyConcepts()
+		protected virtual bool ApplyConcepts()
 		{
 			var userId = _session.UserId;
 			var changed = false;
@@ -234,6 +233,12 @@ namespace MicroserviceFramework.Ef
 						ApplyConceptsForDeletedEntity(entry, userId, _session.UserName);
 						changed = true;
 						break;
+					case EntityState.Detached:
+						break;
+					case EntityState.Unchanged:
+						break;
+					default:
+						throw new ArgumentOutOfRangeException();
 				}
 			}
 

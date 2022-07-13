@@ -33,7 +33,7 @@ namespace MSFramework.Tests
 			// options.Converters.Add(new ObjectIdJsonConverter());
 			var serializer = new DefaultSerializer(options);
 
-			serializer.Serialize(new {id = ObjectId.GenerateNewId()});
+			serializer.Serialize(new { id = ObjectId.GenerateNewId() });
 
 			var json = "{\"id\":null}";
 			var obj = serializer.Deserialize<Obj>(json);
@@ -47,7 +47,7 @@ namespace MSFramework.Tests
 			json = "{}";
 			obj = serializer.Deserialize<Obj>(json);
 			Assert.Equal(ObjectId.Empty, obj.Id);
-			
+
 			json = "{\"enum\":\"Graph\"}";
 			obj = serializer.Deserialize<Obj>(json);
 			Assert.Equal(ObjectId.Empty, obj.Id);
@@ -59,9 +59,10 @@ namespace MSFramework.Tests
 			var options = new JsonSerializerSettings();
 			options.Converters.Add(new MicroserviceFramework.Newtonsoft.Converters.ObjectIdConverter());
 			options.Converters.Add(new MicroserviceFramework.Newtonsoft.Converters.EnumerationConverter());
-			var serializer = new NewtonsoftSerializer(options);
-			
-			serializer.Serialize(new {id = ObjectId.GenerateNewId()});
+			JsonConvert.DefaultSettings = () => options;
+			var serializer = new NewtonsoftSerializer();
+
+			serializer.Serialize(new { id = ObjectId.GenerateNewId() });
 
 			var json = "{\"id\":null}";
 			var obj = serializer.Deserialize<Obj>(json);
@@ -75,7 +76,7 @@ namespace MSFramework.Tests
 			json = "{}";
 			obj = serializer.Deserialize<Obj>(json);
 			Assert.Equal(ObjectId.Empty, obj.Id);
-			
+
 			json = "{\"enum\":\"Graph\"}";
 			obj = serializer.Deserialize<Obj>(json);
 			Assert.Equal(ObjectId.Empty, obj.Id);

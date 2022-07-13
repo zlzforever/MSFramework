@@ -29,7 +29,7 @@ namespace MicroserviceFramework.Ef
 			if (primaryKeyType == Consts.Types.String || primaryKeyType == Consts.Types.Guid ||
 			    primaryKeyType == Consts.Types.ObjectId)
 			{
-				builder.Property("Id").ValueGeneratedNever().HasMaxLength(36);
+				propertyBuilder.ValueGeneratedNever().HasMaxLength(36);
 			}
 		}
 

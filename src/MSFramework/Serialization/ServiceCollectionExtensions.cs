@@ -1,7 +1,5 @@
 using System.Text.Json;
 using MicroserviceFramework.Serialization.Converters;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.DependencyInjection.Extensions;
 
 namespace MicroserviceFramework.Serialization
 {
@@ -11,18 +9,21 @@ namespace MicroserviceFramework.Serialization
 		/// 
 		/// </summary>
 		/// <param name="builder"></param>
+		/// <param name="options"></param>
 		/// <returns></returns>
-		public static MicroserviceFrameworkBuilder UseDefaultSerializer(this MicroserviceFrameworkBuilder builder)
+		public static MicroserviceFrameworkBuilder UseDefaultSerializer(this MicroserviceFrameworkBuilder builder,
+			JsonSerializerOptions options = null)
 		{
-			var options = new JsonSerializerOptions();
-			options.Converters.Add(new ObjectIdJsonConverter());
-			options.Converters.Add(new EnumerationJsonConverterFactory());
-			options.Converters.Add(new EnumerationJsonConverter());
-			options.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
+			if (options == null)
+			{
+				options = new JsonSerializerOptions();
+				options.Converters.Add(new ObjectIdJsonConverter());
+				options.Converters.Add(new EnumerationJsonConverterFactory());
+				options.Converters.Add(new EnumerationJsonConverter());
+				options.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
+			}
 
-			builder.Services.TryAddSingleton(options);
-			builder.Services.AddSingleton<ISerializer, DefaultSerializer>();
-
+			Default.Serializer = new DefaultSerializer(options);
 			return builder;
 		}
 	}

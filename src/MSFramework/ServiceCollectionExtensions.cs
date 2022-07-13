@@ -3,6 +3,7 @@ using System.Linq;
 using System.Runtime.CompilerServices;
 using MicroserviceFramework.DependencyInjection;
 using MicroserviceFramework.Options;
+using MicroserviceFramework.Serialization;
 using MicroserviceFramework.Shared;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -32,6 +33,7 @@ namespace MicroserviceFramework
 			var builder = new MicroserviceFrameworkBuilder(services);
 
 			builder.Services.TryAddSingleton<ApplicationInfo>();
+			builder.UseDefaultSerializer();
 
 			// 放到后面，加载优先级更高
 			builderAction?.Invoke(builder);

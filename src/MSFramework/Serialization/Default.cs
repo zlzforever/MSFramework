@@ -1,6 +1,6 @@
 namespace MicroserviceFramework.Serialization;
 
-public class Default
+public static class Default
 {
-	
+	public static ISerializer Serializer;
 }

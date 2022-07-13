@@ -38,7 +38,7 @@ namespace Ordering.API.Controllers
 		}
 
 		//[AccessControl("TestCreate")]
-		[Route("testCreate")]
+		[Route("createTest")]
 		[HttpPost]
 		public async Task<IActionResult> TestCreate()
 		{
@@ -50,11 +50,10 @@ namespace Ordering.API.Controllers
 				"testProduct1", 10, 0, "");
 			order.AddItem(Guid.NewGuid(),
 				"testProduct2", 10, 0, "");
+			order.SetRivalNetwork(new[] { "hi1", "hi2" });
+			order.AddKeyValue("test1", "value1");
+			order.AddKeyValue("test2", "value2");
 			await _orderRepository.AddAsync(order);
-			// var order = await _orderRepository.GetAsync(Guid.Parse("35a00497-cbb0-4311-af5d-ab6b01281569"));
-			// order.AddOrderItem(Guid.NewGuid(),
-			// 	"testProduct", 10, 0, "");
-			// await _orderRepository.UpdateAsync(order);
 			return Ok(order);
 		}
 

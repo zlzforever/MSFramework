@@ -11,8 +11,7 @@ namespace Ordering.Infrastructure.Repositories
 	{
 		public OrderRepository(DbContextFactory context) : base(context)
 		{
+			UseQuerySplittingBehavior = true;
 		}
-
-		protected override NavigationLoader NavigationLoader => NavigationLoader.Load;
 	}
 }

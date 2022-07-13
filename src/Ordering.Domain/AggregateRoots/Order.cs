@@ -11,6 +11,9 @@ namespace Ordering.Domain.AggregateRoots
 	[Description("订单表")]
 	public class Order : CreationAggregateRoot, IOptimisticLock
 	{
+		private HashSet<string> _rivalNetworks;
+		private Dictionary<string, string> _dict;
+
 		// DDD Patterns comment
 		// Using a private collection field, better for DDD Aggregate's encapsulation
 		// so Items cannot be added from "outside the AggregateRoot" directly to the collection,
@@ -19,11 +22,16 @@ namespace Ordering.Domain.AggregateRoots
 
 		public virtual IReadOnlyCollection<OrderItem> Items => _items;
 
+		public IReadOnlyDictionary<string, string> Dict => _dict;
+
 		/// <summary>
 		/// Address is a Value Object pattern example persisted as EF Core 2.0 owned entity
 		/// </summary>
 		[Description("地址")]
 		public virtual Address Address { get; private set; }
+
+
+		public IReadOnlyCollection<string> RivalNetworks => _rivalNetworks;
 
 		/// <summary>
 		/// 
@@ -38,6 +46,21 @@ namespace Ordering.Domain.AggregateRoots
 		private Order(ObjectId id) : base(id)
 		{
 			_items = new List<OrderItem>();
+			_rivalNetworks = new HashSet<string>();
+			_dict = new Dictionary<string, string>();
+		}
+
+		public void SetRivalNetwork(IEnumerable<string> rivalNetworks)
+		{
+			foreach (var rivalNetwork in rivalNetworks)
+			{
+				_rivalNetworks.Add(rivalNetwork);
+			}
+		}
+
+		public void AddKeyValue(string key, string value)
+		{
+			_dict.TryAdd(key, value);
 		}
 
 		// private Order(ILazyLoader lazyLoader, ObjectId id) : this(id)

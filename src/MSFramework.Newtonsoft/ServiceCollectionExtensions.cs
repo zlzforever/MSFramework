@@ -1,7 +1,7 @@
+using MicroserviceFramework.Newtonsoft.Converters;
 using MicroserviceFramework.Serialization;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.DependencyInjection.Extensions;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Serialization;
 
 namespace MicroserviceFramework.Newtonsoft
 {
@@ -11,11 +11,25 @@ namespace MicroserviceFramework.Newtonsoft
 		/// 
 		/// </summary>
 		/// <param name="builder"></param>
+		/// <param name="settings"></param>
 		/// <returns></returns>
-		public static MicroserviceFrameworkBuilder UseNewtonsoftSerializer(this MicroserviceFrameworkBuilder builder)
+		public static MicroserviceFrameworkBuilder UseNewtonsoftSerializer(this MicroserviceFrameworkBuilder builder,
+			JsonSerializerSettings settings = null)
 		{
-			builder.Services.TryAddSingleton(new JsonSerializerSettings());
-			builder.Services.AddSingleton<ISerializer, NewtonsoftSerializer>();
+			if (settings == null)
+			{
+				settings = new JsonSerializerSettings();
+				settings.Converters.Add(new ObjectIdConverter());
+				settings.Converters.Add(new EnumerationConverter());
+				settings.ContractResolver = new CompositeContractResolver
+				{
+					new EnumerationContractResolver(),
+					new CamelCasePropertyNamesContractResolver()
+				};
+			}
+
+			JsonConvert.DefaultSettings = () => settings;
+			Default.Serializer = new NewtonsoftSerializer();
 
 			return builder;
 		}

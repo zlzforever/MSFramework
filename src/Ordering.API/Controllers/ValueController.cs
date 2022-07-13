@@ -1,4 +1,5 @@
 using System;
+using System.ComponentModel.DataAnnotations;
 using MicroserviceFramework.AspNetCore;
 using Microsoft.AspNetCore.Mvc;
 using MongoDB.Bson;
@@ -10,7 +11,7 @@ namespace Ordering.API.Controllers
 	public class ValueController : ApiControllerBase
 	{
 		[HttpGet]
-		public int Get()
+		public int Get([FromQuery, Required, StringLength(4, ErrorMessage = "长度不能超过 4")] string a)
 		{
 			return new Random().Next(0, 10);
 		}

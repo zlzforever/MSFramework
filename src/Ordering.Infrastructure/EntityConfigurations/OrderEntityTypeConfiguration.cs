@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using MicroserviceFramework.Ef;
 using MicroserviceFramework.Ef.Extensions;
 using Microsoft.EntityFrameworkCore;
@@ -22,7 +23,8 @@ namespace Ordering.Infrastructure.EntityConfigurations
 			builder.Property(x => x.Description).IsRequired(false);
 			builder.Property(x => x.BuyerId).IsRequired().HasMaxLength(36);
 			builder.Property(x => x.Status).UseEnumeration().HasMaxLength(255).IsRequired();
-
+			builder.Property(x => x.RivalNetworks).UseJson(typeof(HashSet<string>));
+			builder.Property(x => x.Dict).UseJson();
 			builder.HasMany(x => x.Items).WithOne().HasForeignKey("OrderId").OnDelete(DeleteBehavior.ClientCascade);
 			// var navigation = builder.Metadata.FindNavigation(nameof(Order.Items));
 			//

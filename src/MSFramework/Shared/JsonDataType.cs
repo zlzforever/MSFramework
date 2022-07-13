@@ -1,6 +1,7 @@
 namespace MicroserviceFramework.Shared;
 
-public class JsonDataType
+public enum JsonDataType
 {
-	
+	JSON,
+	JSONB
 }

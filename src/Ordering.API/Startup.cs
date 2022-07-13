@@ -13,7 +13,6 @@ using MicroserviceFramework.Ef.MySql;
 using MicroserviceFramework.EventBus;
 using MicroserviceFramework.Mediator;
 using MicroserviceFramework.Options;
-using MicroserviceFramework.Serialization;
 using MicroserviceFramework.Serialization.Converters;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.Configuration;
@@ -80,7 +79,6 @@ namespace Ordering.API
 				builder.UseAssemblyScanPrefix("Ordering");
 				builder.UseDependencyInjectionLoader();
 				builder.UseAutoMapper();
-				builder.UseDefaultSerializer();
 				builder.UseMediator();
 				builder.UseEventBus();
 
