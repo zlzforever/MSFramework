@@ -1,11 +1,11 @@
-#nullable enable
+﻿#nullable enable
 using System;
 using System.Linq;
 using MicroserviceFramework.Domain;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
-namespace MicroserviceFramework.Newtonsoft.Converters
+namespace MicroserviceFramework.Serialization.Newtonsoft.Converters
 {
     public class EnumerationConverter : JsonConverter
     {

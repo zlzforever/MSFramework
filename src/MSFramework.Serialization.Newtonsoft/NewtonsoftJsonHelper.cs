@@ -1,8 +1,7 @@
 using System;
-using MicroserviceFramework.Serialization;
 using Newtonsoft.Json;
 
-namespace MicroserviceFramework.Newtonsoft
+namespace MicroserviceFramework.Serialization.Newtonsoft
 {
     public class NewtonsoftJsonHelper : IJsonHelper
     {

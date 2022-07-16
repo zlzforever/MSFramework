@@ -1,9 +1,9 @@
-using System;
+﻿using System;
 using MicroserviceFramework.Domain;
-using MicroserviceFramework.Newtonsoft.Converters;
+using MicroserviceFramework.Serialization.Newtonsoft.Converters;
 using Newtonsoft.Json.Serialization;
 
-namespace MicroserviceFramework.Newtonsoft
+namespace MicroserviceFramework.Serialization.Newtonsoft
 {
     public class EnumerationContractResolver : DefaultContractResolver
     {

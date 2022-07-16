@@ -1,11 +1,10 @@
-using MicroserviceFramework.EventBus;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using RabbitMQ.Client;
 
-namespace MicroserviceFramework.RabbitMQ
+namespace MicroserviceFramework.EventBus.RabbitMQ
 {
     public static class ServiceCollectionExtensions
     {

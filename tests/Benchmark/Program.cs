@@ -1,12 +1,13 @@
 // See https://aka.ms/new-console-template for more information
 
-
 using System.Text.Json.Serialization;
 using BenchmarkDotNet.Attributes;
 using BenchmarkDotNet.Running;
 using DeepCopy;
 using MicroserviceFramework.Domain;
 using MicroserviceFramework.Serialization;
+
+namespace Benchmark;
 
 public class Currency
     : Enumeration

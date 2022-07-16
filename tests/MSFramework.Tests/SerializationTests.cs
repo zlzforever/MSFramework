@@ -3,7 +3,8 @@ using System.Collections.Generic;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using MicroserviceFramework.Domain;
-using MicroserviceFramework.Newtonsoft;
+using MicroserviceFramework.Serialization.Newtonsoft;
+using MicroserviceFramework.Serialization.Newtonsoft.Converters;
 using MicroserviceFramework.Text.Json;
 using MongoDB.Bson;
 using Newtonsoft.Json;
@@ -230,8 +231,8 @@ namespace MSFramework.Tests
         public void DeserializeNullToObjectId2()
         {
             var options = new JsonSerializerSettings();
-            options.Converters.Add(new MicroserviceFramework.Newtonsoft.Converters.ObjectIdConverter());
-            options.Converters.Add(new MicroserviceFramework.Newtonsoft.Converters.EnumerationConverter());
+            options.Converters.Add(new ObjectIdConverter());
+            options.Converters.Add(new EnumerationConverter());
             JsonConvert.DefaultSettings = () => options;
             var serializer = new NewtonsoftJsonHelper();
 

@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Newtonsoft.Json.Serialization;
 
-namespace MicroserviceFramework.Newtonsoft
+namespace MicroserviceFramework.Serialization.Newtonsoft
 {
     public class CompositeContractResolver : IContractResolver, IEnumerable<IContractResolver>
     {

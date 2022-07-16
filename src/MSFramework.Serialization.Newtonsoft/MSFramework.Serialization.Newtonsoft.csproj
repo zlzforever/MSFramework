@@ -2,7 +2,7 @@
 
     <PropertyGroup>
         <PackageId>MSFramework.Serialization.Newtonsoft</PackageId>
-        <RootNamespace>MicroserviceFramework.Newtonsoft</RootNamespace>
+        <RootNamespace>MicroserviceFramework.Serialization.Newtonsoft</RootNamespace>
     </PropertyGroup>
     <Import Project="../../package.props" />
 

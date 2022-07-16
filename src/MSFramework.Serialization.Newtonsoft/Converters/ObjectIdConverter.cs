@@ -2,7 +2,7 @@ using System;
 using MongoDB.Bson;
 using Newtonsoft.Json;
 
-namespace MicroserviceFramework.Newtonsoft.Converters
+namespace MicroserviceFramework.Serialization.Newtonsoft.Converters
 {
     public class ObjectIdConverter : JsonConverter<ObjectId>
     {

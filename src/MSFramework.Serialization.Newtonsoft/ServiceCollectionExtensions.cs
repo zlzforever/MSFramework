@@ -1,9 +1,8 @@
-using MicroserviceFramework.Newtonsoft.Converters;
-using MicroserviceFramework.Serialization;
+using MicroserviceFramework.Serialization.Newtonsoft.Converters;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
 
-namespace MicroserviceFramework.Newtonsoft
+namespace MicroserviceFramework.Serialization.Newtonsoft
 {
     public static class ServiceCollectionExtensions
     {

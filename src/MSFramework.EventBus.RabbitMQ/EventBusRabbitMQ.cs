@@ -2,7 +2,6 @@ using System;
 using System.Net.Sockets;
 using System.Text;
 using System.Threading.Tasks;
-using MicroserviceFramework.EventBus;
 using MicroserviceFramework.Serialization;
 using MicroserviceFramework.Utilities;
 using Microsoft.Extensions.Logging;
@@ -12,7 +11,7 @@ using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
 using RabbitMQ.Client.Exceptions;
 
-namespace MicroserviceFramework.RabbitMQ
+namespace MicroserviceFramework.EventBus.RabbitMQ
 {
     public class EventBusRabbitMQ : IEventBus
     {
@@ -63,25 +62,33 @@ namespace MicroserviceFramework.RabbitMQ
                             $"Could not publish event: {@event.EventId} after {time.TotalSeconds:n1}s ({ex.Message})");
                     });
 
-            using var channel = _connection.CreateModel();
+            var channel = _connection.CreateModel();
 
-            _logger.LogTrace($"Declaring RabbitMQ exchange to publish event: {@event.EventId}");
-
-            channel.ExchangeDeclare(_options.Exchange, "direct");
-
-            var eventName = @event.GetType().GetEventName();
-            var bytes = Encoding.UTF8.GetBytes(Default.JsonHelper.Serialize(@event));
-
-            policy.Execute(() =>
+            try
             {
-                var properties = channel.CreateBasicProperties();
-                properties.DeliveryMode = 2; // persistent
+                _logger.LogTrace($"Declaring RabbitMQ exchange to publish event: {@event.EventId}");
 
-                _logger.LogTrace($"Publishing event to RabbitMQ: {@event.EventId}");
+                channel.ExchangeDeclare(_options.Exchange, "direct");
 
-                channel.BasicPublish(_options.Exchange, eventName, true, properties, bytes);
+                var eventName = @event.GetType().GetEventName();
+                var bytes = Encoding.UTF8.GetBytes(Default.JsonHelper.Serialize(@event));
+                
+                policy.Execute(() =>
+                {
+                    var properties = channel.CreateBasicProperties();
+                    properties.DeliveryMode = 2; // persistent
+
+                    _logger.LogTrace($"Publishing event to RabbitMQ: {@event.EventId}");
+
+                    channel.BasicPublish(_options.Exchange, eventName, true, properties, bytes);
+                    channel.Dispose();
+                });
+            }
+            finally
+            {
+                channel.Close();
                 channel.Dispose();
-            });
+            }
 
             return Task.CompletedTask;
         }

@@ -1,4 +1,4 @@
-namespace MicroserviceFramework.RabbitMQ
+namespace MicroserviceFramework.EventBus.RabbitMQ
 {
     public class RabbitMQOptions
     {

@@ -7,7 +7,7 @@ using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
 using RabbitMQ.Client.Exceptions;
 
-namespace MicroserviceFramework.RabbitMQ
+namespace MicroserviceFramework.EventBus.RabbitMQ
 {
     public class PersistentConnection : IDisposable
     {
