@@ -10,6 +10,7 @@
         <PackageReference Include="Microsoft.Extensions.Configuration" Version="6.0.1" />
         <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="6.0.0" />
         <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="6.0.0" />
+        <PackageReference Include="Microsoft.Extensions.Hosting" Version="6.0.1" />
         <PackageReference Include="Microsoft.Extensions.Logging.Console" Version="6.0.0" />
         <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="6.0.0" />
         <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.2.0" />
@@ -21,7 +22,8 @@
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\..\src\MSFramework.Newtonsoft\MSFramework.Newtonsoft.csproj" />
+      <ProjectReference Include="..\..\src\MSFramework.Serialization.Newtonsoft\MSFramework.Serialization.Newtonsoft.csproj" />
+      <ProjectReference Include="..\..\src\MSFramework.EventBus.RabbitMQ\MSFramework.EventBus.RabbitMQ.csproj" />
       <ProjectReference Include="..\..\src\MSFramework\MSFramework.csproj" />
     </ItemGroup>
 

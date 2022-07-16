@@ -1,63 +1,26 @@
-using System;
-using System.Linq;
 using System.Threading.Tasks;
-using MicroserviceFramework.Shared;
-using Microsoft.Extensions.DependencyInjection;
+using MicroserviceFramework.Serialization;
+using MicroserviceFramework.Utilities;
 
 namespace MicroserviceFramework.EventBus
 {
 	public class InProcessEventBus : IEventBus
 	{
-		private readonly IServiceProvider _serviceProvider;
+		private readonly IEventExecutor _eventExecutor;
 
-		public InProcessEventBus(IServiceProvider serviceProvider)
+		public InProcessEventBus(IEventExecutor eventExecutor)
 		{
-			_serviceProvider = serviceProvider;
-		}
-
-		public virtual async Task PublishAsync(object @event)
-		{
-			Check.NotNull(@event, nameof(@event));
-
-			var type = @event.GetType();
-			if (!type.IsEvent())
-			{
-				throw new MicroserviceFrameworkException($"类型 {type} 不是事件");
-			}
-
-			await PublishAsync(type.GetEventName(), @event);
+			_eventExecutor = eventExecutor;
 		}
 
 		public async Task PublishAsync<TEvent>(TEvent @event) where TEvent : EventBase
 		{
 			Check.NotNull(@event, nameof(@event));
-			await PublishAsync(@event.GetType().GetEventName(), @event);
+			await _eventExecutor.ExecuteAsync(@event.GetType().GetEventName(), Default.JsonHelper.Serialize(@event));
 		}
 
 		public void Dispose()
 		{
-		}
-
-		private async Task PublishAsync(string eventName, object @event)
-		{
-			var handlerInfos = EventHandlerTypeCache.GetOrDefault(eventName);
-			foreach (var handlerInfo in handlerInfos)
-			{
-				// TODO: 每次执行是单独的 scope
-				await using var scope = _serviceProvider.CreateAsyncScope();
-				var handlers = scope.ServiceProvider.GetServices(handlerInfo.Key).ToList();
-
-				foreach (var handler in handlers)
-				{
-					await Task.Yield();
-
-					if (handlerInfo.Value.MethodInfo.Invoke(handler,
-						    new[] { DeepCopy.DeepCopier.Copy(@event) }) is Task task)
-					{
-						await task.ConfigureAwait(false);
-					}
-				}
-			}
 		}
 	}
 }

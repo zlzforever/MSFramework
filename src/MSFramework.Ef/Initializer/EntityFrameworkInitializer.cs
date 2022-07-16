@@ -2,7 +2,6 @@ using System;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using MicroserviceFramework.Extensions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.Extensions.DependencyInjection;
@@ -66,7 +65,7 @@ namespace MicroserviceFramework.Ef.Initializer
 							(await dbContext.Database.GetAppliedMigrationsAsync(cancellationToken: cancellationToken))
 							.ToList();
 						logger.LogInformation(
-							$"Applied {appliedMigrations.Count} migrations： {appliedMigrations.ExpandAndToString()}.");
+							$"Applied {appliedMigrations.Count} migrations： {string.Join(", ", appliedMigrations)}.");
 
 						var migrations =
 							(await dbContext.Database.GetPendingMigrationsAsync(cancellationToken: cancellationToken))
@@ -76,7 +75,7 @@ namespace MicroserviceFramework.Ef.Initializer
 							await dbContext.Database.MigrateAsync(cancellationToken: cancellationToken);
 
 							logger.LogInformation(
-								$"Migrate {migrations.Length}： {migrations.ExpandAndToString()}.");
+								$"Migrate {migrations.Length}： {string.Join(", ", migrations)}.");
 						}
 						else
 						{

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 namespace MicroserviceFramework.Application
 {
 	/// <summary>
-	/// todo: 优化实现，不要每次都从 Claims 里查找
+	/// 
 	/// </summary>
 	public interface ISession
 	{

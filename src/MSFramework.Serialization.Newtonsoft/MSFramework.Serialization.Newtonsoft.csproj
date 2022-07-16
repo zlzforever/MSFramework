@@ -1,0 +1,16 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <PackageId>MSFramework.Serialization.Newtonsoft</PackageId>
+        <RootNamespace>MicroserviceFramework.Newtonsoft</RootNamespace>
+    </PropertyGroup>
+    <Import Project="../../package.props" />
+
+    <ItemGroup>
+        <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\MSFramework\MSFramework.csproj" />
+    </ItemGroup>
+</Project>

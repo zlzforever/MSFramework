@@ -1,11 +1,12 @@
+using System.Threading;
 using System.Threading.Tasks;
+using MicroserviceFramework.Domain;
 using MicroserviceFramework.Ef;
-using MicroserviceFramework.Mediator;
 using Ordering.Domain.AggregateRoots.Events;
 
 namespace Ordering.Application.EventHandlers
 {
-	public class OrderShippedDomainEventHandler : IMessageHandler<OrderShippedDomainEvent>
+	public class OrderShippedDomainEventHandler : IDomainEventHandler<OrderShippedDomainEvent>
 	{
 		private readonly DbContextFactory _dbContextFactory;
 
@@ -14,14 +15,14 @@ namespace Ordering.Application.EventHandlers
 			_dbContextFactory = dbContextFactory;
 		}
 
-		public Task HandleAsync(OrderShippedDomainEvent @event)
+		public void Dispose()
+		{
+		}
+
+		public Task HandleAsync(OrderShippedDomainEvent query, CancellationToken cancellationToken = default)
 		{
 			// todo
 			return Task.CompletedTask;
-		}
-
-		public void Dispose()
-		{
 		}
 	}
 }

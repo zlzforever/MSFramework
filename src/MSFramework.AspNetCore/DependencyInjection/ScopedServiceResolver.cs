@@ -1,6 +1,6 @@
 using System;
 using System.Collections.Generic;
-using MicroserviceFramework.DependencyInjection;
+using MicroserviceFramework.Extensions.DependencyInjection;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
 

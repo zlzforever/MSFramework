@@ -25,12 +25,13 @@ namespace MicroserviceFramework.Mediator
 		Task<TResponse> SendAsync<TResponse>(IRequest<TResponse> request,
 			CancellationToken cancellationToken = default);
 
+		
 		/// <summary>
 		/// 发布模型：所有注册的 Handler 都会响应
 		/// </summary>
 		/// <param name="message"></param>
 		/// <param name="cancellationToken"></param>
 		/// <returns></returns>
-		Task PublishAsync(IMessage message, CancellationToken cancellationToken = default);
+		Task PublishAsync(IRequest message, CancellationToken cancellationToken = default);
 	}
 }

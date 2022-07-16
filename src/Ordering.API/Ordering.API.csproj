@@ -28,8 +28,8 @@
         <ProjectReference Include="..\MSFramework.Ef.PostgreSql\MSFramework.Ef.PostgreSql.csproj" />
         <ProjectReference Include="..\MSFramework.Ef.SqlServer\MSFramework.Ef.SqlServer.csproj" />
         <ProjectReference Include="..\MSFramework.Ef\MSFramework.Ef.csproj" />
-        <ProjectReference Include="..\MSFramework.Newtonsoft\MSFramework.Newtonsoft.csproj" />
-        <ProjectReference Include="..\MSFramework.RabbitMQ\MSFramework.RabbitMQ.csproj" />
+        <ProjectReference Include="..\MSFramework.Serialization.Newtonsoft\MSFramework.Serialization.Newtonsoft.csproj" />
+        <ProjectReference Include="..\MSFramework.EventBus.RabbitMQ\MSFramework.EventBus.RabbitMQ.csproj" />
         <ProjectReference Include="..\MSFramework\MSFramework.csproj" />
         <ProjectReference Include="..\Ordering.Application\Ordering.Application.csproj" />
         <ProjectReference Include="..\Ordering.Domain\Ordering.Domain.csproj" />

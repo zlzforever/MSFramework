@@ -1,6 +1,6 @@
 using System;
 using System.Linq;
-using MicroserviceFramework.Utilities;
+using MicroserviceFramework.Runtime;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 
@@ -13,7 +13,7 @@ namespace MicroserviceFramework.AspNetCore.Mvc.ModelBinding
 			var errors = context.ModelState.Where(x =>
 					x.Value is { ValidationState: ModelValidationState.Invalid })
 				.ToDictionary(
-					x => StringUtilities.ToCamelCase(x.Key),
+					x => x.Key.ToCamelCase(),
 					x =>
 						x.Value?.Errors.Where(z => !string.IsNullOrWhiteSpace(z.ErrorMessage))
 							.Select(y => y.ErrorMessage));

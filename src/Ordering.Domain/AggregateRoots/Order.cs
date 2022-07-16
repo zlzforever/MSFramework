@@ -13,6 +13,7 @@ namespace Ordering.Domain.AggregateRoots
 	{
 		private HashSet<string> _rivalNetworks;
 		private Dictionary<string, string> _dict;
+		private List<ExtraInfo> _extras;
 
 		// DDD Patterns comment
 		// Using a private collection field, better for DDD Aggregate's encapsulation
@@ -23,6 +24,8 @@ namespace Ordering.Domain.AggregateRoots
 		public virtual IReadOnlyCollection<OrderItem> Items => _items;
 
 		public IReadOnlyDictionary<string, string> Dict => _dict;
+
+		public IReadOnlyCollection<ExtraInfo> Extras => _extras;
 
 		/// <summary>
 		/// Address is a Value Object pattern example persisted as EF Core 2.0 owned entity
@@ -48,6 +51,7 @@ namespace Ordering.Domain.AggregateRoots
 			_items = new List<OrderItem>();
 			_rivalNetworks = new HashSet<string>();
 			_dict = new Dictionary<string, string>();
+			_extras = new List<ExtraInfo>();
 		}
 
 		public void SetRivalNetwork(IEnumerable<string> rivalNetworks)
@@ -56,6 +60,11 @@ namespace Ordering.Domain.AggregateRoots
 			{
 				_rivalNetworks.Add(rivalNetwork);
 			}
+		}
+
+		public void AddExtra(string name, string age)
+		{
+			_extras.Add(new ExtraInfo(name, age));
 		}
 
 		public void AddKeyValue(string key, string value)

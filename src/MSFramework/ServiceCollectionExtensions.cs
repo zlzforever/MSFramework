@@ -1,17 +1,17 @@
 using System;
 using System.Linq;
 using System.Runtime.CompilerServices;
-using MicroserviceFramework.DependencyInjection;
-using MicroserviceFramework.Options;
-using MicroserviceFramework.Serialization;
-using MicroserviceFramework.Shared;
+using MicroserviceFramework.Common;
+using MicroserviceFramework.Extensions.DependencyInjection;
+using MicroserviceFramework.Extensions.Options;
+using MicroserviceFramework.Text.Json;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 
-[assembly: InternalsVisibleTo("MSFramework.Newtonsoft")]
+[assembly: InternalsVisibleTo("MSFramework.Serialization.Newtonsoft")]
 [assembly: InternalsVisibleTo("MSFramework.AspNetCore")]
 
 // ReSharper disable InconsistentNaming
@@ -33,7 +33,7 @@ namespace MicroserviceFramework
 			var builder = new MicroserviceFrameworkBuilder(services);
 
 			builder.Services.TryAddSingleton<ApplicationInfo>();
-			builder.UseDefaultSerializer();
+			builder.UseDefaultJsonHelper();
 
 			// 放到后面，加载优先级更高
 			builderAction?.Invoke(builder);

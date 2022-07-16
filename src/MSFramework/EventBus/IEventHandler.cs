@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 namespace MicroserviceFramework.EventBus
 {
 	public interface IEventHandler<in TEvent> : IDisposable
-		where TEvent : class
+		where TEvent : EventBase
 	{
 		Task HandleAsync(TEvent @event);
 	}

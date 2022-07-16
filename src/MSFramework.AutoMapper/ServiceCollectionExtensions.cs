@@ -2,7 +2,7 @@
 using System.Linq;
 using System.Reflection;
 using MicroserviceFramework.Domain;
-using MicroserviceFramework.Utilities;
+using MicroserviceFramework.Runtime;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 

@@ -1,5 +1,5 @@
 using AutoMapper;
-using MicroserviceFramework.Shared;
+using MicroserviceFramework.Common;
 
 namespace MicroserviceFramework.AutoMapper
 {

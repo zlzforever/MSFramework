@@ -9,13 +9,6 @@ namespace MicroserviceFramework.EventBus
 		/// 发布事件
 		/// </summary>
 		/// <param name="event"></param>
-		/// <returns></returns>
-		Task PublishAsync(object @event);
-
-		/// <summary>
-		/// 发布事件
-		/// </summary>
-		/// <param name="event"></param>
 		/// <typeparam name="TEvent"></typeparam>
 		/// <returns></returns>
 		Task PublishAsync<TEvent>(TEvent @event) where TEvent : EventBase;

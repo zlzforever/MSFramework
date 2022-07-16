@@ -1,22 +1,24 @@
+using System.Threading;
 using System.Threading.Tasks;
 using MicroserviceFramework;
 using MicroserviceFramework.Domain;
+using MicroserviceFramework.Extensions.DependencyInjection;
 using MicroserviceFramework.Mediator;
 using Microsoft.Extensions.DependencyInjection;
 using Xunit;
 
 namespace MSFramework.Tests
 {
-	public class Event4 : DomainEvent
+	public class DomainEvent4 : DomainEvent
 	{
 		public static int Count;
 	}
 
-	public class Event1Handler : IDomainEventHandler<Event4>
+	public class DomainEvent4Handler : IDomainEventHandler<DomainEvent4>
 	{
-		public Task HandleAsync(Event4 @event)
+		public Task HandleAsync(DomainEvent4 @event, CancellationToken cancellationToken = default)
 		{
-			Event4.Count += 1;
+			DomainEvent4.Count += 1;
 			return Task.CompletedTask;
 		}
 
@@ -25,20 +27,20 @@ namespace MSFramework.Tests
 		}
 	}
 
-	public class Event2 : DomainEvent
+	public class DomainEvent2 : DomainEvent
 	{
 	}
 
-	public class Event3 : DomainEvent
+	public class DomainEvent3 : DomainEvent
 	{
 		public static int Count;
 	}
 
-	public class Event31Handler : IDomainEventHandler<Event3>
+	public class DomainEvent31Handler : IDomainEventHandler<DomainEvent3>
 	{
-		public Task HandleAsync(Event3 @event)
+		public Task HandleAsync(DomainEvent3 @event, CancellationToken cancellationToken = default)
 		{
-			Event3.Count += 1;
+			DomainEvent3.Count += 1;
 			return Task.CompletedTask;
 		}
 
@@ -47,11 +49,11 @@ namespace MSFramework.Tests
 		}
 	}
 
-	public class Event32Handler : IDomainEventHandler<Event3>
+	public class DomainEvent32Handler : IDomainEventHandler<DomainEvent3>
 	{
-		public Task HandleAsync(Event3 @event)
+		public Task HandleAsync(DomainEvent3 @event, CancellationToken cancellationToken = default)
 		{
-			Event3.Count += 1;
+			DomainEvent3.Count += 1;
 			return Task.CompletedTask;
 		}
 
@@ -66,44 +68,53 @@ namespace MSFramework.Tests
 		public async Task DispatchTo1HandlerTests()
 		{
 			var serviceCollection = new ServiceCollection();
-			serviceCollection.AddMicroserviceFramework(
-				x => { });
+			serviceCollection.AddMicroserviceFramework(x =>
+			{
+				x.UseDependencyInjectionLoader();
+				x.UseMediator();
+			});
 			var serviceProvider = serviceCollection.BuildServiceProvider();
-			
-			var mediator = serviceProvider.GetRequiredService<IMediator>();
-			await mediator.PublishAsync(new Event4());
-			Assert.Equal(1, Event4.Count);
 
-			await mediator.PublishAsync(new Event4());
-			Assert.Equal(2, Event4.Count);
+			var mediator = serviceProvider.GetRequiredService<IMediator>();
+			await mediator.PublishAsync(new DomainEvent4());
+			Assert.Equal(1, DomainEvent4.Count);
+
+			await mediator.PublishAsync(new DomainEvent4());
+			Assert.Equal(2, DomainEvent4.Count);
 		}
 
 		[Fact]
 		public async Task DispatchToMultiHandlerTests()
 		{
 			var serviceCollection = new ServiceCollection();
-			serviceCollection.AddMicroserviceFramework(
-				x => { });
+			serviceCollection.AddMicroserviceFramework(x =>
+			{
+				x.UseDependencyInjectionLoader();
+				x.UseMediator();
+			});
 
 			var serviceProvider = serviceCollection.BuildServiceProvider();
 			var mediator = serviceProvider.GetRequiredService<IMediator>();
-			await mediator.PublishAsync(new Event3());
-			Assert.Equal(2, Event3.Count);
+			await mediator.PublishAsync(new DomainEvent3());
+			Assert.Equal(2, DomainEvent3.Count);
 
-			await mediator.PublishAsync(new Event3());
-			Assert.Equal(4, Event3.Count);
+			await mediator.PublishAsync(new DomainEvent3());
+			Assert.Equal(4, DomainEvent3.Count);
 		}
 
 		[Fact]
 		public async Task EventWithoutHandlerTest()
 		{
 			var serviceCollection = new ServiceCollection();
-			serviceCollection.AddMicroserviceFramework(
-				x => { });
+			serviceCollection.AddMicroserviceFramework(x =>
+			{
+				x.UseDependencyInjectionLoader();
+				x.UseMediator();
+			});
 
 			var serviceProvider = serviceCollection.BuildServiceProvider();
 			var mediator = serviceProvider.GetRequiredService<IMediator>();
-			await mediator.PublishAsync(new Event2());
+			await mediator.PublishAsync(new DomainEvent2());
 		}
 	}
 }

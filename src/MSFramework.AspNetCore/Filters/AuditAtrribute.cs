@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 using MicroserviceFramework.AspNetCore.Extensions;
 using MicroserviceFramework.Audit;
 using MicroserviceFramework.Domain;
-using MicroserviceFramework.Extensions;
+using MicroserviceFramework.Security.Claims;
 using Microsoft.AspNetCore.Http.Extensions;
 using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.Extensions.DependencyInjection;

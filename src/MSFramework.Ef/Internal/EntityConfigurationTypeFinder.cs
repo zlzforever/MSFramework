@@ -1,8 +1,8 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using MicroserviceFramework.Extensions;
-using MicroserviceFramework.Utilities;
+using MicroserviceFramework.Collections.Generic;
+using MicroserviceFramework.Runtime;
 using Microsoft.EntityFrameworkCore;
 
 namespace MicroserviceFramework.Ef.Internal

@@ -53,6 +53,8 @@ namespace Ordering.API.Controllers
 			order.SetRivalNetwork(new[] { "hi1", "hi2" });
 			order.AddKeyValue("test1", "value1");
 			order.AddKeyValue("test2", "value2");
+			order.AddExtra("n1", "a1");
+			order.AddExtra("n2", "a2");
 			await _orderRepository.AddAsync(order);
 			return Ok(order);
 		}

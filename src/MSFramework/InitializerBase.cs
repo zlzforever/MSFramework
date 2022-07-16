@@ -1,6 +1,6 @@
 using System.Threading;
 using System.Threading.Tasks;
-using MicroserviceFramework.DependencyInjection;
+using MicroserviceFramework.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 
 namespace MicroserviceFramework

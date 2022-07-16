@@ -1,7 +1,7 @@
 using System.Threading.Tasks;
-using MicroserviceFramework.DependencyInjection;
+using MicroserviceFramework.Common;
 using MicroserviceFramework.Domain;
-using MicroserviceFramework.Shared;
+using MicroserviceFramework.Extensions.DependencyInjection;
 using MongoDB.Bson;
 using Ordering.Domain.AggregateRoots;
 

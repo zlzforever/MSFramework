@@ -1,7 +1,7 @@
 using System;
 using System.IO;
 using System.Threading.Tasks;
-using MicroserviceFramework.Utilities;
+using MicroserviceFramework.Security.Cryptography;
 using Microsoft.AspNetCore.Http;
 
 namespace MicroserviceFramework.AspNetCore.Extensions

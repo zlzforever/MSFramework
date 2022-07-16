@@ -195,6 +195,10 @@ namespace Ordering.Infrastructure.Migrations
                         .HasColumnType("JSON")
                         .HasColumnName("dict");
 
+                    b.Property<string>("Extras")
+                        .HasColumnType("JSON")
+                        .HasColumnName("extras");
+
                     b.Property<string>("RivalNetworks")
                         .HasColumnType("JSON")
                         .HasColumnName("rival_networks");

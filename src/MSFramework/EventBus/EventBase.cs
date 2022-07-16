@@ -1,4 +1,5 @@
 using System;
+using System.Text.Json.Serialization;
 using MongoDB.Bson;
 
 namespace MicroserviceFramework.EventBus
@@ -8,12 +9,12 @@ namespace MicroserviceFramework.EventBus
 		/// <summary>
 		/// 事件源标识
 		/// </summary>
-		public string EventId { get; }
+		public string EventId { get; set; }
 
 		/// <summary>
 		/// 事件发生时间
 		/// </summary>
-		public long EventTime { get; }
+		public long EventTime { get; set; }
 
 		protected EventBase()
 		{

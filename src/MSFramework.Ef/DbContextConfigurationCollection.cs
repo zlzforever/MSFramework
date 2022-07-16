@@ -1,6 +1,6 @@
 using System;
 using System.Collections.Generic;
-using MicroserviceFramework.Options;
+using MicroserviceFramework.Extensions.Options;
 
 namespace MicroserviceFramework.Ef
 {

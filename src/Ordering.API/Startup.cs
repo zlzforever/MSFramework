@@ -6,14 +6,14 @@ using MicroserviceFramework.AspNetCore.Mvc.ModelBinding;
 using MicroserviceFramework.AspNetCore.Swagger;
 using MicroserviceFramework.Audit;
 using MicroserviceFramework.AutoMapper;
-using MicroserviceFramework.DependencyInjection;
 using MicroserviceFramework.Ef;
 using MicroserviceFramework.Ef.Audit;
 using MicroserviceFramework.Ef.MySql;
 using MicroserviceFramework.EventBus;
+using MicroserviceFramework.Extensions.DependencyInjection;
+using MicroserviceFramework.Extensions.Options;
 using MicroserviceFramework.Mediator;
-using MicroserviceFramework.Options;
-using MicroserviceFramework.Serialization.Converters;
+using MicroserviceFramework.Text.Json.Converters;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -37,7 +37,7 @@ namespace Ordering.API
 		public void ConfigureServices(IServiceCollection services)
 		{
 			services.AddOptions(Configuration);
-
+			services.AddHttpContextAccessor();
 			services.AddControllers(x =>
 				{
 					x.Filters.AddUnitOfWork();
@@ -50,7 +50,6 @@ namespace Ordering.API
 				{
 					options.JsonSerializerOptions.Converters.Add(new ObjectIdJsonConverter());
 					options.JsonSerializerOptions.Converters.Add(new EnumerationJsonConverterFactory());
-					options.JsonSerializerOptions.Converters.Add(new EnumerationJsonConverter());
 					options.JsonSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
 				})
 				// .AddNewtonsoftJson(x =>

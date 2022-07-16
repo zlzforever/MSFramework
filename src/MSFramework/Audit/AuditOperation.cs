@@ -8,7 +8,7 @@ namespace MicroserviceFramework.Audit
 	public class AuditOperation : CreationAggregateRoot<ObjectId>
 	{
 		/// <summary>
-		/// 请求
+		/// 操作路径
 		/// </summary>
 		public string Url { get; private set; }
 

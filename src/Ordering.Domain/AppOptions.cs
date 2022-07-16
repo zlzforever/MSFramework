@@ -1,4 +1,4 @@
-using MicroserviceFramework.Options;
+using MicroserviceFramework.Extensions.Options;
 using Microsoft.Extensions.Configuration;
 
 namespace Ordering.Domain

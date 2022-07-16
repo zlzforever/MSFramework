@@ -8,10 +8,10 @@ rm -rf src/MSFramework.Ef/bin/Release
 rm -rf src/MSFramework.Ef.MySql/bin/Release
 rm -rf src/MSFramework.Ef.PostgreSql/bin/Release
 rm -rf src/MSFramework.Ef.SqlServer/bin/Release
-rm -rf src/MSFramework.RabbitMQ/bin/Release
+rm -rf src/MSFramework.EventBus.RabbitMQ/bin/Release
 rm -rf src/MSFramework.Ef.Design/bin/Release
 rm -rf src/MSFramework.AspNetCore.Swagger/bin/Release
-rm -rf src/MSFramework.Newtonsoft/bin/Release
+rm -rf src/MSFramework.Serialization.Newtonsoft/bin/Release
 dotnet build -c Release
 dotnet pack -c Release
 dotnet nuget push src/MSFramework/bin/Release/*.nupkg -s $NUGET_SERVER -k $NUGET_KEY --skip-duplicate
@@ -22,7 +22,7 @@ dotnet nuget push src/MSFramework.Ef/bin/Release/*.nupkg  -s $NUGET_SERVER -k $N
 dotnet nuget push src/MSFramework.Ef.MySql/bin/Release/*.nupkg  -s $NUGET_SERVER -k $NUGET_KEY --skip-duplicate
 dotnet nuget push src/MSFramework.Ef.PostgreSql/bin/Release/*.nupkg  -s  $NUGET_SERVER -k $NUGET_KEY --skip-duplicate
 dotnet nuget push src/MSFramework.Ef.SqlServer/bin/Release/*.nupkg  -s $NUGET_SERVER -k $NUGET_KEY --skip-duplicate
-dotnet nuget push src/MSFramework.RabbitMQ/bin/Release/*.nupkg  -s $NUGET_SERVER -k $NUGET_KEY --skip-duplicate
+dotnet nuget push src/MSFramework.EventBus.RabbitMQ/bin/Release/*.nupkg  -s $NUGET_SERVER -k $NUGET_KEY --skip-duplicate
 dotnet nuget push src/MSFramework.Ef.Design/bin/Release/*.nupkg  -s $NUGET_SERVER -k $NUGET_KEY --skip-duplicate
 dotnet nuget push src/MSFramework.AspNetCore.Swagger/bin/Release/*.nupkg  -s $NUGET_SERVER -k $NUGET_KEY --skip-duplicate
-dotnet nuget push src/MSFramework.Newtonsoft/bin/Release/*.nupkg  -s $NUGET_SERVER -k $NUGET_KEY --skip-duplicate
+dotnet nuget push src/MSFramework.Serialization.Newtonsoft/bin/Release/*.nupkg  -s $NUGET_SERVER -k $NUGET_KEY --skip-duplicate

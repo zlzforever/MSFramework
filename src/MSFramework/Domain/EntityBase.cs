@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Reflection;
-using MicroserviceFramework.Extensions;
+using MicroserviceFramework.Collections.Generic;
 
 namespace MicroserviceFramework.Domain
 {
@@ -33,7 +33,7 @@ namespace MicroserviceFramework.Domain
 		/// <inheritdoc/>
 		public override string ToString()
 		{
-			return $"[ENTITY: {GetType().Name}] Keys = {GetKeys().ExpandAndToString(", ")}";
+			return $"[ENTITY: {GetType().Name}] Keys = {GetKeys().Join(", ")}";
 		}
 
 		public abstract object[] GetKeys();
@@ -54,7 +54,7 @@ namespace MicroserviceFramework.Domain
 
 		public override object[] GetKeys()
 		{
-			return new object[] {Id};
+			return new object[] { Id };
 		}
 
 		protected EntityBase(TKey id)

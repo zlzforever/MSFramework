@@ -1,4 +1,3 @@
-using MicroserviceFramework.Shared;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace MicroserviceFramework.Utilities

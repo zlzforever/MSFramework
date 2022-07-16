@@ -84,25 +84,25 @@ namespace MicroserviceFramework.Mediator
 		/// <summary>
 		/// 多个响应
 		/// </summary>
-		/// <param name="message"></param>
+		/// <param name="request"></param>
 		/// <param name="cancellationToken"></param>
-		public async Task PublishAsync(IMessage message, CancellationToken cancellationToken = default)
+		public async Task PublishAsync(IRequest request, CancellationToken cancellationToken = default)
 		{
-			if (message == null)
+			if (request == null)
 			{
 				return;
 			}
 
-			var messageType = message.GetType();
+			var messageType = request.GetType();
 
 			var (@interface, method) =
-				_mediatorTypeMapper.Get(messageType, type => Create(typeof(IMessageHandler<>), type));
+				_mediatorTypeMapper.Get(messageType, type => Create(typeof(IRequestHandler<>), type));
 
 			var handlers = _serviceProvider.GetServices(@interface).Where(x => x != null);
 
 			foreach (var handler in handlers)
 			{
-				if (method.Invoke(handler, new object[] { message }) is Task task)
+				if (method.Invoke(handler, new object[] { request, cancellationToken }) is Task task)
 				{
 					await task;
 				}

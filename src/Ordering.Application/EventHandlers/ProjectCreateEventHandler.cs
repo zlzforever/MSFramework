@@ -1,9 +1,10 @@
 using System;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
-using MicroserviceFramework.DependencyInjection;
 using MicroserviceFramework.Domain;
 using MicroserviceFramework.EventBus;
+using MicroserviceFramework.Extensions.DependencyInjection;
 using Ordering.Domain.AggregateRoots;
 using Ordering.Domain.Repositories;
 
@@ -47,7 +48,7 @@ namespace Ordering.Application.EventHandlers
 			_eventBus = eventBus;
 		}
 
-		public async Task HandleAsync(ProjectCreateEvent @event)
+		public async Task HandleAsync(ProjectCreateEvent @event, CancellationToken cancellationToken = default)
 		{
 			Console.WriteLine("Execute ProjectCreateEvent");
 			await _eventBus.PublishAsync(new ProjectCreatedIntegrationEvent());

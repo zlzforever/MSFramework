@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
-using MicroserviceFramework.Extensions;
+using MicroserviceFramework.Security.Claims;
 using Microsoft.AspNetCore.Http;
 using ISession = MicroserviceFramework.Application.ISession;
 

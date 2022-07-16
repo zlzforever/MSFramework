@@ -81,6 +81,6 @@ namespace MicroserviceFramework.Domain
 			return matchingItem;
 		}
 
-		public int CompareTo(object other) => String.Compare(Id, ((Enumeration)other).Id, StringComparison.Ordinal);
+		public int CompareTo(object other) => string.Compare(Id, ((Enumeration)other).Id, StringComparison.Ordinal);
 	}
 }

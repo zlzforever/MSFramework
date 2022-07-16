@@ -1,7 +1,7 @@
 using System;
 using System.Linq;
 using MicroserviceFramework;
-using MicroserviceFramework.DependencyInjection;
+using MicroserviceFramework.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection;
 using Xunit;
 
@@ -69,8 +69,7 @@ namespace MSFramework.Tests
 		public void ScopeTest()
 		{
 			var serviceCollection = new ServiceCollection();
-			serviceCollection.AddMicroserviceFramework(x => { });
-
+			serviceCollection.AddMicroserviceFramework(x => { x.UseDependencyInjectionLoader(); });
 
 			var serviceProvider = serviceCollection.BuildServiceProvider();
 
@@ -83,7 +82,7 @@ namespace MSFramework.Tests
 			var id3 = a3.Id;
 			scope1.Dispose();
 			Assert.Equal(id1, id3);
-			
+
 			var scope2 = serviceProvider.CreateScope();
 			var a2 = scope2.ServiceProvider.GetRequiredService<IA>();
 			Assert.True(a2 is D);
@@ -97,7 +96,7 @@ namespace MSFramework.Tests
 		public void MultiInjectionTest()
 		{
 			var serviceCollection = new ServiceCollection();
-			serviceCollection.AddMicroserviceFramework(x => { });
+			serviceCollection.AddMicroserviceFramework(x => { x.UseDependencyInjectionLoader(); });
 
 			var serviceProvider = serviceCollection.BuildServiceProvider();
 			var scope1 = serviceProvider.CreateScope();
@@ -110,7 +109,7 @@ namespace MSFramework.Tests
 		public void SingletonTest()
 		{
 			var serviceCollection = new ServiceCollection();
-			serviceCollection.AddMicroserviceFramework(x => { });
+			serviceCollection.AddMicroserviceFramework(x => { x.UseDependencyInjectionLoader(); });
 
 			var serviceProvider = serviceCollection.BuildServiceProvider();
 
@@ -127,7 +126,7 @@ namespace MSFramework.Tests
 		public void TransientTest()
 		{
 			var serviceCollection = new ServiceCollection();
-			serviceCollection.AddMicroserviceFramework(x => { });
+			serviceCollection.AddMicroserviceFramework(x => { x.UseDependencyInjectionLoader(); });
 
 			var serviceProvider = serviceCollection.BuildServiceProvider();
 
