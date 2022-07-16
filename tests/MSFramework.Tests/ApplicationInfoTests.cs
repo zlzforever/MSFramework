@@ -8,15 +8,15 @@ namespace MSFramework.Tests;
 
 public class ApplicationInfoTests
 {
-	[Fact]
-	public void GetApplicationName()
-	{
-		var host = Host.CreateDefaultBuilder()
-			.ConfigureServices(collection =>
-			{
-				collection.AddMicroserviceFramework();
-			}).Build();
-		var application = host.Services.GetRequiredService<ApplicationInfo>();
-		Assert.Equal("ReSharperTestRunner", application.Name);
-	}
+    [Fact]
+    public void GetApplicationName()
+    {
+        var host = Host.CreateDefaultBuilder()
+            .ConfigureServices(collection =>
+            {
+                collection.AddMicroserviceFramework();
+            }).Build();
+        var application = host.Services.GetRequiredService<ApplicationInfo>();
+        Assert.Equal("ReSharperTestRunner", application.Name);
+    }
 }

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
@@ -8,224 +8,224 @@ using Ordering.Domain.AggregateRoots.Events;
 
 namespace Ordering.Domain.AggregateRoots
 {
-	[Description("订单表")]
-	public class Order : CreationAggregateRoot, IOptimisticLock
-	{
-		private HashSet<string> _rivalNetworks;
-		private Dictionary<string, string> _dict;
-		private List<ExtraInfo> _extras;
+    [Description("订单表")]
+    public class Order : CreationAggregateRoot, IOptimisticLock
+    {
+        private readonly HashSet<string> _rivalNetworks;
+        private readonly Dictionary<string, string> _dict;
+        private readonly List<ExtraInfo> _extras;
 
-		// DDD Patterns comment
-		// Using a private collection field, better for DDD Aggregate's encapsulation
-		// so Items cannot be added from "outside the AggregateRoot" directly to the collection,
-		// but only through the method OrderAggrergateRoot.AddOrderItem() which includes behaviour.
-		private List<OrderItem> _items;
+        // DDD Patterns comment
+        // Using a private collection field, better for DDD Aggregate's encapsulation
+        // so Items cannot be added from "outside the AggregateRoot" directly to the collection,
+        // but only through the method OrderAggrergateRoot.AddOrderItem() which includes behaviour.
+        private readonly List<OrderItem> _items;
 
-		public virtual IReadOnlyCollection<OrderItem> Items => _items;
+        public virtual IReadOnlyCollection<OrderItem> Items => _items;
 
-		public IReadOnlyDictionary<string, string> Dict => _dict;
+        public IReadOnlyDictionary<string, string> Dict => _dict;
 
-		public IReadOnlyCollection<ExtraInfo> Extras => _extras;
+        public IReadOnlyCollection<ExtraInfo> Extras => _extras;
 
-		/// <summary>
-		/// Address is a Value Object pattern example persisted as EF Core 2.0 owned entity
-		/// </summary>
-		[Description("地址")]
-		public virtual Address Address { get; private set; }
-
-
-		public IReadOnlyCollection<string> RivalNetworks => _rivalNetworks;
-
-		/// <summary>
-		/// 
-		/// </summary>
-		[Description("状态")]
-		public OrderStatus Status { get; private set; }
-
-		public string BuyerId { get; private set; }
-
-		public string Description { get; private set; }
-
-		private Order(ObjectId id) : base(id)
-		{
-			_items = new List<OrderItem>();
-			_rivalNetworks = new HashSet<string>();
-			_dict = new Dictionary<string, string>();
-			_extras = new List<ExtraInfo>();
-		}
-
-		public void SetRivalNetwork(IEnumerable<string> rivalNetworks)
-		{
-			foreach (var rivalNetwork in rivalNetworks)
-			{
-				_rivalNetworks.Add(rivalNetwork);
-			}
-		}
-
-		public void AddExtra(string name, string age)
-		{
-			_extras.Add(new ExtraInfo(name, age));
-		}
-
-		public void AddKeyValue(string key, string value)
-		{
-			_dict.TryAdd(key, value);
-		}
-
-		// private Order(ILazyLoader lazyLoader, ObjectId id) : this(id)
-		// {
-		// 	_lazyLoader = lazyLoader;
-		// 	_lazyLoader.Load(this, ref Items);
-		// }
-
-		private Order(
-			string userId,
-			Address address,
-			string description
-		) : this(ObjectId.GenerateNewId())
-		{
-			Address = address;
-			BuyerId = userId;
-			Description = description;
+        /// <summary>
+        /// Address is a Value Object pattern example persisted as EF Core 2.0 owned entity
+        /// </summary>
+        [Description("地址")]
+        public virtual Address Address { get; private set; }
 
 
-			Status = OrderStatus.Submitted;
+        public IReadOnlyCollection<string> RivalNetworks => _rivalNetworks;
 
-			// Add the OrderStarterDomainEvent to the domain events collection 
-			// to be raised/dispatched when comitting changes into the Database [ After DbContext.SaveChanges() ]
-			var orderStartedDomainEvent = new OrderStartedDomainEvent(this, userId);
+        /// <summary>
+        /// 
+        /// </summary>
+        [Description("状态")]
+        public OrderStatus Status { get; private set; }
 
-			AddDomainEvent(orderStartedDomainEvent);
-		}
+        public string BuyerId { get; private set; }
 
-		public static Order Create(string buyerId,
-			Address address,
-			string description)
-		{
-			return new Order(buyerId,
-					address,
-					description)
-				;
-		}
+        public string Description { get; private set; }
 
-		public void AddItem(Guid productId, string productName, decimal unitPrice, decimal discount,
-			string pictureUrl, int units = 1)
-		{
-			var existingOrderForProduct = Items
-				.SingleOrDefault(o => o.ProductId == productId);
+        private Order(ObjectId id) : base(id)
+        {
+            _items = new List<OrderItem>();
+            _rivalNetworks = new HashSet<string>();
+            _dict = new Dictionary<string, string>();
+            _extras = new List<ExtraInfo>();
+        }
 
-			if (existingOrderForProduct != null)
-			{
-				//if previous line exist modify it with higher discount  and units..
+        public void SetRivalNetwork(IEnumerable<string> rivalNetworks)
+        {
+            foreach (var rivalNetwork in rivalNetworks)
+            {
+                _rivalNetworks.Add(rivalNetwork);
+            }
+        }
 
-				if (discount > existingOrderForProduct.Discount)
-				{
-					existingOrderForProduct.SetNewDiscount(discount);
-				}
+        public void AddExtra(string name, string age)
+        {
+            _extras.Add(new ExtraInfo(name, age));
+        }
 
-				existingOrderForProduct.AddUnits(units);
-			}
-			else
-			{
-				//add validated new order item
+        public void AddKeyValue(string key, string value)
+        {
+            _dict.TryAdd(key, value);
+        }
 
-				var orderItem = new OrderItem(productId, productName, unitPrice, discount, pictureUrl, units);
-				_items.Add(orderItem);
-			}
-		}
+        // private Order(ILazyLoader lazyLoader, ObjectId id) : this(id)
+        // {
+        // 	_lazyLoader = lazyLoader;
+        // 	_lazyLoader.Load(this, ref Items);
+        // }
 
-		public void ChangeAddress(Address newAddress)
-		{
-			Address = newAddress ?? throw new ArgumentException(nameof(newAddress));
-		}
+        private Order(
+            string userId,
+            Address address,
+            string description
+        ) : this(ObjectId.GenerateNewId())
+        {
+            Address = address;
+            BuyerId = userId;
+            Description = description;
 
-		public void SetAwaitingValidationStatus()
-		{
-			if (Status == OrderStatus.Submitted)
-			{
-				AddDomainEvent(new OrderStatusChangedToAwaitingValidationDomainEvent(Id, Items));
-				Status = OrderStatus.AwaitingValidation;
-			}
-		}
 
-		public void SetStockConfirmedStatus()
-		{
-			if (Status == OrderStatus.AwaitingValidation)
-			{
-				AddDomainEvent(new OrderStatusChangedToStockConfirmedDomainEvent(Id));
+            Status = OrderStatus.Submitted;
 
-				Status = OrderStatus.StockConfirmed;
-				Description = "All the items were confirmed with available stock.";
-			}
-		}
+            // Add the OrderStarterDomainEvent to the domain events collection 
+            // to be raised/dispatched when comitting changes into the Database [ After DbContext.SaveChanges() ]
+            var orderStartedDomainEvent = new OrderStartedDomainEvent(this, userId);
 
-		public void SetPaidStatus()
-		{
-			if (Status == OrderStatus.StockConfirmed)
-			{
-				AddDomainEvent(new OrderStatusChangedToPaidDomainEvent(Id, Items));
+            AddDomainEvent(orderStartedDomainEvent);
+        }
 
-				Status = OrderStatus.Paid;
-				Description =
-					"The payment was performed at a simulated \"American Bank checking bank account ending on XX35071\"";
-			}
-		}
+        public static Order Create(string buyerId,
+            Address address,
+            string description)
+        {
+            return new Order(buyerId,
+                    address,
+                    description)
+                ;
+        }
 
-		public void AddEvent()
-		{
-			AddDomainEvent(new EmptyEvent());
-		}
+        public void AddItem(Guid productId, string productName, decimal unitPrice, decimal discount,
+            string pictureUrl, int units = 1)
+        {
+            var existingOrderForProduct = Items
+                .SingleOrDefault(o => o.ProductId == productId);
 
-		public class EmptyEvent : DomainEvent
-		{
-		}
+            if (existingOrderForProduct != null)
+            {
+                //if previous line exist modify it with higher discount  and units..
 
-		public void SetShippedStatus()
-		{
-			if (Status != OrderStatus.Paid)
-			{
-				StatusChangeException(OrderStatus.Shipped);
-			}
+                if (discount > existingOrderForProduct.Discount)
+                {
+                    existingOrderForProduct.SetNewDiscount(discount);
+                }
 
-			Status = OrderStatus.Shipped;
-			Description = "The order was shipped.";
-			AddDomainEvent(new OrderShippedDomainEvent(this));
-		}
+                existingOrderForProduct.AddUnits(units);
+            }
+            else
+            {
+                //add validated new order item
 
-		public void SetCancelledStatus()
-		{
-			if (Status == OrderStatus.Paid ||
-			    Status == OrderStatus.Shipped)
-			{
-				StatusChangeException(OrderStatus.Cancelled);
-			}
+                var orderItem = new OrderItem(productId, productName, unitPrice, discount, pictureUrl, units);
+                _items.Add(orderItem);
+            }
+        }
 
-			Status = OrderStatus.Cancelled;
-			Description = $"The order was cancelled.";
-			AddDomainEvent(new OrderCancelledDomainEvent(this));
-		}
+        public void ChangeAddress(Address newAddress)
+        {
+            Address = newAddress ?? throw new ArgumentException(nameof(newAddress));
+        }
 
-		public void SetCancelledStatusWhenStockIsRejected(IEnumerable<Guid> orderStockRejectedItems)
-		{
-			if (Status == OrderStatus.AwaitingValidation)
-			{
-				Status = OrderStatus.Cancelled;
+        public void SetAwaitingValidationStatus()
+        {
+            if (Status == OrderStatus.Submitted)
+            {
+                AddDomainEvent(new OrderStatusChangedToAwaitingValidationDomainEvent(Id, Items));
+                Status = OrderStatus.AwaitingValidation;
+            }
+        }
 
-				var itemsStockRejectedProductNames = Items
-					.Where(c => orderStockRejectedItems.Contains(c.ProductId))
-					.Select(c => c.ProductName);
+        public void SetStockConfirmedStatus()
+        {
+            if (Status == OrderStatus.AwaitingValidation)
+            {
+                AddDomainEvent(new OrderStatusChangedToStockConfirmedDomainEvent(Id));
 
-				var itemsStockRejectedDescription = string.Join(", ", itemsStockRejectedProductNames);
-				Description = $"The product items don't have stock: ({itemsStockRejectedDescription}).";
-			}
-		}
+                Status = OrderStatus.StockConfirmed;
+                Description = "All the items were confirmed with available stock.";
+            }
+        }
 
-		private void StatusChangeException(OrderStatus orderStatusToChange)
-		{
-			throw new OrderingDomainException(
-				$"Is not possible to change the order status from {Status} to {orderStatusToChange}.");
-		}
+        public void SetPaidStatus()
+        {
+            if (Status == OrderStatus.StockConfirmed)
+            {
+                AddDomainEvent(new OrderStatusChangedToPaidDomainEvent(Id, Items));
 
-		public string ConcurrencyStamp { get; set; }
-	}
+                Status = OrderStatus.Paid;
+                Description =
+                    "The payment was performed at a simulated \"American Bank checking bank account ending on XX35071\"";
+            }
+        }
+
+        public void AddEvent()
+        {
+            AddDomainEvent(new EmptyEvent());
+        }
+
+        public class EmptyEvent : DomainEvent
+        {
+        }
+
+        public void SetShippedStatus()
+        {
+            if (Status != OrderStatus.Paid)
+            {
+                StatusChangeException(OrderStatus.Shipped);
+            }
+
+            Status = OrderStatus.Shipped;
+            Description = "The order was shipped.";
+            AddDomainEvent(new OrderShippedDomainEvent(this));
+        }
+
+        public void SetCancelledStatus()
+        {
+            if (Status == OrderStatus.Paid ||
+                Status == OrderStatus.Shipped)
+            {
+                StatusChangeException(OrderStatus.Cancelled);
+            }
+
+            Status = OrderStatus.Cancelled;
+            Description = $"The order was cancelled.";
+            AddDomainEvent(new OrderCancelledDomainEvent(this));
+        }
+
+        public void SetCancelledStatusWhenStockIsRejected(IEnumerable<Guid> orderStockRejectedItems)
+        {
+            if (Status == OrderStatus.AwaitingValidation)
+            {
+                Status = OrderStatus.Cancelled;
+
+                var itemsStockRejectedProductNames = Items
+                    .Where(c => orderStockRejectedItems.Contains(c.ProductId))
+                    .Select(c => c.ProductName);
+
+                var itemsStockRejectedDescription = string.Join(", ", itemsStockRejectedProductNames);
+                Description = $"The product items don't have stock: ({itemsStockRejectedDescription}).";
+            }
+        }
+
+        private void StatusChangeException(OrderStatus orderStatusToChange)
+        {
+            throw new OrderingDomainException(
+                $"Is not possible to change the order status from {Status} to {orderStatusToChange}.");
+        }
+
+        public string ConcurrencyStamp { get; set; }
+    }
 }

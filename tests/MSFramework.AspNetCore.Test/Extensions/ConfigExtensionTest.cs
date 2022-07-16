@@ -1,4 +1,4 @@
-﻿using System.Threading.Tasks;
+using System.Threading.Tasks;
 using MicroserviceFramework;
 using MicroserviceFramework.AspNetCore;
 using Microsoft.AspNetCore.Builder;
@@ -14,59 +14,59 @@ using Xunit.Abstractions;
 
 namespace MSFramework.AspNetCore.Test.Extensions
 {
-	public class ConfigExtensionTest
-	{
-		private readonly ITestOutputHelper _output;
+    public class ConfigExtensionTest
+    {
+        private readonly ITestOutputHelper _output;
 
-		public ConfigExtensionTest(ITestOutputHelper output)
-		{
-			_output = output;
-		}
+        public ConfigExtensionTest(ITestOutputHelper output)
+        {
+            _output = output;
+        }
 
-		[Fact]
-		public async Task AddConfigModel()
-		{
-			using var host = await new HostBuilder()
-				.ConfigureWebHost(webBuilder =>
-				{
-					webBuilder
-						.UseTestServer()
-						.ConfigureAppConfiguration(builder =>
-						{
-							//
-							builder.AddJsonFile("appsettings.json");
-						})
-						.ConfigureServices((context, services) =>
-						{
-							services.AddMvc();
-							services.AddMicroserviceFramework(x =>
-							{
-								//
-								x.UseOptions(context.Configuration);
-							});
-							services.AddRouting(x => { x.LowercaseUrls = true; });
-							services.AddMicroserviceFramework(builder => { builder.UseAspNetCore(); });
-						})
-						.Configure(app =>
-						{
-							app.UseRouting();
+        [Fact]
+        public async Task AddConfigModel()
+        {
+            using var host = await new HostBuilder()
+                .ConfigureWebHost(webBuilder =>
+                {
+                    webBuilder
+                        .UseTestServer()
+                        .ConfigureAppConfiguration(builder =>
+                        {
+                            //
+                            builder.AddJsonFile("appsettings.json");
+                        })
+                        .ConfigureServices((context, services) =>
+                        {
+                            services.AddMvc();
+                            services.AddMicroserviceFramework(x =>
+                            {
+                                //
+                                x.UseOptions(context.Configuration);
+                            });
+                            services.AddRouting(x => { x.LowercaseUrls = true; });
+                            services.AddMicroserviceFramework(builder => { builder.UseAspNetCore(); });
+                        })
+                        .Configure(app =>
+                        {
+                            app.UseRouting();
 
-							app.UseEndpoints(endpoints =>
-							{
-								endpoints.MapGet("/",
-									async context => { await context.Response.WriteAsync("Hello World!"); });
-							});
+                            app.UseEndpoints(endpoints =>
+                            {
+                                endpoints.MapGet("/",
+                                    async context => { await context.Response.WriteAsync("Hello World!"); });
+                            });
 
-							app.UseMicroserviceFramework();
-						});
-				})
-				.StartAsync();
+                            app.UseMicroserviceFramework();
+                        });
+                })
+                .StartAsync();
 
-			_output.WriteLine("server is running");
-			var options = host.Services.GetService<IOptions<TestConfigModel>>();
-			Assert.NotNull(options);
-			Assert.Equal("joe", options.Value.Name);
-			Assert.Equal(170, options.Value.Height);
-		}
-	}
+            _output.WriteLine("server is running");
+            var options = host.Services.GetService<IOptions<TestConfigModel>>();
+            Assert.NotNull(options);
+            Assert.Equal("joe", options.Value.Name);
+            Assert.Equal(170, options.Value.Height);
+        }
+    }
 }

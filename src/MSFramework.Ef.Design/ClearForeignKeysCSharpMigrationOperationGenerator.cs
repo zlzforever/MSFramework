@@ -1,4 +1,4 @@
-﻿// using System.Collections.Generic;
+// using System.Collections.Generic;
 // using Microsoft.EntityFrameworkCore.Infrastructure;
 // using Microsoft.EntityFrameworkCore.Migrations.Design;
 // using Microsoft.EntityFrameworkCore.Migrations.Operations;

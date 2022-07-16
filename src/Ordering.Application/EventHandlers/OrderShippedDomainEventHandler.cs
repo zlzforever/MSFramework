@@ -6,23 +6,23 @@ using Ordering.Domain.AggregateRoots.Events;
 
 namespace Ordering.Application.EventHandlers
 {
-	public class OrderShippedDomainEventHandler : IDomainEventHandler<OrderShippedDomainEvent>
-	{
-		private readonly DbContextFactory _dbContextFactory;
+    public class OrderShippedDomainEventHandler : IDomainEventHandler<OrderShippedDomainEvent>
+    {
+        private readonly DbContextFactory _dbContextFactory;
 
-		public OrderShippedDomainEventHandler(DbContextFactory dbContextFactory)
-		{
-			_dbContextFactory = dbContextFactory;
-		}
+        public OrderShippedDomainEventHandler(DbContextFactory dbContextFactory)
+        {
+            _dbContextFactory = dbContextFactory;
+        }
 
-		public void Dispose()
-		{
-		}
+        public void Dispose()
+        {
+        }
 
-		public Task HandleAsync(OrderShippedDomainEvent query, CancellationToken cancellationToken = default)
-		{
-			// todo
-			return Task.CompletedTask;
-		}
-	}
+        public Task HandleAsync(OrderShippedDomainEvent query, CancellationToken cancellationToken = default)
+        {
+            // todo
+            return Task.CompletedTask;
+        }
+    }
 }

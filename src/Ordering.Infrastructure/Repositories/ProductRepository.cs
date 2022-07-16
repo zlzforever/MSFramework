@@ -10,20 +10,20 @@ using Ordering.Domain.Repositories;
 
 namespace Ordering.Infrastructure.Repositories
 {
-	public class ProductRepository : EfRepository<Product, ObjectId>, IProductRepository
-	{
-		public ProductRepository(DbContextFactory dbContextFactory) : base(dbContextFactory)
-		{
-		}
+    public class ProductRepository : EfRepository<Product, ObjectId>, IProductRepository
+    {
+        public ProductRepository(DbContextFactory dbContextFactory) : base(dbContextFactory)
+        {
+        }
 
-		public Product GetFirst()
-		{
-			return Store.FirstOrDefault();
-		}
+        public Product GetFirst()
+        {
+            return Store.FirstOrDefault();
+        }
 
-		public async Task<PagedResult<Product>> PagedQueryAsync(int page, int limit)
-		{
-			return await Store.PagedQueryAsync(page, limit);
-		}
-	}
+        public async Task<PagedResult<Product>> PagedQueryAsync(int page, int limit)
+        {
+            return await Store.PagedQueryAsync(page, limit);
+        }
+    }
 }

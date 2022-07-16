@@ -5,7 +5,7 @@ using Ordering.Domain.AggregateRoots;
 
 namespace Ordering.Domain.Repositories
 {
-	public interface IOrderingRepository : IRepository<Order, ObjectId>, IScopeDependency
-	{
-	}
+    public interface IOrderingRepository : IRepository<Order, ObjectId>, IScopeDependency
+    {
+    }
 }

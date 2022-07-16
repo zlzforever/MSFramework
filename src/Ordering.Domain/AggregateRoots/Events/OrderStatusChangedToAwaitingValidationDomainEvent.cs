@@ -4,17 +4,17 @@ using MongoDB.Bson;
 
 namespace Ordering.Domain.AggregateRoots.Events
 {
-	public class OrderStatusChangedToAwaitingValidationDomainEvent
-		: DomainEvent
-	{
-		public ObjectId OrderId { get; }
-		public IEnumerable<OrderItem> OrderItems { get; }
+    public class OrderStatusChangedToAwaitingValidationDomainEvent
+        : DomainEvent
+    {
+        public ObjectId OrderId { get; }
+        public IEnumerable<OrderItem> OrderItems { get; }
 
-		public OrderStatusChangedToAwaitingValidationDomainEvent(ObjectId orderId,
-			IEnumerable<OrderItem> orderItems)
-		{
-			OrderId = orderId;
-			OrderItems = orderItems;
-		}
-	}
+        public OrderStatusChangedToAwaitingValidationDomainEvent(ObjectId orderId,
+            IEnumerable<OrderItem> orderItems)
+        {
+            OrderId = orderId;
+            OrderItems = orderItems;
+        }
+    }
 }

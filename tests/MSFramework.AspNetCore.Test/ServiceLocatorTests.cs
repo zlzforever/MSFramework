@@ -15,74 +15,74 @@ using Xunit.Abstractions;
 
 namespace MSFramework.AspNetCore.Test
 {
-	public class ServiceLocatorTests
-	{
-		private readonly ITestOutputHelper _output;
+    public class ServiceLocatorTests
+    {
+        private readonly ITestOutputHelper _output;
 
-		public ServiceLocatorTests(ITestOutputHelper output)
-		{
-			_output = output;
-		}
+        public ServiceLocatorTests(ITestOutputHelper output)
+        {
+            _output = output;
+        }
 
-		class A
-		{
-			public string TraceIdentifier { get; }
+        private class A
+        {
+            public string TraceIdentifier { get; }
 
-			public A()
-			{
-				TraceIdentifier = ObjectId.GenerateNewId().ToString();
-			}
-		}
+            public A()
+            {
+                TraceIdentifier = ObjectId.GenerateNewId().ToString();
+            }
+        }
 
-		[Fact]
-		public async Task Scoped()
-		{
-			using var host = await new HostBuilder()
-				.ConfigureWebHost(webBuilder =>
-				{
-					webBuilder
-						.UseTestServer()
-						.ConfigureAppConfiguration(builder =>
-						{
-							//
-							builder.AddJsonFile("EfPostgreSqlTest.json");
-						})
-						.ConfigureServices((context, services) =>
-						{
-							services.AddMvc();
-							services.AddRouting(x => { x.LowercaseUrls = true; });
-							services.AddMicroserviceFramework(builder =>
-							{
-								builder.UseOptions(context.Configuration);
-								builder.UseAspNetCore();
-							});
-							services.AddScoped<A>();
-						})
-						.Configure(app =>
-						{
-							app.UseRouting();
+        [Fact]
+        public async Task Scoped()
+        {
+            using var host = await new HostBuilder()
+                .ConfigureWebHost(webBuilder =>
+                {
+                    webBuilder
+                        .UseTestServer()
+                        .ConfigureAppConfiguration(builder =>
+                        {
+                            //
+                            builder.AddJsonFile("EfPostgreSqlTest.json");
+                        })
+                        .ConfigureServices((context, services) =>
+                        {
+                            services.AddMvc();
+                            services.AddRouting(x => { x.LowercaseUrls = true; });
+                            services.AddMicroserviceFramework(builder =>
+                            {
+                                builder.UseOptions(context.Configuration);
+                                builder.UseAspNetCore();
+                            });
+                            services.AddScoped<A>();
+                        })
+                        .Configure(app =>
+                        {
+                            app.UseRouting();
 
-							app.UseEndpoints(endpoints =>
-							{
-								endpoints.MapGet("/",
-									async context =>
-									{
-										var session1 = context.RequestServices.GetRequiredService<A>();
-										var session2 = ServiceLocator.GetService<A>();
-										await context.Response.WriteAsync(
-											session1.TraceIdentifier == session2.TraceIdentifier ? "ok" : "");
-									});
-							});
+                            app.UseEndpoints(endpoints =>
+                            {
+                                endpoints.MapGet("/",
+                                    async context =>
+                                    {
+                                        var session1 = context.RequestServices.GetRequiredService<A>();
+                                        var session2 = ServiceLocator.GetService<A>();
+                                        await context.Response.WriteAsync(
+                                            session1.TraceIdentifier == session2.TraceIdentifier ? "ok" : "");
+                                    });
+                            });
 
-							app.UseMicroserviceFramework();
-						});
-				})
-				.StartAsync();
-			_output.WriteLine("server is running");
+                            app.UseMicroserviceFramework();
+                        });
+                })
+                .StartAsync();
+            _output.WriteLine("server is running");
 
-			var result = await host.GetTestClient().GetStringAsync("/");
+            var result = await host.GetTestClient().GetStringAsync("/");
 
-			Assert.Equal("ok", result);
-		}
-	}
+            Assert.Equal("ok", result);
+        }
+    }
 }

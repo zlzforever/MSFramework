@@ -3,12 +3,12 @@ using MongoDB.Bson;
 
 namespace Ordering.Domain.AggregateRoots.Events
 {
-	public class OrderStatusChangedToStockConfirmedDomainEvent
-		: DomainEvent
-	{
-		public ObjectId OrderId { get; }
+    public class OrderStatusChangedToStockConfirmedDomainEvent
+        : DomainEvent
+    {
+        public ObjectId OrderId { get; }
 
-		public OrderStatusChangedToStockConfirmedDomainEvent(ObjectId orderId)
-			=> OrderId = orderId;
-	}
+        public OrderStatusChangedToStockConfirmedDomainEvent(ObjectId orderId)
+            => OrderId = orderId;
+    }
 }

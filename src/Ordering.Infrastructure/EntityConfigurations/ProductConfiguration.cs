@@ -4,15 +4,15 @@ using Ordering.Domain.AggregateRoots;
 
 namespace Ordering.Infrastructure.EntityConfigurations
 {
-	public class ProductConfiguration
-		: EntityTypeConfigurationBase<Product, OrderingContext>
-	{
-		public override void Configure(EntityTypeBuilder<Product> builder)
-		{
-			base.Configure(builder);
+    public class ProductConfiguration
+        : EntityTypeConfigurationBase<Product, OrderingContext>
+    {
+        public override void Configure(EntityTypeBuilder<Product> builder)
+        {
+            base.Configure(builder);
 
-			builder.Property(x => x.Id).ValueGeneratedNever();
-			builder.Property(x => x.Name).HasMaxLength(256);
-		}
-	}
+            builder.Property(x => x.Id).ValueGeneratedNever();
+            builder.Property(x => x.Name).HasMaxLength(256);
+        }
+    }
 }

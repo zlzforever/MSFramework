@@ -1,4 +1,3 @@
-using System.Collections.Concurrent;
 using System.Threading;
 using System.Threading.Tasks;
 using MicroserviceFramework;
@@ -11,99 +10,109 @@ using Xunit;
 
 namespace MSFramework.Tests
 {
-	public class EventBusTests
-	{
-		public class Event1 : EventBase
-		{
-			public int Order { get; set; }
-		}
+    public class EventBusTests
+    {
+        public class Event1 : EventBase
+        {
+            public int Order { get; set; }
+        }
 
-		public class Event1Handler : IEventHandler<Event1>
-		{
-			public static int Count;
+        public class Event1Handler : IEventHandler<Event1>
+        {
+            public static int Count;
 
-			public Task HandleAsync(Event1 @event)
-			{
-				Interlocked.Increment(ref Count);
-				return Task.CompletedTask;
-			}
+            public Task HandleAsync(Event1 @event)
+            {
+                Interlocked.Increment(ref Count);
+                return Task.CompletedTask;
+            }
 
-			public void Dispose()
-			{
-			}
-		}
+            public void Dispose()
+            {
+            }
+        }
 
-		[EventName("event2")]
-		public class Event2 : EventBase
-		{
-		}
+        [EventName("event2")]
+        public class Event2 : EventBase
+        {
+        }
 
-		public class Event2Handler : IEventHandler<Event2>
-		{
-			public static int Count;
+        public class Event2Handler : IEventHandler<Event2>
+        {
+            public static int Count;
 
-			public Task HandleAsync(Event2 @event)
-			{
-				Interlocked.Increment(ref Count);
-				return Task.CompletedTask;
-			}
+            public Task HandleAsync(Event2 @event)
+            {
+                Interlocked.Increment(ref Count);
+                return Task.CompletedTask;
+            }
 
-			public void Dispose()
-			{
-			}
-		}
+            public void Dispose()
+            {
+            }
+        }
 
-		[Fact]
-		public async Task InProcessEventBus()
-		{
-			var serviceCollection = new ServiceCollection();
-			serviceCollection.AddLogging();
-			serviceCollection.AddMicroserviceFramework(x =>
-			{
-				x.UseDependencyInjectionLoader();
-				x.UseEventBus();
-			});
+        [Fact]
+        public void EventName()
+        {
+            var name = typeof(Event1).GetEventName();
+            Assert.Equal("MSFramework.Tests.EventBusTests+Event1", name);
 
-			var provider = serviceCollection.BuildServiceProvider();
-			var eventBus = provider.GetRequiredService<IEventBus>();
+            var name2 = typeof(Event2).GetEventName();
+            Assert.Equal("event2", name2);
+        }
 
-			for (var i = 0; i < 100; ++i)
-			{
-				await eventBus.PublishAsync(new Event1
-				{
-					Order = 1
-				});
-			}
+        [Fact]
+        public async Task InProcessEventBus()
+        {
+            var serviceCollection = new ServiceCollection();
+            serviceCollection.AddLogging();
+            serviceCollection.AddMicroserviceFramework(x =>
+            {
+                x.UseDependencyInjectionLoader();
+                x.UseEventBus();
+            });
 
-			Thread.Sleep(1000);
-			Assert.Equal(100, Event1Handler.Count);
-		}
+            var provider = serviceCollection.BuildServiceProvider();
+            var eventBus = provider.GetRequiredService<IEventBus>();
 
-		[Fact]
-		public async Task RabbitMQEventBus()
-		{
-			var configurationBuilder = new ConfigurationBuilder();
-			configurationBuilder.AddJsonFile("appsettings.json");
-			var configuration = configurationBuilder.Build();
+            for (var i = 0; i < 100; ++i)
+            {
+                await eventBus.PublishAsync(new Event1
+                {
+                    Order = 1
+                });
+            }
 
-			var serviceCollection = new ServiceCollection();
-			serviceCollection.AddLogging();
-			serviceCollection.AddMicroserviceFramework(x =>
-			{
-				x.UseDependencyInjectionLoader();
-				x.UseEventBusRabbitMQ(configuration);
-			});
+            Thread.Sleep(1000);
+            Assert.Equal(100, Event1Handler.Count);
+        }
 
-			var provider = serviceCollection.BuildServiceProvider();
-			var eventBus = provider.GetRequiredService<IEventBus>();
+        [Fact]
+        public async Task RabbitMQEventBus()
+        {
+            var configurationBuilder = new ConfigurationBuilder();
+            configurationBuilder.AddJsonFile("appsettings.json");
+            var configuration = configurationBuilder.Build();
 
-			for (var i = 0; i < 100; ++i)
-			{
-				await eventBus.PublishAsync(new Event2());
-			}
+            var serviceCollection = new ServiceCollection();
+            serviceCollection.AddLogging();
+            serviceCollection.AddMicroserviceFramework(x =>
+            {
+                x.UseDependencyInjectionLoader();
+                x.UseEventBusRabbitMQ(configuration);
+            });
 
-			Thread.Sleep(2000);
-			Assert.Equal(100, Event2Handler.Count);
-		}
-	}
+            var provider = serviceCollection.BuildServiceProvider();
+            var eventBus = provider.GetRequiredService<IEventBus>();
+
+            for (var i = 0; i < 100; ++i)
+            {
+                await eventBus.PublishAsync(new Event2());
+            }
+
+            Thread.Sleep(2000);
+            Assert.Equal(100, Event2Handler.Count);
+        }
+    }
 }

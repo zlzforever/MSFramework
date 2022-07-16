@@ -4,10 +4,10 @@ using MicroserviceFramework.Audit;
 
 namespace MicroserviceFramework.Domain
 {
-	public interface IUnitOfWork
-	{
-		IEnumerable<AuditEntity> GetAuditEntities();
+    public interface IUnitOfWork
+    {
+        IEnumerable<AuditEntity> GetAuditEntities();
 
-		Task CommitAsync();
-	}
+        Task CommitAsync();
+    }
 }

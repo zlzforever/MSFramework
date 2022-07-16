@@ -6,17 +6,17 @@ using Ordering.Infrastructure;
 
 namespace Ordering.API
 {
-	public class DesignTimeDbContextFactory : DesignTimeDbContextFactoryBase<OrderingContext>
-	{
-		protected override IServiceProvider GetServiceProvider()
-		{
-			return Program.CreateHostBuilder(Array.Empty<string>()).Build().Services;
-		}
+    public class DesignTimeDbContextFactory : DesignTimeDbContextFactoryBase<OrderingContext>
+    {
+        protected override IServiceProvider GetServiceProvider()
+        {
+            return Program.CreateHostBuilder(Array.Empty<string>()).Build().Services;
+        }
 
-		public override void ConfigureDesignTimeServices(IServiceCollection serviceCollection)
-		{
-			serviceCollection.AddLogging(x => { x.AddConsole(); });
-			serviceCollection.ClearForeignKeys();
-		}
-	}
+        public override void ConfigureDesignTimeServices(IServiceCollection serviceCollection)
+        {
+            serviceCollection.AddLogging(x => { x.AddConsole(); });
+            serviceCollection.ClearForeignKeys();
+        }
+    }
 }

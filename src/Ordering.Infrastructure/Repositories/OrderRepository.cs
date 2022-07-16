@@ -6,12 +6,12 @@ using Ordering.Domain.Repositories;
 
 namespace Ordering.Infrastructure.Repositories
 {
-	public class OrderRepository
-		: EfRepository<Order, ObjectId>, IOrderingRepository
-	{
-		public OrderRepository(DbContextFactory context) : base(context)
-		{
-			UseQuerySplittingBehavior = true;
-		}
-	}
+    public class OrderRepository
+        : EfRepository<Order, ObjectId>, IOrderingRepository
+    {
+        public OrderRepository(DbContextFactory context) : base(context)
+        {
+            UseQuerySplittingBehavior = true;
+        }
+    }
 }

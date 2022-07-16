@@ -5,35 +5,35 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace MicroserviceFramework
 {
-	public class MicroserviceFrameworkLoaderContext
-	{
-		private static readonly ConcurrentDictionary<IServiceCollection, MicroserviceFrameworkLoaderContext> Contexts =
-			new();
+    public class MicroserviceFrameworkLoaderContext
+    {
+        private static readonly ConcurrentDictionary<IServiceCollection, MicroserviceFrameworkLoaderContext> Contexts =
+            new();
 
-		private MicroserviceFrameworkLoaderContext()
-		{
-		}
+        private MicroserviceFrameworkLoaderContext()
+        {
+        }
 
-		public event Action<Type> ResolveType;
+        public event Action<Type> ResolveType;
 
-		public static MicroserviceFrameworkLoaderContext Get(IServiceCollection serviceCollection)
-		{
-			return Contexts.GetOrAdd(serviceCollection, _ => new MicroserviceFrameworkLoaderContext());
-		}
+        public static MicroserviceFrameworkLoaderContext Get(IServiceCollection serviceCollection)
+        {
+            return Contexts.GetOrAdd(serviceCollection, _ => new MicroserviceFrameworkLoaderContext());
+        }
 
-		public void LoadTypes()
-		{
-			if (ResolveType == null)
-			{
-				return;
-			}
+        public void LoadTypes()
+        {
+            if (ResolveType == null)
+            {
+                return;
+            }
 
-			var types = RuntimeUtilities.GetAllTypes();
+            var types = RuntimeUtilities.GetAllTypes();
 
-			foreach (var type in types)
-			{
-				ResolveType(type);
-			}
-		}
-	}
+            foreach (var type in types)
+            {
+                ResolveType(type);
+            }
+        }
+    }
 }

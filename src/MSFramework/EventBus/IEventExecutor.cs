@@ -4,5 +4,5 @@ namespace MicroserviceFramework.EventBus;
 
 public interface IEventExecutor
 {
-	Task ExecuteAsync(string eventName, string @event);
+    Task ExecuteAsync(string eventName, string @event);
 }
