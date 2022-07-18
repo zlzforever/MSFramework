@@ -1,69 +1,68 @@
-using System;
+﻿using System;
 using System.Threading.Tasks;
 
-namespace MicroserviceFramework.Domain
+namespace MicroserviceFramework.Domain;
+
+/// <summary>
+/// Just to mark a class as repository.
+/// </summary>
+public interface IRepository
+{
+}
+
+public interface IRepository<in TEntity> : IRepository
 {
     /// <summary>
-    /// Just to mark a class as repository.
+    /// Inserts a new entity.
     /// </summary>
-    public interface IRepository
-    {
-    }
+    /// <param name="entity">Inserted entity</param>
+    void Add(TEntity entity);
 
-    public interface IRepository<in TEntity> : IRepository
-    {
-        /// <summary>
-        /// Inserts a new entity.
-        /// </summary>
-        /// <param name="entity">Inserted entity</param>
-        void Add(TEntity entity);
+    /// <summary>
+    /// Inserts a new entity.
+    /// </summary>
+    /// <param name="entity">Inserted entity</param>
+    Task AddAsync(TEntity entity);
 
-        /// <summary>
-        /// Inserts a new entity.
-        /// </summary>
-        /// <param name="entity">Inserted entity</param>
-        Task AddAsync(TEntity entity);
+    /// <summary>
+    /// Deletes an entity.
+    /// </summary>
+    /// <param name="entity">Entity to be deleted</param>
+    void Delete(TEntity entity);
 
-        /// <summary>
-        /// Deletes an entity.
-        /// </summary>
-        /// <param name="entity">Entity to be deleted</param>
-        void Delete(TEntity entity);
+    /// <summary>
+    /// Deletes an entity.
+    /// </summary>
+    /// <param name="entity">Entity to be deleted</param>
+    Task DeleteAsync(TEntity entity);
+}
 
-        /// <summary>
-        /// Deletes an entity.
-        /// </summary>
-        /// <param name="entity">Entity to be deleted</param>
-        Task DeleteAsync(TEntity entity);
-    }
+public interface IRepository<TEntity, in TKey> : IRepository<TEntity>
+    where TEntity : IAggregateRoot<TKey> where TKey : IEquatable<TKey>
+{
+    /// <summary>
+    /// Gets an entity with given primary key.
+    /// </summary>
+    /// <param name="id">Primary key of the entity to get</param>
+    /// <returns>Entity</returns>
+    TEntity Find(TKey id);
 
-    public interface IRepository<TEntity, in TKey> : IRepository<TEntity>
-        where TEntity : IAggregateRoot<TKey> where TKey : IEquatable<TKey>
-    {
-        /// <summary>
-        /// Gets an entity with given primary key.
-        /// </summary>
-        /// <param name="id">Primary key of the entity to get</param>
-        /// <returns>Entity</returns>
-        TEntity Find(TKey id);
+    /// <summary>
+    /// Gets an entity with given primary key.
+    /// </summary>
+    /// <param name="id">Primary key of the entity to get</param>
+    /// <returns>Entity</returns>
+    Task<TEntity> FindAsync(TKey id);
 
-        /// <summary>
-        /// Gets an entity with given primary key.
-        /// </summary>
-        /// <param name="id">Primary key of the entity to get</param>
-        /// <returns>Entity</returns>
-        Task<TEntity> FindAsync(TKey id);
+    /// <summary>
+    /// Deletes an entity by primary key.
+    /// </summary>
+    /// <param name="id">Primary key of the entity</param>
+    void Delete(TKey id);
 
-        /// <summary>
-        /// Deletes an entity by primary key.
-        /// </summary>
-        /// <param name="id">Primary key of the entity</param>
-        void Delete(TKey id);
-
-        /// <summary>
-        /// Deletes an entity by primary key.
-        /// </summary>
-        /// <param name="id">Primary key of the entity</param>
-        Task DeleteAsync(TKey id);
-    }
+    /// <summary>
+    /// Deletes an entity by primary key.
+    /// </summary>
+    /// <param name="id">Primary key of the entity</param>
+    Task DeleteAsync(TKey id);
 }

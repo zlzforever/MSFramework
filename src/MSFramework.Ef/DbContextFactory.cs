@@ -1,52 +1,51 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace MicroserviceFramework.Ef
+namespace MicroserviceFramework.Ef;
+
+public class DbContextFactory
 {
-    public class DbContextFactory
+    private readonly IEntityConfigurationTypeFinder _entityConfigurationTypeFinder;
+    private readonly IServiceProvider _serviceProvider;
+
+    public DbContextFactory(IServiceProvider serviceProvider)
     {
-        private readonly IEntityConfigurationTypeFinder _entityConfigurationTypeFinder;
-        private readonly IServiceProvider _serviceProvider;
+        _entityConfigurationTypeFinder = serviceProvider
+            .GetRequiredService<IEntityConfigurationTypeFinder>();
+        _serviceProvider = serviceProvider;
+    }
 
-        public DbContextFactory(IServiceProvider serviceProvider)
-        {
-            _entityConfigurationTypeFinder = serviceProvider
-                .GetRequiredService<IEntityConfigurationTypeFinder>();
-            _serviceProvider = serviceProvider;
-        }
+    /// <summary>
+    /// 获取指定数据实体的上下文类型
+    /// </summary>
+    /// <returns>实体所属上下文实例</returns>
+    public DbContextBase GetDbContext<TEntity>()
+    {
+        var dbContextType = _entityConfigurationTypeFinder
+            .GetDbContextTypeForEntity(typeof(TEntity));
+        return (DbContextBase)_serviceProvider.GetRequiredService(dbContextType);
+    }
 
-        /// <summary>
-        /// 获取指定数据实体的上下文类型
-        /// </summary>
-        /// <returns>实体所属上下文实例</returns>
-        public DbContextBase GetDbContext<TEntity>()
+    public IEnumerable<DbContextBase> GetAllDbContexts()
+    {
+        foreach (var dbContextType in _entityConfigurationTypeFinder.GetAllDbContextTypes())
         {
-            var dbContextType = _entityConfigurationTypeFinder
-                .GetDbContextTypeForEntity(typeof(TEntity));
-            return (DbContextBase)_serviceProvider.GetRequiredService(dbContextType);
-        }
-
-        public IEnumerable<DbContextBase> GetAllDbContexts()
-        {
-            foreach (var dbContextType in _entityConfigurationTypeFinder.GetAllDbContextTypes())
+            var dbContext = _serviceProvider.GetService(dbContextType);
+            if (dbContext != null)
             {
-                var dbContext = _serviceProvider.GetService(dbContextType);
-                if (dbContext != null)
-                {
-                    yield return (DbContextBase)dbContext;
-                }
+                yield return (DbContextBase)dbContext;
             }
         }
+    }
 
-        public DbContextBase GetDbContextOrDefault<TEntity>()
+    public DbContextBase GetDbContextOrDefault<TEntity>()
+    {
+        if (!_entityConfigurationTypeFinder.HasDbContextForEntity<TEntity>())
         {
-            if (!_entityConfigurationTypeFinder.HasDbContextForEntity<TEntity>())
-            {
-                return null;
-            }
-
-            return GetDbContext<TEntity>();
+            return null;
         }
+
+        return GetDbContext<TEntity>();
     }
 }

@@ -1,11 +1,10 @@
-using System;
+﻿using System;
 
-namespace MicroserviceFramework.Serialization
+namespace MicroserviceFramework.Serialization;
+
+public interface IJsonHelper
 {
-    public interface IJsonHelper
-    {
-        string Serialize(object obj);
-        T Deserialize<T>(string json);
-        object Deserialize(string json, Type type);
-    }
+    string Serialize(object obj);
+    T Deserialize<T>(string json);
+    object Deserialize(string json, Type type);
 }

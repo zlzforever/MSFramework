@@ -1,4 +1,4 @@
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using MicroserviceFramework;
 using MicroserviceFramework.AspNetCore;
 using MicroserviceFramework.Ef;
@@ -14,64 +14,63 @@ using MSFramework.AspNetCore.Test.EfPostgreSqlTest.Infrastructure;
 using Xunit;
 using Xunit.Abstractions;
 
-namespace MSFramework.AspNetCore.Test.EfPostgreSqlTest
+namespace MSFramework.AspNetCore.Test.EfPostgreSqlTest;
+
+public class RunTest
 {
-    public class RunTest
+    private readonly ITestOutputHelper _output;
+
+    public RunTest(ITestOutputHelper output)
     {
-        private readonly ITestOutputHelper _output;
+        _output = output;
+    }
 
-        public RunTest(ITestOutputHelper output)
-        {
-            _output = output;
-        }
+    [Fact]
+    public async Task Run_When_AddMSFramework_WithEfNpgsql()
+    {
+        using var host = await new HostBuilder()
+            .ConfigureWebHost(webBuilder =>
+            {
+                webBuilder
+                    .UseTestServer()
+                    .ConfigureAppConfiguration(builder =>
+                    {
+                        //
+                        builder.AddJsonFile("EfPostgreSqlTest.json");
+                    })
+                    .ConfigureServices((context, services) =>
+                    {
+                        services.AddMvc();
 
-        [Fact]
-        public async Task Run_When_AddMSFramework_WithEfNpgsql()
-        {
-            using var host = await new HostBuilder()
-                .ConfigureWebHost(webBuilder =>
-                {
-                    webBuilder
-                        .UseTestServer()
-                        .ConfigureAppConfiguration(builder =>
+                        services.AddRouting(x => { x.LowercaseUrls = true; });
+                        services.AddMicroserviceFramework(builder =>
                         {
-                            //
-                            builder.AddJsonFile("EfPostgreSqlTest.json");
-                        })
-                        .ConfigureServices((context, services) =>
-                        {
-                            services.AddMvc();
-
-                            services.AddRouting(x => { x.LowercaseUrls = true; });
-                            services.AddMicroserviceFramework(builder =>
+                            builder.UseOptions(context.Configuration);
+                            builder.UseAspNetCore();
+                            builder.UseEntityFramework(x =>
                             {
-                                builder.UseOptions(context.Configuration);
-                                builder.UseAspNetCore();
-                                builder.UseEntityFramework(x =>
-                                {
-                                    //
-                                    x.AddNpgsql<TestDataContext>(context.Configuration);
-                                });
+                                //
+                                x.AddNpgsql<TestDataContext>(context.Configuration);
                             });
-                        })
-                        .Configure(app =>
-                        {
-                            app.UseRouting();
-
-                            app.UseEndpoints(endpoints =>
-                            {
-                                endpoints.MapGet("/",
-                                    async context => { await context.Response.WriteAsync("Hello World!"); });
-                            });
-
-                            app.UseMicroserviceFramework();
                         });
-                })
-                .StartAsync();
-            _output.WriteLine("server is running");
+                    })
+                    .Configure(app =>
+                    {
+                        app.UseRouting();
 
-            var dbContext = host.Services.CreateScope().ServiceProvider.GetRequiredService<TestDataContext>();
-            Assert.NotNull(dbContext);
-        }
+                        app.UseEndpoints(endpoints =>
+                        {
+                            endpoints.MapGet("/",
+                                async context => { await context.Response.WriteAsync("Hello World!"); });
+                        });
+
+                        app.UseMicroserviceFramework();
+                    });
+            })
+            .StartAsync();
+        _output.WriteLine("server is running");
+
+        var dbContext = host.Services.CreateScope().ServiceProvider.GetRequiredService<TestDataContext>();
+        Assert.NotNull(dbContext);
     }
 }

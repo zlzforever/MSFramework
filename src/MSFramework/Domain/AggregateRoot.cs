@@ -1,20 +1,19 @@
-using System;
+﻿using System;
 
-namespace MicroserviceFramework.Domain
+namespace MicroserviceFramework.Domain;
+
+[Serializable]
+public abstract class AggregateRoot : EntityBase,
+    IAggregateRoot
 {
-    [Serializable]
-    public abstract class AggregateRoot : EntityBase,
-        IAggregateRoot
-    {
-    }
+}
 
-    [Serializable]
-    public abstract class AggregateRoot<TKey> :
-        EntityBase<TKey>,
-        IAggregateRoot<TKey> where TKey : IEquatable<TKey>
+[Serializable]
+public abstract class AggregateRoot<TKey> :
+    EntityBase<TKey>,
+    IAggregateRoot<TKey> where TKey : IEquatable<TKey>
+{
+    protected AggregateRoot(TKey id) : base(id)
     {
-        protected AggregateRoot(TKey id) : base(id)
-        {
-        }
     }
 }

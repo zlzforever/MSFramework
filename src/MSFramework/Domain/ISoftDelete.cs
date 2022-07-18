@@ -1,10 +1,9 @@
-namespace MicroserviceFramework.Domain
+﻿namespace MicroserviceFramework.Domain;
+
+public interface ISoftDelete
 {
-    public interface ISoftDelete
-    {
-        /// <summary>
-        /// 是否已经删除
-        /// </summary>
-        bool IsDeleted { get; }
-    }
+    /// <summary>
+    /// 是否已经删除
+    /// </summary>
+    bool IsDeleted { get; }
 }

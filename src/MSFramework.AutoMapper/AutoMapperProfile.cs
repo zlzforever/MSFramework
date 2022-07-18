@@ -1,13 +1,12 @@
-using AutoMapper;
+﻿using AutoMapper;
 using MicroserviceFramework.Common;
 
-namespace MicroserviceFramework.AutoMapper
+namespace MicroserviceFramework.AutoMapper;
+
+public class AutoMapperProfile : Profile
 {
-    public class AutoMapperProfile : Profile
+    public AutoMapperProfile()
     {
-        public AutoMapperProfile()
-        {
-            CreateMap(typeof(PagedResult<>), typeof(PagedResult<>));
-        }
+        CreateMap(typeof(PagedResult<>), typeof(PagedResult<>));
     }
 }

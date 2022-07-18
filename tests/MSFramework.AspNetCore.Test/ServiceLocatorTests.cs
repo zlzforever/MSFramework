@@ -1,4 +1,4 @@
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using MicroserviceFramework;
 using MicroserviceFramework.AspNetCore;
 using MicroserviceFramework.Extensions.DependencyInjection;
@@ -13,76 +13,75 @@ using MongoDB.Bson;
 using Xunit;
 using Xunit.Abstractions;
 
-namespace MSFramework.AspNetCore.Test
+namespace MSFramework.AspNetCore.Test;
+
+public class ServiceLocatorTests
 {
-    public class ServiceLocatorTests
+    private readonly ITestOutputHelper _output;
+
+    public ServiceLocatorTests(ITestOutputHelper output)
     {
-        private readonly ITestOutputHelper _output;
+        _output = output;
+    }
 
-        public ServiceLocatorTests(ITestOutputHelper output)
+    private class A
+    {
+        public string TraceIdentifier { get; }
+
+        public A()
         {
-            _output = output;
+            TraceIdentifier = ObjectId.GenerateNewId().ToString();
         }
+    }
 
-        private class A
-        {
-            public string TraceIdentifier { get; }
-
-            public A()
+    [Fact]
+    public async Task Scoped()
+    {
+        using var host = await new HostBuilder()
+            .ConfigureWebHost(webBuilder =>
             {
-                TraceIdentifier = ObjectId.GenerateNewId().ToString();
-            }
-        }
-
-        [Fact]
-        public async Task Scoped()
-        {
-            using var host = await new HostBuilder()
-                .ConfigureWebHost(webBuilder =>
-                {
-                    webBuilder
-                        .UseTestServer()
-                        .ConfigureAppConfiguration(builder =>
+                webBuilder
+                    .UseTestServer()
+                    .ConfigureAppConfiguration(builder =>
+                    {
+                        //
+                        builder.AddJsonFile("EfPostgreSqlTest.json");
+                    })
+                    .ConfigureServices((context, services) =>
+                    {
+                        services.AddMvc();
+                        services.AddRouting(x => { x.LowercaseUrls = true; });
+                        services.AddMicroserviceFramework(builder =>
                         {
-                            //
-                            builder.AddJsonFile("EfPostgreSqlTest.json");
-                        })
-                        .ConfigureServices((context, services) =>
-                        {
-                            services.AddMvc();
-                            services.AddRouting(x => { x.LowercaseUrls = true; });
-                            services.AddMicroserviceFramework(builder =>
-                            {
-                                builder.UseOptions(context.Configuration);
-                                builder.UseAspNetCore();
-                            });
-                            services.AddScoped<A>();
-                        })
-                        .Configure(app =>
-                        {
-                            app.UseRouting();
-
-                            app.UseEndpoints(endpoints =>
-                            {
-                                endpoints.MapGet("/",
-                                    async context =>
-                                    {
-                                        var session1 = context.RequestServices.GetRequiredService<A>();
-                                        var session2 = ServiceLocator.GetService<A>();
-                                        await context.Response.WriteAsync(
-                                            session1.TraceIdentifier == session2.TraceIdentifier ? "ok" : "");
-                                    });
-                            });
-
-                            app.UseMicroserviceFramework();
+                            builder.UseOptions(context.Configuration);
+                            builder.UseAspNetCore();
                         });
-                })
-                .StartAsync();
-            _output.WriteLine("server is running");
+                        services.AddScoped<A>();
+                    })
+                    .Configure(app =>
+                    {
+                        app.UseRouting();
 
-            var result = await host.GetTestClient().GetStringAsync("/");
+                        app.UseEndpoints(endpoints =>
+                        {
+                            endpoints.MapGet("/",
+                                async context =>
+                                {
+                                    var session1 = context.RequestServices.GetRequiredService<A>();
+                                    var session2 = ServiceLocator.GetService<A>();
+                                    await context.Response.WriteAsync(
+                                        session1.TraceIdentifier == session2.TraceIdentifier ? "ok" : "");
+                                });
+                        });
 
-            Assert.Equal("ok", result);
-        }
+                        app.UseMicroserviceFramework();
+                    });
+            })
+            .StartAsync();
+        _output.WriteLine("server is running");
+
+        var result = await host.GetTestClient().GetStringAsync("/");
+
+        Assert.Equal("ok", result);
     }
 }

@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Linq;
 using System.Threading.Tasks;
 using MicroserviceFramework.Serialization;
@@ -41,7 +41,6 @@ public class DefaultEventExecutor : IEventExecutor
                     continue;
                 }
 
-                await Task.Yield();
                 var @event = Default.JsonHelper.Deserialize(eventData, subscription.EventType);
                 if (subscription.MethodInfo.Invoke(handler,
                         new[] { @event }) is Task task)

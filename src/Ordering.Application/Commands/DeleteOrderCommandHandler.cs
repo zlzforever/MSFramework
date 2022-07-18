@@ -1,35 +1,34 @@
-using System.Threading;
+﻿using System.Threading;
 using System.Threading.Tasks;
 using MicroserviceFramework.Mediator;
 using Ordering.Domain.Repositories;
 
-namespace Ordering.Application.Commands
+namespace Ordering.Application.Commands;
+
+public class DeleteOrderCommandHandler : IRequestHandler<DeleteOrderCommand>
 {
-    public class DeleteOrderCommandHandler : IRequestHandler<DeleteOrderCommand>
+    private readonly IOrderingRepository _orderRepository;
+
+    public DeleteOrderCommandHandler(IOrderingRepository orderRepository)
     {
-        private readonly IOrderingRepository _orderRepository;
+        _orderRepository = orderRepository;
+    }
 
-        public DeleteOrderCommandHandler(IOrderingRepository orderRepository)
+    /// <summary>
+    /// Handler which processes the command when
+    /// customer executes cancel order from app
+    /// </summary>
+    /// <param name="command"></param>
+    /// <param name="cancellationToken"></param>
+    /// <returns></returns>
+    public async Task HandleAsync(DeleteOrderCommand command, CancellationToken cancellationToken)
+    {
+        var order = await _orderRepository.FindAsync(command.OrderId);
+        if (order == null)
         {
-            _orderRepository = orderRepository;
+            return;
         }
 
-        /// <summary>
-        /// Handler which processes the command when
-        /// customer executes cancel order from app
-        /// </summary>
-        /// <param name="command"></param>
-        /// <param name="cancellationToken"></param>
-        /// <returns></returns>
-        public async Task HandleAsync(DeleteOrderCommand command, CancellationToken cancellationToken)
-        {
-            var order = await _orderRepository.FindAsync(command.OrderId);
-            if (order == null)
-            {
-                return;
-            }
-
-            await _orderRepository.DeleteAsync(order);
-        }
+        await _orderRepository.DeleteAsync(order);
     }
 }

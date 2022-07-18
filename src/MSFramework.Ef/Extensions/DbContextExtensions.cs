@@ -1,13 +1,12 @@
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 
-namespace MicroserviceFramework.Ef.Extensions
+namespace MicroserviceFramework.Ef.Extensions;
+
+public static class DbContextExtensions
 {
-    public static class DbContextExtensions
+    public static string GetTableName<TEntity>(this DbContext dbContext) where TEntity : class
     {
-        public static string GetTableName<TEntity>(this DbContext dbContext) where TEntity : class
-        {
-            var dbSet = dbContext.Set<TEntity>();
-            return dbSet.EntityType.GetTableName();
-        }
+        var dbSet = dbContext.Set<TEntity>();
+        return dbSet.EntityType.GetTableName();
     }
 }

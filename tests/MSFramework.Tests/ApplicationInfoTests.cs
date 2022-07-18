@@ -1,4 +1,4 @@
-using MicroserviceFramework;
+﻿using MicroserviceFramework;
 using MicroserviceFramework.Common;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;

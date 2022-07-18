@@ -1,14 +1,13 @@
-using Microsoft.Extensions.DependencyInjection;
+﻿using Microsoft.Extensions.DependencyInjection;
 
-namespace MicroserviceFramework
+namespace MicroserviceFramework;
+
+public class MicroserviceFrameworkBuilder
 {
-    public class MicroserviceFrameworkBuilder
+    public MicroserviceFrameworkBuilder(IServiceCollection services)
     {
-        public MicroserviceFrameworkBuilder(IServiceCollection services)
-        {
-            Services = services;
-        }
-
-        public IServiceCollection Services { get; }
+        Services = services;
     }
+
+    public IServiceCollection Services { get; }
 }

@@ -1,13 +1,12 @@
-using AutoMapper;
+﻿using AutoMapper;
 using Ordering.Domain.AggregateRoots;
 
-namespace Ordering.API.Controllers
+namespace Ordering.API.Controllers;
+
+public class AutoMapperProfile : Profile
 {
-    public class AutoMapperProfile : Profile
+    public AutoMapperProfile()
     {
-        public AutoMapperProfile()
-        {
-            CreateMap<Product, ProductDTO>();
-        }
+        CreateMap<Product, ProductDTO>();
     }
 }

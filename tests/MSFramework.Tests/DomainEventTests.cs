@@ -1,4 +1,4 @@
-using System.Threading;
+﻿using System.Threading;
 using System.Threading.Tasks;
 using MicroserviceFramework;
 using MicroserviceFramework.Domain;
@@ -7,114 +7,113 @@ using MicroserviceFramework.Mediator;
 using Microsoft.Extensions.DependencyInjection;
 using Xunit;
 
-namespace MSFramework.Tests
+namespace MSFramework.Tests;
+
+public class DomainEvent4 : DomainEvent
 {
-    public class DomainEvent4 : DomainEvent
+    public static int Count;
+}
+
+public class DomainEvent4Handler : IDomainEventHandler<DomainEvent4>
+{
+    public Task HandleAsync(DomainEvent4 @event, CancellationToken cancellationToken = default)
     {
-        public static int Count;
+        DomainEvent4.Count += 1;
+        return Task.CompletedTask;
     }
 
-    public class DomainEvent4Handler : IDomainEventHandler<DomainEvent4>
-    {
-        public Task HandleAsync(DomainEvent4 @event, CancellationToken cancellationToken = default)
-        {
-            DomainEvent4.Count += 1;
-            return Task.CompletedTask;
-        }
-
-        public void Dispose()
-        {
-        }
-    }
-
-    public class DomainEvent2 : DomainEvent
+    public void Dispose()
     {
     }
+}
 
-    public class DomainEvent3 : DomainEvent
+public class DomainEvent2 : DomainEvent
+{
+}
+
+public class DomainEvent3 : DomainEvent
+{
+    public static int Count;
+}
+
+public class DomainEvent31Handler : IDomainEventHandler<DomainEvent3>
+{
+    public Task HandleAsync(DomainEvent3 @event, CancellationToken cancellationToken = default)
     {
-        public static int Count;
+        DomainEvent3.Count += 1;
+        return Task.CompletedTask;
     }
 
-    public class DomainEvent31Handler : IDomainEventHandler<DomainEvent3>
+    public void Dispose()
     {
-        public Task HandleAsync(DomainEvent3 @event, CancellationToken cancellationToken = default)
-        {
-            DomainEvent3.Count += 1;
-            return Task.CompletedTask;
-        }
+    }
+}
 
-        public void Dispose()
-        {
-        }
+public class DomainEvent32Handler : IDomainEventHandler<DomainEvent3>
+{
+    public Task HandleAsync(DomainEvent3 @event, CancellationToken cancellationToken = default)
+    {
+        DomainEvent3.Count += 1;
+        return Task.CompletedTask;
     }
 
-    public class DomainEvent32Handler : IDomainEventHandler<DomainEvent3>
+    public void Dispose()
     {
-        public Task HandleAsync(DomainEvent3 @event, CancellationToken cancellationToken = default)
-        {
-            DomainEvent3.Count += 1;
-            return Task.CompletedTask;
-        }
+    }
+}
 
-        public void Dispose()
+public class DomainEventTests
+{
+    [Fact]
+    public async Task DispatchTo1HandlerTests()
+    {
+        var serviceCollection = new ServiceCollection();
+        serviceCollection.AddMicroserviceFramework(x =>
         {
-        }
+            x.UseDependencyInjectionLoader();
+            x.UseMediator();
+        });
+        var serviceProvider = serviceCollection.BuildServiceProvider();
+
+        var mediator = serviceProvider.GetRequiredService<IMediator>();
+        await mediator.PublishAsync(new DomainEvent4());
+        Assert.Equal(1, DomainEvent4.Count);
+
+        await mediator.PublishAsync(new DomainEvent4());
+        Assert.Equal(2, DomainEvent4.Count);
     }
 
-    public class DomainEventTests
+    [Fact]
+    public async Task DispatchToMultiHandlerTests()
     {
-        [Fact]
-        public async Task DispatchTo1HandlerTests()
+        var serviceCollection = new ServiceCollection();
+        serviceCollection.AddMicroserviceFramework(x =>
         {
-            var serviceCollection = new ServiceCollection();
-            serviceCollection.AddMicroserviceFramework(x =>
-            {
-                x.UseDependencyInjectionLoader();
-                x.UseMediator();
-            });
-            var serviceProvider = serviceCollection.BuildServiceProvider();
+            x.UseDependencyInjectionLoader();
+            x.UseMediator();
+        });
 
-            var mediator = serviceProvider.GetRequiredService<IMediator>();
-            await mediator.PublishAsync(new DomainEvent4());
-            Assert.Equal(1, DomainEvent4.Count);
+        var serviceProvider = serviceCollection.BuildServiceProvider();
+        var mediator = serviceProvider.GetRequiredService<IMediator>();
+        await mediator.PublishAsync(new DomainEvent3());
+        Assert.Equal(2, DomainEvent3.Count);
 
-            await mediator.PublishAsync(new DomainEvent4());
-            Assert.Equal(2, DomainEvent4.Count);
-        }
+        await mediator.PublishAsync(new DomainEvent3());
+        Assert.Equal(4, DomainEvent3.Count);
+    }
 
-        [Fact]
-        public async Task DispatchToMultiHandlerTests()
+    [Fact]
+    public async Task EventWithoutHandlerTest()
+    {
+        var serviceCollection = new ServiceCollection();
+        serviceCollection.AddMicroserviceFramework(x =>
         {
-            var serviceCollection = new ServiceCollection();
-            serviceCollection.AddMicroserviceFramework(x =>
-            {
-                x.UseDependencyInjectionLoader();
-                x.UseMediator();
-            });
+            x.UseDependencyInjectionLoader();
+            x.UseMediator();
+        });
 
-            var serviceProvider = serviceCollection.BuildServiceProvider();
-            var mediator = serviceProvider.GetRequiredService<IMediator>();
-            await mediator.PublishAsync(new DomainEvent3());
-            Assert.Equal(2, DomainEvent3.Count);
-
-            await mediator.PublishAsync(new DomainEvent3());
-            Assert.Equal(4, DomainEvent3.Count);
-        }
-
-        [Fact]
-        public async Task EventWithoutHandlerTest()
-        {
-            var serviceCollection = new ServiceCollection();
-            serviceCollection.AddMicroserviceFramework(x =>
-            {
-                x.UseDependencyInjectionLoader();
-                x.UseMediator();
-            });
-
-            var serviceProvider = serviceCollection.BuildServiceProvider();
-            var mediator = serviceProvider.GetRequiredService<IMediator>();
-            await mediator.PublishAsync(new DomainEvent2());
-        }
+        var serviceProvider = serviceCollection.BuildServiceProvider();
+        var mediator = serviceProvider.GetRequiredService<IMediator>();
+        await mediator.PublishAsync(new DomainEvent2());
     }
 }

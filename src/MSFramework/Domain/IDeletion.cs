@@ -1,19 +1,18 @@
-using System;
+﻿using System;
 
-namespace MicroserviceFramework.Domain
+namespace MicroserviceFramework.Domain;
+
+public interface IDeletion : ISoftDelete
 {
-    public interface IDeletion : ISoftDelete
-    {
-        /// <summary>
-        /// Which user deleted this entity?
-        /// </summary>
-        string DeleterId { get; }
+    /// <summary>
+    /// Which user deleted this entity?
+    /// </summary>
+    string DeleterId { get; }
 
-        /// <summary>
-        /// Deletion time of this entity.
-        /// </summary>
-        DateTimeOffset? DeletionTime { get; set; }
+    /// <summary>
+    /// Deletion time of this entity.
+    /// </summary>
+    DateTimeOffset? DeletionTime { get; set; }
 
-        void Delete(string userId, DateTimeOffset deletionTime = default);
-    }
+    void Delete(string userId, DateTimeOffset deletionTime = default);
 }

@@ -1,44 +1,43 @@
-using MicroserviceFramework.Domain;
+﻿using MicroserviceFramework.Domain;
 using MongoDB.Bson;
 
-namespace Ordering.Domain.AggregateRoots
+namespace Ordering.Domain.AggregateRoots;
+
+public class ProjectCreateEvent : DomainEvent
 {
-    public class ProjectCreateEvent : DomainEvent
+}
+
+public class Product : AggregateRoot<ObjectId>, IOptimisticLock
+{
+    private Product(ObjectId id) : base(id)
     {
     }
 
-    public class Product : AggregateRoot<ObjectId>, IOptimisticLock
+    public static Product Create(string name, int price)
     {
-        private Product(ObjectId id) : base(id)
+        var product = new Product(ObjectId.GenerateNewId())
         {
-        }
+            Name = name,
+            Price = price
+        };
 
-        public static Product Create(string name, int price)
-        {
-            var product = new Product(ObjectId.GenerateNewId())
-            {
-                Name = name,
-                Price = price
-            };
+        product.AddDomainEvent(new ProjectCreateEvent());
+        return product;
+    }
 
-            product.AddDomainEvent(new ProjectCreateEvent());
-            return product;
-        }
+    public string Name { get; private set; }
 
-        public string Name { get; private set; }
+    public int Price { get; private set; }
 
-        public int Price { get; private set; }
+    public override string ToString()
+    {
+        return $"[ENTITY {GetType().Name}] Id = {Id}, Name = {Name}, Price = {Price}";
+    }
 
-        public override string ToString()
-        {
-            return $"[ENTITY {GetType().Name}] Id = {Id}, Name = {Name}, Price = {Price}";
-        }
+    public string ConcurrencyStamp { get; set; }
 
-        public string ConcurrencyStamp { get; set; }
-
-        public void SetName(string name)
-        {
-            Name = name;
-        }
+    public void SetName(string name)
+    {
+        Name = name;
     }
 }

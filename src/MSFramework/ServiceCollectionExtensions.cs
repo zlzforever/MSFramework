@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using MicroserviceFramework.Common;
@@ -16,54 +16,53 @@ using Microsoft.Extensions.Logging;
 
 // ReSharper disable InconsistentNaming
 
-namespace MicroserviceFramework
+namespace MicroserviceFramework;
+
+public static class ServiceCollectionExtensions
 {
-    public static class ServiceCollectionExtensions
+    public static MicroserviceFrameworkBuilder UseOptions(this MicroserviceFrameworkBuilder builder,
+        IConfiguration configuration)
     {
-        public static MicroserviceFrameworkBuilder UseOptions(this MicroserviceFrameworkBuilder builder,
-            IConfiguration configuration)
+        builder.Services.AddOptions(configuration);
+        return builder;
+    }
+
+    public static void AddMicroserviceFramework(this IServiceCollection services,
+        Action<MicroserviceFrameworkBuilder> builderAction = null)
+    {
+        var builder = new MicroserviceFrameworkBuilder(services);
+
+        builder.Services.TryAddSingleton<ApplicationInfo>();
+        builder.UseDefaultJsonHelper();
+
+        // 放到后面，加载优先级更高
+        builderAction?.Invoke(builder);
+
+        // 请保证这在最后，不然类型扫描事件的注册会晚于扫描
+        MicroserviceFrameworkLoaderContext.Get(services).LoadTypes();
+    }
+
+    public static void UseMicroserviceFramework(this IServiceProvider applicationServices)
+    {
+        var configuration = applicationServices.GetService<IConfiguration>();
+        if (configuration == null)
         {
-            builder.Services.AddOptions(configuration);
-            return builder;
+            return;
         }
 
-        public static void AddMicroserviceFramework(this IServiceCollection services,
-            Action<MicroserviceFrameworkBuilder> builderAction = null)
+        var loggerFactory = applicationServices.GetService<ILoggerFactory>();
+        if (loggerFactory == null)
         {
-            var builder = new MicroserviceFrameworkBuilder(services);
-
-            builder.Services.TryAddSingleton<ApplicationInfo>();
-            builder.UseDefaultJsonHelper();
-
-            // 放到后面，加载优先级更高
-            builderAction?.Invoke(builder);
-
-            // 请保证这在最后，不然类型扫描事件的注册会晚于扫描
-            MicroserviceFrameworkLoaderContext.Get(services).LoadTypes();
+            return;
         }
 
-        public static void UseMicroserviceFramework(this IServiceProvider applicationServices)
-        {
-            var configuration = applicationServices.GetService<IConfiguration>();
-            if (configuration == null)
-            {
-                return;
-            }
+        var logger = loggerFactory.CreateLogger("UseMicroserviceFramework");
 
-            var loggerFactory = applicationServices.GetService<ILoggerFactory>();
-            if (loggerFactory == null)
-            {
-                return;
-            }
+        var initializers = applicationServices.GetServices<IHostedService>().Where(x => x is InitializerBase)
+            .ToList();
+        logger.LogInformation(
+            $"Initializers: {string.Join(" -> ", initializers.Select(x => x.GetType().FullName))}");
 
-            var logger = loggerFactory.CreateLogger("UseMicroserviceFramework");
-
-            var initializers = applicationServices.GetServices<IHostedService>().Where(x => x is InitializerBase)
-                .ToList();
-            logger.LogInformation(
-                $"Initializers: {string.Join(" -> ", initializers.Select(x => x.GetType().FullName))}");
-
-            ServiceLocator.ServiceProvider = applicationServices;
-        }
+        ServiceLocator.ServiceProvider = applicationServices;
     }
 }

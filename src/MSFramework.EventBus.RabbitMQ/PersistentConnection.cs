@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.IO;
 using System.Net.Sockets;
 using Microsoft.Extensions.Logging;
@@ -7,137 +7,136 @@ using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
 using RabbitMQ.Client.Exceptions;
 
-namespace MicroserviceFramework.EventBus.RabbitMQ
+namespace MicroserviceFramework.EventBus.RabbitMQ;
+
+public class PersistentConnection : IDisposable
 {
-    public class PersistentConnection : IDisposable
+    private readonly IConnectionFactory _connectionFactory;
+    private readonly ILogger<PersistentConnection> _logger;
+    private readonly int _retryCount;
+    private IConnection _connection;
+    private bool _disposed;
+    private readonly object _syncLocker = new();
+
+    public PersistentConnection(IConnectionFactory connectionFactory, ILogger<PersistentConnection> logger,
+        int retryCount = 5)
     {
-        private readonly IConnectionFactory _connectionFactory;
-        private readonly ILogger<PersistentConnection> _logger;
-        private readonly int _retryCount;
-        private IConnection _connection;
-        private bool _disposed;
-        private readonly object _syncLocker = new();
+        _connectionFactory = connectionFactory ?? throw new ArgumentNullException(nameof(connectionFactory));
+        _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+        _retryCount = retryCount;
+    }
 
-        public PersistentConnection(IConnectionFactory connectionFactory, ILogger<PersistentConnection> logger,
-            int retryCount = 5)
+    public bool IsConnected => _connection is { IsOpen: true } && !_disposed;
+
+    public bool TryConnect()
+    {
+        _logger.LogInformation("RabbitMQ Client is trying to connect");
+
+        lock (_syncLocker)
         {
-            _connectionFactory = connectionFactory ?? throw new ArgumentNullException(nameof(connectionFactory));
-            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
-            _retryCount = retryCount;
-        }
+            var policy = Policy.Handle<SocketException>()
+                .Or<BrokerUnreachableException>()
+                .WaitAndRetry(_retryCount, retryAttempt => TimeSpan.FromSeconds(Math.Pow(2, retryAttempt)),
+                    (ex, time) =>
+                    {
+                        _logger.LogWarning(ex,
+                            "RabbitMQ Client could not connect after {TimeOut}s ({ExceptionMessage})",
+                            $"{time.TotalSeconds:n1}", ex.Message);
+                    }
+                );
 
-        public bool IsConnected => _connection is { IsOpen: true } && !_disposed;
-
-        public bool TryConnect()
-        {
-            _logger.LogInformation("RabbitMQ Client is trying to connect");
-
-            lock (_syncLocker)
+            policy.Execute(() =>
             {
-                var policy = Policy.Handle<SocketException>()
-                    .Or<BrokerUnreachableException>()
-                    .WaitAndRetry(_retryCount, retryAttempt => TimeSpan.FromSeconds(Math.Pow(2, retryAttempt)),
-                        (ex, time) =>
-                        {
-                            _logger.LogWarning(ex,
-                                "RabbitMQ Client could not connect after {TimeOut}s ({ExceptionMessage})",
-                                $"{time.TotalSeconds:n1}", ex.Message);
-                        }
-                    );
+                _connection = _connectionFactory
+                    .CreateConnection();
+            });
 
-                policy.Execute(() =>
-                {
-                    _connection = _connectionFactory
-                        .CreateConnection();
-                });
+            if (IsConnected)
+            {
+                _connection.ConnectionShutdown += OnConnectionShutdown;
+                _connection.CallbackException += OnCallbackException;
+                _connection.ConnectionBlocked += OnConnectionBlocked;
 
-                if (IsConnected)
-                {
-                    _connection.ConnectionShutdown += OnConnectionShutdown;
-                    _connection.CallbackException += OnCallbackException;
-                    _connection.ConnectionBlocked += OnConnectionBlocked;
+                _logger.LogInformation(
+                    "RabbitMQ Client acquired a persistent connection to '{HostName}' and is subscribed to failure events",
+                    _connection.Endpoint.HostName);
 
-                    _logger.LogInformation(
-                        "RabbitMQ Client acquired a persistent connection to '{HostName}' and is subscribed to failure events",
-                        _connection.Endpoint.HostName);
+                return true;
+            }
+            else
+            {
+                _logger.LogCritical("FATAL ERROR: RabbitMQ connections could not be created and opened");
 
-                    return true;
-                }
-                else
-                {
-                    _logger.LogCritical("FATAL ERROR: RabbitMQ connections could not be created and opened");
-
-                    return false;
-                }
+                return false;
             }
         }
+    }
 
-        public IModel CreateModel()
+    public IModel CreateModel()
+    {
+        if (!IsConnected)
         {
-            if (!IsConnected)
-            {
-                throw new InvalidOperationException("No RabbitMQ connections are available to perform this action");
-            }
-
-            return _connection.CreateModel();
+            throw new InvalidOperationException("No RabbitMQ connections are available to perform this action");
         }
 
-        public void Dispose()
+        return _connection.CreateModel();
+    }
+
+    public void Dispose()
+    {
+        if (_disposed)
         {
-            if (_disposed)
-            {
-                return;
-            }
-
-            _disposed = true;
-
-            try
-            {
-                _connection.ConnectionShutdown -= OnConnectionShutdown;
-                _connection.CallbackException -= OnCallbackException;
-                _connection.ConnectionBlocked -= OnConnectionBlocked;
-                _connection.Dispose();
-            }
-            catch (IOException ex)
-            {
-                _logger.LogCritical(ex.ToString());
-            }
+            return;
         }
 
-        private void OnConnectionBlocked(object sender, ConnectionBlockedEventArgs e)
+        _disposed = true;
+
+        try
         {
-            if (_disposed)
-            {
-                return;
-            }
+            _connection.ConnectionShutdown -= OnConnectionShutdown;
+            _connection.CallbackException -= OnCallbackException;
+            _connection.ConnectionBlocked -= OnConnectionBlocked;
+            _connection.Dispose();
+        }
+        catch (IOException ex)
+        {
+            _logger.LogCritical(ex.ToString());
+        }
+    }
 
-            _logger.LogWarning("A RabbitMQ connection is shutdown. Trying to re-connect...");
-
-            TryConnect();
+    private void OnConnectionBlocked(object sender, ConnectionBlockedEventArgs e)
+    {
+        if (_disposed)
+        {
+            return;
         }
 
-        private void OnCallbackException(object sender, CallbackExceptionEventArgs e)
+        _logger.LogWarning("A RabbitMQ connection is shutdown. Trying to re-connect...");
+
+        TryConnect();
+    }
+
+    private void OnCallbackException(object sender, CallbackExceptionEventArgs e)
+    {
+        if (_disposed)
         {
-            if (_disposed)
-            {
-                return;
-            }
-
-            _logger.LogWarning("A RabbitMQ connection throw exception. Trying to re-connect...");
-
-            TryConnect();
+            return;
         }
 
-        private void OnConnectionShutdown(object sender, ShutdownEventArgs reason)
+        _logger.LogWarning("A RabbitMQ connection throw exception. Trying to re-connect...");
+
+        TryConnect();
+    }
+
+    private void OnConnectionShutdown(object sender, ShutdownEventArgs reason)
+    {
+        if (_disposed)
         {
-            if (_disposed)
-            {
-                return;
-            }
-
-            _logger.LogWarning("A RabbitMQ connection is on shutdown. Trying to re-connect...");
-
-            TryConnect();
+            return;
         }
+
+        _logger.LogWarning("A RabbitMQ connection is on shutdown. Trying to re-connect...");
+
+        TryConnect();
     }
 }

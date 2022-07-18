@@ -1,11 +1,10 @@
-using MicroserviceFramework.Domain;
+﻿using MicroserviceFramework.Domain;
 using MicroserviceFramework.Extensions.DependencyInjection;
 using MongoDB.Bson;
 using Ordering.Domain.AggregateRoots;
 
-namespace Ordering.Domain.Repositories
+namespace Ordering.Domain.Repositories;
+
+public interface IOrderingRepository : IRepository<Order, ObjectId>, IScopeDependency
 {
-    public interface IOrderingRepository : IRepository<Order, ObjectId>, IScopeDependency
-    {
-    }
 }

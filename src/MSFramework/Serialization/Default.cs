@@ -1,4 +1,4 @@
-namespace MicroserviceFramework.Serialization;
+﻿namespace MicroserviceFramework.Serialization;
 
 public static class Default
 {

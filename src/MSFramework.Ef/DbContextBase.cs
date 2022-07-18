@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -19,366 +19,365 @@ using Microsoft.Extensions.Options;
 using MongoDB.Bson;
 
 
-namespace MicroserviceFramework.Ef
+namespace MicroserviceFramework.Ef;
+
+public abstract class DbContextBase : DbContext
 {
-    public abstract class DbContextBase : DbContext
+    private readonly ILoggerFactory _loggerFactory;
+    private readonly ILogger _logger;
+    private readonly ISession _session;
+    private readonly DbContextConfigurationCollection _entityFrameworkOptions;
+    private IEntityConfigurationTypeFinder _entityConfigurationTypeFinder;
+
+    private readonly IMediator _mediator;
+
+    /// <summary>
+    /// 初始化一个<see cref="DbContextBase"/>类型的新实例
+    /// </summary>
+    protected DbContextBase(DbContextOptions options,
+        IOptions<DbContextConfigurationCollection> entityFrameworkOptions,
+        IMediator mediator,
+        ISession session, ILoggerFactory loggerFactory)
+        : base(options)
     {
-        private readonly ILoggerFactory _loggerFactory;
-        private readonly ILogger _logger;
-        private readonly ISession _session;
-        private readonly DbContextConfigurationCollection _entityFrameworkOptions;
-        private IEntityConfigurationTypeFinder _entityConfigurationTypeFinder;
+        _mediator = mediator;
+        _entityFrameworkOptions = entityFrameworkOptions.Value;
+        _session = session;
+        _loggerFactory = loggerFactory;
+        _logger = loggerFactory.CreateLogger(GetType());
+    }
 
-        private readonly IMediator _mediator;
+    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+    {
+        base.OnConfiguring(optionsBuilder);
 
-        /// <summary>
-        /// 初始化一个<see cref="DbContextBase"/>类型的新实例
-        /// </summary>
-        protected DbContextBase(DbContextOptions options,
-            IOptions<DbContextConfigurationCollection> entityFrameworkOptions,
-            IMediator mediator,
-            ISession session, ILoggerFactory loggerFactory)
-            : base(options)
+        var option = _entityFrameworkOptions.Get(GetType());
+        Database.AutoTransactionsEnabled = option.AutoTransactionsEnabled;
+
+        if (option.EnableSensitiveDataLogging)
         {
-            _mediator = mediator;
-            _entityFrameworkOptions = entityFrameworkOptions.Value;
-            _session = session;
-            _loggerFactory = loggerFactory;
-            _logger = loggerFactory.CreateLogger(GetType());
+            optionsBuilder.EnableSensitiveDataLogging();
         }
 
-        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+        optionsBuilder.UseLoggerFactory(_loggerFactory);
+    }
+
+    /// <summary>
+    /// 创建上下文数据模型时，对各个实体类的数据库映射细节进行配置
+    /// </summary>
+    /// <param name="modelBuilder">上下文数据模型构建器</param>
+    protected override void OnModelCreating(ModelBuilder modelBuilder)
+    {
+        _entityConfigurationTypeFinder = this.GetService<IEntityConfigurationTypeFinder>();
+
+        //通过实体配置信息将实体注册到当前上下文
+        var contextType = GetType();
+
+        var entityTypeConfigurations = _entityConfigurationTypeFinder.GetEntityTypeConfigurations(contextType);
+        var count = 0;
+        var stringBuilder = new StringBuilder();
+        foreach (var entityTypeConfiguration in entityTypeConfigurations)
         {
-            base.OnConfiguring(optionsBuilder);
+            entityTypeConfiguration.Value.MethodInfo.Invoke(modelBuilder,
+                new[] { entityTypeConfiguration.Value.EntityTypeConfiguration });
 
-            var option = _entityFrameworkOptions.Get(GetType());
-            Database.AutoTransactionsEnabled = option.AutoTransactionsEnabled;
-
-            if (option.EnableSensitiveDataLogging)
-            {
-                optionsBuilder.EnableSensitiveDataLogging();
-            }
-
-            optionsBuilder.UseLoggerFactory(_loggerFactory);
+            stringBuilder.Append($"、{entityTypeConfiguration.Value.EntityType.FullName}");
+            count++;
         }
 
-        /// <summary>
-        /// 创建上下文数据模型时，对各个实体类的数据库映射细节进行配置
-        /// </summary>
-        /// <param name="modelBuilder">上下文数据模型构建器</param>
-        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        _logger.LogInformation(
+            $"将 {count} 个实体 {stringBuilder} 注册到上下文 {contextType} 中");
+
+        var option = _entityFrameworkOptions.Get(GetType());
+
+        var tablePrefix = option.TablePrefix?.Trim();
+
+        foreach (var entityType in modelBuilder.Model.GetEntityTypes())
         {
-            _entityConfigurationTypeFinder = this.GetService<IEntityConfigurationTypeFinder>();
-
-            //通过实体配置信息将实体注册到当前上下文
-            var contextType = GetType();
-
-            var entityTypeConfigurations = _entityConfigurationTypeFinder.GetEntityTypeConfigurations(contextType);
-            var count = 0;
-            var stringBuilder = new StringBuilder();
-            foreach (var entityTypeConfiguration in entityTypeConfigurations)
+            if (!entityType.IsOwned())
             {
-                entityTypeConfiguration.Value.MethodInfo.Invoke(modelBuilder,
-                    new[] { entityTypeConfiguration.Value.EntityTypeConfiguration });
+                var tableName = entityType.GetTableName();
 
-                stringBuilder.Append($"、{entityTypeConfiguration.Value.EntityType.FullName}");
-                count++;
+                if (option.UseUnderScoreCase)
+                {
+                    tableName = tableName.ToSnakeCase();
+                }
+
+                if (!string.IsNullOrWhiteSpace(tablePrefix))
+                {
+                    tableName = tablePrefix + tableName;
+                }
+
+                entityType.SetTableName(tableName);
             }
 
-            _logger.LogInformation(
-                $"将 {count} 个实体 {stringBuilder} 注册到上下文 {contextType} 中");
-
-            var option = _entityFrameworkOptions.Get(GetType());
-
-            var tablePrefix = option.TablePrefix?.Trim();
-
-            foreach (var entityType in modelBuilder.Model.GetEntityTypes())
+            if (typeof(IDeletion).IsAssignableFrom(entityType.ClrType))
             {
-                if (!entityType.IsOwned())
+                entityType.AddSoftDeleteQueryFilter();
+            }
+
+            var optimisticLockTable = typeof(IOptimisticLock).IsAssignableFrom(entityType.ClrType);
+            var properties = entityType.GetProperties();
+            foreach (var property in properties)
+            {
+                if (optimisticLockTable &&
+                    property.Name == "ConcurrencyStamp")
                 {
-                    var tableName = entityType.GetTableName();
-
-                    if (option.UseUnderScoreCase)
-                    {
-                        tableName = tableName.ToSnakeCase();
-                    }
-
-                    if (!string.IsNullOrWhiteSpace(tablePrefix))
-                    {
-                        tableName = tablePrefix + tableName;
-                    }
-
-                    entityType.SetTableName(tableName);
+                    property.SetMaxLength(36);
+                    property.IsConcurrencyToken = true;
+                    property.IsNullable = true;
                 }
 
-                if (typeof(IDeletion).IsAssignableFrom(entityType.ClrType))
+                if (option.UseUnderScoreCase)
                 {
-                    entityType.AddSoftDeleteQueryFilter();
+                    var storeObjectIdentifier = StoreObjectIdentifier.Create(entityType, StoreObjectType.Table);
+                    var propertyName = property.GetColumnName(storeObjectIdentifier.GetValueOrDefault());
+                    if (!string.IsNullOrEmpty(propertyName) && propertyName.StartsWith("_"))
+                    {
+                        propertyName = propertyName.Substring(1, propertyName.Length - 1);
+                    }
+
+                    property.SetColumnName(propertyName.ToSnakeCase());
                 }
 
-                var optimisticLockTable = typeof(IOptimisticLock).IsAssignableFrom(entityType.ClrType);
-                var properties = entityType.GetProperties();
-                foreach (var property in properties)
+                if (property.ClrType == typeof(ObjectId))
                 {
-                    if (optimisticLockTable &&
-                        property.Name == "ConcurrencyStamp")
-                    {
-                        property.SetMaxLength(36);
-                        property.IsConcurrencyToken = true;
-                        property.IsNullable = true;
-                    }
-
-                    if (option.UseUnderScoreCase)
-                    {
-                        var storeObjectIdentifier = StoreObjectIdentifier.Create(entityType, StoreObjectType.Table);
-                        var propertyName = property.GetColumnName(storeObjectIdentifier.GetValueOrDefault());
-                        if (!string.IsNullOrEmpty(propertyName) && propertyName.StartsWith("_"))
-                        {
-                            propertyName = propertyName.Substring(1, propertyName.Length - 1);
-                        }
-
-                        property.SetColumnName(propertyName.ToSnakeCase());
-                    }
-
-                    if (property.ClrType == typeof(ObjectId))
-                    {
-                        property.SetValueConverter(new ObjectIdToStringConverter());
-                    }
+                    property.SetValueConverter(new ObjectIdToStringConverter());
                 }
             }
         }
+    }
 
-        public IEnumerable<AuditEntity> GetAuditEntities()
+    public IEnumerable<AuditEntity> GetAuditEntities()
+    {
+        var entities = new List<AuditEntity>();
+        foreach (var entry in ChangeTracker.Entries())
         {
-            var entities = new List<AuditEntity>();
-            foreach (var entry in ChangeTracker.Entries())
+            var auditEntity = entry.State switch
             {
-                var auditEntity = entry.State switch
-                {
-                    EntityState.Added => GetAuditEntity(entry, OperationType.Add),
-                    EntityState.Modified => GetAuditEntity(entry, OperationType.Modify),
-                    EntityState.Deleted => GetAuditEntity(entry, OperationType.Delete),
-                    _ => null
-                };
+                EntityState.Added => GetAuditEntity(entry, OperationType.Add),
+                EntityState.Modified => GetAuditEntity(entry, OperationType.Modify),
+                EntityState.Deleted => GetAuditEntity(entry, OperationType.Delete),
+                _ => null
+            };
 
-                if (auditEntity != null)
-                {
-                    entities.Add(auditEntity);
-                }
+            if (auditEntity != null)
+            {
+                entities.Add(auditEntity);
             }
-
-            return entities;
         }
 
-        public async Task<int> CommitAsync()
+        return entities;
+    }
+
+    public async Task<int> CommitAsync()
+    {
+        try
         {
-            try
+            // 若是有领域事件则分发出去
+            // 领域事件可能导致别聚合调用当前 DbContext 并改变状态，或者添加新的事件
+            List<DomainEvent> domainEvents;
+            do
             {
-                // 若是有领域事件则分发出去
-                // 领域事件可能导致别聚合调用当前 DbContext 并改变状态，或者添加新的事件
-                List<DomainEvent> domainEvents;
-                do
+                domainEvents = GetDomainEvents();
+                foreach (var @event in domainEvents)
                 {
-                    domainEvents = GetDomainEvents();
-                    foreach (var @event in domainEvents)
-                    {
-                        await _mediator.PublishAsync(@event);
-                    }
-                } while (domainEvents.Count > 0);
-
-                var effectedCount = 0;
-                var changed = ApplyConcepts();
-                if (!changed)
-                {
-                    return effectedCount;
+                    await _mediator.PublishAsync(@event);
                 }
+            } while (domainEvents.Count > 0);
 
-                effectedCount = await SaveChangesAsync();
-                if (Database.CurrentTransaction != null)
-                {
-                    await Database.CurrentTransaction.CommitAsync();
-                }
-
+            var effectedCount = 0;
+            var changed = ApplyConcepts();
+            if (!changed)
+            {
                 return effectedCount;
             }
-            catch
-            {
-                if (Database.CurrentTransaction != null)
-                {
-                    await Database.CurrentTransaction.RollbackAsync();
-                }
 
-                throw;
+            effectedCount = await SaveChangesAsync();
+            if (Database.CurrentTransaction != null)
+            {
+                await Database.CurrentTransaction.CommitAsync();
+            }
+
+            return effectedCount;
+        }
+        catch
+        {
+            if (Database.CurrentTransaction != null)
+            {
+                await Database.CurrentTransaction.RollbackAsync();
+            }
+
+            throw;
+        }
+    }
+
+    protected virtual bool ApplyConcepts()
+    {
+        var userId = _session.UserId;
+        var changed = false;
+
+        foreach (var entry in ChangeTracker.Entries())
+        {
+            switch (entry.State)
+            {
+                case EntityState.Added:
+                    ApplyConceptsForAddedEntity(entry, userId, _session.UserName);
+                    changed = true;
+                    break;
+                case EntityState.Modified:
+                    ApplyConceptsForModifiedEntity(entry, userId, _session.UserName);
+                    changed = true;
+                    break;
+                case EntityState.Deleted:
+                    ApplyConceptsForDeletedEntity(entry, userId, _session.UserName);
+                    changed = true;
+                    break;
+                case EntityState.Detached:
+                    break;
+                case EntityState.Unchanged:
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException();
             }
         }
 
-        protected virtual bool ApplyConcepts()
-        {
-            var userId = _session.UserId;
-            var changed = false;
+        return changed;
+    }
 
-            foreach (var entry in ChangeTracker.Entries())
+    protected virtual AuditEntity GetAuditEntity(EntityEntry entry, OperationType operationType)
+    {
+        var type = entry.Entity.GetType();
+        var typeName = type.FullName;
+
+        string entityId = null;
+        var properties = new List<AuditProperty>();
+        foreach (var property in entry.CurrentValues.Properties)
+        {
+            if (property.IsConcurrencyToken)
             {
-                switch (entry.State)
-                {
-                    case EntityState.Added:
-                        ApplyConceptsForAddedEntity(entry, userId, _session.UserName);
-                        changed = true;
-                        break;
-                    case EntityState.Modified:
-                        ApplyConceptsForModifiedEntity(entry, userId, _session.UserName);
-                        changed = true;
-                        break;
-                    case EntityState.Deleted:
-                        ApplyConceptsForDeletedEntity(entry, userId, _session.UserName);
-                        changed = true;
-                        break;
-                    case EntityState.Detached:
-                        break;
-                    case EntityState.Unchanged:
-                        break;
-                    default:
-                        throw new ArgumentOutOfRangeException();
-                }
+                continue;
             }
 
-            return changed;
-        }
-
-        protected virtual AuditEntity GetAuditEntity(EntityEntry entry, OperationType operationType)
-        {
-            var type = entry.Entity.GetType();
-            var typeName = type.FullName;
-
-            string entityId = null;
-            var properties = new List<AuditProperty>();
-            foreach (var property in entry.CurrentValues.Properties)
+            var propertyName = property.Name;
+            var propertyEntry = entry.Property(property.Name);
+            if (property.IsPrimaryKey())
             {
-                if (property.IsConcurrencyToken)
+                entityId = entry.State == EntityState.Deleted
+                    ? propertyEntry.OriginalValue?.ToString()
+                    : propertyEntry.CurrentValue?.ToString();
+            }
+
+            var propertyType = property.ClrType.ToString();
+            string originalValue = null;
+            string newValue = null;
+
+            if (entry.State == EntityState.Added)
+            {
+                newValue = propertyEntry.CurrentValue?.ToString();
+            }
+            else if (entry.State == EntityState.Deleted)
+            {
+                originalValue = propertyEntry.OriginalValue?.ToString();
+            }
+            else if (entry.State == EntityState.Modified)
+            {
+                var currentValue = propertyEntry.CurrentValue?.ToString();
+                originalValue = propertyEntry.OriginalValue?.ToString();
+                if (currentValue == originalValue)
                 {
                     continue;
                 }
 
-                var propertyName = property.Name;
-                var propertyEntry = entry.Property(property.Name);
-                if (property.IsPrimaryKey())
-                {
-                    entityId = entry.State == EntityState.Deleted
-                        ? propertyEntry.OriginalValue?.ToString()
-                        : propertyEntry.CurrentValue?.ToString();
-                }
-
-                var propertyType = property.ClrType.ToString();
-                string originalValue = null;
-                string newValue = null;
-
-                if (entry.State == EntityState.Added)
-                {
-                    newValue = propertyEntry.CurrentValue?.ToString();
-                }
-                else if (entry.State == EntityState.Deleted)
-                {
-                    originalValue = propertyEntry.OriginalValue?.ToString();
-                }
-                else if (entry.State == EntityState.Modified)
-                {
-                    var currentValue = propertyEntry.CurrentValue?.ToString();
-                    originalValue = propertyEntry.OriginalValue?.ToString();
-                    if (currentValue == originalValue)
-                    {
-                        continue;
-                    }
-
-                    newValue = currentValue;
-                }
-
-                if (string.IsNullOrWhiteSpace(originalValue))
-                {
-                    // 原值为空，新值不为空则记录
-                    if (!string.IsNullOrWhiteSpace(newValue))
-                    {
-                        properties.Add(new AuditProperty(propertyName, propertyType, originalValue, newValue));
-                    }
-                }
-                else
-                {
-                    if (!originalValue.Equals(newValue))
-                    {
-                        properties.Add(new AuditProperty(propertyName, propertyType, originalValue, newValue));
-                    }
-                }
+                newValue = currentValue;
             }
 
-            var auditedEntity = new AuditEntity(typeName, entityId, operationType);
-            auditedEntity.AddProperties(properties);
-            return auditedEntity;
+            if (string.IsNullOrWhiteSpace(originalValue))
+            {
+                // 原值为空，新值不为空则记录
+                if (!string.IsNullOrWhiteSpace(newValue))
+                {
+                    properties.Add(new AuditProperty(propertyName, propertyType, originalValue, newValue));
+                }
+            }
+            else
+            {
+                if (!originalValue.Equals(newValue))
+                {
+                    properties.Add(new AuditProperty(propertyName, propertyType, originalValue, newValue));
+                }
+            }
         }
 
-        protected virtual void ApplyConceptsForAddedEntity(EntityEntry entry, string userId, string userName)
+        var auditedEntity = new AuditEntity(typeName, entityId, operationType);
+        auditedEntity.AddProperties(properties);
+        return auditedEntity;
+    }
+
+    protected virtual void ApplyConceptsForAddedEntity(EntityEntry entry, string userId, string userName)
+    {
+        if (entry.Entity is ICreation entity)
         {
-            if (entry.Entity is ICreation entity)
-            {
-                entity.SetCreation(userId);
-            }
-
-            if (entry.Entity is IHasCreatorName setter)
-            {
-                setter.SetProperty(nameof(IHasCreatorName.CreatorName), userName);
-            }
+            entity.SetCreation(userId);
         }
 
-        protected virtual void ApplyConceptsForModifiedEntity(EntityEntry entry, string userId, string userName)
+        if (entry.Entity is IHasCreatorName setter)
         {
-            if (entry.Entity is IModification entity)
-            {
-                entity.SetModification(userId);
-            }
-
-            if (entry.Entity is IHasLastModifierName setter)
-            {
-                setter.SetProperty(nameof(IHasLastModifierName.LastModifierName), userName);
-            }
+            setter.SetProperty(nameof(IHasCreatorName.CreatorName), userName);
         }
+    }
 
-        protected virtual void ApplyConceptsForDeletedEntity(EntityEntry entry, string userId, string userName)
+    protected virtual void ApplyConceptsForModifiedEntity(EntityEntry entry, string userId, string userName)
+    {
+        if (entry.Entity is IModification entity)
         {
-            if (entry.Entity is IDeletion entity)
-            {
-                entry.Reload();
-                entry.State = EntityState.Modified;
-
-                entity.Delete(userId);
-            }
-
-            if (entry.Entity is IHasDeleterName setter)
-            {
-                setter.SetProperty(nameof(IHasDeleterName.DeleterName), userName);
-            }
+            entity.SetModification(userId);
         }
 
-        private List<DomainEvent> GetDomainEvents()
+        if (entry.Entity is IHasLastModifierName setter)
         {
-            // Dispatch Domain Events collection. 
-            // Choices:
-            // A) Right BEFORE committing data (EF SaveChanges) into the DB will make a single transaction including  
-            // side effects from the domain event handlers which are using the same DbContext with "InstancePerLifetimeScope" or "scoped" lifetime
-            // B) Right AFTER committing data (EF SaveChanges) into the DB will make multiple transactions. 
-            // You will need to handle eventual consistency and compensatory actions in case of failures in any of the Handlers. 
-
-            var domainEvents = new List<DomainEvent>();
-
-            foreach (var aggregateRoot in ChangeTracker
-                         .Entries<EntityBase>())
-            {
-                var events = aggregateRoot.Entity.GetDomainEvents();
-                if (events != null && events.Any())
-                {
-                    domainEvents.AddRange(events);
-                    aggregateRoot.Entity.ClearDomainEvents();
-                }
-            }
-
-            return domainEvents;
+            setter.SetProperty(nameof(IHasLastModifierName.LastModifierName), userName);
         }
+    }
+
+    protected virtual void ApplyConceptsForDeletedEntity(EntityEntry entry, string userId, string userName)
+    {
+        if (entry.Entity is IDeletion entity)
+        {
+            entry.Reload();
+            entry.State = EntityState.Modified;
+
+            entity.Delete(userId);
+        }
+
+        if (entry.Entity is IHasDeleterName setter)
+        {
+            setter.SetProperty(nameof(IHasDeleterName.DeleterName), userName);
+        }
+    }
+
+    private List<DomainEvent> GetDomainEvents()
+    {
+        // Dispatch Domain Events collection. 
+        // Choices:
+        // A) Right BEFORE committing data (EF SaveChanges) into the DB will make a single transaction including  
+        // side effects from the domain event handlers which are using the same DbContext with "InstancePerLifetimeScope" or "scoped" lifetime
+        // B) Right AFTER committing data (EF SaveChanges) into the DB will make multiple transactions. 
+        // You will need to handle eventual consistency and compensatory actions in case of failures in any of the Handlers. 
+
+        var domainEvents = new List<DomainEvent>();
+
+        foreach (var aggregateRoot in ChangeTracker
+                     .Entries<EntityBase>())
+        {
+            var events = aggregateRoot.Entity.GetDomainEvents();
+            if (events != null && events.Any())
+            {
+                domainEvents.AddRange(events);
+                aggregateRoot.Entity.ClearDomainEvents();
+            }
+        }
+
+        return domainEvents;
     }
 }

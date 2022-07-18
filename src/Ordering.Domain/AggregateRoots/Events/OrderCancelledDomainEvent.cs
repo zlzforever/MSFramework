@@ -1,14 +1,13 @@
-using MicroserviceFramework.Domain;
+﻿using MicroserviceFramework.Domain;
 
-namespace Ordering.Domain.AggregateRoots.Events
+namespace Ordering.Domain.AggregateRoots.Events;
+
+public class OrderCancelledDomainEvent : DomainEvent
 {
-    public class OrderCancelledDomainEvent : DomainEvent
-    {
-        public Order Order { get; }
+    public Order Order { get; }
 
-        public OrderCancelledDomainEvent(Order order)
-        {
-            Order = order;
-        }
+    public OrderCancelledDomainEvent(Order order)
+    {
+        Order = order;
     }
 }

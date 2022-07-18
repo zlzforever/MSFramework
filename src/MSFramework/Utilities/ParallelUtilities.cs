@@ -1,38 +1,37 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using System.Threading.Tasks.Dataflow;
 
-namespace MicroserviceFramework.Utilities
+namespace MicroserviceFramework.Utilities;
+
+public static class ParallelUtilities
 {
-    public static class ParallelUtilities
+    public static void For(int fromInclusive,
+        int toExclusive, ExecutionDataflowBlockOptions options, Func<int, Task> body)
     {
-        public static void For(int fromInclusive,
-            int toExclusive, ExecutionDataflowBlockOptions options, Func<int, Task> body)
+        var actionBlock = new ActionBlock<int>(async i => { await body(i); }, options);
+
+        for (var i = fromInclusive; i < toExclusive; ++i)
         {
-            var actionBlock = new ActionBlock<int>(async i => { await body(i); }, options);
-
-            for (var i = fromInclusive; i < toExclusive; ++i)
-            {
-                actionBlock.Post(i);
-            }
-
-            actionBlock.Complete();
-            actionBlock.Completion.Wait();
+            actionBlock.Post(i);
         }
 
-        public static void ForEach<TSource>(IEnumerable<TSource> source, ExecutionDataflowBlockOptions options,
-            Func<TSource, Task> body)
+        actionBlock.Complete();
+        actionBlock.Completion.Wait();
+    }
+
+    public static void ForEach<TSource>(IEnumerable<TSource> source, ExecutionDataflowBlockOptions options,
+        Func<TSource, Task> body)
+    {
+        var actionBlock = new ActionBlock<TSource>(async i => { await body(i); }, options);
+
+        foreach (var item in source)
         {
-            var actionBlock = new ActionBlock<TSource>(async i => { await body(i); }, options);
-
-            foreach (var item in source)
-            {
-                actionBlock.Post(item);
-            }
-
-            actionBlock.Complete();
-            actionBlock.Completion.Wait();
+            actionBlock.Post(item);
         }
+
+        actionBlock.Complete();
+        actionBlock.Completion.Wait();
     }
 }

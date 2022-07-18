@@ -1,4 +1,4 @@
-namespace MicroserviceFramework.Domain;
+﻿namespace MicroserviceFramework.Domain;
 
 public interface IHasDeleterName
 {

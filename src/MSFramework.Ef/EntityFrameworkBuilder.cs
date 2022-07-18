@@ -1,14 +1,13 @@
-using Microsoft.Extensions.DependencyInjection;
+﻿using Microsoft.Extensions.DependencyInjection;
 
-namespace MicroserviceFramework.Ef
+namespace MicroserviceFramework.Ef;
+
+public class EntityFrameworkBuilder
 {
-    public class EntityFrameworkBuilder
+    public EntityFrameworkBuilder(IServiceCollection services)
     {
-        public EntityFrameworkBuilder(IServiceCollection services)
-        {
-            Services = services;
-        }
-
-        public IServiceCollection Services { get; }
+        Services = services;
     }
+
+    public IServiceCollection Services { get; }
 }

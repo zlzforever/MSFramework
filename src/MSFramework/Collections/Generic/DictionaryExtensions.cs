@@ -1,69 +1,68 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 
-namespace MicroserviceFramework.Collections.Generic
+namespace MicroserviceFramework.Collections.Generic;
+
+/// <summary>
+/// 字典辅助扩展方法
+/// </summary>
+public static class DictionaryExtensions
 {
     /// <summary>
-    /// 字典辅助扩展方法
+    /// 从字典中获取值，不存在则返回字典<typeparamref name="TValue"/>类型的默认值
     /// </summary>
-    public static class DictionaryExtensions
+    /// <typeparam name="TKey">字典键类型</typeparam>
+    /// <typeparam name="TValue">字典值类型</typeparam>
+    /// <param name="dictionary">要操作的字典</param>
+    /// <param name="key">指定键名</param>
+    /// <returns>获取到的值</returns>
+    public static TValue GetOrDefault<TKey, TValue>(this IDictionary<TKey, TValue> dictionary, TKey key)
     {
-        /// <summary>
-        /// 从字典中获取值，不存在则返回字典<typeparamref name="TValue"/>类型的默认值
-        /// </summary>
-        /// <typeparam name="TKey">字典键类型</typeparam>
-        /// <typeparam name="TValue">字典值类型</typeparam>
-        /// <param name="dictionary">要操作的字典</param>
-        /// <param name="key">指定键名</param>
-        /// <returns>获取到的值</returns>
-        public static TValue GetOrDefault<TKey, TValue>(this IDictionary<TKey, TValue> dictionary, TKey key)
+        return dictionary.TryGetValue(key, out var value) ? value : default;
+    }
+
+    /// <summary>
+    /// 获取指定键的值，不存在则按指定委托添加值
+    /// </summary>
+    /// <typeparam name="TKey">字典键类型</typeparam>
+    /// <typeparam name="TValue">字典值类型</typeparam>
+    /// <param name="dictionary">要操作的字典</param>
+    /// <param name="key">指定键名</param>
+    /// <param name="value">添加值</param>
+    /// <returns>获取到的值</returns>
+    public static TValue GetOrAdd<TKey, TValue>(this IDictionary<TKey, TValue> dictionary, TKey key, TValue value)
+    {
+        if (dictionary.TryGetValue(key, out var v))
         {
-            return dictionary.TryGetValue(key, out var value) ? value : default;
+            return v;
         }
 
-        /// <summary>
-        /// 获取指定键的值，不存在则按指定委托添加值
-        /// </summary>
-        /// <typeparam name="TKey">字典键类型</typeparam>
-        /// <typeparam name="TValue">字典值类型</typeparam>
-        /// <param name="dictionary">要操作的字典</param>
-        /// <param name="key">指定键名</param>
-        /// <param name="value">添加值</param>
-        /// <returns>获取到的值</returns>
-        public static TValue GetOrAdd<TKey, TValue>(this IDictionary<TKey, TValue> dictionary, TKey key, TValue value)
-        {
-            if (dictionary.TryGetValue(key, out var v))
-            {
-                return v;
-            }
+        return dictionary[key] = value;
+    }
 
-            return dictionary[key] = value;
+    public static void AddOrUpdate<TKey, TValue>(this IDictionary<TKey, TValue> dictionary, TKey key,
+        Func<TValue> factory)
+    {
+        if (dictionary.ContainsKey(key))
+        {
+            dictionary[key] = factory();
         }
-
-        public static void AddOrUpdate<TKey, TValue>(this IDictionary<TKey, TValue> dictionary, TKey key,
-            Func<TValue> factory)
+        else
         {
-            if (dictionary.ContainsKey(key))
-            {
-                dictionary[key] = factory();
-            }
-            else
-            {
-                dictionary.Add(key, factory());
-            }
+            dictionary.Add(key, factory());
         }
+    }
 
-        public static void AddOrUpdate<TKey, TValue>(this IDictionary<TKey, TValue> dictionary, TKey key,
-            TValue value)
+    public static void AddOrUpdate<TKey, TValue>(this IDictionary<TKey, TValue> dictionary, TKey key,
+        TValue value)
+    {
+        if (dictionary.ContainsKey(key))
         {
-            if (dictionary.ContainsKey(key))
-            {
-                dictionary[key] = value;
-            }
-            else
-            {
-                dictionary.Add(key, value);
-            }
+            dictionary[key] = value;
+        }
+        else
+        {
+            dictionary.Add(key, value);
         }
     }
 }
