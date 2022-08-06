@@ -12,6 +12,7 @@ rm -rf src/MSFramework.EventBus.RabbitMQ/bin/Release
 rm -rf src/MSFramework.Ef.Design/bin/Release
 rm -rf src/MSFramework.AspNetCore.Swagger/bin/Release
 rm -rf src/MSFramework.Serialization.Newtonsoft/bin/Release
+echo $NUGET_KEY
 dotnet build -c Release
 dotnet pack -c Release
 dotnet nuget push src/MSFramework/bin/Release/*.nupkg -s $NUGET_SERVER -k $NUGET_KEY --skip-duplicate
