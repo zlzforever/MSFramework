@@ -24,7 +24,7 @@ public static class ServiceCollectionExtensions
             {
                 sqlServerOptionsAction?.Invoke(options);
                 var migrationsHistoryTable = string.IsNullOrWhiteSpace(option.TablePrefix)
-                    ? "__ef_migrations_history"
+                    ? "___ef_migrations_history"
                     : $"{option.TablePrefix}migrations_history";
                 options.MigrationsHistoryTable(migrationsHistoryTable);
                 options.MaxBatchSize(option.MaxBatchSize);
