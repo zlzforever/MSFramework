@@ -8,7 +8,7 @@ using MicroserviceFramework.Audit;
 using MicroserviceFramework.AutoMapper;
 using MicroserviceFramework.Ef;
 using MicroserviceFramework.Ef.Audit;
-using MicroserviceFramework.Ef.MySql;
+using MicroserviceFramework.Ef.PostgreSql;
 using MicroserviceFramework.EventBus;
 using MicroserviceFramework.Extensions.DependencyInjection;
 using MicroserviceFramework.Extensions.Options;
@@ -94,7 +94,7 @@ public class Startup
             builder.UseEntityFramework(x =>
             {
                 // 添加 MySql 支持
-                x.AddMySql<OrderingContext>(Configuration);
+                x.AddNpgsql<OrderingContext, OrderingContext2>(Configuration);
             });
         });
     }

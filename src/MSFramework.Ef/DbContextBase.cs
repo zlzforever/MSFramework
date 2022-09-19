@@ -28,7 +28,6 @@ public abstract class DbContextBase : DbContext
     private readonly ISession _session;
     private readonly DbContextConfigurationCollection _entityFrameworkOptions;
     private IEntityConfigurationTypeFinder _entityConfigurationTypeFinder;
-
     private readonly IMediator _mediator;
 
     /// <summary>
@@ -76,6 +75,7 @@ public abstract class DbContextBase : DbContext
         var entityTypeConfigurations = _entityConfigurationTypeFinder.GetEntityTypeConfigurations(contextType);
         var count = 0;
         var stringBuilder = new StringBuilder();
+
         foreach (var entityTypeConfiguration in entityTypeConfigurations)
         {
             entityTypeConfiguration.Value.MethodInfo.Invoke(modelBuilder,

@@ -78,10 +78,7 @@ public class EventBusTests
 
         for (var i = 0; i < 100; ++i)
         {
-            await eventBus.PublishAsync(new Event1
-            {
-                Order = 1
-            });
+            await eventBus.PublishAsync(new Event1 { Order = 1 });
         }
 
         Thread.Sleep(1000);
@@ -113,5 +110,55 @@ public class EventBusTests
 
         Thread.Sleep(2000);
         Assert.Equal(100, Event2Handler.Count);
+    }
+
+    public class Event3 : EventBase
+    {
+        public static int Count = 0;
+    }
+
+    public class EventHandler31 : IEventHandler<Event3>
+    {
+        public Task HandleAsync(Event3 @event)
+        {
+            Interlocked.Increment(ref Event3.Count);
+            return Task.CompletedTask;
+        }
+
+        public void Dispose()
+        {
+        }
+    }
+
+    public class EventHandler32 : IEventHandler<Event3>
+    {
+        public Task HandleAsync(Event3 @event)
+        {
+            Interlocked.Increment(ref Event3.Count);
+            return Task.CompletedTask;
+        }
+
+        public void Dispose()
+        {
+        }
+    }
+
+    [Fact]
+    public async Task MulitiHandlers()
+    {
+        var serviceCollection = new ServiceCollection();
+        serviceCollection.AddLogging();
+        serviceCollection.AddMicroserviceFramework(x =>
+        {
+            x.UseDependencyInjectionLoader();
+            x.UseEventBus();
+        });
+
+        var provider = serviceCollection.BuildServiceProvider();
+        var eventBus = provider.GetRequiredService<IEventBus>();
+
+        await eventBus.PublishAsync(new Event3 { });
+        Thread.Sleep(1000);
+        Assert.Equal(2, Event3.Count);
     }
 }
