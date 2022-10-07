@@ -62,39 +62,23 @@ public class EventBusRabbitMQ : IEventBus
                         $"Could not publish event: {@event.EventId} after {time.TotalSeconds:n1}s ({ex.Message})");
                 });
 
-        IModel channel = null;
+        var eventName = @event.GetType().GetEventName();
 
-        try
+        using var channel = _connection.CreateModel();
+        _logger.LogTrace($"Declaring RabbitMQ exchange to publish event: {@event.EventId}");
+        channel.ExchangeDeclare(_options.Exchange, "direct");
+
+        var bytes = Encoding.UTF8.GetBytes(Default.JsonHelper.Serialize(@event));
+        
+        policy.Execute(() =>
         {
+            var properties = channel.CreateBasicProperties();
+            properties.DeliveryMode = 2; // persistent
 
+            _logger.LogTrace($"Publishing event to RabbitMQ: {@event.EventId}");
 
-            var eventName = @event.GetType().GetEventName();
-            var bytes = Encoding.UTF8.GetBytes(Default.JsonHelper.Serialize(@event));
-
-            policy.Execute(() =>
-            {
-                if (channel == null)
-                {
-                    channel = _connection.CreateModel();
-                    _logger.LogTrace($"Declaring RabbitMQ exchange to publish event: {@event.EventId}");
-
-                    channel.ExchangeDeclare(_options.Exchange, "direct");
-                }
-
-                var properties = channel.CreateBasicProperties();
-                properties.DeliveryMode = 2; // persistent
-
-                _logger.LogTrace($"Publishing event to RabbitMQ: {@event.EventId}");
-
-                channel.BasicPublish(_options.Exchange, eventName, true, properties, bytes);
-                channel.Dispose();
-            });
-        }
-        finally
-        {
-            // channel.Close();
-            channel?.Dispose();
-        }
+            channel.BasicPublish(_options.Exchange, eventName, true, properties, bytes);
+        });
 
         return Task.CompletedTask;
     }

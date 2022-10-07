@@ -2,7 +2,7 @@
 echo $NUGET_SERVER
 rm -rf src/MSFramework/bin/Release
 rm -rf src/MSFramework.AspNetCore/bin/Release
-rm -rf src/MSFramework.AspNetCore.AccessControl/bin/Release
+#rm -rf src/MSFramework.AspNetCore.AccessControl/bin/Release
 rm -rf src/MSFramework.AutoMapper/bin/Release
 rm -rf src/MSFramework.Ef/bin/Release
 rm -rf src/MSFramework.Ef.MySql/bin/Release
@@ -17,7 +17,7 @@ dotnet build -c Release
 dotnet pack -c Release
 dotnet nuget push src/MSFramework/bin/Release/*.nupkg -s $NUGET_SERVER -k $NUGET_KEY --skip-duplicate
 dotnet nuget push src/MSFramework.AspNetCore/bin/Release/*.nupkg  -s $NUGET_SERVER -k $NUGET_KEY --skip-duplicate
-dotnet nuget push src/MSFramework.AspNetCore.AccessControl/bin/Release/*.nupkg  -s $NUGET_SERVER -k $NUGET_KEY --skip-duplicate
+#dotnet nuget push src/MSFramework.AspNetCore.AccessControl/bin/Release/*.nupkg  -s $NUGET_SERVER -k $NUGET_KEY --skip-duplicate
 dotnet nuget push src/MSFramework.AutoMapper/bin/Release/*.nupkg  -s $NUGET_SERVER -k $NUGET_KEY --skip-duplicate
 dotnet nuget push src/MSFramework.Ef/bin/Release/*.nupkg  -s $NUGET_SERVER -k $NUGET_KEY --skip-duplicate
 dotnet nuget push src/MSFramework.Ef.MySql/bin/Release/*.nupkg  -s $NUGET_SERVER -k $NUGET_KEY --skip-duplicate
