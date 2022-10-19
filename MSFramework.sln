@@ -13,6 +13,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 	ProjectSection(SolutionItems) = preProject
 		.editorconfig = .editorconfig
 		.gitignore = .gitignore
+		global.json = global.json
 		LICENSE = LICENSE
 		publish_nuget_packages.sh = publish_nuget_packages.sh
 		publish_my_packages.sh = publish_my_packages.sh
@@ -61,8 +62,6 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MSFramework.Ef.Design", "src\MSFramework.Ef.Design\MSFramework.Ef.Design.csproj", "{3871A6FD-C712-45FC-B59B-2245DC755246}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MSFramework.AspNetCore.Swagger", "src\MSFramework.AspNetCore.Swagger\MSFramework.AspNetCore.Swagger.csproj", "{3F82B810-5872-4B96-9DD1-103B76357ED0}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MSFramework.AspNetCore.AccessControl", "src\MSFramework.AspNetCore.AccessControl\MSFramework.AspNetCore.AccessControl.csproj", "{5B925151-F428-47DB-A528-75508CA3AF22}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Benchmark", "tests\Benchmark\Benchmark.csproj", "{37E32788-0A5E-43D6-8852-A3A7EAB262F2}"
 EndProject
@@ -140,10 +139,6 @@ Global
 		{3F82B810-5872-4B96-9DD1-103B76357ED0}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{3F82B810-5872-4B96-9DD1-103B76357ED0}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{3F82B810-5872-4B96-9DD1-103B76357ED0}.Release|Any CPU.Build.0 = Release|Any CPU
-		{5B925151-F428-47DB-A528-75508CA3AF22}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{5B925151-F428-47DB-A528-75508CA3AF22}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{5B925151-F428-47DB-A528-75508CA3AF22}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{5B925151-F428-47DB-A528-75508CA3AF22}.Release|Any CPU.Build.0 = Release|Any CPU
 		{37E32788-0A5E-43D6-8852-A3A7EAB262F2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{37E32788-0A5E-43D6-8852-A3A7EAB262F2}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{37E32788-0A5E-43D6-8852-A3A7EAB262F2}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -173,7 +168,6 @@ Global
 		{C7271013-C54D-42A3-AAB7-68BA8012EEE0} = {AFD16F00-F810-4A3C-BA74-59BBFBC2469D}
 		{3871A6FD-C712-45FC-B59B-2245DC755246} = {AFD16F00-F810-4A3C-BA74-59BBFBC2469D}
 		{3F82B810-5872-4B96-9DD1-103B76357ED0} = {AFD16F00-F810-4A3C-BA74-59BBFBC2469D}
-		{5B925151-F428-47DB-A528-75508CA3AF22} = {AFD16F00-F810-4A3C-BA74-59BBFBC2469D}
 		{37E32788-0A5E-43D6-8852-A3A7EAB262F2} = {0CEB99EE-969C-4A1D-841F-D22E4ADCC5F1}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
