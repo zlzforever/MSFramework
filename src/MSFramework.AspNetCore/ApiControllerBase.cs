@@ -53,34 +53,11 @@ public abstract class ApiControllerBase : ControllerBase, IAsyncActionFilter
             return;
         }
 
-        switch (result.Result)
+        result.Result = result.Result switch
         {
-            // OkObjectResult、BadRequestObjectResult 都是继承自它，所以需要考虑 StatusCode
-            // case ObjectResult or:
-            //     // 禁止使用 ApiResult 作为返回值，这样会导致 swagger 不知道返回内容
-            //     if (or.Value is not ApiResult)
-            //     {
-            //         var wrapResult = new ObjectResult(new ApiResult
-            //         {
-            //             Code = 0,
-            //             Success = true,
-            //             Data = or.Value,
-            //             Msg = "",
-            //             Errors = null
-            //         }) { StatusCode = or.StatusCode };
-            //         result.Result = wrapResult;
-            //     }
-            //     else
-            //     {
-            //         Logger.LogWarning(
-            //             $"{HttpContext.Request.GetDisplayUrl()} return an ApiResult, this is not suggested");
-            //     }
-            //
-            //     break;
             // 空内容是使用在 void/Task 这种 Action 中
-            case EmptyResult:
-                result.Result = new ObjectResult(ApiResult.Ok);
-                break;
-        }
+            EmptyResult => new ObjectResult(ApiResult.Ok),
+            _ => result.Result
+        };
     }
 }

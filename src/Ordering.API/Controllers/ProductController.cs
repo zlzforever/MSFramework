@@ -65,6 +65,12 @@ public class ProductController : ApiControllerBase
         return ObjectId.GenerateNewId();
     }
 
+    [HttpGet("modalState")]
+    public bool ModalState([Required] string id)
+    {
+        return true;
+    }
+
     [HttpPost("objectid/{id}")]
     public MyBody Post([FromRoute] ObjectId id, [FromBody] MyBody body)
     {
@@ -105,8 +111,7 @@ public class ProductController : ApiControllerBase
     [HttpGet("Error")]
     public int GetErrorAsync()
     {
-        HttpContext.WriteError(1, "I am an error");
-        return -1;
+        throw new Exception("I am an error");
     }
 
     [HttpGet("FrameworkException")]
@@ -137,7 +142,7 @@ public class ProductController : ApiControllerBase
     [HttpGet("File")]
     public FileResult GetFile()
     {
-        return PhysicalFile("1.csv", "application/txt");
+        return PhysicalFile(AppContext.BaseDirectory + "1.csv", "application/txt");
     }
 
     [HttpGet]

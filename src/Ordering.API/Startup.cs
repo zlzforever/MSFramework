@@ -42,7 +42,8 @@ public class Startup
             {
                 x.Filters.AddUnitOfWork();
                 x.Filters.AddAudit();
-                x.Filters.AddGlobalException();
+                x.Filters.Add<GlobalExceptionFilter>();
+                x.Filters.Add<ActionExceptionFilter>();
                 x.ModelBinderProviders.Insert(0, new ObjectIdModelBinderProvider());
             })
             .ConfigureInvalidModelStateResponse()

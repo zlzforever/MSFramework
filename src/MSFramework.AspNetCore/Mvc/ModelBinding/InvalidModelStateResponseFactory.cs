@@ -19,13 +19,13 @@ public static class InvalidModelStateResponseFactory
                     x.Value?.Errors.Where(z => !string.IsNullOrWhiteSpace(z.ErrorMessage))
                         .Select(y => y.ErrorMessage));
 
-        return new ObjectResult(new ApiResultWithErrors
+        return new BadRequestObjectResult(new ApiResultWithErrors
         {
             Code = 1,
             Success = false,
             Data = null,
             Msg = "数据校验不通过",
             Errors = errors
-        }) { StatusCode = 400 };
+        });
     };
 }

@@ -34,6 +34,7 @@ public static class HttpContextAccessorExtensions
         }
         else
         {
+         
             context.Response.WriteAsJsonAsync(new ApiResultWithErrors
             {
                 Code = code,
@@ -43,5 +44,7 @@ public static class HttpContextAccessorExtensions
                 Errors = errors
             });
         }
+
+        context.Items["WriteError"] = true;
     }
 }
