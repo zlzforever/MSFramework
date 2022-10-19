@@ -2,10 +2,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using MicroserviceFramework.Common;
 using MicroserviceFramework.Domain;
-using MicroserviceFramework.Extensions;
+using MicroserviceFramework.Linq.Expression;
 using MicroserviceFramework.Mediator;
-using MicroserviceFramework.Shared;
 using Template.Domain.Aggregates.Project;
 using Template.Infrastructure;
 

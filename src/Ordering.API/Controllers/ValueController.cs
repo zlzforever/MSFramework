@@ -1,12 +1,14 @@
 ﻿using System;
 using System.ComponentModel.DataAnnotations;
+using System.Threading.Tasks;
 using MicroserviceFramework.AspNetCore;
+using MicroserviceFramework.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc;
 using MongoDB.Bson;
 
 namespace Ordering.API.Controllers;
 
-[Route("api/v1.0/[controller]")]
+[Route("[controller]")]
 [ApiController]
 public class ValueController : ApiControllerBase
 {
@@ -19,7 +21,26 @@ public class ValueController : ApiControllerBase
     [HttpPost]
     public M ModelValid(M m)
     {
+        
         return m;
+    }
+
+    [HttpGet("ok")]
+    public ApiResult GetOk()
+    {
+        return ApiResult.Ok;
+    }
+
+    [HttpGet("error")]
+    public ApiResult GetError()
+    {
+        return ApiResult.Error;
+    }
+
+    [HttpGet("nores")]
+    public Task GetNoRes()
+    {
+        return Task.CompletedTask;
     }
 }
 

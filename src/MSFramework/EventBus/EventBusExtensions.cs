@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Concurrent;
+using System.Diagnostics;
 using System.Reflection;
 
 namespace MicroserviceFramework.EventBus;
@@ -19,6 +20,12 @@ public static class EventBusExtensions
         var attribute = type.GetCustomAttribute<EventNameAttribute>();
 
         return attribute != null ? attribute.Name : type.FullName;
+    }
+
+    public static string GetEventName(this EventBase @event)
+    {
+        var type = @event.GetType();
+        return GetEventName(type);
     }
 
     // public static MethodInfo GetHandlerMethod(this Type handlerType, Type eventType)

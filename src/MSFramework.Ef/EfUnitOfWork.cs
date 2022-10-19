@@ -42,6 +42,14 @@ public class EfUnitOfWork : IUnitOfWork
         }
     }
 
+    public async Task SaveChangesAsync()
+    {
+        foreach (var dbContext in _dbContextFactory.GetAllDbContexts())
+        {
+            await dbContext.SaveChangesAsync();
+        }
+    }
+
     // /// <summary>
     // /// 注册工作单元
     // /// </summary>

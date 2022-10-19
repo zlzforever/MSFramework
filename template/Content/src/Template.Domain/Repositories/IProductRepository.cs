@@ -1,6 +1,6 @@
 using System.Threading.Tasks;
-using MicroserviceFramework.DependencyInjection;
 using MicroserviceFramework.Domain;
+using MicroserviceFramework.Extensions.DependencyInjection;
 using MongoDB.Bson;
 using Template.Domain.Aggregates.Project;
 

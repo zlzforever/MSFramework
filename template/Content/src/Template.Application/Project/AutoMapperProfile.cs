@@ -1,7 +1,7 @@
 using AutoMapper;
 using Template.Domain.Aggregates.Project;
 
-namespace Template.Application.Project.DTOs
+namespace Template.Application.Project
 {
 	public class AutoMapperProfile : Profile
 	{

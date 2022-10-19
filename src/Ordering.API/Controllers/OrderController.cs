@@ -7,6 +7,7 @@ using MicroserviceFramework.Domain;
 using MicroserviceFramework.Mediator;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using MongoDB.Bson;
 using Ordering.Application.Commands;
 using Ordering.Application.Queries;
@@ -40,7 +41,7 @@ public class OrderController : ApiControllerBase
     //[AccessControl("TestCreate")]
     [Route("createTest")]
     [HttpPost]
-    public async Task<IActionResult> TestCreate()
+    public async Task<Order> TestCreate()
     {
         var order = Order.Create(
             "testUSer",
@@ -56,7 +57,8 @@ public class OrderController : ApiControllerBase
         order.AddExtra("n1", "a1");
         order.AddExtra("n2", "a2");
         await _orderRepository.AddAsync(order);
-        return Ok(order);
+        Logger.LogInformation($"{Session.TraceIdentifier}: Create test order completed");
+        return order;
     }
 
     #region Command
@@ -105,19 +107,18 @@ public class OrderController : ApiControllerBase
 
     [HttpDelete("{orderId}")]
     //[AccessControl("删除订单")]
-    public async Task<IActionResult> DeleteOrderAsync([FromRoute] ObjectId orderId)
+    public async Task DeleteOrderAsync([FromRoute] ObjectId orderId)
     {
         await _cqrsProcessor.SendAsync(new DeleteOrderCommand(orderId));
-        return Ok();
     }
 
     [HttpPut("{orderId}/address")]
     //[AccessControl("修改订单地址")]
-    public IActionResult ChangeOrderAddressAsync([FromRoute] ObjectId orderId,
+    public Task ChangeOrderAddressAsync([FromRoute] ObjectId orderId,
         [FromBody] ChangeOrderAddressCommand command)
     {
         command.OrderId = orderId;
-        return Ok();
+        return Task.CompletedTask;
     }
 
     #endregion
@@ -126,10 +127,10 @@ public class OrderController : ApiControllerBase
 
     [HttpGet("{orderId}")]
     //[AccessControl("查看订单")]
-    public async Task<IActionResult> GetOrderAsync([FromRoute, Required] ObjectId orderId)
+    public async Task<Order> GetOrderAsync([FromRoute, Required] ObjectId orderId)
     {
         var order = await _orderingQuery.GetAsync(orderId);
-        return Ok(order);
+        return order;
     }
 
     [HttpGet]

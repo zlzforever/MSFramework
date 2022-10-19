@@ -25,7 +25,7 @@ public class UnitOfWork : IAsyncActionFilter, IOrderedFilter
             return;
         }
 
-        if (!context.HasAttribute<IgnoreUnitOfWork>())
+        if (!context.HasAttribute<NoneUnitOfWork>())
         {
             var unitOfWork = context.HttpContext.RequestServices.GetService<IUnitOfWork>();
             if (unitOfWork != null)

@@ -9,46 +9,23 @@ using Microsoft.Extensions.Logging;
 
 namespace MicroserviceFramework.AspNetCore;
 
-public abstract class ApiControllerBase : ControllerBase, IAsyncResultFilter, IActionFilter, IAsyncActionFilter
+public abstract class ApiControllerBase : ControllerBase, IAsyncActionFilter
 {
-    protected ISession Session;
+    protected ISession Session { get; private set; }
 
-    protected ILogger Logger;
+    protected ILogger Logger { get; private set; }
 
-    [NonAction]
-    public virtual Task OnResultExecutionAsync(ResultExecutingContext context, ResultExecutionDelegate next)
-    {
-        return next();
-    }
-
-    [NonAction]
-    public virtual void OnActionExecuting(ActionExecutingContext context)
-    {
-    }
-
-    [NonAction]
-    public virtual void OnActionExecuted(ActionExecutedContext context)
-    {
-    }
-
-    [NonAction]
-    public virtual ApiResult Success(string msg = null, object data = null)
-    {
-        return new(data)
-        {
-            Msg = msg
-        };
-    }
-
-    [NonAction]
-    public virtual ApiResult Error(string msg = null, int code = 1)
-    {
-        return new(null)
-        {
-            Code = code,
-            Msg = msg
-        };
-    }
+    // [NonAction]
+    // public virtual ApiResult Success(object data = null, string msg = "")
+    // {
+    //     return new(data) { Msg = msg };
+    // }
+    //
+    // [NonAction]
+    // public virtual ApiResult Error(string msg = null, int code = 1)
+    // {
+    //     return new(null) { Code = code, Msg = msg };
+    // }
 
     [NonAction]
     public virtual async Task OnActionExecutionAsync(
@@ -68,14 +45,42 @@ public abstract class ApiControllerBase : ControllerBase, IAsyncResultFilter, IA
         Session = HttpContext.RequestServices.GetService<ISession>();
         Logger = HttpContext.RequestServices.GetRequiredService<ILoggerFactory>().CreateLogger(GetType());
 
-        OnActionExecuting(context);
+        var result = await next();
 
-        if (context.Result != null)
+        // 异常会导致 Result 为空
+        if (result.Result == null)
         {
             return;
         }
 
-        var result = await next();
-        OnActionExecuted(result);
+        switch (result.Result)
+        {
+            // OkObjectResult、BadRequestObjectResult 都是继承自它，所以需要考虑 StatusCode
+            // case ObjectResult or:
+            //     // 禁止使用 ApiResult 作为返回值，这样会导致 swagger 不知道返回内容
+            //     if (or.Value is not ApiResult)
+            //     {
+            //         var wrapResult = new ObjectResult(new ApiResult
+            //         {
+            //             Code = 0,
+            //             Success = true,
+            //             Data = or.Value,
+            //             Msg = "",
+            //             Errors = null
+            //         }) { StatusCode = or.StatusCode };
+            //         result.Result = wrapResult;
+            //     }
+            //     else
+            //     {
+            //         Logger.LogWarning(
+            //             $"{HttpContext.Request.GetDisplayUrl()} return an ApiResult, this is not suggested");
+            //     }
+            //
+            //     break;
+            // 空内容是使用在 void/Task 这种 Action 中
+            case EmptyResult:
+                result.Result = new ObjectResult(ApiResult.Ok);
+                break;
+        }
     }
 }

@@ -1,13 +1,14 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
-        <TargetFramework>netstandard2.1</TargetFramework>
+        <TargetFramework>net6.0</TargetFramework>
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="MSFramework.AutoMapper" Version="0.14.4-beta6" />
-        <PackageReference Include="MSFramework.AspNetCore" Version="0.14.4-beta6" />
-        <PackageReference Include="Dapper" Version="2.0.78" />
+        <PackageReference Include="DotNetCore.CAP.RedisStreams" Version="6.2.1" />
+        <PackageReference Include="MSFramework.AutoMapper" Version="0.14.8-beta4" />
+        <PackageReference Include="MSFramework.AspNetCore" Version="0.14.8-beta4" />
+        <PackageReference Include="Dapper" Version="2.0.123" />
     </ItemGroup>
 
     <ItemGroup>

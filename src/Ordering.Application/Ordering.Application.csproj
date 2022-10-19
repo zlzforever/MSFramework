@@ -1,13 +1,18 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-    <PropertyGroup>
-        <TargetFramework>net6.0</TargetFramework>
-        <IsPackable>true</IsPackable>
-    </PropertyGroup>
+  <PropertyGroup>
+    <TargetFramework>net6.0</TargetFramework>
+    <IsPackable>true</IsPackable>
+  </PropertyGroup>
 
-    <ItemGroup>
-      <ProjectReference Include="..\MSFramework.AspNetCore\MSFramework.AspNetCore.csproj" />
-      <ProjectReference Include="..\Ordering.Domain\Ordering.Domain.csproj" />
-      <ProjectReference Include="..\Ordering.Infrastructure\Ordering.Infrastructure.csproj" />
-    </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\MSFramework.AspNetCore\MSFramework.AspNetCore.csproj"/>
+    <ProjectReference Include="..\Ordering.Domain\Ordering.Domain.csproj"/>
+    <ProjectReference Include="..\Ordering.Infrastructure\Ordering.Infrastructure.csproj"/>
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="DotNetCore.CAP" Version="6.2.1"/>
+    <PackageReference Include="Dapr.AspNetCore" Version="1.8.0"/>
+  </ItemGroup>
 </Project>

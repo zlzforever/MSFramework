@@ -29,7 +29,13 @@ public class ActionResultTypeMapper : IActionResultTypeMapper
         return value switch
         {
             IConvertToActionResult convertToActionResult => convertToActionResult.Convert(),
-            _ => new ApiResult(value)
+            _ => new ObjectResult(new ApiResult
+            {
+                Code = 0,
+                Success = true,
+                Data = value,
+                Msg = ""
+            })
         };
     }
 }

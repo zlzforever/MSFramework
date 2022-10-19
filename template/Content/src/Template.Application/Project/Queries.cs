@@ -1,5 +1,5 @@
+using MicroserviceFramework.Common;
 using MicroserviceFramework.Mediator;
-using MicroserviceFramework.Shared;
 
 namespace Template.Application.Project
 {

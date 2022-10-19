@@ -3,8 +3,8 @@ using System.Threading.Tasks;
 using MicroserviceFramework;
 using MicroserviceFramework.AspNetCore;
 using MicroserviceFramework.AspNetCore.Mvc;
+using MicroserviceFramework.Common;
 using MicroserviceFramework.Mediator;
-using MicroserviceFramework.Shared;
 using Microsoft.AspNetCore.Mvc;
 using Template.Application.Project;
 #if !DEBUG

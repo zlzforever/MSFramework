@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq;
+using MicroserviceFramework.AspNetCore.Extensions;
 using MicroserviceFramework.Runtime;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
@@ -17,13 +18,14 @@ public static class InvalidModelStateResponseFactory
                 x =>
                     x.Value?.Errors.Where(z => !string.IsNullOrWhiteSpace(z.ErrorMessage))
                         .Select(y => y.ErrorMessage));
-        return new ApiResult(null)
+
+        return new ObjectResult(new ApiResultWithErrors
         {
             Code = 1,
             Success = false,
-            Errors = errors,
+            Data = null,
             Msg = "数据校验不通过",
-            StatusCode = 200
-        };
+            Errors = errors
+        }) { StatusCode = 400 };
     };
 }

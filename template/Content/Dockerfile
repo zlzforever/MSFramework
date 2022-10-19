@@ -1,18 +1,17 @@
 # First stage: restore
-FROM registry.cn-shanghai.aliyuncs.com/zlzforever/dotnetsdk-yarn:3.1-latest AS prebuild
+FROM mcr.microsoft.com/dotnet/aspnet:6.0 AS base
 WORKDIR /app
-COPY . ./
-RUN dotnet restore
-RUN cd .. && rm -rf app
+EXPOSE 80
+EXPOSE 443
 
 # Second stage - Build runtime image
-FROM registry.cn-shanghai.aliyuncs.com/zlzforever/Template as build-env
-WORKDIR /app
+FROM mcr.microsoft.com/dotnet/sdk:6.0 AS publish
+WORKDIR /src
 COPY . ./
-RUN dotnet publish -c Release -o out
+RUN dotnet publish "src/Template.API" -c Release -o /output
 
 # Third stage - Copy to host env
-FROM registry-docker.pamirs.com/aspnet:3.1 as release
+FROM base as final
 WORKDIR /app
-COPY --from=build-env /app/out/ .
+COPY --from=publish /output .
 ENTRYPOINT ["dotnet", "template.API.dll"]

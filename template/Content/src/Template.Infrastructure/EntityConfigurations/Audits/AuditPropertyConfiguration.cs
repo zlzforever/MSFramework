@@ -13,7 +13,7 @@ namespace Template.Infrastructure.EntityConfigurations.Audits
 			base.Configure(builder);
 
 			builder.ToTable("audit_property");
-			
+
 			builder.Property(x => x.Id).ValueGeneratedNever();
 			builder.Property(x => x.Name).HasMaxLength(255);
 			builder.Property(x => x.Type).HasMaxLength(255);

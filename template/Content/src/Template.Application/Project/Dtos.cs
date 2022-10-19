@@ -20,8 +20,6 @@ namespace Template.Application.Project
 				public DateTimeOffset CreationTime { get; set; }
 				public string CreationUserName { get; set; }
 			}
-			
-	 
 		}
 	}
 }

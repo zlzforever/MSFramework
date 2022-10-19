@@ -2,7 +2,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using MicroserviceFramework.Domain;
 using MicroserviceFramework.Mediator;
-using MicroserviceFramework.Shared;
+using MicroserviceFramework.Utilities;
 using Microsoft.Extensions.Logging;
 using Template.Domain.Aggregates.Project;
 using Template.Domain.Repositories;

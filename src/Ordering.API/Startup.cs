@@ -62,8 +62,7 @@ public class Startup
             // 		new CamelCasePropertyNamesContractResolver()
             // 	};
             // })
-            ;
-
+            .AddDapr();
         services.AddSwaggerGen(x =>
         {
             x.SwaggerDoc("v1.0", new OpenApiInfo { Version = "v1.0", Description = "Ordering API V1.0" });
@@ -73,13 +72,18 @@ public class Startup
         });
         services.AddHealthChecks();
 
+        services.AddCap(x =>
+        {
+            x.UseEntityFramework<OrderingContext>();
+            x.UseRedis("localhost");
+        });
+
         services.AddMicroserviceFramework(builder =>
         {
             builder.UseAssemblyScanPrefix("Ordering");
             builder.UseDependencyInjectionLoader();
             builder.UseAutoMapper();
             builder.UseMediator();
-            builder.UseEventBus();
 
             //builder.UseAccessControl(Configuration);
             // builder.UseRabbitMQEventDispatcher(new RabbitMQOptions(), typeof(UserCheckoutAcceptedEvent));

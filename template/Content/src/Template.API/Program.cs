@@ -1,11 +1,11 @@
 using System;
 using System.IO;
-using System.Linq;
 using System.Text;
 using Dapper;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
+using RemoteConfiguration.Json.Aliyun;
 using Serilog;
 using Serilog.Events;
 
@@ -25,17 +25,15 @@ namespace Template.API
 			Host.CreateDefaultBuilder(args)
 				.ConfigureAppConfiguration((context, builder) =>
 				{
-					if (File.Exists("nacos.json"))
+					var configuration = builder.Build();
+					builder.AddAliyunJsonFile(source =>
 					{
-						var configurationBuilder = new ConfigurationBuilder();
-						builder.AddJsonFile("nacos.json");
-						var configuration = configurationBuilder.Build();
-						var section = configuration.GetSection("Nacos");
-						if (section.GetChildren().Any())
-						{
-							builder.AddNacosV2Configuration(section);
-						}
-					}
+						source.Endpoint = configuration["RemoteConfiguration:Endpoint"];
+						source.BucketName = configuration["RemoteConfiguration:BucketName"];
+						source.AccessKeyId = configuration["RemoteConfiguration:AccessKeyId"];
+						source.AccessKeySecret = configuration["RemoteConfiguration:AccessKeySecret"];
+						source.Key = configuration["RemoteConfiguration:Key"];
+					});
 
 					if (File.Exists("serilog.json"))
 					{
@@ -53,11 +51,7 @@ namespace Template.API
 						}
 
 						Log.Logger = new LoggerConfiguration()
-#if DEBUG
-							.MinimumLevel.Debug()
-#else
-                            .MinimumLevel.Information()
-#endif
+							.MinimumLevel.Information()
 							.MinimumLevel.Override("Microsoft.Hosting.Lifetime", LogEventLevel.Information)
 #if DEBUG
 							.MinimumLevel.Override("Microsoft.EntityFrameworkCore.Database.Command",
@@ -80,8 +74,7 @@ namespace Template.API
 						options.Limits.KeepAliveTimeout = TimeSpan.FromMinutes(10);
 						options.Limits.RequestHeadersTimeout = TimeSpan.FromMinutes(20);
 					});
-					webBuilder.UseSerilog();
 					webBuilder.UseStartup<Startup>();
-				});
+				}).UseSerilog();
 	}
 }

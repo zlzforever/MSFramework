@@ -1,18 +1,16 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-    <PropertyGroup>
-        <PackageId>MSFramework.AspNetCore</PackageId>
-        <AssemblyName>MSFramework.AspNetCore</AssemblyName>
-        <RootNamespace>MicroserviceFramework.AspNetCore</RootNamespace>
-    </PropertyGroup>
-    <Import Project="../../package.props" />
-    
-    <ItemGroup>
-        <ProjectReference Include="..\MSFramework\MSFramework.csproj" />
-    </ItemGroup>
-    <ItemGroup>
-        <PackageReference Include="Microsoft.FeatureManagement.AspNetCore" Version="2.5.1" />
-        <PackageReference Include="Microsoft.AspNetCore.Mvc.Abstractions" Version="2.2.0" />
-        <PackageReference Include="Microsoft.AspNetCore.Mvc.Core" Version="2.2.5" />
-    </ItemGroup>
+  <PropertyGroup>
+    <PackageId>MSFramework.AspNetCore</PackageId>
+    <AssemblyName>MSFramework.AspNetCore</AssemblyName>
+    <RootNamespace>MicroserviceFramework.AspNetCore</RootNamespace>
+  </PropertyGroup>
+  <Import Project="../../package.props" />
+
+  <ItemGroup>
+    <ProjectReference Include="..\MSFramework\MSFramework.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
+  </ItemGroup>
 
 </Project>
