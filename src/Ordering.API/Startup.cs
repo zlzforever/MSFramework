@@ -1,4 +1,6 @@
-﻿using System.Text.Json;
+﻿using System;
+using System.Text.Json;
+using Dapr.Client;
 using MicroserviceFramework;
 using MicroserviceFramework.AspNetCore;
 using MicroserviceFramework.AspNetCore.Filters;
@@ -18,6 +20,8 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.OpenApi.Models;
+using MongoDB.Bson;
+using Ordering.Application.EventHandlers;
 using Ordering.Domain.AggregateRoots;
 using Ordering.Infrastructure;
 
@@ -78,6 +82,18 @@ public class Startup
             x.UseRedis("localhost");
         });
 
+        services.AddCors(option =>
+        {
+            option
+                .AddPolicy("cors", policy =>
+                    policy.AllowAnyMethod()
+                        .SetIsOriginAllowed(_ => true)
+                        .AllowAnyHeader()
+                        .WithExposedHeaders("x-suggested-filename")
+                        .AllowCredentials().SetPreflightMaxAge(TimeSpan.FromDays(30))
+                );
+        });
+
         services.AddMicroserviceFramework(builder =>
         {
             builder.UseAssemblyScanPrefix("Ordering");
@@ -109,6 +125,10 @@ public class Startup
         if (env.IsDevelopment())
         {
             app.UseDeveloperExceptionPage();
+            //启用中间件服务生成Swagger作为JSON终结点
+            app.UseSwagger();
+            //启用中间件服务对swagger-ui，指定Swagger JSON终结点
+            app.UseSwaggerUI(c => { c.SwaggerEndpoint("/swagger/v1.0/swagger.json", "Ordering API V1.0"); });
         }
         else
         {
@@ -116,27 +136,26 @@ public class Startup
             app.UseHsts();
         }
 
-        app.UseHttpsRedirection();
         app.UseRouting();
         app.UseHealthChecks("/healthcheck");
-
+        app.UseCloudEvents();
         app.UseAuthentication();
         app.UseAuthorization();
-
-        //启用中间件服务生成Swagger作为JSON终结点
-        app.UseSwagger();
-        //启用中间件服务对swagger-ui，指定Swagger JSON终结点
-        app.UseSwaggerUI(c => { c.SwaggerEndpoint("/swagger/v1.0/swagger.json", "Ordering API V1.0"); });
-
-
         app.UseEndpoints(endpoints =>
         {
-            // endpoints.MapSwagger();
-            endpoints.MapControllerRoute(
-                    "default",
-                    "{controller=Home}/{action=Index}/{id?}").RequireCors("cors")
-                ;
+            endpoints.MapDefaultControllerRoute().RequireCors("cors");
+            endpoints.MapControllers();
+            endpoints.MapSubscribeHandler();
         });
+
+        var client = app.ApplicationServices.GetRequiredService<DaprClient>();
+        var integrationEvent = new ProjectCreatedIntegrationEvent
+        {
+            // Id = ObjectId.GenerateNewId()
+        };
+
+        client.PublishEventAsync("pubsub",
+            "Ordering.Application.EventHandlers.ProjectCreatedIntegrationEvent", integrationEvent).Wait();
 
         app.UseMicroserviceFramework();
     }

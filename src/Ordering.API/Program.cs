@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Net;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Server.Kestrel.Core;
 using Microsoft.Extensions.Hosting;
 using Serilog;
 using Serilog.Events;
@@ -12,6 +14,7 @@ public class Program
     {
         AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
         AppContext.SetSwitch("Npgsql.DisableDateTimeInfinityConversions", true);
+        AppContext.SetSwitch("System.Net.Http.SocketsHttpHandler.Http2UnencryptedSupport", true);
 
         Log.Logger = new LoggerConfiguration()
             .MinimumLevel.Information()
@@ -31,7 +34,15 @@ public class Program
             .UseSerilog()
             .ConfigureWebHostDefaults(webBuilder =>
             {
-                webBuilder.UseUrls("http://localhost:5001");
+                // webBuilder.UseUrls("http://localhost:5001");
+                webBuilder.ConfigureKestrel(options =>
+                {
+                    options.ListenAnyIP(5001, x =>
+                    {
+                        x.Protocols = HttpProtocols.Http1AndHttp2;
+                        x.UseHttps();
+                    });
+                });
                 webBuilder.UseStartup<Startup>();
             });
 }

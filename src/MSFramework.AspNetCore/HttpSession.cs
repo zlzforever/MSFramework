@@ -77,13 +77,15 @@ public class HttpSession : ISession
     {
         get
         {
-            if (_roles == null)
+            if (_roles != null)
             {
-                var roles1 = HttpContext.User.FindAll(ClaimTypes.Role).Select(x => x.Value).ToList();
-                var roles2 = HttpContext.User.FindAll("role").Select(x => x.Value).ToList();
-                roles1.AddRange(roles2);
-                _roles = roles1.Count == 0 ? EmptyRoles : new HashSet<string>(roles1);
+                return _roles;
             }
+
+            var roles1 = HttpContext.User.FindAll(ClaimTypes.Role).Select(x => x.Value).ToList();
+            var roles2 = HttpContext.User.FindAll("role").Select(x => x.Value).ToList();
+            roles1.AddRange(roles2);
+            _roles = roles1.Count == 0 ? EmptyRoles : new HashSet<string>(roles1);
 
             return _roles;
         }

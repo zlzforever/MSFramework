@@ -158,15 +158,15 @@ public class ProductController : ApiControllerBase
         return prod;
     }
 
-    [Topic("pubsub", "ProjectCreatedIntegrationEvent")]
-    [HttpPost("Created")]
-    public async Task CreatedAsync(ProjectCreatedIntegrationEvent @event)
-    {
-        var product = await _productRepository.FindAsync(@event.Id);
-        if (product != null)
-        {
-            product.SetName(Guid.NewGuid().ToString());
-            await _unitOfWork.CommitAsync();
-        }
-    }
+    // [Topic("pubsub", "Ordering.Application.EventHandlers.ProjectCreatedIntegrationEvent")]
+    // [HttpPost("Created")]
+    // public async Task CreatedAsync(ProjectCreatedIntegrationEvent @event)
+    // {
+    //     var product = await _productRepository.FindAsync(@event.Id);
+    //     if (product != null)
+    //     {
+    //         product.SetName(Guid.NewGuid().ToString());
+    //         await _unitOfWork.CommitAsync();
+    //     }
+    // }
 }

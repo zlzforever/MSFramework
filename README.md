@@ -35,3 +35,13 @@ $ dotnet ef migrations add init2  --context OrderingContext2 -p ../Ordering.Infr
  为 Modified 导致 Ef 的状态错误
 
 dotnet publish -c Release -r win-x64 -p:PublishSingleFile=true --self-contained true -p:IncludeNativeLibrariesForSelfExtract=true
+
+### 
+
+1. SaveFile 是否有使用文件名来取 MD5？
+
+###
+```
+openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout localhost.key -out localhost.crt -config localhost.conf -passin pass:qpalzm21!
+
+```

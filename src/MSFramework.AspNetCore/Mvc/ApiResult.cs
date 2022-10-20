@@ -23,6 +23,9 @@ public class ApiResult
     /// </summary>
     public string Msg { get; set; } = string.Empty;
 
+    /// <summary>
+    /// 数据
+    /// </summary>
     public object Data { get; set; }
 
     public override string ToString()
