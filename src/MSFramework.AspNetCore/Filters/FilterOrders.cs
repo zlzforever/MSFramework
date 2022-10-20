@@ -1,4 +1,4 @@
-﻿using System.Collections.Concurrent;
+﻿using System.Collections.Generic;
 
 namespace MicroserviceFramework.AspNetCore.Filters;
 
@@ -10,14 +10,10 @@ public static class Conts
     public const int UnitOfWork = 1000;
     public const int Audit = 2000;
 
-    public static readonly ConcurrentDictionary<string, object> MethodDict;
+    public static readonly HashSet<string> CommandMethods;
 
     static Conts()
     {
-        MethodDict = new ConcurrentDictionary<string, object>();
-        MethodDict.TryAdd("POST", null);
-        MethodDict.TryAdd("DELETE", null);
-        MethodDict.TryAdd("PATCH", null);
-        MethodDict.TryAdd("PUT", null);
+        CommandMethods = new HashSet<string> { "POST", "DELETE", "PATCH", "PUT" };
     }
 }

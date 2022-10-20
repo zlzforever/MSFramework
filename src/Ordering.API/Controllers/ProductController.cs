@@ -3,18 +3,14 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Threading.Tasks;
 using Dapr;
-using Dapr.Client;
 using MicroserviceFramework;
 using MicroserviceFramework.AspNetCore;
-using MicroserviceFramework.AspNetCore.Mvc;
 using MicroserviceFramework.Common;
 using MicroserviceFramework.Domain;
 using Microsoft.AspNetCore.Mvc;
 using MongoDB.Bson;
 using Ordering.Domain.AggregateRoots;
 using Ordering.Domain.Repositories;
-using MicroserviceFramework.AspNetCore.Extensions;
-using Microsoft.AspNetCore.Http;
 using Ordering.Application.EventHandlers;
 
 namespace Ordering.API.Controllers;
@@ -85,18 +81,11 @@ public class ProductController : ApiControllerBase
         return 1;
     }
 
-    [HttpGet("First1")]
+    [HttpGet("First")]
     //[AccessControl("查看第一个产品", "产品")]
-    public Product GetFirst1()
+    public Product GetFirst()
     {
         return _productRepository.GetFirst();
-    }
-
-    [HttpGet("First2")]
-    public Product GetFirst2()
-    {
-        var a = _productRepository.GetFirst();
-        return a;
     }
 
     [HttpGet("PagedQuery")]

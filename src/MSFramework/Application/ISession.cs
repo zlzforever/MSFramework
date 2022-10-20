@@ -12,6 +12,6 @@ public interface ISession
     string UserName { get; }
     string Email { get; }
     string PhoneNumber { get; }
-    HashSet<string> Roles { get; }
-    List<string> GetSubjects();
+    IReadOnlyCollection<string> Roles { get; }
+    IReadOnlyCollection<string> Subjects { get; }
 }

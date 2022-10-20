@@ -29,7 +29,7 @@ public class Audit : ActionFilterAttribute
         // 必须保证审计和业务用的是不同的 DbContext 不然，会导致数据异常入库
         using var scope = context.HttpContext.RequestServices.CreateScope();
 
-        if (Conts.MethodDict.ContainsKey(context.HttpContext.Request.Method))
+        if (Conts.CommandMethods.Contains(context.HttpContext.Request.Method))
         {
             auditStore = scope.ServiceProvider.GetService<IAuditStore>();
             if (auditStore == null)
@@ -63,7 +63,7 @@ public class Audit : ActionFilterAttribute
         // comment: 必须使用 HTTP request scope 的 uow manager 才能获取到审计对象
         // comment: 只有有变化的数据才会尝试获取变更对象
         if (auditStore != null &&
-            Conts.MethodDict.ContainsKey(context.HttpContext.Request.Method))
+            Conts.CommandMethods.Contains(context.HttpContext.Request.Method))
         {
             var unitOfWork = context.HttpContext.RequestServices.GetService<IUnitOfWork>();
             if (unitOfWork != null)

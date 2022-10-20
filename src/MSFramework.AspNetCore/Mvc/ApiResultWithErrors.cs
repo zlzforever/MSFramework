@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-
-namespace MicroserviceFramework.AspNetCore.Mvc;
+﻿namespace MicroserviceFramework.AspNetCore.Mvc;
 
 public class ApiResultWithErrors : ApiResult
 {

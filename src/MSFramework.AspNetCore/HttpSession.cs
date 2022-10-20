@@ -10,7 +10,13 @@ namespace MicroserviceFramework.AspNetCore;
 public class HttpSession : ISession
 {
     private static readonly HashSet<string> EmptyRoles = new();
-    private readonly List<string> _subjects;
+    private List<string> _subjects;
+    private string _traceIdentifier;
+    private string _userId;
+    private string _userName;
+    private string _email;
+    private string _phoneNumber;
+    private HashSet<string> _roles;
 
     public HttpSession(IHttpContextAccessor accessor)
     {
@@ -20,37 +26,83 @@ public class HttpSession : ISession
         }
 
         HttpContext = accessor.HttpContext;
-        TraceIdentifier = HttpContext.TraceIdentifier;
-
-        UserId = HttpContext.User.GetValue(ClaimTypes.NameIdentifier, "sid", "sub");
-        UserName = HttpContext.User.GetValue(ClaimTypes.Name, "name");
-        Email = HttpContext.User.GetValue(ClaimTypes.Email, "email");
-        PhoneNumber = HttpContext.User.GetValue(ClaimTypes.MobilePhone, "phone_number");
-
-        var roles1 = HttpContext.User.FindAll(ClaimTypes.Role).Select(x => x.Value).ToList();
-        var roles2 = HttpContext.User.FindAll("role").Select(x => x.Value).ToList();
-        roles1.AddRange(roles2);
-        Roles = roles1.Count == 0 ? EmptyRoles : new HashSet<string>(roles1);
-
-        _subjects = new List<string> { UserId };
-        _subjects.AddRange(Roles);
     }
 
-    public string TraceIdentifier { get; }
-
-    public string UserId { get; }
-
-    public string UserName { get; }
-
-    public string Email { get; }
-
-    public string PhoneNumber { get; }
-
-    public HashSet<string> Roles { get; }
-
-    public List<string> GetSubjects()
+    public string TraceIdentifier
     {
-        return _subjects;
+        get
+        {
+            _traceIdentifier ??= HttpContext.TraceIdentifier;
+            return _traceIdentifier;
+        }
+    }
+
+    public string UserId
+    {
+        get
+        {
+            _userId ??= HttpContext.User.GetValue(ClaimTypes.NameIdentifier, "sid", "sub");
+            return _userId;
+        }
+    }
+
+    public string UserName
+    {
+        get
+        {
+            _userName ??= HttpContext.User.GetValue(ClaimTypes.Name, "name");
+            return _userName;
+        }
+    }
+
+    public string Email
+    {
+        get
+        {
+            _email ??= HttpContext.User.GetValue(ClaimTypes.Email, "email");
+            return _email;
+        }
+    }
+
+    public string PhoneNumber
+    {
+        get
+        {
+            _phoneNumber ??= HttpContext.User.GetValue(ClaimTypes.MobilePhone, "phone_number");
+            return _phoneNumber;
+        }
+    }
+
+    public IReadOnlyCollection<string> Roles
+    {
+        get
+        {
+            if (_roles == null)
+            {
+                var roles1 = HttpContext.User.FindAll(ClaimTypes.Role).Select(x => x.Value).ToList();
+                var roles2 = HttpContext.User.FindAll("role").Select(x => x.Value).ToList();
+                roles1.AddRange(roles2);
+                _roles = roles1.Count == 0 ? EmptyRoles : new HashSet<string>(roles1);
+            }
+
+            return _roles;
+        }
+    }
+
+    public IReadOnlyCollection<string> Subjects
+    {
+        get
+        {
+            if (_subjects != null)
+            {
+                return _subjects;
+            }
+
+            _subjects = new List<string> { UserId };
+            _subjects.AddRange(Roles);
+
+            return _subjects;
+        }
     }
 
     public HttpContext HttpContext { get; }

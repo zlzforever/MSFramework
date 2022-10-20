@@ -1,14 +1,11 @@
 ﻿using System;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Dapr.Client;
 using MicroserviceFramework.Domain;
 using MicroserviceFramework.EventBus;
-using MicroserviceFramework.Extensions.DependencyInjection;
 using MongoDB.Bson;
 using Ordering.Domain.AggregateRoots;
-using Ordering.Domain.Repositories;
 
 namespace Ordering.Application.EventHandlers;
 

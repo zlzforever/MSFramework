@@ -5,6 +5,7 @@ using MicroserviceFramework.AspNetCore.Mvc.ModelBinding;
 using MicroserviceFramework.Extensions.DependencyInjection;
 using MicroserviceFramework.Runtime;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
@@ -27,16 +28,7 @@ public static class ServiceCollectionExtensions
         builder.Services.AddSingleton<IScopedServiceResolver, ScopedServiceResolver>();
         builder.Services.TryAddScoped<ISession, HttpSession>();
 
-        var defaultJsonOptionsType = Type.GetType("Microsoft.AspNetCore.Mvc.JsonOptions, Microsoft.AspNetCore.Mvc.Core");
-        if (defaultJsonOptionsType != null)
-        {
-            builder.Services.AddSingleton(defaultJsonOptionsType,
-                x =>
-                {
-                    var type = typeof(IOptions<>).MakeGenericType(defaultJsonOptionsType);
-                    return ((dynamic)x.GetRequiredService(type)).Value.SerializerSettings;
-                });
-        }
+        builder.Services.AddSingleton(x => x.GetRequiredService<JsonOptions>().JsonSerializerOptions);
 
         var jsonSerializerSettingsType = Type.GetType("Newtonsoft.Json.JsonSerializerSettings, Newtonsoft.Json");
         var jsonOptionsType =

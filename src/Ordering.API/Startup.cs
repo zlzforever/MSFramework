@@ -9,7 +9,6 @@ using MicroserviceFramework.AutoMapper;
 using MicroserviceFramework.Ef;
 using MicroserviceFramework.Ef.Audit;
 using MicroserviceFramework.Ef.PostgreSql;
-using MicroserviceFramework.EventBus;
 using MicroserviceFramework.Extensions.DependencyInjection;
 using MicroserviceFramework.Extensions.Options;
 using MicroserviceFramework.Mediator;
@@ -40,10 +39,10 @@ public class Startup
         services.AddHttpContextAccessor();
         services.AddControllers(x =>
             {
-                x.Filters.AddUnitOfWork();
-                x.Filters.AddAudit();
-                x.Filters.Add<GlobalExceptionFilter>();
-                x.Filters.Add<ActionExceptionFilter>();
+                x.Filters.AddUnitOfWork()
+                    .AddAudit()
+                    .AddGlobalException()
+                    .AddActionException();
                 x.ModelBinderProviders.Insert(0, new ObjectIdModelBinderProvider());
             })
             .ConfigureInvalidModelStateResponse()
