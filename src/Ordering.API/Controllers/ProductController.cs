@@ -3,15 +3,18 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Threading.Tasks;
 using Dapr;
+using DotNetCore.CAP;
 using MicroserviceFramework;
 using MicroserviceFramework.AspNetCore;
 using MicroserviceFramework.Common;
 using MicroserviceFramework.Domain;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 using MongoDB.Bson;
 using Ordering.Domain.AggregateRoots;
 using Ordering.Domain.Repositories;
 using Ordering.Application.EventHandlers;
+using Ordering.Infrastructure;
 
 namespace Ordering.API.Controllers;
 
@@ -46,13 +49,15 @@ public class ProductController : ApiControllerBase
     private readonly IProductRepository _productRepository;
     private readonly IObjectAssembler _mapper;
     private readonly IUnitOfWork _unitOfWork;
+    private readonly ICapPublisher _capBus;
 
     public ProductController(IProductRepository productRepository,
-        IObjectAssembler mapper, IUnitOfWork unitOfWork)
+        IObjectAssembler mapper, IUnitOfWork unitOfWork, ICapPublisher capBus)
     {
         _productRepository = productRepository;
         _mapper = mapper;
         _unitOfWork = unitOfWork;
+        _capBus = capBus;
     }
 
     [HttpGet("objectid")]
@@ -158,15 +163,37 @@ public class ProductController : ApiControllerBase
         return prod;
     }
 
-    // [Topic("pubsub", "Ordering.Application.EventHandlers.ProjectCreatedIntegrationEvent")]
-    // [HttpPost("Created")]
-    // public async Task CreatedAsync(ProjectCreatedIntegrationEvent @event)
-    // {
-    //     var product = await _productRepository.FindAsync(@event.Id);
-    //     if (product != null)
-    //     {
-    //         product.SetName(Guid.NewGuid().ToString());
-    //         await _unitOfWork.CommitAsync();
-    //     }
-    // }
+    [Topic("pubsub", "Ordering.Application.EventHandlers.ProjectCreatedIntegrationEvent")]
+    [HttpPost("Created")]
+    public async Task CreatedAsync([FromBody] ProjectCreatedIntegrationEvent @event)
+    {
+        var product = await _productRepository.FindAsync(@event.Id);
+        if (product != null)
+        {
+            product.SetName(Guid.NewGuid().ToString());
+            await _unitOfWork.CommitAsync();
+        }
+
+        Logger.LogInformation("Created");
+    }
+
+    [HttpPost("CAP")]
+    public IActionResult EntityFrameworkWithTransaction([FromServices] OrderingContext dbContext)
+    {
+        using (var trans = dbContext.Database.BeginTransaction(_capBus, autoCommit: true))
+        {
+            //your business logic code
+
+            _capBus.Publish("Ordering.Application.EventHandlers.ProjectCreatedIntegrationEvent", DateTime.Now);
+        }
+
+        return Ok();
+    }
+
+    [CapSubscribe("Ordering.Application.EventHandlers.ProjectCreatedIntegrationEvent")]
+    [NonAction]
+    public void CheckReceivedMessage(DateTime datetime)
+    {
+        Console.WriteLine(datetime);
+    }
 }

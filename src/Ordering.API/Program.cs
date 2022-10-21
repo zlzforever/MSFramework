@@ -1,5 +1,9 @@
 ﻿using System;
+using System.IO;
+using System.Linq;
 using System.Net;
+using System.Threading.Tasks;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Server.Kestrel.Core;
 using Microsoft.Extensions.Hosting;
@@ -10,39 +14,25 @@ namespace Ordering.API;
 
 public class Program
 {
-    public static void Main(string[] args)
+    public static async Task Main(string[] args)
     {
         AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
         AppContext.SetSwitch("Npgsql.DisableDateTimeInfinityConversions", true);
-        AppContext.SetSwitch("System.Net.Http.SocketsHttpHandler.Http2UnencryptedSupport", true);
+        // AppContext.SetSwitch("System.Net.Http.SocketsHttpHandler.Http2UnencryptedSupport", true);
 
-        Log.Logger = new LoggerConfiguration()
-            .MinimumLevel.Information()
-            .MinimumLevel.Override("Microsoft.Hosting.Lifetime", LogEventLevel.Information)
-            .MinimumLevel.Override("Microsoft.EntityFrameworkCore", LogEventLevel.Information)
-            .MinimumLevel.Override("Microsoft", LogEventLevel.Warning)
-            .MinimumLevel.Override("System", LogEventLevel.Warning)
-            .MinimumLevel.Override("Microsoft.AspNetCore.Authentication", LogEventLevel.Warning)
-            .Enrich.FromLogContext()
-            .WriteTo.Console().WriteTo.RollingFile("logs/ordering.log")
-            .CreateLogger();
-        CreateHostBuilder(args).Build().Run();
+        var webApplicationBuilder = CreateWebApplicationBuilder(args);
+        var web = webApplicationBuilder.Build();
+        web.Configure();
+        await web.RunAsync();
     }
 
-    public static IHostBuilder CreateHostBuilder(string[] args) =>
-        Host.CreateDefaultBuilder(args)
-            .UseSerilog()
-            .ConfigureWebHostDefaults(webBuilder =>
-            {
-                // webBuilder.UseUrls("http://localhost:5001");
-                webBuilder.ConfigureKestrel(options =>
-                {
-                    options.ListenAnyIP(5001, x =>
-                    {
-                        x.Protocols = HttpProtocols.Http1AndHttp2;
-                        x.UseHttps();
-                    });
-                });
-                webBuilder.UseStartup<Startup>();
-            });
+    public static WebApplicationBuilder CreateWebApplicationBuilder(string[] args)
+    {
+        var webApplicationBuilder = WebApplication.CreateBuilder(args);
+        webApplicationBuilder.Host.ConfigureAppConfiguration(Startup.ConfigureConfiguration)
+            .ConfigureServices(Startup.ConfigureServices)
+            .UseSerilog();
+        webApplicationBuilder.WebHost.UseUrls("http://+:5001");
+        return webApplicationBuilder;
+    }
 }

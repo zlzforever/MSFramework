@@ -1,6 +1,7 @@
-﻿using System;
+using System;
+using System.IO;
+using System.Linq;
 using System.Text.Json;
-using Dapr.Client;
 using MicroserviceFramework;
 using MicroserviceFramework.AspNetCore;
 using MicroserviceFramework.AspNetCore.Filters;
@@ -12,35 +13,63 @@ using MicroserviceFramework.Ef;
 using MicroserviceFramework.Ef.Audit;
 using MicroserviceFramework.Ef.PostgreSql;
 using MicroserviceFramework.Extensions.DependencyInjection;
-using MicroserviceFramework.Extensions.Options;
 using MicroserviceFramework.Mediator;
 using MicroserviceFramework.Text.Json.Converters;
 using Microsoft.AspNetCore.Builder;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.OpenApi.Models;
-using MongoDB.Bson;
-using Ordering.Application.EventHandlers;
 using Ordering.Domain.AggregateRoots;
 using Ordering.Infrastructure;
+using MicroserviceFramework.Extensions.Options;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Configuration;
+using Serilog;
+using Serilog.Events;
+
 
 namespace Ordering.API;
 
-public class Startup
+public static class Startup
 {
-    public Startup(IConfiguration configuration)
+    public static readonly Action<IConfigurationBuilder> ConfigureConfiguration = (builder =>
     {
-        Configuration = configuration;
-    }
+        var configuration = builder.Build();
 
-    public IConfiguration Configuration { get; }
+        var serilogSection = configuration.GetSection("Serilog");
+        if (serilogSection.GetChildren().Any())
+        {
+            Log.Logger = new LoggerConfiguration().ReadFrom
+                .Configuration(configuration)
+                .CreateLogger();
+        }
+        else
+        {
+            var logFile = Environment.GetEnvironmentVariable("LOG");
+            if (string.IsNullOrEmpty(logFile))
+            {
+                logFile = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "logs/ordering.log");
+            }
 
-    // This method gets called by the runtime. Use this method to add services to the container.
-    public void ConfigureServices(IServiceCollection services)
+            Log.Logger = new LoggerConfiguration()
+                .MinimumLevel.Information()
+                .MinimumLevel.Override("Microsoft.Hosting.Lifetime", LogEventLevel.Information)
+                .MinimumLevel.Override("Microsoft.EntityFrameworkCore", LogEventLevel.Information)
+                .MinimumLevel.Override("Microsoft", LogEventLevel.Warning)
+                .MinimumLevel.Override("System", LogEventLevel.Warning)
+                .MinimumLevel.Override("Microsoft.AspNetCore.Authentication", LogEventLevel.Warning)
+                .Enrich.FromLogContext()
+                .WriteTo.Console().WriteTo.RollingFile(logFile)
+                .CreateLogger();
+        }
+    });
+
+    public static readonly Action<HostBuilderContext, IServiceCollection> ConfigureServices = ((context, services) =>
     {
-        services.AddOptions(Configuration);
+        var configuration = context.Configuration;
+        services.AddOptions(configuration);
         services.AddHttpContextAccessor();
+        var jsonSerializerOptions = new JsonSerializerOptions();
         services.AddControllers(x =>
             {
                 x.Filters.AddUnitOfWork()
@@ -55,6 +84,8 @@ public class Startup
                 options.JsonSerializerOptions.Converters.Add(new ObjectIdJsonConverter());
                 options.JsonSerializerOptions.Converters.Add(new EnumerationJsonConverterFactory());
                 options.JsonSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
+
+                jsonSerializerOptions = options.JsonSerializerOptions;
             })
             // .AddNewtonsoftJson(x =>
             // {
@@ -66,7 +97,13 @@ public class Startup
             // 		new CamelCasePropertyNamesContractResolver()
             // 	};
             // })
-            .AddDapr();
+            .AddDapr(x =>
+            {
+                x.UseJsonSerializationOptions(jsonSerializerOptions);
+#if DEBUG
+                x.UseGrpcEndpoint("http://localhost:51001");
+#endif
+            });
         services.AddSwaggerGen(x =>
         {
             x.SwaggerDoc("v1.0", new OpenApiInfo { Version = "v1.0", Description = "Ordering API V1.0" });
@@ -80,6 +117,7 @@ public class Startup
         {
             x.UseEntityFramework<OrderingContext>();
             x.UseRedis("localhost");
+            x.TopicNamePrefix = "CAP";
         });
 
         services.AddCors(option =>
@@ -114,14 +152,14 @@ public class Startup
             builder.UseEntityFramework(x =>
             {
                 // 添加 MySql 支持
-                x.AddNpgsql<OrderingContext, OrderingContext2>(Configuration);
+                x.AddNpgsql<OrderingContext, OrderingContext2>(configuration);
             });
         });
-    }
+    });
 
-    // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-    public void Configure(IApplicationBuilder app, IHostEnvironment env)
+    public static void Configure(this WebApplication app)
     {
+        var env = app.Services.GetRequiredService<IHostEnvironment>();
         if (env.IsDevelopment())
         {
             app.UseDeveloperExceptionPage();
@@ -138,24 +176,18 @@ public class Startup
 
         app.UseRouting();
         app.UseHealthChecks("/healthcheck");
-        app.UseCloudEvents();
         app.UseAuthentication();
         app.UseAuthorization();
+
+        // dapr
+        app.UseCloudEvents();
+        app.MapSubscribeHandler();
+
         app.UseEndpoints(endpoints =>
         {
             endpoints.MapDefaultControllerRoute().RequireCors("cors");
             endpoints.MapControllers();
-            endpoints.MapSubscribeHandler();
         });
-
-        var client = app.ApplicationServices.GetRequiredService<DaprClient>();
-        var integrationEvent = new ProjectCreatedIntegrationEvent
-        {
-            // Id = ObjectId.GenerateNewId()
-        };
-
-        client.PublishEventAsync("pubsub",
-            "Ordering.Application.EventHandlers.ProjectCreatedIntegrationEvent", integrationEvent).Wait();
 
         app.UseMicroserviceFramework();
     }
