@@ -9,9 +9,9 @@ using Ordering.Domain.AggregateRoots;
 
 namespace Ordering.Application.EventHandlers;
 
-public class ProjectCreatedIntegrationEvent : EventBase
+public class ProjectCreatedIntegrationEvent
 {
-    // public ObjectId Id { get; set; }
+    public ObjectId Id { get; set; }
 }
 
 public class ProjectCreateEventHandler : IDomainEventHandler<ProjectCreateEvent>
@@ -26,10 +26,7 @@ public class ProjectCreateEventHandler : IDomainEventHandler<ProjectCreateEvent>
     public async Task HandleAsync(ProjectCreateEvent @event, CancellationToken cancellationToken = default)
     {
         Console.WriteLine("Execute ProjectCreateEvent");
-        var integrationEvent = new ProjectCreatedIntegrationEvent
-        {
-            // Id = @event.Id
-        };
+        var integrationEvent = new ProjectCreatedIntegrationEvent { Id = @event.Id };
 
         await _daprClient.PublishEventAsync("pubsub",
             "Ordering.Application.EventHandlers.ProjectCreatedIntegrationEvent", integrationEvent, cancellationToken);
