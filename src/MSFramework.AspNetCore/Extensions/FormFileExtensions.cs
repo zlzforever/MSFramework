@@ -1,7 +1,6 @@
 ﻿using System;
 using System.IO;
 using System.Threading.Tasks;
-using MicroserviceFramework.Security.Cryptography;
 using Microsoft.AspNetCore.Http;
 using MongoDB.Bson;
 

@@ -2,10 +2,12 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using MicroserviceFramework.Application;
-using MicroserviceFramework.Audit;
+using MicroserviceFramework.Auditing;
 using MicroserviceFramework.Domain;
+using MicroserviceFramework.Ef.Auditing.Configuration;
 using MicroserviceFramework.Ef.Extensions;
 using MicroserviceFramework.Ef.Internal;
 using MicroserviceFramework.Mediator;
@@ -85,10 +87,14 @@ public abstract class DbContextBase : DbContext
             count++;
         }
 
+        var option = _entityFrameworkOptions.Get(GetType());
+
+        modelBuilder.ApplyConfiguration(AuditOperationConfiguration.Instance);
+        modelBuilder.ApplyConfiguration(AuditEntityConfiguration.Instance);
+        modelBuilder.ApplyConfiguration(AuditPropertyConfiguration.Instance);
+
         _logger.LogInformation(
             $"将 {count} 个实体 {stringBuilder} 注册到上下文 {contextType} 中");
-
-        var option = _entityFrameworkOptions.Get(GetType());
 
         var tablePrefix = option.TablePrefix?.Trim();
 
@@ -170,46 +176,49 @@ public abstract class DbContextBase : DbContext
         return entities;
     }
 
-    public async Task<int> CommitAsync()
+
+    public override async Task<int> SaveChangesAsync(bool acceptAllChangesOnSuccess,
+        CancellationToken cancellationToken = new())
     {
-        try
+        // 若是有领域事件则分发出去
+        // 领域事件可能导致别聚合调用当前 DbContext 并改变状态，或者添加新的事件
+        List<DomainEvent> domainEvents;
+        do
         {
-            // 若是有领域事件则分发出去
-            // 领域事件可能导致别聚合调用当前 DbContext 并改变状态，或者添加新的事件
-            List<DomainEvent> domainEvents;
-            do
+            domainEvents = GetDomainEvents();
+            foreach (var @event in domainEvents)
             {
-                domainEvents = GetDomainEvents();
-                foreach (var @event in domainEvents)
-                {
-                    await _mediator.PublishAsync(@event);
-                }
-            } while (domainEvents.Count > 0);
-
-            var effectedCount = 0;
-            var changed = ApplyConcepts();
-            if (!changed)
-            {
-                return effectedCount;
+                await _mediator.PublishAsync(@event, cancellationToken);
             }
+        } while (domainEvents.Count > 0);
 
-            effectedCount = await SaveChangesAsync();
-            if (Database.CurrentTransaction != null)
-            {
-                await Database.CurrentTransaction.CommitAsync();
-            }
-
+        var effectedCount = 0;
+        var changed = ApplyConcepts();
+        if (!changed)
+        {
             return effectedCount;
         }
-        catch
-        {
-            if (Database.CurrentTransaction != null)
-            {
-                await Database.CurrentTransaction.RollbackAsync();
-            }
 
-            throw;
-        }
+        return await base.SaveChangesAsync(acceptAllChangesOnSuccess, cancellationToken);
+    }
+
+    public override int SaveChanges(bool acceptAllChangesOnSuccess)
+    {
+        // 若是有领域事件则分发出去
+        // 领域事件可能导致别聚合调用当前 DbContext 并改变状态，或者添加新的事件
+        List<DomainEvent> domainEvents;
+        do
+        {
+            domainEvents = GetDomainEvents();
+            foreach (var @event in domainEvents)
+            {
+                _mediator.PublishAsync(@event).ConfigureAwait(false);
+            }
+        } while (domainEvents.Count > 0);
+
+        var effectedCount = 0;
+        var changed = ApplyConcepts();
+        return !changed ? effectedCount : base.SaveChanges(acceptAllChangesOnSuccess);
     }
 
     protected virtual bool ApplyConcepts()

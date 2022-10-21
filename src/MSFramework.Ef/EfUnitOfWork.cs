@@ -1,7 +1,9 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Threading;
 using System.Threading.Tasks;
-using MicroserviceFramework.Audit;
+using MicroserviceFramework.Auditing;
 using MicroserviceFramework.Domain;
+using MicroserviceFramework.Utilities;
 
 namespace MicroserviceFramework.Ef;
 
@@ -15,15 +17,25 @@ public class EfUnitOfWork : IUnitOfWork
     /// <summary>
     /// 初始化工作单元管理器
     /// </summary>
-    public EfUnitOfWork(DbContextFactory dbContextFactory)
+    public EfUnitOfWork(
+        DbContextFactory dbContextFactory)
     {
         _dbContextFactory = dbContextFactory;
     }
 
-    public void RegisterAuditOperation(AuditOperation auditOperation)
+    public void RegisterAuditing(Func<AuditOperation> auditingFactory)
     {
+        Check.NotNull(auditingFactory, nameof(auditingFactory));
+
         foreach (var dbContextBase in _dbContextFactory.GetAllDbContexts())
         {
+            if (dbContextBase.Model.FindEntityType(typeof(AuditOperation)) == null)
+            {
+                return;
+            }
+
+            var auditOperation = auditingFactory();
+
             dbContextBase.SavingChanges += (sender, _) =>
             {
                 if (sender is not DbContextBase db)
@@ -33,56 +45,25 @@ public class EfUnitOfWork : IUnitOfWork
 
                 var entities = db.GetAuditEntities();
                 auditOperation.AddEntities(entities);
+                auditOperation.End();
+                dbContextBase.Add(auditOperation);
             };
         }
     }
 
-    public IEnumerable<AuditEntity> GetAuditEntities()
-    {
-        foreach (var dbContextBase in _dbContextFactory.GetAllDbContexts())
-        {
-            foreach (var auditEntity in dbContextBase.GetAuditEntities())
-            {
-                yield return auditEntity;
-            }
-        }
-    }
-
-    /// <summary>
-    /// 提交
-    /// </summary>
-    public async Task CommitAsync()
+    public async Task SaveChangesAsync(CancellationToken cancellationToken = default)
     {
         foreach (var dbContext in _dbContextFactory.GetAllDbContexts())
         {
-            await dbContext.CommitAsync();
+            await dbContext.SaveChangesAsync(cancellationToken);
         }
     }
 
-    public async Task SaveChangesAsync()
+    public void SaveChanges()
     {
         foreach (var dbContext in _dbContextFactory.GetAllDbContexts())
         {
-            await dbContext.SaveChangesAsync();
+            dbContext.SaveChanges();
         }
     }
-
-    // /// <summary>
-    // /// 注册工作单元
-    // /// </summary>
-    // /// <param name="unitOfWork">工作单元</param>
-    // public void Register(IUnitOfWork unitOfWork)
-    // {
-    // 	if (unitOfWork == null)
-    // 	{
-    // 		throw new ArgumentNullException(nameof(unitOfWork));
-    // 	}
-    //
-    // 	_unitOfWorks.GetOrAdd(unitOfWork.Id, unitOfWork);
-    // }
-
-    // public IReadOnlyCollection<IUnitOfWork> GetUnitOfWorks()
-    // {
-    // 	return _unitOfWorks.Values;
-    // }
 }

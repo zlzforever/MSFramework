@@ -7,10 +7,8 @@ using MicroserviceFramework.AspNetCore;
 using MicroserviceFramework.AspNetCore.Filters;
 using MicroserviceFramework.AspNetCore.Mvc.ModelBinding;
 using MicroserviceFramework.AspNetCore.Swagger;
-using MicroserviceFramework.Audit;
 using MicroserviceFramework.AutoMapper;
 using MicroserviceFramework.Ef;
-using MicroserviceFramework.Ef.Audit;
 using MicroserviceFramework.Ef.PostgreSql;
 using MicroserviceFramework.Extensions.DependencyInjection;
 using MicroserviceFramework.Mediator;
@@ -22,11 +20,9 @@ using Microsoft.OpenApi.Models;
 using Ordering.Domain.AggregateRoots;
 using Ordering.Infrastructure;
 using MicroserviceFramework.Extensions.Options;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Serilog;
 using Serilog.Events;
-
 
 namespace Ordering.API;
 
@@ -52,7 +48,11 @@ public static class Startup
             }
 
             Log.Logger = new LoggerConfiguration()
+#if DEBUG
+                .MinimumLevel.Debug()
+#else
                 .MinimumLevel.Information()
+#endif
                 .MinimumLevel.Override("Microsoft.Hosting.Lifetime", LogEventLevel.Information)
                 .MinimumLevel.Override("Microsoft.EntityFrameworkCore", LogEventLevel.Information)
                 .MinimumLevel.Override("Microsoft", LogEventLevel.Warning)
@@ -75,7 +75,7 @@ public static class Startup
                 x.Filters.AddUnitOfWork()
                     .AddAudit()
                     .AddGlobalException()
-                    .AddActionException();
+                    .AddActionException().Add<SecurityDaprTopicFilter>();
                 x.ModelBinderProviders.Insert(0, new ObjectIdModelBinderProvider());
             })
             .ConfigureInvalidModelStateResponse()
@@ -139,13 +139,8 @@ public static class Startup
             builder.UseAutoMapper();
             builder.UseMediator();
 
-            //builder.UseAccessControl(Configuration);
-            // builder.UseRabbitMQEventDispatcher(new RabbitMQOptions(), typeof(UserCheckoutAcceptedEvent));
             // 启用审计服务
-            builder.UseAuditStore<EfAuditStore>();
-            // builder.UseMySqlMigrator(typeof(OrderingContext),
-            // 	"Database='ordering';Data Source=localhost;User ID=root;Password=1qazZAQ!;Port=3306;");
-
+            // builder.UseAuditStore<EfAuditStore<OrderingContext>>();
             builder.UseAspNetCore();
             // builder.UseNewtonsoftSerializer();
 
@@ -168,11 +163,11 @@ public static class Startup
             //启用中间件服务对swagger-ui，指定Swagger JSON终结点
             app.UseSwaggerUI(c => { c.SwaggerEndpoint("/swagger/v1.0/swagger.json", "Ordering API V1.0"); });
         }
-        else
-        {
-            // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
-            app.UseHsts();
-        }
+        // else
+        // {
+        //     // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
+        //     app.UseHsts();
+        // }
 
         app.UseRouting();
         app.UseHealthChecks("/healthcheck");

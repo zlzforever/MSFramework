@@ -4,7 +4,7 @@ namespace MicroserviceFramework.Utilities;
 
 public static class ServiceCollectionUtilities
 {
-    public static void TryAdd(IServiceCollection collection, ServiceDescriptor serviceDescriptor)
+    internal static void TryAdd(IServiceCollection collection, ServiceDescriptor serviceDescriptor)
     {
         Check.NotNull(collection, nameof(collection));
         Check.NotNull(serviceDescriptor, nameof(serviceDescriptor));

@@ -24,6 +24,11 @@ public class DbContextFactory
     {
         var dbContextType = _entityConfigurationTypeFinder
             .GetDbContextTypeForEntity(typeof(TEntity));
+        return GetDbContext(dbContextType);
+    }
+
+    private DbContextBase GetDbContext(Type dbContextType)
+    {
         return (DbContextBase)_serviceProvider.GetRequiredService(dbContextType);
     }
 

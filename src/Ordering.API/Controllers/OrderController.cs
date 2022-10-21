@@ -139,7 +139,7 @@ public class OrderController : ApiControllerBase
     {
         var order = await _dbContext.Set<Order>().FirstAsync();
         order.AddEvent();
-        await _unitOfWorkManager.CommitAsync();
+        await _unitOfWorkManager.SaveChangesAsync();
         return await _dbContext.Set<Order>().AsNoTracking().ToListAsync();
     }
 

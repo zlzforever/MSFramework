@@ -31,6 +31,7 @@ public static class ServiceCollectionExtensions
                 options.MigrationsAssembly(entryAssemblyName);
             });
         });
+        builder.Services.AddScoped<DbContext, TDbContext>();
         return builder;
     }
 }

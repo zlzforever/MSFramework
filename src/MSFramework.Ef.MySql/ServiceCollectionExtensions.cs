@@ -71,6 +71,7 @@ namespace MicroserviceFramework.Ef.MySql
                 });
             });
             services.AddDbContext<TDbContext>(action);
+            services.AddScoped<DbContext, TDbContext>();
             return services;
         }
     }

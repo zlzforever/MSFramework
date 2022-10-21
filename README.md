@@ -23,6 +23,7 @@ docker run \
 ```
 $ cd src/Ordering.Api
 $ dotnet ef migrations add init  --context OrderingContext -p ../Ordering.Infrastructure
+$ dotnet ef migrations add init2 --context OrderingContext -p ../Ordering.Infrastructure
 $ dotnet ef migrations add init2  --context OrderingContext2 -p ../Ordering.Infrastructure
 ```
  

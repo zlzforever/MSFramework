@@ -3,7 +3,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using Dapr.Client;
 using MicroserviceFramework.Domain;
-using MicroserviceFramework.EventBus;
 using MongoDB.Bson;
 using Ordering.Domain.AggregateRoots;
 

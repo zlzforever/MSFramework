@@ -2,7 +2,7 @@
 using MicroserviceFramework.Domain;
 using MongoDB.Bson;
 
-namespace MicroserviceFramework.Audit;
+namespace MicroserviceFramework.Auditing;
 
 /// <summary>
 /// 实体属性审计信息

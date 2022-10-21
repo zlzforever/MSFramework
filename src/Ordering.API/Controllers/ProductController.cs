@@ -7,7 +7,6 @@ using DotNetCore.CAP;
 using MicroserviceFramework;
 using MicroserviceFramework.AspNetCore;
 using MicroserviceFramework.AspNetCore.Extensions;
-using MicroserviceFramework.AspNetCore.Filters;
 using MicroserviceFramework.Common;
 using MicroserviceFramework.Domain;
 using Microsoft.AspNetCore.Mvc;
@@ -161,13 +160,12 @@ public class ProductController : ApiControllerBase
     {
         var prod = Product.Create(vo.Name, new Random().Next(100, 10000));
         await _productRepository.AddAsync(prod);
-        await _unitOfWork.SaveChangesAsync();
+        // await _unitOfWork.SaveChangesAsync();
         return prod;
     }
 
     [Topic("pubsub", "Ordering.Application.EventHandlers.ProjectCreatedIntegrationEvent")]
     [HttpPost("Created")]
-    [SecurityDaprTopic]
     public async Task CreatedAsync([FromBody] ProjectCreatedIntegrationEvent @event)
     {
         var ip = HttpContext.GetRemoteIpAddress();
@@ -175,7 +173,7 @@ public class ProductController : ApiControllerBase
         if (product != null)
         {
             product.SetName(Guid.NewGuid().ToString());
-            await _unitOfWork.CommitAsync();
+            // await _unitOfWork.CommitAsync();
         }
 
         Logger.LogInformation($"{ip}: Created");

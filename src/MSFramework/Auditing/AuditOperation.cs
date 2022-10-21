@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using MicroserviceFramework.Domain;
 using MongoDB.Bson;
 
-namespace MicroserviceFramework.Audit;
+namespace MicroserviceFramework.Auditing;
 
 public class AuditOperation : CreationAggregateRoot<ObjectId>
 {

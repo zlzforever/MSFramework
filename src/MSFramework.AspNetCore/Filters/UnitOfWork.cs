@@ -18,6 +18,8 @@ public class UnitOfWork : IAsyncActionFilter, IOrderedFilter
 
     public async Task OnActionExecutionAsync(ActionExecutingContext context, ActionExecutionDelegate next)
     {
+        _logger.LogDebug("On unit of work filter executing...");
+
         var result = await next();
 
         // 若有异常，不应该提交数据
@@ -37,8 +39,9 @@ public class UnitOfWork : IAsyncActionFilter, IOrderedFilter
             return;
         }
 
-        await unitOfWork.CommitAsync();
-        _logger.LogDebug("Executed unit of work filter");
+        await unitOfWork.SaveChangesAsync();
+
+        _logger.LogDebug("On unit of work filter executed.");
     }
 
     public int Order => Conts.UnitOfWork;
