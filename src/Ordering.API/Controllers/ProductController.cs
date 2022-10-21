@@ -6,6 +6,8 @@ using Dapr;
 using DotNetCore.CAP;
 using MicroserviceFramework;
 using MicroserviceFramework.AspNetCore;
+using MicroserviceFramework.AspNetCore.Extensions;
+using MicroserviceFramework.AspNetCore.Filters;
 using MicroserviceFramework.Common;
 using MicroserviceFramework.Domain;
 using Microsoft.AspNetCore.Mvc;
@@ -165,8 +167,10 @@ public class ProductController : ApiControllerBase
 
     [Topic("pubsub", "Ordering.Application.EventHandlers.ProjectCreatedIntegrationEvent")]
     [HttpPost("Created")]
+    [SecurityDaprTopic]
     public async Task CreatedAsync([FromBody] ProjectCreatedIntegrationEvent @event)
     {
+        var ip = HttpContext.GetRemoteIpAddress();
         var product = await _productRepository.FindAsync(@event.Id);
         if (product != null)
         {
@@ -174,7 +178,7 @@ public class ProductController : ApiControllerBase
             await _unitOfWork.CommitAsync();
         }
 
-        Logger.LogInformation("Created");
+        Logger.LogInformation($"{ip}: Created");
     }
 
     [HttpPost("CAP")]
