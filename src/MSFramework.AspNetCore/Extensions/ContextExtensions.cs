@@ -6,12 +6,12 @@ namespace MicroserviceFramework.AspNetCore.Extensions;
 
 public static class ContextExtensions
 {
-    public static string GetRemoteIpAddress(this ActionContext context)
+    public static string GetClientIpAddress(this ActionContext context)
     {
-        return context.HttpContext.GetRemoteIpAddress();
+        return context.HttpContext.GetClientIpAddress();
     }
 
-    public static string GetRemoteIpAddress(this HttpContext context)
+    public static string GetClientIpAddress(this HttpContext context)
     {
         var ip = context.Request.Headers["X-Forwarded-For"].FirstOrDefault();
         if (string.IsNullOrEmpty(ip))

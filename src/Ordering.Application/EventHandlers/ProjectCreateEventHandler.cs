@@ -9,7 +9,7 @@ using Ordering.Domain.AggregateRoots;
 
 namespace Ordering.Application.EventHandlers;
 
-public class ProjectCreatedIntegrationEvent : EventBase
+public class ProjectCreatedIntegrationEvent
 {
     public ObjectId Id { get; set; }
 }

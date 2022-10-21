@@ -20,6 +20,23 @@ public class EfUnitOfWork : IUnitOfWork
         _dbContextFactory = dbContextFactory;
     }
 
+    public void RegisterAuditOperation(AuditOperation auditOperation)
+    {
+        foreach (var dbContextBase in _dbContextFactory.GetAllDbContexts())
+        {
+            dbContextBase.SavingChanges += (sender, _) =>
+            {
+                if (sender is not DbContextBase db)
+                {
+                    return;
+                }
+
+                var entities = db.GetAuditEntities();
+                auditOperation.AddEntities(entities);
+            };
+        }
+    }
+
     public IEnumerable<AuditEntity> GetAuditEntities()
     {
         foreach (var dbContextBase in _dbContextFactory.GetAllDbContexts())

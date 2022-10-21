@@ -23,5 +23,5 @@ public class ActionExceptionFilter : IActionFilter, IOrderedFilter
         }
     }
 
-    public int Order => int.MaxValue - 10;
+    public int Order => Conts.ActionException;
 }

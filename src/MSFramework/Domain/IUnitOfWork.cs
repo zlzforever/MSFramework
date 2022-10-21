@@ -8,6 +8,8 @@ public interface IUnitOfWork
 {
     IEnumerable<AuditEntity> GetAuditEntities();
 
+    void RegisterAuditOperation(AuditOperation auditOperation);
+
     Task CommitAsync();
 
     /// <summary>

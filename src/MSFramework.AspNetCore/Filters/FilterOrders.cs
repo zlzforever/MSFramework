@@ -9,6 +9,7 @@ public static class Conts
 {
     public const int UnitOfWork = 1000;
     public const int Audit = 2000;
+    public const int ActionException = int.MaxValue - 10;
 
     public static readonly HashSet<string> CommandMethods;
 
