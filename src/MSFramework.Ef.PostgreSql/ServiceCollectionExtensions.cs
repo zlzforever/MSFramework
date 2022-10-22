@@ -1,5 +1,6 @@
 ﻿using System;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Infrastructure;
@@ -54,21 +55,22 @@ public static class ServiceCollectionExtensions
                 : dbContextType.Assembly.GetName().Name;
 
             x.UseNpgsql(option.ConnectionString, options =>
-            {
-                configure?.Invoke(options);
+                {
+                    configure?.Invoke(options);
 
-                var migrationsHistoryTable = string.IsNullOrWhiteSpace(option.TablePrefix)
-                    ? "___ef_migrations_history"
-                    : $"{option.TablePrefix}migrations_history";
-                options.MigrationsHistoryTable(migrationsHistoryTable);
-                options.MaxBatchSize(option.MaxBatchSize);
-                options.MigrationsAssembly(entryAssemblyName);
-                options.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery);
-            });
+                    var migrationsHistoryTable = string.IsNullOrWhiteSpace(option.TablePrefix)
+                        ? Defaults.MigrationsHistoryTable
+                        : $"{option.TablePrefix}migrations_history";
+                    options.MigrationsHistoryTable(migrationsHistoryTable, option.Schema);
+                    options.MaxBatchSize(option.MaxBatchSize);
+                    options.MigrationsAssembly(entryAssemblyName);
+                    options.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery);
+                })
+                // .ReplaceService<IMigrationsSqlGenerator, MigrationsSqlGenerator>()
+                ;
         });
 
         services.AddDbContext<TDbContext>(action);
-        services.AddScoped<DbContext, TDbContext>();
         return services;
     }
 }

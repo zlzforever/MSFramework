@@ -62,5 +62,8 @@ public class DbContextConfiguration
 
     public string MigrationsAssembly { get; set; }
 
-    public string Database { get; set; }
+    /// <summary>
+    /// 
+    /// </summary>
+    public string Schema { get; set; }
 }

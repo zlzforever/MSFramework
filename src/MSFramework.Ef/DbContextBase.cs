@@ -115,6 +115,7 @@ public abstract class DbContextBase : DbContext
                 }
 
                 entityType.SetTableName(tableName);
+                entityType.SetSchema(option.Schema);
             }
 
             if (typeof(IDeletion).IsAssignableFrom(entityType.ClrType))

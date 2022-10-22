@@ -24,11 +24,12 @@ public static class ServiceCollectionExtensions
             {
                 sqlServerOptionsAction?.Invoke(options);
                 var migrationsHistoryTable = string.IsNullOrWhiteSpace(option.TablePrefix)
-                    ? "___ef_migrations_history"
+                    ? Defaults.MigrationsHistoryTable
                     : $"{option.TablePrefix}migrations_history";
-                options.MigrationsHistoryTable(migrationsHistoryTable);
+                options.MigrationsHistoryTable(migrationsHistoryTable, option.Schema);
                 options.MaxBatchSize(option.MaxBatchSize);
                 options.MigrationsAssembly(entryAssemblyName);
+                options.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery);
             });
         });
         builder.Services.AddScoped<DbContext, TDbContext>();

@@ -9,6 +9,7 @@ using MicroserviceFramework.AspNetCore.Mvc.ModelBinding;
 using MicroserviceFramework.AspNetCore.Swagger;
 using MicroserviceFramework.AutoMapper;
 using MicroserviceFramework.Ef;
+using MicroserviceFramework.Ef.MySql;
 using MicroserviceFramework.Ef.PostgreSql;
 using MicroserviceFramework.Extensions.DependencyInjection;
 using MicroserviceFramework.Mediator;
@@ -115,6 +116,7 @@ public static class Startup
 
         services.AddCap(x =>
         {
+       
             x.UseEntityFramework<OrderingContext>();
             x.UseRedis("localhost");
             x.TopicNamePrefix = "CAP";
@@ -147,7 +149,7 @@ public static class Startup
             builder.UseEntityFramework(x =>
             {
                 // 添加 MySql 支持
-                x.AddNpgsql<OrderingContext, OrderingContext2>(configuration);
+                x.AddMySql<OrderingContext, OrderingContext2>(configuration);
             });
         });
     });
