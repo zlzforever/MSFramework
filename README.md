@@ -1,8 +1,8 @@
 # MSFramework
+
 A micro service template
 
 [![Build Status](https://dev.azure.com/zlzforever/cerberus/_apis/build/status/zlzforever.MSFramework?branchName=master)](https://dev.azure.com/zlzforever/cerberus/_build/latest?definitionId=10&branchName=master)
-
 
 ## Deploy Seq
 
@@ -18,7 +18,8 @@ docker run \
   -p 5341:5341 \
   datalust/seq
 ```
-### Add EF migrations 
+
+### Add EF migrations
 
 ```
 $ cd src/Ordering.Api
@@ -26,23 +27,36 @@ $ dotnet ef migrations add init  --context OrderingContext -p ../Ordering.Infras
 $ dotnet ef migrations add init2 --context OrderingContext -p ../Ordering.Infrastructure
 $ dotnet ef migrations add init2  --context OrderingContext2 -p ../Ordering.Infrastructure
 ```
- 
- 
- 思考
- 1. 若是 DbContext1 修改了聚合根 1，发出了领域事件，可能触发再次修改这个聚合根吗？
- 
- 若出现这样的情况，则是不正确的，聚合就是一个边界，在这个边界内的事件可以直接处理掉，只有通知别的边界（聚合）时才会发出事件。
- 若是发生这种错误，会导致框架异常：DbContext1 add 聚合/实体，在别的地方又找到这个对象（要么因为没有提交查询不到，要么把 Added 状态改
- 为 Modified 导致 Ef 的状态错误
 
-dotnet publish -c Release -r win-x64 -p:PublishSingleFile=true --self-contained true -p:IncludeNativeLibrariesForSelfExtract=true
+思考
 
-### 
+1. 若是 DbContext1 修改了聚合根 1，发出了领域事件，可能触发再次修改这个聚合根吗？
+
+若出现这样的情况，则是不正确的，聚合就是一个边界，在这个边界内的事件可以直接处理掉，只有通知别的边界（聚合）时才会发出事件。
+若是发生这种错误，会导致框架异常：DbContext1 add 聚合/实体，在别的地方又找到这个对象（要么因为没有提交查询不到，要么把 Added
+状态改
+为 Modified 导致 Ef 的状态错误
+
+dotnet publish -c Release -r win-x64 -p:PublishSingleFile=true --self-contained true -p:
+IncludeNativeLibrariesForSelfExtract=true
+
+###  
 
 1. SaveFile 是否有使用文件名来取 MD5？
 
 ###
+
 ```
 openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout localhost.key -out localhost.crt -config localhost.conf -passin pass:qpalzm21!
 
+```
+
+### 实践说明
+
++ 建议使用 schema 参数来进行隔离， 不再使用 table prefix 进行隔离
+
+### Dapr 
+
+```
+dapr run --dapr-http-port 50001 --dapr-grpc-port 51001 --app-port 5001 --app-id ordering
 ```

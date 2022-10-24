@@ -48,11 +48,16 @@ public abstract class DbContextBase : DbContext
         _logger = loggerFactory.CreateLogger(GetType());
     }
 
+    /// <summary>
+    /// 每次新 DbContext 对象都会调用
+    /// </summary>
+    /// <param name="optionsBuilder"></param>
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
         base.OnConfiguring(optionsBuilder);
 
         var option = _entityFrameworkOptions.Get(GetType());
+
         Database.AutoTransactionsEnabled = option.AutoTransactionsEnabled;
 
         if (option.EnableSensitiveDataLogging)
@@ -64,7 +69,7 @@ public abstract class DbContextBase : DbContext
     }
 
     /// <summary>
-    /// 创建上下文数据模型时，对各个实体类的数据库映射细节进行配置
+    /// 只会调用一次，创建上下文数据模型时，对各个实体类的数据库映射细节进行配置
     /// </summary>
     /// <param name="modelBuilder">上下文数据模型构建器</param>
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -92,9 +97,6 @@ public abstract class DbContextBase : DbContext
         modelBuilder.ApplyConfiguration(AuditOperationConfiguration.Instance);
         modelBuilder.ApplyConfiguration(AuditEntityConfiguration.Instance);
         modelBuilder.ApplyConfiguration(AuditPropertyConfiguration.Instance);
-
-        _logger.LogInformation(
-            $"将 {count} 个实体 {stringBuilder} 注册到上下文 {contextType} 中");
 
         var tablePrefix = option.TablePrefix?.Trim();
 
@@ -124,6 +126,7 @@ public abstract class DbContextBase : DbContext
             }
 
             var optimisticLockTable = typeof(IOptimisticLock).IsAssignableFrom(entityType.ClrType);
+
             var properties = entityType.GetProperties();
             foreach (var property in properties)
             {
@@ -152,7 +155,43 @@ public abstract class DbContextBase : DbContext
                     property.SetValueConverter(new ObjectIdToStringConverter());
                 }
             }
+
+            if (!string.IsNullOrWhiteSpace(option.Schema))
+            {
+                // entityType.GetKeys()
+                // 在 PG 中，schema 进行了物理管理，不需要考虑 KEY Name 重重的情况
+                // 在 MySql 中，KEY 的 name 不是全局重复约束
+
+                foreach (var key in entityType.GetForeignKeys())
+                {
+                    // 若是用户自己设置了名称则不自动更新
+                    var customize = key.GetConstraintName();
+                    if (!string.IsNullOrWhiteSpace(customize))
+                    {
+                        continue;
+                    }
+
+                    var defaultName = key.GetDefaultName();
+                    key.SetConstraintName($"{option.Schema}_{defaultName}");
+                }
+
+                foreach (var index in entityType.GetIndexes())
+                {
+                    // 若是用户自己设置了名称则不自动更新
+                    var customize = index.GetDatabaseName();
+                    if (!string.IsNullOrWhiteSpace(customize))
+                    {
+                        continue;
+                    }
+
+                    var defaultName = index.GetDefaultDatabaseName();
+                    index.SetDatabaseName($"{option.Schema}_{defaultName}");
+                }
+            }
         }
+
+        _logger.LogInformation(
+            $"将 {count} 个实体 {stringBuilder} 注册到上下文 {contextType} 中");
     }
 
     public IEnumerable<AuditEntity> GetAuditEntities()
@@ -183,15 +222,11 @@ public abstract class DbContextBase : DbContext
     {
         // 若是有领域事件则分发出去
         // 领域事件可能导致别聚合调用当前 DbContext 并改变状态，或者添加新的事件
-        List<DomainEvent> domainEvents;
-        do
+        var domainEvents = GetDomainEvents();
+        foreach (var @event in domainEvents)
         {
-            domainEvents = GetDomainEvents();
-            foreach (var @event in domainEvents)
-            {
-                await _mediator.PublishAsync(@event, cancellationToken);
-            }
-        } while (domainEvents.Count > 0);
+            await _mediator.PublishAsync(@event, cancellationToken);
+        }
 
         var effectedCount = 0;
         var changed = ApplyConcepts();
@@ -207,15 +242,11 @@ public abstract class DbContextBase : DbContext
     {
         // 若是有领域事件则分发出去
         // 领域事件可能导致别聚合调用当前 DbContext 并改变状态，或者添加新的事件
-        List<DomainEvent> domainEvents;
-        do
+        var domainEvents = GetDomainEvents();
+        foreach (var @event in domainEvents)
         {
-            domainEvents = GetDomainEvents();
-            foreach (var @event in domainEvents)
-            {
-                _mediator.PublishAsync(@event).ConfigureAwait(false);
-            }
-        } while (domainEvents.Count > 0);
+            _mediator.PublishAsync(@event).ConfigureAwait(false);
+        }
 
         var effectedCount = 0;
         var changed = ApplyConcepts();
@@ -366,7 +397,7 @@ public abstract class DbContextBase : DbContext
         }
     }
 
-    private List<DomainEvent> GetDomainEvents()
+    private IEnumerable<DomainEvent> GetDomainEvents()
     {
         // Dispatch Domain Events collection. 
         // Choices:
@@ -375,19 +406,19 @@ public abstract class DbContextBase : DbContext
         // B) Right AFTER committing data (EF SaveChanges) into the DB will make multiple transactions. 
         // You will need to handle eventual consistency and compensatory actions in case of failures in any of the Handlers. 
 
-        var domainEvents = new List<DomainEvent>();
-
         foreach (var aggregateRoot in ChangeTracker
                      .Entries<EntityBase>())
         {
             var events = aggregateRoot.Entity.GetDomainEvents();
-            if (events != null && events.Any())
+            if (events != null)
             {
-                domainEvents.AddRange(events);
+                foreach (var @event in events)
+                {
+                    yield return @event;
+                }
+
                 aggregateRoot.Entity.ClearDomainEvents();
             }
         }
-
-        return domainEvents;
     }
 }

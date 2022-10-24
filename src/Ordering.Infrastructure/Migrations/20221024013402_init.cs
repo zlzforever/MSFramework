@@ -126,7 +126,7 @@ namespace Ordering.Infrastructure.Migrations
                 {
                     table.PrimaryKey("PK_audit_entity", x => x.id);
                     table.ForeignKey(
-                        name: "FK_audit_entity_audit_operation_operation_id",
+                        name: "ordering_FK_audit_entity_audit_operation_operation_id",
                         column: x => x.operation_id,
                         principalSchema: "ordering",
                         principalTable: "audit_operation",
@@ -156,7 +156,7 @@ namespace Ordering.Infrastructure.Migrations
                 {
                     table.PrimaryKey("PK_order_item", x => x.id);
                     table.ForeignKey(
-                        name: "FK_order_item_order_order_id",
+                        name: "ordering_FK_order_item_order_order_id",
                         column: x => x.order_id,
                         principalSchema: "ordering",
                         principalTable: "order",
@@ -186,7 +186,7 @@ namespace Ordering.Infrastructure.Migrations
                 {
                     table.PrimaryKey("PK_audit_property", x => x.id);
                     table.ForeignKey(
-                        name: "FK_audit_property_audit_entity_entity_id",
+                        name: "ordering_FK_audit_property_audit_entity_entity_id",
                         column: x => x.entity_id,
                         principalSchema: "ordering",
                         principalTable: "audit_entity",
@@ -195,43 +195,43 @@ namespace Ordering.Infrastructure.Migrations
                 .Annotation("MySql:CharSet", "utf8mb4");
 
             migrationBuilder.CreateIndex(
-                name: "IX_audit_entity_entity_id",
+                name: "ordering_IX_audit_entity_entity_id",
                 schema: "ordering",
                 table: "audit_entity",
                 column: "entity_id");
 
             migrationBuilder.CreateIndex(
-                name: "IX_audit_entity_operation_id",
+                name: "ordering_IX_audit_entity_operation_id",
                 schema: "ordering",
                 table: "audit_entity",
                 column: "operation_id");
 
             migrationBuilder.CreateIndex(
-                name: "IX_audit_operation_creation_time",
+                name: "ordering_IX_audit_operation_creation_time",
                 schema: "ordering",
                 table: "audit_operation",
                 column: "creation_time");
 
             migrationBuilder.CreateIndex(
-                name: "IX_audit_operation_creator_id",
+                name: "ordering_IX_audit_operation_creator_id",
                 schema: "ordering",
                 table: "audit_operation",
                 column: "creator_id");
 
             migrationBuilder.CreateIndex(
-                name: "IX_audit_operation_end_time",
+                name: "ordering_IX_audit_operation_end_time",
                 schema: "ordering",
                 table: "audit_operation",
                 column: "end_time");
 
             migrationBuilder.CreateIndex(
-                name: "IX_audit_property_entity_id",
+                name: "ordering_IX_audit_property_entity_id",
                 schema: "ordering",
                 table: "audit_property",
                 column: "entity_id");
 
             migrationBuilder.CreateIndex(
-                name: "IX_order_item_order_id",
+                name: "ordering_IX_order_item_order_id",
                 schema: "ordering",
                 table: "order_item",
                 column: "order_id");

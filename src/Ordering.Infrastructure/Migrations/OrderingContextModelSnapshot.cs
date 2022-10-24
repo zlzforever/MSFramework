@@ -47,9 +47,11 @@ namespace Ordering.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("EntityId");
+                    b.HasIndex("EntityId")
+                        .HasDatabaseName("ordering_IX_audit_entity_entity_id");
 
-                    b.HasIndex("OperationId");
+                    b.HasIndex("OperationId")
+                        .HasDatabaseName("ordering_IX_audit_entity_operation_id");
 
                     b.ToTable("audit_entity", "ordering");
                 });
@@ -115,11 +117,14 @@ namespace Ordering.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("CreationTime");
+                    b.HasIndex("CreationTime")
+                        .HasDatabaseName("ordering_IX_audit_operation_creation_time");
 
-                    b.HasIndex("CreatorId");
+                    b.HasIndex("CreatorId")
+                        .HasDatabaseName("ordering_IX_audit_operation_creator_id");
 
-                    b.HasIndex("EndTime");
+                    b.HasIndex("EndTime")
+                        .HasDatabaseName("ordering_IX_audit_operation_end_time");
 
                     b.ToTable("audit_operation", "ordering");
                 });
@@ -155,7 +160,8 @@ namespace Ordering.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("EntityId");
+                    b.HasIndex("EntityId")
+                        .HasDatabaseName("ordering_IX_audit_property_entity_id");
 
                     b.ToTable("audit_property", "ordering");
                 });
@@ -252,7 +258,8 @@ namespace Ordering.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("OrderId");
+                    b.HasIndex("OrderId")
+                        .HasDatabaseName("ordering_IX_order_item_order_id");
 
                     b.ToTable("order_item", "ordering");
                 });
@@ -288,7 +295,8 @@ namespace Ordering.Infrastructure.Migrations
                 {
                     b.HasOne("MicroserviceFramework.Auditing.AuditOperation", "Operation")
                         .WithMany("Entities")
-                        .HasForeignKey("OperationId");
+                        .HasForeignKey("OperationId")
+                        .HasConstraintName("ordering_FK_audit_entity_audit_operation_operation_id");
 
                     b.Navigation("Operation");
                 });
@@ -297,7 +305,8 @@ namespace Ordering.Infrastructure.Migrations
                 {
                     b.HasOne("MicroserviceFramework.Auditing.AuditEntity", "Entity")
                         .WithMany("Properties")
-                        .HasForeignKey("EntityId");
+                        .HasForeignKey("EntityId")
+                        .HasConstraintName("ordering_FK_audit_property_audit_entity_entity_id");
 
                     b.Navigation("Entity");
                 });
@@ -336,7 +345,8 @@ namespace Ordering.Infrastructure.Migrations
                             b1.ToTable("order", "ordering");
 
                             b1.WithOwner()
-                                .HasForeignKey("OrderId");
+                                .HasForeignKey("OrderId")
+                                .HasConstraintName("ordering_FK_Order_Order_id");
                         });
 
                     b.Navigation("Address");
@@ -347,7 +357,8 @@ namespace Ordering.Infrastructure.Migrations
                     b.HasOne("Ordering.Domain.AggregateRoots.Order", null)
                         .WithMany("Items")
                         .HasForeignKey("OrderId")
-                        .OnDelete(DeleteBehavior.ClientCascade);
+                        .OnDelete(DeleteBehavior.ClientCascade)
+                        .HasConstraintName("ordering_FK_order_item_order_order_id");
                 });
 
             modelBuilder.Entity("MicroserviceFramework.Auditing.AuditEntity", b =>
