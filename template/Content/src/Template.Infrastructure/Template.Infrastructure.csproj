@@ -9,7 +9,7 @@
     </ItemGroup>
 
     <ItemGroup>
-        <PackageReference Include="MSFramework.Ef" Version="0.14.8-beta4" />
-        <PackageReference Include="MSFramework.Ef.PostgreSql" Version="0.14.8-beta4" />
+        <PackageReference Include="MSFramework.Ef" Version="0.14.8-beta5" />
+        <PackageReference Include="MSFramework.Ef.MySql" Version="0.14.8-beta5" />
     </ItemGroup>
 </Project>

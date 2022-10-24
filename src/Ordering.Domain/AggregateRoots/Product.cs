@@ -3,7 +3,7 @@ using MongoDB.Bson;
 
 namespace Ordering.Domain.AggregateRoots;
 
-public class ProjectCreateEvent : DomainEvent
+public class ProjectCreatedEvent : DomainEvent
 {
     public ObjectId Id { get; set; }
 }
@@ -17,8 +17,8 @@ public class Product : AggregateRoot<ObjectId>, IOptimisticLock
     public static Product Create(string name, int price)
     {
         var product = new Product(ObjectId.GenerateNewId()) { Name = name, Price = price };
+        product.AddDomainEvent(new ProjectCreatedEvent { Id = product.Id });
 
-        product.AddDomainEvent(new ProjectCreateEvent { Id = product.Id });
         return product;
     }
 

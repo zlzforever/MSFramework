@@ -13,22 +13,22 @@ public class ProjectCreatedIntegrationEvent
     public ObjectId Id { get; set; }
 }
 
-public class ProjectCreateEventHandler : IDomainEventHandler<ProjectCreateEvent>
+public class ProjectCreatedEventHandler : IDomainEventHandler<ProjectCreatedEvent>
 {
     private readonly DaprClient _daprClient;
 
-    public ProjectCreateEventHandler(DaprClient daprClient)
+    public ProjectCreatedEventHandler(DaprClient daprClient)
     {
         _daprClient = daprClient;
     }
 
-    public async Task HandleAsync(ProjectCreateEvent @event, CancellationToken cancellationToken = default)
+    public async Task HandleAsync(ProjectCreatedEvent @event, CancellationToken cancellationToken = default)
     {
-        Console.WriteLine("Execute ProjectCreateEvent");
         var integrationEvent = new ProjectCreatedIntegrationEvent { Id = @event.Id };
 
         await _daprClient.PublishEventAsync("pubsub",
             "Ordering.Application.EventHandlers.ProjectCreatedIntegrationEvent", integrationEvent, cancellationToken);
+        Console.WriteLine("Execute ProjectCreatedEvent");
     }
 
     public void Dispose()

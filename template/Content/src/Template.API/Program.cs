@@ -1,80 +1,44 @@
 using System;
-using System.IO;
 using System.Text;
+using System.Threading.Tasks;
 using Dapper;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
-using RemoteConfiguration.Json.Aliyun;
 using Serilog;
-using Serilog.Events;
 
-namespace Template.API
+namespace Template.API;
+
+public class Program
 {
-	public class Program
+	public static async Task Main(string[] args)
 	{
-		public static void Main(string[] args)
+		AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
+		AppContext.SetSwitch("Npgsql.DisableDateTimeInfinityConversions", true);
+
+		Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
+		DefaultTypeMap.MatchNamesWithUnderscores = true;
+
+		var webApplicationBuilder = CreateWebApplicationBuilder(args);
+		var web = webApplicationBuilder.Build();
+		web.Configure();
+		await web.RunAsync();
+	}
+
+	public static WebApplicationBuilder CreateWebApplicationBuilder(string[] args)
+	{
+		var webApplicationBuilder = WebApplication.CreateBuilder(args);
+		webApplicationBuilder.Host.ConfigureAppConfiguration(Startup.ConfigureConfiguration)
+			.ConfigureServices(Startup.ConfigureServices)
+			.UseSerilog();
+		webApplicationBuilder.WebHost.UseUrls("http://+:5001");
+		webApplicationBuilder.WebHost.ConfigureKestrel((context, options) =>
 		{
-			Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
-			DefaultTypeMap.MatchNamesWithUnderscores = true;
-			CreateHostBuilder(args).Build().Run();
-			Console.WriteLine("Bye");
-		}
-
-		public static IHostBuilder CreateHostBuilder(string[] args) =>
-			Host.CreateDefaultBuilder(args)
-				.ConfigureAppConfiguration((context, builder) =>
-				{
-					var configuration = builder.Build();
-					builder.AddAliyunJsonFile(source =>
-					{
-						source.Endpoint = configuration["RemoteConfiguration:Endpoint"];
-						source.BucketName = configuration["RemoteConfiguration:BucketName"];
-						source.AccessKeyId = configuration["RemoteConfiguration:AccessKeyId"];
-						source.AccessKeySecret = configuration["RemoteConfiguration:AccessKeySecret"];
-						source.Key = configuration["RemoteConfiguration:Key"];
-					});
-
-					if (File.Exists("serilog.json"))
-					{
-						builder.AddJsonFile("serilog.json");
-						Log.Logger = new LoggerConfiguration().ReadFrom
-							.Configuration(builder.Build())
-							.CreateLogger();
-					}
-					else
-					{
-						var logFile = Environment.GetEnvironmentVariable("LOG");
-						if (string.IsNullOrEmpty(logFile))
-						{
-							logFile = Path.Combine(AppContext.BaseDirectory, "logs/template.log");
-						}
-
-						Log.Logger = new LoggerConfiguration()
-							.MinimumLevel.Information()
-							.MinimumLevel.Override("Microsoft.Hosting.Lifetime", LogEventLevel.Information)
-#if DEBUG
-							.MinimumLevel.Override("Microsoft.EntityFrameworkCore.Database.Command",
-								LogEventLevel.Information)
-#endif
-							.MinimumLevel.Override("Microsoft", LogEventLevel.Warning)
-							.MinimumLevel.Override("System", LogEventLevel.Warning)
-							.MinimumLevel.Override("Microsoft.AspNetCore.Authentication", LogEventLevel.Warning)
-							.Enrich.FromLogContext()
-							.WriteTo.Console().WriteTo.RollingFile(logFile)
-							.CreateLogger();
-					}
-				})
-				.ConfigureWebHostDefaults(webBuilder =>
-				{
-					webBuilder.ConfigureKestrel((context, options) =>
-					{
-						// Handle requests up to 500 MB
-						options.Limits.MaxRequestBodySize = 1024288000;
-						options.Limits.KeepAliveTimeout = TimeSpan.FromMinutes(10);
-						options.Limits.RequestHeadersTimeout = TimeSpan.FromMinutes(20);
-					});
-					webBuilder.UseStartup<Startup>();
-				}).UseSerilog();
+			// Handle requests up to 500 MB
+			options.Limits.MaxRequestBodySize = 1024288000;
+			options.Limits.KeepAliveTimeout = TimeSpan.FromMinutes(10);
+			options.Limits.RequestHeadersTimeout = TimeSpan.FromMinutes(20);
+		});
+		return webApplicationBuilder;
 	}
 }

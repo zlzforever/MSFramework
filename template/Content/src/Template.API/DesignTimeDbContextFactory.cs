@@ -11,7 +11,7 @@ namespace Template.API
 	{
 		protected override IServiceProvider GetServiceProvider()
 		{
-			return Program.CreateHostBuilder(Array.Empty<string>()).Build().Services;
+			return Program.CreateWebApplicationBuilder(Array.Empty<string>()).Build().Services;
 		}
 
 		public override void ConfigureDesignTimeServices(IServiceCollection serviceCollection)

@@ -1,5 +1,6 @@
 using MicroserviceFramework.Common;
 using MicroserviceFramework.Mediator;
+using MongoDB.Bson;
 
 namespace Template.Application.Project
 {
@@ -7,9 +8,9 @@ namespace Template.Application.Project
 	{
 		public static class V10
 		{
-			public class GetProductByNameQuery : IRequest<Dtos.V10.ProductOut>
+			public class GetProductByIdQuery : IRequest<Dtos.V10.ProductOut>
 			{
-				public string Name { get; set; }
+				public ObjectId Id { get; set; }
 			}
 
 			public class PagedProductQuery : IRequest<PagedResult<Dtos.V10.ProductOut>>

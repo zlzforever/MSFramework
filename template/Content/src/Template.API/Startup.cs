@@ -1,4 +1,5 @@
 using System;
+using System.IO;
 using System.Linq;
 using System.Text.Json;
 using MicroserviceFramework;
@@ -6,151 +7,193 @@ using MicroserviceFramework.AspNetCore;
 using MicroserviceFramework.AspNetCore.Filters;
 using MicroserviceFramework.AspNetCore.Mvc.ModelBinding;
 using MicroserviceFramework.AspNetCore.Swagger;
-using MicroserviceFramework.Audit;
 using MicroserviceFramework.AutoMapper;
 using MicroserviceFramework.Ef;
-using MicroserviceFramework.Ef.Audit;
-using MicroserviceFramework.Ef.PostgreSql;
+using MicroserviceFramework.Ef.MySql;
 using MicroserviceFramework.Extensions.DependencyInjection;
 using MicroserviceFramework.Extensions.Options;
 using MicroserviceFramework.Mediator;
+using MicroserviceFramework.Text.Json.Converters;
 using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.ResponseCompression;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.OpenApi.Models;
+using RemoteConfiguration.Json.Aliyun;
+using Serilog;
+using Serilog.Events;
+using Template.Domain;
 using Template.Infrastructure;
-using MicroserviceFramework.Text.Json.Converters;
-using Template.Domain.Aggregates.Project;
 
-namespace Template.API
+namespace Template.API;
+
+public static class Startup
 {
-	public class Startup
+	public static readonly Action<IConfigurationBuilder> ConfigureConfiguration = (builder =>
 	{
-		public Startup(IConfiguration configuration)
+		var configuration = builder.Build();
+
+		builder.AddAliyunJsonFile(source =>
 		{
-			Configuration = configuration;
+			source.Endpoint = configuration["RemoteConfiguration:Endpoint"];
+			source.BucketName = configuration["RemoteConfiguration:BucketName"];
+			source.AccessKeyId = configuration["RemoteConfiguration:AccessKeyId"];
+			source.AccessKeySecret = configuration["RemoteConfiguration:AccessKeySecret"];
+			source.Key = configuration["RemoteConfiguration:Key"];
+		});
+
+		var serilogSection = configuration.GetSection("Serilog");
+		if (serilogSection.GetChildren().Any())
+		{
+			Log.Logger = new LoggerConfiguration().ReadFrom
+				.Configuration(configuration)
+				.CreateLogger();
 		}
-
-		public IConfiguration Configuration { get; }
-
-		// This method gets called by the runtime. Use this method to add services to the container.
-		public void ConfigureServices(IServiceCollection services)
+		else
 		{
-			// 通过 Attribute 绑定 Options
-			services.AddOptions(Configuration);
-			// SwaggerUI require some service from views,
-			// if your project a pure api, please use AddControllers
-			services.AddControllers(x =>
-				{
-					// 使用过滤器 UnitOfWork，即在整个 Request 完成后提交 EF 的变更
-					x.Filters.AddUnitOfWork();
-					// 使用审计过滤器
-					x.Filters.AddAudit();
-					// 使用全局异常
-					x.Filters.AddGlobalException();
-					x.ModelBinderProviders.Insert(0, new ObjectIdModelBinderProvider());
-				})
-				.ConfigureInvalidModelStateResponse()
-				.AddJsonOptions(options =>
-				{
-					options.JsonSerializerOptions.Converters.Add(new ObjectIdJsonConverter());
-					options.JsonSerializerOptions.Converters.Add(new EnumerationJsonConverterFactory());
-					options.JsonSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
-				});
-
-			services.AddHealthChecks();
-			services.AddSwaggerGen(x =>
+			var logFile = Environment.GetEnvironmentVariable("LOG");
+			if (string.IsNullOrEmpty(logFile))
 			{
-				x.SwaggerDoc("v1.0",
-					new OpenApiInfo { Version = "v1.0", Description = "Template API V1.0" });
-				x.CustomSchemaIds(type => type.FullName);
-				x.MapEnumerationType(typeof(ProductType).Assembly);
-				x.SupportObjectId();
-			});
-
-			services.AddResponseCompression(options =>
-			{
-				options.Providers.Add<BrotliCompressionProvider>();
-				options.Providers.Add<GzipCompressionProvider>();
-				options.MimeTypes =
-					ResponseCompressionDefaults.MimeTypes.Concat(
-						new[] { "image/svg+xml", "db" });
-			});
-			services.AddResponseCaching();
-
-			services.AddRouting(x => { x.LowercaseUrls = true; });
-
-			services.AddCors(option =>
-			{
-				option
-					.AddPolicy("cors", policy =>
-						policy.AllowAnyMethod()
-							.SetIsOriginAllowed(_ => true)
-							.AllowAnyHeader()
-							.WithExposedHeaders("x-suggested-filename")
-							.AllowCredentials().SetPreflightMaxAge(TimeSpan.FromDays(30))
-					);
-			});
-
-			services.AddMicroserviceFramework(builder =>
-			{
-				builder.UseAssemblyScanPrefix("Template");
-				builder.UseDependencyInjectionLoader();
-				builder.UseAutoMapper();
-				builder.UseMediator();
-				builder.UseAspNetCore();
-				builder.UseAuditStore<EfAuditStore>();
-				builder.UseEntityFramework(x => { x.AddNpgsql<TemplateDbContext>(Configuration); });
-			});
-			services.AddCap(x =>
-			{
-				x.UseEntityFramework<TemplateDbContext>();
-			});
-
-			services.ConfigureIdentityServer(Configuration);
-		}
-
-		// This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-		public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
-		{
-			if (env.IsDevelopment())
-			{
-				app.UseDeveloperExceptionPage();
-				app.UseSwagger();
-				//启用中间件服务对swagger-ui，指定Swagger JSON终结点
-				app.UseSwaggerUI(
-					c => { c.SwaggerEndpoint("/swagger/v1.0/swagger.json", "Template API V1.0"); });
+				logFile = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "logs/ordering.log");
 			}
-			// else
+
+			Log.Logger = new LoggerConfiguration()
+#if DEBUG
+				.MinimumLevel.Debug()
+#else
+                .MinimumLevel.Information()
+#endif
+				.MinimumLevel.Override("Microsoft.Hosting.Lifetime", LogEventLevel.Information)
+				.MinimumLevel.Override("Microsoft.EntityFrameworkCore", LogEventLevel.Information)
+				.MinimumLevel.Override("Microsoft", LogEventLevel.Warning)
+				.MinimumLevel.Override("System", LogEventLevel.Warning)
+				.MinimumLevel.Override("Microsoft.AspNetCore.Authentication", LogEventLevel.Warning)
+				.Enrich.FromLogContext()
+				.WriteTo.Console().WriteTo.RollingFile(logFile)
+				.CreateLogger();
+		}
+	});
+
+	public static readonly Action<HostBuilderContext, IServiceCollection> ConfigureServices = ((context, services) =>
+	{
+		var configuration = context.Configuration;
+		services.AddOptions(configuration);
+		services.AddHttpContextAccessor();
+		var jsonSerializerOptions = new JsonSerializerOptions();
+		services.AddControllers(x =>
+			{
+				x.Filters.AddUnitOfWork()
+					.AddAudit()
+					.AddGlobalException()
+					.AddActionException().Add<SecurityDaprTopicFilter>();
+				x.ModelBinderProviders.Insert(0, new ObjectIdModelBinderProvider());
+			})
+			.ConfigureInvalidModelStateResponse()
+			.AddJsonOptions(options =>
+			{
+				options.JsonSerializerOptions.Converters.Add(new ObjectIdJsonConverter());
+				options.JsonSerializerOptions.Converters.Add(new EnumerationJsonConverterFactory());
+				options.JsonSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
+
+				jsonSerializerOptions = options.JsonSerializerOptions;
+			})
+			// .AddNewtonsoftJson(x =>
 			// {
-			// 	// app.UseExceptionHandler("/Home/Error");
-			// 	// The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
-			// 	app.UseHsts();
-			// }
-
-			app.UseResponseCompression();
-			app.UseResponseCaching();
-			app.UseRouting();
-			app.UseCors("cors");
-			app.UseAuthorization();
-
-			app.UseEndpoints(endpoints =>
+			// 	x.SerializerSettings.Converters.Add(new ObjectIdConverter());
+			// 	x.SerializerSettings.Converters.Add(new EnumerationConverter());
+			// 	x.SerializerSettings.ContractResolver = new CompositeContractResolver
+			// 	{
+			// 		new EnumerationContractResolver(),
+			// 		new CamelCasePropertyNamesContractResolver()
+			// 	};
+			// })
+			.AddDapr(x =>
 			{
-				endpoints.MapControllers()
-					.RequireAuthorization("Jwt")
-					.RequireCors("cors");
+				x.UseJsonSerializationOptions(jsonSerializerOptions);
+#if DEBUG
+				x.UseGrpcEndpoint("http://localhost:51001");
+#endif
 			});
-			app.UseMicroserviceFramework();
+		services.AddSwaggerGen(x =>
+		{
+			x.SwaggerDoc("v1.0", new OpenApiInfo { Version = "v1.0", Description = "Template API V1.0" });
+			x.CustomSchemaIds(type => type.FullName);
+			x.MapEnumerationType(typeof(TemplateOptions).Assembly);
+			x.SupportObjectId();
+		});
+		services.AddHealthChecks();
 
-			// 必须放在 UseMSFramework 后面
-			var exit = Configuration["exit"] == "true";
-			if (exit)
+		services.AddCap(x =>
+		{
+			x.UseEntityFramework<TemplateDbContext>();
+			x.UseRedis("localhost");
+			x.TopicNamePrefix = "CAP";
+		});
+
+		services.AddCors(option =>
+		{
+			option
+				.AddPolicy("cors", policy =>
+					policy.AllowAnyMethod()
+						.SetIsOriginAllowed(_ => true)
+						.AllowAnyHeader()
+						.WithExposedHeaders("x-suggested-filename")
+						.AllowCredentials().SetPreflightMaxAge(TimeSpan.FromDays(30))
+				);
+		});
+
+		services.AddMicroserviceFramework(builder =>
+		{
+			builder.UseAssemblyScanPrefix("Ordering");
+			builder.UseDependencyInjectionLoader();
+			builder.UseAutoMapper();
+			builder.UseMediator();
+
+			// 启用审计服务
+			// builder.UseAuditStore<EfAuditStore<OrderingContext>>();
+			builder.UseAspNetCore();
+			// builder.UseNewtonsoftSerializer();
+
+			builder.UseEntityFramework(x =>
 			{
-				app.ApplicationServices.GetRequiredService<IHostApplicationLifetime>().StopApplication();
-			}
+				// 添加 MySql 支持
+				x.AddMySql<TemplateDbContext>(configuration);
+			});
+		});
+	});
+
+	public static void Configure(this WebApplication app)
+	{
+		var env = app.Services.GetRequiredService<IHostEnvironment>();
+		if (env.IsDevelopment())
+		{
+			app.UseDeveloperExceptionPage();
+			//启用中间件服务生成Swagger作为JSON终结点
+			app.UseSwagger();
+			//启用中间件服务对swagger-ui，指定Swagger JSON终结点
+			app.UseSwaggerUI(c => { c.SwaggerEndpoint("/swagger/v1.0/swagger.json", "Ordering API V1.0"); });
 		}
+		// else
+		// {
+		//     // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
+		//     app.UseHsts();
+		// }
+
+		app.UseRouting();
+		app.UseHealthChecks("/healthcheck");
+		app.UseAuthentication();
+		app.UseAuthorization();
+
+		// dapr
+		app.UseCloudEvents();
+		app.MapSubscribeHandler();
+
+		app.UseEndpoints(endpoints =>
+		{
+			endpoints.MapDefaultControllerRoute().RequireCors("cors");
+			endpoints.MapControllers();
+		});
+
+		app.UseMicroserviceFramework();
 	}
 }

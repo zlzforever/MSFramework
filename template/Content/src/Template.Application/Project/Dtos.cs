@@ -6,7 +6,7 @@ namespace Template.Application.Project
 	{
 		public static class V10
 		{
-			public class CreatProductOut
+			public class CreateProductOut
 			{
 				public string Name { get; set; }
 				public Guid Id { get; set; }

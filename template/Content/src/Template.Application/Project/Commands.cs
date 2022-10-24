@@ -8,14 +8,19 @@ namespace Template.Application.Project
 	{
 		public static class V10
 		{
-			public class CreateProjectCommand : IRequest<Dtos.V10.CreatProductOut>
+			public class CreateProjectCommand : IRequest<Dtos.V10.CreateProductOut>
 			{
 				public string Name { get; set; }
 				public int Price { get; set; }
 				public ProductType Type { get; set; }
 			}
 
-			public class DeleteProjectCommand : IRequest
+			public class DeleteProjectCommand : IRequest<ObjectId>
+			{
+				public ObjectId ProjectId { get; set; }
+			}
+
+			public class ProjectCreatedCommand : IRequest<ObjectId>
 			{
 				public ObjectId ProjectId { get; set; }
 			}

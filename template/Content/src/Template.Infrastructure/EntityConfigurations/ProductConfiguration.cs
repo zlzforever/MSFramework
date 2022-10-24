@@ -17,6 +17,8 @@ namespace Template.Infrastructure.EntityConfigurations
 			builder.Property(e => e.ProductType).UseEnumeration();
 
 			builder.HasIndex(x => x.Name);
+			builder.ConfigureCreation();
+			builder.ConfigureModification();
 		}
 	}
 }

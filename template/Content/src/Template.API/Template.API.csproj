@@ -6,8 +6,8 @@
 
     <ItemGroup>
         <PackageReference Include="DotNetCore.CAP.MySql" Version="6.2.1" />
-        <PackageReference Include="MSFramework.AspNetCore.Swagger" Version="0.14.8-beta4" />
-        <PackageReference Include="MSFramework.Ef.Design" Version="0.14.8-beta4" />
+        <PackageReference Include="MSFramework.AspNetCore.Swagger" Version="0.14.8-beta5" />
+        <PackageReference Include="MSFramework.Ef.Design" Version="0.14.8-beta5" />
         <PackageReference Include="RemoteConfiguration.Json.Aliyun" Version="0.1.2" />
         <PackageReference Include="Serilog.AspNetCore" Version="6.0.1" />
         <PackageReference Include="Serilog.Sinks.PeriodicBatching" Version="3.1.0" />

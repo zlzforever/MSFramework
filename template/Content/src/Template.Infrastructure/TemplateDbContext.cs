@@ -11,8 +11,8 @@ namespace Template.Infrastructure
 	{
 		public TemplateDbContext(DbContextOptions options,
 			IOptions<DbContextConfigurationCollection> dbContextConfigurationCollection,
-			IMediator domainEventDispatcher, ISession session, ILoggerFactory loggerFactory) : base(
-			options, dbContextConfigurationCollection, domainEventDispatcher, session, loggerFactory)
+			IMediator mediator, ISession session, ILoggerFactory loggerFactory) : base(
+			options, dbContextConfigurationCollection, mediator, session, loggerFactory)
 		{
 		}
 	}

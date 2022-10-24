@@ -8,12 +8,12 @@ using Template.Infrastructure;
 
 namespace Template.Application.Project.QueryHandlers
 {
-	public class GetProductByNameQueryHandler : IRequestHandler<Queries.V10.GetProductByNameQuery, Dtos.V10.ProductOut>
+	public class GetProductByIdQueryHandler : IRequestHandler<Queries.V10.GetProductByIdQuery, Dtos.V10.ProductOut>
 	{
 		private readonly TemplateDbContext _dbContext;
 		private readonly IObjectAssembler _objectAssembler;
 
-		public GetProductByNameQueryHandler(
+		public GetProductByIdQueryHandler(
 			TemplateDbContext dbContext,
 			IObjectAssembler objectAssembler)
 		{
@@ -21,11 +21,11 @@ namespace Template.Application.Project.QueryHandlers
 			_objectAssembler = objectAssembler;
 		}
 
-		public async Task<Dtos.V10.ProductOut> HandleAsync(Queries.V10.GetProductByNameQuery query,
+		public async Task<Dtos.V10.ProductOut> HandleAsync(Queries.V10.GetProductByIdQuery query,
 			CancellationToken cancellationToken = new CancellationToken())
 		{
 			var product = await _dbContext.Set<Product>()
-				.FirstOrDefaultAsync(x => x.Name == query.Name, cancellationToken: cancellationToken);
+				.FirstOrDefaultAsync(x => x.Id == query.Id, cancellationToken: cancellationToken);
 			return _objectAssembler.To<Dtos.V10.ProductOut>(product);
 		}
 	}
