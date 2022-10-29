@@ -11,8 +11,6 @@ public class AuditPropertyConfiguration
 
     public void Configure(EntityTypeBuilder<AuditProperty> builder)
     {
-        builder.ToTable("audit_property");
-
         builder.Property(x => x.Id).ValueGeneratedNever().HasMaxLength(36);
         builder.Property(x => x.Name).HasMaxLength(255);
         builder.Property(x => x.Type).HasMaxLength(255);

@@ -20,7 +20,6 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using MongoDB.Bson;
 
-
 namespace MicroserviceFramework.Ef;
 
 public abstract class DbContextBase : DbContext
@@ -79,54 +78,124 @@ public abstract class DbContextBase : DbContext
         //通过实体配置信息将实体注册到当前上下文
         var contextType = GetType();
 
-        var entityTypeConfigurations = _entityConfigurationTypeFinder.GetEntityTypeConfigurations(contextType);
+        var entityTypeConfigurations = _entityConfigurationTypeFinder
+            .GetEntityTypeConfigurations(contextType);
         var count = 0;
         var stringBuilder = new StringBuilder();
 
         foreach (var entityTypeConfiguration in entityTypeConfigurations)
         {
+            if (EfRuntimeUtilities.IsDesignTime &&
+                entityTypeConfiguration.Value.EntityTypeConfiguration is IExternalMeta
+                {
+                    IsExternal: true
+                })
+            {
+                continue;
+            }
+
             entityTypeConfiguration.Value.MethodInfo.Invoke(modelBuilder,
                 new[] { entityTypeConfiguration.Value.EntityTypeConfiguration });
 
-            stringBuilder.Append($"、{entityTypeConfiguration.Value.EntityType.FullName}");
+            if (stringBuilder.Length == 0)
+            {
+                stringBuilder.Append($"{entityTypeConfiguration.Value.EntityType.FullName}");
+            }
+            else
+            {
+                stringBuilder.Append($"、{entityTypeConfiguration.Value.EntityType.FullName}");
+            }
+
             count++;
         }
 
+        if (entityTypeConfigurations.All(x => x.Value.EntityType != typeof(AuditOperation)))
+        {
+            modelBuilder.ApplyConfiguration(AuditOperationConfiguration.Instance);
+        }
+
+        if (entityTypeConfigurations.All(x => x.Value.EntityType != typeof(AuditEntity)))
+        {
+            modelBuilder.ApplyConfiguration(AuditEntityConfiguration.Instance);
+        }
+
+        if (entityTypeConfigurations.All(x => x.Value.EntityType != typeof(AuditProperty)))
+        {
+            modelBuilder.ApplyConfiguration(AuditPropertyConfiguration.Instance);
+        }
+
         var option = _entityFrameworkOptions.Get(GetType());
-
-        modelBuilder.ApplyConfiguration(AuditOperationConfiguration.Instance);
-        modelBuilder.ApplyConfiguration(AuditEntityConfiguration.Instance);
-        modelBuilder.ApplyConfiguration(AuditPropertyConfiguration.Instance);
-
         var tablePrefix = option.TablePrefix?.Trim();
 
         foreach (var entityType in modelBuilder.Model.GetEntityTypes())
         {
+            // owned 的类型是合并到其主表中，所以没有 table name，schema 的说法
             if (!entityType.IsOwned())
             {
+                var defaultTableName = entityType.GetDefaultTableName();
                 var tableName = entityType.GetTableName();
 
-                if (option.UseUnderScoreCase)
+                // 只有在用户没有设置自定义表名的情况下，才会自动调整表名
+                if (defaultTableName == tableName)
                 {
-                    tableName = tableName.ToSnakeCase();
+                    if (option.UseUnderScoreCase)
+                    {
+                        tableName = tableName.ToSnakeCase();
+                    }
+
+                    if (!string.IsNullOrWhiteSpace(tablePrefix))
+                    {
+                        tableName = tablePrefix + tableName;
+                    }
+
+                    entityType.SetTableName(tableName);
                 }
 
-                if (!string.IsNullOrWhiteSpace(tablePrefix))
+                // var schema = entityType.GetSchema();
+                // schema = string.IsNullOrWhiteSpace(schema) ? option.Schema : schema;
+                // entityType.SetSchema(schema);
+
+                // 并不需要，默认规则是 FK_表名_属性名...，因为表名已经有了前缀，所以不会重复
+                // if (!string.IsNullOrWhiteSpace(tablePrefix))
+                // {
+                //     // entityType.GetKeys()
+                //     // 在 PG 中，schema 进行了物理管理，不需要考虑 KEY Name 重重的情况
+                //     // 在 MySql 中，KEY 的 name 不是全局重复约束
+                //
+                //     foreach (var key in entityType.GetForeignKeys())
+                //     {
+                //         // 若是用户自己设置了名称则不自动更新
+                //         var customize = key.GetConstraintName();
+                //         if (!string.IsNullOrWhiteSpace(customize) && !customize.StartsWith("FK_"))
+                //         {
+                //             continue;
+                //         }
+                //
+                //         var defaultName = key.GetDefaultName();
+                //         key.SetConstraintName($"{tablePrefix}{defaultName}");
+                //     }
+                //
+                //     foreach (var index in entityType.GetIndexes())
+                //     {
+                //         // 若是用户自己设置了名称则不自动更新
+                //         var customize = index.GetDatabaseName();
+                //         if (!string.IsNullOrWhiteSpace(customize) && !customize.StartsWith("IX_"))
+                //         {
+                //             continue;
+                //         }
+                //
+                //         var defaultName = index.GetDefaultDatabaseName();
+                //         index.SetDatabaseName($"{tablePrefix}{defaultName}");
+                //     }
+                // }
+
+                if (typeof(IDeletion).IsAssignableFrom(entityType.ClrType))
                 {
-                    tableName = tablePrefix + tableName;
+                    entityType.AddSoftDeleteQueryFilter();
                 }
-
-                entityType.SetTableName(tableName);
-                entityType.SetSchema(option.Schema);
-            }
-
-            if (typeof(IDeletion).IsAssignableFrom(entityType.ClrType))
-            {
-                entityType.AddSoftDeleteQueryFilter();
             }
 
             var optimisticLockTable = typeof(IOptimisticLock).IsAssignableFrom(entityType.ClrType);
-
             var properties = entityType.GetProperties();
             foreach (var property in properties)
             {
@@ -153,39 +222,6 @@ public abstract class DbContextBase : DbContext
                 if (property.ClrType == typeof(ObjectId))
                 {
                     property.SetValueConverter(new ObjectIdToStringConverter());
-                }
-            }
-
-            if (!string.IsNullOrWhiteSpace(option.Schema))
-            {
-                // entityType.GetKeys()
-                // 在 PG 中，schema 进行了物理管理，不需要考虑 KEY Name 重重的情况
-                // 在 MySql 中，KEY 的 name 不是全局重复约束
-
-                foreach (var key in entityType.GetForeignKeys())
-                {
-                    // 若是用户自己设置了名称则不自动更新
-                    var customize = key.GetConstraintName();
-                    if (!string.IsNullOrWhiteSpace(customize))
-                    {
-                        continue;
-                    }
-
-                    var defaultName = key.GetDefaultName();
-                    key.SetConstraintName($"{option.Schema}_{defaultName}");
-                }
-
-                foreach (var index in entityType.GetIndexes())
-                {
-                    // 若是用户自己设置了名称则不自动更新
-                    var customize = index.GetDatabaseName();
-                    if (!string.IsNullOrWhiteSpace(customize))
-                    {
-                        continue;
-                    }
-
-                    var defaultName = index.GetDefaultDatabaseName();
-                    index.SetDatabaseName($"{option.Schema}_{defaultName}");
                 }
             }
         }

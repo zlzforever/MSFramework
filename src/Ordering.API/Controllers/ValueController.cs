@@ -21,8 +21,13 @@ public class ValueController : ApiControllerBase
     [HttpPost]
     public M ModelValid(M m)
     {
-        
         return m;
+    }
+
+    [HttpGet("string")]
+    public string GetString()
+    {
+        return Guid.NewGuid().ToString();
     }
 
     [HttpGet("ok")]

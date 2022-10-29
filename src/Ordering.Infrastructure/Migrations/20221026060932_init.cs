@@ -9,15 +9,11 @@ namespace Ordering.Infrastructure.Migrations
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.EnsureSchema(
-                name: "ordering");
-
             migrationBuilder.AlterDatabase()
                 .Annotation("MySql:CharSet", "utf8mb4");
 
             migrationBuilder.CreateTable(
-                name: "audit_operation",
-                schema: "ordering",
+                name: "ordering_audit_operation",
                 columns: table => new
                 {
                     id = table.Column<string>(type: "varchar(36)", maxLength: 36, nullable: false)
@@ -42,13 +38,12 @@ namespace Ordering.Infrastructure.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_audit_operation", x => x.id);
+                    table.PrimaryKey("PK_ordering_audit_operation", x => x.id);
                 })
                 .Annotation("MySql:CharSet", "utf8mb4");
 
             migrationBuilder.CreateTable(
-                name: "order",
-                schema: "ordering",
+                name: "ordering_order",
                 columns: table => new
                 {
                     id = table.Column<string>(type: "varchar(36)", maxLength: 36, nullable: false)
@@ -83,13 +78,12 @@ namespace Ordering.Infrastructure.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_order", x => x.id);
+                    table.PrimaryKey("PK_ordering_order", x => x.id);
                 })
                 .Annotation("MySql:CharSet", "utf8mb4");
 
             migrationBuilder.CreateTable(
-                name: "product",
-                schema: "ordering",
+                name: "ordering_product",
                 columns: table => new
                 {
                     id = table.Column<string>(type: "varchar(36)", maxLength: 36, nullable: false)
@@ -98,17 +92,19 @@ namespace Ordering.Infrastructure.Migrations
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     price = table.Column<int>(type: "int", nullable: false),
                     concurrency_stamp = table.Column<string>(type: "varchar(36)", maxLength: 36, nullable: true)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    creation_time = table.Column<DateTimeOffset>(type: "datetime(6)", nullable: true),
+                    creator_id = table.Column<string>(type: "longtext", nullable: true)
                         .Annotation("MySql:CharSet", "utf8mb4")
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_product", x => x.id);
+                    table.PrimaryKey("PK_ordering_product", x => x.id);
                 })
                 .Annotation("MySql:CharSet", "utf8mb4");
 
             migrationBuilder.CreateTable(
-                name: "audit_entity",
-                schema: "ordering",
+                name: "ordering_audit_entity",
                 columns: table => new
                 {
                     id = table.Column<string>(type: "varchar(36)", maxLength: 36, nullable: false)
@@ -124,19 +120,17 @@ namespace Ordering.Infrastructure.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_audit_entity", x => x.id);
+                    table.PrimaryKey("PK_ordering_audit_entity", x => x.id);
                     table.ForeignKey(
-                        name: "ordering_FK_audit_entity_audit_operation_operation_id",
+                        name: "FK_ordering_audit_entity_ordering_audit_operation_operation_id",
                         column: x => x.operation_id,
-                        principalSchema: "ordering",
-                        principalTable: "audit_operation",
+                        principalTable: "ordering_audit_operation",
                         principalColumn: "id");
                 })
                 .Annotation("MySql:CharSet", "utf8mb4");
 
             migrationBuilder.CreateTable(
-                name: "order_item",
-                schema: "ordering",
+                name: "ordering_order_item",
                 columns: table => new
                 {
                     id = table.Column<string>(type: "varchar(36)", maxLength: 36, nullable: false)
@@ -154,19 +148,17 @@ namespace Ordering.Infrastructure.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_order_item", x => x.id);
+                    table.PrimaryKey("PK_ordering_order_item", x => x.id);
                     table.ForeignKey(
-                        name: "ordering_FK_order_item_order_order_id",
+                        name: "FK_ordering_order_item_ordering_order_order_id",
                         column: x => x.order_id,
-                        principalSchema: "ordering",
-                        principalTable: "order",
+                        principalTable: "ordering_order",
                         principalColumn: "id");
                 })
                 .Annotation("MySql:CharSet", "utf8mb4");
 
             migrationBuilder.CreateTable(
-                name: "audit_property",
-                schema: "ordering",
+                name: "ordering_audit_property",
                 columns: table => new
                 {
                     id = table.Column<string>(type: "varchar(36)", maxLength: 36, nullable: false)
@@ -184,84 +176,70 @@ namespace Ordering.Infrastructure.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_audit_property", x => x.id);
+                    table.PrimaryKey("PK_ordering_audit_property", x => x.id);
                     table.ForeignKey(
-                        name: "ordering_FK_audit_property_audit_entity_entity_id",
+                        name: "FK_ordering_audit_property_ordering_audit_entity_entity_id",
                         column: x => x.entity_id,
-                        principalSchema: "ordering",
-                        principalTable: "audit_entity",
+                        principalTable: "ordering_audit_entity",
                         principalColumn: "id");
                 })
                 .Annotation("MySql:CharSet", "utf8mb4");
 
             migrationBuilder.CreateIndex(
-                name: "ordering_IX_audit_entity_entity_id",
-                schema: "ordering",
-                table: "audit_entity",
+                name: "IX_ordering_audit_entity_entity_id",
+                table: "ordering_audit_entity",
                 column: "entity_id");
 
             migrationBuilder.CreateIndex(
-                name: "ordering_IX_audit_entity_operation_id",
-                schema: "ordering",
-                table: "audit_entity",
+                name: "IX_ordering_audit_entity_operation_id",
+                table: "ordering_audit_entity",
                 column: "operation_id");
 
             migrationBuilder.CreateIndex(
-                name: "ordering_IX_audit_operation_creation_time",
-                schema: "ordering",
-                table: "audit_operation",
+                name: "IX_ordering_audit_operation_creation_time",
+                table: "ordering_audit_operation",
                 column: "creation_time");
 
             migrationBuilder.CreateIndex(
-                name: "ordering_IX_audit_operation_creator_id",
-                schema: "ordering",
-                table: "audit_operation",
+                name: "IX_ordering_audit_operation_creator_id",
+                table: "ordering_audit_operation",
                 column: "creator_id");
 
             migrationBuilder.CreateIndex(
-                name: "ordering_IX_audit_operation_end_time",
-                schema: "ordering",
-                table: "audit_operation",
+                name: "IX_ordering_audit_operation_end_time",
+                table: "ordering_audit_operation",
                 column: "end_time");
 
             migrationBuilder.CreateIndex(
-                name: "ordering_IX_audit_property_entity_id",
-                schema: "ordering",
-                table: "audit_property",
+                name: "IX_ordering_audit_property_entity_id",
+                table: "ordering_audit_property",
                 column: "entity_id");
 
             migrationBuilder.CreateIndex(
-                name: "ordering_IX_order_item_order_id",
-                schema: "ordering",
-                table: "order_item",
+                name: "IX_ordering_order_item_order_id",
+                table: "ordering_order_item",
                 column: "order_id");
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "audit_property",
-                schema: "ordering");
+                name: "ordering_audit_property");
 
             migrationBuilder.DropTable(
-                name: "order_item",
-                schema: "ordering");
+                name: "ordering_order_item");
 
             migrationBuilder.DropTable(
-                name: "product",
-                schema: "ordering");
+                name: "ordering_product");
 
             migrationBuilder.DropTable(
-                name: "audit_entity",
-                schema: "ordering");
+                name: "ordering_audit_entity");
 
             migrationBuilder.DropTable(
-                name: "order",
-                schema: "ordering");
+                name: "ordering_order");
 
             migrationBuilder.DropTable(
-                name: "audit_operation",
-                schema: "ordering");
+                name: "ordering_audit_operation");
         }
     }
 }

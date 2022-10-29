@@ -22,14 +22,15 @@ public static class ServiceCollectionExtensions
                 : dbContextType.Assembly.GetName().Name;
             x.UseSqlServer(option.ConnectionString, options =>
             {
-                sqlServerOptionsAction?.Invoke(options);
                 var migrationsHistoryTable = string.IsNullOrWhiteSpace(option.TablePrefix)
                     ? Defaults.MigrationsHistoryTable
                     : $"{option.TablePrefix}migrations_history";
-                options.MigrationsHistoryTable(migrationsHistoryTable, option.Schema);
+                options.MigrationsHistoryTable(migrationsHistoryTable);
                 options.MaxBatchSize(option.MaxBatchSize);
                 options.MigrationsAssembly(entryAssemblyName);
                 options.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery);
+
+                sqlServerOptionsAction?.Invoke(options);
             });
         });
         builder.Services.AddScoped<DbContext, TDbContext>();

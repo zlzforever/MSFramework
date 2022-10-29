@@ -16,7 +16,7 @@ public class ApiResult
     /// <summary>
     /// 业务代码
     /// </summary>
-    public int Code { get; set; }
+    public int Code { get; set; } = 0;
 
     /// <summary>
     /// 消息
@@ -27,6 +27,15 @@ public class ApiResult
     /// 数据
     /// </summary>
     public object Data { get; set; }
+
+    public ApiResult()
+    {
+    }
+
+    public ApiResult(object data) : this()
+    {
+        Data = data;
+    }
 
     public override string ToString()
     {

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.Linq;
 using System.Threading.Tasks;
 using Dapr;
 using DotNetCore.CAP;
@@ -51,14 +52,16 @@ public class ProductController : ApiControllerBase
     private readonly IObjectAssembler _mapper;
     private readonly IUnitOfWork _unitOfWork;
     private readonly ICapPublisher _capBus;
+    private readonly OrderingContext _orderingContext;
 
     public ProductController(IProductRepository productRepository,
-        IObjectAssembler mapper, IUnitOfWork unitOfWork, ICapPublisher capBus)
+        IObjectAssembler mapper, IUnitOfWork unitOfWork, ICapPublisher capBus, OrderingContext orderingContext)
     {
         _productRepository = productRepository;
         _mapper = mapper;
         _unitOfWork = unitOfWork;
         _capBus = capBus;
+        _orderingContext = orderingContext;
     }
 
     [HttpGet("objectid")]
@@ -89,9 +92,21 @@ public class ProductController : ApiControllerBase
 
     [HttpGet("First")]
     //[AccessControl("查看第一个产品", "产品")]
-    public Product GetFirst()
+    public ProductOut GetFirst()
     {
-        return _productRepository.GetFirst();
+        var queryable = from p in _orderingContext.Set<Product>()
+            join u in _orderingContext.Set<User>() on p.CreatorId equals u.Id
+            select new ProductOut { Name = p.Name, Price = p.Price, CreatorName = u.Name };
+        return queryable.FirstOrDefault();
+    }
+
+    public class ProductOut
+    {
+        public string Name { get; set; }
+
+        public int Price { get; set; }
+
+        public string CreatorName { get; set; }
     }
 
     [HttpGet("PagedQuery")]
@@ -159,6 +174,7 @@ public class ProductController : ApiControllerBase
     public async Task<Product> CreateAsync(CreateViewObject vo)
     {
         var prod = Product.Create(vo.Name, new Random().Next(100, 10000));
+        prod.SetCreation("1");
         await _productRepository.AddAsync(prod);
         // await _unitOfWork.SaveChangesAsync();
         return prod;

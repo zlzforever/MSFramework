@@ -11,7 +11,6 @@ public class HttpSession : ISession
 {
     private static readonly HashSet<string> EmptyRoles = new();
     private List<string> _subjects;
-    private string _traceIdentifier;
     private string _userId;
     private string _userName;
     private string _email;
@@ -20,28 +19,23 @@ public class HttpSession : ISession
 
     public HttpSession(IHttpContextAccessor accessor)
     {
-        if (accessor?.HttpContext == null)
-        {
-            return;
-        }
-
-        HttpContext = accessor.HttpContext;
+        HttpContext = accessor?.HttpContext;
     }
 
-    public string TraceIdentifier
-    {
-        get
-        {
-            _traceIdentifier ??= HttpContext.TraceIdentifier;
-            return _traceIdentifier;
-        }
-    }
+    public string TraceIdentifier => HttpContext?.TraceIdentifier;
 
     public string UserId
     {
         get
         {
-            _userId ??= HttpContext.User.GetValue(ClaimTypes.NameIdentifier, "sid", "sub");
+            if (_userId != null)
+            {
+                return _userId;
+            }
+
+            var userId = HttpContext?.User.GetValue(ClaimTypes.NameIdentifier, "sid", "sub");
+            _userId = string.IsNullOrWhiteSpace(userId) ? string.Empty : userId;
+
             return _userId;
         }
     }
@@ -50,7 +44,14 @@ public class HttpSession : ISession
     {
         get
         {
-            _userName ??= HttpContext.User.GetValue(ClaimTypes.Name, "name");
+            if (_userName != null)
+            {
+                return _userName;
+            }
+
+            var userName = HttpContext?.User.GetValue(ClaimTypes.Name, "name");
+            _userName = string.IsNullOrWhiteSpace(userName) ? string.Empty : userName;
+
             return _userName;
         }
     }
@@ -59,7 +60,14 @@ public class HttpSession : ISession
     {
         get
         {
-            _email ??= HttpContext.User.GetValue(ClaimTypes.Email, "email");
+            if (_email != null)
+            {
+                return _email;
+            }
+
+            var email = HttpContext?.User.GetValue(ClaimTypes.Email, "email");
+            _email = string.IsNullOrWhiteSpace(email) ? string.Empty : email;
+
             return _email;
         }
     }
@@ -68,7 +76,14 @@ public class HttpSession : ISession
     {
         get
         {
-            _phoneNumber ??= HttpContext.User.GetValue(ClaimTypes.MobilePhone, "phone_number");
+            if (_phoneNumber != null)
+            {
+                return _phoneNumber;
+            }
+
+            var phoneNumber = HttpContext?.User.GetValue(ClaimTypes.MobilePhone, "phone_number");
+            _phoneNumber = string.IsNullOrWhiteSpace(phoneNumber) ? string.Empty : phoneNumber;
+
             return _phoneNumber;
         }
     }
@@ -79,6 +94,12 @@ public class HttpSession : ISession
         {
             if (_roles != null)
             {
+                return _roles;
+            }
+
+            if (HttpContext == null)
+            {
+                _roles = new HashSet<string>();
                 return _roles;
             }
 

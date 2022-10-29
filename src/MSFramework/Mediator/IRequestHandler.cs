@@ -6,10 +6,10 @@ namespace MicroserviceFramework.Mediator;
 
 public interface IRequestHandler<in TRequest> : IScopeDependency where TRequest : IRequest
 {
-    Task HandleAsync(TRequest query, CancellationToken cancellationToken = default);
+    Task HandleAsync(TRequest request, CancellationToken cancellationToken = default);
 }
 
 public interface IRequestHandler<in TRequest, TResponse> : IScopeDependency where TRequest : IRequest<TResponse>
 {
-    Task<TResponse> HandleAsync(TRequest query, CancellationToken cancellationToken = default);
+    Task<TResponse> HandleAsync(TRequest request, CancellationToken cancellationToken = default);
 }

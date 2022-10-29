@@ -116,7 +116,6 @@ public static class Startup
 
         services.AddCap(x =>
         {
-       
             x.UseEntityFramework<OrderingContext>();
             x.UseRedis("localhost");
             x.TopicNamePrefix = "CAP";

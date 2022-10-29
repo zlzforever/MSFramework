@@ -16,7 +16,7 @@ namespace Ordering.Infrastructure.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "6.0.7")
+                .HasAnnotation("ProductVersion", "6.0.10")
                 .HasAnnotation("Relational:MaxIdentifierLength", 64);
 
             modelBuilder.Entity("MicroserviceFramework.Auditing.AuditEntity", b =>
@@ -47,13 +47,11 @@ namespace Ordering.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("EntityId")
-                        .HasDatabaseName("ordering_IX_audit_entity_entity_id");
+                    b.HasIndex("EntityId");
 
-                    b.HasIndex("OperationId")
-                        .HasDatabaseName("ordering_IX_audit_entity_operation_id");
+                    b.HasIndex("OperationId");
 
-                    b.ToTable("audit_entity", "ordering");
+                    b.ToTable("ordering_audit_entity");
                 });
 
             modelBuilder.Entity("MicroserviceFramework.Auditing.AuditOperation", b =>
@@ -117,16 +115,13 @@ namespace Ordering.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("CreationTime")
-                        .HasDatabaseName("ordering_IX_audit_operation_creation_time");
+                    b.HasIndex("CreationTime");
 
-                    b.HasIndex("CreatorId")
-                        .HasDatabaseName("ordering_IX_audit_operation_creator_id");
+                    b.HasIndex("CreatorId");
 
-                    b.HasIndex("EndTime")
-                        .HasDatabaseName("ordering_IX_audit_operation_end_time");
+                    b.HasIndex("EndTime");
 
-                    b.ToTable("audit_operation", "ordering");
+                    b.ToTable("ordering_audit_operation");
                 });
 
             modelBuilder.Entity("MicroserviceFramework.Auditing.AuditProperty", b =>
@@ -160,10 +155,9 @@ namespace Ordering.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("EntityId")
-                        .HasDatabaseName("ordering_IX_audit_property_entity_id");
+                    b.HasIndex("EntityId");
 
-                    b.ToTable("audit_property", "ordering");
+                    b.ToTable("ordering_audit_property");
                 });
 
             modelBuilder.Entity("Ordering.Domain.AggregateRoots.Order", b =>
@@ -217,7 +211,7 @@ namespace Ordering.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("order", "ordering");
+                    b.ToTable("ordering_order");
                 });
 
             modelBuilder.Entity("Ordering.Domain.AggregateRoots.OrderItem", b =>
@@ -258,10 +252,9 @@ namespace Ordering.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("OrderId")
-                        .HasDatabaseName("ordering_IX_order_item_order_id");
+                    b.HasIndex("OrderId");
 
-                    b.ToTable("order_item", "ordering");
+                    b.ToTable("ordering_order_item");
                 });
 
             modelBuilder.Entity("Ordering.Domain.AggregateRoots.Product", b =>
@@ -277,6 +270,14 @@ namespace Ordering.Infrastructure.Migrations
                         .HasColumnType("varchar(36)")
                         .HasColumnName("concurrency_stamp");
 
+                    b.Property<DateTimeOffset?>("CreationTime")
+                        .HasColumnType("datetime(6)")
+                        .HasColumnName("creation_time");
+
+                    b.Property<string>("CreatorId")
+                        .HasColumnType("longtext")
+                        .HasColumnName("creator_id");
+
                     b.Property<string>("Name")
                         .HasMaxLength(256)
                         .HasColumnType("varchar(256)")
@@ -288,15 +289,14 @@ namespace Ordering.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("product", "ordering");
+                    b.ToTable("ordering_product");
                 });
 
             modelBuilder.Entity("MicroserviceFramework.Auditing.AuditEntity", b =>
                 {
                     b.HasOne("MicroserviceFramework.Auditing.AuditOperation", "Operation")
                         .WithMany("Entities")
-                        .HasForeignKey("OperationId")
-                        .HasConstraintName("ordering_FK_audit_entity_audit_operation_operation_id");
+                        .HasForeignKey("OperationId");
 
                     b.Navigation("Operation");
                 });
@@ -305,8 +305,7 @@ namespace Ordering.Infrastructure.Migrations
                 {
                     b.HasOne("MicroserviceFramework.Auditing.AuditEntity", "Entity")
                         .WithMany("Properties")
-                        .HasForeignKey("EntityId")
-                        .HasConstraintName("ordering_FK_audit_property_audit_entity_entity_id");
+                        .HasForeignKey("EntityId");
 
                     b.Navigation("Entity");
                 });
@@ -342,11 +341,10 @@ namespace Ordering.Infrastructure.Migrations
 
                             b1.HasKey("OrderId");
 
-                            b1.ToTable("order", "ordering");
+                            b1.ToTable("ordering_order");
 
                             b1.WithOwner()
-                                .HasForeignKey("OrderId")
-                                .HasConstraintName("ordering_FK_Order_Order_id");
+                                .HasForeignKey("OrderId");
                         });
 
                     b.Navigation("Address");
@@ -357,8 +355,7 @@ namespace Ordering.Infrastructure.Migrations
                     b.HasOne("Ordering.Domain.AggregateRoots.Order", null)
                         .WithMany("Items")
                         .HasForeignKey("OrderId")
-                        .OnDelete(DeleteBehavior.ClientCascade)
-                        .HasConstraintName("ordering_FK_order_item_order_order_id");
+                        .OnDelete(DeleteBehavior.ClientCascade);
                 });
 
             modelBuilder.Entity("MicroserviceFramework.Auditing.AuditEntity", b =>

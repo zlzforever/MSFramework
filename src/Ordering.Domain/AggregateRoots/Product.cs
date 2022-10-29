@@ -8,7 +8,7 @@ public class ProjectCreatedEvent : DomainEvent
     public ObjectId Id { get; set; }
 }
 
-public class Product : AggregateRoot<ObjectId>, IOptimisticLock
+public class Product : CreationAggregateRoot, IOptimisticLock
 {
     private Product(ObjectId id) : base(id)
     {

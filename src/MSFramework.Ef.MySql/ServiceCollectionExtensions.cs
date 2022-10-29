@@ -1,9 +1,11 @@
 ﻿using System;
+using System.Linq;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Pomelo.EntityFrameworkCore.MySql.Infrastructure;
+using Pomelo.EntityFrameworkCore.MySql.Infrastructure.Internal;
 
 #if !NETSTANDARD2_0
 
@@ -60,21 +62,21 @@ namespace MicroserviceFramework.Ef.MySql
 
                 x.UseMySql(option.ConnectionString, ServerVersion.AutoDetect(option.ConnectionString), options =>
                 {
-                    // 配置优先，可以不重编译代码，修改配置响应变化
                     mySqlOptionsAction?.Invoke(options);
 
                     var migrationsHistoryTable = string.IsNullOrWhiteSpace(option.TablePrefix)
                         ? Defaults.MigrationsHistoryTable
                         : $"{option.TablePrefix}migrations_history";
-                    options.MigrationsHistoryTable(migrationsHistoryTable, option.Schema);
+                    
+                    options.MigrationsHistoryTable(migrationsHistoryTable);
+
                     options.MaxBatchSize(option.MaxBatchSize);
                     options.MigrationsAssembly(entryAssemblyName);
-                    options.SchemaBehavior(MySqlSchemaBehavior.Translate, (schema, table) => $"{schema}.{table}");
+                    options.SchemaBehavior(MySqlSchemaBehavior.Translate, (schema, table) => $"{schema}_{table}");
                     options.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery);
                 });
             });
             services.AddDbContext<TDbContext>(action);
-            services.AddScoped<DbContext, TDbContext>();
             return services;
         }
     }

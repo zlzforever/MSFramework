@@ -12,8 +12,6 @@ public class AuditOperationConfiguration
     
     public void Configure(EntityTypeBuilder<AuditOperation> builder)
     {
-        builder.ToTable("audit_operation");
-
         builder.HasMany(x => x.Entities).WithOne(x => x.Operation);
 
         builder.Property(x => x.Id).ValueGeneratedNever().HasMaxLength(36);

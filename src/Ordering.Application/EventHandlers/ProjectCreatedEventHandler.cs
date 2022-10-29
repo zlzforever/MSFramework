@@ -26,6 +26,7 @@ public class ProjectCreatedEventHandler : IDomainEventHandler<ProjectCreatedEven
     {
         var integrationEvent = new ProjectCreatedIntegrationEvent { Id = @event.Id };
 
+        // await _daprClient.InvokeMethodAsync("sales-collection","api/v1.0/sales-collections")
         await _daprClient.PublishEventAsync("pubsub",
             "Ordering.Application.EventHandlers.ProjectCreatedIntegrationEvent", integrationEvent, cancellationToken);
         Console.WriteLine("Execute ProjectCreatedEvent");
