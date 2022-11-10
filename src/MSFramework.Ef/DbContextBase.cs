@@ -27,7 +27,7 @@ public abstract class DbContextBase : DbContext
     private readonly ILoggerFactory _loggerFactory;
     private readonly ILogger _logger;
     private readonly ISession _session;
-    private readonly DbContextConfigurationCollection _entityFrameworkOptions;
+    protected readonly DbContextConfigurationCollection EntityFrameworkOptions;
     private IEntityConfigurationTypeFinder _entityConfigurationTypeFinder;
     private readonly IMediator _mediator;
 
@@ -41,7 +41,7 @@ public abstract class DbContextBase : DbContext
         : base(options)
     {
         _mediator = mediator;
-        _entityFrameworkOptions = entityFrameworkOptions.Value;
+        EntityFrameworkOptions = entityFrameworkOptions.Value;
         _session = session;
         _loggerFactory = loggerFactory;
         _logger = loggerFactory.CreateLogger(GetType());
@@ -55,7 +55,7 @@ public abstract class DbContextBase : DbContext
     {
         base.OnConfiguring(optionsBuilder);
 
-        var option = _entityFrameworkOptions.Get(GetType());
+        var option = EntityFrameworkOptions.Get(GetType());
 
         Database.AutoTransactionsEnabled = option.AutoTransactionsEnabled;
 
@@ -124,7 +124,7 @@ public abstract class DbContextBase : DbContext
             modelBuilder.ApplyConfiguration(AuditPropertyConfiguration.Instance);
         }
 
-        var option = _entityFrameworkOptions.Get(GetType());
+        var option = EntityFrameworkOptions.Get(GetType());
         var tablePrefix = option.TablePrefix?.Trim();
 
         foreach (var entityType in modelBuilder.Model.GetEntityTypes())
@@ -433,7 +433,7 @@ public abstract class DbContextBase : DbContext
         }
     }
 
-    private IEnumerable<DomainEvent> GetDomainEvents()
+    private List<DomainEvent> GetDomainEvents()
     {
         // Dispatch Domain Events collection. 
         // Choices:
@@ -442,19 +442,20 @@ public abstract class DbContextBase : DbContext
         // B) Right AFTER committing data (EF SaveChanges) into the DB will make multiple transactions. 
         // You will need to handle eventual consistency and compensatory actions in case of failures in any of the Handlers. 
 
+        // 此处不能改为迭代器， 事件在迭代过程中会触发 ChangeTracker.Entries 的变化
+        var domainEvents = new List<DomainEvent>();
+
         foreach (var aggregateRoot in ChangeTracker
                      .Entries<EntityBase>())
         {
             var events = aggregateRoot.Entity.GetDomainEvents();
-            if (events != null)
+            if (events != null && events.Any())
             {
-                foreach (var @event in events)
-                {
-                    yield return @event;
-                }
-
+                domainEvents.AddRange(events);
                 aggregateRoot.Entity.ClearDomainEvents();
             }
         }
+
+        return domainEvents;
     }
 }

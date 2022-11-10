@@ -4,7 +4,7 @@ using MongoDB.Bson;
 
 namespace MicroserviceFramework.Ef.Internal;
 
-internal class ObjectIdValueGenerator : ValueGenerator<ObjectId>
+public class ObjectIdValueGenerator : ValueGenerator<ObjectId>
 {
     public override ObjectId Next(EntityEntry entry)
     {

@@ -5,7 +5,7 @@ using MongoDB.Bson;
 
 namespace MicroserviceFramework.Ef.Internal;
 
-internal class ObjectIdToStringConverter
+public class ObjectIdToStringConverter
     : ValueConverter<ObjectId, string>
 {
     private static new Expression<Func<ObjectId, string>> ToString()

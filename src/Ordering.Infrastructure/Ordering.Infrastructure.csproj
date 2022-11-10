@@ -5,14 +5,12 @@
         <IsPackable>true</IsPackable>
     </PropertyGroup>
     <ItemGroup>
+        <ProjectReference Include="..\MSFramework.Ef.MySql\MSFramework.Ef.MySql.csproj" />
         <ProjectReference Include="..\MSFramework.Ef.PostgreSql\MSFramework.Ef.PostgreSql.csproj" />
         <ProjectReference Include="..\MSFramework.Ef\MSFramework.Ef.csproj" />
         <ProjectReference Include="..\Ordering.Domain\Ordering.Domain.csproj" />
     </ItemGroup>
     <ItemGroup>
         <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="6.0.0" />
-    </ItemGroup>
-    <ItemGroup>
-      <Folder Include="Migrations" />
     </ItemGroup>
 </Project>

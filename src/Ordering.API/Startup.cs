@@ -2,6 +2,7 @@ using System;
 using System.IO;
 using System.Linq;
 using System.Text.Json;
+using Dapr.Client;
 using MicroserviceFramework;
 using MicroserviceFramework.AspNetCore;
 using MicroserviceFramework.AspNetCore.Filters;
@@ -148,7 +149,7 @@ public static class Startup
             builder.UseEntityFramework(x =>
             {
                 // 添加 MySql 支持
-                x.AddMySql<OrderingContext, OrderingContext2>(configuration);
+                x.AddNpgsql<OrderingContext, OrderingContext2>(configuration);
             });
         });
     });

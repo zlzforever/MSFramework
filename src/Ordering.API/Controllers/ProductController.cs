@@ -4,6 +4,7 @@ using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Threading.Tasks;
 using Dapr;
+using Dapr.Client;
 using DotNetCore.CAP;
 using MicroserviceFramework;
 using MicroserviceFramework.AspNetCore;
@@ -204,6 +205,8 @@ public class ProductController : ApiControllerBase
 
             _capBus.Publish("Ordering.Application.EventHandlers.ProjectCreatedIntegrationEvent", DateTime.Now);
         }
+
+        DaprClient client;
 
         return Ok();
     }
