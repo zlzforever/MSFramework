@@ -34,7 +34,6 @@ public class EfUnitOfWork : IUnitOfWork
                 return;
             }
 
-            var auditOperation = auditingFactory();
 
             dbContextBase.SavingChanges += (sender, _) =>
             {
@@ -43,6 +42,7 @@ public class EfUnitOfWork : IUnitOfWork
                     return;
                 }
 
+                var auditOperation = auditingFactory();
                 var entities = db.GetAuditEntities();
                 auditOperation.AddEntities(entities);
                 auditOperation.End();

@@ -1,6 +1,6 @@
 ﻿using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Linq;
 using MicroserviceFramework.Collections.Generic;
 
 namespace MicroserviceFramework.EventBus;
@@ -17,53 +17,49 @@ public static class EventSubscriptionManager
     /// Value->Value: 事件处理器的方法
     /// </summary>
     private static readonly
-        ConcurrentDictionary<string, ConcurrentDictionary<Type, SubscriptionInfo>> Cache;
+        Dictionary<string, Dictionary<Type, SubscriptionInfo>> Cache;
 
-    private static readonly ConcurrentDictionary<Type, object> EventTypes;
+    private static readonly HashSet<string> EventTypes;
 
     static EventSubscriptionManager()
     {
-        Cache = new ConcurrentDictionary<string, ConcurrentDictionary<Type, SubscriptionInfo>>();
-        EventTypes = new ConcurrentDictionary<Type, object>();
+        Cache = new Dictionary<string, Dictionary<Type, SubscriptionInfo>>();
+        EventTypes = new();
     }
 
-    public static bool IsEmpty => EventTypes.IsNullOrEmpty();
-
-    public static bool Register(Type eventType, Type handlerType)
+    public static void Register(Type eventType, Type handlerType)
     {
         if (!eventType.IsEvent())
         {
-            throw new ArgumentException($"{eventType} is not event type");
+            throw new ArgumentException($"{eventType} 不是事件类型");
         }
 
         // TODO: verify handlerType & eventType
+        var eventName = eventType.GetEventName();
+        EventTypes.Add(eventName);
 
-        EventTypes.TryAdd(eventType, null);
-
-        var name = eventType.GetEventName();
-
-        ConcurrentDictionary<Type, SubscriptionInfo> dict;
-        if (!Cache.ContainsKey(name))
+        Dictionary<Type, SubscriptionInfo> dict;
+        if (!Cache.ContainsKey(eventName))
         {
-            dict = new ConcurrentDictionary<Type, SubscriptionInfo>();
-            Cache.TryAdd(name, dict);
+            dict = new Dictionary<Type, SubscriptionInfo>();
+            Cache.TryAdd(eventName, dict);
         }
         else
         {
-            dict = Cache[name];
+            dict = Cache[eventName];
         }
 
-        return dict.TryAdd(handlerType, new SubscriptionInfo(eventType, handlerType));
+        dict.TryAdd(handlerType, new SubscriptionInfo(eventType, handlerType));
     }
 
     public static IEnumerable<SubscriptionInfo> GetOrDefault(string eventName)
     {
         var dict = Cache.GetOrDefault(eventName);
-        return dict?.Values;
+        return dict?.Values ?? Enumerable.Empty<SubscriptionInfo>();
     }
 
-    public static IEnumerable<Type> GetEventTypes()
+    public static IReadOnlyCollection<string> GetEventTypes()
     {
-        return EventTypes.Keys;
+        return EventTypes;
     }
 }

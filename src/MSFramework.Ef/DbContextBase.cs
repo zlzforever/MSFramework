@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using MicroserviceFramework.Application;
@@ -349,24 +350,33 @@ public abstract class DbContextBase : DbContext
             string originalValue = null;
             string newValue = null;
 
-            if (entry.State == EntityState.Added)
+            var columnType = propertyEntry.Metadata.GetColumnType();
+            switch (entry.State)
             {
-                newValue = propertyEntry.CurrentValue?.ToString();
-            }
-            else if (entry.State == EntityState.Deleted)
-            {
-                originalValue = propertyEntry.OriginalValue?.ToString();
-            }
-            else if (entry.State == EntityState.Modified)
-            {
-                var currentValue = propertyEntry.CurrentValue?.ToString();
-                originalValue = propertyEntry.OriginalValue?.ToString();
-                if (currentValue == originalValue)
+                case EntityState.Added:
+                    newValue = GetValue(columnType, propertyEntry.CurrentValue);
+                    break;
+                case EntityState.Deleted:
+                    originalValue = GetValue(columnType, propertyEntry.OriginalValue);
+                    break;
+                case EntityState.Modified:
                 {
-                    continue;
-                }
+                    var currentValue = GetValue(columnType, propertyEntry.CurrentValue);
+                    originalValue = GetValue(columnType, propertyEntry.OriginalValue);
+                    if (currentValue == originalValue)
+                    {
+                        continue;
+                    }
 
-                newValue = currentValue;
+                    newValue = currentValue;
+                    break;
+                }
+                case EntityState.Detached:
+                    break;
+                case EntityState.Unchanged:
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException();
             }
 
             if (string.IsNullOrWhiteSpace(originalValue))
@@ -389,6 +399,18 @@ public abstract class DbContextBase : DbContext
         var auditedEntity = new AuditEntity(typeName, entityId, operationType);
         auditedEntity.AddProperties(properties);
         return auditedEntity;
+    }
+
+    private string GetValue(string columnType, object value)
+    {
+        if (value == null)
+        {
+            return null;
+        }
+
+        return Regex.IsMatch(columnType, "JSON", RegexOptions.IgnoreCase)
+            ? MicroserviceFramework.Defaults.JsonHelper.Serialize(value)
+            : value.ToString();
     }
 
     protected virtual void ApplyConceptsForAddedEntity(EntityEntry entry, string userId, string userName)

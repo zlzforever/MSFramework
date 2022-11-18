@@ -1,5 +1,4 @@
 ﻿using System.Text.Json;
-using MicroserviceFramework.Serialization;
 
 namespace MicroserviceFramework.Text.Json;
 
@@ -14,7 +13,7 @@ public static class ServiceCollectionExtensions
     public static MicroserviceFrameworkBuilder UseDefaultJsonHelper(this MicroserviceFrameworkBuilder builder,
         JsonSerializerOptions options = null)
     {
-        Default.JsonHelper = options == null ? JsonHelper.Create() : new JsonHelper(options);
+        Defaults.JsonHelper = options == null ? JsonHelper.Create() : new JsonHelper(options);
 
         return builder;
     }

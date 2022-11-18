@@ -4,7 +4,7 @@ using MicroserviceFramework.Domain;
 using MicroserviceFramework.Ef;
 using Ordering.Domain.AggregateRoots.Events;
 
-namespace Ordering.Application.EventHandlers;
+namespace Ordering.Application.DomainEventHandlers;
 
 public class OrderShippedDomainEventHandler : IDomainEventHandler<OrderShippedDomainEvent>
 {

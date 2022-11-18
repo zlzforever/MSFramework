@@ -2,16 +2,16 @@ using System;
 using System.IO;
 using System.Linq;
 using System.Text.Json;
-using Dapr.Client;
 using MicroserviceFramework;
 using MicroserviceFramework.AspNetCore;
 using MicroserviceFramework.AspNetCore.Filters;
 using MicroserviceFramework.AspNetCore.Mvc.ModelBinding;
 using MicroserviceFramework.AspNetCore.Swagger;
 using MicroserviceFramework.AutoMapper;
+using MicroserviceFramework.Domain;
 using MicroserviceFramework.Ef;
-using MicroserviceFramework.Ef.MySql;
 using MicroserviceFramework.Ef.PostgreSql;
+using MicroserviceFramework.EventBus;
 using MicroserviceFramework.Extensions.DependencyInjection;
 using MicroserviceFramework.Mediator;
 using MicroserviceFramework.Text.Json.Converters;
@@ -23,6 +23,7 @@ using Ordering.Domain.AggregateRoots;
 using Ordering.Infrastructure;
 using MicroserviceFramework.Extensions.Options;
 using Microsoft.Extensions.Configuration;
+using Ordering.Application.Events;
 using Serilog;
 using Serilog.Events;
 
@@ -76,8 +77,10 @@ public static class Startup
             {
                 x.Filters.AddUnitOfWork()
                     .AddAudit()
-                    .AddGlobalException()
-                    .AddActionException().Add<SecurityDaprTopicFilter>();
+                    .AddGlobalException().AddActionException();
+#if !DEBUG
+                 x.Filters.Add<SecurityDaprTopicFilter>();
+#endif
                 x.ModelBinderProviders.Insert(0, new ObjectIdModelBinderProvider());
             })
             .ConfigureInvalidModelStateResponse()
@@ -104,6 +107,7 @@ public static class Startup
                 x.UseJsonSerializationOptions(jsonSerializerOptions);
 #if DEBUG
                 x.UseGrpcEndpoint("http://localhost:51001");
+                x.UseHttpEndpoint("http://localhost:50001");
 #endif
             });
         services.AddSwaggerGen(x =>
@@ -140,7 +144,14 @@ public static class Startup
             builder.UseDependencyInjectionLoader();
             builder.UseAutoMapper();
             builder.UseMediator();
-
+            builder.UseEventBus(options =>
+            {
+                options.AddAfterInterceptors(async provider =>
+                {
+                    var unitOfWork = provider.GetRequiredService<IUnitOfWork>();
+                    await unitOfWork.SaveChangesAsync();
+                });
+            });
             // 启用审计服务
             // builder.UseAuditStore<EfAuditStore<OrderingContext>>();
             builder.UseAspNetCore();
@@ -170,6 +181,8 @@ public static class Startup
         //     // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
         //     app.UseHsts();
         // }
+
+        app.Services.CreateScope().ServiceProvider.GetRequiredService<IEventBus>().PublishAsync(new TestEvent()).Wait();
 
         app.UseRouting();
         app.UseHealthChecks("/healthcheck");

@@ -28,7 +28,7 @@ public static class ServiceCollectionExtensions
         }
 
         JsonConvert.DefaultSettings = () => settings;
-        Default.JsonHelper = new NewtonsoftJsonHelper();
+        Defaults.JsonHelper = new NewtonsoftJsonHelper();
 
         return builder;
     }

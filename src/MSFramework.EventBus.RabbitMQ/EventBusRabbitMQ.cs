@@ -2,7 +2,6 @@
 using System.Net.Sockets;
 using System.Text;
 using System.Threading.Tasks;
-using MicroserviceFramework.Serialization;
 using MicroserviceFramework.Utilities;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -35,9 +34,8 @@ public class EventBusRabbitMQ : IEventBus
 
     public void SubscribeAllEventTypes()
     {
-        foreach (var eventType in EventSubscriptionManager.GetEventTypes())
+        foreach (var eventName in EventSubscriptionManager.GetEventTypes())
         {
-            var eventName = eventType.GetEventName();
             Subscribe(eventName);
         }
 
@@ -68,8 +66,8 @@ public class EventBusRabbitMQ : IEventBus
         _logger.LogTrace($"Declaring RabbitMQ exchange to publish event: {@event.EventId}");
         channel.ExchangeDeclare(_options.Exchange, "direct");
 
-        var bytes = Encoding.UTF8.GetBytes(Default.JsonHelper.Serialize(@event));
-        
+        var bytes = Encoding.UTF8.GetBytes(Defaults.JsonHelper.Serialize(@event));
+
         policy.Execute(() =>
         {
             var properties = channel.CreateBasicProperties();
@@ -81,6 +79,10 @@ public class EventBusRabbitMQ : IEventBus
         });
 
         return Task.CompletedTask;
+    }
+
+    public void AddInterceptors(InterceptorType type, params Func<IServiceProvider, Task>[] funcs)
+    {
     }
 
     private void Subscribe(string eventName)

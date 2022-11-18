@@ -1,13 +1,11 @@
 ﻿using System;
-using System.Linq;
 using System.Threading.Tasks;
-using MicroserviceFramework.Serialization;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
 namespace MicroserviceFramework.EventBus;
 
-public class DefaultEventExecutor : IEventExecutor
+internal class DefaultEventExecutor : IEventExecutor
 {
     private readonly IServiceProvider _serviceProvider;
     private readonly ILogger<DefaultEventExecutor> _logger;
@@ -31,24 +29,21 @@ public class DefaultEventExecutor : IEventExecutor
         {
             // 每次执行是独立的 scope
             await using var scope = _serviceProvider.CreateAsyncScope();
-            var handlers = scope.ServiceProvider.GetServices(subscription.EventHandlerType)
-                .Select(x => x as IDisposable);
 
-            foreach (var handler in handlers)
+            var handler = scope.ServiceProvider.GetService(subscription.EventHandlerType);
+            if (handler == null)
             {
-                if (handler == null)
-                {
-                    continue;
-                }
+                continue;
+            }
 
-                var @event = Default.JsonHelper.Deserialize(eventData, subscription.EventType);
-                if (subscription.MethodInfo.Invoke(handler,
-                        new[] { @event }) is Task task)
+            var @event = Defaults.JsonHelper.Deserialize(eventData, subscription.EventType);
+            if (subscription.MethodInfo.Invoke(handler,
+                    new[] { @event }) is Task task)
+            {
+                task.ContinueWith((_) =>
                 {
-                    await task.ConfigureAwait(false);
-                }
-
-                handler.Dispose();
+                    (handler as IDisposable)?.Dispose();
+                }).ConfigureAwait(false).GetAwaiter();
             }
         }
     }

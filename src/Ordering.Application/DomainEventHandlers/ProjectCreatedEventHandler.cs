@@ -6,7 +6,7 @@ using MicroserviceFramework.Domain;
 using MongoDB.Bson;
 using Ordering.Domain.AggregateRoots;
 
-namespace Ordering.Application.EventHandlers;
+namespace Ordering.Application.DomainEventHandlers;
 
 public class ProjectCreatedIntegrationEvent
 {
@@ -25,10 +25,16 @@ public class ProjectCreatedEventHandler : IDomainEventHandler<ProjectCreatedEven
     public async Task HandleAsync(ProjectCreatedEvent @event, CancellationToken cancellationToken = default)
     {
         var integrationEvent = new ProjectCreatedIntegrationEvent { Id = @event.Id };
+        // var json = Defaults.JsonHelper.SerializeToUtf8Bytes(integrationEvent);
+        // var str = Encoding.UTF8.GetString(json);
+        // var request = _daprClient.CreateInvokeMethodRequest(HttpMethod.Post, "ordering",
+        //     "api/v1.0/product/created");
+        // request.Content = new ByteArrayContent(json);
+        //  await _daprClient.InvokeMethodWithResponseAsync(request, cancellationToken);
 
-        // await _daprClient.InvokeMethodAsync("sales-collection","api/v1.0/sales-collections")
         await _daprClient.PublishEventAsync("pubsub",
-            "Ordering.Application.EventHandlers.ProjectCreatedIntegrationEvent", integrationEvent, cancellationToken);
+            "Ordering.Application.EventHandlers.ProjectCreatedIntegrationEvent", integrationEvent
+            , cancellationToken);
         Console.WriteLine("Execute ProjectCreatedEvent");
     }
 

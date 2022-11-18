@@ -14,9 +14,9 @@ using MicroserviceFramework.Domain;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using MongoDB.Bson;
+using Ordering.Application.DomainEventHandlers;
 using Ordering.Domain.AggregateRoots;
 using Ordering.Domain.Repositories;
-using Ordering.Application.EventHandlers;
 using Ordering.Infrastructure;
 
 namespace Ordering.API.Controllers;
@@ -177,7 +177,12 @@ public class ProductController : ApiControllerBase
         var prod = Product.Create(vo.Name, new Random().Next(100, 10000));
         prod.SetCreation("1");
         await _productRepository.AddAsync(prod);
-        // await _unitOfWork.SaveChangesAsync();
+        await _unitOfWork.SaveChangesAsync();
+
+        var prod2 = Product.Create(vo.Name, new Random().Next(100, 10000));
+        prod2.SetCreation("1");
+        await _productRepository.AddAsync(prod2);
+        await _unitOfWork.SaveChangesAsync();
         return prod;
     }
 
