@@ -27,23 +27,30 @@ internal class DefaultEventExecutor : IEventExecutor
 
         foreach (var subscription in subscriptions)
         {
+            var @event = Defaults.JsonHelper.Deserialize(eventData, subscription.EventType);
+
             // 每次执行是独立的 scope
-            await using var scope = _serviceProvider.CreateAsyncScope();
+            var scope = _serviceProvider.CreateAsyncScope();
 
             var handler = scope.ServiceProvider.GetService(subscription.EventHandlerType);
             if (handler == null)
             {
+                await scope.DisposeAsync();
                 continue;
             }
 
-            var @event = Defaults.JsonHelper.Deserialize(eventData, subscription.EventType);
             if (subscription.MethodInfo.Invoke(handler,
                     new[] { @event }) is Task task)
             {
-                task.ContinueWith((_) =>
+                task.ContinueWith(_ =>
                 {
                     (handler as IDisposable)?.Dispose();
+                    scope.Dispose();
                 }).ConfigureAwait(false).GetAwaiter();
+            }
+            else
+            {
+                await scope.DisposeAsync();
             }
         }
     }

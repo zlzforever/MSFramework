@@ -29,6 +29,8 @@ public class CreateViewObject
     [Required]
     [StringLength(50)]
     public string Name { get; set; }
+
+    public ProductType Type { get; set; }
 }
 
 public class ProductDTO
@@ -66,15 +68,24 @@ public class ProductController : ApiControllerBase
     }
 
     [HttpGet("objectid")]
+    [HttpGet("id")]
     public ObjectId Get()
     {
         return ObjectId.GenerateNewId();
     }
 
+
     [HttpGet("modalState")]
     public bool ModalState([Required] string id)
     {
         return true;
+    }
+
+    [HttpPost("file")]
+    public string Upload()
+    {
+        var file = HttpContext.Request.Form.Files.First();
+        return file.Name;
     }
 
     [HttpPost("objectid/{id}")]
@@ -106,6 +117,7 @@ public class ProductController : ApiControllerBase
         public string Name { get; set; }
 
         public int Price { get; set; }
+
 
         public string CreatorName { get; set; }
     }

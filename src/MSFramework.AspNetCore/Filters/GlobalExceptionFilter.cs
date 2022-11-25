@@ -17,14 +17,29 @@ public class GlobalExceptionFilter : IExceptionFilter
 
     public void OnException(ExceptionContext context)
     {
-        context.HttpContext.Response.StatusCode = StatusCodes.Status500InternalServerError;
-        
-        context.Result =
-            new ObjectResult(new ApiResult
-            {
-                Success = false, Msg = "系统内部错误", Code = StatusCodes.Status500InternalServerError, Data = null
-            });
+        if (context.ExceptionHandled)
+        {
+            return;
+        }
 
+        if (context.Exception is MicroserviceFrameworkFriendlyException e)
+        {
+            context.Result = new BadRequestObjectResult(new ApiResult
+            {
+                Success = false, Msg = e.Message, Code = e.Code, Data = null
+            });
+        }
+        else
+        {
+            context.HttpContext.Response.StatusCode = StatusCodes.Status500InternalServerError;
+            context.Result =
+                new ObjectResult(new ApiResult
+                {
+                    Success = false, Msg = "系统内部错误", Code = StatusCodes.Status500InternalServerError, Data = null
+                });
+        }
+
+        context.ExceptionHandled = true;
         _logger.LogError(context.Exception.ToString());
     }
 }

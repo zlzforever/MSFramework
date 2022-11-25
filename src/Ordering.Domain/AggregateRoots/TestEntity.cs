@@ -11,3 +11,13 @@ public class TestEntity : CreationAggregateRoot
     {
     }
 }
+
+public class TestEntity2 : CreationAggregateRoot<long>
+{
+    public string Name { get; private set; }
+
+    private TestEntity2(long id) : base(id)
+    {
+    }
+}
+

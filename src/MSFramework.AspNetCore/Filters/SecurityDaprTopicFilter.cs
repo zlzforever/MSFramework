@@ -21,82 +21,72 @@ namespace MicroserviceFramework.AspNetCore.Filters;
 /// </summary>
 public class SecurityDaprTopicFilter : IActionFilter, IOrderedFilter
 {
-	private static readonly ConcurrentDictionary<MethodInfo, bool> Cache;
-	private readonly ILogger<SecurityDaprTopicFilter> _logger;
+    private static readonly ConcurrentDictionary<MethodInfo, bool> Cache;
+    private readonly ILogger<SecurityDaprTopicFilter> _logger;
 
-	private static readonly HashSet<string> InternalIpPrefixes = new()
-	{
-		"172",
-		"10",
-		"192",
-		"127.0.0.1",
-		"localhost",
-		"::ffff:127.0.0.1"
-	};
+    private static readonly HashSet<string> InternalIpPrefixes = new()
+    {
+        "172",
+        "10",
+        "192",
+        "127.0.0.1",
+        "localhost",
+        "::ffff:127.0.0.1"
+    };
 
-	static SecurityDaprTopicFilter()
-	{
-		Cache = new ConcurrentDictionary<MethodInfo, bool>();
-	}
+    static SecurityDaprTopicFilter()
+    {
+        Cache = new ConcurrentDictionary<MethodInfo, bool>();
+    }
 
-	public SecurityDaprTopicFilter(ILogger<SecurityDaprTopicFilter> logger)
-	{
-		_logger = logger;
-	}
+    public SecurityDaprTopicFilter(ILogger<SecurityDaprTopicFilter> logger)
+    {
+        _logger = logger;
+    }
 
-	public void OnActionExecuting(ActionExecutingContext context)
-	{
-		var actionDescriptor = ((ControllerActionDescriptor)context.ActionDescriptor);
-		var isTopic = Cache.GetOrAdd(actionDescriptor.MethodInfo,
-			(entry => context.HasAttribute("Dapr.TopicAttribute")));
-		if (!isTopic)
-		{
-			return;
-		}
+    public void OnActionExecuting(ActionExecutingContext context)
+    {
+        var actionDescriptor = ((ControllerActionDescriptor)context.ActionDescriptor);
+        var isTopic = Cache.GetOrAdd(actionDescriptor.MethodInfo,
+            (entry => context.HasAttribute("Dapr.TopicAttribute")));
+        if (!isTopic)
+        {
+            return;
+        }
 
-		var ip = context.HttpContext.GetRemoteIpAddress();
-		var isInternalIp = InternalIpPrefixes.Any(x => ip.StartsWith(x));
-		if (!string.IsNullOrWhiteSpace(context.HttpContext.Request.Headers["Pubsubname"])
-		    && !string.IsNullOrWhiteSpace(context.HttpContext.Request.Headers["traceparent"])
-		    && isInternalIp)
-		{
-			return;
-		}
+        var ip = context.HttpContext.GetRemoteIpAddress();
+        var isInternalIp = InternalIpPrefixes.Any(x => ip.StartsWith(x));
+        if (!string.IsNullOrWhiteSpace(context.HttpContext.Request.Headers["Pubsubname"])
+            && !string.IsNullOrWhiteSpace(context.HttpContext.Request.Headers["traceparent"])
+            && isInternalIp)
+        {
+            return;
+        }
 
-		context.Result = new OkObjectResult(new ApiResult
-		{
-			Success = false, Msg = "访问受限", Code = StatusCodes.Status403Forbidden, Data = null
-		});
-		_logger.LogError($"Executing {actionDescriptor.DisplayName} forbidden");
-	}
+        context.Result = new OkObjectResult(new ApiResult
+        {
+            Success = false, Msg = "访问受限", Code = StatusCodes.Status403Forbidden, Data = null
+        });
+        _logger.LogError($"Executing {actionDescriptor.DisplayName} forbidden");
+    }
 
-	public void OnActionExecuted(ActionExecutedContext context)
-	{
-		if (context.Exception == null || context.ExceptionHandled)
-		{
-			return;
-		}
+    public void OnActionExecuted(ActionExecutedContext context)
+    {
+        if (context.Exception == null || context.Exception is MicroserviceFrameworkFriendlyException ||
+            context.ExceptionHandled)
+        {
+            return;
+        }
 
-		if (context.Exception is MicroserviceFrameworkFriendlyException e)
-		{
-			context.Result = new NotFoundObjectResult(new ApiResult
-			{
-				Success = false, Msg = e.Message, Code = e.Code, Data = null
-			});
-			_logger.LogError(e.Message);
-		}
-		else
-		{
-			context.Result = new NotFoundObjectResult(new ApiResult
-			{
-				Success = false, Msg = "服务器内部错误", Code = context.Exception.HResult, Data = null
-			});
+        context.Result = new NotFoundObjectResult(new ApiResult
+        {
+            Success = false, Msg = "服务器内部错误", Code = context.Exception.HResult, Data = null
+        });
 
-			_logger.LogError(context.Exception.ToString());
-		}
+        context.ExceptionHandled = true;
 
-		context.ExceptionHandled = true;
-	}
+        _logger.LogError(context.Exception.ToString());
+    }
 
-	public int Order => int.MaxValue;
+    public int Order => int.MaxValue;
 }

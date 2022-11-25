@@ -4,6 +4,8 @@ namespace MicroserviceFramework.Ef;
 
 public class DbContextConfiguration
 {
+    private Type _type;
+
     /// <summary>
     /// 初始化一个<see cref="DbContextConfiguration"/>类型的新实例
     /// </summary>
@@ -18,7 +20,24 @@ public class DbContextConfiguration
     /// <summary>
     /// 获取 上下文类型
     /// </summary>
-    public Type DbContextType => string.IsNullOrEmpty(DbContextTypeName) ? null : Type.GetType(DbContextTypeName);
+    public Type DbContextType
+    {
+        get
+        {
+            if (_type != null)
+            {
+                return _type;
+            }
+
+            _type = string.IsNullOrEmpty(DbContextTypeName) ? null : Type.GetType(DbContextTypeName);
+            if (_type == null)
+            {
+                throw new ArithmeticException($"{DbContextTypeName} is not a valid data context type");
+            }
+
+            return _type;
+        }
+    }
 
     /// <summary>
     /// 获取或设置 上下文类型全名

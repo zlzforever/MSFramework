@@ -5,13 +5,13 @@ using Ordering.Domain.AggregateRoots;
 namespace Ordering.Infrastructure.EntityConfigurations;
 
 public class TestEntityTypeConfiguration
-    : EntityTypeConfigurationBase<TestEntity, OrderingContext2>
+    : EntityTypeConfigurationBase<TestEntity2, OrderingContext2>
 {
-    public override void Configure(EntityTypeBuilder<TestEntity> builder)
+    public override void Configure(EntityTypeBuilder<TestEntity2> builder)
     {
         base.Configure(builder);
 
-        builder.Property(x => x.Id).ValueGeneratedNever();
+        builder.Property(x => x.Id).ValueGeneratedOnAdd();
         builder.Property(x => x.Name).HasMaxLength(256);
     }
 }
