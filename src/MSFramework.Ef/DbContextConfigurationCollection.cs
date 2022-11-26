@@ -18,7 +18,7 @@ public class DbContextConfigurationCollection : List<DbContextConfiguration>
             _dict = new Dictionary<Type, DbContextConfiguration>();
             foreach (var value in this)
             {
-                _dict.Add(value.DbContextType, value);
+                _dict.Add(value.GetDbContextType(), value);
             }
         }
 

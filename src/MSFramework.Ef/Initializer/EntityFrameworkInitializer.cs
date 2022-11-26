@@ -37,7 +37,7 @@ public class EntityFrameworkInitializer : InitializerBase
             }
 
             var repeated = dbContextConfigurationCollection
-                .GroupBy(m => m.DbContextType)
+                .GroupBy(m => m.GetDbContextType())
                 .FirstOrDefault(m => m.Count() > 1);
             if (repeated != null)
             {
@@ -51,7 +51,7 @@ public class EntityFrameworkInitializer : InitializerBase
                 {
                     _logger.LogInformation($"Auto migrate is enabled in {option.DbContextTypeName}.");
 
-                    var dbContext = (DbContextBase)scope.ServiceProvider.GetRequiredService(option.DbContextType);
+                    var dbContext = (DbContextBase)scope.ServiceProvider.GetRequiredService(option.GetDbContextType());
 
                     if (dbContext.Database.ProviderName == "Microsoft.EntityFrameworkCore.InMemory")
                     {

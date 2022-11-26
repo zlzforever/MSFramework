@@ -20,23 +20,20 @@ public class DbContextConfiguration
     /// <summary>
     /// 获取 上下文类型
     /// </summary>
-    public Type DbContextType
+    public Type GetDbContextType()
     {
-        get
+        if (_type != null)
         {
-            if (_type != null)
-            {
-                return _type;
-            }
-
-            _type = string.IsNullOrEmpty(DbContextTypeName) ? null : Type.GetType(DbContextTypeName);
-            if (_type == null)
-            {
-                throw new ArithmeticException($"{DbContextTypeName} is not a valid data context type");
-            }
-
             return _type;
         }
+
+        _type = string.IsNullOrEmpty(DbContextTypeName) ? null : Type.GetType(DbContextTypeName);
+        if (_type == null)
+        {
+            throw new ArithmeticException($"{DbContextTypeName} is not a valid data context type");
+        }
+
+        return _type;
     }
 
     /// <summary>

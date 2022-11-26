@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text.Json;
@@ -82,6 +83,7 @@ public static class Startup
                  x.Filters.Add<SecurityDaprTopicFilter>();
 #endif
                 x.ModelBinderProviders.Insert(0, new ObjectIdModelBinderProvider());
+                x.ModelBinderProviders.Insert(0, new EnumerationModelBinderProvider());
             })
             .ConfigureInvalidModelStateResponse()
             .AddJsonOptions(options =>
@@ -89,7 +91,7 @@ public static class Startup
                 options.JsonSerializerOptions.Converters.Add(new ObjectIdJsonConverter());
                 options.JsonSerializerOptions.Converters.Add(new EnumerationJsonConverterFactory());
                 options.JsonSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
-
+                options.JsonSerializerOptions.DictionaryKeyPolicy = JsonNamingPolicy.CamelCase;
                 jsonSerializerOptions = options.JsonSerializerOptions;
             })
             // .AddNewtonsoftJson(x =>

@@ -155,6 +155,11 @@ public class ProductController : ApiControllerBase
         throw new Exception("i'm an exception");
     }
 
+    [HttpGet("type")]
+    public string GetType([FromQuery] ProductType type)
+    {
+        return type.Id;
+    }
 
     [HttpGet("NoResponse")]
     public Task NoResponse()
