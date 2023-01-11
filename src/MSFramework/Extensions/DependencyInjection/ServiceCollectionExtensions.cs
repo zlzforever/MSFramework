@@ -4,13 +4,19 @@ using MicroserviceFramework.Application;
 using MicroserviceFramework.Domain;
 using MicroserviceFramework.Mediator;
 using MicroserviceFramework.Runtime;
-using MicroserviceFramework.Utilities;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace MicroserviceFramework.Extensions.DependencyInjection;
 
 public static class ServiceCollectionExtensions
 {
+    /// <summary>
+    /// 使用自动依赖注入组件， 扫描程序集中的类型， 对实现了
+    /// IScopeDependency、ISingletonDependency、ITransientDependency
+    /// 接口的类型， 自动注入到依赖注入中
+    /// </summary>
+    /// <param name="builder"></param>
+    /// <returns></returns>
     public static MicroserviceFrameworkBuilder UseDependencyInjectionLoader(
         this MicroserviceFrameworkBuilder builder)
     {
@@ -42,8 +48,7 @@ public static class ServiceCollectionExtensions
         }
 
         // 1. 注册类型本身
-        ServiceCollectionUtilities.TryAdd(services,
-            new ServiceDescriptor(implementationType, implementationType, lifetime));
+        services.TryAdd(new ServiceDescriptor(implementationType, implementationType, lifetime));
 
         var interfaceTypes = implementationType.GetInterfaces(
             typeof(ITransientDependency),
@@ -66,21 +71,21 @@ public static class ServiceCollectionExtensions
             // 瞬时生命周期每次获取对象都是新的，因此实现的接口每个注册一次即可
             if (lifetime == ServiceLifetime.Transient)
             {
-                ServiceCollectionUtilities.TryAdd(services,
+                services.TryAdd(
                     new ServiceDescriptor(interfaceType, implementationType, ServiceLifetime.Transient));
             }
             else
             {
                 if (i == 0)
                 {
-                    ServiceCollectionUtilities.TryAdd(services,
+                    services.TryAdd(
                         new ServiceDescriptor(interfaceType, implementationType, lifetime));
                 }
                 else
                 {
                     //有多个接口时，后边的接口注册使用第一个接口的实例，保证同个实现类的多个接口获得同一个实例
                     var firstInterfaceType = interfaceTypes[0];
-                    ServiceCollectionUtilities.TryAdd(services, new ServiceDescriptor(interfaceType,
+                    services.TryAdd(new ServiceDescriptor(interfaceType,
                         provider => provider.GetService(firstInterfaceType), lifetime));
                 }
             }

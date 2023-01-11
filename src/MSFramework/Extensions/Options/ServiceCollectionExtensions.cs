@@ -8,7 +8,7 @@ namespace MicroserviceFramework.Extensions.Options;
 
 public static class ServiceCollectionExtensions
 {
-    private static void AddOptions(this IServiceCollection services, Type optionsType,
+    private static void AddOptionsType(this IServiceCollection services, Type optionsType,
         IConfiguration config,
         Action<BinderOptions> configureBinder)
     {
@@ -53,7 +53,7 @@ public static class ServiceCollectionExtensions
             namedConfigureFromConfigurationOptions);
     }
 
-    public static IServiceCollection AddOptions(this IServiceCollection services, IConfiguration configuration)
+    public static IServiceCollection AddOptionsType(this IServiceCollection services, IConfiguration configuration)
     {
         services.AddOptions();
 
@@ -65,13 +65,15 @@ public static class ServiceCollectionExtensions
             }
 
             var attribute = type.GetCustomAttribute<OptionsTypeAttribute>();
-            if (attribute != null)
+            if (attribute == null)
             {
-                var section = string.IsNullOrWhiteSpace(attribute.Section)
-                    ? configuration
-                    : configuration.GetSection(attribute.Section);
-                services.AddOptions(type, section, _ => { });
+                return;
             }
+
+            var section = string.IsNullOrWhiteSpace(attribute.Section)
+                ? configuration
+                : configuration.GetSection(attribute.Section);
+            services.AddOptionsType(type, section, _ => { });
         };
 
         return services;

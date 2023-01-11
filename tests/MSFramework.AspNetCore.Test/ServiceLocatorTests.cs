@@ -53,7 +53,7 @@ public class ServiceLocatorTests
                         services.AddRouting(x => { x.LowercaseUrls = true; });
                         services.AddMicroserviceFramework(builder =>
                         {
-                            builder.UseOptions(context.Configuration);
+                            builder.UseOptionsType(context.Configuration);
                             builder.UseAspNetCore();
                         });
                         services.AddScoped<A>();

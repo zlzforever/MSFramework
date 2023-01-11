@@ -42,7 +42,7 @@ public class ConfigExtensionTest
                         services.AddMicroserviceFramework(x =>
                         {
                             //
-                            x.UseOptions(context.Configuration);
+                            x.UseOptionsType(context.Configuration);
                         });
                         services.AddRouting(x => { x.LowercaseUrls = true; });
                         services.AddMicroserviceFramework(builder => { builder.UseAspNetCore(); });

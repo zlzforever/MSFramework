@@ -13,17 +13,17 @@ public class AuditOperation : CreationAggregateRoot<ObjectId>
     public string Url { get; private set; }
 
     /// <summary>
-    /// 图片上传的 IP
+    /// 操作的 IP
     /// </summary>
     public string IP { get; private set; }
 
     /// <summary>
-    /// 图片上传的设备 ID
+    /// 设备 ID
     /// </summary>
     public string DeviceId { get; private set; }
 
     /// <summary>
-    /// 图片上传的设备型号
+    /// 设备型号
     /// </summary>
     public string DeviceModel { get; private set; }
 
@@ -38,17 +38,23 @@ public class AuditOperation : CreationAggregateRoot<ObjectId>
     public double? Lng { get; private set; }
 
     /// <summary>
-    /// 获取或设置 当前访问UserAgent
+    /// 访问的 UserAgent
     /// </summary>
     public string UserAgent { get; private set; }
 
     /// <summary>
-    /// 获取或设置 审计数据信息集合
+    /// 获取或设置审计数据信息集合
     /// </summary>
     public virtual ICollection<AuditEntity> Entities { get; private set; }
 
+    /// <summary>
+    /// 请求结束时间
+    /// </summary>
     public DateTimeOffset EndTime { get; private set; }
 
+    /// <summary>
+    /// 请求耗时
+    /// </summary>
     public int Elapsed { get; private set; }
 
     private AuditOperation() : base(ObjectId.GenerateNewId())

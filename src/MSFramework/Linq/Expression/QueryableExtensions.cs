@@ -13,6 +13,8 @@ public static class PagedQueryExtensions
     {
         page = page < 1 ? 1 : page;
         limit = limit < 1 ? 10 : limit;
+        limit = limit > 60 ? 60 : limit;
+
         var total = queryable.Count();
         var data = total == 0
             ? Enumerable.Empty<TEntity>()

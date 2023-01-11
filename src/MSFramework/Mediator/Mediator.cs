@@ -1,21 +1,33 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Linq;
 using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
+using MongoDB.Bson;
 
 namespace MicroserviceFramework.Mediator;
 
+/// <summary>
+/// 生命周期: Scoped
+/// </summary>
 internal class Mediator : IMediator
 {
     private readonly IServiceProvider _serviceProvider;
-    private readonly IMediatorTypeMapper _mediatorTypeMapper;
+    private readonly ILogger<Mediator> _logger;
+    private static readonly ConcurrentDictionary<Type, (Type Interface, MethodInfo Method)> HandlerCache;
 
-    public Mediator(IServiceProvider serviceProvider, IMediatorTypeMapper mediatorTypeMapper)
+    static Mediator()
+    {
+        HandlerCache = new ConcurrentDictionary<Type, (Type Interface, MethodInfo Method)>();
+    }
+
+    public Mediator(IServiceProvider serviceProvider, ILogger<Mediator> logger)
     {
         _serviceProvider = serviceProvider;
-        _mediatorTypeMapper = mediatorTypeMapper;
+        _logger = logger;
     }
 
     /// <summary>
@@ -31,10 +43,10 @@ internal class Mediator : IMediator
             return;
         }
 
-        var queryType = request.GetType();
+        var requestType = request.GetType();
 
         var (@interface, method) =
-            _mediatorTypeMapper.Get(queryType, type => Create(typeof(IRequestHandler<>), type));
+            HandlerCache.GetOrAdd(requestType, type => CreateHandlerMeta(typeof(IRequestHandler<>), type));
 
         var handler = _serviceProvider.GetService(@interface);
         if (handler == null)
@@ -42,9 +54,32 @@ internal class Mediator : IMediator
             throw new MicroserviceFrameworkException("创建查询处理器失败");
         }
 
-        if (method.Invoke(handler, new object[] { request, cancellationToken }) is Task task)
+        var traceId = ObjectId.GenerateNewId().ToString();
+
+        try
         {
+            _logger.LogInformation(
+                $"{traceId}, {handler.GetType().FullName} 开始处理请求 {Defaults.JsonHelper.Serialize(request)}");
+
+            if (method.Invoke(handler, new object[] { request, cancellationToken }) is not Task task)
+            {
+                return;
+            }
+
             await task;
+
+            _logger.LogInformation($"{traceId}, {handler.GetType().FullName} 处理成功");
+        }
+        catch (Exception e)
+        {
+            _logger.LogError($"{traceId}, {handler.GetType().FullName} 处理失败");
+
+            if (e.InnerException != null)
+            {
+                throw e.InnerException;
+            }
+
+            throw;
         }
     }
 
@@ -64,21 +99,45 @@ internal class Mediator : IMediator
             return default;
         }
 
-        var queryType = request.GetType();
+        var requestType = request.GetType();
         var (@interface, method) =
-            _mediatorTypeMapper.Get(queryType, type => Create(typeof(IRequestHandler<,>), type, typeof(TResponse)));
+            HandlerCache.GetOrAdd(requestType,
+                type => CreateHandlerMeta(typeof(IRequestHandler<,>), type, typeof(TResponse)));
         var handler = _serviceProvider.GetService(@interface);
         if (handler == null)
         {
             throw new MicroserviceFrameworkException("创建查询处理器失败");
         }
 
-        if (method.Invoke(handler, new object[] { request, cancellationToken }) is Task<TResponse> task)
-        {
-            return await task;
-        }
+        var traceId = ObjectId.GenerateNewId().ToString();
 
-        return default;
+        try
+        {
+            _logger.LogInformation(
+                $"{traceId}, {handler.GetType().FullName} 开始处理请求 {Defaults.JsonHelper.Serialize(request)}");
+
+            if (method.Invoke(handler, new object[] { request, cancellationToken }) is not Task<TResponse> task)
+            {
+                _logger.LogWarning(
+                    $"{traceId}, {handler.GetType().FullName} 处理器没有返回值");
+                return default;
+            }
+
+            var result = await task;
+            _logger.LogInformation($"{traceId}, {handler.GetType().FullName} 处理成功");
+            return result;
+        }
+        catch (Exception e)
+        {
+            _logger.LogError($"{traceId}, {handler.GetType().FullName} 处理失败");
+
+            if (e.InnerException != null)
+            {
+                throw e.InnerException;
+            }
+
+            throw;
+        }
     }
 
     /// <summary>
@@ -96,20 +155,41 @@ internal class Mediator : IMediator
         var messageType = request.GetType();
 
         var (@interface, method) =
-            _mediatorTypeMapper.Get(messageType, type => Create(typeof(IRequestHandler<>), type));
+            HandlerCache.GetOrAdd(messageType, type => CreateHandlerMeta(typeof(IRequestHandler<>), type));
 
         var handlers = _serviceProvider.GetServices(@interface).Where(x => x != null);
 
+        var traceId = ObjectId.GenerateNewId().ToString();
+
         foreach (var handler in handlers)
         {
-            if (method.Invoke(handler, new object[] { request, cancellationToken }) is Task task)
+            try
             {
-                await task;
+                _logger.LogInformation(
+                    $"{traceId}, {handler.GetType().FullName} 开始处理请求 {Defaults.JsonHelper.Serialize(request)}");
+
+                if (method.Invoke(handler, new object[] { request, cancellationToken }) is Task task)
+                {
+                    await task;
+                }
+
+                _logger.LogInformation($"{traceId}, {handler.GetType().FullName} 处理成功");
+            }
+            catch (Exception e)
+            {
+                if (e.InnerException != null)
+                {
+                    _logger.LogError($"{traceId}, {handler.GetType().FullName} 处理失败");
+                    throw e.InnerException;
+                }
+
+                _logger.LogError($"{traceId}, {handler.GetType().FullName} 处理失败");
+                throw;
             }
         }
     }
 
-    private static (Type HandlerType, MethodInfo MethodInfo) Create(Type type, params Type[] typeArguments)
+    private static (Type HandlerType, MethodInfo MethodInfo) CreateHandlerMeta(Type type, params Type[] typeArguments)
     {
         var handlerType = type.MakeGenericType(typeArguments);
         var method = handlerType.GetMethods()[0];

@@ -22,6 +22,7 @@
     </ItemGroup>
 
     <ItemGroup>
+      <ProjectReference Include="..\..\src\MSFramework.AspNetCore\MSFramework.AspNetCore.csproj" />
       <ProjectReference Include="..\..\src\MSFramework.Serialization.Newtonsoft\MSFramework.Serialization.Newtonsoft.csproj" />
       <ProjectReference Include="..\..\src\MSFramework.EventBus.RabbitMQ\MSFramework.EventBus.RabbitMQ.csproj" />
       <ProjectReference Include="..\..\src\MSFramework\MSFramework.csproj" />

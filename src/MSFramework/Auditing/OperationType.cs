@@ -12,7 +12,7 @@ public class OperationType : Enumeration
     public static OperationType Modify = new(nameof(Modify), nameof(Modify));
     public static OperationType Delete = new(nameof(Delete), nameof(Delete));
 
-    public OperationType(string id, string name) : base(id, name)
+    private OperationType(string id, string name) : base(id, name)
     {
     }
 }

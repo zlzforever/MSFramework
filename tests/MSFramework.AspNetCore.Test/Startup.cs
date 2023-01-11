@@ -22,7 +22,7 @@ public class Startup
     public void ConfigureServices(IServiceCollection services)
     {
         services.AddMvc();
-        services.AddMicroserviceFramework(x => { x.UseOptions(_configuration); });
+        services.AddMicroserviceFramework(x => { x.UseOptionsType(_configuration); });
         services.AddRouting(x => { x.LowercaseUrls = true; });
     }
 

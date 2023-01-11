@@ -1,10 +1,15 @@
-﻿using System.Collections.Generic;
+﻿using System.Collections;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace MicroserviceFramework.Common;
 
-public record PagedResult<TEntity>(int Page, int Limit, int Total, IEnumerable<TEntity> Data)
+public record PagedResult<TEntity>(int Page, int Limit, int Total, IEnumerable<TEntity> Data) : IPagedResult
 {
     public IEnumerable<TEntity> Data { get; } = Data;
+
+    public IEnumerable GetEnumerable() =>
+        Data ?? Enumerable.Empty<TEntity>();
 
     /// <summary>
     /// 总计

@@ -4,6 +4,7 @@ using MicroserviceFramework.AspNetCore.Infrastructure;
 using MicroserviceFramework.AspNetCore.Mvc.ModelBinding;
 using MicroserviceFramework.Extensions.DependencyInjection;
 using MicroserviceFramework.Runtime;
+using MicroserviceFramework.Utilities;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
@@ -57,13 +58,6 @@ public static class ServiceCollectionExtensions
         {
             x.InvalidModelStateResponseFactory = InvalidModelStateResponseFactory.Instance;
         });
-        return builder;
-    }
-
-    public static MicroserviceFrameworkBuilder UseAssemblyScanPrefix(this MicroserviceFrameworkBuilder builder,
-        params string[] prefixes)
-    {
-        RuntimeUtilities.StartsWith.AddRange(prefixes);
         return builder;
     }
 }

@@ -1,6 +1,8 @@
 ﻿// using System.Threading;
 // using System.Threading.Tasks;
 // using MicroserviceFramework;
+// using MicroserviceFramework.Application;
+// using MicroserviceFramework.AspNetCore;
 // using MicroserviceFramework.EventBus;
 // using MicroserviceFramework.EventBus.RabbitMQ;
 // using MicroserviceFramework.Extensions.DependencyInjection;
@@ -20,6 +22,12 @@
 //     public class Event1Handler : IEventHandler<Event1>
 //     {
 //         public static int Count;
+//         private ISession _session;
+//
+//         public Event1Handler(ISession session)
+//         {
+//             _session = session;
+//         }
 //
 //         public Task HandleAsync(Event1 @event)
 //         {
@@ -70,47 +78,50 @@
 //         serviceCollection.AddMicroserviceFramework(x =>
 //         {
 //             x.UseDependencyInjectionLoader();
+//             x.UseAspNetCore();
 //             x.UseEventBus();
 //         });
 //
 //         var provider = serviceCollection.BuildServiceProvider();
 //         var eventBus = provider.GetRequiredService<IEventBus>();
 //
-//         for (var i = 0; i < 100; ++i)
-//         {
-//             await eventBus.PublishAsync(new Event1 { Order = 1 });
-//         }
+//         await eventBus.PublishAsync(new Event1 { Order = 1 });
+//         
+//         // for (var i = 0; i < 100; ++i)
+//         // {
+//         //     await eventBus.PublishAsync(new Event1 { Order = 1 });
+//         // }
 //
 //         Thread.Sleep(1000);
 //         Assert.Equal(100, Event1Handler.Count);
 //     }
 //
-//     [Fact]
-//     public async Task RabbitMQEventBus()
-//     {
-//         var configurationBuilder = new ConfigurationBuilder();
-//         configurationBuilder.AddJsonFile("appsettings.json");
-//         var configuration = configurationBuilder.Build();
-//
-//         var serviceCollection = new ServiceCollection();
-//         serviceCollection.AddLogging();
-//         serviceCollection.AddMicroserviceFramework(x =>
-//         {
-//             x.UseDependencyInjectionLoader();
-//             x.UseEventBusRabbitMQ(configuration);
-//         });
-//
-//         var provider = serviceCollection.BuildServiceProvider();
-//         var eventBus = provider.GetRequiredService<IEventBus>();
-//
-//         for (var i = 0; i < 100; ++i)
-//         {
-//             await eventBus.PublishAsync(new Event2());
-//         }
-//
-//         Thread.Sleep(2000);
-//         Assert.Equal(100, Event2Handler.Count);
-//     }
+//     // [Fact]
+//     // public async Task RabbitMQEventBus()
+//     // {
+//     //     var configurationBuilder = new ConfigurationBuilder();
+//     //     configurationBuilder.AddJsonFile("appsettings.json");
+//     //     var configuration = configurationBuilder.Build();
+//     //
+//     //     var serviceCollection = new ServiceCollection();
+//     //     serviceCollection.AddLogging();
+//     //     serviceCollection.AddMicroserviceFramework(x =>
+//     //     {
+//     //         x.UseDependencyInjectionLoader();
+//     //         x.UseEventBusRabbitMQ(configuration);
+//     //     });
+//     //
+//     //     var provider = serviceCollection.BuildServiceProvider();
+//     //     var eventBus = provider.GetRequiredService<IEventBus>();
+//     //
+//     //     for (var i = 0; i < 100; ++i)
+//     //     {
+//     //         await eventBus.PublishAsync(new Event2());
+//     //     }
+//     //
+//     //     Thread.Sleep(2000);
+//     //     Assert.Equal(100, Event2Handler.Count);
+//     // }
 //
 //     public class Event3 : EventBase
 //     {

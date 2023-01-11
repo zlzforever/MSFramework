@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text.Json;
+using DotNetCore.CAP.Dapr;
+using DotNetCore.CAP.Internal;
 using MicroserviceFramework;
 using MicroserviceFramework.AspNetCore;
 using MicroserviceFramework.AspNetCore.Filters;
@@ -23,10 +25,16 @@ using Microsoft.OpenApi.Models;
 using Ordering.Domain.AggregateRoots;
 using Ordering.Infrastructure;
 using MicroserviceFramework.Extensions.Options;
+using MicroserviceFramework.Serialization;
+using MicroserviceFramework.Serialization.Newtonsoft;
+using MicroserviceFramework.Serialization.Newtonsoft.Converters;
 using Microsoft.Extensions.Configuration;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Serialization;
 using Ordering.Application.Events;
 using Serilog;
 using Serilog.Events;
+using Defaults = MicroserviceFramework.Defaults;
 
 namespace Ordering.API;
 
@@ -71,9 +79,16 @@ public static class Startup
     public static readonly Action<HostBuilderContext, IServiceCollection> ConfigureServices = ((context, services) =>
     {
         var configuration = context.Configuration;
-        services.AddOptions(configuration);
         services.AddHttpContextAccessor();
         var jsonSerializerOptions = new JsonSerializerOptions();
+        var settings = new JsonSerializerSettings();
+        settings.Converters.Add(new ObjectIdConverter());
+        settings.Converters.Add(new EnumerationConverter());
+        settings.ContractResolver = new CompositeContractResolver
+        {
+            new EnumerationContractResolver(), new CamelCasePropertyNamesContractResolver()
+        };
+        
         services.AddControllers(x =>
             {
                 x.Filters.AddUnitOfWork()
@@ -90,19 +105,20 @@ public static class Startup
             {
                 options.JsonSerializerOptions.Converters.Add(new ObjectIdJsonConverter());
                 options.JsonSerializerOptions.Converters.Add(new EnumerationJsonConverterFactory());
+                options.JsonSerializerOptions.Converters.Add(new PagedResultJsonConverterFactory());
                 options.JsonSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
                 options.JsonSerializerOptions.DictionaryKeyPolicy = JsonNamingPolicy.CamelCase;
                 jsonSerializerOptions = options.JsonSerializerOptions;
             })
             // .AddNewtonsoftJson(x =>
             // {
-            // 	x.SerializerSettings.Converters.Add(new ObjectIdConverter());
-            // 	x.SerializerSettings.Converters.Add(new EnumerationConverter());
-            // 	x.SerializerSettings.ContractResolver = new CompositeContractResolver
-            // 	{
-            // 		new EnumerationContractResolver(),
-            // 		new CamelCasePropertyNamesContractResolver()
-            // 	};
+            //     x.SerializerSettings.Converters.Add(new ObjectIdConverter());
+            //     x.SerializerSettings.Converters.Add(new EnumerationConverter());
+            //     // x.SerializerSettings.ContractResolver = new CompositeContractResolver
+            //     // {
+            //     //     new EnumerationContractResolver(), new CamelCasePropertyNamesContractResolver()
+            //     // };
+            //     settings = x.SerializerSettings;
             // })
             .AddDapr(x =>
             {
@@ -120,11 +136,15 @@ public static class Startup
             x.SupportObjectId();
         });
         services.AddHealthChecks();
-
+        
         services.AddCap(x =>
         {
             x.UseEntityFramework<OrderingContext>();
-            x.UseRedis("localhost");
+//            x.DefaultGroupName = "pubsub";
+            x.UseDapr(configure =>
+            {
+                configure.GrpcEndpoint = "http://localhost:51001";
+            });
             x.TopicNamePrefix = "CAP";
         });
 
@@ -144,20 +164,20 @@ public static class Startup
         {
             builder.UseAssemblyScanPrefix("Ordering");
             builder.UseDependencyInjectionLoader();
+            builder.UseOptionsType(configuration);
             builder.UseAutoMapper();
             builder.UseMediator();
-            builder.UseEventBus(options =>
-            {
-                options.AddAfterInterceptors(async provider =>
-                {
-                    var unitOfWork = provider.GetRequiredService<IUnitOfWork>();
-                    await unitOfWork.SaveChangesAsync();
-                });
-            });
+            // builder.UseEventBus(options =>
+            // {
+            //     options.AddAfterInterceptors(async provider =>
+            //     {
+            //         await provider.GetRequiredService<IUnitOfWork>().SaveChangesAsync();
+            //     });
+            // });
             // 启用审计服务
             // builder.UseAuditStore<EfAuditStore<OrderingContext>>();
             builder.UseAspNetCore();
-            // builder.UseNewtonsoftSerializer();
+            builder.UseNewtonsoftJsonHelper(settings);
 
             builder.UseEntityFramework(x =>
             {
@@ -167,9 +187,18 @@ public static class Startup
         });
     });
 
+    public class A
+    {
+        public string Value { get; set; }
+        public string Type { get; set; }
+        public int Index { get; set; }
+        public string Title { get; set; }
+    }
+
     public static void Configure(this WebApplication app)
     {
         var env = app.Services.GetRequiredService<IHostEnvironment>();
+
         if (env.IsDevelopment())
         {
             app.UseDeveloperExceptionPage();
@@ -183,8 +212,6 @@ public static class Startup
         //     // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
         //     app.UseHsts();
         // }
-
-        app.Services.CreateScope().ServiceProvider.GetRequiredService<IEventBus>().PublishAsync(new TestEvent()).Wait();
 
         app.UseRouting();
         app.UseHealthChecks("/healthcheck");
@@ -200,6 +227,7 @@ public static class Startup
             endpoints.MapDefaultControllerRoute().RequireCors("cors");
             endpoints.MapControllers();
         });
+        app.UseDaprCap();
 
         app.UseMicroserviceFramework();
     }

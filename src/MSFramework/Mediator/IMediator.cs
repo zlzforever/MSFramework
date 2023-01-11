@@ -6,7 +6,7 @@ namespace MicroserviceFramework.Mediator;
 public interface IMediator
 {
     /// <summary>
-    /// 没有返回的：请求/响应
+    /// 请求模型
     /// 只有最后一个注册的 Handler 会响应请求
     /// </summary>
     /// <param name="request"></param>
@@ -15,7 +15,7 @@ public interface IMediator
     Task SendAsync(IRequest request, CancellationToken cancellationToken = default);
 
     /// <summary>
-    /// 带有返回的：请求/响应
+    /// 请求/响应模型
     /// 只有最后一个注册的 Handler 会响应请求
     /// </summary>
     /// <param name="request"></param>
@@ -25,9 +25,8 @@ public interface IMediator
     Task<TResponse> SendAsync<TResponse>(IRequest<TResponse> request,
         CancellationToken cancellationToken = default);
 
-
     /// <summary>
-    /// 发布模型：所有注册的 Handler 都会响应
+    /// 发布模型： 所有注册的 Handler 都会响应
     /// </summary>
     /// <param name="message"></param>
     /// <param name="cancellationToken"></param>

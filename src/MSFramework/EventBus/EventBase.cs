@@ -5,6 +5,8 @@ namespace MicroserviceFramework.EventBus;
 
 public abstract class EventBase
 {
+    public static readonly Type Type = typeof(EventBase);
+
     /// <summary>
     /// 事件源标识
     /// </summary>

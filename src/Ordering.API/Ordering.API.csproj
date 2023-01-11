@@ -6,8 +6,9 @@
 
   <ItemGroup>
 <!--    <PackageReference Include="DotNetCore.CAP.MySql" Version="6.2.1" />-->
-    <PackageReference Include="DotNetCore.CAP.PostgreSql" Version="6.2.1" />
-    <PackageReference Include="DotNetCore.CAP.RedisStreams" Version="6.2.1" />
+    <PackageReference Include="Dapper" Version="2.0.123" />
+    <PackageReference Include="DotNetCore.CAP.PostgreSql" Version="7.0.2" />
+    <PackageReference Include="DotNetCore.CAP.RedisStreams" Version="7.0.2" />
     <PackageReference Include="Microsoft.AspNetCore.Mvc.Core" Version="2.2.5" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="6.0.10">
       <PrivateAssets>all</PrivateAssets>
@@ -25,10 +26,10 @@
     <PackageReference Include="Serilog.Sinks.Async" Version="1.5.0" />
     <PackageReference Include="xunit.assert" Version="2.4.2" />
     <PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="6.0.10" />
-    <PackageReference Include="DotNetCore.CAP.InMemoryStorage" Version="6.2.1" />
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\DotNetCore.CAP.Dapr\DotNetCore.CAP.Dapr.csproj" />
     <ProjectReference Include="..\MSFramework.AspNetCore.Swagger\MSFramework.AspNetCore.Swagger.csproj" />
     <ProjectReference Include="..\MSFramework.AspNetCore\MSFramework.AspNetCore.csproj" />
     <ProjectReference Include="..\MSFramework.AutoMapper\MSFramework.AutoMapper.csproj" />

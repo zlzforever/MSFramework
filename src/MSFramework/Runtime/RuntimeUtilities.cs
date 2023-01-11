@@ -11,11 +11,11 @@ public static class RuntimeUtilities
     private static readonly Lazy<Assembly[]> Assemblies;
     private static readonly Lazy<Type[]> Types;
 
-    public static readonly List<string> StartsWith;
+    public static readonly HashSet<string> StartsWith;
 
     static RuntimeUtilities()
     {
-        StartsWith = new List<string>
+        StartsWith = new HashSet<string>
         {
             "MSFramework",
             "Newtonsoft.Json"

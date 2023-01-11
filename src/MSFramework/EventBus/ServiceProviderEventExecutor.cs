@@ -5,12 +5,12 @@ using Microsoft.Extensions.Logging;
 
 namespace MicroserviceFramework.EventBus;
 
-internal class DefaultEventExecutor : IEventExecutor
+internal class ServiceProviderEventExecutor : IEventExecutor
 {
     private readonly IServiceProvider _serviceProvider;
-    private readonly ILogger<DefaultEventExecutor> _logger;
+    private readonly ILogger<ServiceProviderEventExecutor> _logger;
 
-    public DefaultEventExecutor(IServiceProvider serviceProvider, ILogger<DefaultEventExecutor> logger)
+    public ServiceProviderEventExecutor(IServiceProvider serviceProvider, ILogger<ServiceProviderEventExecutor> logger)
     {
         _serviceProvider = serviceProvider;
         _logger = logger;
@@ -21,18 +21,25 @@ internal class DefaultEventExecutor : IEventExecutor
         var subscriptions = EventSubscriptionManager.GetOrDefault(eventName);
         if (subscriptions == null)
         {
-            _logger.LogWarning($"There is no event handler for {eventName}");
+            _logger.LogWarning($"没有找到事件 {eventName} 的处理器");
             return;
         }
 
+        var traceId = Guid.NewGuid().ToString("N");
+
         foreach (var subscription in subscriptions)
         {
+            var handlerType = subscription.EventHandlerType;
+
+            _logger.LogInformation(
+                $"{traceId}, {handlerType.FullName} start handle request {eventData}");
+
             var @event = Defaults.JsonHelper.Deserialize(eventData, subscription.EventType);
 
             // 每次执行是独立的 scope
             var scope = _serviceProvider.CreateAsyncScope();
 
-            var handler = scope.ServiceProvider.GetService(subscription.EventHandlerType);
+            var handler = scope.ServiceProvider.GetService(handlerType);
             if (handler == null)
             {
                 await scope.DisposeAsync();
@@ -42,8 +49,18 @@ internal class DefaultEventExecutor : IEventExecutor
             if (subscription.MethodInfo.Invoke(handler,
                     new[] { @event }) is Task task)
             {
-                task.ContinueWith(_ =>
+                task.ContinueWith(t =>
                 {
+                    if (t.Exception == null)
+                    {
+                        _logger.LogInformation(
+                            $"{traceId}, {handlerType.FullName} handle success");
+                    }
+                    else
+                    {
+                        _logger.LogError($"{traceId}, {handlerType.FullName} handle failed: {t.Exception}");
+                    }
+
                     (handler as IDisposable)?.Dispose();
                     scope.Dispose();
                 }).ConfigureAwait(false).GetAwaiter();

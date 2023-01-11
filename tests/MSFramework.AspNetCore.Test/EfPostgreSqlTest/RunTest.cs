@@ -45,7 +45,7 @@ public class RunTest
                         services.AddRouting(x => { x.LowercaseUrls = true; });
                         services.AddMicroserviceFramework(builder =>
                         {
-                            builder.UseOptions(context.Configuration);
+                            builder.UseOptionsType(context.Configuration);
                             builder.UseAspNetCore();
                             builder.UseEntityFramework(x =>
                             {

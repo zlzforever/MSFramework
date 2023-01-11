@@ -10,28 +10,28 @@ public static class ServiceCollectionExtensions
 {
     private static readonly Type EventHandlerBaseType = typeof(IEventHandler<>);
 
-    public static MicroserviceFrameworkBuilder UseEventBus(this MicroserviceFrameworkBuilder builder,
-        Action<EventBusOptions> configure = null)
-    {
-        var options = new EventBusOptions();
-        configure?.Invoke(options);
-
-        var afterFunctions = options.AfterFunctions.ToArray();
-        var beforeFunctions = options.BeforeFunctions.ToArray();
-
-        builder.Services.AddSingleton(provider =>
-        {
-            var eventBus = (IEventBus)new InProcessEventBus(provider);
-
-            eventBus.AddInterceptors(InterceptorType.After, afterFunctions);
-            eventBus.AddInterceptors(InterceptorType.Before, beforeFunctions);
-
-            return eventBus;
-        });
-        builder.Services.TryAddScoped<IEventExecutor, DefaultEventExecutor>();
-        builder.RegisterEventHandlers();
-        return builder;
-    }
+    // public static MicroserviceFrameworkBuilder UseEventBus(this MicroserviceFrameworkBuilder builder,
+    //     Action<EventBusOptions> configure = null)
+    // {
+    //     var options = new EventBusOptions();
+    //     configure?.Invoke(options);
+    //
+    //     var afterFunctions = options.AfterFunctions.ToArray();
+    //     var beforeFunctions = options.BeforeFunctions.ToArray();
+    //
+    //     builder.Services.AddSingleton(provider =>
+    //     {
+    //         var eventBus = (IEventBus)new InProcessEventBus(provider);
+    //
+    //         eventBus.AddInterceptors(InterceptorType.After, afterFunctions);
+    //         eventBus.AddInterceptors(InterceptorType.Before, beforeFunctions);
+    //
+    //         return eventBus;
+    //     });
+    //     builder.Services.TryAddScoped<IEventExecutor, ServiceProviderEventExecutor>();
+    //     builder.RegisterEventHandlers();
+    //     return builder;
+    // }
 
     public static MicroserviceFrameworkBuilder RegisterEventHandlers(this MicroserviceFrameworkBuilder builder)
     {
@@ -59,7 +59,7 @@ public static class ServiceCollectionExtensions
                 // 消息队列，得知道系统实现了哪些 EventHandler 才去监听对应的 Topic，所以必须先注册监听。
                 EventSubscriptionManager.Register(eventType, type);
                 // 每次收到的消息都是独立的 Scope
-                ServiceCollectionUtilities.TryAdd(builder.Services,
+                builder.Services.TryAdd(
                     new ServiceDescriptor(type, type, ServiceLifetime.Scoped));
             }
         };

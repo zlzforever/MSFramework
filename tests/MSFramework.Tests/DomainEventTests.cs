@@ -5,6 +5,7 @@ using MicroserviceFramework.Domain;
 using MicroserviceFramework.Extensions.DependencyInjection;
 using MicroserviceFramework.Mediator;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using Xunit;
 
 namespace MSFramework.Tests;
@@ -73,6 +74,7 @@ public class DomainEventTests
             x.UseDependencyInjectionLoader();
             x.UseMediator();
         });
+        serviceCollection.AddLogging(x => x.AddConsole());
         var serviceProvider = serviceCollection.BuildServiceProvider();
 
         var mediator = serviceProvider.GetRequiredService<IMediator>();
@@ -92,7 +94,7 @@ public class DomainEventTests
             x.UseDependencyInjectionLoader();
             x.UseMediator();
         });
-
+        serviceCollection.AddLogging(x => x.AddConsole());
         var serviceProvider = serviceCollection.BuildServiceProvider();
         var mediator = serviceProvider.GetRequiredService<IMediator>();
         await mediator.PublishAsync(new DomainEvent3());
@@ -111,7 +113,7 @@ public class DomainEventTests
             x.UseDependencyInjectionLoader();
             x.UseMediator();
         });
-
+        serviceCollection.AddLogging(x => x.AddConsole());
         var serviceProvider = serviceCollection.BuildServiceProvider();
         var mediator = serviceProvider.GetRequiredService<IMediator>();
         await mediator.PublishAsync(new DomainEvent2());

@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Dapr;
 using Dapr.Client;
 using DotNetCore.CAP;
+using DotNetCore.CAP.Messages;
 using MicroserviceFramework;
 using MicroserviceFramework.AspNetCore;
 using MicroserviceFramework.AspNetCore.Extensions;
@@ -226,9 +227,9 @@ public class ProductController : ApiControllerBase
             //your business logic code
 
             _capBus.Publish("Ordering.Application.EventHandlers.ProjectCreatedIntegrationEvent", DateTime.Now);
+            // trans.Commit();
         }
 
-        DaprClient client;
 
         return Ok();
     }
@@ -236,6 +237,13 @@ public class ProductController : ApiControllerBase
     [CapSubscribe("Ordering.Application.EventHandlers.ProjectCreatedIntegrationEvent")]
     [NonAction]
     public void CheckReceivedMessage(DateTime datetime)
+    {
+        Console.WriteLine(datetime);
+    }
+
+    [CapSubscribe("Ordering.Application.EventHandlers.ProjectCreatedIntegrationEvent2", Group = "test")]
+    [NonAction]
+    public void CheckReceivedMessage2(DateTime datetime)
     {
         Console.WriteLine(datetime);
     }

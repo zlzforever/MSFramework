@@ -35,6 +35,7 @@ public class ProjectCreatedEventHandler : IDomainEventHandler<ProjectCreatedEven
         await _daprClient.PublishEventAsync("pubsub",
             "Ordering.Application.EventHandlers.ProjectCreatedIntegrationEvent", integrationEvent
             , cancellationToken);
+        
         Console.WriteLine("Execute ProjectCreatedEvent");
     }
 

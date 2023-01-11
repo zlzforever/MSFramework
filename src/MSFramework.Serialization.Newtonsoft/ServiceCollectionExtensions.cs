@@ -15,20 +15,7 @@ public static class ServiceCollectionExtensions
     public static MicroserviceFrameworkBuilder UseNewtonsoftJsonHelper(this MicroserviceFrameworkBuilder builder,
         JsonSerializerSettings settings = null)
     {
-        if (settings == null)
-        {
-            settings = new JsonSerializerSettings();
-            settings.Converters.Add(new ObjectIdConverter());
-            settings.Converters.Add(new EnumerationConverter());
-            settings.ContractResolver = new CompositeContractResolver
-            {
-                new EnumerationContractResolver(),
-                new CamelCasePropertyNamesContractResolver()
-            };
-        }
-
-        JsonConvert.DefaultSettings = () => settings;
-        Defaults.JsonHelper = new NewtonsoftJsonHelper();
+        Defaults.JsonHelper = new NewtonsoftJsonHelper(settings);
 
         return builder;
     }

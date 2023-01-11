@@ -35,7 +35,7 @@ public class OptionsTest
         serviceCollection.AddOptions();
         serviceCollection.AddMicroserviceFramework(x =>
         {
-            x.UseOptions(configuration);
+            x.UseOptionsType(configuration);
         });
         var serviceProvider = serviceCollection.BuildServiceProvider();
 
