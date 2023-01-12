@@ -1,6 +1,6 @@
 ﻿namespace MicroserviceFramework.Ef;
 
-public class Defaults
+public class EfDefaults
 {
     public const string MigrationsHistoryTable = "___ef_migrations_history";
 }

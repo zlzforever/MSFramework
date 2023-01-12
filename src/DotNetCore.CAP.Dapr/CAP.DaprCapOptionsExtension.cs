@@ -1,3 +1,4 @@
+using System;
 using DotNetCore.CAP.Transport;
 using Microsoft.Extensions.DependencyInjection;
 

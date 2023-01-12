@@ -7,7 +7,7 @@
   <ItemGroup>
 <!--    <PackageReference Include="DotNetCore.CAP.MySql" Version="6.2.1" />-->
     <PackageReference Include="Dapper" Version="2.0.123" />
-    <PackageReference Include="DotNetCore.CAP.PostgreSql" Version="7.0.2" />
+    <PackageReference Include="DotNetCore.CAP.Dashboard" Version="7.0.2" />
     <PackageReference Include="DotNetCore.CAP.RedisStreams" Version="7.0.2" />
     <PackageReference Include="Microsoft.AspNetCore.Mvc.Core" Version="2.2.5" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="6.0.10">

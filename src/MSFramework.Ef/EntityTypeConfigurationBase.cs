@@ -28,8 +28,8 @@ public abstract class EntityTypeConfigurationBase<TEntity, TDbContext> :
         var propertyBuilder = builder.Property("Id");
 
         var primaryKeyType = propertyBuilder.Metadata.ClrType;
-        if (primaryKeyType == Consts.Types.String || primaryKeyType == Consts.Types.Guid ||
-            primaryKeyType == Consts.Types.ObjectId)
+        if (primaryKeyType == Defaults.Types.String || primaryKeyType == Defaults.Types.Guid ||
+            primaryKeyType == Defaults.Types.ObjectId)
         {
             propertyBuilder.ValueGeneratedNever().HasMaxLength(36);
         }

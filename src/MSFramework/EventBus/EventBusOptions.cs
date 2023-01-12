@@ -6,16 +6,16 @@ namespace MicroserviceFramework.EventBus;
 
 public class EventBusOptions
 {
-    internal readonly List<Func<IServiceProvider, Task>> BeforeFunctions = new();
-    internal readonly List<Func<IServiceProvider, Task>> AfterFunctions = new();
+    internal readonly List<Func<IServiceProvider, Task>> BeforeDelegates = new();
+    internal readonly List<Func<IServiceProvider, Task>> AfterDelegates = new();
 
-    public void AddBeforeInterceptors(params Func<IServiceProvider, Task>[] functions)
+    public void AddBeforeInterceptors(params Func<IServiceProvider, Task>[] delegates)
     {
-        BeforeFunctions.AddRange(functions);
+        BeforeDelegates.AddRange(delegates);
     }
 
-    public void AddAfterInterceptors(params Func<IServiceProvider, Task>[] functions)
+    public void AddAfterInterceptors(params Func<IServiceProvider, Task>[] delegates)
     {
-        AfterFunctions.AddRange(functions);
+        AfterDelegates.AddRange(delegates);
     }
 }

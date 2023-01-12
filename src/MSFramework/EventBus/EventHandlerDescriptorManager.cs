@@ -9,7 +9,7 @@ namespace MicroserviceFramework.EventBus;
 /// 相同的 EventName 可以对应不同的 EventType
 /// 所以需要通过 EventName 找到多个 EventType, 找到 IEventHandler, 再通过 DI 创建出所有注册对象
 /// </summary>
-public static class EventSubscriptionManager
+public static class EventHandlerDescriptorManager
 {
     /// <summary>
     /// KEY: 事件名
@@ -17,13 +17,13 @@ public static class EventSubscriptionManager
     /// Value->Value: 事件处理器的方法
     /// </summary>
     private static readonly
-        Dictionary<string, Dictionary<Type, SubscriptionInfo>> Cache;
+        Dictionary<string, Dictionary<Type, EventHandlerDescriptor>> Cache;
 
     private static readonly HashSet<string> EventTypes;
 
-    static EventSubscriptionManager()
+    static EventHandlerDescriptorManager()
     {
-        Cache = new Dictionary<string, Dictionary<Type, SubscriptionInfo>>();
+        Cache = new Dictionary<string, Dictionary<Type, EventHandlerDescriptor>>();
         EventTypes = new();
     }
 
@@ -38,10 +38,10 @@ public static class EventSubscriptionManager
         var eventName = eventType.GetEventName();
         EventTypes.Add(eventName);
 
-        Dictionary<Type, SubscriptionInfo> dict;
+        Dictionary<Type, EventHandlerDescriptor> dict;
         if (!Cache.ContainsKey(eventName))
         {
-            dict = new Dictionary<Type, SubscriptionInfo>();
+            dict = new Dictionary<Type, EventHandlerDescriptor>();
             Cache.TryAdd(eventName, dict);
         }
         else
@@ -49,13 +49,13 @@ public static class EventSubscriptionManager
             dict = Cache[eventName];
         }
 
-        dict.TryAdd(handlerType, new SubscriptionInfo(eventType, handlerType));
+        dict.TryAdd(handlerType, new EventHandlerDescriptor(eventType, handlerType));
     }
 
-    public static IEnumerable<SubscriptionInfo> GetOrDefault(string eventName)
+    public static IEnumerable<EventHandlerDescriptor> GetOrDefault(string eventName)
     {
         var dict = Cache.GetOrDefault(eventName);
-        return dict?.Values ?? Enumerable.Empty<SubscriptionInfo>();
+        return dict?.Values ?? Enumerable.Empty<EventHandlerDescriptor>();
     }
 
     public static IReadOnlyCollection<string> GetEventTypes()

@@ -1,3 +1,4 @@
+using System;
 using DotNetCore.CAP;
 using DotNetCore.CAP.Dapr;
 

@@ -2,23 +2,28 @@
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
+using System.Text.Json;
 using System.Threading.Tasks;
 using Dapr;
 using Dapr.Client;
 using DotNetCore.CAP;
 using DotNetCore.CAP.Messages;
+using DotNetCore.CAP.PostgreSql;
 using MicroserviceFramework;
 using MicroserviceFramework.AspNetCore;
 using MicroserviceFramework.AspNetCore.Extensions;
 using MicroserviceFramework.Common;
 using MicroserviceFramework.Domain;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore.Storage;
 using Microsoft.Extensions.Logging;
 using MongoDB.Bson;
 using Ordering.Application.DomainEventHandlers;
 using Ordering.Domain.AggregateRoots;
 using Ordering.Domain.Repositories;
 using Ordering.Infrastructure;
+using Ordering.Application;
+
 
 namespace Ordering.API.Controllers;
 
@@ -57,15 +62,19 @@ public class ProductController : ApiControllerBase
     private readonly IUnitOfWork _unitOfWork;
     private readonly ICapPublisher _capBus;
     private readonly OrderingContext _orderingContext;
+    private readonly ILogger<ProductController> _logger;
+
 
     public ProductController(IProductRepository productRepository,
-        IObjectAssembler mapper, IUnitOfWork unitOfWork, ICapPublisher capBus, OrderingContext orderingContext)
+        IObjectAssembler mapper, IUnitOfWork unitOfWork, ICapPublisher capBus, OrderingContext orderingContext,
+        ILogger<ProductController> logger)
     {
         _productRepository = productRepository;
         _mapper = mapper;
         _unitOfWork = unitOfWork;
         _capBus = capBus;
         _orderingContext = orderingContext;
+        _logger = logger;
     }
 
     [HttpGet("objectid")]
@@ -204,47 +213,53 @@ public class ProductController : ApiControllerBase
         return prod;
     }
 
-    [Topic("pubsub", "Ordering.Application.EventHandlers.ProjectCreatedIntegrationEvent")]
-    [HttpPost("Created")]
-    public async Task CreatedAsync([FromBody] ProjectCreatedIntegrationEvent @event)
-    {
-        var ip = HttpContext.GetRemoteIpAddress();
-        var product = await _productRepository.FindAsync(@event.Id);
-        if (product != null)
-        {
-            product.SetName(Guid.NewGuid().ToString());
-            // await _unitOfWork.CommitAsync();
-        }
-
-        Logger.LogInformation($"{ip}: Created");
-    }
-
     [HttpPost("CAP")]
-    public IActionResult EntityFrameworkWithTransaction([FromServices] OrderingContext dbContext)
+    public async Task<IActionResult> EntityFrameworkWithTransaction([FromServices] OrderingContext dbContext)
     {
-        using (var trans = dbContext.Database.BeginTransaction(_capBus, autoCommit: true))
-        {
-            //your business logic code
-
-            _capBus.Publish("Ordering.Application.EventHandlers.ProjectCreatedIntegrationEvent", DateTime.Now);
-            // trans.Commit();
-        }
-
+        _productRepository.BeginTransaction(_capBus, true);
+        var prod = Product.Create("CAP", new Random().Next(100, 10000));
+        prod.SetCreation("1");
+        await dbContext.AddAsync(prod);
+        await dbContext.SaveChangesAsync();
 
         return Ok();
     }
 
     [CapSubscribe("Ordering.Application.EventHandlers.ProjectCreatedIntegrationEvent")]
     [NonAction]
-    public void CheckReceivedMessage(DateTime datetime)
+    public async Task CreatedAsync(ProjectCreatedIntegrationEvent @event)
     {
-        Console.WriteLine(datetime);
+        var product = await _productRepository.FindAsync(@event.Id);
+        if (product != null)
+        {
+            product.SetName(Guid.NewGuid().ToString());
+        }
+
+        await _unitOfWork.SaveChangesAsync();
+        Console.WriteLine($"Created: {JsonSerializer.Serialize(@event)}");
     }
 
-    [CapSubscribe("Ordering.Application.EventHandlers.ProjectCreatedIntegrationEvent2", Group = "test")]
-    [NonAction]
-    public void CheckReceivedMessage2(DateTime datetime)
+    [HttpPost("CAPFail")]
+    public async Task<IActionResult> EntityFrameworkWithTransactionFail([FromServices] OrderingContext dbContext)
     {
-        Console.WriteLine(datetime);
+        _productRepository.BeginTransaction(_capBus, true);
+
+        var prod = Product.CreateWithoutEvent("CAP", new Random().Next(100, 10000));
+        prod.SetCreation("1");
+
+        await dbContext.AddAsync(prod);
+
+        await _capBus.PublishAsync("Ordering.Application.EventHandlers.ProjectCreateFailedIntegrationEvent",
+            new ProjectCreatedIntegrationEvent { Id = prod.Id, Name = prod.Name, CreationTime = DateTimeOffset.Now });
+
+        await dbContext.SaveChangesAsync();
+        return Ok();
+    }
+
+    [CapSubscribe("Ordering.Application.EventHandlers.ProjectCreateFailedIntegrationEvent")]
+    [NonAction]
+    public Task CreateFailedAsync(ProjectCreatedIntegrationEvent @event)
+    {
+        throw new ApplicationException("Transaction failed");
     }
 }

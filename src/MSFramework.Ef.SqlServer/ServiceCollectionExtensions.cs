@@ -23,7 +23,7 @@ public static class ServiceCollectionExtensions
             x.UseSqlServer(option.ConnectionString, options =>
             {
                 var migrationsHistoryTable = string.IsNullOrWhiteSpace(option.TablePrefix)
-                    ? Defaults.MigrationsHistoryTable
+                    ? EfDefaults.MigrationsHistoryTable
                     : $"{option.TablePrefix}migrations_history";
                 options.MigrationsHistoryTable(migrationsHistoryTable);
                 options.MaxBatchSize(option.MaxBatchSize);

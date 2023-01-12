@@ -2,7 +2,9 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text.Encodings.Web;
 using System.Text.Json;
+using System.Text.Unicode;
 using DotNetCore.CAP.Dapr;
 using DotNetCore.CAP.Internal;
 using MicroserviceFramework;
@@ -88,7 +90,7 @@ public static class Startup
         {
             new EnumerationContractResolver(), new CamelCasePropertyNamesContractResolver()
         };
-        
+
         services.AddControllers(x =>
             {
                 x.Filters.AddUnitOfWork()
@@ -136,16 +138,22 @@ public static class Startup
             x.SupportObjectId();
         });
         services.AddHealthChecks();
-        
+
         services.AddCap(x =>
         {
             x.UseEntityFramework<OrderingContext>();
+            x.JsonSerializerOptions.Converters.Add(new ObjectIdJsonConverter());
+            x.JsonSerializerOptions.Converters.Add(new EnumerationJsonConverterFactory());
+
+
 //            x.DefaultGroupName = "pubsub";
             x.UseDapr(configure =>
             {
-                configure.GrpcEndpoint = "http://localhost:51001";
+                configure.Pubsub = "pubsub";
             });
             x.TopicNamePrefix = "CAP";
+            x.UseDashboard();
+            x.JsonSerializerOptions.Encoder = JavaScriptEncoder.Create(UnicodeRanges.All);
         });
 
         services.AddCors(option =>
@@ -167,13 +175,13 @@ public static class Startup
             builder.UseOptionsType(configuration);
             builder.UseAutoMapper();
             builder.UseMediator();
-            // builder.UseEventBus(options =>
-            // {
-            //     options.AddAfterInterceptors(async provider =>
-            //     {
-            //         await provider.GetRequiredService<IUnitOfWork>().SaveChangesAsync();
-            //     });
-            // });
+            builder.UseEventBus(options =>
+            {
+                options.AddAfterInterceptors(async provider =>
+                {
+                    await provider.GetRequiredService<IUnitOfWork>().SaveChangesAsync();
+                });
+            });
             // 启用审计服务
             // builder.UseAuditStore<EfAuditStore<OrderingContext>>();
             builder.UseAspNetCore();

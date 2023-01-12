@@ -1,4 +1,6 @@
-﻿using System.Text;
+﻿using System;
+using System.Text;
+using System.Threading.Tasks;
 using Dapr.Client;
 using DotNetCore.CAP.Internal;
 using DotNetCore.CAP.Messages;
@@ -13,30 +15,22 @@ internal class DaprTransport : ITransport
     private readonly DaprOptions _daprOptions;
     private readonly DaprClient _daprClient;
     private readonly ILogger _logger;
-    private readonly CapOptions _capOptions;
 
     public DaprTransport(IOptionsMonitor<DaprOptions> daprOptions,
-        DaprClient daprClient, ILogger<DaprTransport> logger, IOptions<CapOptions> capOptions)
+        DaprClient daprClient, ILogger<DaprTransport> logger)
     {
         _daprClient = daprClient;
         _logger = logger;
-        _capOptions = capOptions.Value;
         _daprOptions = daprOptions.CurrentValue;
     }
 
-    public BrokerAddress BrokerAddress => new("Dapr", _daprOptions.GrpcEndpoint);
+    public BrokerAddress BrokerAddress => new("Dapr", null);
 
     public async Task<OperateResult> SendAsync(TransportMessage message)
     {
         try
         {
             var topicName = message.GetName();
-            var group = message.GetGroup();
-            if (group == null)
-            {
-                message.Headers.Add(Headers.Group, $"{_capOptions.DefaultGroupName}.{_capOptions.Version}");
-            }
-
             var body = Encoding.UTF8.GetString(message.Body.Span);
 
             await _daprClient.PublishEventAsync(_daprOptions.Pubsub, topicName,

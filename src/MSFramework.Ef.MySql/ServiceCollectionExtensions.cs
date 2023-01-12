@@ -63,7 +63,7 @@ namespace MicroserviceFramework.Ef.MySql
                     mySqlOptionsAction?.Invoke(options);
 
                     var migrationsHistoryTable = string.IsNullOrWhiteSpace(option.TablePrefix)
-                        ? Defaults.MigrationsHistoryTable
+                        ? EfDefaults.MigrationsHistoryTable
                         : $"{option.TablePrefix}migrations_history";
                     
                     options.MigrationsHistoryTable(migrationsHistoryTable);

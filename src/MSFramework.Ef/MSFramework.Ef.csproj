@@ -15,7 +15,6 @@
     </ItemGroup>
 
     <ItemGroup>
-      <Compile Remove="Extensions\RepositoryExtensions.cs" />
       <Compile Remove="Repositories\NavigationLoader.cs" />
     </ItemGroup>
 </Project>

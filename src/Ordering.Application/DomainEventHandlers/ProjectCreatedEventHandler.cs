@@ -2,6 +2,7 @@
 using System.Threading;
 using System.Threading.Tasks;
 using Dapr.Client;
+using DotNetCore.CAP;
 using MicroserviceFramework.Domain;
 using MongoDB.Bson;
 using Ordering.Domain.AggregateRoots;
@@ -11,31 +12,29 @@ namespace Ordering.Application.DomainEventHandlers;
 public class ProjectCreatedIntegrationEvent
 {
     public ObjectId Id { get; set; }
+    public string Name { get; set; }
+    public DateTimeOffset CreationTime { get; set; }
 }
 
 public class ProjectCreatedEventHandler : IDomainEventHandler<ProjectCreatedEvent>
 {
-    private readonly DaprClient _daprClient;
+    private readonly ICapPublisher _capPublisher;
 
-    public ProjectCreatedEventHandler(DaprClient daprClient)
+    public ProjectCreatedEventHandler(ICapPublisher capPublisher)
     {
-        _daprClient = daprClient;
+        _capPublisher = capPublisher;
     }
 
     public async Task HandleAsync(ProjectCreatedEvent @event, CancellationToken cancellationToken = default)
     {
-        var integrationEvent = new ProjectCreatedIntegrationEvent { Id = @event.Id };
-        // var json = Defaults.JsonHelper.SerializeToUtf8Bytes(integrationEvent);
-        // var str = Encoding.UTF8.GetString(json);
-        // var request = _daprClient.CreateInvokeMethodRequest(HttpMethod.Post, "ordering",
-        //     "api/v1.0/product/created");
-        // request.Content = new ByteArrayContent(json);
-        //  await _daprClient.InvokeMethodWithResponseAsync(request, cancellationToken);
+        var integrationEvent = new ProjectCreatedIntegrationEvent
+        {
+            Id = @event.Id, Name = @event.Name, CreationTime = @event.CreationTime
+        };
 
-        await _daprClient.PublishEventAsync("pubsub",
-            "Ordering.Application.EventHandlers.ProjectCreatedIntegrationEvent", integrationEvent
-            , cancellationToken);
-        
+        await _capPublisher.PublishAsync("Ordering.Application.EventHandlers.ProjectCreatedIntegrationEvent",
+            integrationEvent, cancellationToken: cancellationToken);
+
         Console.WriteLine("Execute ProjectCreatedEvent");
     }
 

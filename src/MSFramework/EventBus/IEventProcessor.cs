@@ -2,7 +2,7 @@
 
 namespace MicroserviceFramework.EventBus;
 
-public interface IEventExecutor
+public interface IEventProcessor
 {
     Task ExecuteAsync(string eventName, string eventData);
 }

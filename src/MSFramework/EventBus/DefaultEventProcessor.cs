@@ -5,12 +5,12 @@ using Microsoft.Extensions.Logging;
 
 namespace MicroserviceFramework.EventBus;
 
-internal class ServiceProviderEventExecutor : IEventExecutor
+internal class DefaultEventProcessor : IEventProcessor
 {
     private readonly IServiceProvider _serviceProvider;
-    private readonly ILogger<ServiceProviderEventExecutor> _logger;
+    private readonly ILogger<DefaultEventProcessor> _logger;
 
-    public ServiceProviderEventExecutor(IServiceProvider serviceProvider, ILogger<ServiceProviderEventExecutor> logger)
+    public DefaultEventProcessor(IServiceProvider serviceProvider, ILogger<DefaultEventProcessor> logger)
     {
         _serviceProvider = serviceProvider;
         _logger = logger;
@@ -18,7 +18,7 @@ internal class ServiceProviderEventExecutor : IEventExecutor
 
     public async Task ExecuteAsync(string eventName, string eventData)
     {
-        var subscriptions = EventSubscriptionManager.GetOrDefault(eventName);
+        var subscriptions = EventHandlerDescriptorManager.GetOrDefault(eventName);
         if (subscriptions == null)
         {
             _logger.LogWarning($"没有找到事件 {eventName} 的处理器");
@@ -29,12 +29,12 @@ internal class ServiceProviderEventExecutor : IEventExecutor
 
         foreach (var subscription in subscriptions)
         {
-            var handlerType = subscription.EventHandlerType;
+            var handlerType = subscription.HandlerType;
 
             _logger.LogInformation(
                 $"{traceId}, {handlerType.FullName} start handle request {eventData}");
 
-            var @event = Defaults.JsonHelper.Deserialize(eventData, subscription.EventType);
+            var @event = Defaults.JsonHelper.Deserialize(eventData, subscription.Type);
 
             // 每次执行是独立的 scope
             var scope = _serviceProvider.CreateAsyncScope();
@@ -46,7 +46,7 @@ internal class ServiceProviderEventExecutor : IEventExecutor
                 continue;
             }
 
-            if (subscription.MethodInfo.Invoke(handler,
+            if (subscription.HandlerMethodInfo.Invoke(handler,
                     new[] { @event }) is Task task)
             {
                 task.ContinueWith(t =>

@@ -21,7 +21,7 @@ public class DetectEncodingReader
             }
         }
 
-        throw new MicroserviceFrameworkFriendlyException("无法解码文件");
+        throw new MicroserviceFrameworkException("无法解码文件");
     }
 
     public static string Read(byte[] bytes)

@@ -27,20 +27,4 @@ public static class ClaimsPrincipalExtensions
     {
         return claimsIdentity?.FindFirst(ClaimTypes.NameIdentifier)?.Value;
     }
-
-    /// <summary>
-    /// 获取用户名
-    /// </summary>
-    public static string GetUserName(this ClaimsIdentity claimsIdentity)
-    {
-        return claimsIdentity?.FindFirst(ClaimTypes.Name)?.Value;
-    }
-
-    /// <summary>
-    /// 获取Email
-    /// </summary>
-    public static string GetEmail(this ClaimsIdentity claimsIdentity)
-    {
-        return claimsIdentity?.FindFirst(ClaimTypes.Email)?.Value;
-    }
 }

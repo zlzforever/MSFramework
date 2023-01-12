@@ -6,10 +6,11 @@ using Microsoft.EntityFrameworkCore;
 
 namespace MicroserviceFramework.Ef.Repositories;
 
-public abstract class EfRepository<TEntity> : IRepository<TEntity>
+public abstract class EfRepository<TEntity> : IRepository<TEntity>, IEfRepository
     where TEntity : class, IAggregateRoot
 {
     private IQueryable<TEntity> _store;
+    private readonly DbContextBase _dbContext;
 
     protected IQueryable<TEntity> Store => _store ??= IncludeAllNavigations(DbSet);
 
@@ -17,8 +18,8 @@ public abstract class EfRepository<TEntity> : IRepository<TEntity>
 
     protected EfRepository(DbContextFactory dbContextFactory)
     {
-        var dbContext = dbContextFactory.GetDbContext<TEntity>();
-        DbSet = dbContext.Set<TEntity>();
+        _dbContext = dbContextFactory.GetDbContext<TEntity>();
+        DbSet = _dbContext.Set<TEntity>();
     }
 
     public virtual void Add(TEntity entity)
@@ -61,6 +62,11 @@ public abstract class EfRepository<TEntity> : IRepository<TEntity>
     }
 
     protected bool? UseQuerySplittingBehavior { get; init; }
+
+    public DbContextBase GetDbContext()
+    {
+        return _dbContext;
+    }
 }
 
 public abstract class EfRepository<TEntity, TKey> : EfRepository<TEntity>, IRepository<TEntity, TKey>
