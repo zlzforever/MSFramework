@@ -15,24 +15,4 @@ public record DaprTransportMessage
     /// Gets the body object of this message
     /// </summary>
     public string Body { get; set; }
-
-    public string GetId()
-    {
-        return Headers[Messages.Headers.MessageId]!;
-    }
-
-    public string GetName()
-    {
-        return Headers[Messages.Headers.MessageName]!;
-    }
-
-    public string GetGroup()
-    {
-        return Headers.TryGetValue(Messages.Headers.Group, out var value) ? value : null;
-    }
-
-    public string GetCorrelationId()
-    {
-        return Headers.TryGetValue(Messages.Headers.CorrelationId, out var value) ? value : null;
-    }
 }

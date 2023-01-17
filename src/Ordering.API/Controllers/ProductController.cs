@@ -4,18 +4,13 @@ using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Text.Json;
 using System.Threading.Tasks;
-using Dapr;
-using Dapr.Client;
 using DotNetCore.CAP;
-using DotNetCore.CAP.Messages;
-using DotNetCore.CAP.PostgreSql;
 using MicroserviceFramework;
 using MicroserviceFramework.AspNetCore;
 using MicroserviceFramework.AspNetCore.Extensions;
 using MicroserviceFramework.Common;
 using MicroserviceFramework.Domain;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore.Storage;
 using Microsoft.Extensions.Logging;
 using MongoDB.Bson;
 using Ordering.Application.DomainEventHandlers;
@@ -92,10 +87,11 @@ public class ProductController : ApiControllerBase
     }
 
     [HttpPost("file")]
-    public string Upload()
+    public async Task<string> Upload()
     {
         var file = HttpContext.Request.Form.Files.First();
-        return file.Name;
+        var tuple = await file.SaveAsync();
+        return tuple.Path;
     }
 
     [HttpPost("objectid/{id}")]
@@ -260,6 +256,20 @@ public class ProductController : ApiControllerBase
     [NonAction]
     public Task CreateFailedAsync(ProjectCreatedIntegrationEvent @event)
     {
-        throw new ApplicationException("Transaction failed");
+        // throw new ApplicationException("Transaction failed");
+        return Task.CompletedTask;
+    }
+
+    public class A
+    {
+        public string Id { get; set; }
+        public string Name { get; set; }
+    }
+
+    [HttpGet("testPaged")]
+    public PagedResult<A> TestPagedResult()
+    {
+        return new PagedResult<A>(0, 1, 10,
+            new List<A> { new A() { Id = "1", Name = "A1" }, new A() { Id = "2", Name = "A2" }, });
     }
 }

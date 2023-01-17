@@ -33,7 +33,7 @@ public abstract class EntityBase : IEntity
     /// <inheritdoc/>
     public override string ToString()
     {
-        return $"[ENTITY: {GetType().Name}] Keys = {GetKeys().Join(", ")}";
+        return $"[ENTITY: {GetType().Name}] Keys = {GetKeys().JoinString(", ")}";
     }
 
     public abstract object[] GetKeys();

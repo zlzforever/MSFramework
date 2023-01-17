@@ -16,7 +16,7 @@ public static class DictionaryExtensions
     /// <param name="dictionary">要操作的字典</param>
     /// <param name="key">指定键名</param>
     /// <returns>获取到的值</returns>
-    public static TValue GetOrDefault<TKey, TValue>(this IDictionary<TKey, TValue> dictionary, TKey key)
+    public static TValue GetOrDefault<TKey, TValue>(this Dictionary<TKey, TValue> dictionary, TKey key)
     {
         return dictionary.TryGetValue(key, out var value) ? value : default;
     }
@@ -30,7 +30,7 @@ public static class DictionaryExtensions
     /// <param name="key">指定键名</param>
     /// <param name="value">添加值</param>
     /// <returns>获取到的值</returns>
-    public static TValue GetOrAdd<TKey, TValue>(this IDictionary<TKey, TValue> dictionary, TKey key, TValue value)
+    public static TValue GetOrAdd<TKey, TValue>(this Dictionary<TKey, TValue> dictionary, TKey key, TValue value)
     {
         if (dictionary.TryGetValue(key, out var v))
         {
@@ -40,7 +40,7 @@ public static class DictionaryExtensions
         return dictionary[key] = value;
     }
 
-    public static void AddOrUpdate<TKey, TValue>(this IDictionary<TKey, TValue> dictionary, TKey key,
+    public static void AddOrUpdate<TKey, TValue>(this Dictionary<TKey, TValue> dictionary, TKey key,
         Func<TValue> factory)
     {
         if (dictionary.ContainsKey(key))
@@ -53,7 +53,7 @@ public static class DictionaryExtensions
         }
     }
 
-    public static void AddOrUpdate<TKey, TValue>(this IDictionary<TKey, TValue> dictionary, TKey key,
+    public static void AddOrUpdate<TKey, TValue>(this Dictionary<TKey, TValue> dictionary, TKey key,
         TValue value)
     {
         if (dictionary.ContainsKey(key))

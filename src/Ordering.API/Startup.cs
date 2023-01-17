@@ -1,12 +1,10 @@
 using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text.Encodings.Web;
 using System.Text.Json;
 using System.Text.Unicode;
 using DotNetCore.CAP.Dapr;
-using DotNetCore.CAP.Internal;
 using MicroserviceFramework;
 using MicroserviceFramework.AspNetCore;
 using MicroserviceFramework.AspNetCore.Filters;
@@ -26,17 +24,14 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.OpenApi.Models;
 using Ordering.Domain.AggregateRoots;
 using Ordering.Infrastructure;
-using MicroserviceFramework.Extensions.Options;
 using MicroserviceFramework.Serialization;
 using MicroserviceFramework.Serialization.Newtonsoft;
 using MicroserviceFramework.Serialization.Newtonsoft.Converters;
 using Microsoft.Extensions.Configuration;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
-using Ordering.Application.Events;
 using Serilog;
 using Serilog.Events;
-using Defaults = MicroserviceFramework.Defaults;
 
 namespace Ordering.API;
 
@@ -229,13 +224,10 @@ public static class Startup
         // dapr
         app.UseCloudEvents();
         app.MapSubscribeHandler();
-
-        app.UseEndpoints(endpoints =>
-        {
-            endpoints.MapDefaultControllerRoute().RequireCors("cors");
-            endpoints.MapControllers();
-        });
         app.UseDaprCap();
+
+        app.MapControllers();
+        app.MapDefaultControllerRoute().RequireCors("cors");
 
         app.UseMicroserviceFramework();
     }

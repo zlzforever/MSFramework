@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using MicroserviceFramework.Utilities;
 
 namespace MicroserviceFramework.Collections.Generic;
 
@@ -16,9 +15,15 @@ public static class EnumerableExtensions
     /// <param name="collection"> 要处理的集合 </param>
     /// <param name="separator"> 分隔符，默认为逗号 </param>
     /// <returns> 拼接后的字符串 </returns>
-    public static string Join<T>(this IEnumerable<T> collection, string separator = ",")
+    public static string JoinString<T>(this IEnumerable<T> collection, string separator)
     {
         return string.Join(separator, collection);
+    }
+
+    public static string JoinString<T, TProperty>(this IEnumerable<T> collection,
+        string separator, Func<T, TProperty> selector)
+    {
+        return string.Join(separator, collection.Select(selector));
     }
 
     // /// <summary>

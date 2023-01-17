@@ -6,13 +6,13 @@ public static class ServiceCollectionExtensions
 {
     public static FilterCollection AddUnitOfWork(this FilterCollection filters)
     {
-        filters.Add<UnitOfWork>(Conts.UnitOfWork);
+        filters.Add<UnitOfWork>(Constants.UnitOfWork);
         return filters;
     }
 
     public static FilterCollection AddAudit(this FilterCollection filters)
     {
-        filters.Add<Audit>(Conts.Audit);
+        filters.Add<Audit>(Constants.Audit);
         return filters;
     }
 

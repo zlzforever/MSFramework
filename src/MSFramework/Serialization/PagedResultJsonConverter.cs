@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using MicroserviceFramework.Common;
@@ -24,7 +25,7 @@ public class PagedResultJsonConverter : JsonConverter<IPagedResult>
         if (_mapper == null)
         {
             var str = JsonSerializer.Serialize(
-                new PagedResult(value.Page, value.Limit, value.Total, value.GetEnumerable())
+                new PagedResultWrapper(value.Page, value.Limit, value.Total, value)
                 , options);
             writer.WriteRawValue(str);
         }
@@ -42,5 +43,5 @@ public class PagedResultJsonConverter : JsonConverter<IPagedResult>
         }
     }
 
-    private record PagedResult(int Page, int Limit, int Total, object Data);
+    private record PagedResultWrapper(int Page, int Limit, int Total, IEnumerable Data);
 }

@@ -70,22 +70,26 @@ public class SecurityDaprTopicFilter : IActionFilter, IOrderedFilter
         _logger.LogError($"Executing {actionDescriptor.DisplayName} forbidden");
     }
 
+    /// <summary>
+    /// 异常应该统一交给异常处理过滤器
+    /// </summary>
+    /// <param name="context"></param>
     public void OnActionExecuted(ActionExecutedContext context)
     {
-        if (context.Exception == null || context.Exception is MicroserviceFrameworkFriendlyException ||
-            context.ExceptionHandled)
-        {
-            return;
-        }
+        // if (context.Exception == null || context.Exception is MicroserviceFrameworkFriendlyException ||
+        //     context.ExceptionHandled)
+        // {
+        //     return;
+        // }
 
-        context.Result = new NotFoundObjectResult(new ApiResult
-        {
-            Success = false, Msg = "服务器内部错误", Code = context.Exception.HResult, Data = null
-        });
-
-        context.ExceptionHandled = true;
-
-        _logger.LogError(context.Exception.ToString());
+        // context.Result = new BadRequestObjectResult(new ApiResult
+        // {
+        //     Success = false, Msg = "服务器内部错误", Code = context.Exception.HResult, Data = null
+        // });
+        //
+        // context.ExceptionHandled = true;
+        //
+        // _logger.LogError(context.Exception.ToString());
     }
 
     public int Order => int.MaxValue;

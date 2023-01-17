@@ -1,15 +1,27 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace MicroserviceFramework.Common;
 
-public record PagedResult<TEntity>(int Page, int Limit, int Total, IEnumerable<TEntity> Data) : IPagedResult
+public interface IPagedResult : IEnumerable
+{
+    int Total { get; }
+
+    /// <summary>
+    /// 当前页数 
+    /// </summary>
+    int Page { get; }
+
+    /// <summary>
+    /// 每页数据量 
+    /// </summary>
+    int Limit { get; }
+}
+
+public record PagedResult<TEntity>(int Page, int Limit, int Total, IEnumerable<TEntity> Data) : IEnumerable<TEntity>,
+    IPagedResult
 {
     public IEnumerable<TEntity> Data { get; } = Data;
-
-    public IEnumerable GetEnumerable() =>
-        Data ?? Enumerable.Empty<TEntity>();
 
     /// <summary>
     /// 总计
@@ -25,4 +37,14 @@ public record PagedResult<TEntity>(int Page, int Limit, int Total, IEnumerable<T
     /// 每页数据量 
     /// </summary>
     public int Limit { get; } = Limit;
+
+    public IEnumerator<TEntity> GetEnumerator()
+    {
+        return Data.GetEnumerator();
+    }
+
+    IEnumerator IEnumerable.GetEnumerator()
+    {
+        return GetEnumerator();
+    }
 }

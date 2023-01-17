@@ -37,5 +37,5 @@ public class ActionExceptionFilter : IActionFilter, IOrderedFilter
         _logger.LogError(exception.Message);
     }
 
-    public int Order => Conts.ActionException;
+    public int Order => Constants.ActionException;
 }

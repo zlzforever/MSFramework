@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Threading;
 using System.Threading.Tasks;
-using Dapr.Client;
 using DotNetCore.CAP;
 using MicroserviceFramework.Domain;
 using MongoDB.Bson;

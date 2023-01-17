@@ -4,9 +4,7 @@ using MicroserviceFramework;
 using MicroserviceFramework.Application;
 using MicroserviceFramework.AspNetCore;
 using MicroserviceFramework.EventBus;
-using MicroserviceFramework.EventBus.RabbitMQ;
 using MicroserviceFramework.Extensions.DependencyInjection;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Xunit;
 

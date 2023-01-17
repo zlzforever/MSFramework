@@ -1,20 +1,21 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-    <PropertyGroup>
-        <PackageId>MSFramework.Ef</PackageId>
-        <AssemblyName>MSFramework.Ef</AssemblyName>
-        <RootNamespace>MicroserviceFramework.Ef</RootNamespace>
-    </PropertyGroup>
-    <Import Project="../../package.props" />
-    <ItemGroup>
-        <ProjectReference Include="..\MSFramework\MSFramework.csproj" />
-    </ItemGroup>
+  <PropertyGroup>
+    <PackageId>MSFramework.Ef</PackageId>
+    <AssemblyName>MSFramework.Ef</AssemblyName>
+    <RootNamespace>MicroserviceFramework.Ef</RootNamespace>
+  </PropertyGroup>
+  <Import Project="../../package.props"/>
+  <ItemGroup>
+    <ProjectReference Include="..\MSFramework\MSFramework.csproj"/>
+  </ItemGroup>
 
-    <ItemGroup>
-        <PackageReference Include="Microsoft.EntityFrameworkCore" Version="6.0.10" />
-        <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="6.0.10" />
-    </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="6.0.13"/>
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="6.0.13"/>
+    <PackageReference Include="DeepCopy" Version="1.0.3"/>
+  </ItemGroup>
 
-    <ItemGroup>
-      <Compile Remove="Repositories\NavigationLoader.cs" />
-    </ItemGroup>
+  <ItemGroup>
+    <Compile Remove="Repositories\NavigationLoader.cs"/>
+  </ItemGroup>
 </Project>

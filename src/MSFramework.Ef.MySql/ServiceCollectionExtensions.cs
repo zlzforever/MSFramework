@@ -60,18 +60,19 @@ namespace MicroserviceFramework.Ef.MySql
 
                 x.UseMySql(option.ConnectionString, ServerVersion.AutoDetect(option.ConnectionString), options =>
                 {
-                    mySqlOptionsAction?.Invoke(options);
-
                     var migrationsHistoryTable = string.IsNullOrWhiteSpace(option.TablePrefix)
                         ? EfDefaults.MigrationsHistoryTable
                         : $"{option.TablePrefix}migrations_history";
-                    
+
                     options.MigrationsHistoryTable(migrationsHistoryTable);
 
                     options.MaxBatchSize(option.MaxBatchSize);
                     options.MigrationsAssembly(entryAssemblyName);
                     options.SchemaBehavior(MySqlSchemaBehavior.Translate, (schema, table) => $"{schema}_{table}");
                     options.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery);
+
+                    // 不管默认行为是怎么样的， 代码配置是保底的
+                    mySqlOptionsAction?.Invoke(options);
                 });
             });
             services.AddDbContext<TDbContext>(action);

@@ -1,33 +1,42 @@
 ﻿using System;
 using System.IO;
 using System.Threading.Tasks;
+using MicroserviceFramework.Security.Cryptography;
 using Microsoft.AspNetCore.Http;
-using MongoDB.Bson;
 
 namespace MicroserviceFramework.AspNetCore.Extensions;
 
 public static class FormFileExtensions
 {
-    public static async Task<(string OriginName, string NewPath)> SaveAsync(this IFormFile formFile,
+    public static async Task<(string FileName, string Path)> SaveAsync(this IFormFile formFile,
         string interval = "upload")
     {
         var extension = Path.GetExtension(formFile.FileName);
-        var fileName = $"{ObjectId.GenerateNewId()}{extension}";
+
         var date = $"{DateTime.Now:yyyMMdd}";
-        var path = $"{interval}/{date}";
-        var directory = Path.Combine(AppContext.BaseDirectory, $"wwwroot/{path}");
+        var intervalDirectory = $"{interval}/{date}";
+        var directory = Path.Combine(AppContext.BaseDirectory, $"wwwroot/{intervalDirectory}");
         if (!Directory.Exists(directory))
         {
             Directory.CreateDirectory(directory);
         }
 
-        var filePath = Path.Combine(directory, fileName);
+        await using var stream = formFile.OpenReadStream();
+        var md5 = CryptographyUtilities.ComputeMD5(stream);
+        var fileName = $"{md5}{extension}";
+        var relativePath = $"{intervalDirectory}/{fileName}";
 
-        await using var stream = new MemoryStream();
-        await formFile.CopyToAsync(stream);
-        var bytes = stream.ToArray();
-        await File.WriteAllBytesAsync(filePath, bytes);
+        var absolutePath = Path.Combine(directory, fileName);
+        if (File.Exists(absolutePath))
+        {
+            return (formFile.FileName, relativePath);
+        }
 
-        return (formFile.FileName, $"{path}/{fileName}");
+        await using (Stream outStream = File.OpenWrite(absolutePath))
+        {
+            await stream.CopyToAsync(outStream);
+        }
+
+        return (formFile.FileName, relativePath);
     }
 }

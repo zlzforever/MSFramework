@@ -44,5 +44,5 @@ public class UnitOfWork : IAsyncActionFilter, IOrderedFilter
         _logger.LogDebug("On unit of work filter executed.");
     }
 
-    public int Order => Conts.UnitOfWork;
+    public int Order => Constants.UnitOfWork;
 }

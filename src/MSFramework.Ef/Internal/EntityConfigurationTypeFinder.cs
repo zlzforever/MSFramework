@@ -12,10 +12,10 @@ namespace MicroserviceFramework.Ef.Internal;
 /// </summary>
 internal sealed class EntityConfigurationTypeFinder : IEntityConfigurationTypeFinder
 {
-    private static readonly IDictionary<Type, Dictionary<Type, EntityTypeConfigurationMetadata>>
+    private static readonly Dictionary<Type, Dictionary<Type, EntityTypeConfigurationMetadata>>
         EntityRegistersDict;
 
-    private static readonly IDictionary<Type, Type> EntityMapDbContextDict;
+    private static readonly Dictionary<Type, Type> EntityMapDbContextDict;
     private static readonly Dictionary<Type, EntityTypeConfigurationMetadata> Empty;
     private static readonly HashSet<Type> DbContextTypes;
 

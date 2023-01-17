@@ -7,6 +7,6 @@
   </PropertyGroup>
   <Import Project="../../package.props" />
   <ItemGroup>
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="6.0.10" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="6.0.13" />
   </ItemGroup>
 </Project>

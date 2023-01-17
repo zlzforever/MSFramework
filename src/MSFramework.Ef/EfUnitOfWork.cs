@@ -34,7 +34,6 @@ public class EfUnitOfWork : IUnitOfWork
                 return;
             }
 
-
             dbContextBase.SavingChanges += (sender, _) =>
             {
                 if (sender is not DbContextBase db)
