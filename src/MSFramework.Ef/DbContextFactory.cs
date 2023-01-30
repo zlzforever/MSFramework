@@ -27,7 +27,7 @@ public class DbContextFactory
         return GetDbContext(dbContextType);
     }
 
-    private DbContextBase GetDbContext(Type dbContextType)
+    public DbContextBase GetDbContext(Type dbContextType)
     {
         return (DbContextBase)_serviceProvider.GetRequiredService(dbContextType);
     }

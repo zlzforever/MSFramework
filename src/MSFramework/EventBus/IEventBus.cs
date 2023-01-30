@@ -3,11 +3,16 @@ using System.Threading.Tasks;
 
 namespace MicroserviceFramework.EventBus;
 
+/// <summary>
+/// 仅用于内存型本地事件, 不建议生产大规模使用
+/// 分布式事件， 统一使用 ICapPublisher
+/// </summary>
+[Obsolete]
 public interface IEventBus : IDisposable
 {
     /// <summary>
     /// 发布事件
-    /// 若使用的是内存型事件总线， Handler 对象是独立的 scope。
+    /// Handler 对象是独立的 scope
     /// 注意要
     /// </summary>
     /// <param name="event"></param>

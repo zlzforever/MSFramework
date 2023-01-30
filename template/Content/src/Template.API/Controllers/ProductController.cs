@@ -7,6 +7,7 @@ using MicroserviceFramework.Common;
 using MicroserviceFramework.Mediator;
 using Microsoft.AspNetCore.Mvc;
 using MongoDB.Bson;
+using Template.API.Filters;
 using Template.Application.Project;
 using Template.Application.Project.IntegrationEvents;
 using Template.Infrastructure;
@@ -34,7 +35,7 @@ namespace Template.API.Controllers
 		}
 
 		[HttpGet]
-		public async Task<PagedResult<Dtos.V10.ProductOut>> PagedQueryAsync(
+		public async Task<PagedResult<Dto.V10.ProductOut>> PagedQueryAsync(
 			[FromRoute] Queries.V10.PagedProductQuery query)
 		{
 			var @out = await _mediator.SendAsync(query);
@@ -42,14 +43,15 @@ namespace Template.API.Controllers
 		}
 
 		[HttpPost]
-		public async Task<Dtos.V10.CreateProductOut> CreateAsync([FromBody] Commands.V10.CreateProjectCommand command)
+		[CapTransaction]
+		public async Task<Dto.V10.CreateProductOut> CreateAsync([FromBody] Commands.V10.CreateProjectCommand command)
 		{
 			var @out = await _mediator.SendAsync(command);
 			return @out;
 		}
 
 		[HttpGet("{id}")]
-		public async Task<Dtos.V10.ProductOut> GetAsync([FromRoute] Queries.V10.GetProductByIdQuery query)
+		public async Task<Dto.V10.ProductOut> GetAsync([FromRoute] Queries.V10.GetProductByIdQuery query)
 		{
 			return await _mediator.SendAsync(query);
 		}
@@ -60,28 +62,19 @@ namespace Template.API.Controllers
 			return await _mediator.SendAsync(command);
 		}
 
-		[Topic("pubsub", "Template.Application.Project.IntegrationEvents.ProjectCreatedIntegrationEvent")]
-		[HttpPost("created")]
-		public async Task<ObjectId> CreatedAsync([FromBody] ProjectCreatedIntegrationEvent @event)
+		[HttpPatch("{id}")]
+		public Task<ObjectId> UpdateAsync()
 		{
-			await _mediator.SendAsync(@event);
-			return @event.Id;
+			return Task.FromResult(ObjectId.Empty);
 		}
 
 		[HttpPost("CAP")]
+		[CapTransaction]
 		public IActionResult EntityFrameworkWithTransaction([FromServices] TemplateDbContext dbContext)
 		{
-			dbContext.Database.BeginTransaction(_capBus, autoCommit: true);
 			_capBus.Publish("Ordering.Application.EventHandlers.ProjectCreatedIntegrationEvent", DateTime.Now);
 
 			return Ok();
-		}
-
-		[CapSubscribe("Ordering.Application.EventHandlers.ProjectCreatedIntegrationEvent")]
-		[NonAction]
-		public void CheckReceivedMessage(DateTime datetime)
-		{
-			Console.WriteLine(datetime);
 		}
 	}
 }

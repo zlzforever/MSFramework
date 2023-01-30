@@ -4,9 +4,9 @@ namespace MicroserviceFramework.AspNetCore.Mvc;
 
 public class ApiResult
 {
-    public static readonly ApiResult Ok = new() { Code = 0, Success = true, Data = null, Msg = "" };
+    public static readonly ApiResult Ok = new() { Code = 0, Success = true, Msg = "", Data = null };
 
-    public static readonly ApiResult Error = new() { Code = 1, Success = false, Data = null, Msg = "未知错误" };
+    public static readonly ApiResult Error = new() { Code = 1, Success = false, Msg = "服务器内部错误", Data = null };
 
     /// <summary>
     /// 是否成功
@@ -16,7 +16,7 @@ public class ApiResult
     /// <summary>
     /// 业务代码
     /// </summary>
-    public int Code { get; set; } = 0;
+    public int Code { get; set; }
 
     /// <summary>
     /// 消息

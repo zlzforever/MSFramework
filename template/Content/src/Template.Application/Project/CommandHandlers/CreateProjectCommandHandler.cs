@@ -10,7 +10,7 @@ using Template.Domain.Repositories;
 namespace Template.Application.Project.CommandHandlers
 {
 	public class
-		CreateProjectCommandHandler : IRequestHandler<Commands.V10.CreateProjectCommand, Dtos.V10.CreateProductOut>
+		CreateProjectCommandHandler : IRequestHandler<Commands.V10.CreateProjectCommand, Dto.V10.CreateProductOut>
 	{
 		private readonly IProductRepository _productRepository;
 		private readonly ILogger _logger;
@@ -26,7 +26,7 @@ namespace Template.Application.Project.CommandHandlers
 			_objectAssembler = objectAssembler;
 		}
 
-		public async Task<Dtos.V10.CreateProductOut> HandleAsync(Commands.V10.CreateProjectCommand command,
+		public async Task<Dto.V10.CreateProductOut> HandleAsync(Commands.V10.CreateProjectCommand command,
 			CancellationToken cancellationToken = new CancellationToken())
 		{
 			Check.NotNull(command, nameof(command));
@@ -34,7 +34,7 @@ namespace Template.Application.Project.CommandHandlers
 
 			await _productRepository.AddAsync(product);
 			_logger.LogInformation($"Create product {product.Name} success");
-			return _objectAssembler.To<Dtos.V10.CreateProductOut>(product);
+			return _objectAssembler.To<Dto.V10.CreateProductOut>(product);
 		}
 	}
 }

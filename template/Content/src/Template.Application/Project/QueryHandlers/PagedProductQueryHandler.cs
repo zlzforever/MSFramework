@@ -12,7 +12,7 @@ using Template.Infrastructure;
 namespace Template.Application.Project.QueryHandlers
 {
 	public class
-		PagedProductQueryHandler : IRequestHandler<Queries.V10.PagedProductQuery, PagedResult<Dtos.V10.ProductOut>>
+		PagedProductQueryHandler : IRequestHandler<Queries.V10.PagedProductQuery, PagedResult<Dto.V10.ProductOut>>
 	{
 		private readonly TemplateDbContext _dbContext;
 		private readonly IObjectAssembler _objectAssembler;
@@ -24,7 +24,7 @@ namespace Template.Application.Project.QueryHandlers
 			_objectAssembler = objectAssembler;
 		}
 
-		public async Task<PagedResult<Dtos.V10.ProductOut>> HandleAsync(Queries.V10.PagedProductQuery query,
+		public async Task<PagedResult<Dto.V10.ProductOut>> HandleAsync(Queries.V10.PagedProductQuery query,
 			CancellationToken cancellationToken = new CancellationToken())
 		{
 			query.Keyword = query.Keyword?.Trim();
@@ -44,8 +44,8 @@ namespace Template.Application.Project.QueryHandlers
 					.PagedQueryAsync(query.Page, query.Limit);
 			}
 
-			return new PagedResult<Dtos.V10.ProductOut>(result.Page, result.Limit, result.Total,
-				_objectAssembler.To<IEnumerable<Dtos.V10.ProductOut>>(result.Data));
+			return new PagedResult<Dto.V10.ProductOut>(result.Page, result.Limit, result.Total,
+				_objectAssembler.To<IEnumerable<Dto.V10.ProductOut>>(result.Data));
 		}
 	}
 }

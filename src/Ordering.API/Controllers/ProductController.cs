@@ -22,32 +22,6 @@ using Ordering.Application;
 
 namespace Ordering.API.Controllers;
 
-public class CreateViewObject
-{
-    /// <summary>
-    /// 
-    /// </summary>
-    [Required]
-    [StringLength(50)]
-    public string Name { get; set; }
-
-    public ProductType Type { get; set; }
-}
-
-public class ProductDTO
-{
-    public string Name { get; private set; }
-
-    public int Price { get; private set; }
-}
-
-public class MyBody
-{
-    public ObjectId Id { get; set; }
-    public ObjectId MyId { get; set; }
-    public string Name { get; set; }
-}
-
 [Route("api/v1.0/[controller]")]
 [ApiController]
 public class ProductController : ApiControllerBase
@@ -101,7 +75,6 @@ public class ProductController : ApiControllerBase
         return body;
     }
 
-
     [HttpGet("BaseValueType")]
     public int GetBaseValueType()
     {
@@ -118,15 +91,6 @@ public class ProductController : ApiControllerBase
         return queryable.FirstOrDefault();
     }
 
-    public class ProductOut
-    {
-        public string Name { get; set; }
-
-        public int Price { get; set; }
-
-
-        public string CreatorName { get; set; }
-    }
 
     [HttpGet("PagedQuery")]
     //[AccessControl("查询产品", "产品")]
@@ -210,15 +174,24 @@ public class ProductController : ApiControllerBase
     }
 
     [HttpPost("CAP")]
+    [CapTransaction]
     public async Task<IActionResult> EntityFrameworkWithTransaction([FromServices] OrderingContext dbContext)
     {
-        _productRepository.BeginTransaction(_capBus, true);
+        _logger.LogInformation("调用开始");
         var prod = Product.Create("CAP", new Random().Next(100, 10000));
         prod.SetCreation("1");
         await dbContext.AddAsync(prod);
-        await dbContext.SaveChangesAsync();
+
+        _logger.LogInformation("调用结束");
 
         return Ok();
+    }
+
+    [HttpGet("CAP_Exception")]
+    [CapTransaction]
+    public IActionResult EntityFrameworkWithTransactionException([FromServices] OrderingContext dbContext)
+    {
+        throw new MicroserviceFrameworkFriendlyException("发生异常");
     }
 
     [CapSubscribe("Ordering.Application.EventHandlers.ProjectCreatedIntegrationEvent")]
@@ -236,10 +209,9 @@ public class ProductController : ApiControllerBase
     }
 
     [HttpPost("CAPFail")]
+    [CapTransaction]
     public async Task<IActionResult> EntityFrameworkWithTransactionFail([FromServices] OrderingContext dbContext)
     {
-        _productRepository.BeginTransaction(_capBus, true);
-
         var prod = Product.CreateWithoutEvent("CAP", new Random().Next(100, 10000));
         prod.SetCreation("1");
 
@@ -260,16 +232,52 @@ public class ProductController : ApiControllerBase
         return Task.CompletedTask;
     }
 
-    public class A
-    {
-        public string Id { get; set; }
-        public string Name { get; set; }
-    }
-
     [HttpGet("testPaged")]
     public PagedResult<A> TestPagedResult()
     {
         return new PagedResult<A>(0, 1, 10,
             new List<A> { new A() { Id = "1", Name = "A1" }, new A() { Id = "2", Name = "A2" }, });
     }
+}
+
+public class A
+{
+    public string Id { get; set; }
+    public string Name { get; set; }
+}
+
+public class ProductOut
+{
+    public string Name { get; set; }
+
+    public int Price { get; set; }
+
+
+    public string CreatorName { get; set; }
+}
+
+public class CreateViewObject
+{
+    /// <summary>
+    /// 
+    /// </summary>
+    [Required]
+    [StringLength(50)]
+    public string Name { get; set; }
+
+    public ProductType Type { get; set; }
+}
+
+public class ProductDTO
+{
+    public string Name { get; private set; }
+
+    public int Price { get; private set; }
+}
+
+public class MyBody
+{
+    public ObjectId Id { get; set; }
+    public ObjectId MyId { get; set; }
+    public string Name { get; set; }
 }

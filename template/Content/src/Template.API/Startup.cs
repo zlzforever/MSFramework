@@ -1,9 +1,13 @@
 using System;
 using System.IO;
 using System.Linq;
+using System.Text.Encodings.Web;
 using System.Text.Json;
+using System.Text.Unicode;
+using DotNetCore.CAP.Dapr;
 using MicroserviceFramework;
 using MicroserviceFramework.AspNetCore;
+using MicroserviceFramework.AspNetCore.Extensions;
 using MicroserviceFramework.AspNetCore.Filters;
 using MicroserviceFramework.AspNetCore.Mvc.ModelBinding;
 using MicroserviceFramework.AspNetCore.Swagger;
@@ -11,7 +15,6 @@ using MicroserviceFramework.AutoMapper;
 using MicroserviceFramework.Ef;
 using MicroserviceFramework.Ef.MySql;
 using MicroserviceFramework.Extensions.DependencyInjection;
-using MicroserviceFramework.Extensions.Options;
 using MicroserviceFramework.Mediator;
 using MicroserviceFramework.Text.Json.Converters;
 using Microsoft.AspNetCore.Builder;
@@ -29,9 +32,15 @@ namespace Template.API;
 
 public static class Startup
 {
-	public static readonly Action<IConfigurationBuilder> ConfigureConfiguration = (builder =>
+	public static IConfigurationBuilder ConfigureConfiguration(this IConfigurationBuilder builder)
 	{
 		var configuration = builder.Build();
+
+		var section = configuration.GetSection("Nacos");
+		if (section.GetChildren().Any())
+		{
+			builder.AddNacosV2Configuration(section);
+		}
 
 		builder.AddAliyunJsonFile(source =>
 		{
@@ -42,57 +51,31 @@ public static class Startup
 			source.Key = configuration["RemoteConfiguration:Key"];
 		});
 
-		var serilogSection = configuration.GetSection("Serilog");
-		if (serilogSection.GetChildren().Any())
-		{
-			Log.Logger = new LoggerConfiguration().ReadFrom
-				.Configuration(configuration)
-				.CreateLogger();
-		}
-		else
-		{
-			var logFile = Environment.GetEnvironmentVariable("LOG");
-			if (string.IsNullOrEmpty(logFile))
-			{
-				logFile = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "logs/ordering.log");
-			}
+		return builder;
+	}
 
-			Log.Logger = new LoggerConfiguration()
-#if DEBUG
-				.MinimumLevel.Debug()
-#else
-                .MinimumLevel.Information()
-#endif
-				.MinimumLevel.Override("Microsoft.Hosting.Lifetime", LogEventLevel.Information)
-				.MinimumLevel.Override("Microsoft.EntityFrameworkCore", LogEventLevel.Information)
-				.MinimumLevel.Override("Microsoft", LogEventLevel.Warning)
-				.MinimumLevel.Override("System", LogEventLevel.Warning)
-				.MinimumLevel.Override("Microsoft.AspNetCore.Authentication", LogEventLevel.Warning)
-				.Enrich.FromLogContext()
-				.WriteTo.Console().WriteTo.RollingFile(logFile)
-				.CreateLogger();
-		}
-	});
-
-	public static readonly Action<HostBuilderContext, IServiceCollection> ConfigureServices = ((context, services) =>
+	public static readonly Action<HostBuilderContext, IServiceCollection> ConfigureServices = (context, services) =>
 	{
 		var configuration = context.Configuration;
-		services.AddOptions(configuration);
+
+		ConfigureLogger(configuration);
+
 		services.AddHttpContextAccessor();
+
 		var jsonSerializerOptions = new JsonSerializerOptions();
+
 		services.AddControllers(x =>
 			{
 				x.Filters.AddUnitOfWork()
 					.AddAudit()
-					.AddGlobalException()
-					.AddActionException().Add<SecurityDaprTopicFilter>();
+					.AddGlobalException();
+				x.Filters.Add<SecurityDaprTopicFilter>();
 				x.ModelBinderProviders.Insert(0, new ObjectIdModelBinderProvider());
 			})
 			.ConfigureInvalidModelStateResponse()
 			.AddJsonOptions(options =>
 			{
-				options.JsonSerializerOptions.Converters.Add(new ObjectIdJsonConverter());
-				options.JsonSerializerOptions.Converters.Add(new EnumerationJsonConverterFactory());
+				options.JsonSerializerOptions.AddDefaultConverters();
 				options.JsonSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
 
 				jsonSerializerOptions = options.JsonSerializerOptions;
@@ -110,24 +93,35 @@ public static class Startup
 			.AddDapr(x =>
 			{
 				x.UseJsonSerializationOptions(jsonSerializerOptions);
+				// 部署由命令控制
 #if DEBUG
 				x.UseGrpcEndpoint("http://localhost:51001");
+				x.UseHttpEndpoint("http://localhost:51002");
 #endif
 			});
-		services.AddSwaggerGen(x =>
+
+		if (!context.HostingEnvironment.IsProduction())
 		{
-			x.SwaggerDoc("v1.0", new OpenApiInfo { Version = "v1.0", Description = "Template API V1.0" });
-			x.CustomSchemaIds(type => type.FullName);
-			x.MapEnumerationType(typeof(TemplateOptions).Assembly);
-			x.SupportObjectId();
-		});
+			services.AddSwaggerGen(x =>
+			{
+				x.SwaggerDoc("v1.0", new OpenApiInfo { Version = "v1.0", Description = "Template API V1.0" });
+				x.CustomSchemaIds(type => type.FullName);
+				x.MapEnumerationType(typeof(TemplateOptions).Assembly);
+				x.SupportObjectId();
+			});
+		}
+
 		services.AddHealthChecks();
 
 		services.AddCap(x =>
 		{
 			x.UseEntityFramework<TemplateDbContext>();
-			x.UseRedis("localhost");
-			x.TopicNamePrefix = "CAP";
+			x.JsonSerializerOptions.AddDefaultConverters();
+
+			x.UseDapr(configure => { configure.Pubsub = "pubsub"; });
+			x.TopicNamePrefix = "Template";
+			x.UseDashboard();
+			x.JsonSerializerOptions.Encoder = JavaScriptEncoder.Create(UnicodeRanges.All);
 		});
 
 		services.AddCors(option =>
@@ -148,6 +142,7 @@ public static class Startup
 			builder.UseDependencyInjectionLoader();
 			builder.UseAutoMapper();
 			builder.UseMediator();
+			builder.UseOptionsType(configuration);
 
 			// 启用审计服务
 			// builder.UseAuditStore<EfAuditStore<OrderingContext>>();
@@ -160,7 +155,7 @@ public static class Startup
 				x.AddMySql<TemplateDbContext>(configuration);
 			});
 		});
-	});
+	};
 
 	public static void Configure(this WebApplication app)
 	{
@@ -171,7 +166,7 @@ public static class Startup
 			//启用中间件服务生成Swagger作为JSON终结点
 			app.UseSwagger();
 			//启用中间件服务对swagger-ui，指定Swagger JSON终结点
-			app.UseSwaggerUI(c => { c.SwaggerEndpoint("/swagger/v1.0/swagger.json", "Ordering API V1.0"); });
+			app.UseSwaggerUI(c => { c.SwaggerEndpoint("/swagger/v1.0/swagger.json", "Template API V1.0"); });
 		}
 		// else
 		// {
@@ -187,13 +182,52 @@ public static class Startup
 		// dapr
 		app.UseCloudEvents();
 		app.MapSubscribeHandler();
+		app.UseDaprCap();
 
-		app.UseEndpoints(endpoints =>
-		{
-			endpoints.MapDefaultControllerRoute().RequireCors("cors");
-			endpoints.MapControllers();
-		});
+		app.MapControllers();
+		app.MapDefaultControllerRoute().RequireCors("cors");
 
 		app.UseMicroserviceFramework();
+
+		var configuration = app.Configuration;
+		var exit = configuration["exit"] == "true";
+		if (exit)
+		{
+			app.Services.GetRequiredService<IHostApplicationLifetime>().StopApplication();
+		}
+	}
+
+	private static void ConfigureLogger(IConfiguration configuration)
+	{
+		var serilogSection = configuration.GetSection("Serilog");
+		if (serilogSection.GetChildren().Any())
+		{
+			Log.Logger = new LoggerConfiguration().ReadFrom
+				.Configuration(configuration)
+				.CreateLogger();
+		}
+		else
+		{
+			var logFile = Environment.GetEnvironmentVariable("LOG");
+			if (string.IsNullOrEmpty(logFile))
+			{
+				logFile = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "logs/ordering.log");
+			}
+
+			Log.Logger = new LoggerConfiguration()
+#if DEBUG
+				.MinimumLevel.Debug()
+#else
+				.MinimumLevel.Information()
+#endif
+				.MinimumLevel.Override("Microsoft.Hosting.Lifetime", LogEventLevel.Information)
+				.MinimumLevel.Override("Microsoft.EntityFrameworkCore", LogEventLevel.Information)
+				.MinimumLevel.Override("Microsoft", LogEventLevel.Warning)
+				.MinimumLevel.Override("System", LogEventLevel.Warning)
+				.MinimumLevel.Override("Microsoft.AspNetCore.Authentication", LogEventLevel.Warning)
+				.Enrich.FromLogContext()
+				.WriteTo.Console().WriteTo.RollingFile(logFile)
+				.CreateLogger();
+		}
 	}
 }

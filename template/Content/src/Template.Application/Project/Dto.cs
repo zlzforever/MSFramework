@@ -2,7 +2,7 @@ using System;
 
 namespace Template.Application.Project
 {
-	public static class Dtos
+	public static class Dto
 	{
 		public static class V10
 		{

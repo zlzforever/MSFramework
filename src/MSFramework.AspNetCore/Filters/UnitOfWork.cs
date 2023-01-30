@@ -18,7 +18,7 @@ public class UnitOfWork : IAsyncActionFilter, IOrderedFilter
 
     public async Task OnActionExecutionAsync(ActionExecutingContext context, ActionExecutionDelegate next)
     {
-        _logger.LogDebug("On unit of work filter executing...");
+        _logger.LogDebug("开始执行工作单元过滤器");
 
         var result = await next();
 
@@ -41,7 +41,7 @@ public class UnitOfWork : IAsyncActionFilter, IOrderedFilter
 
         await unitOfWork.SaveChangesAsync();
 
-        _logger.LogDebug("On unit of work filter executed.");
+        _logger.LogDebug("工作单元执行结束");
     }
 
     public int Order => Constants.UnitOfWork;

@@ -4,7 +4,6 @@ using System.Threading.Tasks;
 using Dapper;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.Extensions.Hosting;
 using Serilog;
 
 namespace Template.API;
@@ -15,6 +14,7 @@ public class Program
 	{
 		AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
 		AppContext.SetSwitch("Npgsql.DisableDateTimeInfinityConversions", true);
+		// AppContext.SetSwitch("System.Net.Http.SocketsHttpHandler.Http2UnencryptedSupport", true);
 
 		Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
 		DefaultTypeMap.MatchNamesWithUnderscores = true;
@@ -28,10 +28,9 @@ public class Program
 	public static WebApplicationBuilder CreateWebApplicationBuilder(string[] args)
 	{
 		var webApplicationBuilder = WebApplication.CreateBuilder(args);
-		webApplicationBuilder.Host.ConfigureAppConfiguration(Startup.ConfigureConfiguration)
-			.ConfigureServices(Startup.ConfigureServices)
+		webApplicationBuilder.Configuration.ConfigureConfiguration();
+		webApplicationBuilder.Host.ConfigureServices(Startup.ConfigureServices)
 			.UseSerilog();
-		webApplicationBuilder.WebHost.UseUrls("http://+:5001");
 		webApplicationBuilder.WebHost.ConfigureKestrel((context, options) =>
 		{
 			// Handle requests up to 500 MB

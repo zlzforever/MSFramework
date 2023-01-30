@@ -6,6 +6,7 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace MicroserviceFramework.EventBus;
 
+[Obsolete]
 internal class InProcessEventBus : IEventBus
 {
     private readonly List<Func<IServiceProvider, Task>> _beforeFunctions;

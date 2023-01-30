@@ -1,12 +1,15 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text.Encodings.Web;
 using System.Text.Json;
 using System.Text.Unicode;
+using DotNetCore.CAP;
 using DotNetCore.CAP.Dapr;
 using MicroserviceFramework;
 using MicroserviceFramework.AspNetCore;
+using MicroserviceFramework.AspNetCore.Extensions;
 using MicroserviceFramework.AspNetCore.Filters;
 using MicroserviceFramework.AspNetCore.Mvc.ModelBinding;
 using MicroserviceFramework.AspNetCore.Swagger;
@@ -27,7 +30,9 @@ using Ordering.Infrastructure;
 using MicroserviceFramework.Serialization;
 using MicroserviceFramework.Serialization.Newtonsoft;
 using MicroserviceFramework.Serialization.Newtonsoft.Converters;
+using Microsoft.EntityFrameworkCore.Storage;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
 using Serilog;
@@ -78,19 +83,19 @@ public static class Startup
         var configuration = context.Configuration;
         services.AddHttpContextAccessor();
         var jsonSerializerOptions = new JsonSerializerOptions();
-        var settings = new JsonSerializerSettings();
-        settings.Converters.Add(new ObjectIdConverter());
-        settings.Converters.Add(new EnumerationConverter());
-        settings.ContractResolver = new CompositeContractResolver
-        {
-            new EnumerationContractResolver(), new CamelCasePropertyNamesContractResolver()
-        };
+        // var settings = new JsonSerializerSettings();
+        // settings.Converters.Add(new ObjectIdConverter());
+        // settings.Converters.Add(new EnumerationConverter());
+        // settings.ContractResolver = new CompositeContractResolver
+        // {
+        //     new EnumerationContractResolver(), new CamelCasePropertyNamesContractResolver()
+        // };
 
         services.AddControllers(x =>
             {
                 x.Filters.AddUnitOfWork()
                     .AddAudit()
-                    .AddGlobalException().AddActionException();
+                    .AddGlobalException();
 #if !DEBUG
                  x.Filters.Add<SecurityDaprTopicFilter>();
 #endif
@@ -100,9 +105,7 @@ public static class Startup
             .ConfigureInvalidModelStateResponse()
             .AddJsonOptions(options =>
             {
-                options.JsonSerializerOptions.Converters.Add(new ObjectIdJsonConverter());
-                options.JsonSerializerOptions.Converters.Add(new EnumerationJsonConverterFactory());
-                options.JsonSerializerOptions.Converters.Add(new PagedResultJsonConverterFactory());
+                options.JsonSerializerOptions.AddDefaultConverters();
                 options.JsonSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
                 options.JsonSerializerOptions.DictionaryKeyPolicy = JsonNamingPolicy.CamelCase;
                 jsonSerializerOptions = options.JsonSerializerOptions;
@@ -137,18 +140,14 @@ public static class Startup
         services.AddCap(x =>
         {
             x.UseEntityFramework<OrderingContext>();
-            x.JsonSerializerOptions.Converters.Add(new ObjectIdJsonConverter());
-            x.JsonSerializerOptions.Converters.Add(new EnumerationJsonConverterFactory());
-
-
-//            x.DefaultGroupName = "pubsub";
+            x.JsonSerializerOptions.AddDefaultConverters();
+            x.JsonSerializerOptions.Encoder = JavaScriptEncoder.Create(UnicodeRanges.All);
             x.UseDapr(configure =>
             {
                 configure.Pubsub = "pubsub";
             });
             x.TopicNamePrefix = "CAP";
             x.UseDashboard();
-            x.JsonSerializerOptions.Encoder = JavaScriptEncoder.Create(UnicodeRanges.All);
         });
 
         services.AddCors(option =>
@@ -177,10 +176,8 @@ public static class Startup
                     await provider.GetRequiredService<IUnitOfWork>().SaveChangesAsync();
                 });
             });
-            // 启用审计服务
-            // builder.UseAuditStore<EfAuditStore<OrderingContext>>();
             builder.UseAspNetCore();
-            builder.UseNewtonsoftJsonHelper(settings);
+            // builder.UseNewtonsoftJsonHelper(settings);
 
             builder.UseEntityFramework(x =>
             {
@@ -189,14 +186,6 @@ public static class Startup
             });
         });
     });
-
-    public class A
-    {
-        public string Value { get; set; }
-        public string Type { get; set; }
-        public int Index { get; set; }
-        public string Title { get; set; }
-    }
 
     public static void Configure(this WebApplication app)
     {
@@ -226,9 +215,49 @@ public static class Startup
         app.MapSubscribeHandler();
         app.UseDaprCap();
 
+        // app.Use(async (context, next) =>
+        // {
+        //     var capPublisher = context.RequestServices.GetService<ICapPublisher>();
+        //     if (capPublisher == null)
+        //     {
+        //         await next();
+        //     }
+        //     else
+        //     {
+        //         var logger = context.RequestServices.GetRequiredService<ILoggerFactory>()
+        //             .CreateLogger("CAP.TransactionFilter");
+        //
+        //         var dbContext = context.RequestServices.GetRequiredService<OrderingContext>();
+        //         logger.LogDebug("开启 CAP EF 事务");
+        //
+        //         await using var transaction = dbContext.Database.BeginTransaction(capPublisher);
+        //
+        //         await next.Invoke();
+        //
+        //         // 200 说明执行成功， 没有异常
+        //         if (context.Response.StatusCode == 200)
+        //         {
+        //             await transaction.CommitAsync();
+        //             logger.LogDebug("提交 CAP EF 事务成功");
+        //         }
+        //         else
+        //         {
+        //             await transaction.RollbackAsync();
+        //             logger.LogDebug("回滚 CAP EF 事务成功");
+        //         }
+        //     }
+        // });
+
         app.MapControllers();
         app.MapDefaultControllerRoute().RequireCors("cors");
 
         app.UseMicroserviceFramework();
+
+        var configuration = app.Configuration;
+        var exit = configuration["exit"] == "true";
+        if (exit)
+        {
+            app.Services.GetRequiredService<IHostApplicationLifetime>().StopApplication();
+        }
     }
 }

@@ -22,9 +22,9 @@ public static class ServiceCollectionExtensions
         return filters;
     }
 
-    public static FilterCollection AddActionException(this FilterCollection filters)
-    {
-        filters.Add<ActionExceptionFilter>();
-        return filters;
-    }
+    // public static FilterCollection AddActionException(this FilterCollection filters)
+    // {
+    //     filters.Add<ActionExceptionFilter>();
+    //     return filters;
+    // }
 }

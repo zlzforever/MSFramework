@@ -8,7 +8,7 @@ namespace Template.Application.Project
 	{
 		public static class V10
 		{
-			public class CreateProjectCommand : IRequest<Dtos.V10.CreateProductOut>
+			public class CreateProjectCommand : IRequest<Dto.V10.CreateProductOut>
 			{
 				public string Name { get; set; }
 				public int Price { get; set; }

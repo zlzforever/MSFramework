@@ -1,7 +1,6 @@
-using System;
 using System.Threading;
 using System.Threading.Tasks;
-using Dapr.Client;
+using DotNetCore.CAP;
 using MicroserviceFramework.Domain;
 using Microsoft.Extensions.Logging;
 using Template.Application.Project.IntegrationEvents;
@@ -11,12 +10,12 @@ namespace Template.Application.Project.DomainEventHandlers;
 
 public class ProjectCreatedEventHandler : IDomainEventHandler<ProjectCreatedEvent>
 {
-	private readonly DaprClient _daprClient;
+	private readonly ICapPublisher _capPublisher;
 	private readonly ILogger<ProjectCreatedEventHandler> _logger;
 
-	public ProjectCreatedEventHandler(DaprClient daprClient, ILogger<ProjectCreatedEventHandler> logger)
+	public ProjectCreatedEventHandler(ICapPublisher capPublisher, ILogger<ProjectCreatedEventHandler> logger)
 	{
-		_daprClient = daprClient;
+		_capPublisher = capPublisher;
 		_logger = logger;
 	}
 
@@ -24,8 +23,9 @@ public class ProjectCreatedEventHandler : IDomainEventHandler<ProjectCreatedEven
 	{
 		var integrationEvent = new ProjectCreatedIntegrationEvent { Id = @event.Id };
 
-		await _daprClient.PublishEventAsync("pubsub",
-			"Ordering.Application.EventHandlers.ProjectCreatedIntegrationEvent", integrationEvent, cancellationToken);
+		await _capPublisher.PublishAsync(
+			"Template.Application.Product.SubscribeService.ProjectCreatedIntegrationEvent", integrationEvent,
+			cancellationToken: cancellationToken);
 		_logger.LogInformation("Execute ProjectCreatedEvent");
 	}
 
