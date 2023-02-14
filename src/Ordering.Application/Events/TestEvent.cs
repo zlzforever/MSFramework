@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using MicroserviceFramework.EventBus;
 
 namespace Ordering.Application.Events;

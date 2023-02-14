@@ -28,7 +28,7 @@ public abstract class DbContextBase : DbContext
     private readonly ILoggerFactory _loggerFactory;
     private readonly ILogger _logger;
     private readonly ISession _session;
-    protected readonly DbContextConfigurationCollection EntityFrameworkOptions;
+    private readonly DbContextConfigurationCollection _entityFrameworkOptions;
     private IEntityConfigurationTypeFinder _entityConfigurationTypeFinder;
     private readonly IMediator _mediator;
 
@@ -42,7 +42,7 @@ public abstract class DbContextBase : DbContext
         : base(options)
     {
         _mediator = mediator;
-        EntityFrameworkOptions = entityFrameworkOptions.Value;
+        _entityFrameworkOptions = entityFrameworkOptions.Value;
         _session = session;
         _loggerFactory = loggerFactory;
         _logger = loggerFactory.CreateLogger(GetType());
@@ -52,13 +52,14 @@ public abstract class DbContextBase : DbContext
     /// 每次新 DbContext 对象都会调用
     /// </summary>
     /// <param name="optionsBuilder"></param>
+   
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
         base.OnConfiguring(optionsBuilder);
 
-        var option = EntityFrameworkOptions.Get(GetType());
+        var option = _entityFrameworkOptions.Get(GetType());
 
-        Database.AutoTransactionsEnabled = option.AutoTransactionsEnabled;
+        Database.AutoTransactionBehavior = option.AutoTransactionBehavior;
 
         if (option.EnableSensitiveDataLogging)
         {
@@ -125,7 +126,7 @@ public abstract class DbContextBase : DbContext
             modelBuilder.ApplyConfiguration(AuditPropertyConfiguration.Instance);
         }
 
-        var option = EntityFrameworkOptions.Get(GetType());
+        var option = _entityFrameworkOptions.Get(GetType());
         var tablePrefix = option.TablePrefix?.Trim();
 
         foreach (var entityType in modelBuilder.Model.GetEntityTypes())
@@ -360,17 +361,17 @@ public abstract class DbContextBase : DbContext
                     originalValue = GetValue(columnType, propertyEntry.OriginalValue);
                     break;
                 case EntityState.Modified:
-                {
-                    var currentValue = GetValue(columnType, propertyEntry.CurrentValue);
-                    originalValue = GetValue(columnType, propertyEntry.OriginalValue);
-                    if (currentValue == originalValue)
                     {
-                        continue;
-                    }
+                        var currentValue = GetValue(columnType, propertyEntry.CurrentValue);
+                        originalValue = GetValue(columnType, propertyEntry.OriginalValue);
+                        if (currentValue == originalValue)
+                        {
+                            continue;
+                        }
 
-                    newValue = currentValue;
-                    break;
-                }
+                        newValue = currentValue;
+                        break;
+                    }
                 case EntityState.Detached:
                     break;
                 case EntityState.Unchanged:
@@ -409,7 +410,7 @@ public abstract class DbContextBase : DbContext
         }
 
         return Regex.IsMatch(columnType, "JSON", RegexOptions.IgnoreCase)
-            ? MicroserviceFramework.Defaults.JsonHelper.Serialize(value)
+            ? Defaults.JsonHelper.Serialize(value)
             : value.ToString();
     }
 

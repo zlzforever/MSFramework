@@ -83,7 +83,7 @@ public class EventBusTests
         var provider = serviceCollection.BuildServiceProvider();
         var eventBus = provider.GetRequiredService<IEventBus>();
 
-//        await eventBus.PublishAsync(new Event1 { Order = 1 });
+        //        await eventBus.PublishAsync(new Event1 { Order = 1 });
 
         for (var i = 0; i < 100; ++i)
         {

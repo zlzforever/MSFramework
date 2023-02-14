@@ -17,7 +17,6 @@ using Ordering.Application.DomainEventHandlers;
 using Ordering.Domain.AggregateRoots;
 using Ordering.Domain.Repositories;
 using Ordering.Infrastructure;
-using Ordering.Application;
 
 
 namespace Ordering.API.Controllers;
@@ -86,8 +85,8 @@ public class ProductController : ApiControllerBase
     public ProductOut GetFirst()
     {
         var queryable = from p in _orderingContext.Set<Product>()
-            join u in _orderingContext.Set<User>() on p.CreatorId equals u.Id
-            select new ProductOut { Name = p.Name, Price = p.Price, CreatorName = u.Name };
+                        join u in _orderingContext.Set<User>() on p.CreatorId equals u.Id
+                        select new ProductOut { Name = p.Name, Price = p.Price, CreatorName = u.Name };
         return queryable.FirstOrDefault();
     }
 

@@ -28,7 +28,9 @@ public class ProjectCreatedEventHandler : IDomainEventHandler<ProjectCreatedEven
     {
         var integrationEvent = new ProjectCreatedIntegrationEvent
         {
-            Id = @event.Id, Name = @event.Name, CreationTime = @event.CreationTime
+            Id = @event.Id,
+            Name = @event.Name,
+            CreationTime = @event.CreationTime
         };
 
         await _capPublisher.PublishAsync("Ordering.Application.EventHandlers.ProjectCreatedIntegrationEvent",

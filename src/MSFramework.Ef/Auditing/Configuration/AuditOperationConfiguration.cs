@@ -9,7 +9,7 @@ public class AuditOperationConfiguration
     : IEntityTypeConfiguration<AuditOperation>
 {
     public static readonly AuditOperationConfiguration Instance = new();
-    
+
     public void Configure(EntityTypeBuilder<AuditOperation> builder)
     {
         builder.HasMany(x => x.Entities).WithOne(x => x.Operation);

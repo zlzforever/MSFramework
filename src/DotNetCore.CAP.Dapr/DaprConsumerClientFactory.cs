@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using DotNetCore.CAP.Transport;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;

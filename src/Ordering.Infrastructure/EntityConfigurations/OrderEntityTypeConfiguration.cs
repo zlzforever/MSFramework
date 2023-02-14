@@ -12,7 +12,7 @@ public class OrderEntityTypeConfiguration : EntityTypeConfigurationBase<Order, O
     public override void Configure(EntityTypeBuilder<Order> builder)
     {
         base.Configure(builder);
-        
+
         builder.Property(x => x.Id).ValueGeneratedNever();
 
         //Address value object persisted as owned entity type supported since EF Core 2.0

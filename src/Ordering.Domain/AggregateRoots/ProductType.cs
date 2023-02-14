@@ -1,4 +1,4 @@
-using MicroserviceFramework.Domain;
+﻿using MicroserviceFramework.Domain;
 
 namespace Ordering.Domain.AggregateRoots;
 

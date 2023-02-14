@@ -65,12 +65,12 @@ public static class PropertyBuilderExtensions
     {
         if (jsonHelper == null)
         {
-            if (MicroserviceFramework.Defaults.JsonHelper == null)
+            if (Defaults.JsonHelper == null)
             {
                 throw new ArgumentException("serializer 为空， 并且默认的序列化器也为空。");
             }
 
-            jsonHelper = MicroserviceFramework.Defaults.JsonHelper;
+            jsonHelper = Defaults.JsonHelper;
         }
 
         var comparer = CreateValueComparer<TProperty>(jsonHelper);
@@ -101,12 +101,12 @@ public static class PropertyBuilderExtensions
     {
         if (jsonHelper == null)
         {
-            if (MicroserviceFramework.Defaults.JsonHelper == null)
+            if (Defaults.JsonHelper == null)
             {
                 throw new ArgumentException("serializer 为空， 并且默认的序列化器也为空。");
             }
 
-            jsonHelper = MicroserviceFramework.Defaults.JsonHelper;
+            jsonHelper = Defaults.JsonHelper;
         }
 
         var comparer = CreateValueComparer<TProperty>(jsonHelper, fieldType);

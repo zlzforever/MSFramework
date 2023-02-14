@@ -7,10 +7,10 @@
   <ItemGroup>
 <!--    <PackageReference Include="DotNetCore.CAP.MySql" Version="6.2.1" />-->
     <PackageReference Include="Dapper" Version="2.0.123" />
-    <PackageReference Include="DotNetCore.CAP.Dashboard" Version="7.0.2" />
-    <PackageReference Include="DotNetCore.CAP.RedisStreams" Version="7.0.2" />
+    <PackageReference Include="DotNetCore.CAP.Dashboard" Version="7.0.3" />
+    <PackageReference Include="DotNetCore.CAP.RedisStreams" Version="7.0.3" />
     <PackageReference Include="Microsoft.AspNetCore.Mvc.Core" Version="2.2.5" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="6.0.13">
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="7.0.2">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
@@ -25,7 +25,7 @@
     <PackageReference Include="Serilog.Expressions" Version="3.4.1" />
     <PackageReference Include="Serilog.Sinks.Async" Version="1.5.0" />
     <PackageReference Include="xunit.assert" Version="2.4.2" />
-    <PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="6.0.10" />
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="7.0.2" />
   </ItemGroup>
 
   <ItemGroup>

@@ -4,10 +4,10 @@ using MicroserviceFramework.AspNetCore.Infrastructure;
 using MicroserviceFramework.AspNetCore.Mvc.ModelBinding;
 using MicroserviceFramework.Extensions.DependencyInjection;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Options;
 using ISession = MicroserviceFramework.Application.ISession;
 
@@ -25,7 +25,8 @@ public static class ServiceCollectionExtensions
         builder.Services.AddHttpContextAccessor();
         builder.Services.AddSingleton<IActionResultTypeMapper, ActionResultTypeMapper>();
         builder.Services.AddSingleton<IScopedServiceResolver, ScopedServiceResolver>();
-        builder.Services.TryAddScoped<ISession, HttpSession>();
+        builder.Services.AddScoped<ISession>(provider =>
+            HttpSession.Create(provider.GetRequiredService<IHttpContextAccessor>()));
 
         builder.Services.AddSingleton(x => x.GetRequiredService<JsonOptions>().JsonSerializerOptions);
 

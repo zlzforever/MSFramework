@@ -8,7 +8,7 @@ namespace MicroserviceFramework.Ef.Auditing.Configuration;
 public class AuditEntityConfiguration : IEntityTypeConfiguration<AuditEntity>
 {
     public static readonly AuditEntityConfiguration Instance = new();
-    
+
     public void Configure(EntityTypeBuilder<AuditEntity> builder)
     {
         builder.HasMany(x => x.Properties).WithOne(x => x.Entity);

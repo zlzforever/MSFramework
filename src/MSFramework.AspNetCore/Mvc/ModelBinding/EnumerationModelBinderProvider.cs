@@ -1,4 +1,4 @@
-using MicroserviceFramework.Domain;
+﻿using MicroserviceFramework.Domain;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 
 namespace MicroserviceFramework.AspNetCore.Mvc.ModelBinding;

@@ -93,7 +93,7 @@ public static class ServiceCollectionExtensions
 
         return builder;
     }
-    
+
     internal static void TryAdd(this IServiceCollection collection, ServiceDescriptor serviceDescriptor)
     {
         Check.NotNull(collection, nameof(collection));

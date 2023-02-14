@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using MicroserviceFramework.AspNetCore.Extensions;
 using MicroserviceFramework.Domain;
 using MicroserviceFramework.Serialization.Newtonsoft;
 using MicroserviceFramework.Serialization.Newtonsoft.Converters;
@@ -137,16 +138,9 @@ public class SerializationTests
     [Fact]
     public void EnumTest()
     {
-        var obj = new Obj
-        {
-            Id = ObjectId.GenerateNewId(),
-            Enum = Enum1.Graph
-        };
+        var obj = new Obj { Id = ObjectId.GenerateNewId(), Enum = Enum1.Graph };
         var jsonHelper = JsonHelper.Create();
-        var json = jsonHelper.Serialize(new List<Obj>()
-        {
-            obj
-        });
+        var json = jsonHelper.Serialize(new List<Obj>() { obj });
         var result = jsonHelper.Deserialize<List<Obj>>(json);
         Assert.Single(result);
         Assert.Equal(obj.Id, result[0].Id);
@@ -254,5 +248,14 @@ public class SerializationTests
         json = "{\"enum\":\"Graph\"}";
         obj = serializer.Deserialize<Obj>(json);
         Assert.Equal(ObjectId.Empty, obj.Id);
+    }
+
+    [Fact]
+    public void A()
+    {
+        var dict = new Dictionary<ObjectId, string> { { ObjectId.GenerateNewId(), "1" } };
+        var a = new JsonSerializerOptions();
+        a.AddDefaultConverters();
+        var json = System.Text.Json.JsonSerializer.Serialize(dict, a);
     }
 }

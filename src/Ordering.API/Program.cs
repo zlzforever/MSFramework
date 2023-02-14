@@ -13,11 +13,11 @@ public class Program
     public static async Task Main(string[] args)
     {
         Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
-        
+
         AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
         AppContext.SetSwitch("Npgsql.DisableDateTimeInfinityConversions", true);
         // AppContext.SetSwitch("System.Net.Http.SocketsHttpHandler.Http2UnencryptedSupport", true);
-        
+
         var webApplicationBuilder = CreateWebApplicationBuilder(args);
         var web = webApplicationBuilder.Build();
         web.Configure();

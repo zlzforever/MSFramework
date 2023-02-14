@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using MicroserviceFramework.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Http;
@@ -33,7 +33,7 @@ public static class HttpContextAccessorExtensions
         }
         else
         {
-         
+
             context.Response.WriteAsJsonAsync(new ApiResultWithErrors
             {
                 Code = code,

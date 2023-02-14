@@ -1,4 +1,4 @@
-namespace MicroserviceFramework.EventBus;
+﻿namespace MicroserviceFramework.EventBus;
 
 public enum InterceptorType
 {

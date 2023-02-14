@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
 using MicroserviceFramework.Security.Claims;
@@ -9,124 +10,57 @@ namespace MicroserviceFramework.AspNetCore;
 
 public class HttpSession : ISession
 {
-    private static readonly HashSet<string> EmptyRoles = new();
-    private List<string> _subjects;
-    private string _userId;
-    private string _userName;
-    private string _email;
-    private string _phoneNumber;
-    private HashSet<string> _roles;
-
-    public HttpSession(IHttpContextAccessor accessor)
+    internal static HttpSession Create(IHttpContextAccessor accessor)
     {
-        HttpContext = accessor?.HttpContext;
-    }
-
-    public string TraceIdentifier => HttpContext?.TraceIdentifier;
-
-    public string UserId
-    {
-        get
+        if (accessor?.HttpContext == null)
         {
-            if (_userId != null)
-            {
-                return _userId;
-            }
-
-            var userId = HttpContext?.User.GetValue(ClaimTypes.NameIdentifier, "sid", "sub");
-            _userId = string.IsNullOrWhiteSpace(userId) ? string.Empty : userId;
-
-            return _userId;
+            return new HttpSession { Roles = Array.Empty<string>(), Subjects = new List<string>() };
         }
-    }
 
-    public string UserName
-    {
-        get
+        var session = new HttpSession
         {
-            if (_userName != null)
-            {
-                return _userName;
-            }
+            TraceIdentifier = accessor.HttpContext.TraceIdentifier,
+            UserId = accessor.HttpContext.User.GetValue(ClaimTypes.NameIdentifier, "sid", "sub"),
+            UserName = accessor.HttpContext.User.GetValue(ClaimTypes.Name, "name"),
+            Email = accessor.HttpContext.User.GetValue(ClaimTypes.Email, "email"),
+            PhoneNumber = accessor.HttpContext.User.GetValue(ClaimTypes.MobilePhone, "phone_number"),
+            Roles = accessor.HttpContext.User
+                .FindAll(claim => claim.Type == ClaimTypes.Role ||
+                                  "role".Equals(claim.Type, StringComparison.OrdinalIgnoreCase))
+                .Select(x => x.Value).ToHashSet()
+        };
 
-            var userName = HttpContext?.User.GetValue(ClaimTypes.Name, "name");
-            _userName = string.IsNullOrWhiteSpace(userName) ? string.Empty : userName;
-
-            return _userName;
-        }
-    }
-
-    public string Email
-    {
-        get
+        var subjects = new List<string>();
+        if (!string.IsNullOrWhiteSpace(session.UserId))
         {
-            if (_email != null)
-            {
-                return _email;
-            }
-
-            var email = HttpContext?.User.GetValue(ClaimTypes.Email, "email");
-            _email = string.IsNullOrWhiteSpace(email) ? string.Empty : email;
-
-            return _email;
+            subjects.Add(session.UserId);
         }
-    }
 
-    public string PhoneNumber
-    {
-        get
+        foreach (var role in session.Roles)
         {
-            if (_phoneNumber != null)
+            if (!string.IsNullOrWhiteSpace(role))
             {
-                return _phoneNumber;
+                subjects.Add(role);
             }
-
-            var phoneNumber = HttpContext?.User.GetValue(ClaimTypes.MobilePhone, "phone_number");
-            _phoneNumber = string.IsNullOrWhiteSpace(phoneNumber) ? string.Empty : phoneNumber;
-
-            return _phoneNumber;
         }
+
+        session.Subjects = subjects;
+        return session;
     }
 
-    public IReadOnlyCollection<string> Roles
-    {
-        get
-        {
-            if (_roles != null)
-            {
-                return _roles;
-            }
+    public string TraceIdentifier { get; private init; }
 
-            if (HttpContext == null)
-            {
-                _roles = new HashSet<string>();
-                return _roles;
-            }
+    public string UserId { get; private init; }
 
-            var roles1 = HttpContext.User.FindAll(ClaimTypes.Role).Select(x => x.Value).ToList();
-            var roles2 = HttpContext.User.FindAll("role").Select(x => x.Value).ToList();
-            roles1.AddRange(roles2);
-            _roles = roles1.Count == 0 ? EmptyRoles : new HashSet<string>(roles1);
+    public string UserName { get; private init; }
 
-            return _roles;
-        }
-    }
+    public string Email { get; private init; }
 
-    public IReadOnlyCollection<string> Subjects
-    {
-        get
-        {
-            if (_subjects != null)
-            {
-                return _subjects;
-            }
+    public string PhoneNumber { get; private init; }
 
-            _subjects = new List<string> { UserId };
-            _subjects.AddRange(Roles);
+    public IReadOnlyCollection<string> Roles { get; private init; }
 
-            return _subjects;
-        }
-    }
+    public IReadOnlyCollection<string> Subjects { get; private set; }
 
     public HttpContext HttpContext { get; }
 }

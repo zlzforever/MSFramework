@@ -7,7 +7,7 @@ namespace MicroserviceFramework;
 public static class Defaults
 {
     public static IJsonHelper JsonHelper;
-    
+
     public static class Types
     {
         public static readonly Type String = typeof(string);

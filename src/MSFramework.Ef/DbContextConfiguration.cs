@@ -1,4 +1,5 @@
 ﻿using System;
+using Microsoft.EntityFrameworkCore;
 
 namespace MicroserviceFramework.Ef;
 
@@ -12,7 +13,7 @@ public class DbContextConfiguration
     public DbContextConfiguration()
     {
         AutoMigrationEnabled = false;
-        AutoTransactionsEnabled = true;
+        AutoTransactionBehavior = AutoTransactionBehavior.WhenNeeded;
         EnableSensitiveDataLogging = false;
         UseUnderScoreCase = true;
     }
@@ -54,7 +55,7 @@ public class DbContextConfiguration
     /// <summary>
     /// 启用事务
     /// </summary>
-    public bool AutoTransactionsEnabled { get; set; }
+    public AutoTransactionBehavior AutoTransactionBehavior { get; set; }
 
     /// <summary>
     /// 获取或设置 是否自动迁移

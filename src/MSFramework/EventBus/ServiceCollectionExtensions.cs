@@ -14,17 +14,17 @@ public static class ServiceCollectionExtensions
     {
         var options = new EventBusOptions();
         configure?.Invoke(options);
-    
+
         var afterFunctions = options.AfterDelegates.ToArray();
         var beforeFunctions = options.BeforeDelegates.ToArray();
-    
+
         builder.Services.AddSingleton(provider =>
         {
             var eventBus = (IEventBus)new InProcessEventBus(provider);
-    
+
             eventBus.AddInterceptors(InterceptorType.After, afterFunctions);
             eventBus.AddInterceptors(InterceptorType.Before, beforeFunctions);
-    
+
             return eventBus;
         });
         builder.Services.TryAddScoped<IEventProcessor, DefaultEventProcessor>();

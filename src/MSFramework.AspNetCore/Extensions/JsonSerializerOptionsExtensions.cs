@@ -1,4 +1,4 @@
-using System.Text.Json;
+﻿using System.Text.Json;
 using MicroserviceFramework.Serialization;
 using MicroserviceFramework.Text.Json.Converters;
 
