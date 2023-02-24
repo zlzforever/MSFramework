@@ -180,7 +180,8 @@ public static class Startup
     public static void Configure(this WebApplication app)
     {
         var env = app.Services.GetRequiredService<IHostEnvironment>();
-
+        var a = app.Services.CreateScope().ServiceProvider.GetRequiredService<OrderingContext>();
+        var b = a.Set<Order>().ToList();
         if (env.IsDevelopment())
         {
             app.UseDeveloperExceptionPage();

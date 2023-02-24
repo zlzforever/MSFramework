@@ -17,8 +17,6 @@ public abstract class EntityTypeConfigurationBase<TEntity, TDbContext> :
     where TEntity : class
     where TDbContext : DbContextBase
 {
-    public virtual bool IsExternal => false;
-
     /// <summary>
     /// 重写以实现实体类型各个属性的数据库配置
     /// </summary>

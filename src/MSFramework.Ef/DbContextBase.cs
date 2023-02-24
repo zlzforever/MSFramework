@@ -52,7 +52,6 @@ public abstract class DbContextBase : DbContext
     /// 每次新 DbContext 对象都会调用
     /// </summary>
     /// <param name="optionsBuilder"></param>
-   
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
         base.OnConfiguring(optionsBuilder);
@@ -87,26 +86,12 @@ public abstract class DbContextBase : DbContext
 
         foreach (var entityTypeConfiguration in entityTypeConfigurations)
         {
-            if (EfRuntimeUtilities.IsDesignTime &&
-                entityTypeConfiguration.Value.EntityTypeConfiguration is IExternalMeta
-                {
-                    IsExternal: true
-                })
-            {
-                continue;
-            }
-
             entityTypeConfiguration.Value.MethodInfo.Invoke(modelBuilder,
                 new[] { entityTypeConfiguration.Value.EntityTypeConfiguration });
 
-            if (stringBuilder.Length == 0)
-            {
-                stringBuilder.Append($"{entityTypeConfiguration.Value.EntityType.FullName}");
-            }
-            else
-            {
-                stringBuilder.Append($"、{entityTypeConfiguration.Value.EntityType.FullName}");
-            }
+            stringBuilder.Append(stringBuilder.Length == 0
+                ? $"{entityTypeConfiguration.Value.EntityType.FullName}"
+                : $"、{entityTypeConfiguration.Value.EntityType.FullName}");
 
             count++;
         }
@@ -298,6 +283,12 @@ public abstract class DbContextBase : DbContext
 
         foreach (var entry in ChangeTracker.Entries())
         {
+            if (entry.Entity is IExternalEntity)
+            {
+                entry.State = EntityState.Unchanged;
+                continue;
+            }
+
             switch (entry.State)
             {
                 case EntityState.Added:
@@ -361,17 +352,17 @@ public abstract class DbContextBase : DbContext
                     originalValue = GetValue(columnType, propertyEntry.OriginalValue);
                     break;
                 case EntityState.Modified:
+                {
+                    var currentValue = GetValue(columnType, propertyEntry.CurrentValue);
+                    originalValue = GetValue(columnType, propertyEntry.OriginalValue);
+                    if (currentValue == originalValue)
                     {
-                        var currentValue = GetValue(columnType, propertyEntry.CurrentValue);
-                        originalValue = GetValue(columnType, propertyEntry.OriginalValue);
-                        if (currentValue == originalValue)
-                        {
-                            continue;
-                        }
-
-                        newValue = currentValue;
-                        break;
+                        continue;
                     }
+
+                    newValue = currentValue;
+                    break;
+                }
                 case EntityState.Detached:
                     break;
                 case EntityState.Unchanged:
