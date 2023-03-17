@@ -5,7 +5,7 @@ using Ordering.Domain.AggregateRoots;
 namespace Ordering.Infrastructure.EntityConfigurations;
 
 public class TestEntityTypeConfiguration
-    : EntityTypeConfigurationBase<TestEntity2, OrderingContext2>
+    : EntityTypeConfigurationBase<TestEntity2, AuditingContext>
 {
     public override void Configure(EntityTypeBuilder<TestEntity2> builder)
     {

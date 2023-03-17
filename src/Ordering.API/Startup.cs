@@ -172,7 +172,7 @@ public static class Startup
             builder.UseEntityFramework(x =>
             {
                 // 添加 MySql 支持
-                x.AddNpgsql<OrderingContext, OrderingContext2>(configuration);
+                x.AddNpgsql<OrderingContext, AuditingContext>(configuration);
             });
         });
     });
@@ -180,8 +180,6 @@ public static class Startup
     public static void Configure(this WebApplication app)
     {
         var env = app.Services.GetRequiredService<IHostEnvironment>();
-        var a = app.Services.CreateScope().ServiceProvider.GetRequiredService<OrderingContext>();
-        var b = a.Set<Order>().ToList();
         if (env.IsDevelopment())
         {
             app.UseDeveloperExceptionPage();
