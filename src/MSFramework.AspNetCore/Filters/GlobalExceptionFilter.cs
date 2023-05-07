@@ -26,10 +26,7 @@ public class GlobalExceptionFilter : IExceptionFilter
         {
             context.Result = new BadRequestObjectResult(new ApiResult
             {
-                Success = false,
-                Msg = e.Message,
-                Code = e.Code,
-                Data = null
+                Success = false, Msg = e.Message, Code = e.Code, Data = null
             });
         }
         else
@@ -38,14 +35,11 @@ public class GlobalExceptionFilter : IExceptionFilter
             context.Result =
                 new ObjectResult(new ApiResult
                 {
-                    Success = false,
-                    Msg = "系统内部错误",
-                    Code = StatusCodes.Status500InternalServerError,
-                    Data = null
+                    Success = false, Msg = "系统内部错误", Code = StatusCodes.Status500InternalServerError, Data = null
                 });
         }
 
         context.ExceptionHandled = true;
-        _logger.LogError(context.Exception.ToString());
+        _logger.LogError("{exception}", context.Exception);
     }
 }
