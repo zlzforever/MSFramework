@@ -4,9 +4,8 @@ using System.Runtime.CompilerServices;
 using MicroserviceFramework.Common;
 using MicroserviceFramework.Extensions.DependencyInjection;
 using MicroserviceFramework.Extensions.Options;
-using MicroserviceFramework.Runtime;
 using MicroserviceFramework.Text.Json;
-using MicroserviceFramework.Utilities;
+using MicroserviceFramework.Utils;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
@@ -88,7 +87,7 @@ public static class ServiceCollectionExtensions
 
         foreach (var prefix in prefixes)
         {
-            RuntimeUtilities.StartsWith.Add(prefix);
+            Utils.Runtime.StartsWith.Add(prefix);
         }
 
         return builder;

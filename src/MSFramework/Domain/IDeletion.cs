@@ -5,12 +5,12 @@ namespace MicroserviceFramework.Domain;
 public interface IDeletion : ISoftDelete
 {
     /// <summary>
-    /// Which user deleted this entity?
+    /// 删除人标识
     /// </summary>
     string DeleterId { get; }
 
     /// <summary>
-    /// Deletion time of this entity.
+    /// 删除时间
     /// </summary>
     DateTimeOffset? DeletionTime { get; set; }
 

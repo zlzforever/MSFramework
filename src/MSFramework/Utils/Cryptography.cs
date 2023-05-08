@@ -2,13 +2,12 @@
 using System.Security.Cryptography;
 using System.Text;
 using MicroserviceFramework.Runtime;
-using MicroserviceFramework.Utilities;
 
 // ReSharper disable InconsistentNaming
 
-namespace MicroserviceFramework.Security.Cryptography;
+namespace MicroserviceFramework.Utils;
 
-public static class CryptographyUtilities
+public static class Cryptography
 {
     /// <summary>
     /// 获取字符串的MD5哈希值，默认编码为<see cref="Encoding.UTF8"/>

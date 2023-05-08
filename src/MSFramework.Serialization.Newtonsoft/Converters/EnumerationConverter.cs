@@ -29,7 +29,7 @@ public class EnumerationConverter : JsonConverter
         JsonSerializer serializer)
     {
         var token = JToken.Load(reader);
-        var value = token?.ToString();
+        var value = token.ToString();
 
         var isNullable = objectType.IsGenericType && objectType.GetGenericTypeDefinition() == typeof(Nullable<>);
         var enumType = objectType;

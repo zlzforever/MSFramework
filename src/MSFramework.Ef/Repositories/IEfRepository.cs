@@ -1,8 +1,6 @@
-﻿using MicroserviceFramework.Domain;
+﻿namespace MicroserviceFramework.Ef.Repositories;
 
-namespace MicroserviceFramework.Ef.Repositories;
-
-public interface IEfRepository : IRepository
+public interface IEfRepository
 {
     DbContextBase GetDbContext();
 }

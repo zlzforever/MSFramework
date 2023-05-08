@@ -18,7 +18,7 @@ public class Order : CreationAggregateRoot, IOptimisticLock
     // DDD Patterns comment
     // Using a private collection field, better for DDD Aggregate's encapsulation
     // so Items cannot be added from "outside the AggregateRoot" directly to the collection,
-    // but only through the method OrderAggrergateRoot.AddOrderItem() which includes behaviour.
+    // but only through the method OrderAggregateRoot.AddOrderItem() which includes behaviour.
     private readonly List<OrderItem> _items;
 
     public virtual IReadOnlyCollection<OrderItem> Items => _items;

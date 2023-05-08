@@ -1,5 +1,8 @@
 ﻿namespace MicroserviceFramework.Domain;
 
+/// <summary>
+/// 软删除接口
+/// </summary>
 public interface ISoftDelete
 {
     /// <summary>

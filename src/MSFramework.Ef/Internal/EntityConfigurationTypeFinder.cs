@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using MicroserviceFramework.Collections.Generic;
-using MicroserviceFramework.Runtime;
 using Microsoft.EntityFrameworkCore;
 
 namespace MicroserviceFramework.Ef.Internal;
@@ -26,7 +25,7 @@ internal sealed class EntityConfigurationTypeFinder : IEntityConfigurationTypeFi
         Empty = new Dictionary<Type, EntityTypeConfigurationMetadata>();
         DbContextTypes = new HashSet<Type>();
 
-        var assemblies = RuntimeUtilities.GetAllAssemblies();
+        var assemblies = Utils.Runtime.GetAllAssemblies();
 
         var types = assemblies.SelectMany(assembly => assembly.DefinedTypes).Where(type =>
             type.IsClass && !type.IsAbstract && !type.IsGenericTypeDefinition).ToArray();
@@ -104,8 +103,8 @@ internal sealed class EntityConfigurationTypeFinder : IEntityConfigurationTypeFi
     /// <returns></returns>
     public Dictionary<Type, EntityTypeConfigurationMetadata> GetEntityTypeConfigurations(Type dbContextType)
     {
-        return EntityRegistersDict.ContainsKey(dbContextType)
-            ? EntityRegistersDict[dbContextType]
+        return EntityRegistersDict.TryGetValue(dbContextType, out var value)
+            ? value
             : Empty;
     }
 

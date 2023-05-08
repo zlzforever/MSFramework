@@ -12,6 +12,4 @@ public interface IUnitOfWork
     Task SaveChangesAsync(CancellationToken cancellationToken = default);
 
     void SaveChanges();
-
-    // IReadOnlyCollection<AuditOperation> AuditingList { get; }
 }

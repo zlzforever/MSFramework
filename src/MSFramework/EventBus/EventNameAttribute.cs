@@ -1,5 +1,5 @@
 ﻿using System;
-using MicroserviceFramework.Utilities;
+using MicroserviceFramework.Utils;
 
 namespace MicroserviceFramework.EventBus;
 

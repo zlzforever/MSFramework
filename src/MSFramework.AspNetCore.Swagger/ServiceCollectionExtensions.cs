@@ -17,7 +17,7 @@ public static class ServiceCollectionExtensions
         var enumTypes = assembly.GetTypes().Where(i => i.IsSubclassOf(typeof(Enumeration)));
         foreach (var enumType in enumTypes)
         {
-            var enumDoc = new List<IOpenApiAny> { };
+            var enumDoc = new List<IOpenApiAny>();
             var enums = GetAll(enumType);
             foreach (var enumeration in enums)
             {

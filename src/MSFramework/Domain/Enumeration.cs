@@ -5,6 +5,9 @@ using System.Reflection;
 
 namespace MicroserviceFramework.Domain;
 
+/// <summary>
+/// 枚举基类
+/// </summary>
 public abstract class Enumeration : IComparable
 {
     public string Name { get; private set; }

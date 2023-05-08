@@ -1,10 +1,14 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace MicroserviceFramework.Common;
 
 public interface IPagedResult : IEnumerable
 {
+    /// <summary>
+    /// 总计
+    /// </summary>
     int Total { get; }
 
     /// <summary>
@@ -21,6 +25,9 @@ public interface IPagedResult : IEnumerable
 public record PagedResult<TEntity>(int Page, int Limit, int Total, IEnumerable<TEntity> Data) : IEnumerable<TEntity>,
     IPagedResult
 {
+    /// <summary>
+    /// 数据列表
+    /// </summary>
     public IEnumerable<TEntity> Data { get; } = Data;
 
     /// <summary>
@@ -40,7 +47,7 @@ public record PagedResult<TEntity>(int Page, int Limit, int Total, IEnumerable<T
 
     public IEnumerator<TEntity> GetEnumerator()
     {
-        return Data.GetEnumerator();
+        return Data == null ? Enumerable.Empty<TEntity>().GetEnumerator() : Data.GetEnumerator();
     }
 
     IEnumerator IEnumerable.GetEnumerator()

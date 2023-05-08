@@ -4,25 +4,27 @@ using System.Linq;
 using System.Reflection;
 using Microsoft.Extensions.DependencyModel;
 
-namespace MicroserviceFramework.Runtime;
+namespace MicroserviceFramework.Utils;
 
-public static class RuntimeUtilities
+public static class Runtime
 {
     private static readonly Lazy<Assembly[]> Assemblies;
     private static readonly Lazy<Type[]> Types;
 
     public static readonly HashSet<string> StartsWith;
 
-    static RuntimeUtilities()
+    static Runtime()
     {
-        StartsWith = new HashSet<string>
-        {
-            "MSFramework",
-            "Newtonsoft.Json"
-        };
+        StartsWith = new HashSet<string> { "MSFramework", "Newtonsoft.Json" };
         Assemblies = new Lazy<Assembly[]>(() =>
         {
+            if (DependencyContext.Default == null)
+            {
+                return Array.Empty<Assembly>();
+            }
+
             var list = new List<Assembly>();
+
             var libraries = DependencyContext.Default.CompileLibraries
                 .Where(x => x.Type == "project"
                             || StartsWith.Any(y => x.Name.StartsWith(y)));

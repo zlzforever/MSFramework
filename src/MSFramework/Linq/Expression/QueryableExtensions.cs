@@ -13,7 +13,7 @@ public static class PagedQueryExtensions
     {
         page = page < 1 ? 1 : page;
         limit = limit < 1 ? 10 : limit;
-        limit = limit > 60 ? 60 : limit;
+        limit = limit > 100 ? 100 : limit;
 
         var total = queryable.Count();
         var data = total == 0

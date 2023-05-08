@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections;
+using System.Diagnostics.CodeAnalysis;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using MicroserviceFramework.Common;
@@ -43,5 +44,20 @@ public class PagedResultJsonConverter : JsonConverter<IPagedResult>
         }
     }
 
-    private record PagedResultWrapper(int Page, int Limit, int Total, IEnumerable Data);
+    [SuppressMessage("ReSharper", "UnusedAutoPropertyAccessor.Global")]
+    public class PagedResultWrapper
+    {
+        public int Page { get; set; }
+        public int Limit { get; set; }
+        public int Total { get; set; }
+        public IEnumerable Data { get; set; }
+
+        public PagedResultWrapper(int page, int limit, int total, IEnumerable data)
+        {
+            Page = page;
+            Limit = limit;
+            Total = total;
+            Data = data;
+        }
+    }
 }

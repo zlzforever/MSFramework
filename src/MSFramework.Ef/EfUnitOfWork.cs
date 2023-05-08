@@ -3,7 +3,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using MicroserviceFramework.Auditing;
 using MicroserviceFramework.Domain;
-using MicroserviceFramework.Utilities;
+using MicroserviceFramework.Utils;
 
 namespace MicroserviceFramework.Ef;
 

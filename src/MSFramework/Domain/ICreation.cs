@@ -10,7 +10,7 @@ public interface ICreation
     DateTimeOffset? CreationTime { get; }
 
     /// <summary>
-    /// 创建用户标识
+    /// 创建人标识
     /// </summary>
     string CreatorId { get; }
 

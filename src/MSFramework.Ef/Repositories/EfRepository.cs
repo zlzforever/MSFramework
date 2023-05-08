@@ -6,41 +6,21 @@ using Microsoft.EntityFrameworkCore;
 
 namespace MicroserviceFramework.Ef.Repositories;
 
-public abstract class EfRepository<TEntity> : IRepository<TEntity>, IEfRepository
-    where TEntity : class, IAggregateRoot
+public abstract class EfRepository<TEntity, TKey> : IRepository<TEntity, TKey>, IEfRepository
+    where TEntity : class, IAggregateRoot<TKey> where TKey : IEquatable<TKey>
 {
     private IQueryable<TEntity> _store;
+    private readonly DbSet<TEntity> _dbSet;
     private readonly DbContextBase _dbContext;
 
-    protected IQueryable<TEntity> Store => _store ??= IncludeAllNavigations(DbSet);
+    protected IQueryable<TEntity> Store => _store ??= IncludeAllNavigations(_dbSet);
 
-    protected DbSet<TEntity> DbSet { get; }
+    protected bool? UseQuerySplittingBehavior { get; init; }
 
     protected EfRepository(DbContextFactory dbContextFactory)
     {
         _dbContext = dbContextFactory.GetDbContext<TEntity>();
-        DbSet = _dbContext.Set<TEntity>();
-    }
-
-    public virtual void Add(TEntity entity)
-    {
-        DbSet.Add(entity);
-    }
-
-    public virtual async Task AddAsync(TEntity entity)
-    {
-        await DbSet.AddAsync(entity);
-    }
-
-    public virtual void Delete(TEntity entity)
-    {
-        DbSet.Remove(entity);
-    }
-
-    public virtual Task DeleteAsync(TEntity entity)
-    {
-        Delete(entity);
-        return Task.CompletedTask;
+        _dbSet = _dbContext.Set<TEntity>();
     }
 
     /// <summary>
@@ -55,23 +35,17 @@ public abstract class EfRepository<TEntity> : IRepository<TEntity>, IEfRepositor
         var queryable = dbSet.AsQueryable();
 
         var navigations = dbSet.EntityType.GetNavigations();
-        queryable = navigations.Aggregate(queryable, (current, navigation) => current.Include(navigation.Name));
+        queryable = navigations.Aggregate(queryable, (current, navigation) =>
+        {
+            // TODO: 如何递归全部聚合
+            // navigation.TargetEntityType.GetNavigations();
+            return current.Include(navigation.Name);
+        });
 
         return !UseQuerySplittingBehavior.HasValue ? queryable :
             UseQuerySplittingBehavior.Value ? queryable.AsSplitQuery() : queryable.AsSingleQuery();
     }
 
-    protected bool? UseQuerySplittingBehavior { get; init; }
-
-    public DbContextBase GetDbContext()
-    {
-        return _dbContext;
-    }
-}
-
-public abstract class EfRepository<TEntity, TKey> : EfRepository<TEntity>, IRepository<TEntity, TKey>
-    where TEntity : class, IAggregateRoot<TKey> where TKey : IEquatable<TKey>
-{
     public virtual TEntity Find(TKey id)
     {
         return Store.FirstOrDefault(x => x.Id.Equals(id));
@@ -80,6 +54,27 @@ public abstract class EfRepository<TEntity, TKey> : EfRepository<TEntity>, IRepo
     public virtual async Task<TEntity> FindAsync(TKey id)
     {
         return await Store.FirstOrDefaultAsync(x => x.Id.Equals(id));
+    }
+
+    public virtual void Add(TEntity entity)
+    {
+        _dbSet.Add(entity);
+    }
+
+    public virtual async Task AddAsync(TEntity entity)
+    {
+        await _dbSet.AddAsync(entity);
+    }
+
+    public virtual void Delete(TEntity entity)
+    {
+        _dbSet.Remove(entity);
+    }
+
+    public virtual Task DeleteAsync(TEntity entity)
+    {
+        Delete(entity);
+        return Task.CompletedTask;
     }
 
     public virtual void Delete(TKey id)
@@ -136,7 +131,14 @@ public abstract class EfRepository<TEntity, TKey> : EfRepository<TEntity>, IRepo
     // 	return entity;
     // }
 
-    protected EfRepository(DbContextFactory dbContextFactory) : base(dbContextFactory)
+
+    public DbContextBase GetDbContext()
     {
+        return _dbContext;
+    }
+
+    public DbSet<TEntity> GetDbSet()
+    {
+        return _dbSet;
     }
 }

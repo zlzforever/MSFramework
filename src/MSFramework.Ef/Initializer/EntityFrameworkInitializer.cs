@@ -49,7 +49,7 @@ public class EntityFrameworkInitializer : InitializerBase
             {
                 if (option.AutoMigrationEnabled)
                 {
-                    _logger.LogInformation($"Auto migrate is enabled in {option.DbContextTypeName}.");
+                    _logger.LogInformation("Auto migrate is enabled in {DbContextTypeName}", option.DbContextTypeName);
 
                     var dbContext = (DbContextBase)scope.ServiceProvider.GetRequiredService(option.GetDbContextType());
 
@@ -64,8 +64,8 @@ public class EntityFrameworkInitializer : InitializerBase
                     var appliedMigrations =
                         (await dbContext.Database.GetAppliedMigrationsAsync(cancellationToken: cancellationToken))
                         .ToList();
-                    logger.LogInformation(
-                        $"Applied {appliedMigrations.Count} migrations： {string.Join(", ", appliedMigrations)}.");
+                    logger.LogInformation("Applied {AppliedMigrationsCount} migrations： {AppliedMigrations}",
+                        appliedMigrations.Count, string.Join(", ", appliedMigrations));
 
                     var migrations =
                         (await dbContext.Database.GetPendingMigrationsAsync(cancellationToken: cancellationToken))
@@ -74,17 +74,18 @@ public class EntityFrameworkInitializer : InitializerBase
                     {
                         await dbContext.Database.MigrateAsync(cancellationToken: cancellationToken);
 
-                        logger.LogInformation(
-                            $"Migrate {migrations.Length}： {string.Join(", ", migrations)}.");
+                        logger.LogInformation("Migrate {MigrationsCount}： {Migrations}", migrations.Length,
+                            string.Join(", ", migrations));
                     }
                     else
                     {
-                        _logger.LogInformation($"There is no pending migration in {option.DbContextTypeName}.");
+                        _logger.LogInformation("There is no pending migration in {DbContextTypeName}",
+                            option.DbContextTypeName);
                     }
                 }
                 else
                 {
-                    _logger.LogInformation($"Auto migrate is disabled in {option.DbContextTypeName}.");
+                    _logger.LogInformation("Auto migrate is disabled in {DbContextTypeName}", option.DbContextTypeName);
                 }
             }
 
@@ -92,7 +93,7 @@ public class EntityFrameworkInitializer : InitializerBase
         }
         catch (Exception e)
         {
-            _logger.LogError(e.ToString());
+            _logger.LogError("{Exception}", e.ToString());
         }
     }
 }

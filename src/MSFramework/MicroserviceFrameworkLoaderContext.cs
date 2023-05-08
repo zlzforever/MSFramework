@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Concurrent;
-using MicroserviceFramework.Runtime;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace MicroserviceFramework;
@@ -28,7 +27,7 @@ public class MicroserviceFrameworkLoaderContext
             return;
         }
 
-        var types = RuntimeUtilities.GetAllTypes();
+        var types = Utils.Runtime.GetAllTypes();
 
         foreach (var type in types)
         {

@@ -3,6 +3,9 @@ using MongoDB.Bson;
 
 namespace MicroserviceFramework.Domain;
 
+/// <summary>
+/// 含最后修改人信息的实体
+/// </summary>
 public abstract class ModificationEntity : ModificationEntity<ObjectId>
 {
     protected ModificationEntity(ObjectId id) : base(id)
@@ -10,26 +13,28 @@ public abstract class ModificationEntity : ModificationEntity<ObjectId>
     }
 }
 
+/// <summary>
+/// 含最后修改人信息的实体
+/// </summary>
 public abstract class ModificationEntity<TKey> : CreationEntity<TKey>, IModification where TKey : IEquatable<TKey>
 {
     /// <summary>
-    /// Last modifier user for this entity.
+    /// 最后修改人标识
     /// </summary>
     public string LastModifierId { get; private set; }
 
     /// <summary>
-    /// The last modified time for this entity.
+    /// 最后修改时间
     /// </summary>
     public DateTimeOffset? LastModificationTime { get; private set; }
 
-    public virtual void SetModification(string userId,
-        DateTimeOffset lastModificationTime = default)
+    public virtual void SetModification(string lastModifierId, DateTimeOffset lastModificationTime = default)
     {
         LastModificationTime = lastModificationTime == default ? DateTimeOffset.Now : lastModificationTime;
 
-        if (!string.IsNullOrWhiteSpace(userId))
+        if (!string.IsNullOrEmpty(lastModifierId))
         {
-            LastModifierId = userId;
+            LastModifierId = lastModifierId;
         }
     }
 

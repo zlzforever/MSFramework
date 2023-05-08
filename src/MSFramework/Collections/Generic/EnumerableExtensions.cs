@@ -12,18 +12,18 @@ public static class EnumerableExtensions
     /// <summary>
     /// 将集合展开并分别转换成字符串，再以指定的分隔符衔接，拼成一个字符串返回。默认分隔符为逗号
     /// </summary>
-    /// <param name="collection"> 要处理的集合 </param>
+    /// <param name="enumerable"> 要处理的集合 </param>
     /// <param name="separator"> 分隔符，默认为逗号 </param>
     /// <returns> 拼接后的字符串 </returns>
-    public static string JoinString<T>(this IEnumerable<T> collection, string separator)
+    public static string JoinString<T>(this IEnumerable<T> enumerable, string separator)
     {
-        return string.Join(separator, collection);
+        return string.Join(separator, enumerable);
     }
 
-    public static string JoinString<T, TProperty>(this IEnumerable<T> collection,
+    public static string JoinString<T, TProperty>(this IEnumerable<T> enumerable,
         string separator, Func<T, TProperty> selector)
     {
-        return string.Join(separator, collection.Select(selector));
+        return string.Join(separator, enumerable.Select(selector));
     }
 
     // /// <summary>
@@ -56,9 +56,28 @@ public static class EnumerableExtensions
         return !enumerable.Any();
     }
 
-    public static bool HasDuplicates<T, TProp>(this IEnumerable<T> list, Func<T, TProp> selector)
+    /// <summary>
+    /// 是否存在重复值
+    /// </summary>
+    /// <param name="enumerable"></param>
+    /// <param name="selector"></param>
+    /// <typeparam name="T"></typeparam>
+    /// <typeparam name="TProp"></typeparam>
+    /// <returns></returns>
+    public static bool HasDuplicates<T, TProp>(this IEnumerable<T> enumerable, Func<T, TProp> selector)
     {
         var d = new HashSet<TProp>();
-        return list.Any(t => !d.Add(selector(t)));
+        foreach (var item in enumerable)
+        {
+            var key = selector(item);
+            if (d.Contains(key))
+            {
+                return true;
+            }
+
+            d.Add(key);
+        }
+
+        return false;
     }
 }

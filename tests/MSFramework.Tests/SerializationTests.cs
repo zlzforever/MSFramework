@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using MicroserviceFramework.AspNetCore.Extensions;
+using MicroserviceFramework.Common;
 using MicroserviceFramework.Domain;
 using MicroserviceFramework.Serialization.Newtonsoft;
 using MicroserviceFramework.Serialization.Newtonsoft.Converters;
@@ -250,12 +251,32 @@ public class SerializationTests
         Assert.Equal(ObjectId.Empty, obj.Id);
     }
 
-    [Fact]
-    public void A()
+    public class A
     {
-        var dict = new Dictionary<ObjectId, string> { { ObjectId.GenerateNewId(), "1" } };
-        var a = new JsonSerializerOptions();
-        a.AddDefaultConverters();
-        var json = System.Text.Json.JsonSerializer.Serialize(dict, a);
+        public string Id { get; set; }
+        public string Name { get; set; }
+    }
+
+    [Fact]
+    public void PagedResult()
+    {
+        var options = new JsonSerializerOptions();
+        options.AddDefaultConverters();
+        options.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
+        var json = System.Text.Json.JsonSerializer.Serialize(
+            new PagedResult<A>(1, 10, 2,
+                new List<A> { new A { Id = "1", Name = "A1" }, new A() { Id = "2", Name = "A2" } }), options);
+        Assert.Equal("""
+{"page":1,"limit":10,"total":2,"data":[{"id":"1","name":"A1"},{"id":"2","name":"A2"}]}
+"""
+            , json);
+        var json2 = System.Text.Json.JsonSerializer.Serialize(
+            new PagedResult<A>(1, 10, 2,
+                null), options);
+        Assert.Equal("""
+{"page":1,"limit":10,"total":2,"data":[]}
+"""
+            , json2);
+        
     }
 }

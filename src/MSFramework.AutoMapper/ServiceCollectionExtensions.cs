@@ -2,7 +2,6 @@
 using System.Linq;
 using System.Reflection;
 using MicroserviceFramework.Domain;
-using MicroserviceFramework.Runtime;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 
@@ -12,7 +11,7 @@ public static class ServiceCollectionExtensions
 {
     public static MicroserviceFrameworkBuilder UseAutoMapper(this MicroserviceFrameworkBuilder builder)
     {
-        return builder.UseAutoMapper(RuntimeUtilities.GetAllAssemblies());
+        return builder.UseAutoMapper( Utils.Runtime.GetAllAssemblies());
     }
 
     public static MicroserviceFrameworkBuilder UseAutoMapper(this MicroserviceFrameworkBuilder builder,

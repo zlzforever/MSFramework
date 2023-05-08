@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using MicroserviceFramework.Utilities;
+using MicroserviceFramework.Utils;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace MicroserviceFramework.EventBus;

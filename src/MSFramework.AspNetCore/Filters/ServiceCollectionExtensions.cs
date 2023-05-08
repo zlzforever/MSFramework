@@ -21,10 +21,4 @@ public static class ServiceCollectionExtensions
         filters.Add<GlobalExceptionFilter>();
         return filters;
     }
-
-    // public static FilterCollection AddActionException(this FilterCollection filters)
-    // {
-    //     filters.Add<ActionExceptionFilter>();
-    //     return filters;
-    // }
 }

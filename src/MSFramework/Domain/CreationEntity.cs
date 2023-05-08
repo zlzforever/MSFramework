@@ -3,6 +3,9 @@ using MongoDB.Bson;
 
 namespace MicroserviceFramework.Domain;
 
+/// <summary>
+/// 含创建人信息的实体
+/// </summary>
 public abstract class CreationEntity : CreationEntity<ObjectId>
 {
     protected CreationEntity(ObjectId id) : base(id)
@@ -10,6 +13,9 @@ public abstract class CreationEntity : CreationEntity<ObjectId>
     }
 }
 
+/// <summary>
+/// 含创建人信息的实体
+/// </summary>
 public abstract class CreationEntity<TKey> :
     EntityBase<TKey>, ICreation where TKey : IEquatable<TKey>
 {
@@ -19,7 +25,7 @@ public abstract class CreationEntity<TKey> :
     public DateTimeOffset? CreationTime { get; private set; }
 
     /// <summary>
-    /// 创建用户标识
+    /// 创建人标识
     /// </summary>
     public string CreatorId { get; private set; }
 
@@ -28,7 +34,7 @@ public abstract class CreationEntity<TKey> :
         // 创建只能一次操作，因此如果已经有值，不能再做设置
         CreationTime ??= creationTime == default ? DateTimeOffset.Now : creationTime;
 
-        if (!string.IsNullOrWhiteSpace(userId) && string.IsNullOrWhiteSpace(CreatorId))
+        if (!string.IsNullOrEmpty(userId) && string.IsNullOrEmpty(CreatorId))
         {
             CreatorId = userId;
         }

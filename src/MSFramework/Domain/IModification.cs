@@ -5,14 +5,14 @@ namespace MicroserviceFramework.Domain;
 public interface IModification
 {
     /// <summary>
-    /// Last modifier user for this entity.
+    /// 最后修改人标识
     /// </summary>
     string LastModifierId { get; }
 
     /// <summary>
-    /// The last modified time for this entity.
+    /// 最后修改时间
     /// </summary>
     DateTimeOffset? LastModificationTime { get; }
 
-    void SetModification(string userId, DateTimeOffset modificationTime = default);
+    void SetModification(string lastModifierId, DateTimeOffset lastModificationTime = default);
 }

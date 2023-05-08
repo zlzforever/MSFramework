@@ -3,6 +3,9 @@ using MongoDB.Bson;
 
 namespace MicroserviceFramework.Domain;
 
+/// <summary>
+/// 含删除人信息的实体
+/// </summary>
 public abstract class DeletionEntity : DeletionEntity<ObjectId>
 {
     protected DeletionEntity(ObjectId id) : base(id)
@@ -10,6 +13,9 @@ public abstract class DeletionEntity : DeletionEntity<ObjectId>
     }
 }
 
+/// <summary>
+/// 含删除人信息的实体
+/// </summary>
 public abstract class DeletionEntity<TKey> : ModificationEntity<TKey>, IDeletion where TKey : IEquatable<TKey>
 {
     /// <summary>
@@ -18,12 +24,12 @@ public abstract class DeletionEntity<TKey> : ModificationEntity<TKey>, IDeletion
     public bool IsDeleted { get; private set; }
 
     /// <summary>
-    /// Which user deleted this entity?
+    /// 删除人标识
     /// </summary>
     public string DeleterId { get; private set; }
 
     /// <summary>
-    /// Deletion time of this entity.
+    /// 删除时间
     /// </summary>
     public DateTimeOffset? DeletionTime { get; set; }
 

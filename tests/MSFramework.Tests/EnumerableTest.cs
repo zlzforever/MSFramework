@@ -34,8 +34,9 @@ public class EnumerableTest
     [Fact]
     public void HasDuplicates()
     {
-        var list = new List<string> { "1", "2" };
-        Assert.True(list.HasDuplicates(t => t));
-        Assert.False(list.HasDuplicates(t => t));
+        var list = new List<A> { new A { Name = "1" }, new A { Name = "2" }, new A { Name = "2" } };
+        var list2 = new List<A> { new A { Name = "1" }, new A { Name = "2" } };
+        Assert.True(list.HasDuplicates(t => t.Name));
+        Assert.False(list2.HasDuplicates(t => t.Name));
     }
 }

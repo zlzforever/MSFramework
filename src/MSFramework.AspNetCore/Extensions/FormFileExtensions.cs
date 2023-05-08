@@ -1,7 +1,6 @@
 ﻿using System;
 using System.IO;
 using System.Threading.Tasks;
-using MicroserviceFramework.Security.Cryptography;
 using Microsoft.AspNetCore.Http;
 
 namespace MicroserviceFramework.AspNetCore.Extensions;
@@ -22,7 +21,7 @@ public static class FormFileExtensions
         }
 
         await using var stream = formFile.OpenReadStream();
-        var md5 = CryptographyUtilities.ComputeMD5(stream);
+        var md5 = Utils.Cryptography.ComputeMD5(stream);
         var fileName = $"{md5}{extension}";
         var relativePath = $"{intervalDirectory}/{fileName}";
 

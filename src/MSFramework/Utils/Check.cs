@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using MicroserviceFramework.Collections.Generic;
 
-namespace MicroserviceFramework.Utilities;
+namespace MicroserviceFramework.Utils;
 
 /// <summary>
 /// 参数合法性检查类

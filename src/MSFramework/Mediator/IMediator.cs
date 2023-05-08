@@ -3,6 +3,9 @@ using System.Threading.Tasks;
 
 namespace MicroserviceFramework.Mediator;
 
+/// <summary>
+/// 中介者
+/// </summary>
 public interface IMediator
 {
     /// <summary>

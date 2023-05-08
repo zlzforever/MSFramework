@@ -3,7 +3,7 @@
 public interface IHasLastModifierName
 {
     /// <summary>
-    /// 确保实现具有私有设置方法
+    /// 最后修改人名称
     /// </summary>
     string LastModifierName { get; }
 }

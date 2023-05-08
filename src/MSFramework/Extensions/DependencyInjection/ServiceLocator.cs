@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using MicroserviceFramework.Utilities;
+using MicroserviceFramework.Utils;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace MicroserviceFramework.Extensions.DependencyInjection;

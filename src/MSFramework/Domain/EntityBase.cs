@@ -5,7 +5,9 @@ using MicroserviceFramework.Collections.Generic;
 
 namespace MicroserviceFramework.Domain;
 
-/// <inheritdoc/>
+/// <summary>
+/// 实体基类
+/// </summary>
 [Serializable]
 public abstract class EntityBase : IEntity
 {
@@ -39,7 +41,9 @@ public abstract class EntityBase : IEntity
     public abstract object[] GetKeys();
 }
 
-/// <inheritdoc cref="IEntity{TKey}" />
+/// <summary>
+/// 实体基类
+/// </summary>
 [Serializable]
 public abstract class EntityBase<TKey> : EntityBase, IEntity<TKey> where TKey : IEquatable<TKey>
 {

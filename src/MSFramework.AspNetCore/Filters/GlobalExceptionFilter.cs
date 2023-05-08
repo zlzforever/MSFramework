@@ -40,6 +40,6 @@ public class GlobalExceptionFilter : IExceptionFilter
         }
 
         context.ExceptionHandled = true;
-        _logger.LogError("{exception}", context.Exception);
+        _logger.LogError("{Exception}", context.Exception);
     }
 }

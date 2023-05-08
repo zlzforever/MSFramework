@@ -48,7 +48,7 @@ public class SecurityDaprTopicFilter : IActionFilter, IOrderedFilter
     {
         var actionDescriptor = ((ControllerActionDescriptor)context.ActionDescriptor);
         var isTopic = Cache.GetOrAdd(actionDescriptor.MethodInfo,
-            (entry => context.HasAttribute("Dapr.TopicAttribute")));
+            (_ => context.HasAttribute("Dapr.TopicAttribute")));
         if (!isTopic)
         {
             return;
@@ -65,12 +65,9 @@ public class SecurityDaprTopicFilter : IActionFilter, IOrderedFilter
 
         context.Result = new OkObjectResult(new ApiResult
         {
-            Success = false,
-            Msg = "访问受限",
-            Code = StatusCodes.Status403Forbidden,
-            Data = null
+            Success = false, Msg = "访问受限", Code = StatusCodes.Status403Forbidden, Data = null
         });
-        _logger.LogError($"Executing {actionDescriptor.DisplayName} forbidden");
+        _logger.LogError("Executing {Action} forbidden", actionDescriptor.DisplayName);
     }
 
     /// <summary>
