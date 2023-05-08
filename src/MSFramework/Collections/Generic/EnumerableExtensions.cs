@@ -27,17 +27,6 @@ public static class EnumerableExtensions
     }
 
     // /// <summary>
-    // /// 集合是否为空
-    // /// </summary>
-    // /// <param name="collection"> 要处理的集合 </param>
-    // /// <typeparam name="T"> 动态类型 </typeparam>
-    // /// <returns> 为空返回True，不为空返回False </returns>
-    // public static bool IsEmpty<T>(this IEnumerable<T> collection)
-    // {
-    //     return collection == null || !collection.Any();
-    // }
-
-    // /// <summary>
     // /// 根据指定条件返回集合中不重复的元素
     // /// </summary>
     // /// <typeparam name="T">动态类型</typeparam>
@@ -51,14 +40,20 @@ public static class EnumerableExtensions
     //     return source.GroupBy(keySelector).Select(group => group.First());
     // }
 
-    public static bool IsNullOrEmpty<T>(this IEnumerable<T> list)
+    /// <summary>
+    /// 集合是否为空
+    /// </summary>
+    /// <param name="enumerable"></param>
+    /// <typeparam name="T"></typeparam>
+    /// <returns></returns>
+    public static bool IsNullOrEmpty<T>(this IEnumerable<T> enumerable)
     {
-        if (list == null)
+        if (enumerable == null)
         {
             return true;
         }
 
-        return !list.Any();
+        return !enumerable.Any();
     }
 
     public static bool HasDuplicates<T, TProp>(this IEnumerable<T> list, Func<T, TProp> selector)

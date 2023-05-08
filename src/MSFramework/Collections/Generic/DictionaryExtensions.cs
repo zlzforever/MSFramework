@@ -43,26 +43,12 @@ public static class DictionaryExtensions
     public static void AddOrUpdate<TKey, TValue>(this Dictionary<TKey, TValue> dictionary, TKey key,
         Func<TValue> factory)
     {
-        if (dictionary.ContainsKey(key))
-        {
-            dictionary[key] = factory();
-        }
-        else
-        {
-            dictionary.Add(key, factory());
-        }
+        dictionary[key] = factory();
     }
 
     public static void AddOrUpdate<TKey, TValue>(this Dictionary<TKey, TValue> dictionary, TKey key,
         TValue value)
     {
-        if (dictionary.ContainsKey(key))
-        {
-            dictionary[key] = value;
-        }
-        else
-        {
-            dictionary.Add(key, value);
-        }
+        dictionary[key] = value;
     }
 }
