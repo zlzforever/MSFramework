@@ -45,6 +45,8 @@ public abstract class EfRepository<TEntity, TKey> : IRepository<TEntity, TKey>, 
         return !UseQuerySplittingBehavior.HasValue ? queryable :
             UseQuerySplittingBehavior.Value ? queryable.AsSplitQuery() : queryable.AsSingleQuery();
     }
+    
+ 
 
     public virtual TEntity Find(TKey id)
     {

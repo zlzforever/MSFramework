@@ -11,9 +11,7 @@ public class OrderEntityTypeConfiguration : EntityTypeConfigurationBase<Order, O
 {
     public override void Configure(EntityTypeBuilder<Order> builder)
     {
-        base.Configure(builder);
-
-        builder.Property(x => x.Id).ValueGeneratedNever();
+        ConfigureDefaultIdentifier(builder);
 
         //Address value object persisted as owned entity type supported since EF Core 2.0
         var navigationBuilder = builder.OwnsOne(o => o.Address);
@@ -26,6 +24,8 @@ public class OrderEntityTypeConfiguration : EntityTypeConfigurationBase<Order, O
         builder.Property(x => x.RivalNetworks).UseJson(typeof(HashSet<string>));
         builder.Property(x => x.Dict).UseJson();
         builder.Property(x => x.Extras).UseJson();
+        builder.Property<string>("creator_id2").HasMaxLength(36);
+        builder.HasOne(x => x.Creator2).WithMany().HasForeignKey("creator_id2");
         builder.HasMany(x => x.Items).WithOne().HasForeignKey("OrderId").OnDelete(DeleteBehavior.ClientCascade);
         // var navigation = builder.Metadata.FindNavigation(nameof(Order.Items));
         //

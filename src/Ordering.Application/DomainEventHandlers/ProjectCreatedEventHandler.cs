@@ -4,16 +4,13 @@ using System.Threading.Tasks;
 using DotNetCore.CAP;
 using MicroserviceFramework.Domain;
 using MongoDB.Bson;
+using Ordering.Application.Events;
 using Ordering.Domain.AggregateRoots;
+using Ordering.Domain.AggregateRoots.Events;
 
 namespace Ordering.Application.DomainEventHandlers;
 
-public class ProjectCreatedIntegrationEvent
-{
-    public ObjectId Id { get; set; }
-    public string Name { get; set; }
-    public DateTimeOffset CreationTime { get; set; }
-}
+
 
 public class ProjectCreatedEventHandler : IDomainEventHandler<ProjectCreatedEvent>
 {

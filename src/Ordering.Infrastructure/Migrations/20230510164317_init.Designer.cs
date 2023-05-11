@@ -12,14 +12,15 @@ using Ordering.Infrastructure;
 namespace Ordering.Infrastructure.Migrations
 {
     [DbContext(typeof(OrderingContext))]
-    [Migration("20221102055918_init")]
+    [Migration("20230510164317_init")]
     partial class init
     {
+        /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "6.0.10")
+                .HasAnnotation("ProductVersion", "7.0.5")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
@@ -214,7 +215,14 @@ namespace Ordering.Infrastructure.Migrations
                         .HasColumnType("character varying(255)")
                         .HasColumnName("status");
 
+                    b.Property<string>("creator_id2")
+                        .HasMaxLength(36)
+                        .HasColumnType("character varying(36)")
+                        .HasColumnName("creator_id2");
+
                     b.HasKey("Id");
+
+                    b.HasIndex("creator_id2");
 
                     b.ToTable("ordering_order");
                 });
@@ -297,6 +305,23 @@ namespace Ordering.Infrastructure.Migrations
                     b.ToTable("ordering_product");
                 });
 
+            modelBuilder.Entity("Ordering.Domain.AggregateRoots.User", b =>
+                {
+                    b.Property<string>("Id")
+                        .HasMaxLength(36)
+                        .HasColumnType("character varying(36)")
+                        .HasColumnName("id");
+
+                    b.Property<string>("Name")
+                        .HasMaxLength(256)
+                        .HasColumnType("character varying(256)")
+                        .HasColumnName("name");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("external_user", (string)null);
+                });
+
             modelBuilder.Entity("MicroserviceFramework.Auditing.AuditEntity", b =>
                 {
                     b.HasOne("MicroserviceFramework.Auditing.AuditOperation", "Operation")
@@ -317,6 +342,10 @@ namespace Ordering.Infrastructure.Migrations
 
             modelBuilder.Entity("Ordering.Domain.AggregateRoots.Order", b =>
                 {
+                    b.HasOne("Ordering.Domain.AggregateRoots.User", "Creator2")
+                        .WithMany()
+                        .HasForeignKey("creator_id2");
+
                     b.OwnsOne("Ordering.Domain.AggregateRoots.Address", "Address", b1 =>
                         {
                             b1.Property<string>("OrderId")
@@ -353,6 +382,8 @@ namespace Ordering.Infrastructure.Migrations
                         });
 
                     b.Navigation("Address");
+
+                    b.Navigation("Creator2");
                 });
 
             modelBuilder.Entity("Ordering.Domain.AggregateRoots.OrderItem", b =>

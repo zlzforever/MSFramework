@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.Linq;
 using System.Threading.Tasks;
 using MicroserviceFramework.AspNetCore;
 using MicroserviceFramework.Domain;
@@ -47,17 +48,20 @@ public class OrderController : ApiControllerBase
             "testUSer",
             new Address("Street", "City", "State", "Country", "ZipCode"),
             "Description");
-        order.AddItem(Guid.NewGuid(),
+        var i1 = order.AddItem(Guid.NewGuid(),
             "testProduct1", 10, 0, "");
-        order.AddItem(Guid.NewGuid(),
+        i1.SetCreator(new User("1"));
+        var i2 = order.AddItem(Guid.NewGuid(),
             "testProduct2", 10, 0, "");
+        i2.SetCreator(new User("1"));
         order.SetRivalNetwork(new[] { "hi1", "hi2" });
         order.AddKeyValue("test1", "value1");
         order.AddKeyValue("test2", "value2");
         order.AddExtra("n1", "a1");
         order.AddExtra("n2", "a2");
+        order.SetCreator(new User("1"));
         await _orderRepository.AddAsync(order);
-        Logger.LogInformation($"{Session.TraceIdentifier}: Create test order completed");
+        Logger.LogInformation("{TraceIdentifier}: Create test order completed", Session.TraceIdentifier);
         return order;
     }
 
@@ -140,7 +144,8 @@ public class OrderController : ApiControllerBase
         var order = await _dbContext.Set<Order>().FirstAsync();
         order.AddEvent();
         await _unitOfWorkManager.SaveChangesAsync();
-        return await _dbContext.Set<Order>().AsNoTracking().ToListAsync();
+        var orders = await _dbContext.Set<Order>().ToListAsync();
+        return orders;
     }
 
     #endregion

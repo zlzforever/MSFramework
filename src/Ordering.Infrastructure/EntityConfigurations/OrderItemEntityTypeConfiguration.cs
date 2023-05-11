@@ -9,7 +9,7 @@ public class OrderItemEntityTypeConfiguration : EntityTypeConfigurationBase<Orde
 {
     public override void Configure(EntityTypeBuilder<OrderItem> builder)
     {
-        base.Configure(builder);
+        ConfigureDefaultIdentifier(builder);
 
         builder.Property(x => x.Id).ValueGeneratedNever();
 

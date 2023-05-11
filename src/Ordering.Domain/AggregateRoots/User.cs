@@ -3,7 +3,7 @@
 namespace Ordering.Domain.AggregateRoots;
 
 public class User
-    : EntityBase<string>
+    : EntityBase<string>, IExternalEntity
 {
     public string Name { get; set; }
 

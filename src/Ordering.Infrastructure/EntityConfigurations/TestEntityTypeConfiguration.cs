@@ -9,7 +9,7 @@ public class TestEntityTypeConfiguration
 {
     public override void Configure(EntityTypeBuilder<TestEntity2> builder)
     {
-        base.Configure(builder);
+        ConfigureDefaultIdentifier(builder);
 
         builder.Property(x => x.Id).ValueGeneratedOnAdd();
         builder.Property(x => x.Name).HasMaxLength(256);

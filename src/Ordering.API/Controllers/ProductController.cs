@@ -14,6 +14,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using MongoDB.Bson;
 using Ordering.Application.DomainEventHandlers;
+using Ordering.Application.Events;
 using Ordering.Domain.AggregateRoots;
 using Ordering.Domain.Repositories;
 using Ordering.Infrastructure;

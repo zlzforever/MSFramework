@@ -9,9 +9,8 @@ public class ProductConfiguration
 {
     public override void Configure(EntityTypeBuilder<Product> builder)
     {
-        base.Configure(builder);
-
-        builder.Property(x => x.Id).ValueGeneratedNever();
+        ConfigureDefaultIdentifier(builder);
+        
         builder.Property(x => x.Name).HasMaxLength(256);
     }
 }

@@ -10,10 +10,9 @@ public class UserEntityTypeConfiguration
 {
     public override void Configure(EntityTypeBuilder<User> builder)
     {
-        base.Configure(builder);
+        ConfigureDefaultIdentifier(builder);
 
         builder.ToTable("external_user");
-        builder.Property(x => x.Id).ValueGeneratedNever();
         builder.Property(x => x.Name).HasMaxLength(256);
     }
 }

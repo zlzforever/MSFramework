@@ -30,6 +30,11 @@ public static class Runtime
                             || StartsWith.Any(y => x.Name.StartsWith(y)));
             foreach (var lib in libraries)
             {
+                if (lib.Type == "reference")
+                {
+                    continue;
+                }
+
                 var assembly = AppDomain.CurrentDomain.Load(new AssemblyName(lib.Name));
                 list.Add(assembly);
             }

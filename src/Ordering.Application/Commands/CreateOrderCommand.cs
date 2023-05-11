@@ -52,10 +52,5 @@ public class CreateOrderCommand : IRequest<ObjectId>
         public int Units { get; set; }
 
         public string PictureUrl { get; set; }
-
-        public OrderItem ToOrderItem()
-        {
-            return new OrderItem(ProductId, ProductName, UnitPrice, Discount, PictureUrl, Units);
-        }
     }
 }

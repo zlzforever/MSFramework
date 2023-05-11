@@ -2,8 +2,8 @@
 
   <PropertyGroup>
     <PackageId>MSFramework.CAP.Dapr</PackageId>
-    <AssemblyName>MSFramework.CAP.Dapr</AssemblyName>
     <RootNamespace>DotNetCore.CAP.Dapr</RootNamespace>
+    <AssemblyName>MSFramework.CAP.Dapr</AssemblyName>
   </PropertyGroup>
   <Import Project="../../package.props" />
 
