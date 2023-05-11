@@ -12,7 +12,7 @@ using Ordering.Infrastructure;
 namespace Ordering.Infrastructure.Migrations
 {
     [DbContext(typeof(OrderingContext))]
-    [Migration("20230510164317_init")]
+    [Migration("20230511095529_init")]
     partial class init
     {
         /// <inheritdoc />
@@ -263,9 +263,15 @@ namespace Ordering.Infrastructure.Migrations
                         .HasColumnType("integer")
                         .HasColumnName("units");
 
+                    b.Property<string>("creator_id")
+                        .HasColumnType("character varying(36)")
+                        .HasColumnName("creator_id");
+
                     b.HasKey("Id");
 
                     b.HasIndex("OrderId");
+
+                    b.HasIndex("creator_id");
 
                     b.ToTable("ordering_order_item");
                 });
@@ -392,6 +398,12 @@ namespace Ordering.Infrastructure.Migrations
                         .WithMany("Items")
                         .HasForeignKey("OrderId")
                         .OnDelete(DeleteBehavior.ClientCascade);
+
+                    b.HasOne("Ordering.Domain.AggregateRoots.User", "Creator")
+                        .WithMany()
+                        .HasForeignKey("creator_id");
+
+                    b.Navigation("Creator");
                 });
 
             modelBuilder.Entity("MicroserviceFramework.Auditing.AuditEntity", b =>

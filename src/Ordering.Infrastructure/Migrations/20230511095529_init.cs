@@ -123,11 +123,17 @@ namespace Ordering.Infrastructure.Migrations
                     discount = table.Column<decimal>(type: "numeric", nullable: false),
                     units = table.Column<int>(type: "integer", nullable: false),
                     productid = table.Column<Guid>(name: "product_id", type: "uuid", nullable: false),
+                    creatorid = table.Column<string>(name: "creator_id", type: "character varying(36)", nullable: true),
                     orderid = table.Column<string>(name: "order_id", type: "character varying(36)", nullable: true)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_ordering_order_item", x => x.id);
+                    table.ForeignKey(
+                        name: "FK_ordering_order_item_external_user_creator_id",
+                        column: x => x.creatorid,
+                        principalTable: "external_user",
+                        principalColumn: "id");
                     table.ForeignKey(
                         name: "FK_ordering_order_item_ordering_order_order_id",
                         column: x => x.orderid,
@@ -190,6 +196,11 @@ namespace Ordering.Infrastructure.Migrations
                 name: "IX_ordering_order_creator_id2",
                 table: "ordering_order",
                 column: "creator_id2");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ordering_order_item_creator_id",
+                table: "ordering_order_item",
+                column: "creator_id");
 
             migrationBuilder.CreateIndex(
                 name: "IX_ordering_order_item_order_id",

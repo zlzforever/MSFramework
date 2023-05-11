@@ -9,6 +9,7 @@ using MicroserviceFramework;
 using MicroserviceFramework.AspNetCore;
 using MicroserviceFramework.AspNetCore.Extensions;
 using MicroserviceFramework.AspNetCore.Filters;
+using MicroserviceFramework.AspNetCore.Mvc;
 using MicroserviceFramework.AspNetCore.Mvc.ModelBinding;
 using MicroserviceFramework.AspNetCore.Swagger;
 using MicroserviceFramework.AutoMapper;
@@ -19,9 +20,11 @@ using MicroserviceFramework.EventBus;
 using MicroserviceFramework.Extensions.DependencyInjection;
 using MicroserviceFramework.Mediator;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 using Microsoft.OpenApi.Models;
 using Ordering.Domain.AggregateRoots;
 using Ordering.Infrastructure;
@@ -89,6 +92,7 @@ public static class Startup
 #if !DEBUG
                  x.Filters.Add<SecurityDaprTopicFilter>();
 #endif
+                x.Filters.Add<ResponseWrapperFilter>();
                 x.ModelBinderProviders.Insert(0, new ObjectIdModelBinderProvider());
                 x.ModelBinderProviders.Insert(0, new EnumerationModelBinderProvider());
             })
@@ -236,10 +240,45 @@ public static class Startup
         //         }
         //     }
         // });
+        
+        // 中间件顺序
+        // ExceptionHandler
+        // HSTS
+        // HttpsRedirection
+        // StaticFiles
+        // Routing
+        // Cors
+        // Authentication
+        // Authorization
+        // CustomMiddleware
+        // EndpointRouting
 
         app.MapControllers();
         app.MapDefaultControllerRoute().RequireCors("cors");
+        app.Use(async (context, next) =>
+        {
+            if (context == null)
+            {
+                return;
+            }
+        
+            await next();
 
+        
+            // // 通常情况下异常会导致 Result 为空，但添加 ActionExceptionFilter 后，感知到导常后会返回 BadrequestObjectResult
+            // // 是否有其它情况会导致 Result 为空?
+            // if (actionExecutedContext.Result == null)
+            // {
+            //     return;
+            // }
+            //
+            // actionExecutedContext.Result = actionExecutedContext.Result switch
+            // {
+            //     // 空内容是使用在 void/Task 这种 Action 中
+            //     EmptyResult => new ObjectResult(ApiResult.Ok),
+            //     _ => actionExecutedContext.Result
+            // };
+        });
         app.UseMicroserviceFramework();
 
         var configuration = app.Configuration;

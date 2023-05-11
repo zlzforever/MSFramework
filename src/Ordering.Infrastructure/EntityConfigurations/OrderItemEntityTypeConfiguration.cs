@@ -30,5 +30,6 @@ public class OrderItemEntityTypeConfiguration : EntityTypeConfigurationBase<Orde
 
         builder.Property<string>("PictureUrl")
             .IsRequired(false);
+        builder.HasOne(x => x.Creator).WithMany().HasForeignKey("creator_id");
     }
 }

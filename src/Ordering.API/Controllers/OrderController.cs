@@ -4,6 +4,7 @@ using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Threading.Tasks;
 using MicroserviceFramework.AspNetCore;
+using MicroserviceFramework.AspNetCore.Mvc;
 using MicroserviceFramework.Domain;
 using MicroserviceFramework.Mediator;
 using Microsoft.AspNetCore.Mvc;
@@ -137,11 +138,29 @@ public class OrderController : ApiControllerBase
         return order;
     }
 
+    [HttpGet("get1")]
+    public IEnumerable<int> Get1()
+    {
+        return new List<int> { 1, 2, 3 };
+    }
+
+
+    [HttpGet("get2")]
+    public ApiResult Get2()
+    {
+        return new ApiResult(new List<int> { 1, 2, 3 });
+    }
+
     [HttpGet]
     // [AccessControl("查看所有订单")]
     public async Task<IEnumerable<Order>> GetOrdersAsync()
     {
-        var order = await _dbContext.Set<Order>().FirstAsync();
+        var order = await _dbContext.Set<Order>().FirstOrDefaultAsync();
+        if (order == null)
+        {
+            return Enumerable.Empty<Order>();
+        }
+
         order.AddEvent();
         await _unitOfWorkManager.SaveChangesAsync();
         var orders = await _dbContext.Set<Order>().ToListAsync();
