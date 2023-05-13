@@ -6,7 +6,9 @@ using System.Threading.Tasks;
 using MicroserviceFramework.AspNetCore;
 using MicroserviceFramework.AspNetCore.Mvc;
 using MicroserviceFramework.Domain;
+using MicroserviceFramework.Ef.Repositories;
 using MicroserviceFramework.Mediator;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -28,15 +30,17 @@ public class OrderController : ApiControllerBase
     private readonly IMediator _cqrsProcessor;
     private readonly OrderingContext _dbContext;
     private readonly IUnitOfWork _unitOfWorkManager;
+    private readonly IExternalEntityRepository _externalEntityRepository;
 
     public OrderController(IOrderingRepository orderRepository,
         IOrderingQuery orderingQuery, IMediator commandExecutor, OrderingContext dbContext,
-        IUnitOfWork unitOfWorkManager)
+        IUnitOfWork unitOfWorkManager, IExternalEntityRepository externalEntityRepository)
     {
         _orderingQuery = orderingQuery;
         _cqrsProcessor = commandExecutor;
         _dbContext = dbContext;
         _unitOfWorkManager = unitOfWorkManager;
+        _externalEntityRepository = externalEntityRepository;
         _orderRepository = orderRepository;
     }
 
@@ -51,16 +55,19 @@ public class OrderController : ApiControllerBase
             "Description");
         var i1 = order.AddItem(Guid.NewGuid(),
             "testProduct1", 10, 0, "");
-        i1.SetCreator(new User("1"));
+        var user1 = _externalEntityRepository.GetOrCreate<User, string>(() => new User("1") { Name = "Lewis" });
+        i1.SetCreator(user1);
         var i2 = order.AddItem(Guid.NewGuid(),
             "testProduct2", 10, 0, "");
-        i2.SetCreator(new User("1"));
+        var user2 = _externalEntityRepository.GetOrCreate<User, string>(() => new User("1"));
+        i2.SetCreator(user2);
         order.SetRivalNetwork(new[] { "hi1", "hi2" });
         order.AddKeyValue("test1", "value1");
         order.AddKeyValue("test2", "value2");
         order.AddExtra("n1", "a1");
         order.AddExtra("n2", "a2");
-        order.SetCreator(new User("1"));
+        var user3 = _externalEntityRepository.GetOrCreate<User, string>(() => new User("1"));
+        order.SetCreator(user3);
         await _orderRepository.AddAsync(order);
         Logger.LogInformation("{TraceIdentifier}: Create test order completed", Session.TraceIdentifier);
         return order;
@@ -122,6 +129,7 @@ public class OrderController : ApiControllerBase
     public Task ChangeOrderAddressAsync([FromRoute] ObjectId orderId,
         [FromBody] ChangeOrderAddressCommand command)
     {
+ 
         command.OrderId = orderId;
         return Task.CompletedTask;
     }
@@ -136,19 +144,6 @@ public class OrderController : ApiControllerBase
     {
         var order = await _orderingQuery.GetAsync(orderId);
         return order;
-    }
-
-    [HttpGet("get1")]
-    public IEnumerable<int> Get1()
-    {
-        return new List<int> { 1, 2, 3 };
-    }
-
-
-    [HttpGet("get2")]
-    public ApiResult Get2()
-    {
-        return new ApiResult(new List<int> { 1, 2, 3 });
     }
 
     [HttpGet]

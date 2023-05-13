@@ -2,12 +2,8 @@
 
 namespace MicroserviceFramework.AspNetCore.Mvc;
 
-public class ApiResult
+public class ApiResult<T>
 {
-    public static readonly ApiResult Ok = new() { Code = 0, Success = true, Msg = "", Data = null };
-
-    public static readonly ApiResult Error = new() { Code = 1, Success = false, Msg = "服务器内部错误", Data = null };
-
     /// <summary>
     /// 是否成功
     /// </summary>
@@ -23,18 +19,35 @@ public class ApiResult
     /// </summary>
     public string Msg { get; set; } = string.Empty;
 
-    /// <summary>
-    /// 数据
-    /// </summary>
-    public object Data { get; set; }
+    public T Data { get; set; }
 
-    public ApiResult()
+    public ApiResult() : this(default)
     {
     }
 
-    public ApiResult(object data) : this()
+    public ApiResult(T data)
     {
         Data = data;
+    }
+
+    public override string ToString()
+    {
+        return $"Code: {Code}, Success: {Success}, Msg: {Msg}";
+    }
+}
+
+public class ApiResult : ApiResult<object>
+{
+    public static readonly ApiResult Ok = new(null) { Code = 0, Success = true, Msg = "" };
+
+    public static readonly ApiResult Error = new(null) { Code = 1, Success = false, Msg = "服务器内部错误" };
+
+    public ApiResult() : this(null)
+    {
+    }
+
+    public ApiResult(object data) : base(data)
+    {
     }
 
     public override string ToString()

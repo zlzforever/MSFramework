@@ -9,6 +9,6 @@ public class ApiResultWithErrors : ApiResult
     public override string ToString()
     {
         return
-            $"Code: {Code}, Success: {Success}, Msg: {Msg}, Data: {JsonSerializer.Serialize(Data)}, Errors: {JsonSerializer.Serialize(Errors)}";
+            $"Code: {Code}, Success: {Success}, Msg: {Msg}, Errors: {JsonSerializer.Serialize(Errors)}";
     }
 }

@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using MicroserviceFramework.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
@@ -18,26 +19,28 @@ public sealed class ResponseWrapperFilter : ActionFilterAttribute
 
     public override void OnResultExecuting(ResultExecutingContext context)
     {
-        foreach (var value in context.HttpContext.Request.Headers.Accept)
+        if (context.HttpContext.Request.Headers.Accept.Any(value => SupportedMediaTypes.Contains(value)))
         {
-            if (!SupportedMediaTypes.Contains(value))
+            // 根据请求内容的类型，返回对应的空结果
+            // 比如请求的是一个图片，那么返回一个空的图片
+            if (context.Result is EmptyResult)
             {
-                continue;
+                context.Result = new ObjectResult(ApiResult.Ok);
             }
-
-            switch (context.Result)
+            else if (context.Result is ObjectResult objectResult)
             {
-                case EmptyResult:
-                    // 根据请求内容的类型，返回对应的空结果
-                    // 比如请求的是一个图片，那么返回一个空的图片
+                if (objectResult.Value == null)
+                {
                     context.Result = new ObjectResult(ApiResult.Ok);
-                    break;
-                case ObjectResult { Value: not ApiResult } objResult:
-                    context.Result = new ObjectResult(new ApiResult(objResult.Value));
-                    break;
-            }
+                    return;
+                }
 
-            break;
+                if (objectResult.Value.GetType().GetGenericTypeDefinition() != typeof(ApiResult<>))
+                {
+                    context.Result = new ObjectResult(
+                        new ApiResult { Data = objectResult.Value });
+                }
+            }
         }
     }
 }

@@ -3,7 +3,9 @@ using System.Threading;
 using System.Threading.Tasks;
 using MicroserviceFramework.Auditing;
 using MicroserviceFramework.Domain;
+using MicroserviceFramework.Ef.Auditing;
 using MicroserviceFramework.Utils;
+using Microsoft.Extensions.Options;
 
 namespace MicroserviceFramework.Ef;
 
@@ -13,19 +15,26 @@ namespace MicroserviceFramework.Ef;
 public class EfUnitOfWork : IUnitOfWork
 {
     private readonly DbContextFactory _dbContextFactory;
+    private readonly AuditingOptions _auditingOptions;
 
     /// <summary>
     /// 初始化工作单元管理器
     /// </summary>
     public EfUnitOfWork(
-        DbContextFactory dbContextFactory)
+        DbContextFactory dbContextFactory, IOptionsMonitor<AuditingOptions> auditingOptions)
     {
         _dbContextFactory = dbContextFactory;
+        _auditingOptions = auditingOptions.CurrentValue;
     }
 
     public void RegisterAuditing(Func<AuditOperation> auditingFactory)
     {
         Check.NotNull(auditingFactory, nameof(auditingFactory));
+
+        var auditingDbContext = string.IsNullOrEmpty(_auditingOptions.AuditingDbContextTypeName)
+            ? null
+            : _dbContextFactory.GetDbContext(Type.GetType(_auditingOptions.AuditingDbContextTypeName));
+        var singleAuditOperation = auditingDbContext != null ? auditingFactory() : null;
 
         foreach (var dbContextBase in _dbContextFactory.GetAllDbContexts())
         {
@@ -41,11 +50,20 @@ public class EfUnitOfWork : IUnitOfWork
                     return;
                 }
 
-                var auditOperation = auditingFactory();
+                var auditOperation = singleAuditOperation == null ? auditingFactory() : singleAuditOperation;
+
                 var entities = db.GetAuditEntities();
                 auditOperation.AddEntities(entities);
                 auditOperation.End();
-                dbContextBase.Add(auditOperation);
+
+                if (auditingDbContext == null)
+                {
+                    dbContextBase.Add(auditOperation);
+                }
+                else
+                {
+                    auditingDbContext.Add(auditOperation);
+                }
             };
         }
     }

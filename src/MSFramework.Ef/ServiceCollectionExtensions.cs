@@ -1,6 +1,7 @@
 ﻿using System;
 using MicroserviceFramework.Domain;
 using MicroserviceFramework.Ef.Internal;
+using MicroserviceFramework.Ef.Repositories;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 
@@ -23,6 +24,7 @@ public static class ServiceCollectionExtensions
         services.TryAddSingleton<IEntityConfigurationTypeFinder, EntityConfigurationTypeFinder>();
         services.TryAddScoped<DbContextFactory>();
         services.TryAddScoped<IUnitOfWork, EfUnitOfWork>();
+        services.TryAddScoped<IExternalEntityRepository, ExternalEntityRepository>();
         return services;
     }
 }

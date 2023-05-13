@@ -29,6 +29,11 @@ public class DbContextFactory
 
     public DbContextBase GetDbContext(Type dbContextType)
     {
+        if (dbContextType == null)
+        {
+            return null;
+        }
+
         return (DbContextBase)_serviceProvider.GetRequiredService(dbContextType);
     }
 
