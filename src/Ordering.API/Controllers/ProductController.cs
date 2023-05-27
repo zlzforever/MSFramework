@@ -162,12 +162,12 @@ public class ProductController : ApiControllerBase
     public async Task<Product> CreateAsync(CreateViewObject vo)
     {
         var prod = Product.Create(vo.Name, new Random().Next(100, 10000));
-        prod.SetCreation("1");
+        prod.SetCreation("1","1");
         await _productRepository.AddAsync(prod);
         await _unitOfWork.SaveChangesAsync();
 
         var prod2 = Product.Create(vo.Name, new Random().Next(100, 10000));
-        prod2.SetCreation("1");
+        prod2.SetCreation("1","1");
         await _productRepository.AddAsync(prod2);
         await _unitOfWork.SaveChangesAsync();
         return prod;
@@ -179,7 +179,7 @@ public class ProductController : ApiControllerBase
     {
         _logger.LogInformation("调用开始");
         var prod = Product.Create("CAP", new Random().Next(100, 10000));
-        prod.SetCreation("1");
+        prod.SetCreation("1","1");
         await dbContext.AddAsync(prod);
 
         _logger.LogInformation("调用结束");
@@ -213,7 +213,7 @@ public class ProductController : ApiControllerBase
     public async Task<IActionResult> EntityFrameworkWithTransactionFail([FromServices] OrderingContext dbContext)
     {
         var prod = Product.CreateWithoutEvent("CAP", new Random().Next(100, 10000));
-        prod.SetCreation("1");
+        prod.SetCreation("1","1");
 
         await dbContext.AddAsync(prod);
 

@@ -58,7 +58,7 @@ internal class Mediator : IMediator
 
         try
         {
-            _logger.LogInformation("{TraceId}, {HandlerType} 开始处理请求 {Request}", traceId, handler.GetType().FullName,
+            _logger.LogDebug("{TraceId}, {HandlerType} 开始处理请求 {Request}", traceId, handler.GetType().FullName,
                 Defaults.JsonHelper.Serialize(request));
 
             if (method.Invoke(handler, new object[] { request, cancellationToken }) is not Task task)
@@ -68,7 +68,7 @@ internal class Mediator : IMediator
 
             await task;
 
-            _logger.LogInformation("{TraceId}, {HandlerType} 处理成功", traceId, handler.GetType().FullName);
+            _logger.LogDebug("{TraceId}, {HandlerType} 处理成功", traceId, handler.GetType().FullName);
         }
         catch (Exception e)
         {
@@ -113,7 +113,7 @@ internal class Mediator : IMediator
 
         try
         {
-            _logger.LogInformation("{TraceId}, {HandlerType} 开始处理请求 {Request}", traceId, handler.GetType().FullName,
+            _logger.LogDebug("{TraceId}, {HandlerType} 开始处理请求 {Request}", traceId, handler.GetType().FullName,
                 Defaults.JsonHelper.Serialize(request));
 
             if (method.Invoke(handler, new object[] { request, cancellationToken }) is not Task<TResponse> task)
@@ -123,7 +123,7 @@ internal class Mediator : IMediator
             }
 
             var result = await task;
-            _logger.LogInformation("{TraceId}, {HandlerType} 处理成功", traceId, handler.GetType().FullName);
+            _logger.LogDebug("{TraceId}, {HandlerType} 处理成功", traceId, handler.GetType().FullName);
             return result;
         }
         catch (Exception e)
@@ -164,7 +164,7 @@ internal class Mediator : IMediator
         {
             try
             {
-                _logger.LogInformation("{TraceId}, {HandlerType} 开始处理请求 {Request}", traceId, handler.GetType().FullName,
+                _logger.LogDebug("{TraceId}, {HandlerType} 开始处理请求 {Request}", traceId, handler.GetType().FullName,
                     Defaults.JsonHelper.Serialize(request));
 
                 if (method.Invoke(handler, new object[] { request, cancellationToken }) is Task task)
@@ -172,7 +172,7 @@ internal class Mediator : IMediator
                     await task;
                 }
 
-                _logger.LogInformation("{TraceId}, {HandlerType} 处理成功", traceId, handler.GetType().FullName);
+                _logger.LogDebug("{TraceId}, {HandlerType} 处理成功", traceId, handler.GetType().FullName);
             }
             catch (Exception e)
             {

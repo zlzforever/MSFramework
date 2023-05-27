@@ -1,9 +1,9 @@
-﻿namespace MicroserviceFramework.Domain;
-
-public interface IHasCreatorName
-{
-    /// <summary>
-    /// 创建人名称
-    /// </summary>
-    string CreatorName { get; }
-}
+﻿// namespace MicroserviceFramework.Domain;
+//
+// public interface IHasCreatorName
+// {
+//     /// <summary>
+//     /// 创建人名称
+//     /// </summary>
+//     string CreatorName { get; }
+// }

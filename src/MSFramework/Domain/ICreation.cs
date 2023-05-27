@@ -14,5 +14,10 @@ public interface ICreation
     /// </summary>
     string CreatorId { get; }
 
-    void SetCreation(string userId, DateTimeOffset creationTime = default);
+    /// <summary>
+    /// 创建人名称
+    /// </summary>
+    string CreatorName { get; }
+
+    void SetCreation(string creatorId, string creatorName, DateTimeOffset creationTime = default);
 }

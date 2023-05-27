@@ -64,7 +64,7 @@ public abstract class DbContextBase : DbContext
         {
             optionsBuilder.EnableSensitiveDataLogging();
         }
-        
+
         optionsBuilder.UseLoggerFactory(_loggerFactory);
     }
 
@@ -213,7 +213,8 @@ public abstract class DbContextBase : DbContext
             }
         }
 
-        _logger.LogInformation("将 {EntityCount} 个实体 {EntityTypes} 注册到上下文 {DbContextType} 中", count, stringBuilder, contextType);
+        _logger.LogInformation("将 {EntityCount} 个实体 {EntityTypes} 注册到上下文 {DbContextType} 中", count, stringBuilder,
+            contextType);
     }
 
     public IEnumerable<AuditEntity> GetAuditEntities()
@@ -408,12 +409,7 @@ public abstract class DbContextBase : DbContext
     {
         if (entry.Entity is ICreation entity)
         {
-            entity.SetCreation(userId);
-        }
-
-        if (entry.Entity is IHasCreatorName setter)
-        {
-            setter.SetProperty(nameof(IHasCreatorName.CreatorName), userName);
+            entity.SetCreation(userId, userName);
         }
     }
 
@@ -421,28 +417,20 @@ public abstract class DbContextBase : DbContext
     {
         if (entry.Entity is IModification entity)
         {
-            entity.SetModification(userId);
-        }
-
-        if (entry.Entity is IHasLastModifierName setter)
-        {
-            setter.SetProperty(nameof(IHasLastModifierName.LastModifierName), userName);
+            entity.SetModification(userId, userName);
         }
     }
 
     protected virtual void ApplyConceptsForDeletedEntity(EntityEntry entry, string userId, string userName)
     {
-        if (entry.Entity is IDeletion entity)
+        if (entry.Entity is not IDeletion entity)
         {
-            entry.Reload();
-            entry.State = EntityState.Modified;
-            entity.Delete(userId);
+            return;
         }
 
-        if (entry.Entity is IHasDeleterName setter)
-        {
-            setter.SetProperty(nameof(IHasDeleterName.DeleterName), userName);
-        }
+        entry.Reload();
+        entry.State = EntityState.Modified;
+        entity.SetDeletion(userId, userName);
     }
 
     private List<DomainEvent> GetDomainEvents()

@@ -24,18 +24,21 @@ public abstract class ModificationEntity<TKey> : CreationEntity<TKey>, IModifica
     public string LastModifierId { get; private set; }
 
     /// <summary>
+    /// 最后修改人名称
+    /// </summary>
+    public string LastModifierName { get; private set; }
+
+    /// <summary>
     /// 最后修改时间
     /// </summary>
     public DateTimeOffset? LastModificationTime { get; private set; }
 
-    public virtual void SetModification(string lastModifierId, DateTimeOffset lastModificationTime = default)
+    public virtual void SetModification(string lastModifierId, string lastModifierName,
+        DateTimeOffset lastModificationTime = default)
     {
         LastModificationTime = lastModificationTime == default ? DateTimeOffset.Now : lastModificationTime;
-
-        if (!string.IsNullOrEmpty(lastModifierId))
-        {
-            LastModifierId = lastModifierId;
-        }
+        LastModifierId = lastModifierId;
+        LastModifierName = lastModifierName;
     }
 
     protected ModificationEntity(TKey id) : base(id)

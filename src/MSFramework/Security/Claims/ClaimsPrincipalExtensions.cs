@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System.Globalization;
+using System.Linq;
 using System.Security.Claims;
 using MicroserviceFramework.Runtime;
 
@@ -26,5 +27,10 @@ public static class ClaimsPrincipalExtensions
     public static string GetUserId(this ClaimsIdentity claimsIdentity)
     {
         return claimsIdentity?.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+    }
+    
+    public static string GetDisplayName(this ClaimsIdentity claimsIdentity)
+    {
+        return claimsIdentity?.FindFirst(ClaimTypes.GivenName)?.Value;
     }
 }

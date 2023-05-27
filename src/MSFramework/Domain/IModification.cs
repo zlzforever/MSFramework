@@ -14,5 +14,10 @@ public interface IModification
     /// </summary>
     DateTimeOffset? LastModificationTime { get; }
 
-    void SetModification(string lastModifierId, DateTimeOffset lastModificationTime = default);
+    /// <summary>
+    /// 最后修改人名称
+    /// </summary>
+    string LastModifierName { get; }
+
+    void SetModification(string lastModifierId, string lastModifierName, DateTimeOffset lastModificationTime = default);
 }

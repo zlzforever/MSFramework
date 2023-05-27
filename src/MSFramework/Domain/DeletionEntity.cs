@@ -29,26 +29,34 @@ public abstract class DeletionEntity<TKey> : ModificationEntity<TKey>, IDeletion
     public string DeleterId { get; private set; }
 
     /// <summary>
+    /// 删除人
+    /// </summary>
+    public string DeleterName { get; private set; }
+
+    /// <summary>
     /// 删除时间
     /// </summary>
-    public DateTimeOffset? DeletionTime { get; set; }
+    public DateTimeOffset? DeletionTime { get; private set; }
 
-    public virtual void Delete(string userId, DateTimeOffset deletionTime = default)
+    public virtual void SetDeletion(string deleterId, string deleterName, DateTimeOffset deletionTime = default)
     {
-        // 删除只能一次操作，因此如果已经有值，不能再做设置
+        // 删除只能一次操作， 因此如果已经有值， 不能再做设置
+        // 若更新成功为 true， 则不会发生再次更新的情况
         if (IsDeleted)
         {
             return;
         }
 
         IsDeleted = true;
+        DeletionTime = deletionTime == default ? DateTimeOffset.Now : deletionTime;
+        DeleterId = deleterId;
+        DeleterName = deleterName;
 
-        DeletionTime ??= deletionTime == default ? DateTimeOffset.Now : deletionTime;
-
-        if (!string.IsNullOrWhiteSpace(userId) && string.IsNullOrWhiteSpace(DeleterId))
-        {
-            DeleterId = userId;
-        }
+        // DeletionTime ??= deletionTime == default ? DateTimeOffset.Now : deletionTime;
+        // if (!string.IsNullOrWhiteSpace(userId) && string.IsNullOrWhiteSpace(DeleterId))
+        // {
+        //     DeleterId = userId;
+        // }
     }
 
     protected DeletionEntity(TKey id) : base(id)

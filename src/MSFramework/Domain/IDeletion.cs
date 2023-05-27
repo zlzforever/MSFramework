@@ -10,9 +10,14 @@ public interface IDeletion : ISoftDelete
     string DeleterId { get; }
 
     /// <summary>
+    /// 删除人名称
+    /// </summary>
+    string DeleterName { get; }
+
+    /// <summary>
     /// 删除时间
     /// </summary>
-    DateTimeOffset? DeletionTime { get; set; }
+    DateTimeOffset? DeletionTime { get; }
 
-    void Delete(string userId, DateTimeOffset deletionTime = default);
+    void SetDeletion(string deleterId, string deleterName, DateTimeOffset deletionTime = default);
 }

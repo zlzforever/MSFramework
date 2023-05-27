@@ -29,15 +29,23 @@ public abstract class CreationEntity<TKey> :
     /// </summary>
     public string CreatorId { get; private set; }
 
-    public virtual void SetCreation(string userId, DateTimeOffset creationTime = default)
-    {
-        // 创建只能一次操作，因此如果已经有值，不能再做设置
-        CreationTime ??= creationTime == default ? DateTimeOffset.Now : creationTime;
+    /// <summary>
+    /// 创建人名称
+    /// </summary>
+    public string CreatorName { get; private set; }
 
-        if (!string.IsNullOrEmpty(userId) && string.IsNullOrEmpty(CreatorId))
+    public virtual void SetCreation(string creatorId, string creatorName, DateTimeOffset creationTime = default)
+    {
+        // 创建只能一次操作， 因此如果已经有值， 不能再做设置
+        // 若更新成功则创建时间不会为空， 不会发生再次更新的情况
+        if (CreationTime.HasValue)
         {
-            CreatorId = userId;
+            return;
         }
+
+        CreationTime = creationTime == default ? DateTimeOffset.Now : creationTime;
+        CreatorId = creatorId;
+        CreatorName = creatorName;
     }
 
     protected CreationEntity(TKey id) : base(id)

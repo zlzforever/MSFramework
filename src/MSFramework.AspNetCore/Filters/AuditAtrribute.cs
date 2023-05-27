@@ -56,6 +56,14 @@ public class Audit : ActionFilterAttribute
 
         double? lat = double.TryParse(context.HttpContext.Request.Query["lat"].ToString(), out var a) ? a : null;
         double? lng = double.TryParse(context.HttpContext.Request.Query["lng"].ToString(), out var n) ? n : null;
+
+        (string UserId, string UserName) user = default;
+        if (context.HttpContext.User.Identity is { IsAuthenticated: true } and ClaimsIdentity identity1)
+        {
+            user.UserId = identity1.GetUserId();
+            //user.UserName=identity1.
+        }
+
         var userId = context.HttpContext.User.Identity is { IsAuthenticated: true } and ClaimsIdentity identity
             ? identity.GetUserId()
             : string.Empty;
@@ -65,7 +73,8 @@ public class Audit : ActionFilterAttribute
         {
             var auditedOperation = new AuditOperation(url, ua, ip, deviceModel, deviceId,
                 lat, lng);
-            auditedOperation.SetCreation(userId, creationTime);
+            // EF 那边可能
+            auditedOperation.SetCreation(userId, "",creationTime);
             return auditedOperation;
         });
 
