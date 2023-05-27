@@ -1,10 +1,9 @@
 ﻿using System;
-using System.Security.Claims;
 using System.Threading.Tasks;
+using MicroserviceFramework.Application;
 using MicroserviceFramework.AspNetCore.Extensions;
 using MicroserviceFramework.Auditing;
 using MicroserviceFramework.Domain;
-using MicroserviceFramework.Security.Claims;
 using Microsoft.AspNetCore.Http.Extensions;
 using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.Extensions.DependencyInjection;
@@ -57,16 +56,17 @@ public class Audit : ActionFilterAttribute
         double? lat = double.TryParse(context.HttpContext.Request.Query["lat"].ToString(), out var a) ? a : null;
         double? lng = double.TryParse(context.HttpContext.Request.Query["lng"].ToString(), out var n) ? n : null;
 
-        (string UserId, string UserName) user = default;
-        if (context.HttpContext.User.Identity is { IsAuthenticated: true } and ClaimsIdentity identity1)
+        (string UserId, string UserDisplayName) user = default;
+        if (context.HttpContext.User.Identity is { IsAuthenticated: true })
         {
-            user.UserId = identity1.GetUserId();
-            //user.UserName=identity1.
+            var session = context.HttpContext.RequestServices.GetService<ISession>();
+            if (session != null)
+            {
+                user.UserId = session.UserId;
+                user.UserDisplayName = session.UserDisplayName;
+            }
         }
 
-        var userId = context.HttpContext.User.Identity is { IsAuthenticated: true } and ClaimsIdentity identity
-            ? identity.GetUserId()
-            : string.Empty;
         var creationTime = DateTimeOffset.Now;
 
         unitOfWork.RegisterAuditing(() =>
@@ -74,7 +74,7 @@ public class Audit : ActionFilterAttribute
             var auditedOperation = new AuditOperation(url, ua, ip, deviceModel, deviceId,
                 lat, lng);
             // EF 那边可能
-            auditedOperation.SetCreation(userId, "",creationTime);
+            auditedOperation.SetCreation(user.UserId, user.UserDisplayName, creationTime);
             return auditedOperation;
         });
 
