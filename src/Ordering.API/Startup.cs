@@ -1,10 +1,12 @@
 ﻿using System;
 using System.IO;
 using System.Linq;
+using System.Text;
 using System.Text.Encodings.Web;
 using System.Text.Json;
 using System.Text.Unicode;
 using DotNetCore.CAP.Dapr;
+using DotNetCore.CAP.Messages;
 using MicroserviceFramework;
 using MicroserviceFramework.AspNetCore;
 using MicroserviceFramework.AspNetCore.Extensions;
@@ -29,6 +31,7 @@ using Microsoft.OpenApi.Models;
 using Ordering.Domain.AggregateRoots;
 using Ordering.Infrastructure;
 using Serilog;
+using Serilog.Core;
 using Serilog.Events;
 
 namespace Ordering.API;
@@ -83,7 +86,6 @@ public static class Startup
         // {
         //     new EnumerationContractResolver(), new CamelCasePropertyNamesContractResolver()
         // };
-
         services.AddControllers(x =>
             {
                 x.Filters.AddUnitOfWork()
@@ -133,13 +135,37 @@ public static class Startup
 
         services.AddCap(x =>
         {
-            x.UseEntityFramework<OrderingContext>();
+            x.UseEntityFramework<OrderingContext>(y =>
+            {
+                y.Schema = "ordering";
+            });
             x.JsonSerializerOptions.AddDefaultConverters();
             x.JsonSerializerOptions.Encoder = JavaScriptEncoder.Create(UnicodeRanges.All);
-            x.UseDapr(configure =>
+            // var password = Environment.GetEnvironmentVariable("RABBITMQ_PASSWORD");
+            // x.UseRabbitMQ(configure =>
+            // {
+            //     configure.HostName = "192.168.100.254";
+            //     configure.Password = password;
+            //     configure.UserName = "admin";
+            //     // configure.ExchangeName = "ordering";
+            // });
+            x.UseDapr(y => y.Pubsub = "rabbitmq-pubsub");
+            x.FailedRetryCount = 3;
+            x.FailedMessageExpiredAfter = 365 * 24 * 3600;
+            x.FailedThresholdCallback += failed =>
             {
-                configure.Pubsub = "pubsub";
-            });
+                var traceId = failed.Message.Headers[Headers.MessageId];
+                var messageBuilder = new StringBuilder($"消息名称: {failed.Message.GetName()}[{failed.MessageType}] ");
+                messageBuilder.AppendLine();
+                messageBuilder.AppendLine($"消息组: {failed.Message.GetGroup()}[CAP]");
+                messageBuilder.AppendLine("消息ID(Content):");
+                messageBuilder.AppendLine(failed.Message.GetId());
+                messageBuilder.AppendLine($"日志跟踪标识: {traceId}");
+                messageBuilder.AppendLine($"发送时间: {failed.Message.Headers[Headers.SentTime]}");
+                messageBuilder.AppendLine("错误消息:");
+                messageBuilder.AppendLine(failed.Message.Headers[Headers.Exception]);
+                Log.Error(messageBuilder.ToString());
+            };
             x.TopicNamePrefix = "CAP";
             x.UseDashboard();
         });
@@ -240,7 +266,7 @@ public static class Startup
         //         }
         //     }
         // });
-        
+
         // 中间件顺序
         // ExceptionHandler
         // HSTS
@@ -261,10 +287,10 @@ public static class Startup
             {
                 return;
             }
-        
+
             await next();
 
-        
+
             // // 通常情况下异常会导致 Result 为空，但添加 ActionExceptionFilter 后，感知到导常后会返回 BadrequestObjectResult
             // // 是否有其它情况会导致 Result 为空?
             // if (actionExecutedContext.Result == null)

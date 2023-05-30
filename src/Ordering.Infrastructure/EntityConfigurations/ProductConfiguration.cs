@@ -1,4 +1,5 @@
 ﻿using MicroserviceFramework.Ef;
+using MicroserviceFramework.Ef.Extensions;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Ordering.Domain.AggregateRoots;
 
@@ -12,5 +13,7 @@ public class ProductConfiguration
         ConfigureDefaultIdentifier(builder);
         
         builder.Property(x => x.Name).HasMaxLength(256);
+        
+        builder.ConfigureCreation();
     }
 }

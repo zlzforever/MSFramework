@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
-using System.Text.Json;
 using System.Threading.Tasks;
 using DotNetCore.CAP;
 using MicroserviceFramework;
@@ -13,7 +12,6 @@ using MicroserviceFramework.Domain;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using MongoDB.Bson;
-using Ordering.Application.DomainEventHandlers;
 using Ordering.Application.Events;
 using Ordering.Domain.AggregateRoots;
 using Ordering.Domain.Repositories;
@@ -32,7 +30,6 @@ public class ProductController : ApiControllerBase
     private readonly ICapPublisher _capBus;
     private readonly OrderingContext _orderingContext;
     private readonly ILogger<ProductController> _logger;
-
 
     public ProductController(IProductRepository productRepository,
         IObjectAssembler mapper, IUnitOfWork unitOfWork, ICapPublisher capBus, OrderingContext orderingContext,
@@ -86,8 +83,8 @@ public class ProductController : ApiControllerBase
     public ProductOut GetFirst()
     {
         var queryable = from p in _orderingContext.Set<Product>()
-                        join u in _orderingContext.Set<User>() on p.CreatorId equals u.Id
-                        select new ProductOut { Name = p.Name, Price = p.Price, CreatorName = u.Name };
+            join u in _orderingContext.Set<User>() on p.CreatorId equals u.Id
+            select new ProductOut { Name = p.Name, Price = p.Price, CreatorName = u.Name };
         return queryable.FirstOrDefault();
     }
 
@@ -162,12 +159,12 @@ public class ProductController : ApiControllerBase
     public async Task<Product> CreateAsync(CreateViewObject vo)
     {
         var prod = Product.Create(vo.Name, new Random().Next(100, 10000));
-        prod.SetCreation("1","1");
+        prod.SetCreation("1", "1");
         await _productRepository.AddAsync(prod);
         await _unitOfWork.SaveChangesAsync();
 
         var prod2 = Product.Create(vo.Name, new Random().Next(100, 10000));
-        prod2.SetCreation("1","1");
+        prod2.SetCreation("1", "1");
         await _productRepository.AddAsync(prod2);
         await _unitOfWork.SaveChangesAsync();
         return prod;
@@ -179,12 +176,18 @@ public class ProductController : ApiControllerBase
     {
         _logger.LogInformation("调用开始");
         var prod = Product.Create("CAP", new Random().Next(100, 10000));
-        prod.SetCreation("1","1");
+        prod.SetCreation("1", "1");
         await dbContext.AddAsync(prod);
 
         _logger.LogInformation("调用结束");
 
         return Ok();
+    }
+
+    [CapSubscribe("subscribe")]
+    [NonAction]
+    public void Subscribe()
+    {
     }
 
     [HttpGet("CAP_Exception")]
@@ -194,42 +197,20 @@ public class ProductController : ApiControllerBase
         throw new MicroserviceFrameworkFriendlyException("发生异常");
     }
 
-    [CapSubscribe("Ordering.Application.EventHandlers.ProjectCreatedIntegrationEvent")]
-    [NonAction]
-    public async Task CreatedAsync(ProjectCreatedIntegrationEvent @event)
-    {
-        var product = await _productRepository.FindAsync(@event.Id);
-        if (product != null)
-        {
-            product.SetName(Guid.NewGuid().ToString());
-        }
-
-        await _unitOfWork.SaveChangesAsync();
-        Console.WriteLine($"Created: {JsonSerializer.Serialize(@event)}");
-    }
-
     [HttpPost("CAPFail")]
     [CapTransaction]
     public async Task<IActionResult> EntityFrameworkWithTransactionFail([FromServices] OrderingContext dbContext)
     {
         var prod = Product.CreateWithoutEvent("CAP", new Random().Next(100, 10000));
-        prod.SetCreation("1","1");
+        prod.SetCreation("1", "1");
 
         await dbContext.AddAsync(prod);
 
-        await _capBus.PublishAsync("Ordering.Application.EventHandlers.ProjectCreateFailedIntegrationEvent",
-            new ProjectCreatedIntegrationEvent { Id = prod.Id, Name = prod.Name, CreationTime = DateTimeOffset.Now });
+        await _capBus.PublishAsync(Names.ProjectCreateFailedEvent,
+            new { prod.Id, prod.Name, CreationTime = DateTimeOffset.Now });
 
         await dbContext.SaveChangesAsync();
         return Ok();
-    }
-
-    [CapSubscribe("Ordering.Application.EventHandlers.ProjectCreateFailedIntegrationEvent")]
-    [NonAction]
-    public Task CreateFailedAsync(ProjectCreatedIntegrationEvent @event)
-    {
-        // throw new ApplicationException("Transaction failed");
-        return Task.CompletedTask;
     }
 
     [HttpGet("testPaged")]

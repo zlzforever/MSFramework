@@ -40,7 +40,7 @@ $ dotnet ef migrations add init2  --context OrderingContext2 -p ../Ordering.Infr
 dotnet publish -c Release -r win-x64 -p:PublishSingleFile=true --self-contained true -p:
 IncludeNativeLibrariesForSelfExtract=true
 
-###  
+###   
 
 1. SaveFile 是否有使用文件名来取 MD5？
 
@@ -55,8 +55,9 @@ openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout localhost.key -out l
 
 + 建议使用 schema 参数来进行隔离， 不再使用 table prefix 进行隔离
 
-### Dapr 
+### Dapr
 
 ```
-dapr run --dapr-http-port 50001 --dapr-grpc-port 51001 --app-port 5001 --app-id ordering
+dapr run --dapr-http-port 50001 --dapr-grpc-port 51001 --app-port 5001 --app-id ordering --components-path ./dapr/components
+dapr run --dapr-http-port 50002 --dapr-grpc-port 51002 --app-port 5002 --app-id ordering-subscribe --components-path ./dapr/components
 ```

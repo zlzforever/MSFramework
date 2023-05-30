@@ -38,7 +38,8 @@ namespace Ordering.Infrastructure.Migrations
                     endtime = table.Column<long>(name: "end_time", type: "bigint", nullable: false, defaultValue: 0L),
                     elapsed = table.Column<int>(type: "integer", nullable: false),
                     creationtime = table.Column<long>(name: "creation_time", type: "bigint", nullable: true),
-                    creatorid = table.Column<string>(name: "creator_id", type: "character varying(255)", maxLength: 255, nullable: true)
+                    creatorid = table.Column<string>(name: "creator_id", type: "character varying(36)", maxLength: 36, nullable: true),
+                    creatorname = table.Column<string>(name: "creator_name", type: "character varying(255)", maxLength: 255, nullable: true)
                 },
                 constraints: table =>
                 {
@@ -53,8 +54,9 @@ namespace Ordering.Infrastructure.Migrations
                     name = table.Column<string>(type: "character varying(256)", maxLength: 256, nullable: true),
                     price = table.Column<int>(type: "integer", nullable: false),
                     concurrencystamp = table.Column<string>(name: "concurrency_stamp", type: "character varying(36)", maxLength: 36, nullable: true),
-                    creationtime = table.Column<DateTimeOffset>(name: "creation_time", type: "timestamp with time zone", nullable: true),
-                    creatorid = table.Column<string>(name: "creator_id", type: "text", nullable: true)
+                    creationtime = table.Column<long>(name: "creation_time", type: "bigint", nullable: true),
+                    creatorid = table.Column<string>(name: "creator_id", type: "character varying(36)", maxLength: 36, nullable: true),
+                    creatorname = table.Column<string>(name: "creator_name", type: "character varying(255)", maxLength: 255, nullable: true)
                 },
                 constraints: table =>
                 {
@@ -79,8 +81,9 @@ namespace Ordering.Infrastructure.Migrations
                     description = table.Column<string>(type: "text", nullable: true),
                     creatorid2 = table.Column<string>(name: "creator_id2", type: "character varying(36)", maxLength: 36, nullable: true),
                     concurrencystamp = table.Column<string>(name: "concurrency_stamp", type: "character varying(36)", maxLength: 36, nullable: true),
-                    creationtime = table.Column<DateTimeOffset>(name: "creation_time", type: "timestamp with time zone", nullable: true),
-                    creatorid = table.Column<string>(name: "creator_id", type: "text", nullable: true)
+                    creationtime = table.Column<long>(name: "creation_time", type: "bigint", nullable: true),
+                    creatorid = table.Column<string>(name: "creator_id", type: "character varying(36)", maxLength: 36, nullable: true),
+                    creatorname = table.Column<string>(name: "creator_name", type: "character varying(255)", maxLength: 255, nullable: true)
                 },
                 constraints: table =>
                 {
@@ -193,6 +196,11 @@ namespace Ordering.Infrastructure.Migrations
                 column: "entity_id");
 
             migrationBuilder.CreateIndex(
+                name: "IX_ordering_order_creation_time",
+                table: "ordering_order",
+                column: "creation_time");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_ordering_order_creator_id2",
                 table: "ordering_order",
                 column: "creator_id2");
@@ -206,6 +214,11 @@ namespace Ordering.Infrastructure.Migrations
                 name: "IX_ordering_order_item_order_id",
                 table: "ordering_order_item",
                 column: "order_id");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ordering_product_creation_time",
+                table: "ordering_product",
+                column: "creation_time");
         }
 
         /// <inheritdoc />

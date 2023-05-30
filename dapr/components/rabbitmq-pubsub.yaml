@@ -1,0 +1,30 @@
+apiVersion: dapr.io/v1alpha1
+kind: Component
+metadata:
+  name: rabbitmq-pubsub
+spec:
+  type: pubsub.rabbitmq
+  version: v1
+  metadata:
+    - name: hostname
+      value: "192.168.100.254"
+    - name: username
+      value: "admin"
+    - name: password
+      value: "w7qcFfxK^YS&fn"
+    - name: durable
+      value: "true"
+    - name: deletedWhenUnused
+      value: "false"
+    - name: autoAck
+      value: "false"
+    - name: deliveryMode
+      value: "2"
+    - name: requeueInFailure
+      value: "true"
+    - name: prefetchCount
+      value: "0"
+    - name: reconnectWait
+      value: "0"
+    - name: concurrencyMode
+      value: parallel

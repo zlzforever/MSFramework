@@ -69,9 +69,14 @@ namespace Ordering.Infrastructure.Migrations
                         .HasColumnName("creation_time");
 
                     b.Property<string>("CreatorId")
+                        .HasMaxLength(36)
+                        .HasColumnType("character varying(36)")
+                        .HasColumnName("creator_id");
+
+                    b.Property<string>("CreatorName")
                         .HasMaxLength(255)
                         .HasColumnType("character varying(255)")
-                        .HasColumnName("creator_id");
+                        .HasColumnName("creator_name");
 
                     b.Property<string>("DeviceId")
                         .HasMaxLength(36)
@@ -182,13 +187,19 @@ namespace Ordering.Infrastructure.Migrations
                         .HasColumnType("character varying(36)")
                         .HasColumnName("concurrency_stamp");
 
-                    b.Property<DateTimeOffset?>("CreationTime")
-                        .HasColumnType("timestamp with time zone")
+                    b.Property<long?>("CreationTime")
+                        .HasColumnType("bigint")
                         .HasColumnName("creation_time");
 
                     b.Property<string>("CreatorId")
-                        .HasColumnType("text")
+                        .HasMaxLength(36)
+                        .HasColumnType("character varying(36)")
                         .HasColumnName("creator_id");
+
+                    b.Property<string>("CreatorName")
+                        .HasMaxLength(255)
+                        .HasColumnType("character varying(255)")
+                        .HasColumnName("creator_name");
 
                     b.Property<string>("Description")
                         .HasColumnType("text")
@@ -218,6 +229,8 @@ namespace Ordering.Infrastructure.Migrations
                         .HasColumnName("creator_id2");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("CreationTime");
 
                     b.HasIndex("creator_id2");
 
@@ -286,13 +299,19 @@ namespace Ordering.Infrastructure.Migrations
                         .HasColumnType("character varying(36)")
                         .HasColumnName("concurrency_stamp");
 
-                    b.Property<DateTimeOffset?>("CreationTime")
-                        .HasColumnType("timestamp with time zone")
+                    b.Property<long?>("CreationTime")
+                        .HasColumnType("bigint")
                         .HasColumnName("creation_time");
 
                     b.Property<string>("CreatorId")
-                        .HasColumnType("text")
+                        .HasMaxLength(36)
+                        .HasColumnType("character varying(36)")
                         .HasColumnName("creator_id");
+
+                    b.Property<string>("CreatorName")
+                        .HasMaxLength(255)
+                        .HasColumnType("character varying(255)")
+                        .HasColumnName("creator_name");
 
                     b.Property<string>("Name")
                         .HasMaxLength(256)
@@ -304,6 +323,8 @@ namespace Ordering.Infrastructure.Migrations
                         .HasColumnName("price");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("CreationTime");
 
                     b.ToTable("ordering_product");
                 });

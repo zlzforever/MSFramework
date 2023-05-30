@@ -43,9 +43,9 @@ internal class DaprTransport : ITransport
         }
         catch (Exception ex)
         {
-            var wapperEx = new PublisherSentFailedException(ex.Message, ex);
+            var wrapperEx = new PublisherSentFailedException(ex.Message, ex);
 
-            return OperateResult.Failed(wapperEx);
+            return OperateResult.Failed(wrapperEx);
         }
     }
 }
