@@ -1,4 +1,4 @@
-﻿using System.Collections.Concurrent;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
@@ -65,7 +65,10 @@ public class SecurityDaprTopicFilter : IActionFilter, IOrderedFilter
 
         context.Result = new OkObjectResult(new ApiResult
         {
-            Success = false, Msg = "访问受限", Code = StatusCodes.Status403Forbidden, Data = null
+            Success = false,
+            Msg = "访问受限",
+            Code = StatusCodes.Status403Forbidden,
+            Data = null
         });
         _logger.LogError("Executing {Action} forbidden", actionDescriptor.DisplayName);
     }

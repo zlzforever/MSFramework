@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Linq;
 using MicroserviceFramework.Runtime;
 using Microsoft.AspNetCore.Mvc;

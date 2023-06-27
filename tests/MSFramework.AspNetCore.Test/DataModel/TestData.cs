@@ -1,4 +1,4 @@
-﻿using MicroserviceFramework.Domain;
+using MicroserviceFramework.Domain;
 using MongoDB.Bson;
 
 namespace MSFramework.AspNetCore.Test.DataModel;

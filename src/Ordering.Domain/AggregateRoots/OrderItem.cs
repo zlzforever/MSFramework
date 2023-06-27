@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using MicroserviceFramework.Domain;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using MongoDB.Bson;

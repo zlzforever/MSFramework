@@ -1,4 +1,4 @@
-﻿using MicroserviceFramework.Domain;
+using MicroserviceFramework.Domain;
 using MicroserviceFramework.Extensions.DependencyInjection;
 using MongoDB.Bson;
 using Ordering.Domain.AggregateRoots;

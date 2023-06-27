@@ -1,1 +1,1 @@
-﻿namespace Ordering.Application.DTOs;
+namespace Ordering.Application.DTOs;

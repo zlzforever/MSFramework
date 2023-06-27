@@ -1,4 +1,4 @@
-﻿using System.Threading;
+using System.Threading;
 using System.Threading.Tasks;
 using DotNetCore.CAP;
 using MicroserviceFramework.Domain;
@@ -22,9 +22,11 @@ public class ProjectCreatedEventHandler : IDomainEventHandler<ProjectCreatedEven
     public async Task HandleAsync(ProjectCreatedEvent @event, CancellationToken cancellationToken = default)
     {
         await _capPublisher.PublishAsync(Names.ProjectCreatedEvent,
-            new 
+            new
             {
-                @event.Id, @event.Name, @event.CreationTime
+                @event.Id,
+                @event.Name,
+                @event.CreationTime
             }, cancellationToken: cancellationToken);
 
         _logger.LogInformation("Publish ProjectCreatedEvent");

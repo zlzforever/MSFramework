@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using MicroserviceFramework.Ef.Design;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;

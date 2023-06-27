@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using System.Text.Json.Serialization;
 using MicroserviceFramework.Domain;
 using MongoDB.Bson;
@@ -23,7 +23,7 @@ public class AuditEntity : EntityBase<ObjectId>
     /// 所属的操作
     /// </summary>
     [JsonIgnore]
-    public virtual AuditOperation Operation { get; internal set; }
+    public AuditOperation Operation { get; internal set; }
 
     /// <summary>
     /// 获取或设置 类型名称

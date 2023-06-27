@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using MicroserviceFramework.Domain;
 using MongoDB.Bson;
 using Ordering.Domain.AggregateRoots.Events;
@@ -16,7 +16,9 @@ public class Product : CreationAggregateRoot, IOptimisticLock
         var product = new Product(ObjectId.GenerateNewId()) { Name = name, Price = price };
         product.AddDomainEvent(new ProjectCreatedEvent
         {
-            Id = product.Id, Name = name, CreationTime = DateTimeOffset.Now
+            Id = product.Id,
+            Name = name,
+            CreationTime = DateTimeOffset.Now
         });
 
         return product;

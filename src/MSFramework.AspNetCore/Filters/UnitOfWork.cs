@@ -1,4 +1,4 @@
-﻿using System.Threading.Tasks;
+using System.Threading.Tasks;
 using MicroserviceFramework.AspNetCore.Extensions;
 using MicroserviceFramework.Domain;
 using Microsoft.AspNetCore.Mvc.Filters;

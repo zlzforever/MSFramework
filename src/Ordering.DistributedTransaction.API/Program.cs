@@ -105,6 +105,6 @@ app.UseCloudEvents();
 app.MapSubscribeHandler();
 app.UseDaprCap();
 app.MapControllers();
- 
+
 
 app.Run();

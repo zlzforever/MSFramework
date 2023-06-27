@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using MicroserviceFramework.Domain;
 using MongoDB.Bson;
@@ -75,15 +75,6 @@ public class AuditOperation : CreationAggregateRoot<ObjectId>
     }
 
     public void AddEntities(IEnumerable<AuditEntity> entities)
-    {
-        foreach (var entity in entities)
-        {
-            entity.Operation = this;
-            Entities.Add(entity);
-        }
-    }
-
-    public void AddEntities(params AuditEntity[] entities)
     {
         foreach (var entity in entities)
         {

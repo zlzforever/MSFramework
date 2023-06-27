@@ -1,11 +1,9 @@
-﻿using System;
+using System;
 using System.Globalization;
 using System.Text;
-using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.Extensions.Hosting;
 using Serilog;
 
 namespace Ordering.API;
@@ -30,7 +28,8 @@ public class Program
     public static WebApplicationBuilder CreateWebApplicationBuilder(string[] args)
     {
         var webApplicationBuilder = WebApplication.CreateBuilder(args);
-        webApplicationBuilder.Host.ConfigureAppConfiguration(Startup.ConfigureConfiguration)
+        Startup.ConfigureConfiguration(webApplicationBuilder.Configuration);
+        webApplicationBuilder.Host
             .ConfigureServices(Startup.ConfigureServices)
             .UseSerilog();
         webApplicationBuilder.WebHost.UseUrls("http://+:5001");

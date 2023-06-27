@@ -43,8 +43,8 @@ public class SubscribeController : ControllerBase
     public Task CreateFailedAsync(ProjectCreatedIntegrationEvent @event)
     {
         throw new ApplicationException("Transaction failed");
-        _logger.LogInformation("Received project created failed event: " + JsonSerializer.Serialize(@event));
-        return Task.CompletedTask;
+        // _logger.LogInformation("Received project created failed event: " + JsonSerializer.Serialize(@event));
+        // return Task.CompletedTask;
     }
 
     public class ProjectCreatedIntegrationEvent

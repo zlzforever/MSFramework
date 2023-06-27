@@ -1,14 +1,12 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Threading.Tasks;
 using MicroserviceFramework.AspNetCore;
-using MicroserviceFramework.AspNetCore.Mvc;
 using MicroserviceFramework.Domain;
 using MicroserviceFramework.Ef.Repositories;
 using MicroserviceFramework.Mediator;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -129,7 +127,7 @@ public class OrderController : ApiControllerBase
     public Task ChangeOrderAddressAsync([FromRoute] ObjectId orderId,
         [FromBody] ChangeOrderAddressCommand command)
     {
- 
+
         command.OrderId = orderId;
         return Task.CompletedTask;
     }

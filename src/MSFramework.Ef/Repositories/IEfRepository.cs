@@ -1,4 +1,4 @@
-﻿namespace MicroserviceFramework.Ef.Repositories;
+namespace MicroserviceFramework.Ef.Repositories;
 
 public interface IEfRepository
 {

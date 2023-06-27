@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
@@ -83,8 +83,8 @@ public class ProductController : ApiControllerBase
     public ProductOut GetFirst()
     {
         var queryable = from p in _orderingContext.Set<Product>()
-            join u in _orderingContext.Set<User>() on p.CreatorId equals u.Id
-            select new ProductOut { Name = p.Name, Price = p.Price, CreatorName = u.Name };
+                        join u in _orderingContext.Set<User>() on p.CreatorId equals u.Id
+                        select new ProductOut { Name = p.Name, Price = p.Price, CreatorName = u.Name };
         return queryable.FirstOrDefault();
     }
 

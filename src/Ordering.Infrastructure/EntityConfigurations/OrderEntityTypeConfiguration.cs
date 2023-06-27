@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using MicroserviceFramework.Ef;
 using MicroserviceFramework.Ef.Extensions;
 using Microsoft.EntityFrameworkCore;
@@ -32,7 +32,7 @@ public class OrderEntityTypeConfiguration : EntityTypeConfigurationBase<Order, O
         // // DDD Patterns comment:
         // //Set as field (New since EF 1.1) to access the OrderItem collection property through its field
         // navigation?.SetPropertyAccessMode(PropertyAccessMode.Field);
-        
+
         builder.ConfigureCreation();
     }
 }

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using DeepCopy;
 using MicroserviceFramework.Common;
 using MicroserviceFramework.Domain;

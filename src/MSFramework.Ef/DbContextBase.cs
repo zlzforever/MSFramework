@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -352,17 +352,17 @@ public abstract class DbContextBase : DbContext
                     originalValue = GetValue(columnType, propertyEntry.OriginalValue);
                     break;
                 case EntityState.Modified:
-                {
-                    var currentValue = GetValue(columnType, propertyEntry.CurrentValue);
-                    originalValue = GetValue(columnType, propertyEntry.OriginalValue);
-                    if (currentValue == originalValue)
                     {
-                        continue;
-                    }
+                        var currentValue = GetValue(columnType, propertyEntry.CurrentValue);
+                        originalValue = GetValue(columnType, propertyEntry.OriginalValue);
+                        if (currentValue == originalValue)
+                        {
+                            continue;
+                        }
 
-                    newValue = currentValue;
-                    break;
-                }
+                        newValue = currentValue;
+                        break;
+                    }
                 case EntityState.Detached:
                     break;
                 case EntityState.Unchanged:

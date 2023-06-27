@@ -1,4 +1,4 @@
-﻿using System.Threading.Tasks;
+using System.Threading.Tasks;
 using MicroserviceFramework.Application;
 using MicroserviceFramework.EventBus;
 using MicroserviceFramework.Mediator;

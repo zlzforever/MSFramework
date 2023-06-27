@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Linq;
 using System.Reflection;
 using MicroserviceFramework.Domain;
@@ -11,7 +11,7 @@ public static class ServiceCollectionExtensions
 {
     public static MicroserviceFrameworkBuilder UseAutoMapper(this MicroserviceFrameworkBuilder builder)
     {
-        return builder.UseAutoMapper( Utils.Runtime.GetAllAssemblies());
+        return builder.UseAutoMapper(Utils.Runtime.GetAllAssemblies());
     }
 
     public static MicroserviceFrameworkBuilder UseAutoMapper(this MicroserviceFrameworkBuilder builder,

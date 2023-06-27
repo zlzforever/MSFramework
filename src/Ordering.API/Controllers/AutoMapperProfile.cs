@@ -1,4 +1,4 @@
-﻿using AutoMapper;
+using AutoMapper;
 using Ordering.Domain.AggregateRoots;
 
 namespace Ordering.API.Controllers;

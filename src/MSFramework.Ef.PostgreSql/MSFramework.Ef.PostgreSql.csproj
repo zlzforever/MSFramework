@@ -1,15 +1,14 @@
 <Project Sdk="Microsoft.NET.Sdk">
-
-    <PropertyGroup>
-        <PackageId>MSFramework.Ef.PostgreSql</PackageId>
-        <AssemblyName>MSFramework.Ef.PostgreSql</AssemblyName>
-        <RootNamespace>MicroserviceFramework.Ef.PostgreSql</RootNamespace>
-    </PropertyGroup>
-    <Import Project="../../package.props" />
-    <ItemGroup>
-        <ProjectReference Include="..\MSFramework.Ef\MSFramework.Ef.csproj" />
-    </ItemGroup>
-    <ItemGroup>
-        <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="7.0.4" />
-    </ItemGroup>
+  <PropertyGroup>
+    <PackageId>MSFramework.Ef.PostgreSql</PackageId>
+    <AssemblyName>MSFramework.Ef.PostgreSql</AssemblyName>
+    <RootNamespace>MicroserviceFramework.Ef.PostgreSql</RootNamespace>
+  </PropertyGroup>
+  <Import Project="../../package.props" />
+  <ItemGroup>
+    <ProjectReference Include="..\MSFramework.Ef\MSFramework.Ef.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="7.0.4" />
+  </ItemGroup>
 </Project>

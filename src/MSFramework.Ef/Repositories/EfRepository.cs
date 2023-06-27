@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Linq;
 using System.Threading.Tasks;
 using MicroserviceFramework.Domain;
@@ -45,8 +45,8 @@ public abstract class EfRepository<TEntity, TKey> : IRepository<TEntity, TKey>, 
         return !UseQuerySplittingBehavior.HasValue ? queryable :
             UseQuerySplittingBehavior.Value ? queryable.AsSplitQuery() : queryable.AsSingleQuery();
     }
-    
- 
+
+
 
     public virtual TEntity Find(TKey id)
     {

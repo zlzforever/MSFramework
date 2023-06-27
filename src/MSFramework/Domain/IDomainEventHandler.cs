@@ -1,4 +1,4 @@
-﻿using MicroserviceFramework.Mediator;
+using MicroserviceFramework.Mediator;
 
 namespace MicroserviceFramework.Domain;
 

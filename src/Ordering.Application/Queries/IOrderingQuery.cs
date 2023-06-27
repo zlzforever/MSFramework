@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using MicroserviceFramework.Extensions.DependencyInjection;
 using MongoDB.Bson;

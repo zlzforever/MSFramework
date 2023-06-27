@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using MicroserviceFramework.Domain;
 using MicroserviceFramework.Ef.Internal;
 using MicroserviceFramework.Ef.Repositories;

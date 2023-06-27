@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using MicroserviceFramework.Domain;
 
 namespace MicroserviceFramework.Ef.Repositories;

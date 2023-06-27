@@ -1,4 +1,4 @@
-﻿using MicroserviceFramework.Domain;
+using MicroserviceFramework.Domain;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 

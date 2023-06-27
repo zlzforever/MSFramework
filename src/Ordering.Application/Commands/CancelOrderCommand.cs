@@ -1,4 +1,4 @@
-﻿using MicroserviceFramework.Mediator;
+using MicroserviceFramework.Mediator;
 using MongoDB.Bson;
 
 namespace Ordering.Application.Commands;

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using MicroserviceFramework.Utils;
 using Microsoft.Extensions.DependencyInjection;

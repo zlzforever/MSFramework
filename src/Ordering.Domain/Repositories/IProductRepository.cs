@@ -1,4 +1,4 @@
-﻿using System.Threading.Tasks;
+using System.Threading.Tasks;
 using MicroserviceFramework.Common;
 using MicroserviceFramework.Domain;
 using MicroserviceFramework.Extensions.DependencyInjection;

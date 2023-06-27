@@ -1,4 +1,4 @@
-﻿using MicroserviceFramework.Auditing;
+using MicroserviceFramework.Auditing;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 

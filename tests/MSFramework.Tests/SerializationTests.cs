@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Text.Json;
 using System.Text.Json.Serialization;
@@ -277,6 +277,6 @@ public class SerializationTests
 {"page":1,"limit":10,"total":2,"data":[]}
 """
             , json2);
-        
+
     }
 }

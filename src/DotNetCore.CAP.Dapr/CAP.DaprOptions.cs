@@ -1,4 +1,4 @@
-﻿namespace DotNetCore.CAP.Dapr;
+namespace DotNetCore.CAP.Dapr;
 
 public class DaprOptions
 {

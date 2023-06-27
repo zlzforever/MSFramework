@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using MicroserviceFramework.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Http;

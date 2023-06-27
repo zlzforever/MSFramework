@@ -1,16 +1,16 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
-    <PropertyGroup>
-        <PackageId>MSFramework.AspNetCore.Swagger</PackageId>
-        <AssemblyName>MSFramework.AspNetCore.Swagger</AssemblyName>
-        <RootNamespace>MicroserviceFramework.AspNetCore.Swagger</RootNamespace>
-    </PropertyGroup>
-    <Import Project="../../package.props" />
-    <ItemGroup>
-        <PackageReference Include="Swashbuckle.AspNetCore.SwaggerGen" Version="6.5.0" />
-        <PackageReference Include="Swashbuckle.AspNetCore.SwaggerUI" Version="6.5.0" />
-    </ItemGroup>
-    <ItemGroup>
-        <ProjectReference Include="..\MSFramework\MSFramework.csproj" />
-    </ItemGroup>
+  <PropertyGroup>
+    <PackageId>MSFramework.AspNetCore.Swagger</PackageId>
+    <AssemblyName>MSFramework.AspNetCore.Swagger</AssemblyName>
+    <RootNamespace>MicroserviceFramework.AspNetCore.Swagger</RootNamespace>
+  </PropertyGroup>
+  <Import Project="../../package.props" />
+  <ItemGroup>
+    <PackageReference Include="Swashbuckle.AspNetCore.SwaggerGen" Version="6.5.0" />
+    <PackageReference Include="Swashbuckle.AspNetCore.SwaggerUI" Version="6.5.0" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\MSFramework\MSFramework.csproj" />
+  </ItemGroup>
 </Project>

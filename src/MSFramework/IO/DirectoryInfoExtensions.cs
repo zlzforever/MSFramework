@@ -1,4 +1,4 @@
-﻿namespace MicroserviceFramework.IO;
+namespace MicroserviceFramework.IO;
 
 public static class DirectoryInfoExtensions
 {

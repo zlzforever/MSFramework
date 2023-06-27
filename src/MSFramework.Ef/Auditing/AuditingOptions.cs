@@ -1,4 +1,4 @@
-﻿using MicroserviceFramework.Extensions.Options;
+using MicroserviceFramework.Extensions.Options;
 
 namespace MicroserviceFramework.Ef.Auditing;
 

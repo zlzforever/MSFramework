@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using MicroserviceFramework.Serialization;
 using MongoDB.Bson;
 

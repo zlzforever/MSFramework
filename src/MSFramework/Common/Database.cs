@@ -1,4 +1,4 @@
-﻿namespace MicroserviceFramework.Common;
+namespace MicroserviceFramework.Common;
 
 public enum Database
 {

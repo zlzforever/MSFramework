@@ -1,16 +1,16 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-    <PropertyGroup>
-        <PackageId>MSFramework.Ef.SqlServer</PackageId>
-        <AssemblyName>MSFramework.Ef.SqlServer</AssemblyName>
-        <RootNamespace>MicroserviceFramework.Ef.SqlServer</RootNamespace>
-    </PropertyGroup>
-    <Import Project="../../package.props" />
-    <ItemGroup>
-    </ItemGroup>
-    <ItemGroup>
-      <ProjectReference Include="..\MSFramework.Ef\MSFramework.Ef.csproj" />
-    </ItemGroup>
-    <ItemGroup>
-        <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="7.0.5" />
-    </ItemGroup>
+  <PropertyGroup>
+    <PackageId>MSFramework.Ef.SqlServer</PackageId>
+    <AssemblyName>MSFramework.Ef.SqlServer</AssemblyName>
+    <RootNamespace>MicroserviceFramework.Ef.SqlServer</RootNamespace>
+  </PropertyGroup>
+  <Import Project="../../package.props" />
+  <ItemGroup>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\MSFramework.Ef\MSFramework.Ef.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="7.0.5" />
+  </ItemGroup>
 </Project>

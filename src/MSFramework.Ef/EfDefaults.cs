@@ -1,4 +1,4 @@
-﻿namespace MicroserviceFramework.Ef;
+namespace MicroserviceFramework.Ef;
 
 public static class EfDefaults
 {

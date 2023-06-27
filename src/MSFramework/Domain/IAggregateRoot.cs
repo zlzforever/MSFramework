@@ -1,4 +1,4 @@
-﻿namespace MicroserviceFramework.Domain;
+namespace MicroserviceFramework.Domain;
 
 /// <summary>
 /// Defines an aggregate root. It's primary key may not be "Id" or it may have a composite primary key.

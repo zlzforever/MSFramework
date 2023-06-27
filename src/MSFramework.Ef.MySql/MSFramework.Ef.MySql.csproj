@@ -1,16 +1,16 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-    <PropertyGroup>
-        <PackageId>MSFramework.Ef.MySql</PackageId>
-        <AssemblyName>MSFramework.Ef.MySql</AssemblyName>
-        <RootNamespace>MicroserviceFramework.Ef.MySql</RootNamespace>
-    </PropertyGroup>
-    <Import Project="../../package.props" />
-    <ItemGroup>
-    </ItemGroup>
-    <ItemGroup>
-        <ProjectReference Include="..\MSFramework.Ef\MSFramework.Ef.csproj" />
-    </ItemGroup>
-    <ItemGroup>
-        <PackageReference Include="Pomelo.EntityFrameworkCore.MySql" Version="7.0.0" />
-    </ItemGroup>
+  <PropertyGroup>
+    <PackageId>MSFramework.Ef.MySql</PackageId>
+    <AssemblyName>MSFramework.Ef.MySql</AssemblyName>
+    <RootNamespace>MicroserviceFramework.Ef.MySql</RootNamespace>
+  </PropertyGroup>
+  <Import Project="../../package.props" />
+  <ItemGroup>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\MSFramework.Ef\MSFramework.Ef.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Pomelo.EntityFrameworkCore.MySql" Version="7.0.0" />
+  </ItemGroup>
 </Project>

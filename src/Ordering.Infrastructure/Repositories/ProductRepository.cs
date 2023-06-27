@@ -1,4 +1,4 @@
-﻿using System.Linq;
+using System.Linq;
 using System.Threading.Tasks;
 using MicroserviceFramework.Common;
 using MicroserviceFramework.Ef;

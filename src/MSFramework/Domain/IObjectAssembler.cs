@@ -1,4 +1,4 @@
-﻿namespace MicroserviceFramework.Domain;
+namespace MicroserviceFramework.Domain;
 
 /// <summary>
 /// 对象装载器

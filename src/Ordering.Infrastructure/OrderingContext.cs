@@ -1,4 +1,4 @@
-﻿using MicroserviceFramework.Application;
+using MicroserviceFramework.Application;
 using MicroserviceFramework.Ef;
 using MicroserviceFramework.Mediator;
 using Microsoft.EntityFrameworkCore;

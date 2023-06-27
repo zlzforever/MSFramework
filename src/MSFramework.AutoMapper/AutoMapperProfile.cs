@@ -1,4 +1,4 @@
-﻿using AutoMapper;
+using AutoMapper;
 using MicroserviceFramework.Common;
 
 namespace MicroserviceFramework.AutoMapper;

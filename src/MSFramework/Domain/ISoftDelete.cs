@@ -1,4 +1,4 @@
-﻿namespace MicroserviceFramework.Domain;
+namespace MicroserviceFramework.Domain;
 
 /// <summary>
 /// 软删除接口

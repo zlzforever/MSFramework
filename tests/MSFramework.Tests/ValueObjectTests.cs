@@ -1,4 +1,4 @@
-﻿using MicroserviceFramework.Domain;
+using MicroserviceFramework.Domain;
 using Xunit;
 
 namespace MSFramework.Tests;

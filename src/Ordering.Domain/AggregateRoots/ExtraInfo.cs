@@ -1,4 +1,4 @@
-﻿namespace Ordering.Domain.AggregateRoots;
+namespace Ordering.Domain.AggregateRoots;
 
 public class ExtraInfo
 {

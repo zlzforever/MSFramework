@@ -1,4 +1,4 @@
-﻿namespace MicroserviceFramework.Mediator;
+namespace MicroserviceFramework.Mediator;
 
 public interface IRequest
 {

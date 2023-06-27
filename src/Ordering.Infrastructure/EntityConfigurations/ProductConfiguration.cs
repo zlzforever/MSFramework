@@ -1,4 +1,4 @@
-﻿using MicroserviceFramework.Ef;
+using MicroserviceFramework.Ef;
 using MicroserviceFramework.Ef.Extensions;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Ordering.Domain.AggregateRoots;
@@ -11,9 +11,9 @@ public class ProductConfiguration
     public override void Configure(EntityTypeBuilder<Product> builder)
     {
         ConfigureDefaultIdentifier(builder);
-        
+
         builder.Property(x => x.Name).HasMaxLength(256);
-        
+
         builder.ConfigureCreation();
     }
 }

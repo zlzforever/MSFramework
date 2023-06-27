@@ -1,4 +1,4 @@
-﻿using DotNetCore.CAP;
+using DotNetCore.CAP;
 using MicroserviceFramework.Domain;
 using MicroserviceFramework.Ef.Repositories;
 using Microsoft.EntityFrameworkCore.Storage;

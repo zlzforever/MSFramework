@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using MicroserviceFramework.Domain;
 using MicroserviceFramework.Serialization.Newtonsoft.Converters;
 using Newtonsoft.Json.Serialization;

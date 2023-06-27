@@ -1,4 +1,4 @@
-﻿using MicroserviceFramework.Ef;
+using MicroserviceFramework.Ef;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using MSFramework.AspNetCore.Test.DataModel;
 using MSFramework.AspNetCore.Test.EfPostgreSqlTest.Infrastructure;

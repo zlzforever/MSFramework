@@ -1,4 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations;
 using MicroserviceFramework.Mediator;
 
 namespace Ordering.Application.Commands;

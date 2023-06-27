@@ -1,4 +1,4 @@
-﻿// using MicroserviceFramework.Shared;
+// using MicroserviceFramework.Shared;
 // using MongoDB.Bson;
 // using Xunit;
 //

@@ -1,8 +1,5 @@
-﻿using System.Threading.Tasks;
 using MicroserviceFramework.Application;
-using MicroserviceFramework.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 

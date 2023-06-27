@@ -1,4 +1,4 @@
-﻿using MicroserviceFramework.Extensions.DependencyInjection;
+using MicroserviceFramework.Extensions.DependencyInjection;
 
 namespace MicroserviceFramework.Domain;
 

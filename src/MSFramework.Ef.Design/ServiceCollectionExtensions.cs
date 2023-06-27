@@ -1,4 +1,4 @@
-﻿
+
 using Microsoft.Extensions.DependencyInjection;
 
 namespace MicroserviceFramework.Ef.Design;

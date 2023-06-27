@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
@@ -52,7 +52,7 @@ public class Order : CreationAggregateRoot, IOptimisticLock
     public string BuyerId { get; private set; }
 
     public string Description { get; private set; }
-    
+
     public User Creator2 => _lazyLoader.Load(this, ref _creator2);
 
     public void SetRivalNetwork(IEnumerable<string> rivalNetworks)

@@ -1,17 +1,17 @@
 <Project Sdk="Microsoft.NET.Sdk">
-    <PropertyGroup>
-        <PackageId>MSFramework.AutoMapper</PackageId>
-        <AssemblyName>MSFramework.AutoMapper</AssemblyName>
-        <RootNamespace>MicroserviceFramework.AutoMapper</RootNamespace>
-    </PropertyGroup>
-    <Import Project="../../package.props" />
-    <ItemGroup>
-      <PackageReference Include="AutoMapper" Version="12.0.1" />
-      <PackageReference Include="AutoMapper.Extensions.Microsoft.DependencyInjection" Version="12.0.1" />
-    </ItemGroup>
+  <PropertyGroup>
+    <PackageId>MSFramework.AutoMapper</PackageId>
+    <AssemblyName>MSFramework.AutoMapper</AssemblyName>
+    <RootNamespace>MicroserviceFramework.AutoMapper</RootNamespace>
+  </PropertyGroup>
+  <Import Project="../../package.props" />
+  <ItemGroup>
+    <PackageReference Include="AutoMapper" Version="12.0.1" />
+    <PackageReference Include="AutoMapper.Extensions.Microsoft.DependencyInjection" Version="12.0.1" />
+  </ItemGroup>
 
-    <ItemGroup>
-      <ProjectReference Include="..\MSFramework\MSFramework.csproj" />
-    </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\MSFramework\MSFramework.csproj" />
+  </ItemGroup>
 
 </Project>

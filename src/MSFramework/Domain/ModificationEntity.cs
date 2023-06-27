@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using MongoDB.Bson;
 
 namespace MicroserviceFramework.Domain;

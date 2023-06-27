@@ -1,4 +1,4 @@
-﻿using MicroserviceFramework.Ef;
+using MicroserviceFramework.Ef;
 using MicroserviceFramework.Ef.Repositories;
 using MongoDB.Bson;
 using Ordering.Domain.AggregateRoots;
