@@ -1,15 +1,11 @@
-using System;
 using MicroserviceFramework.Domain;
-using Microsoft.EntityFrameworkCore.Infrastructure;
 using MongoDB.Bson;
 
 namespace Ordering.Domain.AggregateRoots;
 
 public class OrderItem : EntityBase<ObjectId>
 {
-    private User _creator;
-
-    private readonly ILazyLoader _lazyLoader;
+    public string ProductId { get; private set; }
 
     // DDD Patterns comment
     // Using private fields, allowed since EF Core 1.1, is a much better encapsulation
@@ -19,19 +15,12 @@ public class OrderItem : EntityBase<ObjectId>
     public decimal UnitPrice { get; private set; }
     public decimal Discount { get; private set; }
     public int Units { get; private set; }
-    public Guid ProductId { get; private set; }
-    public User Creator => _lazyLoader.Load(this, ref _creator);
-
-    private OrderItem(ILazyLoader lazyLoader) : this(ObjectId.Empty)
-    {
-        _lazyLoader = lazyLoader;
-    }
 
     private OrderItem(ObjectId id) : base(id)
     {
     }
 
-    public static OrderItem Create(Guid productId, string productName, decimal unitPrice,
+    public static OrderItem Create(string productId, string productName, decimal unitPrice,
         decimal discount,
         string pictureUrl,
         int units = 1)
@@ -77,10 +66,5 @@ public class OrderItem : EntityBase<ObjectId>
         }
 
         Units += units;
-    }
-
-    public void SetCreator(User user)
-    {
-        _creator = user;
     }
 }

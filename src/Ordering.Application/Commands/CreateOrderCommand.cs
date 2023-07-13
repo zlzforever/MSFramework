@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using MicroserviceFramework.Mediator;
 using MongoDB.Bson;
@@ -40,7 +39,7 @@ public class CreateOrderCommand : IRequest<ObjectId>
 
     public class OrderItemDTO
     {
-        public Guid ProductId { get; set; }
+        public string ProductId { get; set; }
 
         public string ProductName { get; set; }
 

@@ -21,7 +21,7 @@ public class ApiResult<T>
 
     public T Data { get; set; }
 
-    public ApiResult() : this(default)
+    protected ApiResult() : this(default)
     {
     }
 
@@ -32,23 +32,20 @@ public class ApiResult<T>
 
     public override string ToString()
     {
-        return $"Code: {Code}, Success: {Success}, Msg: {Msg}";
+        return $"Code: {Code}, Success: {Success}, Msg: {Msg}, Data: {JsonSerializer.Serialize(Data)}";
+    }
+
+    public static implicit operator ApiResult<T>(T value)
+    {
+        return new ApiResult<T> { Data = value };
     }
 }
 
 public class ApiResult : ApiResult<object>
 {
-    public static readonly ApiResult Ok = new(null) { Code = 0, Success = true, Msg = "" };
+    public static readonly ApiResult Ok = new() { Code = 0, Success = true, Msg = string.Empty, Data = null };
 
-    public static readonly ApiResult Error = new(null) { Code = 1, Success = false, Msg = "服务器内部错误" };
-
-    public ApiResult() : this(null)
-    {
-    }
-
-    public ApiResult(object data) : base(data)
-    {
-    }
+    public static readonly ApiResult Error = new() { Code = 1, Success = false, Msg = "服务器内部错误", Data = null };
 
     public override string ToString()
     {

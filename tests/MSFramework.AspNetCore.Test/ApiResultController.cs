@@ -1,36 +1,68 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
 using System.IO;
 using System.Threading.Tasks;
 using MicroserviceFramework.AspNetCore;
 using MicroserviceFramework.AspNetCore.Mvc;
 using MicroserviceFramework.Common;
 using Microsoft.AspNetCore.Mvc;
-using MongoDB.Bson;
 
-namespace Ordering.API.Controllers;
+namespace MSFramework.AspNetCore.Test;
 
 [Route("[controller]")]
 [ApiController]
-public class ValueController : ApiControllerBase
+public class ApiResultController : ApiControllerBase
 {
     [HttpGet("int")]
-    public int Get([FromQuery, Required, StringLength(4, ErrorMessage = "长度不能超过 4")] string a)
+    public int Get()
     {
-        return new Random().Next(0, 10);
-    }
-
-    [HttpPost]
-    public M ModelValid(M m)
-    {
-        return m;
+        return 7896;
     }
 
     [HttpGet("string")]
     public string GetString()
     {
-        return Guid.NewGuid().ToString();
+        return "AAABBB";
+    }
+
+    [HttpGet("dateTime")]
+    public DateTime GetDateTime()
+    {
+        return new DateTime(2023, 07, 13, 23,
+            26, 0);
+    }
+
+    [HttpGet("nullableDateTime1")]
+    public DateTime? GetNullableDateTime()
+    {
+        return null;
+    }
+
+    [HttpGet("nullableDateTime2")]
+    public DateTime? GetNullableDateTime2()
+    {
+        return new DateTime(2023, 07, 13, 23,
+            26, 0);
+    }
+
+    [HttpGet("dateTimeOffset")]
+    public DateTimeOffset GetDateTimeOffset()
+    {
+        return new DateTimeOffset(2023, 07, 13, 23,
+            26, 0, DateTimeOffset.Now.Offset);
+    }
+
+    [HttpGet("nullableDateTimeOffset1")]
+    public DateTimeOffset? GetNullableDateTimeOffset()
+    {
+        return null;
+    }
+
+    [HttpGet("nullableDateTimeOffset2")]
+    public DateTimeOffset? GetNullableDateTimeOffset2()
+    {
+        return new DateTimeOffset(2023, 07, 13, 23,
+            26, 0, DateTimeOffset.Now.Offset);
     }
 
     [HttpGet("ok")]
@@ -45,7 +77,7 @@ public class ValueController : ApiControllerBase
         return ApiResult.Error;
     }
 
-    [HttpGet("noData")]
+    [HttpGet("noResponse")]
     public Task GetNoRes()
     {
         return Task.CompletedTask;
@@ -87,12 +119,4 @@ public class ValueController : ApiControllerBase
     {
         return new EmptyResult();
     }
-}
-
-public class M
-{
-    public DateTimeOffset FullDateTimeOffset { get; set; }
-    public DateTimeOffset PartDateTimeOffset { get; set; }
-    public ObjectId ObjectId { get; set; }
-    public int Usage { get; set; }
 }

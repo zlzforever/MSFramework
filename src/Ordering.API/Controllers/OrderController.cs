@@ -42,30 +42,35 @@ public class OrderController : ApiControllerBase
         _orderRepository = orderRepository;
     }
 
-    //[AccessControl("TestCreate")]
-    [Route("createTest")]
-    [HttpPost]
+    [HttpPost("createTest")]
     public async Task<Order> TestCreate()
     {
         var order = Order.Create(
-            "testUSer",
+            "1",
             new Address("Street", "City", "State", "Country", "ZipCode"),
             "Description");
-        var i1 = order.AddItem(Guid.NewGuid(),
-            "testProduct1", 10, 0, "");
-        var user1 = _externalEntityRepository.GetOrCreate<User, string>(() => new User("1") { Name = "Lewis" });
-        i1.SetCreator(user1);
-        var i2 = order.AddItem(Guid.NewGuid(),
-            "testProduct2", 10, 0, "");
-        var user2 = _externalEntityRepository.GetOrCreate<User, string>(() => new User("1"));
-        i2.SetCreator(user2);
-        order.SetRivalNetwork(new[] { "hi1", "hi2" });
+        order.AddItem("100049450275",
+            "英特尔(Intel) i5-13400F 13代 酷睿 处理器 10核16线程 睿频至高可达4.6Ghz 20M三级缓存 台式机CPU", 149900, 0,
+            "https://img10.360buyimg.com/n1/s450x450_jfs/t1/125974/18/29337/184045/63ae90f3F3d8b8b8a/b6cef93bb9b3b2c1.jpgl",
+            1);
+        order.AddItem("100041994142",
+            "ROG ROG STRIX Z790-A GAMING WIFI吹雪主板 支持DDR5 CPU 13900K/13700K（Intel Z790/LGA 1700）", 28400, 0,
+            "https://img12.360buyimg.com/n1/s450x450_jfs/t1/177676/26/33690/186079/63f71ca3F72878ea9/54e9c6c564a1d4e1.jpg",
+            1);
+        order.SetList(new[] { "hi1", "hi2" });
+        order.AddExtra("质保", "3 年");
+        order.AddExtra("RGB", "ARGB");
         order.AddKeyValue("test1", "value1");
         order.AddKeyValue("test2", "value2");
-        order.AddExtra("n1", "a1");
-        order.AddExtra("n2", "a2");
-        var user3 = _externalEntityRepository.GetOrCreate<User, string>(() => new User("1"));
-        order.SetCreator(user3);
+
+        // var user1 = _externalEntityRepository.GetOrCreate<User, string>(() => new User("1") { Name = "Lewis" });
+        //i1.SetCreator(user1);
+
+        // var user2 = _externalEntityRepository.GetOrCreate<User, string>(() => new User("1"));
+        //i2.SetCreator(user2);
+
+        // var user3 = _externalEntityRepository.GetOrCreate<User, string>(() => new User("1"));
+        // order.SetCreator(user3);
         await _orderRepository.AddAsync(order);
         Logger.LogInformation("{TraceIdentifier}: Create test order completed", Session.TraceIdentifier);
         return order;
@@ -73,16 +78,24 @@ public class OrderController : ApiControllerBase
 
     #region Command
 
-    [HttpPost("test-command1")]
-    public async Task<string> TestCommand1Async([FromBody] TestCommand1 command)
+    /// <summary>
+    /// 测试有返回值的命令
+    /// </summary>
+    /// <param name="command"></param>
+    /// <returns></returns>
+    [HttpPost("tesCommand1")]
+    public async Task<string> ExecuteTestCommand1Async([FromBody] TestCommand1 command)
     {
         var a = await _cqrsProcessor.SendAsync(command, default);
         return a;
     }
 
-    [HttpPost("test-command2")]
-    //[AccessControl("test-command2")]
-    public async Task TestCommand2Async([FromBody] TestCommand2 command)
+    /// <summary>
+    /// 测试无返回值的命令
+    /// </summary>
+    /// <param name="command"></param>
+    [HttpPost("tesCommand2")]
+    public async Task ExecuteTestCommand2Async([FromBody] TestCommand2 command)
     {
         await _cqrsProcessor.SendAsync(command, default);
     }
@@ -93,41 +106,21 @@ public class OrderController : ApiControllerBase
     /// <returns></returns>
     [HttpPost]
     //[AccessControl("创建订单")]
-    public async Task<ObjectId> CreateOrderAsync()
+    public async Task<ObjectId> CreateAsync([FromBody] CreateOrderCommand command)
     {
-        var random = new Random();
-        var items = new List<CreateOrderCommand.OrderItemDTO>();
-        var count = random.Next(2, 5);
-        for (var i = 0; i < count; ++i)
-        {
-            var product = Guid.NewGuid();
-            items.Add(new CreateOrderCommand.OrderItemDTO
-            {
-                ProductName = "product" + product.ToString("N"),
-                ProductId = product,
-                Units = random.Next(1, 10),
-                Discount = 0,
-                UnitPrice = random.Next(2, 1000)
-            });
-        }
-
-        return await _cqrsProcessor.SendAsync(new CreateOrderCommand(items, "HELLO", "上海", "张扬路500号", "上海",
-            "中国", "200000", "what?"));
+        return await _cqrsProcessor.SendAsync(command);
     }
 
     [HttpDelete("{orderId}")]
-    //[AccessControl("删除订单")]
-    public async Task DeleteOrderAsync([FromRoute] ObjectId orderId)
+    public async Task DeleteAsync([FromRoute] DeleteOrderCommand command)
     {
-        await _cqrsProcessor.SendAsync(new DeleteOrderCommand(orderId));
+        await _cqrsProcessor.SendAsync(command);
     }
 
     [HttpPut("{orderId}/address")]
-    //[AccessControl("修改订单地址")]
-    public Task ChangeOrderAddressAsync([FromRoute] ObjectId orderId,
+    public Task ChangeAddressAsync([FromRoute] ObjectId orderId,
         [FromBody] ChangeOrderAddressCommand command)
     {
-
         command.OrderId = orderId;
         return Task.CompletedTask;
     }
@@ -137,16 +130,14 @@ public class OrderController : ApiControllerBase
     #region QUERY
 
     [HttpGet("{orderId}")]
-    //[AccessControl("查看订单")]
-    public async Task<Order> GetOrderAsync([FromRoute, Required] ObjectId orderId)
+    public async Task<Order> GetAsync([FromRoute, Required] ObjectId orderId)
     {
         var order = await _orderingQuery.GetAsync(orderId);
         return order;
     }
 
     [HttpGet]
-    // [AccessControl("查看所有订单")]
-    public async Task<IEnumerable<Order>> GetOrdersAsync()
+    public async Task<IEnumerable<Order>> GetAsync()
     {
         var order = await _dbContext.Set<Order>().FirstOrDefaultAsync();
         if (order == null)

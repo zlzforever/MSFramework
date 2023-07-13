@@ -13,7 +13,7 @@ public class AuditOperation : CreationAggregateRoot<ObjectId>
     public string Url { get; private set; }
 
     /// <summary>
-    /// 操作的 IP
+    /// 操作的 IP 地址
     /// </summary>
     public string IP { get; private set; }
 

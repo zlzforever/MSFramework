@@ -1,145 +1,47 @@
-using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using System.Reflection;
 
 namespace MicroserviceFramework.Domain;
 
-public abstract class ValueObject<T> where T : ValueObject<T>
+public abstract class ValueObject
 {
-    private static readonly Member[] Members;
-
-    static ValueObject()
+    protected static bool EqualOperator(ValueObject left, ValueObject right)
     {
-        Members = GetMembers().ToArray();
-    }
-
-    public static bool operator ==(ValueObject<T> left, ValueObject<T> right) => Equals(left, right);
-
-    public static bool operator !=(ValueObject<T> left, ValueObject<T> right) => !Equals(left, right);
-
-    public override bool Equals(object other)
-    {
-        if (ReferenceEquals(null, other)) return false;
-        if (ReferenceEquals(this, other)) return true;
-
-        return other.GetType() == typeof(T) && Members.All(m =>
+        if (ReferenceEquals(left, null) ^ ReferenceEquals(right, null))
         {
-            var otherValue = m.GetValue(other);
-            var thisValue = m.GetValue(this);
-            return m.IsNonStringEnumerable
-                ? GetEnumerableValues(otherValue).SequenceEqual(GetEnumerableValues(thisValue))
-                : otherValue?.Equals(thisValue) ?? thisValue == null;
-        });
+            return false;
+        }
+        return ReferenceEquals(left, null) || left.Equals(right);
     }
 
-    public override int GetHashCode() =>
-        CombineHashCodes(
-            Members.Select(m => m.IsNonStringEnumerable
-                ? CombineHashCodes(GetEnumerableValues(m.GetValue(this)))
-                : m.GetValue(this)));
-
-    public ValueObject<T> Clone()
+    protected static bool NotEqualOperator(ValueObject left, ValueObject right)
     {
-        return MemberwiseClone() as ValueObject<T>;
+        return !(EqualOperator(left, right));
     }
 
-    public override string ToString()
+    protected abstract IEnumerable<object> GetEqualityComponents();
+
+    public override bool Equals(object obj)
     {
-        if (Members.Length == 1)
+        if (obj == null || obj.GetType() != GetType())
         {
-            var m = Members[0];
-            var value = m.GetValue(this);
-            return m.IsNonStringEnumerable
-                ? $"{string.Join(" | ", GetEnumerableValues(value))}"
-                : value.ToString();
+            return false;
         }
 
-        var values = Members.Select(m =>
-        {
-            var value = m.GetValue(this);
-            return m.IsNonStringEnumerable
-                ? $"{m.Name} :{string.Join(" | ", GetEnumerableValues(value))}"
-                : m.Type != typeof(string)
-                    ? $"{m.Name}: {value}"
-                    : value == null
-                        ? $"{m.Name}: null"
-                        : $"{m.Name}: \"{value}\"";
-        });
-        return $"{typeof(T).Name} [{string.Join(" | ", values)}]";
+        var other = (ValueObject)obj;
+
+        return this.GetEqualityComponents().SequenceEqual(other.GetEqualityComponents());
     }
 
-    private static IEnumerable<Member> GetMembers()
+    public override int GetHashCode()
     {
-        var t = typeof(T);
-        const BindingFlags flags = BindingFlags.Instance | BindingFlags.Public;
-        while (t != typeof(object))
-        {
-            if (t == null)
-            {
-                continue;
-            }
-
-            foreach (var p in t.GetProperties(flags))
-            {
-                yield return new Member(p);
-            }
-
-            foreach (var f in t.GetFields(flags))
-            {
-                yield return new Member(f);
-            }
-
-            t = t.BaseType;
-        }
+        return GetEqualityComponents()
+            .Select(x => x != null ? x.GetHashCode() : 0)
+            .Aggregate((x, y) => x ^ y);
     }
 
-    private static IEnumerable<object> GetEnumerableValues(object obj)
+    public ValueObject Clone()
     {
-        var enumerator = ((IEnumerable)obj).GetEnumerator();
-        while (enumerator.MoveNext())
-        {
-            yield return enumerator.Current;
-        }
-    }
-
-    private static int CombineHashCodes(IEnumerable<object> objs)
-    {
-        unchecked
-        {
-            return objs.Aggregate(17, (current, obj) => current * 59 + (obj?.GetHashCode() ?? 0));
-        }
-    }
-
-    private readonly struct Member
-    {
-        public readonly string Name;
-        public readonly Func<object, object> GetValue;
-        public readonly bool IsNonStringEnumerable;
-        public readonly Type Type;
-
-        public Member(MemberInfo info)
-        {
-            switch (info)
-            {
-                case FieldInfo field:
-                    Name = field.Name;
-                    GetValue = obj => field.GetValue(obj);
-                    IsNonStringEnumerable = typeof(IEnumerable).IsAssignableFrom(field.FieldType) &&
-                                            field.FieldType != typeof(string);
-                    Type = field.FieldType;
-                    break;
-                case PropertyInfo prop:
-                    Name = prop.Name;
-                    GetValue = obj => prop.GetValue(obj);
-                    IsNonStringEnumerable = typeof(IEnumerable).IsAssignableFrom(prop.PropertyType) &&
-                                            prop.PropertyType != typeof(string);
-                    Type = prop.PropertyType;
-                    break;
-                default:
-                    throw new ArgumentException("Member is not a field or property?!?!", info.Name);
-            }
-        }
+        return this.MemberwiseClone() as ValueObject;
     }
 }

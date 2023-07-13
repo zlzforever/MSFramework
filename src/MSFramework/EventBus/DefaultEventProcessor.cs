@@ -21,7 +21,7 @@ internal class DefaultEventProcessor : IEventProcessor
         var subscriptions = EventHandlerDescriptorManager.GetOrDefault(eventName);
         if (subscriptions == null)
         {
-            _logger.LogWarning($"没有找到事件 {eventName} 的处理器");
+            _logger.LogWarning("没有找到事件 {EventName} 的处理器", eventName);
             return;
         }
 

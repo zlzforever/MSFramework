@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using MicroserviceFramework.Domain;
 using Xunit;
 
@@ -5,7 +6,7 @@ namespace MSFramework.Tests;
 
 public class ValueObjectTests
 {
-    public class V1 : ValueObject<V1>
+    public class V1 : ValueObject
     {
         public string V { get; private set; }
 
@@ -13,9 +14,14 @@ public class ValueObjectTests
         {
             V = v;
         }
+
+        protected override IEnumerable<object> GetEqualityComponents()
+        {
+            yield return V;
+        }
     }
 
-    public class Address : ValueObject<Address>
+    public class Address : ValueObject
     {
         public string Street { get; private set; }
         public string City { get; private set; }
@@ -31,6 +37,15 @@ public class ValueObjectTests
             State = state;
             Country = country;
             ZipCode = zipcode;
+        }
+
+        protected override IEnumerable<object> GetEqualityComponents()
+        {
+            yield return Street;
+            yield return City;
+            yield return State;
+            yield return Country;
+            yield return ZipCode;
         }
     }
 
@@ -56,7 +71,7 @@ public class ValueObjectTests
     {
         var address1 = new Address("a", "b", "c", "d", "e");
         var address2 = address1.Clone();
-        Assert.True(address1 == address2);
+        Assert.True(Equals(address1, address2));
     }
 
     [Fact]

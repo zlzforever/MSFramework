@@ -14,6 +14,7 @@
     </ItemGroup>
     <ItemGroup>
         <ProjectReference Include="..\..\src\MSFramework.AspNetCore\MSFramework.AspNetCore.csproj" />
+        <ProjectReference Include="..\..\src\MSFramework.AutoMapper\MSFramework.AutoMapper.csproj" />
         <ProjectReference Include="..\..\src\MSFramework.Ef.MySql\MSFramework.Ef.MySql.csproj" />
         <ProjectReference Include="..\..\src\MSFramework.Ef.PostgreSql\MSFramework.Ef.PostgreSql.csproj" />
         <ProjectReference Include="..\..\src\MSFramework.Ef.SqlServer\MSFramework.Ef.SqlServer.csproj" />

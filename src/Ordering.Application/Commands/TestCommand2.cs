@@ -6,6 +6,9 @@ namespace Ordering.Application.Commands;
 public class TestCommand2
     : IRequest
 {
-    [Required]
-    public string Name { get; set; }
+    /// <summary>
+    ///
+    /// </summary>
+    [Required, StringLength(32)]
+    public string Value { get; set; }
 }

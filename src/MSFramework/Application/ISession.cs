@@ -37,6 +37,14 @@ public interface ISession
     /// </summary>
     string UserDisplayName { get; }
 
+    /// <summary>
+    /// 用户所具有的角色
+    /// </summary>
     IReadOnlyCollection<string> Roles { get; }
+
+    /// <summary>
+    /// 用户所具有的主体：ID + 角色
+    /// 主要用于权限系统进行检测
+    /// </summary>
     IReadOnlyCollection<string> Subjects { get; }
 }

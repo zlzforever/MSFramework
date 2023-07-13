@@ -12,24 +12,12 @@ public class OrderItemEntityTypeConfiguration : EntityTypeConfigurationBase<Orde
         ConfigureDefaultIdentifier(builder);
 
         builder.Property(x => x.Id).ValueGeneratedNever();
-
-        builder.Property<decimal>("Discount")
-            .IsRequired();
-
-        builder.Property<Guid>("ProductId")
-            .IsRequired();
-
-        builder.Property<string>("ProductName")
-            .IsRequired();
-
-        builder.Property<decimal>("UnitPrice")
-            .IsRequired();
-
-        builder.Property<int>("Units")
-            .IsRequired();
-
-        builder.Property<string>("PictureUrl")
-            .IsRequired(false);
-        builder.HasOne(x => x.Creator).WithMany().HasForeignKey("creator_id");
+        builder.Property<decimal>("Discount").IsRequired();
+        builder.Property<string>("ProductId").IsRequired();
+        builder.Property<string>("ProductName").IsRequired();
+        builder.Property<decimal>("UnitPrice").IsRequired();
+        builder.Property<int>("Units").IsRequired();
+        builder.Property<string>("PictureUrl").IsRequired(false);
+        // builder.HasOne(x => x.Creator).WithMany().HasForeignKey("creator_id");
     }
 }

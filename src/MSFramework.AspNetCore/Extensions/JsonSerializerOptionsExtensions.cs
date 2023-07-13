@@ -10,6 +10,8 @@ public static class JsonSerializerOptionsExtensions
     {
         options.Converters.Add(new ObjectIdJsonConverter());
         options.Converters.Add(new EnumerationJsonConverterFactory());
-        options.Converters.Add(new PagedResultJsonConverterFactory());
+        options.Converters.Add(new DateTimeJsonConverter());
+        options.Converters.Add(new DateTimeOffsetJsonConverter());
+        // options.Converters.Add(new PagedResultJsonConverterFactory());
     }
 }

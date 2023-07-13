@@ -1,5 +1,4 @@
 using System;
-using System.Globalization;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Builder;
@@ -12,7 +11,8 @@ public class Program
 {
     public static async Task Main(string[] args)
     {
-        var a = CultureInfo.CurrentCulture.Name;
+
+
         Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
 
         AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);

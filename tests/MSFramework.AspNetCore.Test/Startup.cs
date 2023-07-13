@@ -1,10 +1,18 @@
+using System.Text.Json;
 using MicroserviceFramework;
+using MicroserviceFramework.AspNetCore;
+using MicroserviceFramework.AspNetCore.Extensions;
+using MicroserviceFramework.AspNetCore.Filters;
+using MicroserviceFramework.AspNetCore.Mvc.ModelBinding;
+using MicroserviceFramework.AutoMapper;
+using MicroserviceFramework.Domain;
+using MicroserviceFramework.EventBus;
+using MicroserviceFramework.Extensions.DependencyInjection;
+using MicroserviceFramework.Mediator;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
 
 namespace MSFramework.AspNetCore.Test;
 
@@ -21,24 +29,55 @@ public class Startup
     // For more information on how to configure your application, visit https://go.microsoft.com/fwlink/?LinkID=398940
     public void ConfigureServices(IServiceCollection services)
     {
-        services.AddMvc();
-        services.AddMicroserviceFramework(x => { x.UseOptionsType(_configuration); });
+        services.AddControllers(x =>
+            {
+                x.Filters.AddUnitOfWork()
+                    .AddAudit()
+                    .AddGlobalException();
+#if !DEBUG
+                 x.Filters.Add<SecurityDaprTopicFilter>();
+#endif
+                x.Filters.Add<ResponseWrapperFilter>();
+                x.ModelBinderProviders.Insert(0, new ObjectIdModelBinderProvider());
+                x.ModelBinderProviders.Insert(0, new EnumerationModelBinderProvider());
+            })
+            .ConfigureInvalidModelStateResponse()
+            .AddJsonOptions(options =>
+            {
+                options.JsonSerializerOptions.AddDefaultConverters();
+                options.JsonSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
+                options.JsonSerializerOptions.DictionaryKeyPolicy = JsonNamingPolicy.CamelCase;
+            });
         services.AddRouting(x => { x.LowercaseUrls = true; });
+        services.AddMicroserviceFramework(builder =>
+        {
+            builder.UseAssemblyScanPrefix("Ordering");
+            builder.UseDependencyInjectionLoader();
+            builder.UseOptionsType(_configuration);
+            builder.UseAutoMapper();
+            builder.UseMediator();
+            builder.UseEventBus(options =>
+            {
+                options.AddAfterInterceptors(async provider =>
+                {
+                    await provider.GetRequiredService<IUnitOfWork>().SaveChangesAsync();
+                });
+            });
+            builder.UseAspNetCore();
+        });
     }
 
     // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
     public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
     {
-        if (env.IsDevelopment())
-        {
-            app.UseDeveloperExceptionPage();
-        }
-
         app.UseRouting();
 
-        app.UseEndpoints(endpoints =>
+
+        app.UseEndpoints(builder =>
         {
-            endpoints.MapGet("/", async context => { await context.Response.WriteAsync("Hello World!"); });
+            builder.MapControllers();
         });
+
+        app.UseMicroserviceFramework();
     }
 }

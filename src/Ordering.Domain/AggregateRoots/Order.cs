@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
 using MicroserviceFramework.Domain;
-using Microsoft.EntityFrameworkCore.Infrastructure;
 using MongoDB.Bson;
 using Ordering.Domain.AggregateRoots.Events;
 
@@ -12,11 +11,9 @@ namespace Ordering.Domain.AggregateRoots;
 [Description("订单表")]
 public class Order : CreationAggregateRoot, IOptimisticLock
 {
-    private readonly HashSet<string> _rivalNetworks;
-    private readonly Dictionary<string, string> _dict;
-    private readonly ILazyLoader _lazyLoader;
-    private readonly List<ExtraInfo> _extras;
-    private User _creator2;
+    private readonly HashSet<string> _listJson;
+    private readonly Dictionary<string, string> _dictJson;
+    private readonly List<OrderExtra> _extras;
 
     // DDD Patterns comment
     // Using a private collection field, better for DDD Aggregate's encapsulation
@@ -25,27 +22,11 @@ public class Order : CreationAggregateRoot, IOptimisticLock
     private List<OrderItem> _items;
 
     /// <summary>
-    /// 用于测试字典 JSON 在 EF 中的序列化与反序列化
-    /// KEY 的大小写差异
-    /// </summary>
-    public IReadOnlyDictionary<string, string> Dict => _dict;
-
-    /// <summary>
     /// Address is a Value Object pattern example persisted as EF Core 2.0 owned entity
     /// </summary>
     public Address Address { get; private set; }
 
-    /// <summary>
-    /// 测试 List 的 JSON
-    /// </summary>
-    public IReadOnlyCollection<string> RivalNetworks => _rivalNetworks;
-
-    /// <summary>
-    /// 测试对象列表的 JSON 存储 
-    /// </summary>
-    public IReadOnlyCollection<ExtraInfo> Extras => _extras;
-
-    public IReadOnlyCollection<OrderItem> Items => _lazyLoader.Load(this, ref _items);
+    public IReadOnlyCollection<OrderItem> Items => _items;
 
     public OrderStatus Status { get; private set; }
 
@@ -53,43 +34,46 @@ public class Order : CreationAggregateRoot, IOptimisticLock
 
     public string Description { get; private set; }
 
-    public User Creator2 => _lazyLoader.Load(this, ref _creator2);
+    /// <summary>
+    /// 测试 List 的 JSON
+    /// </summary>
+    public IReadOnlyCollection<string> ListJson => _listJson;
 
-    public void SetRivalNetwork(IEnumerable<string> rivalNetworks)
+    /// <summary>
+    /// 测试对象列表的 JSON 存储
+    /// </summary>
+    public IReadOnlyCollection<OrderExtra> Extras => _extras;
+
+    /// <summary>
+    /// 用于测试字典 JSON 在 EF 中的序列化与反序列化
+    /// KEY 的大小写差异
+    /// </summary>
+    public IReadOnlyDictionary<string, string> DictJson => _dictJson;
+
+    public void SetList(IEnumerable<string> list)
     {
-        foreach (var rivalNetwork in rivalNetworks)
+        foreach (var item in list)
         {
-            _rivalNetworks.Add(rivalNetwork);
+            _listJson.Add(item);
         }
     }
 
-    public void SetCreator(User creator)
+    public void AddExtra(string key, string value)
     {
-        _creator2 = creator;
-    }
-
-    public void AddExtra(string name, string age)
-    {
-        _extras.Add(new ExtraInfo(name, age));
+        _extras.Add(new OrderExtra(key, value));
     }
 
     public void AddKeyValue(string key, string value)
     {
-        _dict.TryAdd(key, value);
-    }
-
-    // ReSharper disable once UnusedMember.Local
-    private Order(ILazyLoader lazyLoader) : this(ObjectId.Empty)
-    {
-        _lazyLoader = lazyLoader;
+        _dictJson.TryAdd(key, value);
     }
 
     private Order(ObjectId id) : base(id)
     {
         _items = new List<OrderItem>();
-        _rivalNetworks = new HashSet<string>();
-        _dict = new Dictionary<string, string>();
-        _extras = new List<ExtraInfo>();
+        _listJson = new HashSet<string>();
+        _dictJson = new Dictionary<string, string>();
+        _extras = new List<OrderExtra>();
     }
 
     private Order(
@@ -103,7 +87,7 @@ public class Order : CreationAggregateRoot, IOptimisticLock
         Description = description;
         Status = OrderStatus.Submitted;
 
-        // Add the OrderStarterDomainEvent to the domain events collection 
+        // Add the OrderStarterDomainEvent to the domain events collection
         // to be raised/dispatched when comitting changes into the Database [ After DbContext.SaveChanges() ]
         var orderStartedDomainEvent = new OrderStartedDomainEvent(this, userId);
         AddDomainEvent(orderStartedDomainEvent);
@@ -114,12 +98,11 @@ public class Order : CreationAggregateRoot, IOptimisticLock
         string description)
     {
         return new Order(buyerId,
-                address,
-                description)
-            ;
+            address,
+            description);
     }
 
-    public OrderItem AddItem(Guid productId, string productName, decimal unitPrice, decimal discount,
+    public OrderItem AddItem(string productId, string productName, decimal unitPrice, decimal discount,
         string pictureUrl, int units = 1)
     {
         var existingOrderForProduct = Items
@@ -214,7 +197,7 @@ public class Order : CreationAggregateRoot, IOptimisticLock
         AddDomainEvent(new OrderCancelledDomainEvent(this));
     }
 
-    public void SetCancelledStatusWhenStockIsRejected(IEnumerable<Guid> orderStockRejectedItems)
+    public void SetCancelledStatusWhenStockIsRejected(IEnumerable<string> orderStockRejectedItems)
     {
         if (Equals(Status, OrderStatus.AwaitingValidation))
         {

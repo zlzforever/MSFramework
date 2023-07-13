@@ -6,49 +6,43 @@
 
   <ItemGroup>
     <!--    <PackageReference Include="DotNetCore.CAP.MySql" Version="6.2.1" />-->
-    <PackageReference Include="Dapper" Version="2.0.123"/>
-    <PackageReference Include="DotNetCore.CAP.Dashboard" Version="7.1.3"/>
+    <PackageReference Include="Dapper" Version="2.0.123" />
+    <PackageReference Include="DotNetCore.CAP.Dashboard" Version="7.1.3" />
     <!--    <PackageReference Include="DotNetCore.CAP.RabbitMQ" Version="7.1.2" />-->
-    <PackageReference Include="Microsoft.AspNetCore.Mvc.Core" Version="2.2.5"/>
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.Core" Version="2.2.5" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="7.0.5">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="Newtonsoft.Json" Version="13.0.3"/>
-    <PackageReference Include="Serilog.AspNetCore" Version="7.0.0"/>
-    <PackageReference Include="Serilog.Sinks.PeriodicBatching" Version="3.1.0"/>
-    <PackageReference Include="Serilog.Sinks.Console" Version="4.1.0"/>
-    <PackageReference Include="Serilog.Sinks.RollingFile" Version="3.3.0"/>
-    <PackageReference Include="Serilog.Sinks.Seq" Version="5.2.2"/>
-    <PackageReference Include="Serilog.Enrichers.Environment" Version="2.2.0"/>
-    <PackageReference Include="Serilog.Enrichers.Thread" Version="3.1.0"/>
-    <PackageReference Include="Serilog.Expressions" Version="3.4.1"/>
-    <PackageReference Include="Serilog.Sinks.Async" Version="1.5.0"/>
-    <PackageReference Include="xunit.assert" Version="2.4.2"/>
-    <PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="7.0.5"/>
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+    <PackageReference Include="Serilog.AspNetCore" Version="7.0.0" />
+    <PackageReference Include="Serilog.Sinks.PeriodicBatching" Version="3.1.0" />
+    <PackageReference Include="Serilog.Sinks.Console" Version="4.1.0" />
+    <PackageReference Include="Serilog.Sinks.RollingFile" Version="3.3.0" />
+    <PackageReference Include="Serilog.Sinks.Seq" Version="5.2.2" />
+    <PackageReference Include="Serilog.Enrichers.Environment" Version="2.2.0" />
+    <PackageReference Include="Serilog.Enrichers.Thread" Version="3.1.0" />
+    <PackageReference Include="Serilog.Expressions" Version="3.4.1" />
+    <PackageReference Include="Serilog.Sinks.Async" Version="1.5.0" />
+    <PackageReference Include="xunit.assert" Version="2.4.2" />
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="7.0.5" />
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\DotNetCore.CAP.Dapr\DotNetCore.CAP.Dapr.csproj"/>
-    <ProjectReference Include="..\MSFramework.AspNetCore.Swagger\MSFramework.AspNetCore.Swagger.csproj"/>
-    <ProjectReference Include="..\MSFramework.AspNetCore\MSFramework.AspNetCore.csproj"/>
-    <ProjectReference Include="..\MSFramework.AutoMapper\MSFramework.AutoMapper.csproj"/>
-    <ProjectReference Include="..\MSFramework.Ef.Design\MSFramework.Ef.Design.csproj"/>
-    <ProjectReference Include="..\MSFramework.Ef.PostgreSql\MSFramework.Ef.PostgreSql.csproj"/>
-    <ProjectReference Include="..\MSFramework.Ef.SqlServer\MSFramework.Ef.SqlServer.csproj"/>
-    <ProjectReference Include="..\MSFramework.Ef\MSFramework.Ef.csproj"/>
-    <ProjectReference Include="..\MSFramework.Serialization.Newtonsoft\MSFramework.Serialization.Newtonsoft.csproj"/>
-    <ProjectReference Include="..\MSFramework\MSFramework.csproj"/>
-    <ProjectReference Include="..\Ordering.Application\Ordering.Application.csproj"/>
-    <ProjectReference Include="..\Ordering.Domain\Ordering.Domain.csproj"/>
-    <ProjectReference Include="..\Ordering.Infrastructure\Ordering.Infrastructure.csproj"/>
-    <ProjectReference Include="..\MSFramework.Ef.MySql\MSFramework.Ef.MySql.csproj"/>
-  </ItemGroup>
-
-  <ItemGroup>
-    <None Update="1.csv">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
+    <ProjectReference Include="..\DotNetCore.CAP.Dapr\DotNetCore.CAP.Dapr.csproj" />
+    <ProjectReference Include="..\MSFramework.AspNetCore.Swagger\MSFramework.AspNetCore.Swagger.csproj" />
+    <ProjectReference Include="..\MSFramework.AspNetCore\MSFramework.AspNetCore.csproj" />
+    <ProjectReference Include="..\MSFramework.AutoMapper\MSFramework.AutoMapper.csproj" />
+    <ProjectReference Include="..\MSFramework.Ef.Design\MSFramework.Ef.Design.csproj" />
+    <ProjectReference Include="..\MSFramework.Ef.PostgreSql\MSFramework.Ef.PostgreSql.csproj" />
+    <ProjectReference Include="..\MSFramework.Ef.SqlServer\MSFramework.Ef.SqlServer.csproj" />
+    <ProjectReference Include="..\MSFramework.Ef\MSFramework.Ef.csproj" />
+    <ProjectReference Include="..\MSFramework.Serialization.Newtonsoft\MSFramework.Serialization.Newtonsoft.csproj" />
+    <ProjectReference Include="..\MSFramework\MSFramework.csproj" />
+    <ProjectReference Include="..\Ordering.Application\Ordering.Application.csproj" />
+    <ProjectReference Include="..\Ordering.Domain\Ordering.Domain.csproj" />
+    <ProjectReference Include="..\Ordering.Infrastructure\Ordering.Infrastructure.csproj" />
+    <ProjectReference Include="..\MSFramework.Ef.MySql\MSFramework.Ef.MySql.csproj" />
   </ItemGroup>
 
 </Project>
