@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Security.Claims;
+using MicroserviceFramework.AspNetCore.IdentityModel;
 using MicroserviceFramework.Security.Claims;
 using Microsoft.AspNetCore.Http;
 using ISession = MicroserviceFramework.Application.ISession;
@@ -11,45 +12,65 @@ namespace MicroserviceFramework.AspNetCore;
 
 public class HttpSession : ISession
 {
+    private static readonly HashSet<string> ChineseCultures = new()
+    {
+        "zh",
+        "zh-CN",
+        "zh-HK",
+        "zh-MO",
+        "zh-CHS",
+        "zh-SG",
+        "zh-TW",
+        "zh-CHT",
+        "zh-Hant",
+        "zh-Hans"
+    };
+
     internal static HttpSession Create(IHttpContextAccessor accessor)
     {
         if (accessor?.HttpContext == null)
         {
-            return new HttpSession { Roles = Array.Empty<string>(), Subjects = new List<string>() };
+            return new HttpSession { Roles = Array.Empty<string>(), Subjects = Array.Empty<string>() };
         }
 
-        var userName = accessor.HttpContext.User.GetValue(ClaimTypes.Name, "name");
-        var givenName = accessor.HttpContext.User.GetValue(ClaimTypes.GivenName, "given_name");
-        var familyName = accessor.HttpContext.User.GetValue(ClaimTypes.Surname, "family_name");
-        var name = CultureInfo.CurrentCulture.Name == "zh-CN" ? $"{familyName}{givenName}" : $"{givenName}{familyName}";
-        name = string.IsNullOrWhiteSpace(name) ? accessor.HttpContext.User.GetValue("preferred_username") : name;
-        name = string.IsNullOrWhiteSpace(name) ? userName : name;
+        var userName = accessor.HttpContext.User.GetValue(ClaimTypes.Name, JwtClaimTypes.Name);
+        var givenName = accessor.HttpContext.User.GetValue(ClaimTypes.GivenName, JwtClaimTypes.GivenName);
+        var familyName = accessor.HttpContext.User.GetValue(ClaimTypes.Surname, JwtClaimTypes.FamilyName);
+        // 中文环境下，姓在前，名在后
+        var name = ChineseCultures.Contains(CultureInfo.CurrentCulture.Name)
+            ? $"{familyName}{givenName}"
+            : $"{givenName}{familyName}";
+        name = string.IsNullOrEmpty(name)
+            ? accessor.HttpContext.User.GetValue(JwtClaimTypes.PreferredUserName)
+            : name;
+        name = string.IsNullOrEmpty(name) ? userName : name;
         var userDisplayName = name;
 
         var session = new HttpSession
         {
             TraceIdentifier = accessor.HttpContext.TraceIdentifier,
-            UserId = accessor.HttpContext.User.GetValue(ClaimTypes.NameIdentifier, "sid", "sub"),
+            UserId = accessor.HttpContext.User.GetValue(ClaimTypes.NameIdentifier, JwtClaimTypes.Subject),
             UserName = userName,
-            Email = accessor.HttpContext.User.GetValue(ClaimTypes.Email, "email"),
-            PhoneNumber = accessor.HttpContext.User.GetValue(ClaimTypes.MobilePhone, "phone_number"),
+            Email = accessor.HttpContext.User.GetValue(ClaimTypes.Email, JwtClaimTypes.Email),
+            // phone_number 优先， 一般能先获取到， 优化性能
+            PhoneNumber = accessor.HttpContext.User.GetValue(JwtClaimTypes.PhoneNumber, ClaimTypes.MobilePhone),
             Roles = accessor.HttpContext.User
                 .FindAll(claim => claim.Type == ClaimTypes.Role ||
-                                  "role".Equals(claim.Type, StringComparison.OrdinalIgnoreCase))
+                                  JwtClaimTypes.Role.Equals(claim.Type, StringComparison.OrdinalIgnoreCase))
                 .Select(x => x.Value).ToHashSet(),
             UserDisplayName = userDisplayName,
             HttpContext = accessor.HttpContext
         };
 
         var subjects = new List<string>();
-        if (!string.IsNullOrWhiteSpace(session.UserId))
+        if (!string.IsNullOrEmpty(session.UserId))
         {
             subjects.Add(session.UserId);
         }
 
         foreach (var role in session.Roles)
         {
-            if (!string.IsNullOrWhiteSpace(role))
+            if (!string.IsNullOrEmpty(role))
             {
                 subjects.Add(role);
             }

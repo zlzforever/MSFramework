@@ -12,14 +12,14 @@ public static class ServiceCollectionExtensions
         IConfiguration config,
         Action<BinderOptions> configureBinder)
     {
-        if (!optionsType.IsClass)
-        {
-            throw new ArgumentException("options type should be class");
-        }
-
         if (services == null)
         {
             throw new ArgumentNullException(nameof(services));
+        }
+
+        if (optionsType.IsAbstract || !optionsType.IsClass)
+        {
+            throw new ArgumentException("配置类型必需要是类");
         }
 
         if (config == null)
@@ -59,7 +59,7 @@ public static class ServiceCollectionExtensions
 
         MicroserviceFrameworkLoaderContext.Get(services).ResolveType += type =>
         {
-            if (type.IsAbstract || type.IsInterface)
+            if (!(!type.IsAbstract && type.IsClass))
             {
                 return;
             }

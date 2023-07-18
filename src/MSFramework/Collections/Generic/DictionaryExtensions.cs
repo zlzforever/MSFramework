@@ -1,10 +1,12 @@
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 
 namespace MicroserviceFramework.Collections.Generic;
 
 /// <summary>
 /// 字典辅助扩展方法
+/// 只对 Dictionary 进行扩展，ConcurrentDictionary 或其它字典实现可能不一样
 /// </summary>
 public static class DictionaryExtensions
 {

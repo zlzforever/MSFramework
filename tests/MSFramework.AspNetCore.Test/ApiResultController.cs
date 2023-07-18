@@ -83,39 +83,45 @@ public class ApiResultController : ApiControllerBase
         return Task.CompletedTask;
     }
 
-    [HttpGet("list")]
-    public IEnumerable<int> Get1()
+    [HttpGet("list1")]
+    public IEnumerable<int> GetList1()
     {
-        return new List<int> { 1, 2, 3 };
+        return new List<int> { 1, 2 };
     }
 
-    [HttpGet("apiResult")]
-    public ApiResult<List<int>> Get2()
+    [HttpGet("list2")]
+    public ApiResult<List<int>> GetList2()
     {
         return new ApiResult<List<int>>(new List<int> { 1, 2, 3 });
     }
 
     [HttpGet("file")]
-    public IActionResult Get3()
+    public IActionResult GetFile()
     {
         var stream = System.IO.File.ReadAllBytes("1.csv");
         return new FileStreamResult(new MemoryStream(stream), "text/csv");
     }
 
-    [HttpGet("actionResult")]
-    public IActionResult Get4()
+    [HttpGet("objectResult1")]
+    public IActionResult GetObjectResult1()
     {
-        return new ObjectResult(null);
+        return new ObjectResult(1);
+    }
+
+    [HttpGet("objectResult2")]
+    public IActionResult GetObjectResult2()
+    {
+        return new ObjectResult(new { A = 1, B = 2 });
     }
 
     [HttpGet("pagedResult")]
-    public PagedResult<int> Get5()
+    public PagedResult<int> GetPagedResult()
     {
         return new PagedResult<int>(1, 10, 10, new[] { 1, 2, 3 });
     }
 
     [HttpGet("emptyResult")]
-    public IActionResult Get6()
+    public IActionResult GetEmptyResult()
     {
         return new EmptyResult();
     }

@@ -4,7 +4,8 @@ using MicroserviceFramework.Utils;
 
 namespace MicroserviceFramework.Ef.Repositories;
 
-public class ExternalEntityRepository : IExternalEntityRepository
+public class ExternalEntityRepository<TEntity> : IExternalEntityRepository
+    where TEntity : class, IExternalEntity,IEntity<TKey>
 {
     private readonly DbContextFactory _dbContextFactory;
 

@@ -56,14 +56,4 @@ public class PagedResult<TEntity>
         Total = total;
         Data = data;
     }
-
-    // public IEnumerator<TEntity> GetEnumerator()
-    // {
-    //     return Data == null ? Enumerable.Empty<TEntity>().GetEnumerator() : Data.GetEnumerator();
-    // }
-    //
-    // IEnumerator IEnumerable.GetEnumerator()
-    // {
-    //     return GetEnumerator();
-    // }
 }

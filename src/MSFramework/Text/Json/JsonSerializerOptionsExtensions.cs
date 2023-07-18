@@ -2,7 +2,7 @@ using System.Text.Json;
 using MicroserviceFramework.Serialization;
 using MicroserviceFramework.Text.Json.Converters;
 
-namespace MicroserviceFramework.AspNetCore.Extensions;
+namespace MicroserviceFramework.Text.Json;
 
 public static class JsonSerializerOptionsExtensions
 {
@@ -12,6 +12,5 @@ public static class JsonSerializerOptionsExtensions
         options.Converters.Add(new EnumerationJsonConverterFactory());
         options.Converters.Add(new DateTimeJsonConverter());
         options.Converters.Add(new DateTimeOffsetJsonConverter());
-        // options.Converters.Add(new PagedResultJsonConverterFactory());
     }
 }

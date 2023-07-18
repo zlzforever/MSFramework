@@ -6,7 +6,6 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace MicroserviceFramework.EventBus;
 
-[Obsolete]
 internal class InProcessEventBus : IEventBus
 {
     private readonly List<Func<IServiceProvider, Task>> _beforeFunctions;
@@ -27,7 +26,9 @@ internal class InProcessEventBus : IEventBus
         Task.Factory.StartNew(async (e) =>
         {
             // 主动延迟 500 豪秒， 模拟消息队列延迟， 提供时间本进程提交数据
-            await Task.Delay(500);
+            // comments by lewis at 20230718
+            // 应该由调用方来决定是否延迟
+            // await Task.Delay(500);
 
             using var scope = _serviceProvider.CreateScope();
             var eventExecutor = scope.ServiceProvider.GetRequiredService<IEventProcessor>();

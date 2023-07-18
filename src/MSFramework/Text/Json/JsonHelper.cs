@@ -15,10 +15,14 @@ public class JsonHelper : IJsonHelper
         var options = new JsonSerializerOptions();
         options.Converters.Add(new ObjectIdJsonConverter());
         options.Converters.Add(new EnumerationJsonConverterFactory());
-        // options.Converters.Add(new EnumerationJsonConverter());
+        options.Converters.Add(new DateTimeJsonConverter());
+        options.Converters.Add(new DateTimeOffsetJsonConverter());
         options.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
         options.PropertyNameCaseInsensitive = false;
-        options.DictionaryKeyPolicy = JsonNamingPolicy.CamelCase;
+
+        // comments by lewis at 20230714
+        // 不应该使用这个功能， 如果一个字典的键值中， 同时有 a 和 A， 会导致有两个 a 在序列化结果中
+        // options.DictionaryKeyPolicy = JsonNamingPolicy.CamelCase;
 
         return new JsonHelper(options);
     }

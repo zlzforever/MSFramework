@@ -32,7 +32,8 @@ internal class DefaultEventProcessor : IEventProcessor
             var handlerType = subscription.HandlerType;
 
             _logger.LogInformation(
-                $"{traceId}, {handlerType.FullName} start handle request {eventData}");
+                "{TraceId}, {HandlerType} start handle request {EventData}", traceId, handlerType.FullName,
+                eventData);
 
             var @event = Defaults.JsonHelper.Deserialize(eventData, subscription.Type);
 
@@ -54,11 +55,12 @@ internal class DefaultEventProcessor : IEventProcessor
                     if (t.Exception == null)
                     {
                         _logger.LogInformation(
-                            $"{traceId}, {handlerType.FullName} handle success");
+                            "{TraceId}, {HandlerType} handle success", traceId, handlerType.FullName);
                     }
                     else
                     {
-                        _logger.LogError($"{traceId}, {handlerType.FullName} handle failed: {t.Exception}");
+                        _logger.LogError("{TraceId}, {HandlerType} handle failed: {Exception}", traceId,
+                            handlerType.FullName, t.Exception);
                     }
 
                     (handler as IDisposable)?.Dispose();

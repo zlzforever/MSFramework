@@ -13,6 +13,7 @@ using MicroserviceFramework.Ef.PostgreSql;
 using MicroserviceFramework.EventBus;
 using MicroserviceFramework.Extensions.DependencyInjection;
 using MicroserviceFramework.Mediator;
+using MicroserviceFramework.Text.Json;
 using Ordering.Infrastructure;
 
 var webApplicationBuilder = WebApplication.CreateBuilder(args);

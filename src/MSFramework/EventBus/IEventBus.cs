@@ -7,7 +7,6 @@ namespace MicroserviceFramework.EventBus;
 /// 仅用于内存型本地事件, 不建议生产大规模使用
 /// 分布式事件， 统一使用 ICapPublisher
 /// </summary>
-[Obsolete]
 public interface IEventBus : IDisposable
 {
     /// <summary>

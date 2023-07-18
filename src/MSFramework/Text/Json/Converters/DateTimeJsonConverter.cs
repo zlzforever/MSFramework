@@ -3,7 +3,7 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 using MicroserviceFramework.Extensions;
 
-namespace MicroserviceFramework.Serialization;
+namespace MicroserviceFramework.Text.Json.Converters;
 
 public class DateTimeJsonConverter : JsonConverter<DateTime>
 {

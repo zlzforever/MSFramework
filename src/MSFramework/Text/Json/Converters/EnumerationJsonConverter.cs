@@ -10,7 +10,7 @@ public class EnumerationJsonConverter<T> : JsonConverter<T> where T : Enumeratio
 {
     public override T Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
     {
-        var value = Encoding.UTF8.GetString(reader.ValueSpan);
+        var value = System.Text.Encoding.UTF8.GetString(reader.ValueSpan);
         return Enumeration.Parse(typeToConvert, value) as T;
     }
 

@@ -11,6 +11,7 @@ using MicroserviceFramework.Text.Json;
 using MongoDB.Bson;
 using Newtonsoft.Json;
 using Xunit;
+using JsonSerializer = System.Text.Json.JsonSerializer;
 
 namespace MSFramework.Tests;
 
@@ -134,6 +135,15 @@ public class SerializationTests
         public Enum1(string id, string name) : base(id, name)
         {
         }
+    }
+
+    [Fact]
+    public void DicTest()
+    {
+        var dict = new Dictionary<string, string> { { "a", "v1" }, { "A", "v2" } };
+        var result1 = JsonConvert.SerializeObject(dict);
+        var result2 = JsonSerializer.Serialize(dict);
+        Assert.Equal(result1, result2);
     }
 
     [Fact]
@@ -277,6 +287,5 @@ public class SerializationTests
 {"page":1,"limit":10,"total":2,"data":[]}
 """
             , json2);
-
     }
 }

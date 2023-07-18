@@ -1,5 +1,6 @@
 using System.Linq;
 using System.Security.Claims;
+using MicroserviceFramework.Collections.Generic;
 using MicroserviceFramework.Runtime;
 
 namespace MicroserviceFramework.Security.Claims;
@@ -17,7 +18,7 @@ public static class ClaimsPrincipalExtensions
         }
 
         return claims.Select(claim => principal.FindFirst(claim)?.Value)
-            .FirstOrDefault(value => !value.IsNullOrWhiteSpace());
+            .FirstOrDefault(value => !value.IsNullOrEmpty());
     }
 
     /// <summary>

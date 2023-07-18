@@ -50,7 +50,7 @@ public static class ServiceCollectionExtensions
         // 1. 注册类型本身
         services.TryAdd(new ServiceDescriptor(implementationType, implementationType, lifetime));
 
-        var interfaceTypes = implementationType.GetInterfaces(
+        var interfaceTypes = implementationType.GetInterfacesExcludeBy(
             typeof(ITransientDependency),
             typeof(ISingletonDependency),
             typeof(IScopeDependency),

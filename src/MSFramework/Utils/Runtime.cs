@@ -10,7 +10,6 @@ public static class Runtime
 {
     private static readonly Lazy<Assembly[]> Assemblies;
     private static readonly Lazy<Type[]> Types;
-
     public static readonly HashSet<string> StartsWith;
 
     static Runtime()
@@ -55,7 +54,7 @@ public static class Runtime
         return Assemblies.Value;
     }
 
-    public static IList<Type> GetAllTypes()
+    public static IReadOnlyCollection<Type> GetAllTypes()
     {
         return Types.Value;
     }
