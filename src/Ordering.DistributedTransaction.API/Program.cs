@@ -5,7 +5,6 @@ using DotNetCore.CAP.Dapr;
 using DotNetCore.CAP.Messages;
 using MicroserviceFramework;
 using MicroserviceFramework.AspNetCore;
-using MicroserviceFramework.AspNetCore.Extensions;
 using MicroserviceFramework.AutoMapper;
 using MicroserviceFramework.Domain;
 using MicroserviceFramework.Ef;

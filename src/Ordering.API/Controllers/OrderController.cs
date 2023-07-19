@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
@@ -28,11 +27,11 @@ public class OrderController : ApiControllerBase
     private readonly IMediator _cqrsProcessor;
     private readonly OrderingContext _dbContext;
     private readonly IUnitOfWork _unitOfWorkManager;
-    private readonly IExternalEntityRepository _externalEntityRepository;
+    private readonly IExternalEntityRepository<User, string> _externalEntityRepository;
 
     public OrderController(IOrderingRepository orderRepository,
         IOrderingQuery orderingQuery, IMediator commandExecutor, OrderingContext dbContext,
-        IUnitOfWork unitOfWorkManager, IExternalEntityRepository externalEntityRepository)
+        IUnitOfWork unitOfWorkManager, IExternalEntityRepository<User, string> externalEntityRepository)
     {
         _orderingQuery = orderingQuery;
         _cqrsProcessor = commandExecutor;

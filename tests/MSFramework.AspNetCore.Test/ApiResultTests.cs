@@ -1,5 +1,4 @@
 ﻿using System.Threading.Tasks;
-using Microsoft.AspNetCore.TestHost;
 using Xunit;
 using Xunit.Abstractions;
 

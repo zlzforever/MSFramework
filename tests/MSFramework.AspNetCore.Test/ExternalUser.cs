@@ -1,0 +1,2 @@
+namespace MSFramework.Tests;
+

@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Text.Json;
 using System.Text.Json.Serialization;
-using MicroserviceFramework.AspNetCore.Extensions;
 using MicroserviceFramework.Common;
 using MicroserviceFramework.Domain;
 using MicroserviceFramework.Serialization.Newtonsoft;

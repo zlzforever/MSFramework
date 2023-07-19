@@ -24,7 +24,7 @@ public static class ServiceCollectionExtensions
         services.TryAddSingleton<IEntityConfigurationTypeFinder, EntityConfigurationTypeFinder>();
         services.TryAddScoped<DbContextFactory>();
         services.TryAddScoped<IUnitOfWork, EfUnitOfWork>();
-        services.TryAddScoped<IExternalEntityRepository, ExternalEntityRepository>();
+        services.TryAddScoped(typeof(IExternalEntityRepository<,>), typeof(ExternalEntityRepository<,>));
         return services;
     }
 }

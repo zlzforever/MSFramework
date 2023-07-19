@@ -1,6 +1,3 @@
-using System.Text.Json;
-using MicroserviceFramework.Common;
-using MicroserviceFramework.Text.Json;
 using Xunit;
 
 namespace MSFramework.Tests;

@@ -4,8 +4,8 @@ using MicroserviceFramework.Utils;
 
 namespace MicroserviceFramework.Ef.Repositories;
 
-public class ExternalEntityRepository<TEntity> : IExternalEntityRepository
-    where TEntity : class, IExternalEntity,IEntity<TKey>
+public class ExternalEntityRepository<TEntity, TKey> : IExternalEntityRepository<TEntity, TKey>
+    where TEntity : ExternalEntity<TKey> where TKey : IEquatable<TKey>
 {
     private readonly DbContextFactory _dbContextFactory;
 
@@ -14,7 +14,7 @@ public class ExternalEntityRepository<TEntity> : IExternalEntityRepository
         _dbContextFactory = dbContextFactory;
     }
 
-    public TEntity GetOrCreate<TEntity, TKey>(Func<TEntity> factory) where TEntity : class, IEntity<TKey>
+    public TEntity GetOrCreate(Func<TEntity> factory)
     {
         Check.NotNull(factory, nameof(factory));
         var dbContext = _dbContextFactory.GetDbContext<TEntity>();
@@ -23,7 +23,7 @@ public class ExternalEntityRepository<TEntity> : IExternalEntityRepository
         Check.NotNull(item, nameof(item));
         foreach (var entity in dbContext.Set<TEntity>().Local)
         {
-            if (item.Id.Equals(entity.Id))
+            if (item.Equals(entity))
             {
                 return entity;
             }

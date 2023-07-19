@@ -1,11 +1,12 @@
 using System.Text.Json;
 using MicroserviceFramework;
 using MicroserviceFramework.AspNetCore;
-using MicroserviceFramework.AspNetCore.Extensions;
 using MicroserviceFramework.AspNetCore.Filters;
 using MicroserviceFramework.AspNetCore.Mvc.ModelBinding;
 using MicroserviceFramework.AutoMapper;
 using MicroserviceFramework.Domain;
+using MicroserviceFramework.Ef;
+using MicroserviceFramework.Ef.PostgreSql;
 using MicroserviceFramework.EventBus;
 using MicroserviceFramework.Extensions.DependencyInjection;
 using MicroserviceFramework.Mediator;
@@ -14,6 +15,7 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using MSFramework.AspNetCore.Test.EfPostgreSqlTest.Infrastructure;
 
 namespace MSFramework.AspNetCore.Test;
 
@@ -65,6 +67,11 @@ public class Startup
                 });
             });
             builder.UseAspNetCore();
+            builder.UseEntityFramework(x =>
+            {
+                //
+                x.AddNpgsql<TestDataContext>(_configuration);
+            });
         });
     }
 

@@ -9,7 +9,6 @@ using DotNetCore.CAP.Dapr;
 using DotNetCore.CAP.Messages;
 using MicroserviceFramework;
 using MicroserviceFramework.AspNetCore;
-using MicroserviceFramework.AspNetCore.Extensions;
 using MicroserviceFramework.AspNetCore.Filters;
 using MicroserviceFramework.AspNetCore.Mvc.ModelBinding;
 using MicroserviceFramework.AspNetCore.Swagger;

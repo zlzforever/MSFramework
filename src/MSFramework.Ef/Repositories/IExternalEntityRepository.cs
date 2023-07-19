@@ -3,7 +3,8 @@ using MicroserviceFramework.Domain;
 
 namespace MicroserviceFramework.Ef.Repositories;
 
-public interface IExternalEntityRepository
+public interface IExternalEntityRepository<TEntity, TKey>
+    where TEntity : ExternalEntity<TKey> where TKey : IEquatable<TKey>
 {
-    TEntity GetOrCreate<TEntity, TKey>(Func<TEntity> factory) where TEntity : class, IEntity<TKey>;
+    TEntity GetOrCreate(Func<TEntity> factory);
 }

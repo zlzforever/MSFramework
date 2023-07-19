@@ -1,6 +1,5 @@
 using System.Linq;
 using System.Security.Claims;
-using MicroserviceFramework.Collections.Generic;
 using MicroserviceFramework.Runtime;
 
 namespace MicroserviceFramework.Security.Claims;

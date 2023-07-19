@@ -1,4 +1,3 @@
-using System;
 using MicroserviceFramework.Ef;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Ordering.Domain.AggregateRoots;
