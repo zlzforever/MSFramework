@@ -43,7 +43,7 @@ public class AuditEntity : EntityBase<ObjectId>
     /// <summary>
     /// 获取或设置 操作实体属性集合
     /// </summary>
-    public virtual ICollection<AuditProperty> Properties { get; private set; }
+    public ICollection<AuditProperty> Properties { get; private set; }
 
     public void AddProperties(IEnumerable<AuditProperty> properties)
     {

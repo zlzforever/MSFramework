@@ -31,22 +31,22 @@ public class AuditProperty : EntityBase<ObjectId>
     /// <summary>
     /// 获取或设置 字段
     /// </summary>
-    public virtual string Name { get; private set; }
+    public string Name { get; private set; }
 
     /// <summary>
     /// 获取或设置 数据类型
     /// </summary>
-    public virtual string Type { get; private set; }
+    public string Type { get; private set; }
 
     /// <summary>
     /// 获取或设置 旧值
     /// </summary>
-    public virtual string OriginalValue { get; private set; }
+    public string OriginalValue { get; private set; }
 
     /// <summary>
     /// 获取或设置 新值
     /// </summary>
-    public virtual string NewValue { get; private set; }
+    public string NewValue { get; private set; }
 
     public override string ToString()
     {

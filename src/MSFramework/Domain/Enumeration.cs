@@ -10,9 +10,9 @@ namespace MicroserviceFramework.Domain;
 /// </summary>
 public abstract class Enumeration : IComparable
 {
-    public string Name { get; private set; }
+    public string Name { get; }
 
-    public string Id { get; private set; }
+    public string Id { get; }
 
     protected Enumeration(string id, string name)
     {
