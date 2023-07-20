@@ -19,12 +19,11 @@ public static class EventHandlerDescriptorManager
     private static readonly
         Dictionary<string, Dictionary<Type, EventHandlerDescriptor>> Cache;
 
-    private static readonly HashSet<string> EventTypes;
+    private static readonly HashSet<string> EventTypes = new();
 
     static EventHandlerDescriptorManager()
     {
         Cache = new Dictionary<string, Dictionary<Type, EventHandlerDescriptor>>();
-        EventTypes = new();
     }
 
     public static void Register(Type eventType, Type handlerType)

@@ -1,12 +1,13 @@
 using System.Threading;
 using System.Threading.Tasks;
+using MicroserviceFramework.Extensions.DependencyInjection;
 
 namespace MicroserviceFramework.Mediator;
 
 /// <summary>
 /// 中介者
 /// </summary>
-public interface IMediator
+public interface IMediator : IScopeDependency
 {
     /// <summary>
     /// 请求模型

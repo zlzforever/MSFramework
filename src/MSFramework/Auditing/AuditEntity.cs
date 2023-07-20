@@ -57,6 +57,6 @@ public class AuditEntity : EntityBase<ObjectId>
     public override string ToString()
     {
         return
-            $"[ENTITY: {GetType().Name}] Id = {Id}; {{ 'TypeName': {Type}, 'EntityId': {EntityId}, 'OperateType': {OperationType} }}";
+            $"Id = {Id}, TypeName = {Type}, EntityId = {EntityId}, OperateType = {OperationType}";
     }
 }

@@ -11,7 +11,6 @@ using MicroserviceFramework.Ef;
 using MicroserviceFramework.Ef.PostgreSql;
 using MicroserviceFramework.EventBus;
 using MicroserviceFramework.Extensions.DependencyInjection;
-using MicroserviceFramework.Mediator;
 using MicroserviceFramework.Text.Json;
 using Ordering.Infrastructure;
 
@@ -34,7 +33,7 @@ webApplicationBuilder.Services.AddMicroserviceFramework(builder =>
     builder.UseDependencyInjectionLoader();
     builder.UseOptionsType(webApplicationBuilder.Configuration);
     builder.UseAutoMapper();
-    builder.UseMediator();
+    // builder.UseMediator();
     builder.UseEventBus(options =>
     {
         options.AddAfterInterceptors(async provider =>

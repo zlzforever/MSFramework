@@ -13,7 +13,7 @@ public sealed class EventNameAttribute : Attribute
 
     public EventNameAttribute(string name)
     {
-        Check.NotNullOrWhiteSpace(name, nameof(name));
+        Check.NotNullOrEmpty(name, nameof(name));
         Name = name;
     }
 }

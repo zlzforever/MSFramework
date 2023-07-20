@@ -1,7 +1,5 @@
 using System;
-using MicroserviceFramework.AspNetCore.DependencyInjection;
 using MicroserviceFramework.AspNetCore.Mvc.ModelBinding;
-using MicroserviceFramework.Extensions.DependencyInjection;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -14,7 +12,7 @@ namespace MicroserviceFramework.AspNetCore;
 public static class ServiceCollectionExtensions
 {
     /// <summary>
-    /// 
+    ///
     /// </summary>
     /// <param name="builder"></param>
     /// <returns></returns>
@@ -22,7 +20,7 @@ public static class ServiceCollectionExtensions
     {
         builder.Services.AddHttpContextAccessor();
         // builder.Services.AddSingleton<IActionResultTypeMapper, ActionResultTypeMapper>();
-        builder.Services.AddSingleton<IScopedServiceResolver, ScopedServiceResolver>();
+        // builder.Services.AddSingleton<IScopedServiceResolver, ScopedServiceResolver>();
         builder.Services.AddScoped<ISession>(provider =>
             HttpSession.Create(provider.GetRequiredService<IHttpContextAccessor>()));
 

@@ -2,7 +2,6 @@ using System;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using MicroserviceFramework.Common;
-using MicroserviceFramework.Extensions.DependencyInjection;
 using MicroserviceFramework.Extensions.Options;
 using MicroserviceFramework.Text.Json;
 using MicroserviceFramework.Utils;
@@ -63,14 +62,12 @@ public static class ServiceCollectionExtensions
             return;
         }
 
-        var logger = loggerFactory.CreateLogger("UseMicroserviceFramework");
+        var logger = loggerFactory.CreateLogger("MicroserviceFramework");
 
         var initializers = applicationServices.GetServices<IHostedService>().Where(x => x is InitializerBase)
             .ToList();
         logger.LogInformation(
             $"Initializers: {string.Join(" -> ", initializers.Select(x => x.GetType().FullName))}");
-
-        ServiceLocator.ServiceProvider = applicationServices;
     }
 
     /// <summary>

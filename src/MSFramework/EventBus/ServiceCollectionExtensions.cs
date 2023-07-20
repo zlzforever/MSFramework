@@ -32,7 +32,7 @@ public static class ServiceCollectionExtensions
         return builder;
     }
 
-    public static MicroserviceFrameworkBuilder RegisterEventHandlers(this MicroserviceFrameworkBuilder builder)
+    private static MicroserviceFrameworkBuilder RegisterEventHandlers(this MicroserviceFrameworkBuilder builder)
     {
         MicroserviceFrameworkLoaderContext.Get(builder.Services).ResolveType += type =>
         {

@@ -15,7 +15,7 @@ public static class SoftDeleteQueryExtension
         var methodToCall = typeof(SoftDeleteQueryExtension)
             .GetMethod(nameof(GetSoftDeleteFilter),
                 BindingFlags.NonPublic | BindingFlags.Static).MakeGenericMethod(entityData.ClrType);
-        var filter = methodToCall.Invoke(null, new object[] { });
+        var filter = methodToCall.Invoke(null, Array.Empty<object>());
         entityData.SetQueryFilter((LambdaExpression)filter);
     }
 

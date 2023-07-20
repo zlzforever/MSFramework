@@ -9,7 +9,6 @@ using MicroserviceFramework.Ef;
 using MicroserviceFramework.Ef.PostgreSql;
 using MicroserviceFramework.EventBus;
 using MicroserviceFramework.Extensions.DependencyInjection;
-using MicroserviceFramework.Mediator;
 using MicroserviceFramework.Text.Json;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -37,9 +36,9 @@ public class Startup
                 x.Filters.AddUnitOfWork()
                     .AddAudit()
                     .AddGlobalException();
-#if !DEBUG
-                 x.Filters.Add<SecurityDaprTopicFilter>();
-#endif
+// #if !DEBUG
+//                  x.Filters.Add<SecurityDaprTopicFilter>();
+// #endif
                 x.Filters.Add<ResponseWrapperFilter>();
                 x.ModelBinderProviders.Insert(0, new ObjectIdModelBinderProvider());
                 x.ModelBinderProviders.Insert(0, new EnumerationModelBinderProvider());
@@ -58,7 +57,7 @@ public class Startup
             builder.UseDependencyInjectionLoader();
             builder.UseOptionsType(_configuration);
             builder.UseAutoMapper();
-            builder.UseMediator();
+            // builder.UseMediator();
             builder.UseEventBus(options =>
             {
                 options.AddAfterInterceptors(async provider =>

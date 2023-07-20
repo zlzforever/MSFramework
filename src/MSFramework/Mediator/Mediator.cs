@@ -17,12 +17,7 @@ internal class Mediator : IMediator
 {
     private readonly IServiceProvider _serviceProvider;
     private readonly ILogger<Mediator> _logger;
-    private static readonly ConcurrentDictionary<Type, (Type Interface, MethodInfo Method)> HandlerCache;
-
-    static Mediator()
-    {
-        HandlerCache = new ConcurrentDictionary<Type, (Type Interface, MethodInfo Method)>();
-    }
+    private static readonly Lazy<ConcurrentDictionary<Type, (Type Interface, MethodInfo Method)>> HandlerCache = new();
 
     public Mediator(IServiceProvider serviceProvider, ILogger<Mediator> logger)
     {
@@ -46,12 +41,12 @@ internal class Mediator : IMediator
         var requestType = request.GetType();
 
         var (@interface, method) =
-            HandlerCache.GetOrAdd(requestType, type => CreateHandlerMeta(typeof(IRequestHandler<>), type));
+            HandlerCache.Value.GetOrAdd(requestType, type => CreateHandlerMeta(typeof(IRequestHandler<>), type));
 
         var handler = _serviceProvider.GetService(@interface);
         if (handler == null)
         {
-            throw new MicroserviceFrameworkException("创建查询处理器失败");
+            throw new MicroserviceFrameworkException("创建处理器失败");
         }
 
         var traceId = ObjectId.GenerateNewId().ToString();
@@ -101,7 +96,7 @@ internal class Mediator : IMediator
 
         var requestType = request.GetType();
         var (@interface, method) =
-            HandlerCache.GetOrAdd(requestType,
+            HandlerCache.Value.GetOrAdd(requestType,
                 type => CreateHandlerMeta(typeof(IRequestHandler<,>), type, typeof(TResponse)));
         var handler = _serviceProvider.GetService(@interface);
         if (handler == null)
@@ -154,7 +149,7 @@ internal class Mediator : IMediator
         var messageType = request.GetType();
 
         var (@interface, method) =
-            HandlerCache.GetOrAdd(messageType, type => CreateHandlerMeta(typeof(IRequestHandler<>), type));
+            HandlerCache.Value.GetOrAdd(messageType, type => CreateHandlerMeta(typeof(IRequestHandler<>), type));
 
         var handlers = _serviceProvider.GetServices(@interface).Where(x => x != null);
 
