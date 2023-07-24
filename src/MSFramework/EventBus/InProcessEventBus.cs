@@ -23,7 +23,7 @@ internal class InProcessEventBus : IEventBus
     {
         Check.NotNull(@event, nameof(@event));
 
-        Task.Factory.StartNew(async (e) =>
+        Task.Factory.StartNew(async e =>
         {
             // 主动延迟 500 豪秒， 模拟消息队列延迟， 提供时间本进程提交数据
             // comments by lewis at 20230718
@@ -37,8 +37,34 @@ internal class InProcessEventBus : IEventBus
                 await function(scope.ServiceProvider);
             }
 
-            await eventExecutor.ExecuteAsync(@event.GetType().GetEventName(),
-                Defaults.JsonHelper.Serialize(@event));
+            await eventExecutor.ExecuteAsync(e.GetType().GetEventName(),
+                Defaults.JsonHelper.Serialize(e));
+
+            foreach (var function in _afterFunctions)
+            {
+                await function(scope.ServiceProvider);
+            }
+        }, @event).ConfigureAwait(false);
+
+        return Task.CompletedTask;
+    }
+
+    public Task PublishAsync(string name, object @event)
+    {
+        Check.NotNull(@event, nameof(@event));
+        Check.NotNullOrEmpty(name, nameof(name));
+
+        Task.Factory.StartNew(async (e) =>
+        {
+            using var scope = _serviceProvider.CreateScope();
+            var eventExecutor = scope.ServiceProvider.GetRequiredService<IEventProcessor>();
+            foreach (var function in _beforeFunctions)
+            {
+                await function(scope.ServiceProvider);
+            }
+
+            await eventExecutor.ExecuteAsync(name,
+                Defaults.JsonHelper.Serialize(e));
 
             foreach (var function in _afterFunctions)
             {

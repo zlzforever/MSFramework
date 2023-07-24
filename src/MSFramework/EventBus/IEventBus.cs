@@ -19,5 +19,7 @@ public interface IEventBus : IDisposable
     /// <returns></returns>
     Task PublishAsync<TEvent>(TEvent @event) where TEvent : EventBase;
 
+    Task PublishAsync(string name, dynamic @event);
+
     void AddInterceptors(InterceptorType type, params Func<IServiceProvider, Task>[] functions);
 }

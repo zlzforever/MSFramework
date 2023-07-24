@@ -48,6 +48,12 @@ public abstract class Enumeration : IComparable
         return typeMatches && valueMatches;
     }
 
+    public static bool operator ==(Enumeration a, Enumeration b)
+        => Equals(a, b);
+
+    public static bool operator !=(Enumeration a, Enumeration b)
+        => !Equals(a, b);
+
     public override int GetHashCode() => Id.GetHashCode();
 
     public static T FromValue<T>(string value) where T : Enumeration
