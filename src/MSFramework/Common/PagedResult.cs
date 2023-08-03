@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 
 namespace MicroserviceFramework.Common;
 
@@ -54,6 +55,6 @@ public class PagedResult<TEntity>
         Page = page;
         Limit = limit;
         Total = total;
-        Data = data;
+        Data = data ?? Enumerable.Empty<TEntity>();
     }
 }

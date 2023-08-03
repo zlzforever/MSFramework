@@ -49,4 +49,5 @@ public class UserCheckoutAcceptedEvent : EventBase
         ZipCode = zipCode;
         Description = description;
     }
+
 }

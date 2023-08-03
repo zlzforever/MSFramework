@@ -79,7 +79,7 @@ public class ValueObjectTests
     {
         var v1 = new V1("a").ToString();
         var v2 = new Address("a", "b", "c", "d", "f").ToString();
-        Assert.Equal("a", v1);
-        Assert.Equal("Address [Street: \"a\" | City: \"b\" | State: \"c\" | Country: \"d\" | ZipCode: \"f\"]", v2);
+        Assert.Equal("V1: a", v1);
+        Assert.Equal("Address: a, b, c, d, f", v2);
     }
 }

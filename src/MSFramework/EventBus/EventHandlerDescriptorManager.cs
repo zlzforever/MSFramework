@@ -1,7 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using MicroserviceFramework.Collections.Generic;
 
 namespace MicroserviceFramework.EventBus;
 
@@ -33,7 +31,6 @@ public static class EventHandlerDescriptorManager
             throw new ArgumentException($"{eventType} 不是事件类型");
         }
 
-        // TODO: verify handlerType & eventType
         var eventName = eventType.GetEventName();
         EventTypes.Add(eventName);
 
@@ -51,10 +48,9 @@ public static class EventHandlerDescriptorManager
         dict.TryAdd(handlerType, new EventHandlerDescriptor(eventType, handlerType));
     }
 
-    public static IEnumerable<EventHandlerDescriptor> GetOrDefault(string eventName)
+    public static ICollection<EventHandlerDescriptor> GetOrDefault(string eventName)
     {
-        var dict = Cache.GetOrDefault(eventName);
-        return dict?.Values ?? Enumerable.Empty<EventHandlerDescriptor>();
+        return Cache.TryGetValue(eventName, out var result) ? result.Values : null;
     }
 
     public static IReadOnlyCollection<string> GetEventTypes()

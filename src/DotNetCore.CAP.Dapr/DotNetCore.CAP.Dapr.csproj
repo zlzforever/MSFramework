@@ -8,8 +8,8 @@
   <Import Project="../../package.props" />
 
   <ItemGroup>
-    <PackageReference Include="Dapr.AspNetCore" Version="1.10.0" />
-    <PackageReference Include="DotNetCore.CAP" Version="7.1.3" />
+    <PackageReference Include="Dapr.AspNetCore" Version="1.11.0" />
+    <PackageReference Include="DotNetCore.CAP" Version="7.2.0" />
   </ItemGroup>
 
 </Project>

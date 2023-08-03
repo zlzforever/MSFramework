@@ -11,6 +11,7 @@ public abstract class ValueObject
         {
             return false;
         }
+
         return ReferenceEquals(left, null) || left.Equals(right);
     }
 
@@ -20,6 +21,21 @@ public abstract class ValueObject
     }
 
     protected abstract IEnumerable<object> GetEqualityComponents();
+
+    public override string ToString()
+    {
+        return $"{GetType().Name}: {string.Join(", ", GetEqualityComponents())}";
+    }
+
+    public static bool operator ==(ValueObject b, ValueObject c)
+    {
+        return EqualOperator(b, c);
+    }
+
+    public static bool operator !=(ValueObject b, ValueObject c)
+    {
+        return !(b == c);
+    }
 
     public override bool Equals(object obj)
     {

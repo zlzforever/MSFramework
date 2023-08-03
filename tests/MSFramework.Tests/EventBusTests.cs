@@ -1,3 +1,5 @@
+using System;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using MicroserviceFramework;
@@ -14,48 +16,61 @@ public class EventBusTests
 {
     public class Event1 : EventBase
     {
+        public static readonly StringBuilder Output = new();
         public int Order { get; set; }
     }
 
-    public class Event1Handler : IEventHandler<Event1>
+    public class SingleHandlerEventHandler : IEventHandler<Event1>
     {
-        public static int Count;
-        private ISession _session;
+        private readonly ISession _session;
 
-        public Event1Handler(ISession session)
+        public SingleHandlerEventHandler(ISession session)
         {
             _session = session;
         }
 
         public Task HandleAsync(Event1 @event)
         {
-            Interlocked.Increment(ref Count);
+            Console.WriteLine(_session.UserId);
+            Event1.Output.Append(@event.Order).Append(", ");
             return Task.CompletedTask;
         }
 
         public void Dispose()
         {
+        }
+    }
+
+    [Fact]
+    public void SingleSubscribeEvent()
+    {
+        for (var i = 0; i < 40; ++i)
+        {
+            Event1.Output.Clear();
+
+            var serviceCollection = new ServiceCollection();
+            serviceCollection.AddLogging();
+            serviceCollection.AddMicroserviceFramework(x =>
+            {
+                x.UseDependencyInjectionLoader();
+                x.UseAspNetCore();
+                x.UseEventBus();
+            });
+
+            var provider = serviceCollection.BuildServiceProvider();
+            var eventBus = provider.GetRequiredService<IEventPublisher>();
+
+            eventBus.Publish(new Event1 { Order = 1 });
+            Thread.Sleep(25);
+            eventBus.Publish(new Event1 { Order = 2 });
+            Thread.Sleep(25);
+            Assert.Equal("1, 2, ", Event1.Output.ToString());
         }
     }
 
     [EventName("event2")]
     public class Event2 : EventBase
     {
-    }
-
-    public class Event2Handler : IEventHandler<Event2>
-    {
-        public static int Count;
-
-        public Task HandleAsync(Event2 @event)
-        {
-            Interlocked.Increment(ref Count);
-            return Task.CompletedTask;
-        }
-
-        public void Dispose()
-        {
-        }
     }
 
     [Fact]
@@ -68,69 +83,21 @@ public class EventBusTests
         Assert.Equal("event2", name2);
     }
 
-    [Fact]
-    public async Task InProcessEventBus()
-    {
-        var serviceCollection = new ServiceCollection();
-        serviceCollection.AddLogging();
-        serviceCollection.AddMicroserviceFramework(x =>
-        {
-            x.UseDependencyInjectionLoader();
-            x.UseAspNetCore();
-            x.UseEventBus();
-        });
-
-        var provider = serviceCollection.BuildServiceProvider();
-        var eventBus = provider.GetRequiredService<IEventBus>();
-
-        //        await eventBus.PublishAsync(new Event1 { Order = 1 });
-
-        for (var i = 0; i < 100; ++i)
-        {
-            await eventBus.PublishAsync(new Event1 { Order = 1 });
-        }
-
-        Thread.Sleep(3000);
-        Assert.Equal(100, Event1Handler.Count);
-    }
-
-    // [Fact]
-    // public async Task RabbitMQEventBus()
-    // {
-    //     var configurationBuilder = new ConfigurationBuilder();
-    //     configurationBuilder.AddJsonFile("appsettings.json");
-    //     var configuration = configurationBuilder.Build();
-    //
-    //     var serviceCollection = new ServiceCollection();
-    //     serviceCollection.AddLogging();
-    //     serviceCollection.AddMicroserviceFramework(x =>
-    //     {
-    //         x.UseDependencyInjectionLoader();
-    //         x.UseEventBusRabbitMQ(configuration);
-    //     });
-    //
-    //     var provider = serviceCollection.BuildServiceProvider();
-    //     var eventBus = provider.GetRequiredService<IEventBus>();
-    //
-    //     for (var i = 0; i < 100; ++i)
-    //     {
-    //         await eventBus.PublishAsync(new Event2());
-    //     }
-    //
-    //     Thread.Sleep(2000);
-    //     Assert.Equal(100, Event2Handler.Count);
-    // }
-
     public class Event3 : EventBase
     {
-        public static int Count = 0;
+        public static readonly StringBuilder Output = new();
+        public int Order { get; set; }
     }
 
     public class EventHandler31 : IEventHandler<Event3>
     {
         public Task HandleAsync(Event3 @event)
         {
-            Interlocked.Increment(ref Event3.Count);
+            lock (Event3.Output)
+            {
+                Event3.Output.Append(@event.Order).Append(", ");
+            }
+
             return Task.CompletedTask;
         }
 
@@ -143,7 +110,11 @@ public class EventBusTests
     {
         public Task HandleAsync(Event3 @event)
         {
-            Interlocked.Increment(ref Event3.Count);
+            lock (Event3.Output)
+            {
+                Event3.Output.Append(@event.Order).Append(", ");
+            }
+
             return Task.CompletedTask;
         }
 
@@ -153,21 +124,27 @@ public class EventBusTests
     }
 
     [Fact]
-    public async Task MulitiHandlers()
+    public void MultiSubscribeEvent()
     {
-        var serviceCollection = new ServiceCollection();
-        serviceCollection.AddLogging();
-        serviceCollection.AddMicroserviceFramework(x =>
+        for (var i = 0; i < 40; ++i)
         {
-            x.UseDependencyInjectionLoader();
-            x.UseEventBus();
-        });
+            Event3.Output.Clear();
+            var serviceCollection = new ServiceCollection();
+            serviceCollection.AddLogging();
+            serviceCollection.AddMicroserviceFramework(x =>
+            {
+                x.UseDependencyInjectionLoader();
+                x.UseEventBus();
+            });
 
-        var provider = serviceCollection.BuildServiceProvider();
-        var eventBus = provider.GetRequiredService<IEventBus>();
+            var provider = serviceCollection.BuildServiceProvider();
+            var eventBus = provider.GetRequiredService<IEventPublisher>();
 
-        await eventBus.PublishAsync(new Event3 { });
-        Thread.Sleep(1000);
-        Assert.Equal(2, Event3.Count);
+            eventBus.Publish(new Event3 { Order = 1 });
+            Thread.Sleep(20);
+            eventBus.Publish(new Event3 { Order = 2 });
+            Thread.Sleep(20);
+            Assert.Equal("1, 1, 2, 2, ", Event3.Output.ToString());
+        }
     }
 }

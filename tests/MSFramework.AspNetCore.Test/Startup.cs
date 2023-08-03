@@ -57,10 +57,9 @@ public class Startup
             builder.UseDependencyInjectionLoader();
             builder.UseOptionsType(_configuration);
             builder.UseAutoMapper();
-            // builder.UseMediator();
-            builder.UseEventBus(options =>
+            builder.UseEventBus((_, options) =>
             {
-                options.AddAfterInterceptors(async provider =>
+                options.AddAfterInterceptor(async (provider, _) =>
                 {
                     await provider.GetRequiredService<IUnitOfWork>().SaveChangesAsync();
                 });

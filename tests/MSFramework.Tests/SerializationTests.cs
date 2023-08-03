@@ -276,14 +276,14 @@ public class SerializationTests
             new PagedResult<A>(1, 10, 2,
                 new List<A> { new A { Id = "1", Name = "A1" }, new A() { Id = "2", Name = "A2" } }), options);
         Assert.Equal("""
-{"page":1,"limit":10,"total":2,"data":[{"id":"1","name":"A1"},{"id":"2","name":"A2"}]}
+{"data":[{"id":"1","name":"A1"},{"id":"2","name":"A2"}],"total":2,"page":1,"limit":10}
 """
             , json);
         var json2 = System.Text.Json.JsonSerializer.Serialize(
             new PagedResult<A>(1, 10, 2,
                 null), options);
         Assert.Equal("""
-{"page":1,"limit":10,"total":2,"data":[]}
+{"data":[],"total":2,"page":1,"limit":10}
 """
             , json2);
     }

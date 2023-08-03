@@ -40,4 +40,22 @@ public class EnumerationTests
         var list2 = Enumeration.GetAll<OrderStatus>().ToList();
         Assert.Equal(6, list2.Count);
     }
+
+    [Fact]
+    public void Equal()
+    {
+        var e1 = OrderStatus.Cancelled;
+        var e2 = OrderStatus.Cancelled;
+        var r = e1 == e2;
+        Assert.True(r);
+    }
+
+    [Fact]
+    public void NotEqual()
+    {
+        var e1 = OrderStatus.Cancelled;
+        var e2 = OrderStatus.StockConfirmed;
+        var r = e1 != e2;
+        Assert.True(r);
+    }
 }
