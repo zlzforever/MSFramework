@@ -4,7 +4,7 @@ using MongoDB.Bson;
 
 namespace Ordering.Application.Commands;
 
-public class DeleteOrderCommand : IRequest
+public record DeleteOrderCommand : Request
 {
     /// <summary>
     ///

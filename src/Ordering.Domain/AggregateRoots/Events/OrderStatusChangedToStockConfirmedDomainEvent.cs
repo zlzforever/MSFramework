@@ -3,7 +3,7 @@ using MongoDB.Bson;
 
 namespace Ordering.Domain.AggregateRoots.Events;
 
-public class OrderStatusChangedToStockConfirmedDomainEvent
+public record OrderStatusChangedToStockConfirmedDomainEvent
     : DomainEvent
 {
     public ObjectId OrderId { get; }

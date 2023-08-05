@@ -2,7 +2,7 @@ using MicroserviceFramework.Domain;
 
 namespace Ordering.Domain.AggregateRoots.Events;
 
-public class OrderStartedDomainEvent : DomainEvent
+public record OrderStartedDomainEvent : DomainEvent
 {
     public string UserId { get; }
 

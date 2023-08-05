@@ -3,7 +3,7 @@ using MongoDB.Bson;
 
 namespace Ordering.Application.Commands;
 
-public class CancelOrderCommand : IRequest<ObjectId>
+public record CancelOrderCommand : Request<ObjectId>
 {
     public ObjectId OrderId { get; private set; }
 

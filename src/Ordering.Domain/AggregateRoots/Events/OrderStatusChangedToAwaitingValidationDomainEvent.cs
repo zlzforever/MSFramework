@@ -4,7 +4,7 @@ using MongoDB.Bson;
 
 namespace Ordering.Domain.AggregateRoots.Events;
 
-public class OrderStatusChangedToAwaitingValidationDomainEvent
+public record OrderStatusChangedToAwaitingValidationDomainEvent
     : DomainEvent
 {
     public ObjectId OrderId { get; }

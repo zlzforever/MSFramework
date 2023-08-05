@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Concurrent;
-using System.Linq;
 using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
@@ -26,12 +25,12 @@ internal class Mediator : IMediator
     }
 
     /// <summary>
-    /// 单个响应
+    /// 请求无响应模型
     /// </summary>
     /// <param name="request"></param>
     /// <param name="cancellationToken"></param>
     /// <exception cref="MicroserviceFrameworkException"></exception>
-    public async Task SendAsync(IRequest request, CancellationToken cancellationToken = default)
+    public async Task SendAsync(Request request, CancellationToken cancellationToken = default)
     {
         if (request == null)
         {
@@ -39,54 +38,29 @@ internal class Mediator : IMediator
         }
 
         var requestType = request.GetType();
-
         var (@interface, method) =
             HandlerCache.Value.GetOrAdd(requestType, type => CreateHandlerMeta(typeof(IRequestHandler<>), type));
 
         var handler = _serviceProvider.GetService(@interface);
         if (handler == null)
         {
-            throw new MicroserviceFrameworkException("创建处理器失败");
+            throw new MicroserviceFrameworkException(
+                $"创建处理器 IRequestHandler<{requestType.FullName}> 失败");
         }
 
         var traceId = ObjectId.GenerateNewId().ToString();
-
-        try
-        {
-            _logger.LogDebug("{TraceId}, {HandlerType} 开始处理请求 {Request}", traceId, handler.GetType().FullName,
-                Defaults.JsonHelper.Serialize(request));
-
-            if (method.Invoke(handler, new object[] { request, cancellationToken }) is not Task task)
-            {
-                return;
-            }
-
-            await task;
-
-            _logger.LogDebug("{TraceId}, {HandlerType} 处理成功", traceId, handler.GetType().FullName);
-        }
-        catch (Exception e)
-        {
-            _logger.LogError("{TraceId}, {HandlerType} 处理失败", traceId, handler.GetType().FullName);
-
-            if (e.InnerException != null)
-            {
-                throw e.InnerException;
-            }
-
-            throw;
-        }
+        await HandleAsync(traceId, request, handler, method);
     }
 
     /// <summary>
-    /// 单个响应
+    /// 请求响应模型
     /// </summary>
     /// <param name="request"></param>
     /// <param name="cancellationToken"></param>
     /// <typeparam name="TResponse"></typeparam>
     /// <returns></returns>
     /// <exception cref="MicroserviceFrameworkException"></exception>
-    public async Task<TResponse> SendAsync<TResponse>(IRequest<TResponse> request,
+    public async Task<TResponse> SendAsync<TResponse>(Request<TResponse> request,
         CancellationToken cancellationToken = default)
     {
         if (request == null)
@@ -95,13 +69,15 @@ internal class Mediator : IMediator
         }
 
         var requestType = request.GetType();
+        var responseType = typeof(TResponse);
         var (@interface, method) =
             HandlerCache.Value.GetOrAdd(requestType,
-                type => CreateHandlerMeta(typeof(IRequestHandler<,>), type, typeof(TResponse)));
+                type => CreateHandlerMeta(typeof(IRequestHandler<,>), type, responseType));
         var handler = _serviceProvider.GetService(@interface);
         if (handler == null)
         {
-            throw new MicroserviceFrameworkException("创建查询处理器失败");
+            throw new MicroserviceFrameworkException(
+                $"创建处理器 IRequestHandler<{requestType.FullName}, {responseType.FullName}> 失败");
         }
 
         var traceId = ObjectId.GenerateNewId().ToString();
@@ -121,65 +97,75 @@ internal class Mediator : IMediator
             _logger.LogDebug("{TraceId}, {HandlerType} 处理成功", traceId, handler.GetType().FullName);
             return result;
         }
-        catch (Exception e)
+        catch (Exception exception)
         {
             _logger.LogError("{TraceId}, {HandlerType} 处理失败", traceId, handler.GetType().FullName);
 
-            if (e.InnerException != null)
+            if (exception.InnerException != null)
             {
-                throw e.InnerException;
+                throw exception.InnerException;
             }
 
             throw;
         }
     }
 
+
     /// <summary>
     /// 多个响应
+    /// 注意：Handler 之间应该是独立的，不应该有依赖、顺序关系，并且必须所有 Handler 都能执行成功
     /// </summary>
     /// <param name="request"></param>
     /// <param name="cancellationToken"></param>
-    public async Task PublishAsync(IRequest request, CancellationToken cancellationToken = default)
+    public async Task PublishAsync(Request request, CancellationToken cancellationToken = default)
     {
         if (request == null)
         {
             return;
         }
 
-        var messageType = request.GetType();
-
         var (@interface, method) =
-            HandlerCache.Value.GetOrAdd(messageType, type => CreateHandlerMeta(typeof(IRequestHandler<>), type));
+            HandlerCache.Value.GetOrAdd(request.GetType(), type => CreateHandlerMeta(typeof(IRequestHandler<>), type));
 
-        var handlers = _serviceProvider.GetServices(@interface).Where(x => x != null);
+        var handlers = _serviceProvider.GetServices(@interface);
 
         var traceId = ObjectId.GenerateNewId().ToString();
 
         foreach (var handler in handlers)
         {
-            try
+            if (handler == null)
             {
-                _logger.LogDebug("{TraceId}, {HandlerType} 开始处理请求 {Request}", traceId, handler.GetType().FullName,
-                    Defaults.JsonHelper.Serialize(request));
-
-                if (method.Invoke(handler, new object[] { request, cancellationToken }) is Task task)
-                {
-                    await task;
-                }
-
-                _logger.LogDebug("{TraceId}, {HandlerType} 处理成功", traceId, handler.GetType().FullName);
+                continue;
             }
-            catch (Exception e)
-            {
-                if (e.InnerException != null)
-                {
-                    _logger.LogError("{TraceId}, {HandlerType} 处理失败", traceId, handler.GetType().FullName);
-                    throw e.InnerException;
-                }
 
+            await HandleAsync(traceId, request, handler, method);
+        }
+    }
+
+    private async Task HandleAsync(string traceId, Request request, object handler, MethodInfo method)
+    {
+        try
+        {
+            _logger.LogDebug("{TraceId}, {HandlerType} 开始处理请求 {Request}", traceId, handler.GetType().FullName,
+                Defaults.JsonHelper.Serialize(request));
+
+            if (method.Invoke(handler, new object[] { request }) is Task task)
+            {
+                await task;
+            }
+
+            _logger.LogDebug("{TraceId}, {HandlerType} 处理成功", traceId, handler.GetType().FullName);
+        }
+        catch (Exception e)
+        {
+            if (e.InnerException != null)
+            {
                 _logger.LogError("{TraceId}, {HandlerType} 处理失败", traceId, handler.GetType().FullName);
-                throw;
+                throw e.InnerException;
             }
+
+            _logger.LogError("{TraceId}, {HandlerType} 处理失败", traceId, handler.GetType().FullName);
+            throw;
         }
     }
 

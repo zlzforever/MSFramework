@@ -2,7 +2,9 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.IO;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
+using Dapr;
 using MicroserviceFramework.AspNetCore;
 using MicroserviceFramework.AspNetCore.Mvc;
 using MicroserviceFramework.Common;
@@ -27,6 +29,8 @@ public class ValueController : ApiControllerBase
         return m;
     }
 
+
+    [Topic("pubsub", "test")]
     [HttpGet("string")]
     public string GetString()
     {

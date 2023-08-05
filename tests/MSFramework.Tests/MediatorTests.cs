@@ -10,7 +10,7 @@ using Xunit;
 
 namespace MSFramework.Tests;
 
-public class Command0 : IRequest
+public record Command0 : Request
 {
     public static int Count;
 }
@@ -24,7 +24,7 @@ public class CommandHandler0 : IRequestHandler<Command0>
     }
 }
 
-public class Command1 : IRequest
+public record Command1 : Request
 {
     public static int Count;
 }
@@ -47,7 +47,7 @@ public class CommandHandler2 : IRequestHandler<Command1>
     }
 }
 
-public class Command2 : IRequest<int>
+public record Command2 : Request<int>
 {
     public static int Count;
 }
@@ -61,7 +61,7 @@ public class Command2Handler : IRequestHandler<Command2, int>
     }
 }
 
-public class Command3 : IRequest<int>
+public record Command3 : Request<int>
 {
     public int Count { get; set; } = 1;
 }
@@ -76,6 +76,21 @@ public class Command3Handler : IRequestHandler<Command3, int>
 
 public class MediatorTests
 {
+    [Fact]
+    public async Task Response()
+    {
+        var method = typeof(IRequestHandler<Command2, int>).GetMethod("HandleAsync");
+        var handler = new Command2Handler();
+        var result = method.Invoke(handler, new object[] { new Command2 { }, CancellationToken.None });
+        if (result is Task t)
+        {
+            await t;
+        }
+        else
+        {
+        }
+    }
+
     [Fact]
     public async Task RequestToMultiHandlersTest()
     {

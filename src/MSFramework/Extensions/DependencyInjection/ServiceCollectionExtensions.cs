@@ -56,8 +56,8 @@ public static class ServiceCollectionExtensions
             typeof(IScopeDependency),
             typeof(IDomainService),
             typeof(ISession),
-            typeof(IRequest),
-            typeof(IRequest<>)).ToArray();
+            typeof(Request),
+            typeof(Request<>)).ToArray();
 
         if (interfaceTypes.Length == 0)
         {

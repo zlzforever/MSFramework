@@ -16,7 +16,7 @@ public interface IMediator : IScopeDependency
     /// <param name="request"></param>
     /// <param name="cancellationToken"></param>
     /// <returns></returns>
-    Task SendAsync(IRequest request, CancellationToken cancellationToken = default);
+    Task SendAsync(Request request, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// 请求/响应模型
@@ -26,7 +26,7 @@ public interface IMediator : IScopeDependency
     /// <param name="cancellationToken"></param>
     /// <typeparam name="TResponse"></typeparam>
     /// <returns></returns>
-    Task<TResponse> SendAsync<TResponse>(IRequest<TResponse> request,
+    Task<TResponse> SendAsync<TResponse>(Request<TResponse> request,
         CancellationToken cancellationToken = default);
 
     /// <summary>
@@ -35,5 +35,5 @@ public interface IMediator : IScopeDependency
     /// <param name="message"></param>
     /// <param name="cancellationToken"></param>
     /// <returns></returns>
-    Task PublishAsync(IRequest message, CancellationToken cancellationToken = default);
+    Task PublishAsync(Request message, CancellationToken cancellationToken = default);
 }

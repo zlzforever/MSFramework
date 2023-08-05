@@ -4,7 +4,7 @@ using MongoDB.Bson;
 
 namespace Ordering.Domain.AggregateRoots.Events;
 
-public class OrderStatusChangedToPaidDomainEvent
+public record OrderStatusChangedToPaidDomainEvent
     : DomainEvent
 {
     public ObjectId OrderId { get; }

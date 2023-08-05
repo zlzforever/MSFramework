@@ -10,7 +10,7 @@ using Xunit;
 
 namespace MSFramework.Tests;
 
-public class DomainEvent4 : DomainEvent
+public record DomainEvent4 : DomainEvent
 {
     public static int Count;
 }
@@ -28,11 +28,11 @@ public class DomainEvent4Handler : IDomainEventHandler<DomainEvent4>
     }
 }
 
-public class DomainEvent2 : DomainEvent
+public record DomainEvent2 : DomainEvent
 {
 }
 
-public class DomainEvent3 : DomainEvent
+public record DomainEvent3 : DomainEvent
 {
     public static int Count;
 }

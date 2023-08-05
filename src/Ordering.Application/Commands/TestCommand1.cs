@@ -3,7 +3,7 @@ using MicroserviceFramework.Mediator;
 
 namespace Ordering.Application.Commands;
 
-public class TestCommand1 : IRequest<string>
+public record TestCommand1 : Request<string>
 {
     /// <summary>
     ///

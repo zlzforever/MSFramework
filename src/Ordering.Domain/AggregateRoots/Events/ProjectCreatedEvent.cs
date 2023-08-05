@@ -4,7 +4,7 @@ using MongoDB.Bson;
 
 namespace Ordering.Domain.AggregateRoots.Events;
 
-public class ProjectCreatedEvent : DomainEvent
+public record ProjectCreatedEvent : DomainEvent
 {
     public ObjectId Id { get; set; }
     public string Name { get; set; }

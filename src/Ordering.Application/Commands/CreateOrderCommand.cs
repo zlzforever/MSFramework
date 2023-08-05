@@ -4,7 +4,7 @@ using MongoDB.Bson;
 
 namespace Ordering.Application.Commands;
 
-public class CreateOrderCommand : IRequest<ObjectId>
+public record CreateOrderCommand : Request<ObjectId>
 {
     public string UserId { get; set; }
 
