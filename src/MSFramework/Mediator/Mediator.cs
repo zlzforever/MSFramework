@@ -49,7 +49,7 @@ internal class Mediator : IMediator
         }
 
         var traceId = ObjectId.GenerateNewId().ToString();
-        await HandleAsync(traceId, request, handler, method);
+        await HandleAsync(traceId, request, handler, method, cancellationToken);
     }
 
     /// <summary>
@@ -87,26 +87,20 @@ internal class Mediator : IMediator
             _logger.LogDebug("{TraceId}, {HandlerType} 开始处理请求 {Request}", traceId, handler.GetType().FullName,
                 Defaults.JsonHelper.Serialize(request));
 
-            if (method.Invoke(handler, new object[] { request, cancellationToken }) is not Task<TResponse> task)
+            TResponse result = default;
+            var invokeResult = method.Invoke(handler, new object[] { request, cancellationToken });
+            if (invokeResult is Task<TResponse> task)
             {
-                _logger.LogWarning("{TraceId}, {HandlerType} 处理器没有返回值", traceId, handler.GetType().FullName);
-                return default;
+                result = await task;
             }
 
-            var result = await task;
             _logger.LogDebug("{TraceId}, {HandlerType} 处理成功", traceId, handler.GetType().FullName);
             return result;
         }
-        catch (Exception exception)
+        catch (Exception e)
         {
             _logger.LogError("{TraceId}, {HandlerType} 处理失败", traceId, handler.GetType().FullName);
-
-            if (exception.InnerException != null)
-            {
-                throw exception.InnerException;
-            }
-
-            throw;
+            throw e.InnerException ?? e;
         }
     }
 
@@ -138,18 +132,19 @@ internal class Mediator : IMediator
                 continue;
             }
 
-            await HandleAsync(traceId, request, handler, method);
+            await HandleAsync(traceId, request, handler, method, cancellationToken);
         }
     }
 
-    private async Task HandleAsync(string traceId, Request request, object handler, MethodInfo method)
+    private async Task HandleAsync(string traceId, Request request, object handler, MethodInfo method,
+        CancellationToken cancellationToken)
     {
         try
         {
             _logger.LogDebug("{TraceId}, {HandlerType} 开始处理请求 {Request}", traceId, handler.GetType().FullName,
                 Defaults.JsonHelper.Serialize(request));
 
-            if (method.Invoke(handler, new object[] { request }) is Task task)
+            if (method.Invoke(handler, new object[] { request, cancellationToken }) is Task task)
             {
                 await task;
             }
@@ -158,14 +153,8 @@ internal class Mediator : IMediator
         }
         catch (Exception e)
         {
-            if (e.InnerException != null)
-            {
-                _logger.LogError("{TraceId}, {HandlerType} 处理失败", traceId, handler.GetType().FullName);
-                throw e.InnerException;
-            }
-
             _logger.LogError("{TraceId}, {HandlerType} 处理失败", traceId, handler.GetType().FullName);
-            throw;
+            throw e.InnerException ?? e;
         }
     }
 

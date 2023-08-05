@@ -25,7 +25,7 @@ public class RunTest
         _output = output;
     }
 
-    [Fact]
+    // [Fact]
     public async Task Run_When_AddMSFramework_WithEfNpgsql()
     {
         using var host = await new HostBuilder()

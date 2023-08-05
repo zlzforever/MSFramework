@@ -9,5 +9,6 @@ public class TestDataConfiguration : EntityTypeConfigurationBase<TestData, TestD
 {
     public override void Configure(EntityTypeBuilder<TestData> builder)
     {
+        ConfigureDefaultIdentifier(builder);
     }
 }

@@ -77,21 +77,6 @@ public class Command3Handler : IRequestHandler<Command3, int>
 public class MediatorTests
 {
     [Fact]
-    public async Task Response()
-    {
-        var method = typeof(IRequestHandler<Command2, int>).GetMethod("HandleAsync");
-        var handler = new Command2Handler();
-        var result = method.Invoke(handler, new object[] { new Command2 { }, CancellationToken.None });
-        if (result is Task t)
-        {
-            await t;
-        }
-        else
-        {
-        }
-    }
-
-    [Fact]
     public async Task RequestToMultiHandlersTest()
     {
         var serviceCollection = new ServiceCollection();

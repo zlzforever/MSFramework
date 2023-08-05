@@ -11,7 +11,7 @@
     <ProjectReference Include="..\..\src\MSFramework\MSFramework.csproj" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="BenchmarkDotNet" Version="0.13.6" />
+    <PackageReference Include="BenchmarkDotNet" Version="0.13.7" />
     <PackageReference Include="DeepCopy" Version="1.0.3" />
       
   </ItemGroup>

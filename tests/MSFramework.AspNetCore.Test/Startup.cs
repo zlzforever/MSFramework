@@ -53,7 +53,7 @@ public class Startup
         services.AddRouting(x => { x.LowercaseUrls = true; });
         services.AddMicroserviceFramework(builder =>
         {
-            builder.UseAssemblyScanPrefix("Ordering");
+            builder.UseAssemblyScanPrefix("MSFramework.AspNetCore.Test");
             builder.UseDependencyInjectionLoader();
             builder.UseOptionsType(_configuration);
             builder.UseAutoMapper();
