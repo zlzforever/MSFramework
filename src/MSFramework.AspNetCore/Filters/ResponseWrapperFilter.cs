@@ -1,4 +1,3 @@
-using System.Collections.Generic;
 using MicroserviceFramework.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
@@ -7,15 +6,6 @@ namespace MicroserviceFramework.AspNetCore.Filters;
 
 public sealed class ResponseWrapperFilter : ActionFilterAttribute
 {
-    private static readonly HashSet<string> SupportedMediaTypes = new();
-
-    static ResponseWrapperFilter()
-    {
-        SupportedMediaTypes.Add("application/json");
-        SupportedMediaTypes.Add("text/json");
-        SupportedMediaTypes.Add("application/*+json");
-    }
-
     public override void OnResultExecuting(ResultExecutingContext context)
     {
         // if (!context.HttpContext.Request.Headers.Accept.Any(value => SupportedMediaTypes.Contains(value)))

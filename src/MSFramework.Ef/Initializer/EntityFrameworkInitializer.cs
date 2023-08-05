@@ -25,7 +25,7 @@ public class EntityFrameworkInitializer : InitializerBase
     {
         try
         {
-            _logger.LogInformation("Start initialize ef...");
+            _logger.LogInformation("开始 EF 初始化...");
             using var scope = _serviceProvider.CreateScope();
 
             var dbContextConfigurationCollection =
@@ -49,7 +49,7 @@ public class EntityFrameworkInitializer : InitializerBase
             {
                 if (option.AutoMigrationEnabled)
                 {
-                    _logger.LogInformation("Auto migrate is enabled in {DbContextTypeName}", option.DbContextTypeName);
+                    _logger.LogInformation("在 {DbContextTypeName} 中开启了数据库自动迁移", option.DbContextTypeName);
 
                     var dbContext = (DbContextBase)scope.ServiceProvider.GetRequiredService(option.GetDbContextType());
 
@@ -61,11 +61,11 @@ public class EntityFrameworkInitializer : InitializerBase
                     ILogger logger = dbContext.GetService<ILoggerFactory>()
                         .CreateLogger<EntityFrameworkInitializer>();
 
-                    var appliedMigrations =
-                        (await dbContext.Database.GetAppliedMigrationsAsync(cancellationToken: cancellationToken))
-                        .ToList();
-                    logger.LogInformation("Applied {AppliedMigrationsCount} migrations： {AppliedMigrations}",
-                        appliedMigrations.Count, string.Join(", ", appliedMigrations));
+                    // var appliedMigrations =
+                    //     (await dbContext.Database.GetAppliedMigrationsAsync(cancellationToken: cancellationToken))
+                    //     .ToList();
+                    // logger.LogInformation("Applied {AppliedMigrationsCount} migrations： {AppliedMigrations}",
+                    //     appliedMigrations.Count, string.Join(", ", appliedMigrations));
 
                     var migrations =
                         (await dbContext.Database.GetPendingMigrationsAsync(cancellationToken: cancellationToken))
@@ -74,22 +74,22 @@ public class EntityFrameworkInitializer : InitializerBase
                     {
                         await dbContext.Database.MigrateAsync(cancellationToken: cancellationToken);
 
-                        logger.LogInformation("Migrate {MigrationsCount}： {Migrations}", migrations.Length,
+                        logger.LogInformation("执行了 {MigrationsCount} 个数据库迁移： {Migrations}", migrations.Length,
                             string.Join(", ", migrations));
                     }
                     else
                     {
-                        _logger.LogInformation("There is no pending migration in {DbContextTypeName}",
+                        _logger.LogInformation("在 {DbContextTypeName} 中没有挂起的迁移",
                             option.DbContextTypeName);
                     }
                 }
                 else
                 {
-                    _logger.LogInformation("Auto migrate is disabled in {DbContextTypeName}", option.DbContextTypeName);
+                    _logger.LogInformation("在 {DbContextTypeName} 中禁用了数据库自动迁移", option.DbContextTypeName);
                 }
             }
 
-            _logger.LogInformation("Initialize ef complete");
+            _logger.LogInformation("EF 初始化完成");
         }
         catch (Exception e)
         {
