@@ -25,6 +25,6 @@ jobs:
     - name: Build
       run: dotnet build --no-restore
     - name: Test1
-      run: cd .\tests\MSFramework.AspNetCore.Test\ && dotnet test --no-build --verbosity normal
+      run: cd ./tests/MSFramework.AspNetCore.Test && dotnet test --no-build --verbosity normal
     - name: Test1
-      run: cd .\MSFramework.Tests\ && dotnet test --no-build --verbosity normal
+      run: cd ./tests/MSFramework.Tests && dotnet test --no-build --verbosity normal
