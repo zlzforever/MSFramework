@@ -5,16 +5,15 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="MSFramework.AutoMapper" Version="0.15.1-beta19" />
-        <PackageReference Include="MSFramework.AspNetCore" Version="0.15.1-beta19" />
-        <PackageReference Include="Dapper" Version="2.0.123" />
-        <PackageReference Include="DotNetCore.CAP" Version="7.0.2" />
-        <PackageReference Include="DotNetCore.CAP.MySql" Version="7.0.2" />
-        <PackageReference Include="Dapr.AspNetCore" Version="1.9.0" />
+        <PackageReference Include="MSFramework.AutoMapper" Version="0.15.1-beta29" />
+        <PackageReference Include="MSFramework.AspNetCore" Version="0.15.1-beta29" />
+        <PackageReference Include="Dapper" Version="2.0.143" />
+        <PackageReference Include="Dapr.AspNetCore" Version="1.11.0" />
     </ItemGroup>
 
     <ItemGroup>
         <ProjectReference Include="..\Template.Infrastructure\Template.Infrastructure.csproj" />
     </ItemGroup>
+
 
 </Project>

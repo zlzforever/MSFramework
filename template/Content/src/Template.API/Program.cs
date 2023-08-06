@@ -28,9 +28,8 @@ public class Program
 	public static WebApplicationBuilder CreateWebApplicationBuilder(string[] args)
 	{
 		var webApplicationBuilder = WebApplication.CreateBuilder(args);
-		webApplicationBuilder.Configuration.ConfigureConfiguration();
-		webApplicationBuilder.Host.ConfigureServices(Startup.ConfigureServices)
-			.UseSerilog();
+		webApplicationBuilder.ConfigureConfiguration();
+		webApplicationBuilder.ConfigureService();
 		webApplicationBuilder.WebHost.ConfigureKestrel((context, options) =>
 		{
 			// Handle requests up to 500 MB

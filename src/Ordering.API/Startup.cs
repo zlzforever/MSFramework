@@ -18,7 +18,9 @@ using MicroserviceFramework.Ef;
 using MicroserviceFramework.Ef.PostgreSql;
 using MicroserviceFramework.EventBus;
 using MicroserviceFramework.Extensions.DependencyInjection;
+using MicroserviceFramework.Serialization;
 using MicroserviceFramework.Text.Json;
+using MicroserviceFramework.Text.Json.Converters;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -98,7 +100,6 @@ public static class Startup
             {
                 options.JsonSerializerOptions.AddDefaultConverters();
                 options.JsonSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
-                options.JsonSerializerOptions.DictionaryKeyPolicy = JsonNamingPolicy.CamelCase;
                 jsonSerializerOptions = options.JsonSerializerOptions;
             })
             // .AddNewtonsoftJson(x =>

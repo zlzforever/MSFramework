@@ -10,7 +10,7 @@ namespace Template.Infrastructure.EntityConfigurations
 	{
 		public override void Configure(EntityTypeBuilder<Product> builder)
 		{
-			base.Configure(builder);
+			ConfigureDefaultIdentifier(builder);
 
 			builder.Property(i => i.Id).HasColumnType("varchar").HasMaxLength(36);
 			builder.Property(i => i.Name).HasMaxLength(100);

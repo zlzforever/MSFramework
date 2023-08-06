@@ -8,12 +8,12 @@ namespace Template.Application.Project
 	{
 		public static class V10
 		{
-			public class GetProductByIdQuery : IRequest<Dto.V10.ProductOut>
+			public record GetProductByIdQuery : Request<Dto.V10.ProductOut>
 			{
 				public ObjectId Id { get; set; }
 			}
 
-			public class PagedProductQuery : IRequest<PagedResult<Dto.V10.ProductOut>>
+			public record PagedProductQuery : Request<PagedResult<Dto.V10.ProductOut>>
 			{
 				public int Page { get; set; }
 				public int Limit { get; set; }

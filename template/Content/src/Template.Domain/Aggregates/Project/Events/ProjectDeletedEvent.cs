@@ -3,7 +3,7 @@ using MongoDB.Bson;
 
 namespace Template.Domain.Aggregates.Project.Events;
 
-public class ProjectDeletedEvent
+public record ProjectDeletedEvent
 	: DomainEvent
 {
 	public ObjectId Id { get; set; }

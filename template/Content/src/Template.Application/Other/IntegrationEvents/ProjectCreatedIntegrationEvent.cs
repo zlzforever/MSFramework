@@ -1,7 +1,7 @@
-using MicroserviceFramework.Mediator;
+﻿using MicroserviceFramework.Mediator;
 using MongoDB.Bson;
 
-namespace Template.Application.Project.IntegrationEvents;
+namespace Template.Application.Other.IntegrationEvents;
 
 public record ProjectCreatedIntegrationEvent : Request
 {

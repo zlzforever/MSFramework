@@ -1,16 +1,13 @@
-using System;
 using System.Threading.Tasks;
 using Dapr;
-using DotNetCore.CAP;
+using Dapr.Client;
 using MicroserviceFramework.AspNetCore;
 using MicroserviceFramework.Common;
 using MicroserviceFramework.Mediator;
 using Microsoft.AspNetCore.Mvc;
 using MongoDB.Bson;
-using Template.API.Filters;
 using Template.Application.Project;
 using Template.Application.Project.IntegrationEvents;
-using Template.Infrastructure;
 #if !DEBUG
 using Microsoft.AspNetCore.Authorization;
 #endif
@@ -25,13 +22,11 @@ namespace Template.API.Controllers
 	public class ProductController : ApiControllerBase
 	{
 		private readonly IMediator _mediator;
-		private readonly ICapPublisher _capBus;
 
 		public ProductController(
-			IMediator mediator, ICapPublisher capBus)
+			IMediator mediator)
 		{
 			_mediator = mediator;
-			_capBus = capBus;
 		}
 
 		[HttpGet]
@@ -43,7 +38,6 @@ namespace Template.API.Controllers
 		}
 
 		[HttpPost]
-		[CapTransaction]
 		public async Task<Dto.V10.CreateProductOut> CreateAsync([FromBody] Commands.V10.CreateProjectCommand command)
 		{
 			var @out = await _mediator.SendAsync(command);
@@ -68,13 +62,11 @@ namespace Template.API.Controllers
 			return Task.FromResult(ObjectId.Empty);
 		}
 
-		[HttpPost("CAP")]
-		[CapTransaction]
-		public IActionResult EntityFrameworkWithTransaction([FromServices] TemplateDbContext dbContext)
+		[Topic("pubsub", "ProjectCreatedEvent")]
+		[NonAction]
+		public async Task SubscribeProjectCreatedEventAsync([FromBody] ProjectCreatedIntegrationEvent @event)
 		{
-			_capBus.Publish("Ordering.Application.EventHandlers.ProjectCreatedIntegrationEvent", DateTime.Now);
-
-			return Ok();
+			await _mediator.SendAsync(@event);
 		}
 	}
 }

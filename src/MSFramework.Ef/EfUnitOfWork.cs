@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using MicroserviceFramework.Auditing;
@@ -16,6 +17,8 @@ public class EfUnitOfWork : IUnitOfWork
 {
     private readonly DbContextFactory _dbContextFactory;
     private readonly AuditingOptions _auditingOptions;
+    private readonly List<Func<Task>> _tasks;
+
 
     /// <summary>
     /// 初始化工作单元管理器
@@ -25,9 +28,10 @@ public class EfUnitOfWork : IUnitOfWork
     {
         _dbContextFactory = dbContextFactory;
         _auditingOptions = auditingOptions.CurrentValue;
+        _tasks = new List<Func<Task>>();
     }
 
-    public void RegisterAuditing(Func<AuditOperation> auditingFactory)
+    public void SetAuditingFactory(Func<AuditOperation> auditingFactory)
     {
         Check.NotNull(auditingFactory, nameof(auditingFactory));
 
@@ -74,13 +78,26 @@ public class EfUnitOfWork : IUnitOfWork
         {
             await dbContext.SaveChangesAsync(cancellationToken);
         }
+
+        if (_tasks != null)
+        {
+            foreach (var task in _tasks)
+            {
+                await task();
+            }
+        }
     }
 
-    public void SaveChanges()
+    // public void SaveChanges()
+    // {
+    //     foreach (var dbContext in _dbContextFactory.GetAllDbContexts())
+    //     {
+    //         dbContext.SaveChanges();
+    //     }
+    // }
+
+    public void Register(Func<Task> action)
     {
-        foreach (var dbContext in _dbContextFactory.GetAllDbContexts())
-        {
-            dbContext.SaveChanges();
-        }
+        _tasks.Add(action);
     }
 }

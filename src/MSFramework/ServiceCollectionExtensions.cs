@@ -67,7 +67,7 @@ public static class ServiceCollectionExtensions
         var initializers = applicationServices.GetServices<IHostedService>().Where(x => x is InitializerBase)
             .ToList();
         logger.LogInformation(
-            $"Initializers: {string.Join(" -> ", initializers.Select(x => x.GetType().FullName))}");
+            "初始化器: {Initializers}", string.Join(" -> ", initializers.Select(x => x.GetType().FullName)));
     }
 
     /// <summary>

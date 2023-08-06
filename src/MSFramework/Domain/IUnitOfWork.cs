@@ -7,9 +7,15 @@ namespace MicroserviceFramework.Domain;
 
 public interface IUnitOfWork
 {
-    void RegisterAuditing(Func<AuditOperation> auditingFactory);
+    void SetAuditingFactory(Func<AuditOperation> factory);
 
     Task SaveChangesAsync(CancellationToken cancellationToken = default);
 
-    void SaveChanges();
+    // void SaveChanges();
+
+    /// <summary>
+    /// 注册操作
+    /// </summary>
+    /// <param name="action"></param>
+    void Register(Func<Task> action);
 }

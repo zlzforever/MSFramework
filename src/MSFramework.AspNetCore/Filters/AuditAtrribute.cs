@@ -12,7 +12,7 @@ using Microsoft.Extensions.Logging;
 namespace MicroserviceFramework.AspNetCore.Filters;
 
 /// <summary>
-///  
+///
 /// </summary>
 [AttributeUsage(AttributeTargets.Class | AttributeTargets.Method)]
 public class Audit : ActionFilterAttribute
@@ -69,7 +69,7 @@ public class Audit : ActionFilterAttribute
 
         var creationTime = DateTimeOffset.Now;
 
-        unitOfWork.RegisterAuditing(() =>
+        unitOfWork.SetAuditingFactory(() =>
         {
             var auditedOperation = new AuditOperation(url, ua, ip, deviceModel, deviceId,
                 lat, lng);
