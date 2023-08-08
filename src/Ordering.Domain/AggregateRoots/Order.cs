@@ -19,17 +19,26 @@ public class Order : CreationAggregateRoot, IOptimisticLock
     // Using a private collection field, better for DDD Aggregate's encapsulation
     // so Items cannot be added from "outside the AggregateRoot" directly to the collection,
     // but only through the method OrderAggregateRoot.AddOrderItem() which includes behaviour.
-    private List<OrderItem> _items;
+    private readonly List<OrderItem> _items;
 
     /// <summary>
     /// Address is a Value Object pattern example persisted as EF Core 2.0 owned entity
     /// </summary>
     public Address Address { get; private set; }
 
+    /// <summary>
+    /// 订单项
+    /// </summary>
     public IReadOnlyCollection<OrderItem> Items => _items;
 
+    /// <summary>
+    /// 订单状态
+    /// </summary>
     public OrderStatus Status { get; private set; }
 
+    /// <summary>
+    /// 购买人员
+    /// </summary>
     public string BuyerId { get; private set; }
 
     public string Description { get; private set; }
@@ -102,11 +111,11 @@ public class Order : CreationAggregateRoot, IOptimisticLock
             description);
     }
 
-    public OrderItem AddItem(string productId, string productName, decimal unitPrice, decimal discount,
-        string pictureUrl, int units = 1)
+    public OrderItem AddItem(string productId, string productName, string pictureUrl, decimal unitPrice,
+        int units = 1, decimal discount = 0)
     {
         var existingOrderForProduct = Items
-            .SingleOrDefault(o => o.ProductId == productId);
+            .SingleOrDefault(o => o.Product.ProductId == productId);
 
         if (existingOrderForProduct != null)
         {
@@ -114,7 +123,7 @@ public class Order : CreationAggregateRoot, IOptimisticLock
 
             if (discount > existingOrderForProduct.Discount)
             {
-                existingOrderForProduct.SetNewDiscount(discount);
+                existingOrderForProduct.SetDiscount(discount);
             }
 
             existingOrderForProduct.AddUnits(units);
@@ -123,14 +132,14 @@ public class Order : CreationAggregateRoot, IOptimisticLock
         else
         {
             //add validated new order item
-
-            var orderItem = OrderItem.Create(productId, productName, unitPrice, discount, pictureUrl, units);
+            var product = OrderProduct.Create(productId, productName, pictureUrl);
+            var orderItem = OrderItem.Create(this, product, unitPrice, units, discount);
             _items.Add(orderItem);
             return orderItem;
         }
     }
 
-    public void ChangeAddress(Address newAddress)
+    public void SetAddress(Address newAddress)
     {
         Address = newAddress ?? throw new ArgumentException(nameof(newAddress));
     }
@@ -204,8 +213,8 @@ public class Order : CreationAggregateRoot, IOptimisticLock
             Status = OrderStatus.Cancelled;
 
             var itemsStockRejectedProductNames = Items
-                .Where(c => orderStockRejectedItems.Contains(c.ProductId))
-                .Select(c => c.ProductName);
+                .Where(c => orderStockRejectedItems.Contains(c.Product.ProductId))
+                .Select(c => c.Product.Name);
 
             var itemsStockRejectedDescription = string.Join(", ", itemsStockRejectedProductNames);
             Description = $"The product items don't have stock: ({itemsStockRejectedDescription}).";

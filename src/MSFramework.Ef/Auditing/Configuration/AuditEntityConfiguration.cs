@@ -1,4 +1,5 @@
 using MicroserviceFramework.Auditing;
+using MicroserviceFramework.Auditing.Model;
 using MicroserviceFramework.Ef.Extensions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;

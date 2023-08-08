@@ -35,8 +35,8 @@ public class CreateOrderCommandHandler : IRequestHandler<CreateOrderCommand, Obj
 
         foreach (var item in command.OrderItems)
         {
-            order.AddItem(item.ProductId, item.ProductName, item.UnitPrice, item.Discount,
-                item.PictureUrl, item.Units);
+            order.AddItem(item.ProductId, item.ProductName, item.PictureUrl, item.UnitPrice,
+                item.Units, item.Discount);
         }
 
         await _orderRepository.AddAsync(order);

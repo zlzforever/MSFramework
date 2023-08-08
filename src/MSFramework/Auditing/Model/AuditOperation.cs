@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using MicroserviceFramework.Auditing.Model;
 using MicroserviceFramework.Domain;
 using MongoDB.Bson;
 

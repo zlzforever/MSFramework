@@ -49,13 +49,15 @@ public class OrderController : ApiControllerBase
             new Address("Street", "City", "State", "Country", "ZipCode"),
             "Description");
         order.AddItem("100049450275",
-            "英特尔(Intel) i5-13400F 13代 酷睿 处理器 10核16线程 睿频至高可达4.6Ghz 20M三级缓存 台式机CPU", 149900, 0,
+            "英特尔(Intel) i5-13400F 13代 酷睿 处理器 10核16线程 睿频至高可达4.6Ghz 20M三级缓存 台式机CPU",
             "https://img10.360buyimg.com/n1/s450x450_jfs/t1/125974/18/29337/184045/63ae90f3F3d8b8b8a/b6cef93bb9b3b2c1.jpgl",
-            1);
+            149900, 1,
+            0);
         order.AddItem("100041994142",
-            "ROG ROG STRIX Z790-A GAMING WIFI吹雪主板 支持DDR5 CPU 13900K/13700K（Intel Z790/LGA 1700）", 28400, 0,
+            "ROG ROG STRIX Z790-A GAMING WIFI吹雪主板 支持DDR5 CPU 13900K/13700K（Intel Z790/LGA 1700）",
             "https://img12.360buyimg.com/n1/s450x450_jfs/t1/177676/26/33690/186079/63f71ca3F72878ea9/54e9c6c564a1d4e1.jpg",
-            1);
+            28400, 1,
+            0);
         order.SetList(new[] { "hi1", "hi2" });
         order.AddExtra("质保", "3 年");
         order.AddExtra("RGB", "ARGB");

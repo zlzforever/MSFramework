@@ -1,6 +1,7 @@
 using System;
 using System.Linq;
 using System.Runtime.CompilerServices;
+using MicroserviceFramework.Auditing;
 using MicroserviceFramework.Common;
 using MicroserviceFramework.Extensions.Options;
 using MicroserviceFramework.Text.Json;
@@ -21,6 +22,18 @@ namespace MicroserviceFramework;
 public static class ServiceCollectionExtensions
 {
     /// <summary>
+    /// 注入审计存储
+    /// </summary>
+    /// <param name="builder"></param>
+    /// <returns></returns>
+    public static MicroserviceFrameworkBuilder UseAuditingStore<TEntity>(this MicroserviceFrameworkBuilder builder)
+        where TEntity : class, IAuditingStore
+    {
+        builder.Services.AddScoped<IAuditingStore, TEntity>();
+        return builder;
+    }
+
+    /// <summary>
     /// 通过 OptionsType 特性使类自动绑定为 Options
     /// </summary>
     /// <param name="builder"></param>
@@ -38,6 +51,7 @@ public static class ServiceCollectionExtensions
     {
         var builder = new MicroserviceFrameworkBuilder(services);
 
+        builder.Services.TryAddScoped<IAuditingStore, NullAuditingStore>();
         builder.Services.TryAddSingleton<ApplicationInfo>();
         builder.UseDefaultJsonHelper();
 

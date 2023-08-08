@@ -5,25 +5,34 @@ namespace Ordering.Domain.AggregateRoots;
 
 public class OrderItem : EntityBase<ObjectId>
 {
-    public string ProductId { get; private set; }
+    public Order Order { get; private set; }
 
-    // DDD Patterns comment
-    // Using private fields, allowed since EF Core 1.1, is a much better encapsulation
-    // aligned with DDD Aggregates and Domain Entities (Instead of properties and property collections)
-    public string ProductName { get; private set; }
-    public string PictureUrl { get; private set; }
+    /// <summary>
+    /// 销售产品
+    /// </summary>
+    public OrderProduct Product { get; private set; }
+
+    /// <summary>
+    /// 单价
+    /// </summary>
     public decimal UnitPrice { get; private set; }
-    public decimal Discount { get; private set; }
+
+    /// <summary>
+    /// 数量
+    /// </summary>
     public int Units { get; private set; }
+
+    /// <summary>
+    /// 折扣
+    /// </summary>
+    public decimal Discount { get; private set; }
 
     private OrderItem(ObjectId id) : base(id)
     {
     }
 
-    public static OrderItem Create(string productId, string productName, decimal unitPrice,
-        decimal discount,
-        string pictureUrl,
-        int units = 1)
+    public static OrderItem Create(Order order, OrderProduct product, decimal unitPrice,
+        int units, decimal discount)
     {
         if (units <= 0)
         {
@@ -37,18 +46,16 @@ public class OrderItem : EntityBase<ObjectId>
 
         var item = new OrderItem(ObjectId.GenerateNewId())
         {
-            ProductId = productId,
-            ProductName = productName,
+            Order = order,
+            Product = product,
             UnitPrice = unitPrice,
             Discount = discount,
-            Units = units,
-            PictureUrl = pictureUrl
+            Units = units
         };
         return item;
     }
 
-
-    public void SetNewDiscount(decimal discount)
+    public void SetDiscount(decimal discount)
     {
         if (discount < 0)
         {

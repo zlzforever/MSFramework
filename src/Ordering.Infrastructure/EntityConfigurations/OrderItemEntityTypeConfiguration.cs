@@ -1,4 +1,5 @@
 using MicroserviceFramework.Ef;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Ordering.Domain.AggregateRoots;
 
@@ -10,13 +11,16 @@ public class OrderItemEntityTypeConfiguration : EntityTypeConfigurationBase<Orde
     {
         ConfigureDefaultIdentifier(builder);
 
-        builder.Property(x => x.Id).ValueGeneratedNever();
-        builder.Property<decimal>("Discount").IsRequired();
-        builder.Property<string>("ProductId").IsRequired();
-        builder.Property<string>("ProductName").IsRequired();
-        builder.Property<decimal>("UnitPrice").IsRequired();
-        builder.Property<int>("Units").IsRequired();
-        builder.Property<string>("PictureUrl").IsRequired(false);
-        // builder.HasOne(x => x.Creator).WithMany().HasForeignKey("creator_id");
+        builder.OwnsOne(x => x.Product, y =>
+        {
+            y.Property(x => x.ProductId).HasColumnName("ProductId").HasMaxLength(36).IsRequired();
+            y.Property(x => x.Name).HasMaxLength(255).IsRequired();
+            y.Property(x => x.PictureUrl).HasMaxLength(300).IsRequired(false);
+
+            y.HasIndex(x => x.ProductId);
+        });
+        builder.Property(x => x.Discount);
+        builder.Property(x => x.Units);
+        builder.Property(x => x.UnitPrice);
     }
 }

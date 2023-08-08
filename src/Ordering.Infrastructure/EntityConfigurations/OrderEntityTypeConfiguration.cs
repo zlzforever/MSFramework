@@ -13,21 +13,26 @@ public class OrderEntityTypeConfiguration : EntityTypeConfigurationBase<Order, O
     {
         ConfigureDefaultIdentifier(builder);
 
-        //Address value object persisted as owned entity type supported since EF Core 2.0
-        var navigationBuilder = builder.OwnsOne(o => o.Address);
-        navigationBuilder.Property(x => x.City).IsRequired();
-        navigationBuilder.WithOwner();
+        builder.OwnsOne(o => o.Address, x =>
+        {
+            x.Property(y => y.City).HasMaxLength(200).IsRequired();
+            x.Property(y => y.Country).HasMaxLength(50).IsRequired();
+            x.Property(y => y.ZipCode).HasMaxLength(20).IsRequired();
+            x.Property(y => y.State).HasMaxLength(200).IsRequired();
+            x.Property(y => y.Street).HasMaxLength(200).IsRequired();
+        });
 
-        builder.Property(x => x.Description).IsRequired(false);
+        builder.Property(x => x.Description).HasMaxLength(2000).IsRequired(false);
         builder.Property(x => x.BuyerId).IsRequired().HasMaxLength(36);
-        builder.Property(x => x.Status).UseEnumeration().HasMaxLength(255).IsRequired();
+        builder.Property(x => x.Status).UseEnumeration().HasMaxLength(20).IsRequired();
         // 若类型不一致，则需要主动设置
         builder.Property(x => x.ListJson).UseJson(typeof(HashSet<string>));
         builder.Property(x => x.DictJson).UseJson();
         builder.Property(x => x.Extras).UseJson();
-        // builder.Property<string>("creator_id2").HasMaxLength(36);
-        // builder.HasOne(x => x.Creator2).WithMany().HasForeignKey("creator_id2");
-        builder.HasMany(x => x.Items).WithOne().HasForeignKey("OrderId").OnDelete(DeleteBehavior.ClientCascade);
+
+        builder.HasMany(x => x.Items).WithOne(x => x.Order)
+            .OnDelete(DeleteBehavior.ClientCascade);
+
         // var navigation = builder.Metadata.FindNavigation(nameof(Order.Items));
         //
         // // DDD Patterns comment:
@@ -35,5 +40,7 @@ public class OrderEntityTypeConfiguration : EntityTypeConfigurationBase<Order, O
         // navigation?.SetPropertyAccessMode(PropertyAccessMode.Field);
 
         builder.ConfigureCreation();
+
+        builder.HasIndex(x => x.CreationTime);
     }
 }

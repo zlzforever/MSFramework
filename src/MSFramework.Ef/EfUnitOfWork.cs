@@ -18,15 +18,17 @@ public class EfUnitOfWork : IUnitOfWork
     private readonly DbContextFactory _dbContextFactory;
     private readonly AuditingOptions _auditingOptions;
     private readonly List<Func<Task>> _tasks;
+    private readonly IAuditingStore _auditingStore;
 
 
     /// <summary>
     /// 初始化工作单元管理器
     /// </summary>
     public EfUnitOfWork(
-        DbContextFactory dbContextFactory, IOptionsMonitor<AuditingOptions> auditingOptions)
+        DbContextFactory dbContextFactory, IOptionsMonitor<AuditingOptions> auditingOptions, IAuditingStore auditingStore)
     {
         _dbContextFactory = dbContextFactory;
+        _auditingStore = auditingStore;
         _auditingOptions = auditingOptions.CurrentValue;
         _tasks = new List<Func<Task>>();
     }

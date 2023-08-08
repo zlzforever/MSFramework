@@ -27,8 +27,6 @@ public class Product : CreationAggregateRoot, IOptimisticLock
     public static Product CreateWithoutEvent(string name, int price)
     {
         var product = new Product(ObjectId.GenerateNewId()) { Name = name, Price = price };
-
-
         return product;
     }
 

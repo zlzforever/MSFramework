@@ -3,7 +3,7 @@ using System.Text.Json.Serialization;
 using MicroserviceFramework.Domain;
 using MongoDB.Bson;
 
-namespace MicroserviceFramework.Auditing;
+namespace MicroserviceFramework.Auditing.Model;
 
 public class AuditEntity : EntityBase<ObjectId>
 {

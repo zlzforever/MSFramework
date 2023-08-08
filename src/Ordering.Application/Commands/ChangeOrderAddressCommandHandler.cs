@@ -24,6 +24,6 @@ public class ChangeOrderAddressCommandHandler : IRequestHandler<ChangeOrderAddre
     public async Task HandleAsync(ChangeOrderAddressCommand command, CancellationToken cancellationToken)
     {
         var order = await _orderRepository.FindAsync(command.OrderId);
-        order?.ChangeAddress(command.NewAddress);
+        order?.SetAddress(command.NewAddress);
     }
 }

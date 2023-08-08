@@ -1,5 +1,7 @@
 using System;
+using MicroserviceFramework.Auditing;
 using MicroserviceFramework.Domain;
+using MicroserviceFramework.Ef.Auditing;
 using MicroserviceFramework.Ef.Internal;
 using MicroserviceFramework.Ef.Repositories;
 using Microsoft.Extensions.DependencyInjection;

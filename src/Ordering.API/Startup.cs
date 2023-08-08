@@ -15,6 +15,7 @@ using MicroserviceFramework.AspNetCore.Swagger;
 using MicroserviceFramework.AutoMapper;
 using MicroserviceFramework.Domain;
 using MicroserviceFramework.Ef;
+using MicroserviceFramework.Ef.Auditing;
 using MicroserviceFramework.Ef.PostgreSql;
 using MicroserviceFramework.EventBus;
 using MicroserviceFramework.Extensions.DependencyInjection;
@@ -184,6 +185,7 @@ public static class Startup
             builder.UseDependencyInjectionLoader();
             builder.UseOptionsType(configuration);
             builder.UseAutoMapper();
+            builder.UseAuditingStore<EfAuditingStore>();
             builder.UseEventBus((_, options) =>
             {
                 options.AddAfterInterceptor(async (provider, _) =>

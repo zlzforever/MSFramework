@@ -14,5 +14,7 @@ public class UserEntityTypeConfiguration
 
         builder.ToTable("external_user");
         builder.Property(x => x.Name).HasMaxLength(256);
+
+        builder.HasAnnotation("ExternalEntity", "true");
     }
 }

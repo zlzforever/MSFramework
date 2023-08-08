@@ -6,7 +6,7 @@ namespace MSFramework.Tests;
 
 public class ValueObjectTests
 {
-    public class V1 : ValueObject
+    public record V1 : ValueObject
     {
         public string V { get; private set; }
 
@@ -15,13 +15,13 @@ public class ValueObjectTests
             V = v;
         }
 
-        protected override IEnumerable<object> GetEqualityComponents()
-        {
-            yield return V;
-        }
+        // protected override IEnumerable<object> GetEqualityComponents()
+        // {
+        //     yield return V;
+        // }
     }
 
-    public class Address : ValueObject
+    public record Address : ValueObject
     {
         public string Street { get; private set; }
         public string City { get; private set; }
@@ -38,15 +38,15 @@ public class ValueObjectTests
             Country = country;
             ZipCode = zipcode;
         }
-
-        protected override IEnumerable<object> GetEqualityComponents()
-        {
-            yield return Street;
-            yield return City;
-            yield return State;
-            yield return Country;
-            yield return ZipCode;
-        }
+        //
+        // protected override IEnumerable<object> GetEqualityComponents()
+        // {
+        //     yield return Street;
+        //     yield return City;
+        //     yield return State;
+        //     yield return Country;
+        //     yield return ZipCode;
+        // }
     }
 
     [Fact]
@@ -70,7 +70,7 @@ public class ValueObjectTests
     public void ValueObjectCopy()
     {
         var address1 = new Address("a", "b", "c", "d", "e");
-        var address2 = address1.Clone();
+        var address2 = address1.Copy();
         Assert.True(Equals(address1, address2));
     }
 
@@ -79,7 +79,7 @@ public class ValueObjectTests
     {
         var v1 = new V1("a").ToString();
         var v2 = new Address("a", "b", "c", "d", "f").ToString();
-        Assert.Equal("V1: a", v1);
-        Assert.Equal("Address: a, b, c, d, f", v2);
+        Assert.Equal("V1 { V = a }", v1);
+        Assert.Equal("Address { Street = a, City = b, State = c, Country = d, ZipCode = f }", v2);
     }
 }

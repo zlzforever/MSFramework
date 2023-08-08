@@ -1,4 +1,5 @@
 using System.Text.Json.Serialization;
+using MicroserviceFramework.Auditing.Model;
 using MicroserviceFramework.Domain;
 using MongoDB.Bson;
 
