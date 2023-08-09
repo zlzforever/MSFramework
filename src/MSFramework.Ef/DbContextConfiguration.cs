@@ -33,7 +33,7 @@ public class DbContextConfiguration
         _type = string.IsNullOrEmpty(DbContextTypeName) ? null : Type.GetType(DbContextTypeName);
         if (_type == null)
         {
-            throw new ArithmeticException($"{DbContextTypeName} is not a valid data context type");
+            throw new ArithmeticException($"找不到类型 {DbContextTypeName}");
         }
 
         return _type;
@@ -80,7 +80,7 @@ public class DbContextConfiguration
     // 若要查询其他领域的数据，DbContext 中可能会注入只读的模型，使用全局 schema 会
     // 导致 SQL 生成不正确，若要使用 schema 则应该在 ToTable 中自己处理
     // /// <summary>
-    // /// 
+    // ///
     // /// </summary>
     // public string Schema { get; set; }
 

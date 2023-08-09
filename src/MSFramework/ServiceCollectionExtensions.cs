@@ -51,7 +51,6 @@ public static class ServiceCollectionExtensions
     {
         var builder = new MicroserviceFrameworkBuilder(services);
 
-        builder.Services.TryAddScoped<IAuditingStore, NullAuditingStore>();
         builder.Services.TryAddSingleton<ApplicationInfo>();
         builder.UseDefaultJsonHelper();
 
@@ -81,7 +80,7 @@ public static class ServiceCollectionExtensions
         var initializers = applicationServices.GetServices<IHostedService>().Where(x => x is InitializerBase)
             .ToList();
         logger.LogInformation(
-            "初始化器: {Initializers}", string.Join(" -> ", initializers.Select(x => x.GetType().FullName)));
+            "发现初始化器: {Initializers}", string.Join(" -> ", initializers.Select(x => x.GetType().FullName)));
     }
 
     /// <summary>

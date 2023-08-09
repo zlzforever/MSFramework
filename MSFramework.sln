@@ -15,7 +15,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		.gitignore = .gitignore
 		global.json = global.json
 		LICENSE = LICENSE
-		publish_nuget_packages.sh = publish_nuget_packages.sh
 		publish_my_packages.sh = publish_my_packages.sh
 		publish.sh = publish.sh
 		README.md = README.md
@@ -24,6 +23,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		publish_template.sh = publish_template.sh
 		template\MSFramework.API.Template.nuspec = template\MSFramework.API.Template.nuspec
 		localhost.conf = localhost.conf
+		publish_nuget_packages.sh = publish_nuget_packages.sh
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{BC00DC54-17AB-455D-AE75-FDF74923FC13}"

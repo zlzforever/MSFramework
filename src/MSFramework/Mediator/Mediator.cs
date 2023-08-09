@@ -84,7 +84,7 @@ internal class Mediator : IMediator
 
         try
         {
-            _logger.LogDebug("{TraceId}, {HandlerType} 开始处理请求 {Request}", traceId, handler.GetType().FullName,
+            _logger.LogDebug("{TraceId}, 处理器 {HandlerType} 开始处理 {Request}", traceId, handler.GetType().FullName,
                 Defaults.JsonHelper.Serialize(request));
 
             TResponse result = default;
@@ -94,12 +94,12 @@ internal class Mediator : IMediator
                 result = await task;
             }
 
-            _logger.LogDebug("{TraceId}, {HandlerType} 处理成功", traceId, handler.GetType().FullName);
+            _logger.LogDebug("{TraceId}, 处理器 {HandlerType} 处理成功", traceId, handler.GetType().FullName);
             return result;
         }
         catch (Exception e)
         {
-            _logger.LogError("{TraceId}, {HandlerType} 处理失败", traceId, handler.GetType().FullName);
+            _logger.LogError("{TraceId}, 处理器 {HandlerType} 处理失败", traceId, handler.GetType().FullName);
             throw e.InnerException ?? e;
         }
     }
@@ -141,7 +141,7 @@ internal class Mediator : IMediator
     {
         try
         {
-            _logger.LogDebug("{TraceId}, {HandlerType} 开始处理请求 {Request}", traceId, handler.GetType().FullName,
+            _logger.LogDebug("{TraceId}, 处理器 {HandlerType} 开始处理 {Request}", traceId, handler.GetType().FullName,
                 Defaults.JsonHelper.Serialize(request));
 
             if (method.Invoke(handler, new object[] { request, cancellationToken }) is Task task)
@@ -149,11 +149,11 @@ internal class Mediator : IMediator
                 await task;
             }
 
-            _logger.LogDebug("{TraceId}, {HandlerType} 处理成功", traceId, handler.GetType().FullName);
+            _logger.LogDebug("{TraceId}, 处理器 {HandlerType} 处理成功", traceId, handler.GetType().FullName);
         }
         catch (Exception e)
         {
-            _logger.LogError("{TraceId}, {HandlerType} 处理失败", traceId, handler.GetType().FullName);
+            _logger.LogError("{TraceId}, 处理器 {HandlerType} 处理失败", traceId, handler.GetType().FullName);
             throw e.InnerException ?? e;
         }
     }

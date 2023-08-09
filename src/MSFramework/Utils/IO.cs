@@ -13,7 +13,7 @@ public class IO
         // Check if the source directory exists
         if (!dir.Exists)
         {
-            throw new DirectoryNotFoundException($"Source directory not found: {dir.FullName}");
+            throw new DirectoryNotFoundException($"源文件夹不存在: {dir.FullName}");
         }
 
         // Cache directories before we start copying

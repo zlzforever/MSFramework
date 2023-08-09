@@ -3,6 +3,7 @@ using System.Threading.Tasks;
 using MicroserviceFramework.Application;
 using MicroserviceFramework.AspNetCore.Extensions;
 using MicroserviceFramework.Auditing;
+using MicroserviceFramework.Auditing.Model;
 using MicroserviceFramework.Domain;
 using Microsoft.AspNetCore.Http.Extensions;
 using Microsoft.AspNetCore.Mvc.Filters;

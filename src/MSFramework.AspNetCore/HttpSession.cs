@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
+using System.Net.Http;
 using System.Security.Claims;
 using MicroserviceFramework.AspNetCore.IdentityModel;
 using MicroserviceFramework.Security.Claims;
@@ -28,6 +29,7 @@ public class HttpSession : ISession
 
     internal static HttpSession Create(IHttpContextAccessor accessor)
     {
+
         if (accessor?.HttpContext == null)
         {
             return new HttpSession { Roles = Array.Empty<string>(), Subjects = Array.Empty<string>() };

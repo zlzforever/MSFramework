@@ -1,7 +1,7 @@
 using System;
 using System.Threading;
 using System.Threading.Tasks;
-using MicroserviceFramework.Auditing;
+using MicroserviceFramework.Auditing.Model;
 
 namespace MicroserviceFramework.Domain;
 

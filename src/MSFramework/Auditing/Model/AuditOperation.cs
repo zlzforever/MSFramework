@@ -1,10 +1,9 @@
 using System;
 using System.Collections.Generic;
-using MicroserviceFramework.Auditing.Model;
 using MicroserviceFramework.Domain;
 using MongoDB.Bson;
 
-namespace MicroserviceFramework.Auditing;
+namespace MicroserviceFramework.Auditing.Model;
 
 public class AuditOperation : CreationAggregateRoot<ObjectId>
 {

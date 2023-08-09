@@ -6,10 +6,8 @@ using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using MicroserviceFramework.Application;
-using MicroserviceFramework.Auditing;
 using MicroserviceFramework.Auditing.Model;
 using MicroserviceFramework.Domain;
-using MicroserviceFramework.Ef.Auditing;
 using MicroserviceFramework.Ef.Auditing.Configuration;
 using MicroserviceFramework.Ef.Extensions;
 using MicroserviceFramework.Ef.Internal;
@@ -221,7 +219,6 @@ public abstract class DbContextBase : DbContext
 
     public IEnumerable<AuditEntity> GetAuditEntities()
     {
-        var entities = new List<AuditEntity>();
         foreach (var entry in ChangeTracker.Entries())
         {
             var auditEntity = entry.State switch
@@ -234,11 +231,9 @@ public abstract class DbContextBase : DbContext
 
             if (auditEntity != null)
             {
-                entities.Add(auditEntity);
+                yield return auditEntity;
             }
         }
-
-        return entities;
     }
 
 

@@ -53,7 +53,7 @@ internal class LocalEventPublisher : IEventPublisher
                     var handler = scope.ServiceProvider.GetService(wrapper.HandlerType);
                     if (handler == null)
                     {
-                        _logger.LogWarning("IOC 没有找到事件 {EventName} 的处理器", name);
+                        _logger.LogWarning("没有找到事件 {EventName} 的处理器", name);
                     }
 
                     var e = Defaults.JsonHelper.Deserialize(wrapper.EventData, wrapper.EventType);
@@ -70,13 +70,13 @@ internal class LocalEventPublisher : IEventPublisher
                         {
                             if (t.Exception == null)
                             {
-                                _logger.LogInformation(
-                                    "{TraceId}, {HandlerType} handle success", wrapper.TraceId,
+                                _logger.LogDebug(
+                                    "{TraceId}, 处理器 {HandlerType} 执行成功", wrapper.TraceId,
                                     wrapper.HandlerType.FullName);
                             }
                             else
                             {
-                                _logger.LogError("{TraceId}, {HandlerType} handle failed: {Exception}", wrapper.TraceId,
+                                _logger.LogError("{TraceId}, 处理器 {HandlerType} 执行失败， 异常: {Exception}", wrapper.TraceId,
                                     wrapper.HandlerType.FullName, t.Exception.ToString());
                             }
 

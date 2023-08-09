@@ -28,7 +28,7 @@ public static class EventHandlerDescriptorManager
     {
         if (!eventType.IsEvent())
         {
-            throw new ArgumentException($"{eventType} 不是事件类型");
+            throw new ArgumentException($"类型 {eventType} 不是事件");
         }
 
         var eventName = eventType.GetEventName();

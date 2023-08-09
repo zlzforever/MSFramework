@@ -1,35 +1,34 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using MicroserviceFramework.Auditing;
+using MicroserviceFramework.Auditing.Model;
 using MicroserviceFramework.Domain;
-using MicroserviceFramework.Ef.Auditing;
 using MicroserviceFramework.Utils;
-using Microsoft.Extensions.Options;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace MicroserviceFramework.Ef;
 
 /// <summary>
 /// 工作单元管理器
 /// </summary>
-public class EfUnitOfWork : IUnitOfWork
+internal class EfUnitOfWork : IUnitOfWork
 {
     private readonly DbContextFactory _dbContextFactory;
-    private readonly AuditingOptions _auditingOptions;
     private readonly List<Func<Task>> _tasks;
-    private readonly IAuditingStore _auditingStore;
-
+    private readonly IServiceProvider _serviceProvider;
 
     /// <summary>
     /// 初始化工作单元管理器
     /// </summary>
     public EfUnitOfWork(
-        DbContextFactory dbContextFactory, IOptionsMonitor<AuditingOptions> auditingOptions, IAuditingStore auditingStore)
+        DbContextFactory dbContextFactory,
+        IServiceProvider serviceProvider)
     {
         _dbContextFactory = dbContextFactory;
-        _auditingStore = auditingStore;
-        _auditingOptions = auditingOptions.CurrentValue;
+        _serviceProvider = serviceProvider;
         _tasks = new List<Func<Task>>();
     }
 
@@ -37,10 +36,11 @@ public class EfUnitOfWork : IUnitOfWork
     {
         Check.NotNull(auditingFactory, nameof(auditingFactory));
 
-        var auditingDbContext = string.IsNullOrEmpty(_auditingOptions.AuditingDbContextTypeName)
-            ? null
-            : _dbContextFactory.GetDbContext(Type.GetType(_auditingOptions.AuditingDbContextTypeName));
-        var singleAuditOperation = auditingDbContext != null ? auditingFactory() : null;
+        var auditingStores = _serviceProvider.GetServices<IAuditingStore>().ToList();
+        if (auditingStores.Count <= 0)
+        {
+            return;
+        }
 
         foreach (var dbContextBase in _dbContextFactory.GetAllDbContexts())
         {
@@ -56,19 +56,20 @@ public class EfUnitOfWork : IUnitOfWork
                     return;
                 }
 
-                var auditOperation = singleAuditOperation == null ? auditingFactory() : singleAuditOperation;
+                var auditOperation = auditingFactory();
 
                 var entities = db.GetAuditEntities();
                 auditOperation.AddEntities(entities);
                 auditOperation.End();
 
-                if (auditingDbContext == null)
+                if (!auditOperation.Entities.Any())
                 {
-                    dbContextBase.Add(auditOperation);
+                    return;
                 }
-                else
+
+                foreach (var auditingStore in auditingStores)
                 {
-                    auditingDbContext.Add(auditOperation);
+                    auditingStore.AddAsync(sender, auditOperation);
                 }
             };
         }

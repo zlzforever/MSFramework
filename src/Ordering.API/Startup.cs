@@ -12,6 +12,7 @@ using MicroserviceFramework.AspNetCore;
 using MicroserviceFramework.AspNetCore.Filters;
 using MicroserviceFramework.AspNetCore.Mvc.ModelBinding;
 using MicroserviceFramework.AspNetCore.Swagger;
+using MicroserviceFramework.Auditing;
 using MicroserviceFramework.AutoMapper;
 using MicroserviceFramework.Domain;
 using MicroserviceFramework.Ef;
@@ -19,9 +20,7 @@ using MicroserviceFramework.Ef.Auditing;
 using MicroserviceFramework.Ef.PostgreSql;
 using MicroserviceFramework.EventBus;
 using MicroserviceFramework.Extensions.DependencyInjection;
-using MicroserviceFramework.Serialization;
 using MicroserviceFramework.Text.Json;
-using MicroserviceFramework.Text.Json.Converters;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -75,6 +74,7 @@ public static class Startup
     public static readonly Action<HostBuilderContext, IServiceCollection> ConfigureServices = ((context, services) =>
     {
         var configuration = context.Configuration;
+        services.AddHttpClient();
         services.AddHttpContextAccessor();
         var jsonSerializerOptions = new JsonSerializerOptions();
         // var settings = new JsonSerializerSettings();
@@ -124,48 +124,48 @@ public static class Startup
         services.AddSwaggerGen(x =>
         {
             x.SwaggerDoc("v1.0", new OpenApiInfo { Version = "v1.0", Description = "Ordering API V1.0" });
-            x.CustomSchemaIds(type => type.FullName);
+            x.CustomSchemaIds(type => type.FullName?.Replace("+", "."));
             x.MapEnumerationType(typeof(Address).Assembly);
             x.SupportObjectId();
         });
         services.AddHealthChecks();
 
-        services.AddCap(x =>
-        {
-            x.UseEntityFramework<OrderingContext>(y =>
-            {
-                y.Schema = "ordering";
-            });
-            x.JsonSerializerOptions.AddDefaultConverters();
-            x.JsonSerializerOptions.Encoder = JavaScriptEncoder.Create(UnicodeRanges.All);
-            // var password = Environment.GetEnvironmentVariable("RABBITMQ_PASSWORD");
-            // x.UseRabbitMQ(configure =>
-            // {
-            //     configure.HostName = "192.168.100.254";
-            //     configure.Password = password;
-            //     configure.UserName = "admin";
-            //     // configure.ExchangeName = "ordering";
-            // });
-            x.UseDapr(y => y.Pubsub = "rabbitmq-pubsub");
-            x.FailedRetryCount = 3;
-            x.FailedMessageExpiredAfter = 365 * 24 * 3600;
-            x.FailedThresholdCallback += failed =>
-            {
-                var traceId = failed.Message.Headers[Headers.MessageId];
-                var messageBuilder = new StringBuilder($"消息名称: {failed.Message.GetName()}[{failed.MessageType}] ");
-                messageBuilder.AppendLine();
-                messageBuilder.AppendLine($"消息组: {failed.Message.GetGroup()}[CAP]");
-                messageBuilder.AppendLine("消息ID(Content):");
-                messageBuilder.AppendLine(failed.Message.GetId());
-                messageBuilder.AppendLine($"日志跟踪标识: {traceId}");
-                messageBuilder.AppendLine($"发送时间: {failed.Message.Headers[Headers.SentTime]}");
-                messageBuilder.AppendLine("错误消息:");
-                messageBuilder.AppendLine(failed.Message.Headers[Headers.Exception]);
-                Log.Error(messageBuilder.ToString());
-            };
-            x.TopicNamePrefix = "CAP";
-            x.UseDashboard();
-        });
+        // services.AddCap(x =>
+        // {
+        //     x.UseEntityFramework<OrderingContext>(y =>
+        //     {
+        //         y.Schema = "ordering";
+        //     });
+        //     x.JsonSerializerOptions.AddDefaultConverters();
+        //     x.JsonSerializerOptions.Encoder = JavaScriptEncoder.Create(UnicodeRanges.All);
+        //     // var password = Environment.GetEnvironmentVariable("RABBITMQ_PASSWORD");
+        //     // x.UseRabbitMQ(configure =>
+        //     // {
+        //     //     configure.HostName = "192.168.100.254";
+        //     //     configure.Password = password;
+        //     //     configure.UserName = "admin";
+        //     //     // configure.ExchangeName = "ordering";
+        //     // });
+        //     x.UseDapr(y => y.Pubsub = "rabbitmq-pubsub");
+        //     x.FailedRetryCount = 3;
+        //     x.FailedMessageExpiredAfter = 365 * 24 * 3600;
+        //     x.FailedThresholdCallback += failed =>
+        //     {
+        //         var traceId = failed.Message.Headers[Headers.MessageId];
+        //         var messageBuilder = new StringBuilder($"消息名称: {failed.Message.GetName()}[{failed.MessageType}] ");
+        //         messageBuilder.AppendLine();
+        //         messageBuilder.AppendLine($"消息组: {failed.Message.GetGroup()}[CAP]");
+        //         messageBuilder.AppendLine("消息ID(Content):");
+        //         messageBuilder.AppendLine(failed.Message.GetId());
+        //         messageBuilder.AppendLine($"日志跟踪标识: {traceId}");
+        //         messageBuilder.AppendLine($"发送时间: {failed.Message.Headers[Headers.SentTime]}");
+        //         messageBuilder.AppendLine("错误消息:");
+        //         messageBuilder.AppendLine(failed.Message.Headers[Headers.Exception]);
+        //         Log.Error(messageBuilder.ToString());
+        //     };
+        //     x.TopicNamePrefix = "CAP";
+        //     x.UseDashboard();
+        // });
 
         services.AddCors(option =>
         {
@@ -174,7 +174,7 @@ public static class Startup
                     policy.AllowAnyMethod()
                         .SetIsOriginAllowed(_ => true)
                         .AllowAnyHeader()
-                        .WithExposedHeaders("x-suggested-filename")
+                        // .WithExposedHeaders("x-suggested-filename")
                         .AllowCredentials().SetPreflightMaxAge(TimeSpan.FromDays(30))
                 );
         });
@@ -185,6 +185,7 @@ public static class Startup
             builder.UseDependencyInjectionLoader();
             builder.UseOptionsType(configuration);
             builder.UseAutoMapper();
+            builder.UseAuditingStore<LogAuditingStore>();
             builder.UseAuditingStore<EfAuditingStore>();
             builder.UseEventBus((_, options) =>
             {
@@ -278,30 +279,6 @@ public static class Startup
 
         app.MapControllers();
         app.MapDefaultControllerRoute().RequireCors("cors");
-        app.Use(async (context, next) =>
-        {
-            if (context == null)
-            {
-                return;
-            }
-
-            await next();
-
-
-            // // 通常情况下异常会导致 Result 为空，但添加 ActionExceptionFilter 后，感知到导常后会返回 BadrequestObjectResult
-            // // 是否有其它情况会导致 Result 为空?
-            // if (actionExecutedContext.Result == null)
-            // {
-            //     return;
-            // }
-            //
-            // actionExecutedContext.Result = actionExecutedContext.Result switch
-            // {
-            //     // 空内容是使用在 void/Task 这种 Action 中
-            //     EmptyResult => new ObjectResult(ApiResult.Ok),
-            //     _ => actionExecutedContext.Result
-            // };
-        });
         app.UseMicroserviceFramework();
 
         var configuration = app.Configuration;

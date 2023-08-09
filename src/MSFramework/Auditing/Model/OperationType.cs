@@ -1,6 +1,6 @@
 using MicroserviceFramework.Domain;
 
-namespace MicroserviceFramework.Auditing;
+namespace MicroserviceFramework.Auditing.Model;
 
 /// <summary>
 /// 表示实体审计操作类型

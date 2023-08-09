@@ -1,9 +1,8 @@
 using System.Text.Json.Serialization;
-using MicroserviceFramework.Auditing.Model;
 using MicroserviceFramework.Domain;
 using MongoDB.Bson;
 
-namespace MicroserviceFramework.Auditing;
+namespace MicroserviceFramework.Auditing.Model;
 
 /// <summary>
 /// 实体属性审计信息

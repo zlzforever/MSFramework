@@ -45,7 +45,7 @@ public class EnumerationConverter : JsonConverter
                 return null;
             }
 
-            throw new MicroserviceFrameworkException(122, $" {reader.Path} 不支持空值");
+            throw new MicroserviceFrameworkException(122, $"{reader.Path} 不支持空值");
         }
 
         try
@@ -59,11 +59,11 @@ public class EnumerationConverter : JsonConverter
         catch (Exception)
         {
             // 异常数据，不允许绑定
-            throw new MicroserviceFrameworkException(122, $" {reader.Path} 不支持绑定值 {value}");
+            throw new MicroserviceFrameworkException(122, $"{reader.Path} 不支持绑定值 {value}");
         }
 
         // 异常数据，不允许绑定
-        throw new MicroserviceFrameworkException(122, $" {reader.Path} 不支持绑定值 {value}");
+        throw new MicroserviceFrameworkException(122, $"{reader.Path} 不支持绑定值 {value}");
     }
 
     public override bool CanConvert(Type objectType)
