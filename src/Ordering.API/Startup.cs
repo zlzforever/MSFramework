@@ -185,7 +185,7 @@ public static class Startup
             builder.UseDependencyInjectionLoader();
             builder.UseOptionsType(configuration);
             builder.UseAutoMapper();
-            builder.UseAuditingStore<LogAuditingStore>();
+            builder.UseAuditingStore<LokiAuditingStore>();
             builder.UseAuditingStore<EfAuditingStore>();
             builder.UseEventBus((_, options) =>
             {

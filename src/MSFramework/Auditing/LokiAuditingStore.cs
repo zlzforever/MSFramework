@@ -10,13 +10,13 @@ using Microsoft.Extensions.Configuration;
 
 namespace MicroserviceFramework.Auditing;
 
-public class LogAuditingStore : IAuditingStore
+public class LokiAuditingStore : IAuditingStore
 {
     private readonly IHttpClientFactory _httpClientFactory;
     private readonly IConfiguration _configuration;
     private readonly ApplicationInfo _applicationInfo;
 
-    public LogAuditingStore(IHttpClientFactory httpClientFactory, IConfiguration configuration,
+    public LokiAuditingStore(IHttpClientFactory httpClientFactory, IConfiguration configuration,
         ApplicationInfo applicationInfo)
     {
         _httpClientFactory = httpClientFactory;
