@@ -5,12 +5,12 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="7.0.9">
+        <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="7.0.10">
           <PrivateAssets>all</PrivateAssets>
           <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
-        <PackageReference Include="MSFramework.AspNetCore.Swagger" Version="0.15.1-beta29" />
-        <PackageReference Include="MSFramework.Ef.Design" Version="0.15.1-beta29" />
+        <PackageReference Include="MSFramework.AspNetCore.Swagger" Version="0.15.1-beta31" />
+        <PackageReference Include="MSFramework.Ef.Design" Version="0.15.1-beta31" />
         <PackageReference Include="RemoteConfiguration.Json.Aliyun" Version="0.1.2" />
         <PackageReference Include="Serilog.AspNetCore" Version="7.0.0" />
         <PackageReference Include="Serilog.Sinks.PeriodicBatching" Version="3.1.0" />
@@ -21,7 +21,7 @@
         <PackageReference Include="Serilog.Enrichers.Thread" Version="3.1.0" />
         <PackageReference Include="Serilog.Expressions" Version="3.4.1" />
         <PackageReference Include="Serilog.Sinks.Async" Version="1.5.0" />
-        <PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="7.0.9" />
+        <PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="7.0.10" />
         <PackageReference Include="IdentityServer4.AccessTokenValidation" Version="3.0.1" />
     </ItemGroup>
 

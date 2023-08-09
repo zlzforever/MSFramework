@@ -5,8 +5,8 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="MSFramework.AutoMapper" Version="0.15.1-beta29" />
-        <PackageReference Include="MSFramework.AspNetCore" Version="0.15.1-beta29" />
+        <PackageReference Include="MSFramework.AutoMapper" Version="0.15.1-beta31" />
+        <PackageReference Include="MSFramework.AspNetCore" Version="0.15.1-beta31" />
         <PackageReference Include="Dapper" Version="2.0.143" />
         <PackageReference Include="Dapr.AspNetCore" Version="1.11.0" />
     </ItemGroup>

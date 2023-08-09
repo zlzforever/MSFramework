@@ -7,9 +7,11 @@ using MicroserviceFramework.AspNetCore;
 using MicroserviceFramework.AspNetCore.Filters;
 using MicroserviceFramework.AspNetCore.Mvc.ModelBinding;
 using MicroserviceFramework.AspNetCore.Swagger;
+using MicroserviceFramework.Auditing;
 using MicroserviceFramework.AutoMapper;
 using MicroserviceFramework.Domain;
 using MicroserviceFramework.Ef;
+using MicroserviceFramework.Ef.Auditing;
 using MicroserviceFramework.Ef.MySql;
 using MicroserviceFramework.EventBus;
 using MicroserviceFramework.Extensions.DependencyInjection;
@@ -139,6 +141,8 @@ public static class StartupExtensions
 			x.UseAutoMapper();
 			x.UseOptionsType(builder.Configuration);
 			x.UseAspNetCore();
+			x.UseAuditingStore<LokiAuditingStore>();
+			x.UseAuditingStore<EfAuditingStore>();
 			x.UseEventBus((_, options) =>
 			{
 				options.AddAfterInterceptor(async (provider, _) =>
