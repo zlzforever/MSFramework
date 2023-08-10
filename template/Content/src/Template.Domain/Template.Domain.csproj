@@ -5,6 +5,6 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="MSFramework" Version="0.15.1-beta31" />
+        <PackageReference Include="MSFramework" Version="0.15.1-beta32" />
     </ItemGroup>
 </Project>

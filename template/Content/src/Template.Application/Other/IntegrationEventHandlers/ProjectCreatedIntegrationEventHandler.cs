@@ -19,7 +19,7 @@ namespace Template.Application.Other.IntegrationEventHandlers
 		public Task HandleAsync(ProjectCreatedIntegrationEvent request,
 			CancellationToken cancellationToken = new CancellationToken())
 		{
-			_logger.LogInformation("Received integration event: {Event}", Defaults.JsonHelper.Serialize(request));
+			_logger.LogInformation("Received integration event: {Event}", Defaults.JsonSerializer.Serialize(request));
 			return Task.CompletedTask;
 		}
 	}
