@@ -7,11 +7,11 @@ using Newtonsoft.Json.Serialization;
 
 namespace MicroserviceFramework.Serialization.Newtonsoft;
 
-public class NewtonsoftJsonHelper : IJsonHelper
+public class NewtonsoftJsonSerializer : IJsonSerializer
 {
     private readonly JsonSerializerSettings _settings;
 
-    public NewtonsoftJsonHelper(JsonSerializerSettings settings = null)
+    public NewtonsoftJsonSerializer(JsonSerializerSettings settings = null)
     {
         if (settings == null)
         {

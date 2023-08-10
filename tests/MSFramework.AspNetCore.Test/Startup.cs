@@ -56,7 +56,7 @@ public class Startup
             builder.UseAssemblyScanPrefix("MSFramework.AspNetCore.Test");
             builder.UseDependencyInjectionLoader();
             builder.UseOptionsType(_configuration);
-            builder.UseAutoMapper();
+            builder.UseAutoMapperObjectAssembler();
             builder.UseEventBus((_, options) =>
             {
                 options.AddAfterInterceptor(async (provider, _) =>

@@ -85,7 +85,7 @@ internal class Mediator : IMediator
         try
         {
             _logger.LogDebug("{TraceId}, 处理器 {HandlerType} 开始处理 {Request}", traceId, handler.GetType().FullName,
-                Defaults.JsonHelper.Serialize(request));
+                Defaults.JsonSerializer.Serialize(request));
 
             TResponse result = default;
             var invokeResult = method.Invoke(handler, new object[] { request, cancellationToken });
@@ -142,7 +142,7 @@ internal class Mediator : IMediator
         try
         {
             _logger.LogDebug("{TraceId}, 处理器 {HandlerType} 开始处理 {Request}", traceId, handler.GetType().FullName,
-                Defaults.JsonHelper.Serialize(request));
+                Defaults.JsonSerializer.Serialize(request));
 
             if (method.Invoke(handler, new object[] { request, cancellationToken }) is Task task)
             {

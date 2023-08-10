@@ -2,8 +2,10 @@ using System;
 using System.Threading;
 using System.Threading.Tasks;
 using MicroserviceFramework;
+using MicroserviceFramework.AspNetCore;
 using MicroserviceFramework.Extensions.DependencyInjection;
 using MicroserviceFramework.Mediator;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Xunit;
@@ -83,10 +85,12 @@ public class MediatorTests
         serviceCollection.AddMicroserviceFramework(x =>
         {
             x.UseDependencyInjectionLoader();
-            //x.UseMediator();
+            x.UseAspNetCore();
         });
         serviceCollection.AddLogging(x => x.AddConsole());
         var serviceProvider = serviceCollection.BuildServiceProvider();
+        serviceProvider.UseMicroserviceFramework();
+
         var mediator = serviceProvider.GetRequiredService<IMediator>();
         await mediator.SendAsync(new Command1());
         Assert.Equal(1, Command1.Count);
@@ -102,9 +106,11 @@ public class MediatorTests
         serviceCollection.AddMicroserviceFramework(x =>
         {
             x.UseDependencyInjectionLoader();
-            // x.UseMediator();
+            x.UseAspNetCore();
         });
         var serviceProvider = serviceCollection.BuildServiceProvider();
+        serviceProvider.UseMicroserviceFramework();
+
         var mediator = serviceProvider.GetRequiredService<IMediator>();
         await mediator.SendAsync(new Command0());
         Assert.Equal(1, Command0.Count);
@@ -121,10 +127,12 @@ public class MediatorTests
         serviceCollection.AddMicroserviceFramework(x =>
         {
             x.UseDependencyInjectionLoader();
-            // x.UseMediator();
+            x.UseAspNetCore();
         });
         serviceCollection.AddLogging(x => x.AddConsole());
         var serviceProvider = serviceCollection.BuildServiceProvider();
+        serviceProvider.UseMicroserviceFramework();
+
         var mediator = serviceProvider.GetRequiredService<IMediator>();
         var a = await mediator.SendAsync(new Command2());
         Assert.Equal(1, a);
@@ -138,13 +146,18 @@ public class MediatorTests
     public void ThrowExceptionTest()
     {
         var serviceCollection = new ServiceCollection();
+
         serviceCollection.AddMicroserviceFramework(x =>
         {
             x.UseDependencyInjectionLoader();
+            x.UseAspNetCore();
             // x.UseMediator();
         });
         serviceCollection.AddLogging(x => x.AddConsole());
+
         var serviceProvider = serviceCollection.BuildServiceProvider();
+        serviceProvider.UseMicroserviceFramework();
+
         var mediator = serviceProvider.GetRequiredService<IMediator>();
 
         Assert.Throws<ArgumentException>(() =>

@@ -61,16 +61,16 @@ public static class PropertyBuilderExtensions
 
     public static PropertyBuilder<TProperty> UseJson<TProperty>(
         this PropertyBuilder<TProperty> builder,
-        JsonDataType databaseType = JsonDataType.JSON, IJsonHelper jsonHelper = null) where TProperty : class
+        JsonDataType databaseType = JsonDataType.JSON, IJsonSerializer jsonHelper = null) where TProperty : class
     {
         if (jsonHelper == null)
         {
-            if (Defaults.JsonHelper == null)
+            if (Defaults.JsonSerializer == null)
             {
                 throw new ArgumentException("serializer 为空， 并且默认的序列化器也为空。");
             }
 
-            jsonHelper = Defaults.JsonHelper;
+            jsonHelper = Defaults.JsonSerializer;
         }
 
         var comparer = CreateValueComparer<TProperty>(jsonHelper);
@@ -84,7 +84,7 @@ public static class PropertyBuilderExtensions
     }
 
     /// <summary>
-    /// 
+    ///
     /// </summary>
     /// <param name="builder"></param>
     /// <param name="fieldType">JSON field 的数据类型。比如属性是 IReadonlyList, 其 field 可能定义为 HashSet
@@ -96,17 +96,17 @@ public static class PropertyBuilderExtensions
     public static PropertyBuilder<TProperty> UseJson<TProperty>(
         this PropertyBuilder<TProperty> builder,
         Type fieldType,
-        JsonDataType databaseType = JsonDataType.JSON, IJsonHelper jsonHelper = null)
+        JsonDataType databaseType = JsonDataType.JSON, IJsonSerializer jsonHelper = null)
         where TProperty : class
     {
         if (jsonHelper == null)
         {
-            if (Defaults.JsonHelper == null)
+            if (Defaults.JsonSerializer == null)
             {
                 throw new ArgumentException("serializer 为空， 并且默认的序列化器也为空。");
             }
 
-            jsonHelper = Defaults.JsonHelper;
+            jsonHelper = Defaults.JsonSerializer;
         }
 
         var comparer = CreateValueComparer<TProperty>(jsonHelper, fieldType);
@@ -123,14 +123,14 @@ public static class PropertyBuilderExtensions
     public static PropertyBuilder<TProperty> UseJson<TProperty>(
         this PropertyBuilder<TProperty> builder,
         Type fieldType,
-        IJsonHelper jsonHelper, JsonDataType databaseType = JsonDataType.JSON)
+        IJsonSerializer jsonHelper, JsonDataType databaseType = JsonDataType.JSON)
         where TProperty : class
     {
         builder.UseJson(fieldType, databaseType, jsonHelper);
         return builder;
     }
 
-    private static ValueComparer<TProperty> CreateValueComparer<TProperty>(IJsonHelper jsonHelper,
+    private static ValueComparer<TProperty> CreateValueComparer<TProperty>(IJsonSerializer jsonHelper,
         Type targetType = null)
         where TProperty : class
     {
@@ -143,7 +143,7 @@ public static class PropertyBuilderExtensions
         );
     }
 
-    private static TProperty Copy<TProperty>(IJsonHelper jsonHelper, TProperty v, Type targetType = null)
+    private static TProperty Copy<TProperty>(IJsonSerializer jsonHelper, TProperty v, Type targetType = null)
         where TProperty : class
     {
         if (v == null)

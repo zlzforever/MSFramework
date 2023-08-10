@@ -11,6 +11,12 @@ namespace MicroserviceFramework.Ef;
 
 public static class ServiceCollectionExtensions
 {
+    public static MicroserviceFrameworkBuilder UseEfAuditing(this MicroserviceFrameworkBuilder builder)
+    {
+        builder.Services.AddScoped<IAuditingStore, EfAuditingStore>();
+        return builder;
+    }
+
     public static MicroserviceFrameworkBuilder UseEntityFramework(this MicroserviceFrameworkBuilder builder,
         Action<EntityFrameworkBuilder> configure)
     {

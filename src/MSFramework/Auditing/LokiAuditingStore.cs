@@ -6,46 +6,49 @@ using System.Text;
 using System.Threading.Tasks;
 using MicroserviceFramework.Auditing.Model;
 using MicroserviceFramework.Common;
-using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Options;
 
 namespace MicroserviceFramework.Auditing;
 
+/// <summary>
+/// TODO: 最好优化成 Serilog 的写入，有存储优化、指优化
+/// </summary>
 public class LokiAuditingStore : IAuditingStore
 {
     private readonly IHttpClientFactory _httpClientFactory;
-    private readonly IConfiguration _configuration;
     private readonly ApplicationInfo _applicationInfo;
+    private readonly LokiOptions _lokiOptions;
 
-    public LokiAuditingStore(IHttpClientFactory httpClientFactory, IConfiguration configuration,
-        ApplicationInfo applicationInfo)
+    public LokiAuditingStore(IHttpClientFactory httpClientFactory,
+        ApplicationInfo applicationInfo, LokiOptions lokiOptions)
     {
         _httpClientFactory = httpClientFactory;
-        _configuration = configuration;
         _applicationInfo = applicationInfo;
+        _lokiOptions = lokiOptions;
     }
 
     public async Task AddAsync(object sender, AuditOperation auditOperation)
     {
-        var loki = _configuration["Loki"];
-        if (string.IsNullOrEmpty(loki))
-        {
-            return;
-        }
-
-        var lokiServer = _configuration[$"Serilog:WriteTo:{loki}:Args:uri"];
-        if (string.IsNullOrEmpty(lokiServer))
-        {
-            return;
-        }
-
         var client = _httpClientFactory.CreateClient("Loki");
         var timestamp = DateTimeOffset.Now.ToUnixTimeMilliseconds();
+
+        var lokiLog = new AuditLog
+        {
+            Streams = new LogItem[]
+            {
+                new()
+                {
+                    Stream =
+                        _lokiOptions.Labels,
+                    Values = new List<string[]>()
+                }
+            }
+        };
 
         foreach (var auditEntity in auditOperation.Entities)
         {
             var dict = new Dictionary<string, string>
             {
-                { "Category", "Auditing" },
                 { "DeviceId", auditOperation.DeviceId },
                 { "DeviceModel", auditOperation.DeviceModel },
                 { "Elapsed", auditOperation.Elapsed.ToString() },
@@ -65,37 +68,26 @@ public class LokiAuditingStore : IAuditingStore
                 dict.Add($"{property.Name}NewValue", property.NewValue);
             }
 
-            var lokiLog = new AuditLog
-            {
-                Streams = new LogItem[]
-                {
-                    new()
-                    {
-                        Stream =
-                            new Dictionary<string, string> { { "Application", _applicationInfo.Name } },
-                        Values = new[] { new[] { $"{timestamp}000000", Defaults.JsonHelper.Serialize(dict) } }
-                    }
-                }
-            };
+            lokiLog.Streams[0].Values.Add(new[] { $"{timestamp}000000", Defaults.JsonSerializer.Serialize(dict) });
+        }
 
-            for (var i = 0; i <= 3; ++i)
+        for (var i = 0; i <= 3; ++i)
+        {
+            var response = await client.PostAsync($"{_lokiOptions.Uri}/loki/api/v1/push",
+                new StringContent(Defaults.JsonSerializer.Serialize(lokiLog), Encoding.UTF8, "application/json"));
+            if (response.IsSuccessStatusCode)
             {
-                var response = await client.PostAsync($"{lokiServer}/loki/api/v1/push",
-                    new StringContent(Defaults.JsonHelper.Serialize(lokiLog), Encoding.UTF8, "application/json"));
-                if (response.IsSuccessStatusCode)
-                {
-                    break;
-                }
-
-                await Task.Delay(10);
+                break;
             }
+
+            await Task.Delay(10);
         }
     }
 
     private class LogItem
     {
         public Dictionary<string, string> Stream { get; set; }
-        public string[][] Values { get; set; }
+        public List<string[]> Values { get; set; }
     }
 
     private class AuditLog

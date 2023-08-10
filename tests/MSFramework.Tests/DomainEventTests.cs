@@ -1,6 +1,7 @@
 using System.Threading;
 using System.Threading.Tasks;
 using MicroserviceFramework;
+using MicroserviceFramework.AspNetCore;
 using MicroserviceFramework.Domain;
 using MicroserviceFramework.Extensions.DependencyInjection;
 using MicroserviceFramework.Mediator;
@@ -72,10 +73,11 @@ public class DomainEventTests
         serviceCollection.AddMicroserviceFramework(x =>
         {
             x.UseDependencyInjectionLoader();
-           // x.UseMediator();
+            x.UseAspNetCore();
         });
         serviceCollection.AddLogging(x => x.AddConsole());
         var serviceProvider = serviceCollection.BuildServiceProvider();
+        serviceProvider.UseMicroserviceFramework();
 
         var mediator = serviceProvider.GetRequiredService<IMediator>();
         await mediator.PublishAsync(new DomainEvent4());
@@ -92,10 +94,12 @@ public class DomainEventTests
         serviceCollection.AddMicroserviceFramework(x =>
         {
             x.UseDependencyInjectionLoader();
-            // x.UseMediator();
+            x.UseAspNetCore();
         });
         serviceCollection.AddLogging(x => x.AddConsole());
         var serviceProvider = serviceCollection.BuildServiceProvider();
+        serviceProvider.UseMicroserviceFramework();
+
         var mediator = serviceProvider.GetRequiredService<IMediator>();
         await mediator.PublishAsync(new DomainEvent3());
         Assert.Equal(2, DomainEvent3.Count);
@@ -111,10 +115,12 @@ public class DomainEventTests
         serviceCollection.AddMicroserviceFramework(x =>
         {
             x.UseDependencyInjectionLoader();
-            // x.UseMediator();
+            x.UseAspNetCore();
         });
         serviceCollection.AddLogging(x => x.AddConsole());
         var serviceProvider = serviceCollection.BuildServiceProvider();
+        serviceProvider.UseMicroserviceFramework();
+
         var mediator = serviceProvider.GetRequiredService<IMediator>();
         await mediator.PublishAsync(new DomainEvent2());
     }

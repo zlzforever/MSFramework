@@ -6,7 +6,7 @@ namespace MicroserviceFramework;
 
 public static class Defaults
 {
-    public static IJsonHelper JsonHelper;
+    public static IJsonSerializer JsonSerializer;
 
     public static class Types
     {

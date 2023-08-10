@@ -3,7 +3,7 @@ using System.IO;
 
 namespace MicroserviceFramework.Serialization;
 
-public interface IJsonHelper
+public interface IJsonSerializer
 {
     string Serialize(object obj);
     byte[] SerializeToUtf8Bytes(object obj);

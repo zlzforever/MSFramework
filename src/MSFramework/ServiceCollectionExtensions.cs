@@ -1,9 +1,11 @@
 using System;
 using System.Linq;
 using System.Runtime.CompilerServices;
+using System.Text.Json;
 using MicroserviceFramework.Auditing;
 using MicroserviceFramework.Common;
 using MicroserviceFramework.Extensions.Options;
+using MicroserviceFramework.Serialization;
 using MicroserviceFramework.Text.Json;
 using MicroserviceFramework.Utils;
 using Microsoft.Extensions.Configuration;
@@ -21,18 +23,6 @@ namespace MicroserviceFramework;
 
 public static class ServiceCollectionExtensions
 {
-    /// <summary>
-    /// 注入审计存储
-    /// </summary>
-    /// <param name="builder"></param>
-    /// <returns></returns>
-    public static MicroserviceFrameworkBuilder UseAuditingStore<TEntity>(this MicroserviceFrameworkBuilder builder)
-        where TEntity : class, IAuditingStore
-    {
-        builder.Services.AddScoped<IAuditingStore, TEntity>();
-        return builder;
-    }
-
     /// <summary>
     /// 通过 OptionsType 特性使类自动绑定为 Options
     /// </summary>
@@ -52,10 +42,11 @@ public static class ServiceCollectionExtensions
         var builder = new MicroserviceFrameworkBuilder(services);
 
         builder.Services.TryAddSingleton<ApplicationInfo>();
-        builder.UseDefaultJsonHelper();
 
         // 放到后面，加载优先级更高
         builderAction?.Invoke(builder);
+
+        builder.UseDefaultJsonSerializer();
 
         // 请保证这在最后，不然类型扫描事件的注册会晚于扫描
         MicroserviceFrameworkLoaderContext.Get(services).LoadTypes();
@@ -63,6 +54,9 @@ public static class ServiceCollectionExtensions
 
     public static void UseMicroserviceFramework(this IServiceProvider applicationServices)
     {
+        var defaultJsonSerializerFactory = applicationServices.GetService<IJsonSerializerFactory>();
+        Defaults.JsonSerializer = defaultJsonSerializerFactory.Create();
+
         var configuration = applicationServices.GetService<IConfiguration>();
         if (configuration == null)
         {

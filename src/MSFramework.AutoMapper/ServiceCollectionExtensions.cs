@@ -9,12 +9,12 @@ namespace MicroserviceFramework.AutoMapper;
 
 public static class ServiceCollectionExtensions
 {
-    public static MicroserviceFrameworkBuilder UseAutoMapper(this MicroserviceFrameworkBuilder builder)
+    public static MicroserviceFrameworkBuilder UseAutoMapperObjectAssembler(this MicroserviceFrameworkBuilder builder)
     {
-        return builder.UseAutoMapper(Utils.Runtime.GetAllAssemblies());
+        return builder.UseAutoMapperObjectAssembler(Utils.Runtime.GetAllAssemblies());
     }
 
-    public static MicroserviceFrameworkBuilder UseAutoMapper(this MicroserviceFrameworkBuilder builder,
+    public static MicroserviceFrameworkBuilder UseAutoMapperObjectAssembler(this MicroserviceFrameworkBuilder builder,
         params Assembly[] assemblies)
     {
         builder.Services.TryAddScoped<IObjectAssembler, AutoMapperObjectAssembler>();
@@ -22,9 +22,9 @@ public static class ServiceCollectionExtensions
         return builder;
     }
 
-    public static MicroserviceFrameworkBuilder UseAutoMapper(this MicroserviceFrameworkBuilder builder,
+    public static MicroserviceFrameworkBuilder UseAutoMapperObjectAssembler(this MicroserviceFrameworkBuilder builder,
         params Type[] types)
     {
-        return builder.UseAutoMapper(types.Select(x => x.Assembly).ToArray());
+        return builder.UseAutoMapperObjectAssembler(types.Select(x => x.Assembly).ToArray());
     }
 }

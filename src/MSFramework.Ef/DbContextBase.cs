@@ -398,7 +398,7 @@ public abstract class DbContextBase : DbContext
         }
 
         return Regex.IsMatch(columnType, "JSON", RegexOptions.IgnoreCase)
-            ? Defaults.JsonHelper.Serialize(value)
+            ? Defaults.JsonSerializer.Serialize(value)
             : value.ToString();
     }
 

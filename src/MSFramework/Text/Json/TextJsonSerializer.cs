@@ -6,11 +6,11 @@ using MicroserviceFramework.Text.Json.Converters;
 
 namespace MicroserviceFramework.Text.Json;
 
-public class JsonHelper : IJsonHelper
+public class TextJsonSerializer : IJsonSerializer
 {
     private readonly JsonSerializerOptions _options;
 
-    public static IJsonHelper Create()
+    public static IJsonSerializer Create()
     {
         var options = new JsonSerializerOptions();
         options.Converters.Add(new ObjectIdJsonConverter());
@@ -24,10 +24,10 @@ public class JsonHelper : IJsonHelper
         // 不应该使用这个功能， 如果一个字典的键值中， 同时有 a 和 A， 会导致有两个 a 在序列化结果中
         // options.DictionaryKeyPolicy = JsonNamingPolicy.CamelCase;
 
-        return new JsonHelper(options);
+        return new TextJsonSerializer(options);
     }
 
-    public JsonHelper(JsonSerializerOptions options)
+    public TextJsonSerializer(JsonSerializerOptions options)
     {
         _options = options;
     }

@@ -33,7 +33,7 @@ public class ObjectAssembler
         var service = new ServiceCollection();
         service.AddMicroserviceFramework(x =>
         {
-            x.UseAutoMapper();
+            x.UseAutoMapperObjectAssembler();
         });
         var provider = service.BuildServiceProvider();
         var assembler = provider.GetRequiredService<IObjectAssembler>();
@@ -47,7 +47,7 @@ public class ObjectAssembler
         var service = new ServiceCollection();
         service.AddMicroserviceFramework(x =>
         {
-            x.UseAutoMapper();
+            x.UseAutoMapperObjectAssembler();
         });
         var provider = service.BuildServiceProvider();
         var assembler = provider.GetRequiredService<IObjectAssembler>();

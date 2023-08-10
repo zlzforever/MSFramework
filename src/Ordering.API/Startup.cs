@@ -184,9 +184,9 @@ public static class Startup
             builder.UseAssemblyScanPrefix("Ordering");
             builder.UseDependencyInjectionLoader();
             builder.UseOptionsType(configuration);
-            builder.UseAutoMapper();
-            builder.UseAuditingStore<LokiAuditingStore>();
-            builder.UseAuditingStore<EfAuditingStore>();
+            builder.UseAutoMapperObjectAssembler();
+            builder.UseEfAuditing();
+            builder.UseLokiAuditing();
             builder.UseEventBus((_, options) =>
             {
                 options.AddAfterInterceptor(async (provider, _) =>

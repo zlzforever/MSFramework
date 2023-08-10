@@ -95,7 +95,7 @@ public class Price
 public class MyClass
 {
     private static readonly int Count = 1000;
-    private static readonly IJsonHelper JsonHelper = MicroserviceFramework.Text.Json.JsonHelper.Create();
+    private static readonly IJsonSerializer JsonHelper = MicroserviceFramework.Text.Json.TextJsonSerializer.Create();
     private static readonly Price Price = new Price(2000.0m, Unit.Hourly, Currency.CNY);
 
     [Benchmark]

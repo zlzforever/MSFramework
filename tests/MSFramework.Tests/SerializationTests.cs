@@ -149,7 +149,7 @@ public class SerializationTests
     public void EnumTest()
     {
         var obj = new Obj { Id = ObjectId.GenerateNewId(), Enum = Enum1.Graph };
-        var jsonHelper = JsonHelper.Create();
+        var jsonHelper = TextJsonSerializer.Create();
         var json = jsonHelper.Serialize(new List<Obj>() { obj });
         var result = jsonHelper.Deserialize<List<Obj>>(json);
         Assert.Single(result);
@@ -168,7 +168,7 @@ public class SerializationTests
 			""currency"": ""CNY""
 		}
 		]";
-        var jsonHelper = JsonHelper.Create();
+        var jsonHelper = TextJsonSerializer.Create();
         var result2 = jsonHelper.Deserialize<List<Price>>(json1);
         Assert.Single(result2);
         Assert.Equal(Currency.CNY, result2[0].Currency);
@@ -187,7 +187,7 @@ public class SerializationTests
 			""currency"": ""CNY""
 		}
 		]";
-        var jsonHelper = JsonHelper.Create();
+        var jsonHelper = TextJsonSerializer.Create();
         var result2 = jsonHelper.Deserialize<List<Price2>>(json1);
         Assert.Single(result2);
         Assert.Equal(Currency.CNY, result2[0].Currency);
@@ -209,7 +209,7 @@ public class SerializationTests
     {
         var options = new JsonSerializerOptions();
         // options.Converters.Add(new ObjectIdJsonConverter());
-        var serializer = new JsonHelper(options);
+        var serializer = new TextJsonSerializer(options);
 
         serializer.Serialize(new { id = ObjectId.GenerateNewId() });
 
@@ -238,7 +238,7 @@ public class SerializationTests
         options.Converters.Add(new ObjectIdConverter());
         options.Converters.Add(new EnumerationConverter());
         JsonConvert.DefaultSettings = () => options;
-        var serializer = new NewtonsoftJsonHelper();
+        var serializer = new NewtonsoftJsonSerializer();
 
         serializer.Serialize(new { id = ObjectId.GenerateNewId() });
 

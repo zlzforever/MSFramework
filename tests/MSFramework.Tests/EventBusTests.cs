@@ -58,6 +58,8 @@ public class EventBusTests
             });
 
             var provider = serviceCollection.BuildServiceProvider();
+            provider.UseMicroserviceFramework();
+
             var eventBus = provider.GetRequiredService<IEventPublisher>();
 
             eventBus.Publish(new Event1 { Order = 1 });
@@ -135,9 +137,12 @@ public class EventBusTests
             {
                 x.UseDependencyInjectionLoader();
                 x.UseEventBus();
+                x.UseAspNetCore();
             });
 
             var provider = serviceCollection.BuildServiceProvider();
+            provider.UseMicroserviceFramework();
+
             var eventBus = provider.GetRequiredService<IEventPublisher>();
 
             eventBus.Publish(new Event3 { Order = 1 });

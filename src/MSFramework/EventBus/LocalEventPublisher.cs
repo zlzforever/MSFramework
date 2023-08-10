@@ -40,7 +40,7 @@ internal class LocalEventPublisher : IEventPublisher
             return;
         }
 
-        var json = Defaults.JsonHelper.Serialize(@event);
+        var json = Defaults.JsonSerializer.Serialize(@event);
         var traceId = ObjectId.GenerateNewId().ToString();
 
         foreach (var subscription in subscriptions)
@@ -56,7 +56,7 @@ internal class LocalEventPublisher : IEventPublisher
                         _logger.LogWarning("没有找到事件 {EventName} 的处理器", name);
                     }
 
-                    var e = Defaults.JsonHelper.Deserialize(wrapper.EventData, wrapper.EventType);
+                    var e = Defaults.JsonSerializer.Deserialize(wrapper.EventData, wrapper.EventType);
 
                     foreach (var function in _eventBusOptions.BeforeDelegates)
                     {

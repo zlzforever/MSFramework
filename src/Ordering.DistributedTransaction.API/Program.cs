@@ -32,7 +32,7 @@ webApplicationBuilder.Services.AddMicroserviceFramework(builder =>
     builder.UseAssemblyScanPrefix("Ordering");
     builder.UseDependencyInjectionLoader();
     builder.UseOptionsType(webApplicationBuilder.Configuration);
-    builder.UseAutoMapper();
+    builder.UseAutoMapperObjectAssembler();
     // builder.UseMediator();
     builder.UseEventBus((_, options) =>
     {

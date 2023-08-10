@@ -24,7 +24,7 @@ public static class ServiceCollectionExtensions
         builder.Services.AddScoped<ISession>(provider =>
             HttpSession.Create(provider.GetRequiredService<IHttpContextAccessor>()));
 
-        builder.Services.AddSingleton(x => x.GetRequiredService<JsonOptions>().JsonSerializerOptions);
+        builder.Services.AddSingleton(x => x.GetRequiredService<IOptions<JsonOptions>>().Value.JsonSerializerOptions);
 
         var jsonSerializerSettingsType = Type.GetType("Newtonsoft.Json.JsonSerializerSettings, Newtonsoft.Json");
         var jsonOptionsType =
