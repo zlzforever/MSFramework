@@ -33,6 +33,7 @@
     <ProjectReference Include="..\DotNetCore.CAP.Dapr\DotNetCore.CAP.Dapr.csproj" />
     <ProjectReference Include="..\MSFramework.AspNetCore.Swagger\MSFramework.AspNetCore.Swagger.csproj" />
     <ProjectReference Include="..\MSFramework.AspNetCore\MSFramework.AspNetCore.csproj" />
+    <ProjectReference Include="..\MSFramework.Auditing.Loki\MSFramework.Auditing.Loki.csproj" />
     <ProjectReference Include="..\MSFramework.AutoMapper\MSFramework.AutoMapper.csproj" />
     <ProjectReference Include="..\MSFramework.Ef.Design\MSFramework.Ef.Design.csproj" />
     <ProjectReference Include="..\MSFramework.Ef.PostgreSql\MSFramework.Ef.PostgreSql.csproj" />

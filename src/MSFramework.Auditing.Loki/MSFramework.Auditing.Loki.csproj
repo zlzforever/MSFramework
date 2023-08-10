@@ -1,0 +1,17 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <PackageId>MSFramework.Auditing.Loki</PackageId>
+    <AssemblyName>MSFramework.Auditing.Loki</AssemblyName>
+    <RootNamespace>MicroserviceFramework.Auditing.Loki</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\MSFramework\MSFramework.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Serilog" Version="3.0.1" />
+  </ItemGroup>
+  <Import Project="../../package.props"/>
+</Project>

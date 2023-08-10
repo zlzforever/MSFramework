@@ -68,6 +68,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DotNetCore.CAP.Dapr", "src\
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Ordering.DistributedTransaction.API", "src\Ordering.DistributedTransaction.API\Ordering.DistributedTransaction.API.csproj", "{43C74833-69F0-4CCD-903E-35C142C1268E}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MSFramework.Auditing.Loki", "src\MSFramework.Auditing.Loki\MSFramework.Auditing.Loki.csproj", "{AF6DD5F0-039B-444E-AF8E-756D9A0F0AA6}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -150,6 +152,10 @@ Global
 		{43C74833-69F0-4CCD-903E-35C142C1268E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{43C74833-69F0-4CCD-903E-35C142C1268E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{43C74833-69F0-4CCD-903E-35C142C1268E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{AF6DD5F0-039B-444E-AF8E-756D9A0F0AA6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AF6DD5F0-039B-444E-AF8E-756D9A0F0AA6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AF6DD5F0-039B-444E-AF8E-756D9A0F0AA6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AF6DD5F0-039B-444E-AF8E-756D9A0F0AA6}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -177,6 +183,7 @@ Global
 		{37E32788-0A5E-43D6-8852-A3A7EAB262F2} = {0CEB99EE-969C-4A1D-841F-D22E4ADCC5F1}
 		{FDE60B8F-232B-41FE-858C-22EF86821902} = {AFD16F00-F810-4A3C-BA74-59BBFBC2469D}
 		{43C74833-69F0-4CCD-903E-35C142C1268E} = {47747049-F28E-4474-B09F-E98147F91C83}
+		{AF6DD5F0-039B-444E-AF8E-756D9A0F0AA6} = {AFD16F00-F810-4A3C-BA74-59BBFBC2469D}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {BE296FC5-5695-4FE5-9BAE-7168B9BACB47}

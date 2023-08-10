@@ -23,6 +23,7 @@
 
     <ItemGroup>
       <ProjectReference Include="..\..\src\MSFramework.AspNetCore\MSFramework.AspNetCore.csproj" />
+      <ProjectReference Include="..\..\src\MSFramework.Auditing.Loki\MSFramework.Auditing.Loki.csproj" />
       <ProjectReference Include="..\..\src\MSFramework.AutoMapper\MSFramework.AutoMapper.csproj" />
       <ProjectReference Include="..\..\src\MSFramework.Serialization.Newtonsoft\MSFramework.Serialization.Newtonsoft.csproj" />
       <ProjectReference Include="..\..\src\MSFramework\MSFramework.csproj" />

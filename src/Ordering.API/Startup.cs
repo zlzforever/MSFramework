@@ -13,6 +13,7 @@ using MicroserviceFramework.AspNetCore.Filters;
 using MicroserviceFramework.AspNetCore.Mvc.ModelBinding;
 using MicroserviceFramework.AspNetCore.Swagger;
 using MicroserviceFramework.Auditing;
+using MicroserviceFramework.Auditing.Loki;
 using MicroserviceFramework.AutoMapper;
 using MicroserviceFramework.Domain;
 using MicroserviceFramework.Ef;
