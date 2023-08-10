@@ -4,6 +4,11 @@ namespace MicroserviceFramework.Auditing.Loki;
 
 public static class ServiceCollectionExtensions
 {
+    /// <summary>
+    /// 使用 Loki 存储审计日志
+    /// </summary>
+    /// <param name="builder"></param>
+    /// <returns></returns>
     public static MicroserviceFrameworkBuilder UseLokiAuditing(this MicroserviceFrameworkBuilder builder)
     {
         builder.Services.AddSingleton<IAuditingStore, LokiAuditingStore>();

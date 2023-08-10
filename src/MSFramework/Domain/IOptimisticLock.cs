@@ -1,5 +1,8 @@
 namespace MicroserviceFramework.Domain;
 
+/// <summary>
+/// 乐观锁接口
+/// </summary>
 public interface IOptimisticLock
 {
     /// <summary>

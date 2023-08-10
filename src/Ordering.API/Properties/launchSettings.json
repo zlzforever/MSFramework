@@ -4,8 +4,7 @@
     "Ordering.API": {
       "commandName": "Project",
       "environmentVariables": {
-        "ASPNETCORE_ENVIRONMENT": "Development",
-        "COMPUTERNAME": "LewisdeMBP"
+        "ASPNETCORE_ENVIRONMENT": "Development"
       }
     }
   }

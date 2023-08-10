@@ -28,6 +28,10 @@ namespace MicroserviceFramework.Common;
 //     }
 // }
 
+/// <summary>
+/// 分页结果包装类
+/// </summary>
+/// <typeparam name="TEntity"></typeparam>
 public class PagedResult<TEntity>
 {
     /// <summary>

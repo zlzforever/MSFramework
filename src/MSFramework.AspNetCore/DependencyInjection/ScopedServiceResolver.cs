@@ -1,3 +1,6 @@
+// comments by lewis
+// 不建议使用定位器
+
 // using System;
 // using System.Collections.Generic;
 // using MicroserviceFramework.Extensions.DependencyInjection;
@@ -37,3 +40,5 @@
 //         return _httpContextAccessor.HttpContext?.RequestServices.GetServices(serviceType);
 //     }
 // }
+
+

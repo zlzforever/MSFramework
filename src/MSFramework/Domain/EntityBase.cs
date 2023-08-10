@@ -13,23 +13,38 @@ public abstract class EntityBase : IEntity
 {
     private readonly List<DomainEvent> _domainEvents;
 
-    public IReadOnlyCollection<DomainEvent> GetDomainEvents() => _domainEvents.AsReadOnly();
-
     protected EntityBase()
     {
         _domainEvents = new List<DomainEvent>();
     }
 
+    /// <summary>
+    /// 添加领域事件
+    /// </summary>
+    /// <param name="event">领域事件</param>
     public void AddDomainEvent(DomainEvent @event)
     {
         _domainEvents.Add(@event);
     }
 
+    /// <summary>
+    /// 删除领域事件
+    /// </summary>
+    /// <param name="event">领域事件</param>
     public void RemoveDomainEvent(DomainEvent @event)
     {
         _domainEvents.Remove(@event);
     }
 
+    /// <summary>
+    /// 获取所有领域事件
+    /// </summary>
+    /// <returns></returns>
+    public IReadOnlyCollection<DomainEvent> GetDomainEvents() => _domainEvents.AsReadOnly();
+
+    /// <summary>
+    /// 清空领域事件
+    /// </summary>
     public void ClearDomainEvents() => _domainEvents.Clear();
 
     /// <inheritdoc/>
@@ -38,6 +53,10 @@ public abstract class EntityBase : IEntity
         return $"[ENTITY: {GetType().Name}] Keys = {GetKeys().JoinString(", ")}";
     }
 
+    /// <summary>
+    /// 获取主键
+    /// </summary>
+    /// <returns></returns>
     public abstract object[] GetKeys();
 }
 
@@ -49,13 +68,19 @@ public abstract class EntityBase<TKey> : EntityBase, IEntity<TKey> where TKey : 
 {
     private TKey _id;
 
-    /// <inheritdoc/>
+    /// <summary>
+    /// 主键
+    /// </summary>
     public TKey Id
     {
         get => _id;
         protected set => _id = value;
     }
 
+    /// <summary>
+    /// 获取主键
+    /// </summary>
+    /// <returns></returns>
     public override object[] GetKeys()
     {
         return new object[] { Id };

@@ -1,7 +1,8 @@
-﻿using System.Threading.Tasks;
+﻿namespace MicroserviceFramework.EventBus;
 
-namespace MicroserviceFramework.EventBus;
-
+/// <summary>
+/// 事件发布器
+/// </summary>
 public interface IEventPublisher
 {
     /// <summary>

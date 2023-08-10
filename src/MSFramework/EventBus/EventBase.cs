@@ -3,17 +3,20 @@ using MongoDB.Bson;
 
 namespace MicroserviceFramework.EventBus;
 
+/// <summary>
+/// 事件基类
+/// </summary>
 public abstract class EventBase
 {
     public static readonly Type Type = typeof(EventBase);
 
     /// <summary>
-    /// 事件源标识
+    /// 事件标识
     /// </summary>
     public string EventId { get; set; } = ObjectId.GenerateNewId().ToString();
 
     /// <summary>
-    /// 事件发生时间
+    /// 事件时间
     /// </summary>
     public long EventTime { get; set; } = DateTimeOffset.Now.ToUnixTimeMilliseconds();
 

@@ -19,5 +19,11 @@ public interface IDeletion : ISoftDelete
     /// </summary>
     DateTimeOffset? DeletionTime { get; }
 
+    /// <summary>
+    /// 设置删除信息
+    /// </summary>
+    /// <param name="deleterId">删除人标识</param>
+    /// <param name="deleterName">删除人名称</param>
+    /// <param name="deletionTime">删除时间</param>
     void SetDeletion(string deleterId, string deleterName, DateTimeOffset deletionTime = default);
 }

@@ -3,6 +3,9 @@ using System.Linq;
 
 namespace MicroserviceFramework.Domain;
 
+/// <summary>
+/// 值类型
+/// </summary>
 public abstract record ValueObject
 {
     public ValueObject Copy()

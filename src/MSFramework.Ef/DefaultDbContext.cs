@@ -7,7 +7,7 @@ using Microsoft.Extensions.Options;
 namespace MicroserviceFramework.Ef;
 
 /// <summary>
-/// 默认EntityFramework数据上下文
+/// 默认 EntityFramework 数据上下文
 /// </summary>
 public class DefaultDbContext : DbContextBase
 {

@@ -4,11 +4,11 @@ using System.Reflection;
 
 namespace MicroserviceFramework.EventBus;
 
-public static class EventBusExtensions
+public static class EventTypeExtensions
 {
     private static readonly ConcurrentDictionary<Type, bool> EventTypes;
 
-    static EventBusExtensions() => EventTypes = new ConcurrentDictionary<Type, bool>();
+    static EventTypeExtensions() => EventTypes = new ConcurrentDictionary<Type, bool>();
 
     public static bool IsEvent(this Type eventType)
     {

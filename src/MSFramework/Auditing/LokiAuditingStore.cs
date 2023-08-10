@@ -1,3 +1,7 @@
+// comments by lewis at 20230810
+// 直接通过 HTTP 发送日志会和业务开销捆绑
+// 已经通过 Serilog.Loki 来实现
+
 // using System;
 // using System.Collections.Generic;
 // using System.Linq;
@@ -11,7 +15,7 @@
 // namespace MicroserviceFramework.Auditing;
 //
 // /// <summary>
-// /// TODO: 最好优化成 Serilog 的写入，有存储优化、指优化
+// ///
 // /// </summary>
 // public class LokiAuditingStore : IAuditingStore
 // {

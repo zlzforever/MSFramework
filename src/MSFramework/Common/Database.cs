@@ -1,5 +1,8 @@
 namespace MicroserviceFramework.Common;
 
+/// <summary>
+/// 数据库枚举
+/// </summary>
 public enum Database
 {
     PostgreSql,

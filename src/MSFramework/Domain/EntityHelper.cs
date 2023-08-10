@@ -16,7 +16,7 @@ public static class EntityHelper
             return true;
         }
 
-        //Workaround for EF Core since it sets int/long to min value when attaching to dbcontext
+        //Workaround for EF Core since it sets int/long to min value when attaching to dbContext
         if (typeof(TKey) == typeof(int))
         {
             return Convert.ToInt32(entity.Id) <= 0;

@@ -3,6 +3,9 @@ using MongoDB.Bson;
 
 namespace MicroserviceFramework.Domain;
 
+/// <summary>
+/// 含最后修改信息的聚合根
+/// </summary>
 public abstract class ModificationAggregateRoot : ModificationAggregateRoot<ObjectId>
 {
     protected ModificationAggregateRoot(ObjectId id) : base(id)
@@ -10,6 +13,9 @@ public abstract class ModificationAggregateRoot : ModificationAggregateRoot<Obje
     }
 }
 
+/// <summary>
+/// 含最后修改信息的聚合根
+/// </summary>
 public abstract class ModificationAggregateRoot<TKey> : ModificationEntity<TKey>, IAggregateRoot<TKey>
     where TKey : IEquatable<TKey>
 {
