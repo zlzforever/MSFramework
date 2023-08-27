@@ -5,7 +5,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Ordering.Infrastructure;
 
-namespace Ordering.API.Controllers;
+namespace Ordering.API;
 
 public class CapTransactionAttribute : ActionFilterAttribute
 {

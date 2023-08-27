@@ -83,6 +83,10 @@ public class Order : CreationAggregateRoot, IOptimisticLock
         _listJson = new HashSet<string>();
         _dictJson = new Dictionary<string, string>();
         _extras = new List<OrderExtra>();
+        AddDomainEvent(new OrderCreatedDomainEvent
+        {
+            Id = id.ToString(), CreationTime = DateTimeOffset.Now, Name = "test"
+        });
     }
 
     private Order(

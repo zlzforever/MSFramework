@@ -23,9 +23,8 @@ public class OrderingQuery : IOrderingQuery
 
     public async Task<Order> GetAsync(ObjectId orderId)
     {
-
         var order = await _orderSet
-            .Include(x => x.Items)
+            .Include("Items")
             .AsNoTracking()
             .FirstOrDefaultAsync(x => x.Id == orderId);
 

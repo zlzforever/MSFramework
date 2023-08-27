@@ -1,7 +1,10 @@
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Threading.Tasks;
+using Dapr;
+using MicroserviceFramework;
 using MicroserviceFramework.AspNetCore;
 using MicroserviceFramework.Domain;
 using MicroserviceFramework.Ef.Repositories;
@@ -12,6 +15,7 @@ using Microsoft.Extensions.Logging;
 using MongoDB.Bson;
 using Ordering.Application.Commands;
 using Ordering.Application.Dto;
+using Ordering.Application.Events;
 using Ordering.Application.Queries;
 using Ordering.Domain.AggregateRoots;
 using Ordering.Domain.Repositories;
@@ -25,23 +29,25 @@ public class OrderController : ApiControllerBase
 {
     private readonly IOrderingQuery _orderingQuery;
     private readonly IOrderingRepository _orderRepository;
-    private readonly IMediator _cqrsProcessor;
+    private readonly IMediator _mediator;
     private readonly OrderingContext _dbContext;
     private readonly IUnitOfWork _unitOfWorkManager;
     private readonly IExternalEntityRepository<User, string> _externalEntityRepository;
     private readonly IObjectAssembler _objectAssembler;
+    private readonly ILogger<OrderController> _logger;
 
     public OrderController(IOrderingRepository orderRepository,
-        IOrderingQuery orderingQuery, IMediator commandExecutor, OrderingContext dbContext,
+        IOrderingQuery orderingQuery, OrderingContext dbContext,
         IUnitOfWork unitOfWorkManager, IExternalEntityRepository<User, string> externalEntityRepository,
-        IObjectAssembler objectAssembler)
+        IObjectAssembler objectAssembler, IMediator mediator, ILogger<OrderController> logger)
     {
         _orderingQuery = orderingQuery;
-        _cqrsProcessor = commandExecutor;
         _dbContext = dbContext;
         _unitOfWorkManager = unitOfWorkManager;
         _externalEntityRepository = externalEntityRepository;
         _objectAssembler = objectAssembler;
+        _mediator = mediator;
+        _logger = logger;
         _orderRepository = orderRepository;
     }
 
@@ -79,29 +85,23 @@ public class OrderController : ApiControllerBase
         return _objectAssembler.To<OrderDto>(order);
     }
 
+    [Topic("pubsub", Names.OrderCreatedEvent)]
+    [NonAction]
+    public Task OnProductCreatedAsync(E e)
+    {
+        var a = Defaults.JsonSerializer.Serialize(e);
+        _logger.LogInformation(a);
+        return Task.CompletedTask;
+    }
+
+    public class E
+    {
+        public string Id { get; set; }
+        public string Name { get; set; }
+        public DateTimeOffset CreationTime { get; set; }
+    }
+
     #region Command
-
-    /// <summary>
-    /// 测试有返回值的命令
-    /// </summary>
-    /// <param name="command"></param>
-    /// <returns></returns>
-    [HttpPost("tesCommand1")]
-    public async Task<string> ExecuteTestCommand1Async([FromBody] TestCommand1 command)
-    {
-        var a = await _cqrsProcessor.SendAsync(command);
-        return a;
-    }
-
-    /// <summary>
-    /// 测试无返回值的命令
-    /// </summary>
-    /// <param name="command"></param>
-    [HttpPost("tesCommand2")]
-    public async Task ExecuteTestCommand2Async([FromBody] TestCommand2 command)
-    {
-        await _cqrsProcessor.SendAsync(command);
-    }
 
     /// <summary>
     /// FOR TEST Method
@@ -111,13 +111,13 @@ public class OrderController : ApiControllerBase
     //[AccessControl("创建订单")]
     public async Task<ObjectId> CreateAsync([FromBody] CreateOrderCommand command)
     {
-        return await _cqrsProcessor.SendAsync(command);
+        return await _mediator.SendAsync(command);
     }
 
     [HttpDelete("{orderId}")]
     public async Task DeleteAsync([FromRoute] DeleteOrderCommand command)
     {
-        await _cqrsProcessor.SendAsync(command);
+        await _mediator.SendAsync(command);
     }
 
     [HttpPut("{orderId}/address")]

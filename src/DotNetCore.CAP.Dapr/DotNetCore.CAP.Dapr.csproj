@@ -10,6 +10,7 @@
   <ItemGroup>
     <PackageReference Include="Dapr.AspNetCore" Version="1.11.0" />
     <PackageReference Include="DotNetCore.CAP" Version="7.2.0" />
+    <PackageReference Include="Grpc.Net.Client" Version="2.55.0" />
   </ItemGroup>
 
 </Project>

@@ -170,48 +170,48 @@ public class ProductController : ApiControllerBase
         return prod;
     }
 
-    [HttpPost("CAP")]
-    [CapTransaction]
-    public async Task<IActionResult> EntityFrameworkWithTransaction([FromServices] OrderingContext dbContext)
-    {
-        _logger.LogInformation("调用开始");
-        var prod = Product.Create("CAP", new Random().Next(100, 10000));
-        prod.SetCreation("1", "1");
-        await dbContext.AddAsync(prod);
+    // [HttpPost("CAP")]
+    // [CapTransaction]
+    // public async Task<IActionResult> EntityFrameworkWithTransaction([FromServices] OrderingContext dbContext)
+    // {
+    //     _logger.LogInformation("调用开始");
+    //     var prod = Product.Create("CAP", new Random().Next(100, 10000));
+    //     prod.SetCreation("1", "1");
+    //     await dbContext.AddAsync(prod);
+    //
+    //     _logger.LogInformation("调用结束");
+    //
+    //     return Ok();
+    // }
 
-        _logger.LogInformation("调用结束");
-
-        return Ok();
-    }
-
-    [CapSubscribe("subscribe")]
-    [NonAction]
-    public void Subscribe()
-    {
-    }
-
-    [HttpGet("CAP_Exception")]
-    [CapTransaction]
-    public IActionResult EntityFrameworkWithTransactionException([FromServices] OrderingContext dbContext)
-    {
-        throw new MicroserviceFrameworkFriendlyException("发生异常");
-    }
-
-    [HttpPost("CAPFail")]
-    [CapTransaction]
-    public async Task<IActionResult> EntityFrameworkWithTransactionFail([FromServices] OrderingContext dbContext)
-    {
-        var prod = Product.CreateWithoutEvent("CAP", new Random().Next(100, 10000));
-        prod.SetCreation("1", "1");
-
-        await dbContext.AddAsync(prod);
-
-        await _capBus.PublishAsync(Names.ProjectCreateFailedEvent,
-            new { prod.Id, prod.Name, CreationTime = DateTimeOffset.Now });
-
-        await dbContext.SaveChangesAsync();
-        return Ok();
-    }
+    // [CapSubscribe("subscribe")]
+    // [NonAction]
+    // public void Subscribe()
+    // {
+    // }
+    //
+    // [HttpGet("CAP_Exception")]
+    // [CapTransaction]
+    // public IActionResult EntityFrameworkWithTransactionException([FromServices] OrderingContext dbContext)
+    // {
+    //     throw new MicroserviceFrameworkFriendlyException("发生异常");
+    // }
+    //
+    // [HttpPost("CAPFail")]
+    // [CapTransaction]
+    // public async Task<IActionResult> EntityFrameworkWithTransactionFail([FromServices] OrderingContext dbContext)
+    // {
+    //     var prod = Product.CreateWithoutEvent("CAP", new Random().Next(100, 10000));
+    //     prod.SetCreation("1", "1");
+    //
+    //     await dbContext.AddAsync(prod);
+    //
+    //     await _capBus.PublishAsync(Names.ProjectCreateFailedEvent,
+    //         new { prod.Id, prod.Name, CreationTime = DateTimeOffset.Now });
+    //
+    //     await dbContext.SaveChangesAsync();
+    //     return Ok();
+    // }
 
     [HttpGet("testPaged")]
     public PagedResult<A> TestPagedResult()
@@ -240,7 +240,7 @@ public class ProductOut
 public class CreateViewObject
 {
     /// <summary>
-    /// 
+    ///
     /// </summary>
     [Required]
     [StringLength(50)]

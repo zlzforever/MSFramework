@@ -5,6 +5,7 @@ namespace Ordering.Application.Dto;
 
 public class OrderDto
 {
+    public string Id { get; set; }
     /// <summary>
     /// Address is a Value Object pattern example persisted as EF Core 2.0 owned entity
     /// </summary>

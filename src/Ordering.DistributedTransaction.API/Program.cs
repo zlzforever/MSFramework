@@ -47,7 +47,7 @@ webApplicationBuilder.Services.AddMicroserviceFramework(builder =>
     builder.UseEntityFramework(x =>
     {
         // 添加 MySql 支持
-        x.AddNpgsql<OrderingContext, AuditingContext>(webApplicationBuilder.Configuration);
+        x.AddNpgsql<OrderingContext>(webApplicationBuilder.Configuration);
     });
 });
 webApplicationBuilder.Services.AddCap(x =>

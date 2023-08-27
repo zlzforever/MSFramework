@@ -1,23 +1,16 @@
 ﻿using System;
 using System.IO;
 using System.Linq;
-using System.Text;
-using System.Text.Encodings.Web;
 using System.Text.Json;
-using System.Text.Unicode;
-using DotNetCore.CAP.Dapr;
-using DotNetCore.CAP.Messages;
 using MicroserviceFramework;
 using MicroserviceFramework.AspNetCore;
 using MicroserviceFramework.AspNetCore.Filters;
 using MicroserviceFramework.AspNetCore.Mvc.ModelBinding;
 using MicroserviceFramework.AspNetCore.Swagger;
-using MicroserviceFramework.Auditing;
 using MicroserviceFramework.Auditing.Loki;
 using MicroserviceFramework.AutoMapper;
 using MicroserviceFramework.Domain;
 using MicroserviceFramework.Ef;
-using MicroserviceFramework.Ef.Auditing;
 using MicroserviceFramework.Ef.PostgreSql;
 using MicroserviceFramework.EventBus;
 using MicroserviceFramework.Extensions.DependencyInjection;
@@ -117,10 +110,19 @@ public static class Startup
             .AddDapr(x =>
             {
                 x.UseJsonSerializationOptions(jsonSerializerOptions);
-#if DEBUG
-                x.UseGrpcEndpoint("http://localhost:51001");
-                x.UseHttpEndpoint("http://localhost:50001");
-#endif
+                // x.UseGrpcEndpoint("http://localhost:3500");
+                // x.UseHttpEndpoint("http://localhost:50001");
+                // x.UseGrpcChannelOptions(new GrpcChannelOptions
+                // {
+                //     HttpHandler  = new GrpcWebHandler(new HttpClientHandler
+                //     {
+                //         ServerCertificateCustomValidationCallback = (message, certificate2, arg3, arg4) => true,
+                //         UseProxy=false
+                //
+                //     })
+                //     {
+                //     }
+                // });
             });
         services.AddSwaggerGen(x =>
         {
@@ -201,7 +203,7 @@ public static class Startup
             builder.UseEntityFramework(x =>
             {
                 // 添加 MySql 支持
-                x.AddNpgsql<OrderingContext, AuditingContext>(configuration);
+                x.AddNpgsql<OrderingContext>(configuration);
             });
         });
     });
@@ -231,7 +233,7 @@ public static class Startup
         // dapr
         app.UseCloudEvents();
         app.MapSubscribeHandler();
-        app.UseDaprCap();
+        // app.UseDaprCap();
 
         // app.Use(async (context, next) =>
         // {

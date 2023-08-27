@@ -1,2 +1,2 @@
-namespace MSFramework.Tests;
+namespace MSFramework.AspNetCore.Test;
 

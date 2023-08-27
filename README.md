@@ -19,6 +19,6 @@ $ dotnet ef migrations add Init  --context OrderingContext -p ../Ordering.Infras
 ### Dapr
 
 ```
-dapr run --dapr-http-port 50001 --dapr-grpc-port 51001 --app-port 5001 --app-id ordering --components-path ./dapr/components
-dapr run --dapr-http-port 50002 --dapr-grpc-port 51002 --app-port 5002 --app-id ordering-subscribe --components-path ./dapr/components
+dapr run --dapr-http-port 3500 --dapr-grpc-port 50001 --app-port 5001 --app-id ordering-api --log-level debug --placement-host-address 192.168.31.78 --components-path C:\Users\zlzfo\.dapr\components
+dapr run --dapr-http-port 50002 --dapr-grpc-port 51002 --app-port 5002 --app-id ordering-subscribe
 ```
