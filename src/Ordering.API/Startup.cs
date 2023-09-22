@@ -83,9 +83,7 @@ public static class Startup
                 x.Filters.AddUnitOfWork()
                     .AddAudit()
                     .AddGlobalException();
-// #if !DEBUG
-//                  x.Filters.Add<SecurityDaprTopicFilter>();
-// #endif
+                // x.Filters.Add<SecurityDaprTopicFilter>();
                 x.Filters.Add<ResponseWrapperFilter>();
                 x.ModelBinderProviders.Insert(0, new ObjectIdModelBinderProvider());
                 x.ModelBinderProviders.Insert(0, new EnumerationModelBinderProvider());
@@ -231,8 +229,10 @@ public static class Startup
         app.UseAuthorization();
 
         // dapr
+        app.UseDaprSecurity();
         app.UseCloudEvents();
         app.MapSubscribeHandler();
+
         // app.UseDaprCap();
 
         // app.Use(async (context, next) =>
@@ -280,7 +280,6 @@ public static class Startup
         // CustomMiddleware
         // EndpointRouting
 
-        app.MapControllers();
         app.MapDefaultControllerRoute().RequireCors("cors");
         app.UseMicroserviceFramework();
 

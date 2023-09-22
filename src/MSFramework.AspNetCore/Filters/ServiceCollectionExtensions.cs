@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Mvc.Filters;
 
 namespace MicroserviceFramework.AspNetCore.Filters;
@@ -20,5 +21,11 @@ public static class ServiceCollectionExtensions
     {
         filters.Add<GlobalExceptionFilter>();
         return filters;
+    }
+
+    public static WebApplication UseDaprSecurity(this WebApplication app)
+    {
+        app.UseMiddleware<DaprSecurityMiddleware>();
+        return app;
     }
 }

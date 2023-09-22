@@ -4,6 +4,7 @@ using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Threading.Tasks;
 using Dapr;
+using Dapr.Client;
 using MicroserviceFramework;
 using MicroserviceFramework.AspNetCore;
 using MicroserviceFramework.Domain;
@@ -35,11 +36,12 @@ public class OrderController : ApiControllerBase
     private readonly IExternalEntityRepository<User, string> _externalEntityRepository;
     private readonly IObjectAssembler _objectAssembler;
     private readonly ILogger<OrderController> _logger;
+    private readonly DaprClient _daprClient;
 
     public OrderController(IOrderingRepository orderRepository,
         IOrderingQuery orderingQuery, OrderingContext dbContext,
         IUnitOfWork unitOfWorkManager, IExternalEntityRepository<User, string> externalEntityRepository,
-        IObjectAssembler objectAssembler, IMediator mediator, ILogger<OrderController> logger)
+        IObjectAssembler objectAssembler, IMediator mediator, ILogger<OrderController> logger, DaprClient daprClient)
     {
         _orderingQuery = orderingQuery;
         _dbContext = dbContext;
@@ -48,6 +50,7 @@ public class OrderController : ApiControllerBase
         _objectAssembler = objectAssembler;
         _mediator = mediator;
         _logger = logger;
+        _daprClient = daprClient;
         _orderRepository = orderRepository;
     }
 
@@ -86,7 +89,7 @@ public class OrderController : ApiControllerBase
     }
 
     [Topic("pubsub", Names.OrderCreatedEvent)]
-    [NonAction]
+    [HttpPost("OnProductCreated")]
     public Task OnProductCreatedAsync(E e)
     {
         var a = Defaults.JsonSerializer.Serialize(e);

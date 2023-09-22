@@ -160,9 +160,9 @@ public class MediatorTests
 
         var mediator = serviceProvider.GetRequiredService<IMediator>();
 
-        Assert.Throws<ArgumentException>(() =>
+        Assert.ThrowsAsync<ArgumentException>(async () =>
         {
-            mediator.SendAsync(new Command3()).GetAwaiter().GetResult();
+            await mediator.SendAsync(new Command3());
         });
     }
 }

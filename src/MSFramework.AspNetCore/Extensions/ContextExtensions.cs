@@ -1,4 +1,5 @@
 using System.Linq;
+using System.Net;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -8,17 +9,28 @@ public static class ContextExtensions
 {
     public static string GetRemoteIpAddress(this ActionContext context)
     {
-        return context.HttpContext.GetRemoteIpAddress();
+        return context.HttpContext.GetRemoteIpAddressString();
     }
 
-    public static string GetRemoteIpAddress(this HttpContext context)
+    public static string GetRemoteIpAddressString(this HttpContext context)
     {
-        var ip = context.Request.Headers["X-Forwarded-For"].FirstOrDefault();
-        if (string.IsNullOrEmpty(ip))
+        var forwardedFor = context.Request.Headers["X-Forwarded-For"].FirstOrDefault();
+        if (string.IsNullOrEmpty(forwardedFor))
         {
-            ip = context.Connection.RemoteIpAddress?.ToString();
+            forwardedFor = context.Connection.RemoteIpAddress?.ToString();
         }
 
-        return ip;
+        return forwardedFor;
+    }
+
+    public static IPAddress GetRemoteIpAddress(this HttpContext context)
+    {
+        var forwardedFor = context.Request.Headers["X-Forwarded-For"].FirstOrDefault();
+        if (string.IsNullOrEmpty(forwardedFor))
+        {
+            return context.Connection.RemoteIpAddress;
+        }
+
+        return IPAddress.TryParse(forwardedFor, out var ip) ? ip : null;
     }
 }

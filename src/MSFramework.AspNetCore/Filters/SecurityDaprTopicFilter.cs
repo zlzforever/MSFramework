@@ -1,3 +1,4 @@
+// using System;
 // using System.Collections.Concurrent;
 // using System.Collections.Generic;
 // using System.Linq;
@@ -19,6 +20,7 @@
 // /// 404： 错误被记录下来，信息被删除
 // /// other: 警告被记录并重试消息
 // /// </summary>
+// [Obsolete("use app.UseDaprSecurity() instead")]
 // public class SecurityDaprTopicFilter : IActionFilter, IOrderedFilter
 // {
 //     private static readonly ConcurrentDictionary<MethodInfo, bool> Cache;
