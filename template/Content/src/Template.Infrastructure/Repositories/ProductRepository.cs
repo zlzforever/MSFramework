@@ -8,16 +8,16 @@ using Template.Domain.Repositories;
 
 namespace Template.Infrastructure.Repositories
 {
-	public class ProductRepository
-		: EfRepository<Product, ObjectId>, IProductRepository
-	{
-		public ProductRepository(DbContextFactory dbContextFactory) : base(dbContextFactory)
-		{
-		}
+    public class ProductRepository
+        : EfRepository<Product, ObjectId>, IProductRepository
+    {
+        public ProductRepository(DbContextFactory dbContextFactory) : base(dbContextFactory)
+        {
+        }
 
-		public async Task<Product> GetByNameAsync(string name)
-		{
-			return await Store.FirstOrDefaultAsync(x => x.Name == name);
-		}
-	}
+        public async Task<Product> GetByNameAsync(string name)
+        {
+            return await Store.FirstOrDefaultAsync(x => x.Name == name);
+        }
+    }
 }

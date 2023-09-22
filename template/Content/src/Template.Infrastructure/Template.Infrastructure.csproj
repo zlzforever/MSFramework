@@ -9,7 +9,7 @@
     </ItemGroup>
 
     <ItemGroup>
-        <PackageReference Include="MSFramework.Ef" Version="0.15.1-beta32" />
-        <PackageReference Include="MSFramework.Ef.MySql" Version="0.15.1-beta32" />
+        <PackageReference Include="MSFramework.Ef" Version="0.15.1-beta33" />
+        <PackageReference Include="MSFramework.Ef.MySql" Version="0.15.1-beta33" />
     </ItemGroup>
 </Project>

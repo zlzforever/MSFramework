@@ -2,7 +2,7 @@ using MicroserviceFramework.Domain;
 
 namespace Template.Domain.Services
 {
-	public interface IProductDomainService : IDomainService
-	{
-	}
+    public interface IProductDomainService : IDomainService
+    {
+    }
 }

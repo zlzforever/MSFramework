@@ -6,8 +6,8 @@ using Template.Domain.Aggregates.Project;
 
 namespace Template.Domain.Repositories
 {
-	public interface IProductRepository : IRepository<Product, ObjectId>, IScopeDependency
-	{
-		Task<Product> GetByNameAsync(string name);
-	}
+    public interface IProductRepository : IRepository<Product, ObjectId>, IScopeDependency
+    {
+        Task<Product> GetByNameAsync(string name);
+    }
 }

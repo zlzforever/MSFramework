@@ -4,7 +4,7 @@ using MongoDB.Bson;
 namespace Template.Domain.Aggregates.Project.Events;
 
 public record ProjectCreatedEvent
-	: DomainEvent
+    : DomainEvent
 {
-	public ObjectId Id { get; set; }
+    public ObjectId Id { get; set; }
 }

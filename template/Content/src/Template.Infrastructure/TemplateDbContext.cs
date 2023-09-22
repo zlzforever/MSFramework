@@ -7,13 +7,13 @@ using Microsoft.Extensions.Options;
 
 namespace Template.Infrastructure
 {
-	public class TemplateDbContext : DbContextBase
-	{
-		public TemplateDbContext(DbContextOptions options,
-			IOptions<DbContextConfigurationCollection> dbContextConfigurationCollection,
-			IMediator mediator, ISession session, ILoggerFactory loggerFactory) : base(
-			options, dbContextConfigurationCollection, mediator, session, loggerFactory)
-		{
-		}
-	}
+    public class TemplateDbContext : DbContextBase
+    {
+        public TemplateDbContext(DbContextOptions options,
+            IOptions<DbContextConfigurationCollection> dbContextConfigurationCollection,
+            IMediator mediator, ISession session, ILoggerFactory loggerFactory) : base(
+            options, dbContextConfigurationCollection, mediator, session, loggerFactory)
+        {
+        }
+    }
 }
