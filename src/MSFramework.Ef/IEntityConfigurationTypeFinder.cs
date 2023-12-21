@@ -32,16 +32,9 @@ public interface IEntityConfigurationTypeFinder
     bool HasDbContextForEntity<T>();
 }
 
-public struct EntityTypeConfigurationMetadata
+public struct EntityTypeConfigurationMetadata(Type entityType, MethodInfo methodInfo, object entityTypeConfiguration)
 {
-    public readonly Type EntityType;
-    public readonly MethodInfo MethodInfo;
-    public readonly object EntityTypeConfiguration;
-
-    public EntityTypeConfigurationMetadata(Type entityType, MethodInfo methodInfo, object entityTypeConfiguration)
-    {
-        EntityType = entityType;
-        MethodInfo = methodInfo;
-        EntityTypeConfiguration = entityTypeConfiguration;
-    }
+    public readonly Type EntityType = entityType;
+    public readonly MethodInfo MethodInfo = methodInfo;
+    public readonly object EntityTypeConfiguration = entityTypeConfiguration;
 }

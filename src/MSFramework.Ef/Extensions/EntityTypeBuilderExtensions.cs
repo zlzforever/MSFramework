@@ -11,7 +11,7 @@ public static class EntityTypeBuilderExtensions
     {
         builder.Property(x => x.CreationTime).UseUnixTime();
         builder.Property(x => x.CreatorId).HasMaxLength(36);
-        builder.Property(x => x.CreatorName).HasMaxLength(255);
+        builder.Property(x => x.CreatorName).HasMaxLength(256);
 
         // comments: 是否需要索引要由业务方来指定
         // builder.HasIndex(x => x.CreationTime);
@@ -22,7 +22,7 @@ public static class EntityTypeBuilderExtensions
     {
         builder.Property(x => x.LastModificationTime).UseUnixTime();
         builder.Property(x => x.LastModifierId).HasMaxLength(36);
-        builder.Property(x => x.LastModifierName).HasMaxLength(255);
+        builder.Property(x => x.LastModifierName).HasMaxLength(256);
 
         // comments: 是否需要索引要由业务方来指定
         // builder.HasIndex(x => x.LastModificationTime);
@@ -34,7 +34,7 @@ public static class EntityTypeBuilderExtensions
         builder.Property(x => x.IsDeleted).HasDefaultValue(false);
         builder.Property(x => x.DeletionTime).UseUnixTime();
         builder.Property(x => x.DeleterId).HasMaxLength(36);
-        builder.Property(x => x.DeleterName).HasMaxLength(255);
+        builder.Property(x => x.DeleterName).HasMaxLength(256);
 
         // comments: 是否需要索引要由业务方来指定
         // builder.HasIndex(x => x.DeletionTime);

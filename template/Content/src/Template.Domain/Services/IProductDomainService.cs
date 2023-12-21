@@ -1,8 +1,5 @@
 using MicroserviceFramework.Domain;
 
-namespace Template.Domain.Services
-{
-    public interface IProductDomainService : IDomainService
-    {
-    }
-}
+namespace Template.Domain.Services;
+
+public interface IProductDomainService : IDomainService;

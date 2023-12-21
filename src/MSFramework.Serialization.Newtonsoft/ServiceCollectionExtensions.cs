@@ -1,4 +1,5 @@
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using Newtonsoft.Json;
 
 namespace MicroserviceFramework.Serialization.Newtonsoft;
@@ -16,12 +17,15 @@ public static class ServiceCollectionExtensions
     {
         if (settings != null)
         {
-            builder.Services.AddSingleton<IJsonSerializerFactory>(new DefaultJsonSerializerFactory(settings));
+            builder.Services.TryAddSingleton<IJsonSerializer>(new NewtonsoftJsonSerializer(settings));
         }
         else
         {
-            builder.Services.AddSingleton<IJsonSerializerFactory>(provider =>
-                new DefaultJsonSerializerFactory(provider.GetRequiredService<JsonSerializerSettings>()));
+            builder.Services.TryAddSingleton<IJsonSerializer>(provider =>
+            {
+                var x = provider.GetService<JsonSerializerSettings>();
+                return new NewtonsoftJsonSerializer(x);
+            });
         }
 
         return builder;

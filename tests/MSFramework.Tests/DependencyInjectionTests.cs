@@ -25,42 +25,22 @@ public interface IC : ITransientDependency
 
 public class A : IA
 {
-    public string Id { get; }
-
-    public A()
-    {
-        Id = Guid.NewGuid().ToString();
-    }
+    public string Id { get; } = Guid.NewGuid().ToString();
 }
 
 public class B : IB
 {
-    public string Id { get; }
-
-    public B()
-    {
-        Id = Guid.NewGuid().ToString();
-    }
+    public string Id { get; } = Guid.NewGuid().ToString();
 }
 
 public class C : IC
 {
-    public string Id { get; }
-
-    public C()
-    {
-        Id = Guid.NewGuid().ToString();
-    }
+    public string Id { get; } = Guid.NewGuid().ToString();
 }
 
 public class D : IA
 {
-    public string Id { get; }
-
-    public D()
-    {
-        Id = Guid.NewGuid().ToString();
-    }
+    public string Id { get; } = Guid.NewGuid().ToString();
 }
 
 public class DependencyInjectionTests

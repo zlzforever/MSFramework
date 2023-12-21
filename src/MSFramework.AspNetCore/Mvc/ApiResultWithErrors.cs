@@ -2,7 +2,7 @@ using System.Text.Json;
 
 namespace MicroserviceFramework.AspNetCore.Mvc;
 
-public class ApiResultWithErrors : ApiResult
+internal class ApiResultWithErrors : ApiResult
 {
     public object Errors { get; set; }
 

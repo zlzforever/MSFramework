@@ -4,38 +4,31 @@ using MongoDB.Bson;
 
 namespace Ordering.Application.Commands;
 
-public record CreateOrderCommand : Request<ObjectId>
+public record CreateOrderCommand(
+    List<CreateOrderCommand.OrderItemDTO> OrderItems,
+    string UserId,
+    string City,
+    string Street,
+    string State,
+    string Country,
+    string ZipCode,
+    string Description)
+    : Request<ObjectId>
 {
-    public string UserId { get; set; }
+    public string UserId { get; set; } = UserId;
 
-    public string City { get; set; }
+    public string City { get; set; } = City;
 
-    public string Street { get; set; }
+    public string Street { get; set; } = Street;
 
-    public string State { get; set; }
+    public string State { get; set; } = State;
 
-    public string Country { get; set; }
+    public string Country { get; set; } = Country;
 
-    public string ZipCode { get; set; }
+    public string ZipCode { get; set; } = ZipCode;
 
-    public string Description { get; set; }
+    public string Description { get; set; } = Description;
 
-    public List<OrderItemDTO> OrderItems { get; }
-
-
-    public CreateOrderCommand(List<OrderItemDTO> basketItems, string userId, string city,
-        string street, string state, string country, string zipcode, string description)
-    {
-        OrderItems = basketItems;
-        UserId = userId;
-
-        City = city;
-        Street = street;
-        State = state;
-        Country = country;
-        ZipCode = zipcode;
-        Description = description;
-    }
 
     public class OrderItemDTO
     {

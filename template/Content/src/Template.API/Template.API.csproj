@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk.Web">
 
     <PropertyGroup>
-        <TargetFramework>net7.0</TargetFramework>
+        <TargetFramework>net8.0</TargetFramework>
     </PropertyGroup>
 
     <ItemGroup>
@@ -9,9 +9,9 @@
           <PrivateAssets>all</PrivateAssets>
           <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
-        <PackageReference Include="MSFramework.AspNetCore.Swagger" Version="0.15.1-beta33" />
-        <PackageReference Include="MSFramework.Auditing.Loki" Version="0.15.1-beta33" />
-        <PackageReference Include="MSFramework.Ef.Design" Version="0.15.1-beta33" />
+        <PackageReference Include="MSFramework.AspNetCore.Swagger" Version="0.15.1-beta42" />
+        <PackageReference Include="MSFramework.Auditing.Loki" Version="0.15.1-beta42" />
+        <PackageReference Include="MSFramework.Ef.Design" Version="0.15.1-beta42" />
         <PackageReference Include="RemoteConfiguration.Json.Aliyun" Version="0.1.2" />
         <PackageReference Include="Serilog.AspNetCore" Version="7.0.0" />
         <PackageReference Include="Serilog.Sinks.PeriodicBatching" Version="3.1.0" />

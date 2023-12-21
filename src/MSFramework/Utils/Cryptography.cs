@@ -1,7 +1,8 @@
+using System;
 using System.IO;
 using System.Security.Cryptography;
 using System.Text;
-using MicroserviceFramework.Runtime;
+using System.Threading.Tasks;
 
 // ReSharper disable InconsistentNaming
 
@@ -22,13 +23,16 @@ public static class Cryptography
         return ComputeMD5(bytes);
     }
 
-    public static string ComputeMD5(Stream stream)
+    public static async Task<string> ComputeMD5Async(Stream stream)
     {
         Check.NotNull(stream, nameof(stream));
 
-        var hash = MD5.Create();
-        var bytes = hash.ComputeHash(stream);
-        return bytes.ToHex();
+        stream.Seek(0, SeekOrigin.Begin);
+        var data = new byte[stream.Length];
+        _ = await stream.ReadAsync(data, 0, data.Length);
+
+        var bytes = MD5.HashData(data);
+        return Convert.ToHexString(bytes);
     }
 
     /// <summary>
@@ -38,9 +42,8 @@ public static class Cryptography
     {
         Check.NotNull(bytes, nameof(bytes));
 
-        var hash = MD5.Create();
-        bytes = hash.ComputeHash(bytes);
-        return bytes.ToHex();
+        var hashBytes = MD5.HashData(bytes);
+        return Convert.ToHexString(hashBytes);
     }
 
     /// <summary>
@@ -50,11 +53,9 @@ public static class Cryptography
     {
         Check.NotNull(value, nameof(value));
 
-        var hash = SHA1.Create();
         encoding ??= Encoding.UTF8;
-
-        var bytes = hash.ComputeHash(encoding.GetBytes(value));
-        return bytes.ToHex();
+        var bytes = SHA1.HashData(encoding.GetBytes(value));
+        return Convert.ToHexString(bytes);
     }
 
     /// <summary>
@@ -64,11 +65,9 @@ public static class Cryptography
     {
         Check.NotNull(value, nameof(value));
 
-        var hash = SHA256.Create();
         encoding ??= Encoding.UTF8;
-
-        var bytes = hash.ComputeHash(encoding.GetBytes(value));
-        return bytes.ToHex();
+        var bytes = SHA256.HashData(encoding.GetBytes(value));
+        return Convert.ToHexString(bytes);
     }
 
     /// <summary>
@@ -78,10 +77,9 @@ public static class Cryptography
     {
         Check.NotNull(value, nameof(value));
 
-        var hash = SHA512.Create();
         encoding ??= Encoding.UTF8;
 
-        var bytes = hash.ComputeHash(encoding.GetBytes(value));
-        return bytes.ToHex();
+        var bytes = SHA512.HashData(encoding.GetBytes(value));
+        return Convert.ToHexString(bytes);
     }
 }

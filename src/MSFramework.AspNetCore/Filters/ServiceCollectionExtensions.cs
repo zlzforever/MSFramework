@@ -17,9 +17,15 @@ public static class ServiceCollectionExtensions
         return filters;
     }
 
+    public static FilterCollection AddResponseWrapper(this FilterCollection filters)
+    {
+        filters.Add<ResponseWrapperFilter>(Constants.ResponseWrapper);
+        return filters;
+    }
+
     public static FilterCollection AddGlobalException(this FilterCollection filters)
     {
-        filters.Add<GlobalExceptionFilter>();
+        filters.Add<GlobalExceptionFilter>(Constants.GlobalException);
         return filters;
     }
 

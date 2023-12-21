@@ -4,12 +4,11 @@ using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Threading.Tasks;
 using Dapr;
-using Dapr.Client;
-using MicroserviceFramework;
 using MicroserviceFramework.AspNetCore;
 using MicroserviceFramework.Domain;
 using MicroserviceFramework.Ef.Repositories;
 using MicroserviceFramework.Mediator;
+using MicroserviceFramework.Serialization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -24,38 +23,30 @@ using Ordering.Infrastructure;
 
 namespace Ordering.API.Controllers;
 
-[Route("api/v1.0/[controller]")]
+[Route("api/v1.0/orders")]
 [ApiController]
-public class OrderController : ApiControllerBase
+public class OrderController(
+    IOrderingRepository orderRepository,
+    IOrderingQuery orderingQuery,
+    OrderingContext dbContext,
+    IUnitOfWork unitOfWorkManager,
+    IExternalEntityRepository<User, int> externalEntityRepository,
+    IObjectAssembler objectAssembler,
+    IMediator mediator,
+    ILogger<OrderController> logger,
+    IJsonSerializer jsonSerializer)
+    : ApiControllerBase
 {
-    private readonly IOrderingQuery _orderingQuery;
-    private readonly IOrderingRepository _orderRepository;
-    private readonly IMediator _mediator;
-    private readonly OrderingContext _dbContext;
-    private readonly IUnitOfWork _unitOfWorkManager;
-    private readonly IExternalEntityRepository<User, string> _externalEntityRepository;
-    private readonly IObjectAssembler _objectAssembler;
-    private readonly ILogger<OrderController> _logger;
-    private readonly DaprClient _daprClient;
-
-    public OrderController(IOrderingRepository orderRepository,
-        IOrderingQuery orderingQuery, OrderingContext dbContext,
-        IUnitOfWork unitOfWorkManager, IExternalEntityRepository<User, string> externalEntityRepository,
-        IObjectAssembler objectAssembler, IMediator mediator, ILogger<OrderController> logger, DaprClient daprClient)
+    [HttpPost("createTest")]
+    public async Task<(OrderDto Order1, OrderDto Order2)> TestCreate()
     {
-        _orderingQuery = orderingQuery;
-        _dbContext = dbContext;
-        _unitOfWorkManager = unitOfWorkManager;
-        _externalEntityRepository = externalEntityRepository;
-        _objectAssembler = objectAssembler;
-        _mediator = mediator;
-        _logger = logger;
-        _daprClient = daprClient;
-        _orderRepository = orderRepository;
+        var order1 = await AddAsync();
+        var order2 = await AddAsync();
+        Logger.LogInformation("{TraceIdentifier}: Create test order completed", Session.TraceIdentifier);
+        return (objectAssembler.To<OrderDto>(order1), objectAssembler.To<OrderDto>(order2));
     }
 
-    [HttpPost("createTest")]
-    public async Task<OrderDto> TestCreate()
+    private async Task<Order> AddAsync()
     {
         var order = Order.Create(
             "1",
@@ -75,25 +66,22 @@ public class OrderController : ApiControllerBase
         order.AddKeyValue("test1", "value1");
         order.AddKeyValue("test2", "value2");
 
-        // var user1 = _externalEntityRepository.GetOrCreate<User, string>(() => new User("1") { Name = "Lewis" });
-        //i1.SetCreator(user1);
+        var user1 = externalEntityRepository.GetOrCreate(() => new User(1) { Name = "Lewis" });
+        order.SetOperator(user1);
 
-        // var user2 = _externalEntityRepository.GetOrCreate<User, string>(() => new User("1"));
-        //i2.SetCreator(user2);
-
-        // var user3 = _externalEntityRepository.GetOrCreate<User, string>(() => new User("1"));
-        // order.SetCreator(user3);
-        await _orderRepository.AddAsync(order);
-        Logger.LogInformation("{TraceIdentifier}: Create test order completed", Session.TraceIdentifier);
-        return _objectAssembler.To<OrderDto>(order);
+        logger.LogInformation("{TraceIdentifier}: Create test order", Session.TraceIdentifier);
+        logger.LogError(new Exception("test"), "{TraceIdentifier}: Create test order", Session.TraceIdentifier);
+        await orderRepository.AddAsync(order);
+        return order;
     }
 
-    [Topic("pubsub", Names.OrderCreatedEvent)]
-    [HttpPost("OnProductCreated")]
-    public Task OnProductCreatedAsync(E e)
+    [Topic("rabbitmq-pubsub", Names.OrderCreatedEvent, "biz.ordering.dead-letter", false)]
+    [HttpPost("OnOrderCreated")]
+    public Task OnOrderCreatedAsync([FromBody] E e)
     {
-        var a = Defaults.JsonSerializer.Serialize(e);
-        _logger.LogInformation(a);
+        var a = jsonSerializer.Serialize(e);
+        Console.WriteLine(a);
+        logger.LogInformation(a);
         return Task.CompletedTask;
     }
 
@@ -101,7 +89,7 @@ public class OrderController : ApiControllerBase
     {
         public string Id { get; set; }
         public string Name { get; set; }
-        public DateTimeOffset CreationTime { get; set; }
+        public long CreationTime { get; set; }
     }
 
     #region Command
@@ -114,13 +102,13 @@ public class OrderController : ApiControllerBase
     //[AccessControl("创建订单")]
     public async Task<ObjectId> CreateAsync([FromBody] CreateOrderCommand command)
     {
-        return await _mediator.SendAsync(command);
+        return await mediator.SendAsync(command);
     }
 
     [HttpDelete("{orderId}")]
     public async Task DeleteAsync([FromRoute] DeleteOrderCommand command)
     {
-        await _mediator.SendAsync(command);
+        await mediator.SendAsync(command);
     }
 
     [HttpPut("{orderId}/address")]
@@ -138,23 +126,23 @@ public class OrderController : ApiControllerBase
     [HttpGet("{orderId}")]
     public async Task<OrderDto> GetAsync([FromRoute, Required] ObjectId orderId)
     {
-        var order = await _orderingQuery.GetAsync(orderId);
-        return _objectAssembler.To<OrderDto>(order);
+        var order = await orderingQuery.GetAsync(orderId);
+        return objectAssembler.To<OrderDto>(order);
     }
 
     [HttpGet]
     public async Task<IEnumerable<OrderDto>> GetAsync()
     {
-        var order = await _dbContext.Set<Order>().FirstOrDefaultAsync();
+        var order = await dbContext.Set<Order>().FirstOrDefaultAsync();
         if (order == null)
         {
             return Enumerable.Empty<OrderDto>();
         }
 
         order.AddEvent();
-        await _unitOfWorkManager.SaveChangesAsync();
-        var orders = await _dbContext.Set<Order>().ToListAsync();
-        return orders.Select(x => _objectAssembler.To<OrderDto>(x));
+        await unitOfWorkManager.SaveChangesAsync();
+        var orders = await dbContext.Set<Order>().ToListAsync();
+        return orders.Select(x => objectAssembler.To<OrderDto>(x));
     }
 
     #endregion

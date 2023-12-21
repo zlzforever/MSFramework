@@ -2,7 +2,7 @@ using System.Text.Json;
 
 namespace MicroserviceFramework.AspNetCore.Mvc;
 
-public class ApiResult<T>
+internal class ApiResult<T>(T data)
 {
     /// <summary>
     /// 是否成功
@@ -19,15 +19,10 @@ public class ApiResult<T>
     /// </summary>
     public string Msg { get; set; } = string.Empty;
 
-    public T Data { get; set; }
+    public T Data { get; set; } = data;
 
     protected ApiResult() : this(default)
     {
-    }
-
-    public ApiResult(T data)
-    {
-        Data = data;
     }
 
     public override string ToString()
@@ -41,7 +36,7 @@ public class ApiResult<T>
     }
 }
 
-public class ApiResult : ApiResult<object>
+internal class ApiResult : ApiResult<object>
 {
     public static readonly ApiResult Ok = new() { Code = 0, Success = true, Msg = string.Empty, Data = null };
 

@@ -10,32 +10,24 @@ namespace Ordering.DistributedTransaction.API.Controllers;
 
 [ApiController]
 [Route("[controller]")]
-public class SubscribeController : ControllerBase
+public class SubscribeController(
+    ILogger<SubscribeController> logger,
+    IProductRepository productRepository,
+    IUnitOfWork unitOfWork)
+    : ControllerBase
 {
-    private readonly ILogger<SubscribeController> _logger;
-    private readonly IProductRepository _productRepository;
-    private readonly IUnitOfWork _unitOfWork;
-
-    public SubscribeController(ILogger<SubscribeController> logger, IProductRepository productRepository,
-        IUnitOfWork unitOfWork)
-    {
-        _logger = logger;
-        _productRepository = productRepository;
-        _unitOfWork = unitOfWork;
-    }
-
     [CapSubscribe(Names.ProjectCreatedEvent)]
     [NonAction]
     public async Task CreatedAsync(ProjectCreatedIntegrationEvent @event)
     {
-        var product = await _productRepository.FindAsync(@event.Id);
+        var product = await productRepository.FindAsync(@event.Id);
         if (product != null)
         {
             product.SetName(Guid.NewGuid().ToString());
         }
 
-        await _unitOfWork.SaveChangesAsync();
-        _logger.LogInformation($"Created: {JsonSerializer.Serialize(@event)}");
+        await unitOfWork.SaveChangesAsync();
+        logger.LogInformation($"Created: {JsonSerializer.Serialize(@event)}");
     }
 
     [CapSubscribe(Names.ProjectCreateFailedEvent)]

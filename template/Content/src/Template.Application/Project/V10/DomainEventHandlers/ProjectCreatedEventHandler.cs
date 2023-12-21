@@ -6,30 +6,23 @@ using Microsoft.Extensions.Logging;
 using Template.Application.Project.V10.IntegrationEvents;
 using Template.Domain.Aggregates.Project.Events;
 
-namespace Template.Application.Project.DomainEventHandlers;
+namespace Template.Application.Project.V10.DomainEventHandlers;
 
-public class ProjectCreatedEventHandler : IDomainEventHandler<ProjectCreatedEvent>
+public class ProjectCreatedEventHandler(
+    DaprClient daprClient,
+    ILogger<ProjectCreatedEventHandler> logger,
+    IUnitOfWork unitOfWork)
+    : IDomainEventHandler<ProjectCreatedEvent>
 {
-    private readonly DaprClient _daprClient;
-    private readonly ILogger<ProjectCreatedEventHandler> _logger;
-    private readonly IUnitOfWork _unitOfWork;
-
-    public ProjectCreatedEventHandler(DaprClient daprClient, ILogger<ProjectCreatedEventHandler> logger,
-        IUnitOfWork unitOfWork)
-    {
-        _daprClient = daprClient;
-        _logger = logger;
-        _unitOfWork = unitOfWork;
-    }
-
     public async Task HandleAsync(ProjectCreatedEvent @event, CancellationToken cancellationToken = default)
     {
         var integrationEvent = new ProjectCreatedIntegrationEvent { Id = @event.Id };
-        await _unitOfWork.SaveChangesAsync(cancellationToken);
-        await _daprClient.PublishEventAsync("pubsub",
+        unitOfWork.SavedChanges += () => daprClient.PublishEventAsync("pubsub",
             "ProjectCreatedEvent", integrationEvent,
             cancellationToken: cancellationToken);
-        _logger.LogInformation("Execute ProjectCreatedEvent");
+        await unitOfWork.SaveChangesAsync(cancellationToken);
+
+        logger.LogInformation("Execute ProjectCreatedEvent");
     }
 
     public void Dispose()

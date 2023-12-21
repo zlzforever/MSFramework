@@ -10,11 +10,11 @@ public static class Runtime
 {
     private static readonly Lazy<Assembly[]> Assemblies;
     private static readonly Lazy<Type[]> Types;
-    public static readonly HashSet<string> StartsWith;
+    internal static readonly HashSet<string> StartsWith;
 
     static Runtime()
     {
-        StartsWith = new HashSet<string> { "MSFramework", "Newtonsoft.Json" };
+        StartsWith = ["MSFramework", "Newtonsoft.Json"];
         Assemblies = new Lazy<Assembly[]>(() =>
         {
             if (DependencyContext.Default == null)

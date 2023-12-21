@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -17,7 +16,6 @@ namespace MicroserviceFramework.Ef;
 internal class EfUnitOfWork : IUnitOfWork
 {
     private readonly DbContextFactory _dbContextFactory;
-    private readonly List<Func<Task>> _tasks;
     private readonly IServiceProvider _serviceProvider;
 
     /// <summary>
@@ -29,12 +27,13 @@ internal class EfUnitOfWork : IUnitOfWork
     {
         _dbContextFactory = dbContextFactory;
         _serviceProvider = serviceProvider;
-        _tasks = new List<Func<Task>>();
     }
 
-    public void SetAuditingFactory(Func<AuditOperation> auditingFactory)
+    public event Func<Task> SavedChanges;
+
+    public void SetAuditOperationFactory(Func<AuditOperation> factory)
     {
-        Check.NotNull(auditingFactory, nameof(auditingFactory));
+        Check.NotNull(factory, nameof(factory));
 
         var auditingStores = _serviceProvider.GetServices<IAuditingStore>().ToList();
         if (auditingStores.Count <= 0)
@@ -49,14 +48,13 @@ internal class EfUnitOfWork : IUnitOfWork
                 return;
             }
 
-            dbContextBase.SavingChanges += (sender, _) =>
+            var auditOperation = factory();
+            dbContextBase.SavingChanges += async (sender, _) =>
             {
                 if (sender is not DbContextBase db)
                 {
                     return;
                 }
-
-                var auditOperation = auditingFactory();
 
                 var entities = db.GetAuditEntities();
                 auditOperation.AddEntities(entities);
@@ -69,7 +67,7 @@ internal class EfUnitOfWork : IUnitOfWork
 
                 foreach (var auditingStore in auditingStores)
                 {
-                    auditingStore.AddAsync(sender, auditOperation);
+                    await auditingStore.AddAsync(auditOperation);
                 }
             };
         }
@@ -82,25 +80,6 @@ internal class EfUnitOfWork : IUnitOfWork
             await dbContext.SaveChangesAsync(cancellationToken);
         }
 
-        if (_tasks != null)
-        {
-            foreach (var task in _tasks)
-            {
-                await task();
-            }
-        }
-    }
-
-    // public void SaveChanges()
-    // {
-    //     foreach (var dbContext in _dbContextFactory.GetAllDbContexts())
-    //     {
-    //         dbContext.SaveChanges();
-    //     }
-    // }
-
-    public void Register(Func<Task> action)
-    {
-        _tasks.Add(action);
+        SavedChanges?.Invoke().ConfigureAwait(true).GetAwaiter();
     }
 }

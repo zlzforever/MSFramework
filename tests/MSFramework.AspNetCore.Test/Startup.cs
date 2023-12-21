@@ -4,7 +4,6 @@ using MicroserviceFramework.AspNetCore;
 using MicroserviceFramework.AspNetCore.Filters;
 using MicroserviceFramework.AspNetCore.Mvc.ModelBinding;
 using MicroserviceFramework.AutoMapper;
-using MicroserviceFramework.Domain;
 using MicroserviceFramework.Ef;
 using MicroserviceFramework.Ef.PostgreSql;
 using MicroserviceFramework.EventBus;
@@ -12,21 +11,15 @@ using MicroserviceFramework.Extensions.DependencyInjection;
 using MicroserviceFramework.Text.Json;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using MSFramework.AspNetCore.Test.EfPostgreSqlTest.Infrastructure;
 
 namespace MSFramework.AspNetCore.Test;
 
-public class Startup
+public class Startup(IConfiguration configuration)
 {
-    private readonly IConfiguration _configuration;
-
-    public Startup(IConfiguration configuration)
-    {
-        _configuration = configuration;
-    }
-
     // This method gets called by the runtime. Use this method to add services to the container.
     // For more information on how to configure your application, visit https://go.microsoft.com/fwlink/?LinkID=398940
     public void ConfigureServices(IServiceCollection services)
@@ -39,7 +32,7 @@ public class Startup
 // #if !DEBUG
 //                  x.Filters.Add<SecurityDaprTopicFilter>();
 // #endif
-                x.Filters.Add<ResponseWrapperFilter>();
+                x.Filters.AddResponseWrapper();
                 x.ModelBinderProviders.Insert(0, new ObjectIdModelBinderProvider());
                 x.ModelBinderProviders.Insert(0, new EnumerationModelBinderProvider());
             })
@@ -51,25 +44,20 @@ public class Startup
                 options.JsonSerializerOptions.DictionaryKeyPolicy = JsonNamingPolicy.CamelCase;
             });
         services.AddRouting(x => { x.LowercaseUrls = true; });
+        services.AddDbContext<TestDataContext>((provider, x) =>
+        {
+            x.UseNpgsql(y => y.LoadFromConfiguration(provider));
+        });
+
         services.AddMicroserviceFramework(builder =>
         {
             builder.UseAssemblyScanPrefix("MSFramework.AspNetCore.Test");
             builder.UseDependencyInjectionLoader();
-            builder.UseOptionsType(_configuration);
+            builder.UseOptionsType(configuration);
             builder.UseAutoMapperObjectAssembler();
-            builder.UseEventBus((_, options) =>
-            {
-                options.AddAfterInterceptor(async (provider, _) =>
-                {
-                    await provider.GetRequiredService<IUnitOfWork>().SaveChangesAsync();
-                });
-            });
+            builder.UseLocalEventPublisher();
             builder.UseAspNetCore();
-            builder.UseEntityFramework(x =>
-            {
-                //
-                x.AddNpgsql<TestDataContext>(_configuration);
-            });
+            builder.UseEntityFramework();
         });
     }
 

@@ -1,0 +1,19 @@
+apiVersion: dapr.io/v1alpha1
+kind: Resiliency
+metadata:
+  name: resiliency
+spec:
+  policies:
+    # Retries are named templates for retry configurations and are instantiated for life of the operation.
+    retries:
+      DefaultRetryPolicy:
+        policy: constant
+        duration: 5s
+        maxRetries: 3
+  
+  targets:
+    components:
+      rabbitmq-pubsub:
+        inbound:
+          retry: DefaultRetryPolicy
+ 

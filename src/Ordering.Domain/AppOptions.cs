@@ -4,18 +4,11 @@ using Microsoft.Extensions.Configuration;
 namespace Ordering.Domain;
 
 [OptionsType]
-public class AppOptions
+public class AppOptions(IConfiguration configuration)
 {
-    private readonly IConfiguration _configuration;
-
-    public AppOptions(IConfiguration configuration)
-    {
-        _configuration = configuration;
-    }
-
     public string Audience { get; set; }
 
-    public string DefaultConnectionString => _configuration["DbContexts:OrderingContext:ConnectionString"];
+    public string DefaultConnectionString => configuration["DbContexts:OrderingContext:ConnectionString"];
 }
 
 [OptionsType("Email")]

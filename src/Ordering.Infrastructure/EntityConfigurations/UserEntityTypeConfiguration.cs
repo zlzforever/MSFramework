@@ -12,9 +12,7 @@ public class UserEntityTypeConfiguration
     {
         ConfigureDefaultIdentifier(builder);
 
-        builder.ToTable("external_user");
+        builder.ToTable("user");
         builder.Property(x => x.Name).HasMaxLength(256);
-
-        builder.HasAnnotation("ExternalEntity", "true");
     }
 }

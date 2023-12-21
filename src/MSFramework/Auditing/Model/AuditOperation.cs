@@ -57,13 +57,15 @@ public class AuditOperation : CreationAggregateRoot<ObjectId>
     /// </summary>
     public int Elapsed { get; private set; }
 
+    public string TraceId { get; private set; }
+
     private AuditOperation() : base(ObjectId.GenerateNewId())
     {
         Entities = new List<AuditEntity>();
     }
 
     public AuditOperation(string url, string userAgent, string ip, string deviceModel, string deviceId, double? lat,
-        double? lng) : this()
+        double? lng, string traceId) : this()
     {
         IP = ip;
         Url = url;
@@ -72,6 +74,7 @@ public class AuditOperation : CreationAggregateRoot<ObjectId>
         DeviceId = deviceId;
         Lat = lat;
         Lng = lng;
+        TraceId = traceId;
     }
 
     public void AddEntities(IEnumerable<AuditEntity> entities)

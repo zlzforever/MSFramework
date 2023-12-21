@@ -1,13 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Net.Http;
-using System.Net.Http.Json;
 using System.Text;
 using System.Threading.Tasks;
-using MicroserviceFramework.Auditing;
-using Microsoft.Extensions.Configuration;
 using MongoDB.Bson;
-using Serilog;
 using Serilog.Events;
 using Serilog.Parsing;
 using Xunit;

@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
-using System.Net.Http;
 using System.Security.Claims;
 using MicroserviceFramework.AspNetCore.IdentityModel;
 using MicroserviceFramework.Security.Claims;
@@ -13,8 +12,8 @@ namespace MicroserviceFramework.AspNetCore;
 
 public class HttpSession : ISession
 {
-    private static readonly HashSet<string> ChineseCultures = new()
-    {
+    private static readonly HashSet<string> ChineseCultures =
+    [
         "zh",
         "zh-CN",
         "zh-HK",
@@ -25,11 +24,10 @@ public class HttpSession : ISession
         "zh-CHT",
         "zh-Hant",
         "zh-Hans"
-    };
+    ];
 
-    internal static HttpSession Create(IHttpContextAccessor accessor)
+    public static HttpSession Create(IHttpContextAccessor accessor)
     {
-
         if (accessor?.HttpContext == null)
         {
             return new HttpSession { Roles = Array.Empty<string>(), Subjects = Array.Empty<string>() };
@@ -60,8 +58,7 @@ public class HttpSession : ISession
                 .FindAll(claim => claim.Type == ClaimTypes.Role ||
                                   JwtClaimTypes.Role.Equals(claim.Type, StringComparison.OrdinalIgnoreCase))
                 .Select(x => x.Value).ToHashSet(),
-            UserDisplayName = userDisplayName,
-            HttpContext = accessor.HttpContext
+            UserDisplayName = userDisplayName
         };
 
         var subjects = new List<string>();
@@ -97,6 +94,4 @@ public class HttpSession : ISession
     public IReadOnlyCollection<string> Roles { get; private init; }
 
     public IReadOnlyCollection<string> Subjects { get; private set; }
-
-    public HttpContext HttpContext { get; private init; }
 }

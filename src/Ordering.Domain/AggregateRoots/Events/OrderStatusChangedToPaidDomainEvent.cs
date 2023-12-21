@@ -4,16 +4,6 @@ using MongoDB.Bson;
 
 namespace Ordering.Domain.AggregateRoots.Events;
 
-public record OrderStatusChangedToPaidDomainEvent
-    : DomainEvent
-{
-    public ObjectId OrderId { get; }
-    public IEnumerable<OrderItem> OrderItems { get; }
-
-    public OrderStatusChangedToPaidDomainEvent(ObjectId orderId,
-        IEnumerable<OrderItem> orderItems)
-    {
-        OrderId = orderId;
-        OrderItems = orderItems;
-    }
-}
+public record OrderStatusChangedToPaidDomainEvent(
+    ObjectId OrderId,
+    IEnumerable<OrderItem> OrderItems) : DomainEvent;

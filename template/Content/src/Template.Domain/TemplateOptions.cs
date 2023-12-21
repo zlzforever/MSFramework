@@ -1,12 +1,11 @@
 using MicroserviceFramework.Extensions.Options;
 
-namespace Template.Domain
+namespace Template.Domain;
+
+[OptionsType]
+public class TemplateOptions
 {
-    [OptionsType]
-    public class TemplateOptions
-    {
-        public string ApiName { get; set; }
-        public string Authority { get; set; }
-        public bool RequireHttpsMetadata { get; set; }
-    }
+    public string ApiName { get; set; }
+    public string Authority { get; set; }
+    public bool RequireHttpsMetadata { get; set; }
 }

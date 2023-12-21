@@ -16,13 +16,8 @@ namespace MSFramework.Tests;
 
 public class SerializationTests
 {
-    public class Currency
-        : Enumeration
+    public class Currency(string id, string name) : Enumeration(id, name)
     {
-        public Currency(string id, string name) : base(id, name)
-        {
-        }
-
         /// <summary>
         /// RMB
         /// </summary>
@@ -39,7 +34,7 @@ public class SerializationTests
         public static readonly Currency USD = new Currency(nameof(USD), nameof(USD));
     }
 
-    public class Unit : Enumeration
+    public class Unit(string id, string name) : Enumeration(id, name)
     {
         /// <summary>
         /// 小时
@@ -65,10 +60,6 @@ public class SerializationTests
         /// 个
         /// </summary>
         public static readonly Unit Per = new Unit(nameof(Per), nameof(Per));
-
-        public Unit(string id, string name) : base(id, name)
-        {
-        }
     }
 
     public class Price
@@ -92,32 +83,25 @@ public class SerializationTests
         public Currency Currency { get; private set; }
     }
 
-    public class Price2
+    public class Price2(decimal? value, Unit unit, Currency currency)
     {
         /// <summary>
         /// 费率
         /// </summary>
         [JsonInclude]
-        public decimal? Value { get; private set; }
+        public decimal? Value { get; private set; } = value;
 
         /// <summary>
         /// 费率单位
         /// </summary>
         [JsonInclude]
-        public Unit Unit { get; private set; }
+        public Unit Unit { get; private set; } = unit;
 
         /// <summary>
         /// 币种
         /// </summary>
         [JsonInclude]
-        public Currency Currency { get; private set; }
-
-        public Price2(decimal? value, Unit unit, Currency currency)
-        {
-            Value = value;
-            Unit = unit;
-            Currency = currency;
-        }
+        public Currency Currency { get; private set; } = currency;
     }
 
     private class Obj
@@ -126,14 +110,10 @@ public class SerializationTests
         public Enum1 Enum { get; set; }
     }
 
-    private class Enum1 : Enumeration
+    private class Enum1(string id, string name) : Enumeration(id, name)
     {
         public static Enum1 Graph = new Enum1(nameof(Graph), nameof(Graph));
         public static Enum1 Property = new Enum1(nameof(Property), nameof(Property));
-
-        public Enum1(string id, string name) : base(id, name)
-        {
-        }
     }
 
     [Fact]
@@ -150,7 +130,7 @@ public class SerializationTests
     {
         var obj = new Obj { Id = ObjectId.GenerateNewId(), Enum = Enum1.Graph };
         var jsonHelper = TextJsonSerializer.Create();
-        var json = jsonHelper.Serialize(new List<Obj>() { obj });
+        var json = jsonHelper.Serialize(new List<Obj> { obj });
         var result = jsonHelper.Deserialize<List<Obj>>(json);
         Assert.Single(result);
         Assert.Equal(obj.Id, result[0].Id);
@@ -273,14 +253,14 @@ public class SerializationTests
         options.AddDefaultConverters();
         options.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
         var json = System.Text.Json.JsonSerializer.Serialize(
-            new PagedResult<A>(1, 10, 2,
-                new List<A> { new A { Id = "1", Name = "A1" }, new A() { Id = "2", Name = "A2" } }), options);
+            new PaginationResult<A>(1, 10, 2,
+                [new A { Id = "1", Name = "A1" }, new A { Id = "2", Name = "A2" }]), options);
         Assert.Equal("""
 {"data":[{"id":"1","name":"A1"},{"id":"2","name":"A2"}],"total":2,"page":1,"limit":10}
 """
             , json);
         var json2 = System.Text.Json.JsonSerializer.Serialize(
-            new PagedResult<A>(1, 10, 2,
+            new PaginationResult<A>(1, 10, 2,
                 null), options);
         Assert.Equal("""
 {"data":[],"total":2,"page":1,"limit":10}

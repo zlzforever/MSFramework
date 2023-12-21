@@ -6,18 +6,14 @@ namespace MicroserviceFramework.Domain;
 /// <summary>
 /// 含创建人信息的实体
 /// </summary>
-public abstract class CreationEntity : CreationEntity<ObjectId>
-{
-    protected CreationEntity(ObjectId id) : base(id)
-    {
-    }
-}
+public abstract class CreationEntity(ObjectId id) : CreationEntity<ObjectId>(id);
 
 /// <summary>
 /// 含创建人信息的实体
 /// </summary>
-public abstract class CreationEntity<TKey> :
-    EntityBase<TKey>, ICreation where TKey : IEquatable<TKey>
+public abstract class CreationEntity<TKey>(TKey id) :
+    EntityBase<TKey>(id), ICreation
+    where TKey : IEquatable<TKey>
 {
     /// <summary>
     /// 创建时间
@@ -46,9 +42,5 @@ public abstract class CreationEntity<TKey> :
         CreationTime = creationTime == default ? DateTimeOffset.Now : creationTime;
         CreatorId = creatorId;
         CreatorName = creatorName;
-    }
-
-    protected CreationEntity(TKey id) : base(id)
-    {
     }
 }

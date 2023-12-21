@@ -12,21 +12,14 @@ using Microsoft.Extensions.Options;
 
 namespace DotNetCore.CAP.Dapr;
 
-public class DaprConsumerClient : IConsumerClient
+public class DaprConsumerClient(
+    string groupId,
+    IOptionsMonitor<DaprOptions> daprOptions,
+    Action<string, string, string, Delegate> configureApi,
+    ILogger<DaprConsumerClient> logger)
+    : IConsumerClient
 {
-    private readonly DaprOptions _daprOptions;
-    private readonly string _groupId;
-    private readonly ILogger<DaprConsumerClient> _logger;
-    private readonly Action<string, string, string, Delegate> _configureApi;
-
-    public DaprConsumerClient(string groupId, IOptionsMonitor<DaprOptions> daprOptions,
-        Action<string, string, string, Delegate> configureApi, ILogger<DaprConsumerClient> logger)
-    {
-        _daprOptions = daprOptions.CurrentValue;
-        _groupId = groupId;
-        _logger = logger;
-        _configureApi = configureApi;
-    }
+    private readonly DaprOptions _daprOptions = daprOptions.CurrentValue;
 
     public BrokerAddress BrokerAddress => new("Dapr", null);
 
@@ -40,17 +33,17 @@ public class DaprConsumerClient : IConsumerClient
         foreach (var topic in topics)
         {
             var path = $"v1.0/publish/{_daprOptions.Pubsub}/{topic.Replace(".", "_")}";
-            _configureApi(path, _daprOptions.Pubsub, topic, ([FromBody] DaprTransportMessage message,
+            configureApi(path, _daprOptions.Pubsub, topic, ([FromBody] DaprTransportMessage message,
                 [FromServices] IHttpContextAccessor httpContextAccessor) =>
             {
-                message.Headers.Add(Headers.Group, _groupId);
+                message.Headers.Add(Headers.Group, groupId);
 
                 OnMessageCallback!(
                     new TransportMessage(message.Headers, Encoding.UTF8.GetBytes(message.Body)),
                     httpContextAccessor);
             });
 
-            _logger.LogInformation($"Subscribe groupId {_groupId}, topic {topic} on web api route {path}");
+            logger.LogInformation($"Subscribe groupId {groupId}, topic {topic} on web api route {path}");
         }
     }
 

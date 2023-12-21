@@ -25,5 +25,6 @@ public interface IModification
     /// <param name="lastModifierId">最后修改人标识</param>
     /// <param name="lastModifierName">最后修改时间</param>
     /// <param name="lastModificationTime">最后修改人名称</param>
-    void SetModification(string lastModifierId, string lastModifierName, DateTimeOffset lastModificationTime = default);
+    void SetModification(string lastModifierId, string lastModifierName,
+        DateTimeOffset lastModificationTime = default);
 }

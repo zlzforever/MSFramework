@@ -8,65 +8,57 @@ using MongoDB.Bson;
 using Template.Application.Project.V10;
 using Template.Application.Project.V10.Commands;
 using Template.Application.Project.V10.IntegrationEvents;
-using Template.Application.Project.V10.QueryHandlers;
+using Template.Application.Project.V10.Queries;
 #if !DEBUG
 using Microsoft.AspNetCore.Authorization;
 #endif
 
-namespace Template.API.Controllers
-{
-    [Route("api/v1.0/products")]
-    [ApiController]
+namespace Template.API.Controllers;
+
+[Route("api/v1.0/products")]
+[ApiController]
 #if !DEBUG
     [Authorize]
 #endif
-    public class ProductController : ApiControllerBase
+public class ProductController(IMediator mediator) : ApiControllerBase
+{
+    [HttpGet]
+    public async Task<PaginationResult<Dto.V10.ProductOut>> PagedQueryAsync(
+        [FromRoute] PagedProductQuery query)
     {
-        private readonly IMediator _mediator;
+        var @out = await mediator.SendAsync(query);
+        return @out;
+    }
 
-        public ProductController(IMediator mediator)
-        {
-            _mediator = mediator;
-        }
+    [HttpPost]
+    public async Task<Dto.V10.CreateProductOut> CreateAsync([FromBody] CreateProjectCommand command)
+    {
+        var @out = await mediator.SendAsync(command);
+        return @out;
+    }
 
-        [HttpGet]
-        public async Task<PagedResult<Dto.V10.ProductOut>> PagedQueryAsync(
-            [FromRoute] PagedProductQuery query)
-        {
-            var @out = await _mediator.SendAsync(query);
-            return @out;
-        }
+    [HttpGet("{id}")]
+    public Task<Dto.V10.ProductOut> GetAsync([FromRoute] GetProductByIdQuery query)
+    {
+        return mediator.SendAsync(query);
+    }
 
-        [HttpPost]
-        public async Task<Dto.V10.CreateProductOut> CreateAsync([FromBody] CreateProjectCommand command)
-        {
-            var @out = await _mediator.SendAsync(command);
-            return @out;
-        }
+    [HttpDelete]
+    public Task<ObjectId> DeleteAsync([FromRoute] DeleteProjectCommand command)
+    {
+        return mediator.SendAsync(command);
+    }
 
-        [HttpGet("{id}")]
-        public async Task<Dto.V10.ProductOut> GetAsync([FromRoute] GetProductByIdQuery query)
-        {
-            return await _mediator.SendAsync(query);
-        }
+    [HttpPatch("{id}")]
+    public Task<ObjectId> UpdateAsync()
+    {
+        return Task.FromResult(ObjectId.Empty);
+    }
 
-        [HttpDelete]
-        public async Task<ObjectId> DeleteAsync([FromRoute] DeleteProjectCommand command)
-        {
-            return await _mediator.SendAsync(command);
-        }
-
-        [HttpPatch("{id}")]
-        public Task<ObjectId> UpdateAsync()
-        {
-            return Task.FromResult(ObjectId.Empty);
-        }
-
-        [Topic("pubsub", "ProjectCreatedEvent")]
-        [NonAction]
-        public async Task SubscribeProjectCreatedEventAsync([FromBody] ProjectCreatedIntegrationEvent @event)
-        {
-            await _mediator.SendAsync(@event);
-        }
+    [Topic("pubsub", "ProjectCreatedEvent")]
+    [NonAction]
+    public Task SubscribeProjectCreatedEventAsync([FromBody] ProjectCreatedIntegrationEvent @event)
+    {
+        return mediator.SendAsync(@event);
     }
 }

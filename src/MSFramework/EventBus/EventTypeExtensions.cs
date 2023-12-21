@@ -1,35 +1,49 @@
 using System;
 using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.Reflection;
+using MicroserviceFramework.Utils;
 
 namespace MicroserviceFramework.EventBus;
 
 public static class EventTypeExtensions
 {
     private static readonly ConcurrentDictionary<Type, bool> EventTypes;
+    private static readonly ConcurrentDictionary<Type, (Type, Type, MethodInfo)> EventMetadata;
 
-    static EventTypeExtensions() => EventTypes = new ConcurrentDictionary<Type, bool>();
+    static EventTypeExtensions()
+    {
+        EventTypes = new ConcurrentDictionary<Type, bool>();
+        EventMetadata = new ConcurrentDictionary<Type, (Type, Type, MethodInfo)>();
+    }
 
-    public static bool IsEvent(this Type eventType)
+    private static bool IsEvent(this Type eventType)
     {
         return eventType != null && EventTypes.GetOrAdd(eventType,
-            type => type != null && EventBase.Type.IsAssignableFrom(type));
+            type => type != null && EventBase.EventBaseType.IsAssignableFrom(type));
     }
 
-    public static string GetEventName(this Type type)
+    public static (Type HandlerInterfaceType, Type ServiceType, MethodInfo Method) GetEventMetadata(this Type eventType)
     {
-        if (!type.IsEvent())
+        Check.NotNull(eventType, nameof(eventType));
+
+        if (!eventType.IsEvent())
         {
-            throw new MicroserviceFrameworkException($"类型 {type.FullName} 不是事件");
+            throw new ArgumentException($"{eventType.Name} 不是一个事件类型");
         }
 
-        var attribute = type.GetCustomAttribute<EventNameAttribute>();
-        return attribute != null ? attribute.Name : type.FullName;
-    }
+        return EventMetadata.GetOrAdd(eventType,
+            t =>
+            {
+                var eventHandlerType = Defaults.EventHandlerType.MakeGenericType(t);
+                var serviceType = typeof(IEnumerable<>).MakeGenericType(eventHandlerType);
+                var handlerMethod = eventHandlerType.GetMethod("HandleAsync");
+                if (handlerMethod == null)
+                {
+                    throw new ArgumentException($"{eventHandlerType.Name} 查询 HandleAsync 方法失败");
+                }
 
-    // public static MethodInfo GetHandlerMethod(this Type handlerType, Type eventType)
-    // {
-    // 	var type = typeof(IEventHandler<>).MakeGenericType(eventType);
-    // 	return type.IsAssignableFrom(handlerType) ? type.GetMethod("HandleAsync", new[] { eventType }) : null;
-    // }
+                return (eventHandlerType, serviceType, handlerMethod);
+            });
+    }
 }

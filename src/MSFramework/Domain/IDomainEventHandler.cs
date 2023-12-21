@@ -6,6 +6,4 @@ namespace MicroserviceFramework.Domain;
 /// 领域事件处理器
 /// </summary>
 /// <typeparam name="TMessage"></typeparam>
-public interface IDomainEventHandler<in TMessage> : IRequestHandler<TMessage> where TMessage : DomainEvent
-{
-}
+public interface IDomainEventHandler<in TMessage> : IRequestHandler<TMessage> where TMessage : DomainEvent;

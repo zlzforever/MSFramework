@@ -4,7 +4,16 @@ using MicroserviceFramework.EventBus;
 
 namespace Ordering.Application.Events;
 
-public class UserCheckoutAcceptedEvent : EventBase
+public record UserCheckoutAcceptedEvent(
+    List<UserCheckoutAcceptedEvent.OrderItemDTO> basketItems,
+    string userId,
+    string city,
+    string street,
+    string state,
+    string country,
+    string zipCode,
+    string description)
+    : EventBase
 {
     public class OrderItemDTO
     {
@@ -21,33 +30,19 @@ public class UserCheckoutAcceptedEvent : EventBase
         public string PictureUrl { get; set; }
     }
 
-    public string UserId { get; }
+    public string UserId { get; } = userId;
 
-    public string City { get; set; }
+    public string City { get; set; } = city;
 
-    public string Street { get; set; }
+    public string Street { get; set; } = street;
 
-    public string State { get; set; }
+    public string State { get; set; } = state;
 
-    public string Country { get; set; }
+    public string Country { get; set; } = country;
 
-    public string ZipCode { get; set; }
+    public string ZipCode { get; set; } = zipCode;
 
-    public string Description { get; }
+    public string Description { get; } = description;
 
-    public List<OrderItemDTO> OrderItems { get; set; }
-
-    public UserCheckoutAcceptedEvent(List<OrderItemDTO> basketItems, string userId, string city, string street,
-        string state, string country, string zipCode, string description)
-    {
-        OrderItems = basketItems;
-        UserId = userId;
-        City = city;
-        Street = street;
-        State = state;
-        Country = country;
-        ZipCode = zipCode;
-        Description = description;
-    }
-
+    public List<OrderItemDTO> OrderItems { get; set; } = basketItems;
 }

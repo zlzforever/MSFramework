@@ -2,8 +2,13 @@ using System;
 
 namespace MicroserviceFramework.Domain;
 
-public interface IDeletion : ISoftDelete
+public interface IDeletion
 {
+    /// <summary>
+    /// 是否已经删除
+    /// </summary>
+    bool IsDeleted { get; }
+
     /// <summary>
     /// 删除人标识
     /// </summary>

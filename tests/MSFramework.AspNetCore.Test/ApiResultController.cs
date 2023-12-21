@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
 using MicroserviceFramework.AspNetCore;
-using MicroserviceFramework.AspNetCore.Mvc;
 using MicroserviceFramework.Common;
 using Microsoft.AspNetCore.Mvc;
 
@@ -65,17 +64,17 @@ public class ApiResultController : ApiControllerBase
             26, 0, DateTimeOffset.Now.Offset);
     }
 
-    [HttpGet("ok")]
-    public ApiResult GetOk()
-    {
-        return ApiResult.Ok;
-    }
-
-    [HttpGet("error")]
-    public ApiResult GetError()
-    {
-        return ApiResult.Error;
-    }
+    // [HttpGet("ok")]
+    // public ApiResult GetOk()
+    // {
+    //     return ApiResult.Ok;
+    // }
+    //
+    // [HttpGet("error")]
+    // public ApiResult GetError()
+    // {
+    //     return ApiResult.Error;
+    // }
 
     [HttpGet("noResponse")]
     public Task GetNoRes()
@@ -89,11 +88,11 @@ public class ApiResultController : ApiControllerBase
         return new List<int> { 1, 2 };
     }
 
-    [HttpGet("list2")]
-    public ApiResult<List<int>> GetList2()
-    {
-        return new ApiResult<List<int>>(new List<int> { 1, 2, 3 });
-    }
+    // [HttpGet("list2")]
+    // public ApiResult<List<int>> GetList2()
+    // {
+    //     return new ApiResult<List<int>>([1, 2, 3]);
+    // }
 
     [HttpGet("file")]
     public IActionResult GetFile()
@@ -115,9 +114,9 @@ public class ApiResultController : ApiControllerBase
     }
 
     [HttpGet("pagedResult")]
-    public PagedResult<int> GetPagedResult()
+    public PaginationResult<int> GetPagedResult()
     {
-        return new PagedResult<int>(1, 10, 10, new[] { 1, 2, 3 });
+        return new PaginationResult<int>(1, 10, 10, [1, 2, 3]);
     }
 
     [HttpGet("emptyResult")]

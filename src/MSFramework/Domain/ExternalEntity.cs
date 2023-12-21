@@ -2,9 +2,7 @@ using System;
 
 namespace MicroserviceFramework.Domain;
 
-internal interface IExternalEntity
-{
-}
+public interface IExternalEntity;
 
 /// <summary>
 /// 系统外部实体
@@ -13,9 +11,5 @@ internal interface IExternalEntity
 /// 理论上外部表应该是已经创建了的，若没有注释掉创建脚本则会导致迁移失败（表已经存在）
 /// 若没有注释掉删除表的脚本，在数据库降级操作可能导致表的删除！！！
 /// </summary>
-public abstract class ExternalEntity<TKey> : EntityBase<TKey>, IExternalEntity where TKey : IEquatable<TKey>
-{
-    protected ExternalEntity(TKey id) : base(id)
-    {
-    }
-}
+public abstract class ExternalEntity<TKey>(TKey id) : EntityBase<TKey>(id), IExternalEntity
+    where TKey : IEquatable<TKey>;

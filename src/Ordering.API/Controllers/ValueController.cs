@@ -2,11 +2,9 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.IO;
-using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 using Dapr;
 using MicroserviceFramework.AspNetCore;
-using MicroserviceFramework.AspNetCore.Mvc;
 using MicroserviceFramework.Common;
 using Microsoft.AspNetCore.Mvc;
 using MongoDB.Bson;
@@ -30,24 +28,24 @@ public class ValueController : ApiControllerBase
     }
 
 
-    [Topic("pubsub", "test")]
+    [Topic("rabbitmq-pubsub", "test")]
     [HttpGet("string")]
     public string GetString()
     {
         return Guid.NewGuid().ToString();
     }
 
-    [HttpGet("ok")]
-    public ApiResult GetOk()
-    {
-        return ApiResult.Ok;
-    }
-
-    [HttpGet("error")]
-    public ApiResult GetError()
-    {
-        return ApiResult.Error;
-    }
+    // [HttpGet("ok")]
+    // public ApiResult GetOk()
+    // {
+    //     return ApiResult.Ok;
+    // }
+    //
+    // [HttpGet("error")]
+    // public ApiResult GetError()
+    // {
+    //     return ApiResult.Error;
+    // }
 
     [HttpGet("noData")]
     public Task GetNoRes()
@@ -62,9 +60,9 @@ public class ValueController : ApiControllerBase
     }
 
     [HttpGet("apiResult")]
-    public ApiResult<List<int>> Get2()
+    public List<int> Get2()
     {
-        return new ApiResult<List<int>>(new List<int> { 1, 2, 3 });
+        return [1, 2, 3];
     }
 
     [HttpGet("file")]
@@ -81,9 +79,9 @@ public class ValueController : ApiControllerBase
     }
 
     [HttpGet("pagedResult")]
-    public PagedResult<int> Get5()
+    public PaginationResult<int> Get5()
     {
-        return new PagedResult<int>(1, 10, 10, new[] { 1, 2, 3 });
+        return new PaginationResult<int>(1, 10, 10, [1, 2, 3]);
     }
 
     [HttpGet("emptyResult")]

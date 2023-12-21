@@ -1,4 +1,3 @@
-using System.Collections.Generic;
 using MicroserviceFramework.Domain;
 using Xunit;
 
@@ -6,14 +5,9 @@ namespace MSFramework.Tests;
 
 public class ValueObjectTests
 {
-    public record V1 : ValueObject
+    public record V1(string V) : ValueObject
     {
-        public string V { get; private set; }
-
-        public V1(string v)
-        {
-            V = v;
-        }
+        public string V { get; private set; } = V;
 
         // protected override IEnumerable<object> GetEqualityComponents()
         // {
@@ -21,23 +15,16 @@ public class ValueObjectTests
         // }
     }
 
-    public record Address : ValueObject
+    public record Address(string Street, string City, string State, string Country, string ZipCode)
+        : ValueObject
     {
-        public string Street { get; private set; }
-        public string City { get; private set; }
-        public string State { get; private set; }
-        public string Country { get; private set; }
-        public string ZipCode { get; private set; }
+        public string Street { get; private set; } = Street;
+        public string City { get; private set; } = City;
+        public string State { get; private set; } = State;
+        public string Country { get; private set; } = Country;
+        public string ZipCode { get; private set; } = ZipCode;
 
 
-        public Address(string street, string city, string state, string country, string zipcode)
-        {
-            Street = street;
-            City = city;
-            State = state;
-            Country = country;
-            ZipCode = zipcode;
-        }
         //
         // protected override IEnumerable<object> GetEqualityComponents()
         // {

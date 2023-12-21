@@ -4,7 +4,7 @@ using Xunit;
 
 namespace MSFramework.Tests;
 
-public class OrderStatus : Enumeration
+public class OrderStatus(string id, string name) : Enumeration(id, name)
 {
     public static OrderStatus Submitted = new OrderStatus(nameof(Submitted), nameof(Submitted));
 
@@ -15,10 +15,6 @@ public class OrderStatus : Enumeration
     public static OrderStatus Paid = new OrderStatus(nameof(Paid), nameof(Paid));
     public static OrderStatus Shipped = new OrderStatus(nameof(Shipped), nameof(Shipped));
     public static OrderStatus Cancelled = new OrderStatus(nameof(Cancelled), nameof(Cancelled));
-
-    public OrderStatus(string id, string name) : base(id, name)
-    {
-    }
 }
 
 public class EnumerationTests

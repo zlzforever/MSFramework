@@ -6,14 +6,10 @@ using Ordering.Domain.AggregateRoots.Events;
 
 namespace Ordering.Application.DomainEventHandlers;
 
-public class OrderShippedDomainEventHandler : IDomainEventHandler<OrderShippedDomainEvent>
+public class OrderShippedDomainEventHandler(DbContextFactory dbContextFactory)
+    : IDomainEventHandler<OrderShippedDomainEvent>
 {
-    private readonly DbContextFactory _dbContextFactory;
-
-    public OrderShippedDomainEventHandler(DbContextFactory dbContextFactory)
-    {
-        _dbContextFactory = dbContextFactory;
-    }
+    private readonly DbContextFactory _dbContextFactory = dbContextFactory;
 
     public void Dispose()
     {

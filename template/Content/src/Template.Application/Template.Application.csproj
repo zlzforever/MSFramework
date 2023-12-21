@@ -1,35 +1,17 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net6.0</TargetFramework>
+    <TargetFramework>net8.0</TargetFramework>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="MSFramework.AutoMapper" Version="0.15.1-beta33"/>
-    <PackageReference Include="MSFramework.AspNetCore" Version="0.15.1-beta33"/>
+    <PackageReference Include="MSFramework.AutoMapper" Version="0.15.1-beta42" />
+    <PackageReference Include="MSFramework.AspNetCore" Version="0.15.1-beta42" />
     <PackageReference Include="Dapper" Version="2.0.151"/>
     <PackageReference Include="Dapr.AspNetCore" Version="1.11.0"/>
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\Template.Infrastructure\Template.Infrastructure.csproj"/>
-  </ItemGroup>
-  
-  <ItemGroup>
-    <Compile Update="Project\V10\Commands\CreateProjectCommandHandler.cs">
-      <DependentUpon>CreateProjectCommand.cs</DependentUpon>
-    </Compile>
-    <Compile Update="Project\V10\Commands\DeleteProjectCommandHandler.cs">
-      <DependentUpon>DeleteProjectCommand.cs</DependentUpon>
-    </Compile>
-    <Compile Update="Project\V10\Queries\GetProductByIdQueryHandler.cs">
-      <DependentUpon>GetProductByIdQuery.cs</DependentUpon>
-    </Compile>
-    <Compile Update="Project\V10\Queries\PagedProductQueryHandler.cs">
-      <DependentUpon>PagedProductQuery.cs</DependentUpon>
-    </Compile>
-    <Compile Update="Other\V10\IntegrationEvents\ProjectCreatedIntegrationEventHandler.cs">
-      <DependentUpon>ProjectCreatedIntegrationEvent.cs</DependentUpon>
-    </Compile>
   </ItemGroup>
 </Project>

@@ -11,7 +11,7 @@ spec:
     - name: username
       value: "admin"
     - name: password
-      value: "w7qcFfxK^YS&fn"
+      value: "w7qcFfxKYSfn"
     - name: durable
       value: "true"
     - name: deletedWhenUnused

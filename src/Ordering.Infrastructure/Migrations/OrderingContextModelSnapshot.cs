@@ -17,12 +17,47 @@ namespace Ordering.Infrastructure.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "7.0.9")
+                .HasAnnotation("ProductVersion", "8.0.0")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
-            modelBuilder.Entity("MicroserviceFramework.Auditing.AuditOperation", b =>
+            modelBuilder.Entity("MicroserviceFramework.Auditing.Model.AuditEntity", b =>
+                {
+                    b.Property<string>("Id")
+                        .HasMaxLength(36)
+                        .HasColumnType("character varying(36)")
+                        .HasColumnName("id");
+
+                    b.Property<string>("EntityId")
+                        .HasMaxLength(36)
+                        .HasColumnType("character varying(36)")
+                        .HasColumnName("entity_id");
+
+                    b.Property<string>("OperationId")
+                        .HasColumnType("character varying(36)")
+                        .HasColumnName("operation_id");
+
+                    b.Property<string>("OperationType")
+                        .HasMaxLength(256)
+                        .HasColumnType("character varying(256)")
+                        .HasColumnName("operation_type");
+
+                    b.Property<string>("Type")
+                        .HasMaxLength(256)
+                        .HasColumnType("character varying(256)")
+                        .HasColumnName("type");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("EntityId");
+
+                    b.HasIndex("OperationId");
+
+                    b.ToTable("ordering_audit_entity");
+                });
+
+            modelBuilder.Entity("MicroserviceFramework.Auditing.Model.AuditOperation", b =>
                 {
                     b.Property<string>("Id")
                         .HasMaxLength(36)
@@ -39,8 +74,8 @@ namespace Ordering.Infrastructure.Migrations
                         .HasColumnName("creator_id");
 
                     b.Property<string>("CreatorName")
-                        .HasMaxLength(255)
-                        .HasColumnType("character varying(255)")
+                        .HasMaxLength(256)
+                        .HasColumnType("character varying(256)")
                         .HasColumnName("creator_name");
 
                     b.Property<string>("DeviceId")
@@ -49,8 +84,8 @@ namespace Ordering.Infrastructure.Migrations
                         .HasColumnName("device_id");
 
                     b.Property<string>("DeviceModel")
-                        .HasMaxLength(50)
-                        .HasColumnType("character varying(50)")
+                        .HasMaxLength(256)
+                        .HasColumnType("character varying(256)")
                         .HasColumnName("device_model");
 
                     b.Property<int>("Elapsed")
@@ -64,8 +99,8 @@ namespace Ordering.Infrastructure.Migrations
                         .HasColumnName("end_time");
 
                     b.Property<string>("IP")
-                        .HasMaxLength(255)
-                        .HasColumnType("character varying(255)")
+                        .HasMaxLength(256)
+                        .HasColumnType("character varying(256)")
                         .HasColumnName("ip");
 
                     b.Property<double?>("Lat")
@@ -75,6 +110,10 @@ namespace Ordering.Infrastructure.Migrations
                     b.Property<double?>("Lng")
                         .HasColumnType("double precision")
                         .HasColumnName("lng");
+
+                    b.Property<string>("TraceId")
+                        .HasColumnType("text")
+                        .HasColumnName("trace_id");
 
                     b.Property<string>("Url")
                         .HasMaxLength(1024)
@@ -95,7 +134,7 @@ namespace Ordering.Infrastructure.Migrations
                     b.ToTable("ordering_audit_operation");
                 });
 
-            modelBuilder.Entity("MicroserviceFramework.Auditing.AuditProperty", b =>
+            modelBuilder.Entity("MicroserviceFramework.Auditing.Model.AuditProperty", b =>
                 {
                     b.Property<string>("Id")
                         .HasMaxLength(36)
@@ -107,8 +146,8 @@ namespace Ordering.Infrastructure.Migrations
                         .HasColumnName("entity_id");
 
                     b.Property<string>("Name")
-                        .HasMaxLength(255)
-                        .HasColumnType("character varying(255)")
+                        .HasMaxLength(256)
+                        .HasColumnType("character varying(256)")
                         .HasColumnName("name");
 
                     b.Property<string>("NewValue")
@@ -120,8 +159,8 @@ namespace Ordering.Infrastructure.Migrations
                         .HasColumnName("original_value");
 
                     b.Property<string>("Type")
-                        .HasMaxLength(255)
-                        .HasColumnType("character varying(255)")
+                        .HasMaxLength(256)
+                        .HasColumnType("character varying(256)")
                         .HasColumnName("type");
 
                     b.HasKey("Id");
@@ -129,41 +168,6 @@ namespace Ordering.Infrastructure.Migrations
                     b.HasIndex("EntityId");
 
                     b.ToTable("ordering_audit_property");
-                });
-
-            modelBuilder.Entity("MicroserviceFramework.Auditing.Model.AuditEntity", b =>
-                {
-                    b.Property<string>("Id")
-                        .HasMaxLength(36)
-                        .HasColumnType("character varying(36)")
-                        .HasColumnName("id");
-
-                    b.Property<string>("EntityId")
-                        .HasMaxLength(36)
-                        .HasColumnType("character varying(36)")
-                        .HasColumnName("entity_id");
-
-                    b.Property<string>("OperationId")
-                        .HasColumnType("character varying(36)")
-                        .HasColumnName("operation_id");
-
-                    b.Property<string>("OperationType")
-                        .HasMaxLength(255)
-                        .HasColumnType("character varying(255)")
-                        .HasColumnName("operation_type");
-
-                    b.Property<string>("Type")
-                        .HasMaxLength(255)
-                        .HasColumnType("character varying(255)")
-                        .HasColumnName("type");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("EntityId");
-
-                    b.HasIndex("OperationId");
-
-                    b.ToTable("ordering_audit_entity");
                 });
 
             modelBuilder.Entity("Ordering.Domain.AggregateRoots.Order", b =>
@@ -195,8 +199,8 @@ namespace Ordering.Infrastructure.Migrations
                         .HasColumnName("creator_id");
 
                     b.Property<string>("CreatorName")
-                        .HasMaxLength(255)
-                        .HasColumnType("character varying(255)")
+                        .HasMaxLength(256)
+                        .HasColumnType("character varying(256)")
                         .HasColumnName("creator_name");
 
                     b.Property<string>("Description")
@@ -205,16 +209,20 @@ namespace Ordering.Infrastructure.Migrations
                         .HasColumnName("description");
 
                     b.Property<string>("DictJson")
-                        .HasColumnType("JSON")
+                        .HasColumnType("JSONB")
                         .HasColumnName("dict_json");
 
                     b.Property<string>("Extras")
-                        .HasColumnType("JSON")
+                        .HasColumnType("JSONB")
                         .HasColumnName("extras");
 
                     b.Property<string>("ListJson")
-                        .HasColumnType("JSON")
+                        .HasColumnType("JSONB")
                         .HasColumnName("list_json");
+
+                    b.Property<int?>("OperatorId")
+                        .HasColumnType("integer")
+                        .HasColumnName("operator_id");
 
                     b.Property<string>("Status")
                         .IsRequired()
@@ -225,6 +233,8 @@ namespace Ordering.Infrastructure.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("CreationTime");
+
+                    b.HasIndex("OperatorId");
 
                     b.ToTable("ordering_order");
                 });
@@ -282,8 +292,8 @@ namespace Ordering.Infrastructure.Migrations
                         .HasColumnName("creator_id");
 
                     b.Property<string>("CreatorName")
-                        .HasMaxLength(255)
-                        .HasColumnType("character varying(255)")
+                        .HasMaxLength(256)
+                        .HasColumnType("character varying(256)")
                         .HasColumnName("creator_name");
 
                     b.Property<string>("Name")
@@ -302,10 +312,12 @@ namespace Ordering.Infrastructure.Migrations
 
             modelBuilder.Entity("Ordering.Domain.AggregateRoots.User", b =>
                 {
-                    b.Property<string>("Id")
-                        .HasMaxLength(36)
-                        .HasColumnType("character varying(36)")
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
                         .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<string>("Name")
                         .HasMaxLength(256)
@@ -314,12 +326,19 @@ namespace Ordering.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("external_user", (string)null);
-
-                    b.HasAnnotation("ExternalEntity", "true");
+                    b.ToTable("user", (string)null);
                 });
 
-            modelBuilder.Entity("MicroserviceFramework.Auditing.AuditProperty", b =>
+            modelBuilder.Entity("MicroserviceFramework.Auditing.Model.AuditEntity", b =>
+                {
+                    b.HasOne("MicroserviceFramework.Auditing.Model.AuditOperation", "Operation")
+                        .WithMany("Entities")
+                        .HasForeignKey("OperationId");
+
+                    b.Navigation("Operation");
+                });
+
+            modelBuilder.Entity("MicroserviceFramework.Auditing.Model.AuditProperty", b =>
                 {
                     b.HasOne("MicroserviceFramework.Auditing.Model.AuditEntity", "Entity")
                         .WithMany("Properties")
@@ -328,17 +347,12 @@ namespace Ordering.Infrastructure.Migrations
                     b.Navigation("Entity");
                 });
 
-            modelBuilder.Entity("MicroserviceFramework.Auditing.Model.AuditEntity", b =>
-                {
-                    b.HasOne("MicroserviceFramework.Auditing.AuditOperation", "Operation")
-                        .WithMany("Entities")
-                        .HasForeignKey("OperationId");
-
-                    b.Navigation("Operation");
-                });
-
             modelBuilder.Entity("Ordering.Domain.AggregateRoots.Order", b =>
                 {
+                    b.HasOne("Ordering.Domain.AggregateRoots.User", "Operator")
+                        .WithMany()
+                        .HasForeignKey("OperatorId");
+
                     b.OwnsOne("Ordering.Domain.AggregateRoots.Address", "Address", b1 =>
                         {
                             b1.Property<string>("OrderId")
@@ -384,6 +398,8 @@ namespace Ordering.Infrastructure.Migrations
                         });
 
                     b.Navigation("Address");
+
+                    b.Navigation("Operator");
                 });
 
             modelBuilder.Entity("Ordering.Domain.AggregateRoots.OrderItem", b =>
@@ -431,14 +447,14 @@ namespace Ordering.Infrastructure.Migrations
                     b.Navigation("Product");
                 });
 
-            modelBuilder.Entity("MicroserviceFramework.Auditing.AuditOperation", b =>
-                {
-                    b.Navigation("Entities");
-                });
-
             modelBuilder.Entity("MicroserviceFramework.Auditing.Model.AuditEntity", b =>
                 {
                     b.Navigation("Properties");
+                });
+
+            modelBuilder.Entity("MicroserviceFramework.Auditing.Model.AuditOperation", b =>
+                {
+                    b.Navigation("Entities");
                 });
 
             modelBuilder.Entity("Ordering.Domain.AggregateRoots.Order", b =>

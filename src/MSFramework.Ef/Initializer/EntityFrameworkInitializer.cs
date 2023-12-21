@@ -10,26 +10,18 @@ using Microsoft.Extensions.Options;
 
 namespace MicroserviceFramework.Ef.Initializer;
 
-public class EntityFrameworkInitializer : InitializerBase
+public class EntityFrameworkInitializer(IServiceProvider serviceProvider, ILogger<EntityFrameworkInitializer> logger)
+    : IInitializerBase
 {
-    private readonly IServiceProvider _serviceProvider;
-    private readonly ILogger<EntityFrameworkInitializer> _logger;
-
-    public EntityFrameworkInitializer(IServiceProvider serviceProvider, ILogger<EntityFrameworkInitializer> logger)
-    {
-        _serviceProvider = serviceProvider;
-        _logger = logger;
-    }
-
-    public override async Task StartAsync(CancellationToken cancellationToken)
+    public async Task StartAsync(CancellationToken cancellationToken)
     {
         try
         {
-            _logger.LogInformation("开始 EF 初始化...");
-            using var scope = _serviceProvider.CreateScope();
+            logger.LogInformation("开始 EF 初始化...");
+            using var scope = serviceProvider.CreateScope();
 
             var dbContextConfigurationCollection =
-                scope.ServiceProvider.GetRequiredService<IOptions<DbContextConfigurationCollection>>().Value;
+                scope.ServiceProvider.GetRequiredService<IOptions<DbContextSettingsList>>().Value;
 
             if (dbContextConfigurationCollection.Count == 0)
             {
@@ -49,7 +41,7 @@ public class EntityFrameworkInitializer : InitializerBase
             {
                 if (option.AutoMigrationEnabled)
                 {
-                    _logger.LogInformation("在 {DbContextTypeName} 中开启了数据库自动迁移", option.DbContextTypeName);
+                    logger.LogInformation("数据库上下文 {DbContextTypeName} 中开启了数据库自动迁移", option.DbContextTypeName);
 
                     var dbContext = (DbContextBase)scope.ServiceProvider.GetRequiredService(option.GetDbContextType());
 
@@ -58,7 +50,7 @@ public class EntityFrameworkInitializer : InitializerBase
                         continue;
                     }
 
-                    ILogger logger = dbContext.GetService<ILoggerFactory>()
+                    ILogger logger1 = dbContext.GetService<ILoggerFactory>()
                         .CreateLogger<EntityFrameworkInitializer>();
 
                     // var appliedMigrations =
@@ -74,26 +66,28 @@ public class EntityFrameworkInitializer : InitializerBase
                     {
                         await dbContext.Database.MigrateAsync(cancellationToken: cancellationToken);
 
-                        logger.LogInformation("执行了 {MigrationsCount} 个数据库迁移： {Migrations}", migrations.Length,
+                        logger1.LogInformation("执行了 {MigrationsCount} 个数据库迁移： {Migrations}", migrations.Length,
                             string.Join(", ", migrations));
                     }
                     else
                     {
-                        _logger.LogInformation("在 {DbContextTypeName} 中没有挂起的迁移",
+                        logger.LogInformation("数据库上下文 {DbContextTypeName} 中没有挂起的迁移",
                             option.DbContextTypeName);
                     }
                 }
                 else
                 {
-                    _logger.LogInformation("在 {DbContextTypeName} 中禁用了数据库自动迁移", option.DbContextTypeName);
+                    logger.LogInformation("数据库上下文 {DbContextTypeName} 禁用了自动迁移", option.DbContextTypeName);
                 }
             }
 
-            _logger.LogInformation("EF 初始化完成");
+            logger.LogInformation("EF 初始化完成");
         }
         catch (Exception e)
         {
-            _logger.LogError("{Exception}", e.ToString());
+            logger.LogError(e, "EF 初始化异常");
         }
     }
+
+    public int Order => int.MinValue;
 }

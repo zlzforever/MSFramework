@@ -8,27 +8,21 @@ using Template.Domain.Repositories;
 
 namespace Template.Application.Project.V10.Commands;
 
-public class DeleteProjectCommandHandler : IRequestHandler<DeleteProjectCommand, ObjectId>
+public class DeleteProjectCommandHandler(
+    IProductRepository productRepository,
+    ILogger<DeleteProjectCommandHandler> logger)
+    : IRequestHandler<DeleteProjectCommand, ObjectId>
 {
-    private readonly IProductRepository _productRepository;
-    private readonly ILogger _logger;
-
-    public DeleteProjectCommandHandler(
-        IProductRepository productRepository,
-        ILogger<DeleteProjectCommandHandler> logger)
-    {
-        _productRepository = productRepository;
-        _logger = logger;
-    }
+    private readonly ILogger _logger = logger;
 
     public async Task<ObjectId> HandleAsync(DeleteProjectCommand command,
-        CancellationToken cancellationToken = new CancellationToken())
+        CancellationToken cancellationToken = new())
     {
-        var product = await _productRepository.FindAsync(command.ProjectId);
+        var product = await productRepository.FindAsync(command.ProjectId);
         if (product != null)
         {
             product.Delete();
-            await _productRepository.DeleteAsync(product);
+            await productRepository.DeleteAsync(product);
 
             _logger.LogInformation($"Delete product {command.ProjectId}");
         }

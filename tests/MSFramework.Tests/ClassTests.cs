@@ -4,9 +4,7 @@ namespace MSFramework.Tests;
 
 public class ClassTests
 {
-    private abstract class A
-    {
-    }
+    private abstract class A;
 
     [Fact]
     public void AbstractClass()

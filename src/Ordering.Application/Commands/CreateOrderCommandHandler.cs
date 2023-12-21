@@ -7,15 +7,9 @@ using Ordering.Domain.Repositories;
 
 namespace Ordering.Application.Commands;
 
-public class CreateOrderCommandHandler : IRequestHandler<CreateOrderCommand, ObjectId>
+public class CreateOrderCommandHandler(IOrderingRepository orderRepository)
+    : IRequestHandler<CreateOrderCommand, ObjectId>
 {
-    private readonly IOrderingRepository _orderRepository;
-
-    public CreateOrderCommandHandler(IOrderingRepository orderRepository)
-    {
-        _orderRepository = orderRepository;
-    }
-
     /// <summary>
     /// Handler which processes the command when
     /// customer executes cancel order from app
@@ -39,7 +33,7 @@ public class CreateOrderCommandHandler : IRequestHandler<CreateOrderCommand, Obj
                 item.Units, item.Discount);
         }
 
-        await _orderRepository.AddAsync(order);
+        await orderRepository.AddAsync(order);
         return order.Id;
     }
 }

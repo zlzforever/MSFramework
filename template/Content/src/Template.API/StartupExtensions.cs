@@ -9,15 +9,14 @@ using MicroserviceFramework.AspNetCore.Mvc.ModelBinding;
 using MicroserviceFramework.AspNetCore.Swagger;
 using MicroserviceFramework.Auditing.Loki;
 using MicroserviceFramework.AutoMapper;
-using MicroserviceFramework.Domain;
 using MicroserviceFramework.Ef;
 using MicroserviceFramework.Ef.MySql;
-using MicroserviceFramework.EventBus;
 using MicroserviceFramework.Extensions.DependencyInjection;
 using MicroserviceFramework.Text.Json;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 using Microsoft.OpenApi.Models;
 using RemoteConfiguration.Json.Aliyun;
 using Serilog;
@@ -37,14 +36,13 @@ public static class StartupExtensions
 
             var configuration = context.Configuration;
             services.AddHttpContextAccessor();
-            var jsonSerializerOptions = new JsonSerializerOptions();
 
             services.AddControllers(x =>
                 {
-                    x.Filters.AddUnitOfWork()
-                        .AddAudit()
-                        .AddGlobalException();
-                    x.Filters.Add<ResponseWrapperFilter>();
+                    x.Filters.AddUnitOfWork();
+                    x.Filters.AddAudit();
+                    x.Filters.AddGlobalException();
+                    x.Filters.AddResponseWrapper();
                     x.ModelBinderProviders.Insert(0, new ObjectIdModelBinderProvider());
                     x.ModelBinderProviders.Insert(0, new EnumerationModelBinderProvider());
                 })
@@ -53,7 +51,6 @@ public static class StartupExtensions
                 {
                     options.JsonSerializerOptions.AddDefaultConverters();
                     options.JsonSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
-                    jsonSerializerOptions = options.JsonSerializerOptions;
                 })
                 // .AddNewtonsoftJson(x =>
                 // {
@@ -67,7 +64,7 @@ public static class StartupExtensions
                 // })
                 .AddDapr(x =>
                 {
-                    x.UseJsonSerializationOptions(jsonSerializerOptions);
+                    // x.UseJsonSerializationOptions();
                     // 部署由命令控制
 #if DEBUG
                     x.UseGrpcEndpoint("http://localhost:51001");
@@ -85,47 +82,9 @@ public static class StartupExtensions
 
             services.AddHealthChecks();
 
-            // comments: 使用 dapr 的 pubsub 稳定性有一定保证
-            // builder.Services.AddCap(x =>
-            // {
-            // 	x.UseEntityFramework<TemplateDbContext>(y =>
-            // 	{
-            // 		y.Schema = "ordering";
-            // 	});
-            // 	x.JsonSerializerOptions.AddDefaultConverters();
-            // 	x.JsonSerializerOptions.Encoder = JavaScriptEncoder.Create(UnicodeRanges.All);
-            // 	// var password = Environment.GetEnvironmentVariable("RABBITMQ_PASSWORD");
-            // 	// x.UseRabbitMQ(configure =>
-            // 	// {
-            // 	//     configure.HostName = "192.168.100.254";
-            // 	//     configure.Password = password;
-            // 	//     configure.UserName = "admin";
-            // 	//     // configure.ExchangeName = "ordering";
-            // 	// });
-            // 	x.UseDapr(y => y.Pubsub = "rabbitmq-pubsub");
-            // 	x.FailedRetryCount = 3;
-            // 	x.FailedMessageExpiredAfter = 365 * 24 * 3600;
-            // 	x.FailedThresholdCallback += failed =>
-            // 	{
-            // 		var traceId = failed.Message.Headers[Headers.MessageId];
-            // 		var messageBuilder = new StringBuilder($"消息名称: {failed.Message.GetName()}[{failed.MessageType}] ");
-            // 		messageBuilder.AppendLine();
-            // 		messageBuilder.AppendLine($"消息组: {failed.Message.GetGroup()}[CAP]");
-            // 		messageBuilder.AppendLine("消息ID(Content):");
-            // 		messageBuilder.AppendLine(failed.Message.GetId());
-            // 		messageBuilder.AppendLine($"日志跟踪标识: {traceId}");
-            // 		messageBuilder.AppendLine($"发送时间: {failed.Message.Headers[Headers.SentTime]}");
-            // 		messageBuilder.AppendLine("错误消息:");
-            // 		messageBuilder.AppendLine(failed.Message.Headers[Headers.Exception]);
-            // 		Log.Error(messageBuilder.ToString());
-            // 	};
-            // 	x.TopicNamePrefix = "CAP";
-            // 	x.UseDashboard();
-            // });
-
             services.AddCors(option =>
             {
-                option.AddPolicy("cors", policy =>
+                option.AddPolicy("___my_cors", policy =>
                     policy.AllowAnyMethod()
                         .SetIsOriginAllowed(_ => true)
                         .AllowAnyHeader()
@@ -135,29 +94,29 @@ public static class StartupExtensions
                 );
             });
 
+            services.AddDbContext<TemplateDbContext>((provider, x) =>
+            {
+                var loggerFactory = provider.GetRequiredService<ILoggerFactory>();
+                x.UseLoggerFactory(loggerFactory);
+                x.UseMySql(provider, y =>
+                {
+                    y.LoadFromConfiguration(provider);
+                    y.UseRemoveForeignKeyService();
+                    y.UseRemoveExternalEntityService();
+                });
+            });
+
             services.AddMicroserviceFramework(x =>
             {
                 x.UseAssemblyScanPrefix("Template");
                 x.UseDependencyInjectionLoader();
-                x.UseAutoMapperObjectAssembler();
                 x.UseOptionsType(configuration);
+                x.UseAutoMapperObjectAssembler();
                 x.UseAspNetCore();
-                x.UseEfAuditing();
+                x.UseEfAuditing<TemplateDbContext>();
                 x.UseLokiAuditing();
-                x.UseEventBus((_, options) =>
-                {
-                    options.AddAfterInterceptor(async (provider, _) =>
-                    {
-                        await provider.GetRequiredService<IUnitOfWork>().SaveChangesAsync();
-                    });
-                });
                 // builder.UseNewtonsoftSerializer();
-
-                x.UseEntityFramework(e =>
-                {
-                    // 添加 MySql 支持
-                    e.AddMySql<TemplateDbContext>(configuration);
-                });
+                x.UseEntityFramework();
             });
         });
         builder.UseSerilog();
@@ -223,7 +182,7 @@ public static class StartupExtensions
         app.UseCloudEvents();
         app.MapSubscribeHandler();
 
-        app.MapDefaultControllerRoute().RequireCors("cors");
+        app.MapDefaultControllerRoute().RequireCors("___my_cors");
 
         app.UseMicroserviceFramework();
 

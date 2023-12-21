@@ -1,0 +1,11 @@
+version: 1
+common: # optional section for variables shared across apps
+  resourcesPath: ./dapr/components # any dapr resources to be shared across apps
+  env: # any environment variable shared across apps
+    DEBUG: true
+apps:
+  - appID: ordering-api
+    appPort: 5001
+    daprHTTPPort: 5101
+    daprGRPCPort: 5102
+    appDirPath: .

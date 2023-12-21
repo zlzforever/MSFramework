@@ -2,6 +2,7 @@ using System;
 using System.Reflection;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Options;
 
 namespace MicroserviceFramework.Extensions.Options;
@@ -36,8 +37,8 @@ public static class ServiceCollectionExtensions
             throw new ArgumentNullException(nameof(configurationChangeTokenSource));
         }
 
-        services.AddSingleton(typeof(IOptionsChangeTokenSource<>).MakeGenericType(optionsType),
-            configurationChangeTokenSource);
+        services.TryAddSingleton(typeof(IOptionsChangeTokenSource<>).MakeGenericType(optionsType),
+            _ => configurationChangeTokenSource);
 
         var namedConfigureFromConfigurationOptionsType =
             typeof(NamedConfigureFromConfigurationOptions<>).MakeGenericType(optionsType);
@@ -49,8 +50,8 @@ public static class ServiceCollectionExtensions
             throw new ArgumentNullException(nameof(namedConfigureFromConfigurationOptions));
         }
 
-        services.AddSingleton(typeof(IConfigureOptions<>).MakeGenericType(optionsType),
-            namedConfigureFromConfigurationOptions);
+        services.TryAddSingleton(typeof(IConfigureOptions<>).MakeGenericType(optionsType),
+            _ => namedConfigureFromConfigurationOptions);
     }
 
     public static IServiceCollection AddOptionsType(this IServiceCollection services, IConfiguration configuration)

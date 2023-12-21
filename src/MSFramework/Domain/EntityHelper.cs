@@ -27,11 +27,6 @@ public static class EntityHelper
             return Convert.ToInt64(entity.Id) <= 0;
         }
 
-        if (typeof(TKey) == typeof(ObjectId))
-        {
-            return entity.Id.Equals(ObjectId.Empty);
-        }
-
-        return false;
+        return typeof(TKey) == typeof(ObjectId) && entity.Id.Equals(ObjectId.Empty);
     }
 }

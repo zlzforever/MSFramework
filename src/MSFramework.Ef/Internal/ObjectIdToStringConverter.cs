@@ -5,8 +5,8 @@ using MongoDB.Bson;
 
 namespace MicroserviceFramework.Ef.Internal;
 
-public class ObjectIdToStringConverter
-    : ValueConverter<ObjectId, string>
+public class ObjectIdToStringConverter(ConverterMappingHints mappingHints = null)
+    : ValueConverter<ObjectId, string>(ToString(), ToObjectId(), mappingHints ?? DefaultHints)
 {
     private static new Expression<Func<ObjectId, string>> ToString()
         => v => v.ToString();
@@ -17,9 +17,4 @@ public class ObjectIdToStringConverter
     private static readonly ConverterMappingHints DefaultHints = new(36,
         null, null, null,
         (_, _) => new ObjectIdValueGenerator());
-
-    public ObjectIdToStringConverter(ConverterMappingHints mappingHints = null)
-        : base(ToString(), ToObjectId(), mappingHints ?? DefaultHints)
-    {
-    }
 }

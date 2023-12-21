@@ -9,42 +9,32 @@ using MicroserviceFramework.Mediator;
 using Template.Domain.Aggregates.Project;
 using Template.Infrastructure;
 
-namespace Template.Application.Project.V10.QueryHandlers;
+namespace Template.Application.Project.V10.Queries;
 
-public class PagedProductQueryHandler
-    : IRequestHandler<PagedProductQuery, PagedResult<Dto.V10.ProductOut>>
+public class PagedProductQueryHandler(TemplateDbContext dbContext, IObjectAssembler objectAssembler)
+    : IRequestHandler<PagedProductQuery, PaginationResult<Dto.V10.ProductOut>>
 {
-    private readonly TemplateDbContext _dbContext;
-    private readonly IObjectAssembler _objectAssembler;
-
-    public PagedProductQueryHandler(
-        TemplateDbContext dbContext, IObjectAssembler objectAssembler)
-    {
-        _dbContext = dbContext;
-        _objectAssembler = objectAssembler;
-    }
-
-    public async Task<PagedResult<Dto.V10.ProductOut>> HandleAsync(PagedProductQuery query,
-        CancellationToken cancellationToken = new CancellationToken())
+    public async Task<PaginationResult<Dto.V10.ProductOut>> HandleAsync(PagedProductQuery query,
+        CancellationToken cancellationToken = new())
     {
         query.Keyword = query.Keyword?.Trim();
 
-        PagedResult<Product> result;
+        PaginationResult<Product> result;
         if (string.IsNullOrWhiteSpace(query.Keyword))
         {
-            result = await _dbContext.Set<Product>()
+            result = await dbContext.Set<Product>()
                 .OrderByDescending(x => x.LastModificationTime)
                 .PagedQueryAsync(query.Page, query.Limit);
         }
         else
         {
-            result = await _dbContext.Set<Product>()
+            result = await dbContext.Set<Product>()
                 .Where(x => x.Name.Contains(query.Keyword))
                 .OrderByDescending(x => x.LastModificationTime)
                 .PagedQueryAsync(query.Page, query.Limit);
         }
 
-        return new PagedResult<Dto.V10.ProductOut>(result.Page, result.Limit, result.Total,
-            _objectAssembler.To<IEnumerable<Dto.V10.ProductOut>>(result.Data));
+        return new PaginationResult<Dto.V10.ProductOut>(result.Page, result.Limit, result.Total,
+            objectAssembler.To<List<Dto.V10.ProductOut>>(result.Data));
     }
 }

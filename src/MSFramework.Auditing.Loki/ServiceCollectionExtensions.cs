@@ -4,14 +4,9 @@ namespace MicroserviceFramework.Auditing.Loki;
 
 public static class ServiceCollectionExtensions
 {
-    /// <summary>
-    /// 使用 Loki 存储审计日志
-    /// </summary>
-    /// <param name="builder"></param>
-    /// <returns></returns>
-    public static MicroserviceFrameworkBuilder UseLokiAuditing(this MicroserviceFrameworkBuilder builder)
+    public static IServiceCollection AddLokiAuditing(this IServiceCollection services)
     {
-        builder.Services.AddSingleton<IAuditingStore, LokiAuditingStore>();
+        services.AddSingleton<IAuditingStore, LokiAuditingStore>();
         // builder.Services.AddSingleton(provider =>
         // {
         //     var serilogOptions = provider.GetRequiredService<IOptions<SerilogOptions>>().Value;
@@ -28,6 +23,17 @@ public static class ServiceCollectionExtensions
         //     lokiOptions.Labels.Add("Classification", "Auditing");
         //     return lokiOptions;
         // });
+        return services;
+    }
+
+    /// <summary>
+    /// 使用 Loki 存储审计日志
+    /// </summary>
+    /// <param name="builder"></param>
+    /// <returns></returns>
+    public static MicroserviceFrameworkBuilder UseLokiAuditing(this MicroserviceFrameworkBuilder builder)
+    {
+        builder.Services.AddLokiAuditing();
         return builder;
     }
 }

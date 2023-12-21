@@ -5,12 +5,7 @@ using Xunit;
 
 namespace MSFramework.AspNetCore.Test;
 
-public class ExternalUser : ExternalEntity<string>
-{
-    public ExternalUser(string id) : base(id)
-    {
-    }
-}
+public class ExternalUser(string id) : ExternalEntity<string>(id);
 
 public class ExternalEntityTests : BaseTest
 {

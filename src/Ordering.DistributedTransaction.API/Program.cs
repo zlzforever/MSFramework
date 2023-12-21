@@ -34,13 +34,7 @@ webApplicationBuilder.Services.AddMicroserviceFramework(builder =>
     builder.UseOptionsType(webApplicationBuilder.Configuration);
     builder.UseAutoMapperObjectAssembler();
     // builder.UseMediator();
-    builder.UseEventBus((_, options) =>
-    {
-        options.AddAfterInterceptor(async (provider, _) =>
-        {
-            await provider.GetRequiredService<IUnitOfWork>().SaveChangesAsync();
-        });
-    });
+    builder.UseLocalEventPublisher();
     builder.UseAspNetCore();
     // builder.UseNewtonsoftJsonHelper(settings);
 

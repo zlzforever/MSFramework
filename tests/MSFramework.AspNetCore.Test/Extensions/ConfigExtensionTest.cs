@@ -14,15 +14,8 @@ using Xunit.Abstractions;
 
 namespace MSFramework.AspNetCore.Test.Extensions;
 
-public class ConfigExtensionTest
+public class ConfigExtensionTest(ITestOutputHelper output)
 {
-    private readonly ITestOutputHelper _output;
-
-    public ConfigExtensionTest(ITestOutputHelper output)
-    {
-        _output = output;
-    }
-
     [Fact]
     public async Task AddConfigModel()
     {
@@ -62,7 +55,7 @@ public class ConfigExtensionTest
             })
             .StartAsync();
 
-        _output.WriteLine("server is running");
+        output.WriteLine("server is running");
         var options = host.Services.GetService<IOptions<TestConfigModel>>();
         Assert.NotNull(options);
         Assert.Equal("joe", options.Value.Name);

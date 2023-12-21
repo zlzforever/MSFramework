@@ -7,20 +7,15 @@ using Ordering.Application.Events;
 
 namespace Ordering.Application.EventHandlers;
 
-public class UserCheckoutAcceptedEventHandler : IEventHandler<UserCheckoutAcceptedEvent>
+public class UserCheckoutAcceptedEventHandler(
+    ISession session,
+    IMediator mediator,
+    ILogger<UserCheckoutAcceptedEventHandler> logger)
+    : IEventHandler<UserCheckoutAcceptedEvent>
 {
-    private readonly ILogger _logger;
-    private readonly IMediator _mediator;
-    private readonly ISession _session;
-
-    public UserCheckoutAcceptedEventHandler(ISession session,
-        IMediator mediator,
-        ILogger<UserCheckoutAcceptedEventHandler> logger)
-    {
-        _logger = logger;
-        _mediator = mediator;
-        _session = session;
-    }
+    private readonly ILogger _logger = logger;
+    private readonly IMediator _mediator = mediator;
+    private readonly ISession _session = session;
 
     public Task HandleAsync(UserCheckoutAcceptedEvent @event)
     {

@@ -1,33 +1,19 @@
-using System;
 using System.Threading.Tasks;
 using MicroserviceFramework.Auditing;
 using MicroserviceFramework.Auditing.Model;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Options;
 
 namespace MicroserviceFramework.Ef.Auditing;
 
-public class EfAuditingStore : IAuditingStore
+public class EfAuditingStore<TDbContext>(TDbContext dbContext) : IAuditingStore
+    where TDbContext : DbContextBase
 {
-    private readonly DbContextFactory _dbContextFactory;
-    private readonly AuditingOptions _auditingOptions;
-
-    public EfAuditingStore(DbContextFactory dbContextFactory, IOptionsMonitor<AuditingOptions> auditingOptions)
+    public async Task AddAsync(AuditOperation auditOperation)
     {
-        _dbContextFactory = dbContextFactory;
-        _auditingOptions = auditingOptions.CurrentValue;
+        await dbContext.AddAsync(auditOperation);
     }
 
-    public async Task AddAsync(object sender, AuditOperation auditOperation)
+    public Task CommitAsync()
     {
-        var auditingDbContext = string.IsNullOrEmpty(_auditingOptions.AuditingDbContextTypeName)
-            ? null
-            : _dbContextFactory.GetDbContext(Type.GetType(_auditingOptions.AuditingDbContextTypeName));
-
-        var dbContextBase = auditingDbContext ?? sender as DbContext;
-        if (dbContextBase != null)
-        {
-            await dbContextBase.AddAsync(auditOperation);
-        }
+        return dbContext.SaveChangesAsync();
     }
 }

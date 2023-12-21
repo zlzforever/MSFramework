@@ -7,14 +7,15 @@ namespace MicroserviceFramework.AspNetCore.Filters;
 /// </summary>
 public static class Constants
 {
-    public const int UnitOfWork = 1000;
-    public const int Audit = 2000;
-    public const int ActionException = int.MaxValue - 10;
+    public const int GlobalException = 0;
+    public const int ResponseWrapper = 1001;
+    public const int UnitOfWork = 1002;
+    public const int Audit = 1003;
 
     public static readonly HashSet<string> CommandMethods;
 
     static Constants()
     {
-        CommandMethods = new HashSet<string> { "POST", "DELETE", "PATCH", "PUT" };
+        CommandMethods = ["POST", "DELETE", "PATCH", "PUT"];
     }
 }

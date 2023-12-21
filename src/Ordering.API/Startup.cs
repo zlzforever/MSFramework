@@ -9,16 +9,20 @@ using MicroserviceFramework.AspNetCore.Mvc.ModelBinding;
 using MicroserviceFramework.AspNetCore.Swagger;
 using MicroserviceFramework.Auditing.Loki;
 using MicroserviceFramework.AutoMapper;
-using MicroserviceFramework.Domain;
 using MicroserviceFramework.Ef;
+using MicroserviceFramework.Ef.MySql;
 using MicroserviceFramework.Ef.PostgreSql;
+using MicroserviceFramework.Ef.SqlServer;
 using MicroserviceFramework.EventBus;
 using MicroserviceFramework.Extensions.DependencyInjection;
 using MicroserviceFramework.Text.Json;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using Microsoft.OpenApi.Models;
 using Ordering.Domain.AggregateRoots;
 using Ordering.Infrastructure;
@@ -60,7 +64,7 @@ public static class Startup
                 .MinimumLevel.Override("System", LogEventLevel.Warning)
                 .MinimumLevel.Override("Microsoft.AspNetCore.Authentication", LogEventLevel.Warning)
                 .Enrich.FromLogContext()
-                .WriteTo.Console().WriteTo.RollingFile(logFile)
+                .WriteTo.Console()
                 .CreateLogger();
         }
     });
@@ -68,23 +72,16 @@ public static class Startup
     public static readonly Action<HostBuilderContext, IServiceCollection> ConfigureServices = ((context, services) =>
     {
         var configuration = context.Configuration;
+
         services.AddHttpClient();
         services.AddHttpContextAccessor();
-        var jsonSerializerOptions = new JsonSerializerOptions();
-        // var settings = new JsonSerializerSettings();
-        // settings.Converters.Add(new ObjectIdConverter());
-        // settings.Converters.Add(new EnumerationConverter());
-        // settings.ContractResolver = new CompositeContractResolver
-        // {
-        //     new EnumerationContractResolver(), new CamelCasePropertyNamesContractResolver()
-        // };
+
         services.AddControllers(x =>
             {
-                x.Filters.AddUnitOfWork()
-                    .AddAudit()
-                    .AddGlobalException();
-                // x.Filters.Add<SecurityDaprTopicFilter>();
-                x.Filters.Add<ResponseWrapperFilter>();
+                x.Filters.AddUnitOfWork();
+                x.Filters.AddAudit();
+                x.Filters.AddGlobalException();
+                x.Filters.AddResponseWrapper();
                 x.ModelBinderProviders.Insert(0, new ObjectIdModelBinderProvider());
                 x.ModelBinderProviders.Insert(0, new EnumerationModelBinderProvider());
             })
@@ -93,7 +90,6 @@ public static class Startup
             {
                 options.JsonSerializerOptions.AddDefaultConverters();
                 options.JsonSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
-                jsonSerializerOptions = options.JsonSerializerOptions;
             })
             // .AddNewtonsoftJson(x =>
             // {
@@ -107,20 +103,8 @@ public static class Startup
             // })
             .AddDapr(x =>
             {
-                x.UseJsonSerializationOptions(jsonSerializerOptions);
-                // x.UseGrpcEndpoint("http://localhost:3500");
-                // x.UseHttpEndpoint("http://localhost:50001");
-                // x.UseGrpcChannelOptions(new GrpcChannelOptions
-                // {
-                //     HttpHandler  = new GrpcWebHandler(new HttpClientHandler
-                //     {
-                //         ServerCertificateCustomValidationCallback = (message, certificate2, arg3, arg4) => true,
-                //         UseProxy=false
-                //
-                //     })
-                //     {
-                //     }
-                // });
+                x.UseHttpEndpoint("http://localhost:5101");
+                x.UseGrpcEndpoint("http://localhost:5102");
             });
         services.AddSwaggerGen(x =>
         {
@@ -131,54 +115,48 @@ public static class Startup
         });
         services.AddHealthChecks();
 
-        // services.AddCap(x =>
-        // {
-        //     x.UseEntityFramework<OrderingContext>(y =>
-        //     {
-        //         y.Schema = "ordering";
-        //     });
-        //     x.JsonSerializerOptions.AddDefaultConverters();
-        //     x.JsonSerializerOptions.Encoder = JavaScriptEncoder.Create(UnicodeRanges.All);
-        //     // var password = Environment.GetEnvironmentVariable("RABBITMQ_PASSWORD");
-        //     // x.UseRabbitMQ(configure =>
-        //     // {
-        //     //     configure.HostName = "192.168.100.254";
-        //     //     configure.Password = password;
-        //     //     configure.UserName = "admin";
-        //     //     // configure.ExchangeName = "ordering";
-        //     // });
-        //     x.UseDapr(y => y.Pubsub = "rabbitmq-pubsub");
-        //     x.FailedRetryCount = 3;
-        //     x.FailedMessageExpiredAfter = 365 * 24 * 3600;
-        //     x.FailedThresholdCallback += failed =>
-        //     {
-        //         var traceId = failed.Message.Headers[Headers.MessageId];
-        //         var messageBuilder = new StringBuilder($"消息名称: {failed.Message.GetName()}[{failed.MessageType}] ");
-        //         messageBuilder.AppendLine();
-        //         messageBuilder.AppendLine($"消息组: {failed.Message.GetGroup()}[CAP]");
-        //         messageBuilder.AppendLine("消息ID(Content):");
-        //         messageBuilder.AppendLine(failed.Message.GetId());
-        //         messageBuilder.AppendLine($"日志跟踪标识: {traceId}");
-        //         messageBuilder.AppendLine($"发送时间: {failed.Message.Headers[Headers.SentTime]}");
-        //         messageBuilder.AppendLine("错误消息:");
-        //         messageBuilder.AppendLine(failed.Message.Headers[Headers.Exception]);
-        //         Log.Error(messageBuilder.ToString());
-        //     };
-        //     x.TopicNamePrefix = "CAP";
-        //     x.UseDashboard();
-        // });
-
         services.AddCors(option =>
         {
-            option
-                .AddPolicy("cors", policy =>
-                    policy.AllowAnyMethod()
-                        .SetIsOriginAllowed(_ => true)
-                        .AllowAnyHeader()
-                        // .WithExposedHeaders("x-suggested-filename")
-                        .AllowCredentials().SetPreflightMaxAge(TimeSpan.FromDays(30))
-                );
+            option.AddPolicy("___my_cors", policy =>
+                policy.AllowAnyMethod()
+                    .SetIsOriginAllowed(_ => true)
+                    .AllowAnyHeader()
+                    // .WithExposedHeaders("x-suggested-filename")
+                    .AllowCredentials().SetPreflightMaxAge(TimeSpan.FromDays(30))
+            );
         });
+
+        services.AddDbContext<OrderingContext>((provider, x) =>
+        {
+            var loggerFactory = provider.GetRequiredService<ILoggerFactory>();
+            x.UseLoggerFactory(loggerFactory);
+            x.UseNpgsql(y =>
+            {
+                y.LoadFromConfiguration(provider);
+                y.UseRemoveForeignKeyService();
+                y.UseRemoveExternalEntityService();
+            });
+            // x.UseMySql(provider, y =>
+            // {
+            //     y.LoadFromConfiguration(provider);
+            //     y.UseRemoveForeignKeyService();
+            //     y.UseRemoveExternalEntityService();
+            // });
+            // x.UseSqlServer(y =>
+            // {
+            //     y.LoadFromConfiguration(provider);
+            //     y.UseRemoveForeignKeyService();
+            //     y.UseRemoveExternalEntityService();
+            // });
+        });
+
+        // services.AddAssemblyScanPrefix("Ordering");
+        // services.AddDependencyInjectionLoader();
+        // services.AddOptionsType(configuration);
+        // services.AddEfAuditing<OrderingContext>();
+        // services.AddLocalEventPublisher();
+        // services.AddLokiAuditing();
+        // services.AddAspNetCore();
 
         services.AddMicroserviceFramework(builder =>
         {
@@ -186,28 +164,18 @@ public static class Startup
             builder.UseDependencyInjectionLoader();
             builder.UseOptionsType(configuration);
             builder.UseAutoMapperObjectAssembler();
-            builder.UseEfAuditing();
+            builder.UseEfAuditing<OrderingContext>();
             builder.UseLokiAuditing();
-            builder.UseEventBus((_, options) =>
-            {
-                options.AddAfterInterceptor(async (provider, _) =>
-                {
-                    await provider.GetRequiredService<IUnitOfWork>().SaveChangesAsync();
-                });
-            });
+            builder.UseLocalEventPublisher();
             builder.UseAspNetCore();
             // builder.UseNewtonsoftJsonHelper(settings);
-
-            builder.UseEntityFramework(x =>
-            {
-                // 添加 MySql 支持
-                x.AddNpgsql<OrderingContext>(configuration);
-            });
+            builder.UseEntityFramework();
         });
     });
 
     public static void Configure(this WebApplication app)
     {
+        var b = app.Services.CreateScope().ServiceProvider.GetRequiredService<IOptions<DbContextSettingsList>>().Value;
         var env = app.Services.GetRequiredService<IHostEnvironment>();
         if (env.IsDevelopment())
         {
@@ -280,7 +248,7 @@ public static class Startup
         // CustomMiddleware
         // EndpointRouting
 
-        app.MapDefaultControllerRoute().RequireCors("cors");
+        app.MapDefaultControllerRoute().RequireCors("___my_cors");
         app.UseMicroserviceFramework();
 
         var configuration = app.Configuration;

@@ -29,9 +29,7 @@ public class DomainEvent4Handler : IDomainEventHandler<DomainEvent4>
     }
 }
 
-public record DomainEvent2 : DomainEvent
-{
-}
+public record DomainEvent2 : DomainEvent;
 
 public record DomainEvent3 : DomainEvent
 {

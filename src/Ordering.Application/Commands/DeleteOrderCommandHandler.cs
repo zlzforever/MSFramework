@@ -5,15 +5,8 @@ using Ordering.Domain.Repositories;
 
 namespace Ordering.Application.Commands;
 
-public class DeleteOrderCommandHandler : IRequestHandler<DeleteOrderCommand>
+public class DeleteOrderCommandHandler(IOrderingRepository orderRepository) : IRequestHandler<DeleteOrderCommand>
 {
-    private readonly IOrderingRepository _orderRepository;
-
-    public DeleteOrderCommandHandler(IOrderingRepository orderRepository)
-    {
-        _orderRepository = orderRepository;
-    }
-
     /// <summary>
     /// Handler which processes the command when
     /// customer executes cancel order from app
@@ -23,12 +16,12 @@ public class DeleteOrderCommandHandler : IRequestHandler<DeleteOrderCommand>
     /// <returns></returns>
     public async Task HandleAsync(DeleteOrderCommand command, CancellationToken cancellationToken)
     {
-        var order = await _orderRepository.FindAsync(command.OrderId);
+        var order = await orderRepository.FindAsync(command.OrderId);
         if (order == null)
         {
             return;
         }
 
-        await _orderRepository.DeleteAsync(order);
+        await orderRepository.DeleteAsync(order);
     }
 }

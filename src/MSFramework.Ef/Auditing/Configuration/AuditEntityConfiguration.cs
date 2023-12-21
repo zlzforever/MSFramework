@@ -1,4 +1,3 @@
-using MicroserviceFramework.Auditing;
 using MicroserviceFramework.Auditing.Model;
 using MicroserviceFramework.Ef.Extensions;
 using Microsoft.EntityFrameworkCore;
@@ -16,8 +15,8 @@ public class AuditEntityConfiguration : IEntityTypeConfiguration<AuditEntity>
 
         builder.Property(x => x.Id).ValueGeneratedNever().HasMaxLength(36);
         builder.Property(x => x.EntityId).HasMaxLength(36);
-        builder.Property(x => x.Type).HasMaxLength(255);
-        builder.Property(e => e.OperationType).HasMaxLength(255).UseEnumeration();
+        builder.Property(x => x.Type).HasMaxLength(256);
+        builder.Property(e => e.OperationType).HasMaxLength(256).UseEnumeration();
 
         builder.HasIndex(m => m.EntityId);
     }

@@ -6,17 +6,13 @@ namespace MicroserviceFramework.Domain;
 /// <summary>
 /// 含删除人信息的实体
 /// </summary>
-public abstract class DeletionEntity : DeletionEntity<ObjectId>
-{
-    protected DeletionEntity(ObjectId id) : base(id)
-    {
-    }
-}
+public abstract class DeletionEntity(ObjectId id) : DeletionEntity<ObjectId>(id);
 
 /// <summary>
 /// 含删除人信息的实体
 /// </summary>
-public abstract class DeletionEntity<TKey> : ModificationEntity<TKey>, IDeletion where TKey : IEquatable<TKey>
+public abstract class DeletionEntity<TKey>(TKey id) : ModificationEntity<TKey>(id), IDeletion
+    where TKey : IEquatable<TKey>
 {
     /// <summary>
     /// 是否已经删除
@@ -57,9 +53,5 @@ public abstract class DeletionEntity<TKey> : ModificationEntity<TKey>, IDeletion
         // {
         //     DeleterId = userId;
         // }
-    }
-
-    protected DeletionEntity(TKey id) : base(id)
-    {
     }
 }

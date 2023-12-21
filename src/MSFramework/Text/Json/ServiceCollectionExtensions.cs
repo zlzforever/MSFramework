@@ -1,7 +1,7 @@
-using System.Linq;
 using System.Text.Json;
 using MicroserviceFramework.Serialization;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 
 namespace MicroserviceFramework.Text.Json;
 
@@ -13,17 +13,20 @@ public static class ServiceCollectionExtensions
     /// <param name="builder"></param>
     /// <param name="options"></param>
     /// <returns></returns>
-    public static MicroserviceFrameworkBuilder UseDefaultJsonSerializer(this MicroserviceFrameworkBuilder builder,
+    public static MicroserviceFrameworkBuilder UseTextJsonSerializer(this MicroserviceFrameworkBuilder builder,
         JsonSerializerOptions options = null)
     {
         if (options != null)
         {
-            builder.Services.AddSingleton<IJsonSerializerFactory>(new DefaultJsonSerializerFactory(options));
+            builder.Services.TryAddSingleton<IJsonSerializer>(new TextJsonSerializer(options));
         }
         else
         {
-            builder.Services.AddSingleton<IJsonSerializerFactory>(provider =>
-                new DefaultJsonSerializerFactory(provider.GetRequiredService<JsonSerializerOptions>()));
+            builder.Services.TryAddSingleton(provider =>
+            {
+                var x = provider.GetService<JsonSerializerOptions>();
+                return x != null ? new TextJsonSerializer(x) : TextJsonSerializer.Create();
+            });
         }
 
         return builder;

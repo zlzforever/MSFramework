@@ -48,10 +48,10 @@ public class ObjectIdOperationFilter : IOperationFilter
                     var idName = p.Name.Substring(0, dotIndex);
                     if (operation.Parameters.All(x => x.Name != idName))
                     {
-                        operation.Parameters.Insert(parameterIndex, new OpenApiParameter()
+                        operation.Parameters.Insert(parameterIndex, new OpenApiParameter
                         {
                             Name = idName,
-                            Schema = new OpenApiSchema()
+                            Schema = new OpenApiSchema
                             {
                                 Type = "string",
                                 Format = "24-digit hex string"

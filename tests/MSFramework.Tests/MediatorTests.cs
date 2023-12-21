@@ -1,11 +1,11 @@
 using System;
+using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
 using MicroserviceFramework;
 using MicroserviceFramework.AspNetCore;
 using MicroserviceFramework.Extensions.DependencyInjection;
 using MicroserviceFramework.Mediator;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Xunit;
@@ -78,6 +78,22 @@ public class Command3Handler : IRequestHandler<Command3, int>
 
 public class MediatorTests
 {
+    public record A
+    {
+        public string Name { get; set; }
+    }
+
+    [Fact]
+    public void RecordReadonly()
+    {
+        var a = new A
+        {
+            Name = "a"
+        };
+        a.Name = "b";
+
+    }
+
     [Fact]
     public async Task RequestToMultiHandlersTest()
     {
@@ -143,7 +159,7 @@ public class MediatorTests
     }
 
     [Fact]
-    public void ThrowExceptionTest()
+    public async Task ThrowExceptionTest()
     {
         var serviceCollection = new ServiceCollection();
 
@@ -151,7 +167,6 @@ public class MediatorTests
         {
             x.UseDependencyInjectionLoader();
             x.UseAspNetCore();
-            // x.UseMediator();
         });
         serviceCollection.AddLogging(x => x.AddConsole());
 
@@ -160,9 +175,12 @@ public class MediatorTests
 
         var mediator = serviceProvider.GetRequiredService<IMediator>();
 
-        Assert.ThrowsAsync<ArgumentException>(async () =>
+        var targetInvocationException = await Assert.ThrowsAsync<TargetInvocationException>(async () =>
         {
             await mediator.SendAsync(new Command3());
         });
+        var argumentException = targetInvocationException.InnerException as ArgumentException;
+        Assert.NotNull(argumentException);
+        Assert.Equal("test", argumentException.Message);
     }
 }

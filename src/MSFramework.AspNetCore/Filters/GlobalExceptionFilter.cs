@@ -1,22 +1,18 @@
 using MicroserviceFramework.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http.Extensions;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.Extensions.Logging;
 
 namespace MicroserviceFramework.AspNetCore.Filters;
 
-public class GlobalExceptionFilter : IExceptionFilter
+internal class GlobalExceptionFilter(ILogger<GlobalExceptionFilter> logger) : IExceptionFilter
 {
-    private readonly ILogger<GlobalExceptionFilter> _logger;
-
-    public GlobalExceptionFilter(ILogger<GlobalExceptionFilter> logger)
-    {
-        _logger = logger;
-    }
-
     public void OnException(ExceptionContext context)
     {
+        logger.LogError(context.Exception, "请求 {Url} 异常", context.HttpContext.Request.GetDisplayUrl());
+
         if (context.ExceptionHandled)
         {
             return;
@@ -24,12 +20,10 @@ public class GlobalExceptionFilter : IExceptionFilter
 
         if (context.Exception is MicroserviceFrameworkFriendlyException e)
         {
+            context.HttpContext.Response.StatusCode = 200;
             context.Result = new BadRequestObjectResult(new ApiResult
             {
-                Success = false,
-                Msg = e.Message,
-                Code = e.Code,
-                Data = null
+                Success = false, Msg = e.Message, Code = e.Code, Data = null
             });
         }
         else
@@ -38,14 +32,10 @@ public class GlobalExceptionFilter : IExceptionFilter
             context.Result =
                 new ObjectResult(new ApiResult
                 {
-                    Success = false,
-                    Msg = "系统内部错误",
-                    Code = StatusCodes.Status500InternalServerError,
-                    Data = null
+                    Success = false, Msg = "系统内部错误", Code = StatusCodes.Status500InternalServerError, Data = null
                 });
         }
 
         context.ExceptionHandled = true;
-        _logger.LogError("{Exception}", context.Exception);
     }
 }

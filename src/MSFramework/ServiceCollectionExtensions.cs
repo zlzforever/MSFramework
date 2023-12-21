@@ -1,8 +1,7 @@
 using System;
 using System.Linq;
 using System.Runtime.CompilerServices;
-using System.Text.Json;
-using MicroserviceFramework.Auditing;
+using System.Threading;
 using MicroserviceFramework.Common;
 using MicroserviceFramework.Extensions.Options;
 using MicroserviceFramework.Serialization;
@@ -46,16 +45,16 @@ public static class ServiceCollectionExtensions
         // 放到后面，加载优先级更高
         builderAction?.Invoke(builder);
 
-        builder.UseDefaultJsonSerializer();
+        builder.UseTextJsonSerializer();
 
-        // 请保证这在最后，不然类型扫描事件的注册会晚于扫描
+        // 请保证这在最后， 不然类型扫描事件的注册会晚于扫描
         MicroserviceFrameworkLoaderContext.Get(services).LoadTypes();
     }
 
     public static void UseMicroserviceFramework(this IServiceProvider applicationServices)
     {
-        var defaultJsonSerializerFactory = applicationServices.GetService<IJsonSerializerFactory>();
-        Defaults.JsonSerializer = defaultJsonSerializerFactory.Create();
+        var defaultJsonSerializer = applicationServices.GetService<IJsonSerializer>();
+        Defaults.JsonSerializer = defaultJsonSerializer ?? TextJsonSerializer.Create();
 
         var configuration = applicationServices.GetService<IConfiguration>();
         if (configuration == null)
@@ -71,10 +70,35 @@ public static class ServiceCollectionExtensions
 
         var logger = loggerFactory.CreateLogger("MicroserviceFramework");
 
-        var initializers = applicationServices.GetServices<IHostedService>().Where(x => x is InitializerBase)
-            .ToList();
+        var initializers = applicationServices.GetServices<IInitializerBase>()
+            .OrderBy(x => x.Order).ToList();
         logger.LogInformation(
             "发现初始化器: {Initializers}", string.Join(" -> ", initializers.Select(x => x.GetType().FullName)));
+
+        var hostApplicationLifetime = applicationServices.GetRequiredService<IHostApplicationLifetime>();
+        using var combinedCancellationTokenSource =
+            CancellationTokenSource.CreateLinkedTokenSource(hostApplicationLifetime.ApplicationStopping);
+        var combinedCancellationToken = combinedCancellationTokenSource.Token;
+        // await _hostLifetime.WaitForStartAsync(combinedCancellationToken).ConfigureAwait(false);
+        combinedCancellationToken.ThrowIfCancellationRequested();
+
+        foreach (var hostedService in initializers)
+        {
+            hostedService.StartAsync(combinedCancellationToken).ConfigureAwait(false).GetAwaiter();
+        }
+    }
+
+    public static IServiceCollection AddAssemblyScanPrefix(this IServiceCollection services,
+        params string[] prefixes)
+    {
+        Check.NotNull(prefixes, nameof(prefixes));
+
+        foreach (var prefix in prefixes)
+        {
+            Utils.Runtime.StartsWith.Add(prefix);
+        }
+
+        return services;
     }
 
     /// <summary>
@@ -87,13 +111,7 @@ public static class ServiceCollectionExtensions
     public static MicroserviceFrameworkBuilder UseAssemblyScanPrefix(this MicroserviceFrameworkBuilder builder,
         params string[] prefixes)
     {
-        Check.NotNull(prefixes, nameof(prefixes));
-
-        foreach (var prefix in prefixes)
-        {
-            Utils.Runtime.StartsWith.Add(prefix);
-        }
-
+        builder.Services.AddAssemblyScanPrefix(prefixes);
         return builder;
     }
 

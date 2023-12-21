@@ -8,17 +8,10 @@ namespace MicroserviceFramework.Domain;
 /// <summary>
 /// 枚举基类
 /// </summary>
-public abstract class Enumeration
+public abstract class Enumeration(string id, string name)
 {
-    public string Name { get; }
-
-    public string Id { get; }
-
-    protected Enumeration(string id, string name)
-    {
-        Id = id;
-        Name = name;
-    }
+    public string Id { get; } = id;
+    public string Name { get; } = name;
 
     public override string ToString() => Id;
 
@@ -65,6 +58,7 @@ public abstract class Enumeration
         => !Equals(a, b);
 
     public override int GetHashCode() => Id.GetHashCode();
+
 
     /// <summary>
     /// 字符串转换为枚举类型

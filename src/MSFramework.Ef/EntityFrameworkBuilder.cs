@@ -2,12 +2,7 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace MicroserviceFramework.Ef;
 
-public class EntityFrameworkBuilder
+public class EntityFrameworkBuilder(IServiceCollection services)
 {
-    public EntityFrameworkBuilder(IServiceCollection services)
-    {
-        Services = services;
-    }
-
-    public IServiceCollection Services { get; }
+    public IServiceCollection Services { get; } = services;
 }

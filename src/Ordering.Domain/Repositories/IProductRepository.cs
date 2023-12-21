@@ -9,6 +9,5 @@ namespace Ordering.Domain.Repositories;
 
 public interface IProductRepository : IRepository<Product, ObjectId>, IScopeDependency
 {
-    Product GetFirst();
-    Task<PagedResult<Product>> PagedQueryAsync(int page, int limit);
+    Task<PaginationResult<Product>> PagedQueryAsync(int page, int limit);
 }

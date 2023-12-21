@@ -2,6 +2,9 @@
 
 /// <summary>
 /// 事件发布器
+/// 警告：使用本地事件是独立的 Task + Scope
+/// 警告：本地事件尽量只使用在不影响业务的情况下使用，如：发送邮件，短信等，即使失败也不会有太大影响
+/// 若是集成事件，如：订单创建事件，支付成功事件等，建议使用分布式事件/SAGA
 /// </summary>
 public interface IEventPublisher
 {
@@ -14,6 +17,4 @@ public interface IEventPublisher
     /// <typeparam name="TEvent"></typeparam>
     /// <returns></returns>
     void Publish<TEvent>(TEvent @event) where TEvent : EventBase;
-
-    void Publish(string name, object @event);
 }

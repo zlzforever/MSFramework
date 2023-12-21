@@ -6,29 +6,17 @@ namespace MSFramework.Tests;
 
 public class TypeTests
 {
-    interface IInterface
-    {
-    }
+    interface IInterface;
 
-    public class A : IInterface
-    {
-    }
+    public class A : IInterface;
 
-    public class B : A
-    {
-    }
+    public class B : A;
 
-    interface IG<T>
-    {
-    }
+    interface IG<T>;
 
-    public class C : IG<int>
-    {
-    }
+    public class C : IG<int>;
 
-    public class D : IG<D>
-    {
-    }
+    public class D : IG<D>;
 
     [Fact]
     public void GetInterfaces()

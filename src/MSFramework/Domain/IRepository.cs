@@ -6,9 +6,7 @@ namespace MicroserviceFramework.Domain;
 /// <summary>
 /// 仓储接口
 /// </summary>
-public interface IRepository
-{
-}
+public interface IRepository;
 
 /// <summary>
 /// 仓储接口

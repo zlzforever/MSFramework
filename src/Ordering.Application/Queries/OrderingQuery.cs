@@ -7,14 +7,9 @@ using Ordering.Infrastructure;
 
 namespace Ordering.Application.Queries;
 
-public class OrderingQuery : IOrderingQuery
+public class OrderingQuery(OrderingContext context) : IOrderingQuery
 {
-    private readonly DbSet<Order> _orderSet;
-
-    public OrderingQuery(OrderingContext context)
-    {
-        _orderSet = context.Set<Order>();
-    }
+    private readonly DbSet<Order> _orderSet = context.Set<Order>();
 
     public async Task<List<Order>> GetAllListAsync()
     {

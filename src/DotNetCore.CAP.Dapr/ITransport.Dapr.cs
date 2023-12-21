@@ -10,19 +10,14 @@ using Microsoft.Extensions.Options;
 
 namespace DotNetCore.CAP.Dapr;
 
-internal class DaprTransport : ITransport
+internal class DaprTransport(
+    IOptionsMonitor<DaprOptions> daprOptions,
+    DaprClient daprClient,
+    ILogger<DaprTransport> logger)
+    : ITransport
 {
-    private readonly DaprOptions _daprOptions;
-    private readonly DaprClient _daprClient;
-    private readonly ILogger _logger;
-
-    public DaprTransport(IOptionsMonitor<DaprOptions> daprOptions,
-        DaprClient daprClient, ILogger<DaprTransport> logger)
-    {
-        _daprClient = daprClient;
-        _logger = logger;
-        _daprOptions = daprOptions.CurrentValue;
-    }
+    private readonly DaprOptions _daprOptions = daprOptions.CurrentValue;
+    private readonly ILogger _logger = logger;
 
     public BrokerAddress BrokerAddress => new("Dapr", null);
 
@@ -33,7 +28,7 @@ internal class DaprTransport : ITransport
             var topicName = message.GetName();
             var body = Encoding.UTF8.GetString(message.Body.Span);
 
-            await _daprClient.PublishEventAsync(_daprOptions.Pubsub, topicName,
+            await daprClient.PublishEventAsync(_daprOptions.Pubsub, topicName,
                 new DaprTransportMessage { Headers = message.Headers, Body = body });
 
             _logger.LogDebug($"dapr topic message [{message.GetName()}] has been published.");

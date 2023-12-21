@@ -2,7 +2,6 @@ using System;
 using System.Threading.Tasks;
 using MicroserviceFramework.Application;
 using MicroserviceFramework.AspNetCore.Extensions;
-using MicroserviceFramework.Auditing;
 using MicroserviceFramework.Auditing.Model;
 using MicroserviceFramework.Domain;
 using Microsoft.AspNetCore.Http.Extensions;
@@ -16,28 +15,11 @@ namespace MicroserviceFramework.AspNetCore.Filters;
 ///
 /// </summary>
 [AttributeUsage(AttributeTargets.Class | AttributeTargets.Method)]
-public class Audit : ActionFilterAttribute
+internal class Audit(ILogger<Audit> logger) : ActionFilterAttribute
 {
-    private readonly ILogger<Audit> _logger;
-
-    public Audit(ILogger<Audit> logger)
-    {
-        _logger = logger;
-    }
-
     public override async Task OnActionExecutionAsync(ActionExecutingContext context, ActionExecutionDelegate next)
     {
-        _logger.LogDebug("审计过滤器执行开始");
-
-        // 必须保证审计和业务用的是不同的 DbContext 不然，会导致数据异常入库
-        using var scope = context.HttpContext.RequestServices.CreateScope();
-
-        var unitOfWork = context.HttpContext.RequestServices.GetService<IUnitOfWork>();
-        if (unitOfWork == null)
-        {
-            await base.OnActionExecutionAsync(context, next);
-            return;
-        }
+        logger.LogDebug("审计过滤器执行开始");
 
         if (!Constants.CommandMethods.Contains(context.HttpContext.Request.Method))
         {
@@ -45,6 +27,28 @@ public class Audit : ActionFilterAttribute
             return;
         }
 
+        var services = context.HttpContext.RequestServices;
+
+        var unitOfWork = services.GetService<IUnitOfWork>();
+        if (unitOfWork == null)
+        {
+            await base.OnActionExecutionAsync(context, next);
+            return;
+        }
+
+        var creationTime = DateTimeOffset.Now;
+
+        unitOfWork.SetAuditOperationFactory(() => CreateAuditedOperation(context, creationTime));
+
+        await base.OnActionExecutionAsync(context, next);
+
+        logger.LogDebug("审计过滤器执行结束");
+        // comment: 必须使用 HTTP request scope 的 uow manager 才能获取到审计对象
+        // comment: 只有有变化的数据才会尝试获取变更对象
+    }
+
+    private AuditOperation CreateAuditedOperation(ActionExecutingContext context, DateTimeOffset creationTime)
+    {
         var ua = context.HttpContext.Request.Headers["User-Agent"].ToString();
         var ip = context.GetRemoteIpAddress();
         var url = $"{context.HttpContext.Request.Method} {context.HttpContext.Request.GetDisplayUrl()}";
@@ -68,22 +72,9 @@ public class Audit : ActionFilterAttribute
             }
         }
 
-        var creationTime = DateTimeOffset.Now;
-
-        unitOfWork.SetAuditingFactory(() =>
-        {
-            var auditedOperation = new AuditOperation(url, ua, ip, deviceModel, deviceId,
-                lat, lng);
-            // EF 那边可能
-            auditedOperation.SetCreation(user.UserId, user.UserDisplayName, creationTime);
-            return auditedOperation;
-        });
-
-        await base.OnActionExecutionAsync(context, next);
-
-        _logger.LogDebug("审计过滤器执行结束");
-
-        // comment: 必须使用 HTTP request scope 的 uow manager 才能获取到审计对象
-        // comment: 只有有变化的数据才会尝试获取变更对象
+        var auditedOperation = new AuditOperation(url, ua, ip, deviceModel, deviceId,
+            lat, lng, context.HttpContext.TraceIdentifier);
+        auditedOperation.SetCreation(user.UserId, user.UserDisplayName, creationTime);
+        return auditedOperation;
     }
 }

@@ -1,21 +1,16 @@
 using MicroserviceFramework.Domain;
 
-namespace Template.Domain.Aggregates.Project
+namespace Template.Domain.Aggregates.Project;
+
+public class ProductType(string id, string name) : Enumeration(id, name)
 {
-    public class ProductType : Enumeration
-    {
-        /// <summary>
-        /// 家居
-        /// </summary>
-        public static ProductType Home = new ProductType(nameof(Home), nameof(Home));
+    /// <summary>
+    /// 家居
+    /// </summary>
+    public static ProductType Home = new(nameof(Home), nameof(Home));
 
-        /// <summary>
-        /// 美妆
-        /// </summary>
-        public static ProductType Beauty = new ProductType(nameof(Beauty), nameof(Beauty));
-
-        public ProductType(string id, string name) : base(id, name)
-        {
-        }
-    }
+    /// <summary>
+    /// 美妆
+    /// </summary>
+    public static ProductType Beauty = new(nameof(Beauty), nameof(Beauty));
 }

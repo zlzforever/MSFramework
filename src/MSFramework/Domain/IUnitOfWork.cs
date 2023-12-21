@@ -10,11 +10,13 @@ namespace MicroserviceFramework.Domain;
 /// </summary>
 public interface IUnitOfWork
 {
+    event Func<Task> SavedChanges;
+
     /// <summary>
-    /// 设置审计信息工厂
+    /// 设置审计信息
     /// </summary>
     /// <param name="factory"></param>
-    void SetAuditingFactory(Func<AuditOperation> factory);
+    void SetAuditOperationFactory(Func<AuditOperation> factory);
 
     /// <summary>
     /// 保存工作单元
@@ -22,13 +24,4 @@ public interface IUnitOfWork
     /// <param name="cancellationToken"></param>
     /// <returns></returns>
     Task SaveChangesAsync(CancellationToken cancellationToken = default);
-
-    // void SaveChanges();
-
-    /// <summary>
-    /// 注册操作
-    /// 注册的操作会在 SaveChangesAsync 发生之后执行
-    /// </summary>
-    /// <param name="action"></param>
-    void Register(Func<Task> action);
 }

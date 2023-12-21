@@ -21,7 +21,7 @@ public static class FormFileExtensions
         }
 
         await using var stream = formFile.OpenReadStream();
-        var md5 = Utils.Cryptography.ComputeMD5(stream);
+        var md5 = await Utils.Cryptography.ComputeMD5Async(stream);
         var fileName = $"{md5}{extension}";
         var relativePath = $"{intervalDirectory}/{fileName}";
 

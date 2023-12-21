@@ -15,6 +15,7 @@ internal sealed class EntityConfigurationTypeFinder : IEntityConfigurationTypeFi
         EntityRegistersDict;
 
     private static readonly Dictionary<Type, Type> EntityMapDbContextDict;
+    private static readonly Dictionary<string, Type> EntityNameMapEntityTypeDict;
     private static readonly Dictionary<Type, EntityTypeConfigurationMetadata> Empty;
     private static readonly HashSet<Type> DbContextTypes;
 
@@ -22,8 +23,9 @@ internal sealed class EntityConfigurationTypeFinder : IEntityConfigurationTypeFi
     {
         EntityRegistersDict = new Dictionary<Type, Dictionary<Type, EntityTypeConfigurationMetadata>>();
         EntityMapDbContextDict = new Dictionary<Type, Type>();
+        EntityNameMapEntityTypeDict = new();
         Empty = new Dictionary<Type, EntityTypeConfigurationMetadata>();
-        DbContextTypes = new HashSet<Type>();
+        DbContextTypes = [];
 
         var assemblies = Utils.Runtime.GetAllAssemblies();
 
@@ -69,13 +71,14 @@ internal sealed class EntityConfigurationTypeFinder : IEntityConfigurationTypeFi
 
                     if (EntityRegistersDict[dbContextType].ContainsKey(entityType))
                     {
-                        throw new MicroserviceFrameworkException($"类型 {entityType}, {dbContextType} 已经被注册过");
+                        throw new MicroserviceFrameworkException($"类型 {entityType}, {dbContextType} 已经注册");
                     }
 
                     var methodInfo = applyConfigurationMethod.MakeGenericMethod(entityType);
                     EntityRegistersDict[dbContextType].Add(entityType,
                         new EntityTypeConfigurationMetadata(entityType, methodInfo, configuration));
                     EntityMapDbContextDict.AddOrUpdate(entityType, dbContextType);
+                    EntityNameMapEntityTypeDict.TryAdd(entityType.FullName, entityType);
                     DbContextTypes.Add(dbContextType);
                 }
 
@@ -94,6 +97,11 @@ internal sealed class EntityConfigurationTypeFinder : IEntityConfigurationTypeFi
                 // }
             }
         }
+    }
+
+    public Type GetEntityType(string name)
+    {
+        return EntityNameMapEntityTypeDict.TryGetValue(name, out var value) ? value : null;
     }
 
     /// <summary>
@@ -118,7 +126,7 @@ internal sealed class EntityConfigurationTypeFinder : IEntityConfigurationTypeFi
         if (!EntityMapDbContextDict.ContainsKey(entityType))
         {
             throw new MicroserviceFrameworkException(
-                "未发现任何数据上下文实体映射配置");
+                "未发现任何数据库上下文实体映射配置");
         }
 
         return EntityMapDbContextDict[entityType];

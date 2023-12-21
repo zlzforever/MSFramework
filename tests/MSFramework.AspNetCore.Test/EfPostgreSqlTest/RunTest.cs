@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.TestHost;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -16,15 +17,8 @@ using Xunit.Abstractions;
 
 namespace MSFramework.AspNetCore.Test.EfPostgreSqlTest;
 
-public class RunTest
+public class RunTest(ITestOutputHelper output)
 {
-    private readonly ITestOutputHelper _output;
-
-    public RunTest(ITestOutputHelper output)
-    {
-        _output = output;
-    }
-
     // [Fact]
     public async Task Run_When_AddMSFramework_WithEfNpgsql()
     {
@@ -43,15 +37,19 @@ public class RunTest
                         services.AddMvc();
 
                         services.AddRouting(x => { x.LowercaseUrls = true; });
+                        services.AddDbContext<TestDataContext>((provider, x) =>
+                        {
+                            x.UseNpgsql(y =>
+                            {
+                                y.LoadFromConfiguration(provider);
+                            });
+                        });
+
                         services.AddMicroserviceFramework(builder =>
                         {
                             builder.UseOptionsType(context.Configuration);
                             builder.UseAspNetCore();
-                            builder.UseEntityFramework(x =>
-                            {
-                                //
-                                x.AddNpgsql<TestDataContext>(context.Configuration);
-                            });
+                            builder.UseEntityFramework();
                         });
                     })
                     .Configure(app =>
@@ -68,7 +66,7 @@ public class RunTest
                     });
             })
             .StartAsync();
-        _output.WriteLine("server is running");
+        output.WriteLine("server is running");
 
         var dbContext = host.Services.CreateScope().ServiceProvider.GetRequiredService<TestDataContext>();
         Assert.NotNull(dbContext);

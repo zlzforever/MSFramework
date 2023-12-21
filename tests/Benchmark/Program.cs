@@ -1,119 +1,76 @@
 // See https://aka.ms/new-console-template for more information
 
-using System.Text.Json.Serialization;
+using System.Buffers;
+using System.IO.Pipelines;
+using System.Text;
 using BenchmarkDotNet.Attributes;
 using BenchmarkDotNet.Running;
-using DeepCopy;
-using MicroserviceFramework.Domain;
-using MicroserviceFramework.Serialization;
 
 namespace Benchmark;
 
-public class Currency
-    : Enumeration
-{
-    public Currency(string id, string name) : base(id, name)
-    {
-    }
-
-    /// <summary>
-    /// RMB
-    /// </summary>
-    public static readonly Currency CNY = new Currency(nameof(CNY), nameof(CNY));
-
-    /// <summary>
-    /// 小时数
-    /// </summary>
-    public static readonly Currency Hour = new Currency(nameof(Hour), nameof(Hour));
-
-    /// <summary>
-    /// 美元
-    /// </summary>
-    public static readonly Currency USD = new Currency(nameof(USD), nameof(USD));
-}
-
-public class Unit : Enumeration
-{
-    /// <summary>
-    /// 小时
-    /// </summary>
-    public static readonly Unit Hourly = new Unit(nameof(Hourly), nameof(Hourly));
-
-    /// <summary>
-    /// 场
-    /// </summary>
-    public static readonly Unit Event = new Unit(nameof(Event), nameof(Event));
-
-    /// <summary>
-    /// 包
-    /// </summary>
-    public static readonly Unit Package = new Unit(nameof(Package), nameof(Package));
-
-    /// <summary>
-    /// 天
-    /// </summary>
-    public static readonly Unit Daily = new Unit(nameof(Daily), nameof(Daily));
-
-    /// <summary>
-    /// 个
-    /// </summary>
-    public static readonly Unit Per = new Unit(nameof(Per), nameof(Per));
-
-    public Unit(string id, string name) : base(id, name)
-    {
-    }
-}
-
-public class Price
-{
-    /// <summary>
-    /// 费率
-    /// </summary>
-    [JsonInclude]
-    public decimal? Value { get; private set; }
-
-    /// <summary>
-    /// 费率单位
-    /// </summary>
-    [JsonInclude]
-    public Unit Unit { get; private set; }
-
-    /// <summary>
-    /// 币种
-    /// </summary>
-    [JsonInclude]
-    public Currency Currency { get; private set; }
-
-    public Price(decimal? value, Unit unit, Currency currency)
-    {
-        Value = value;
-        Unit = unit;
-        Currency = currency;
-    }
-}
-
 public class MyClass
 {
-    private static readonly int Count = 1000;
-    private static readonly IJsonSerializer JsonHelper = MicroserviceFramework.Text.Json.TextJsonSerializer.Create();
-    private static readonly Price Price = new Price(2000.0m, Unit.Hourly, Currency.CNY);
+    static readonly byte[] Data = Encoding.UTF8.GetBytes("Hello World!");
+
+    private Stream _stream1;
+    private Stream _stream2;
+    private Stream _stream3;
+    private Stream _stream4;
+    private Stream _stream5;
+
+    [GlobalSetup]
+    public void Setup()
+    {
+        _stream1 = new MemoryStream(Data);
+        _stream2 = new MemoryStream(Data);
+        _stream3 = new MemoryStream(Data);
+        _stream4 = new MemoryStream(Data);
+        _stream5 = new MemoryStream(Data);
+    }
 
     [Benchmark]
-    public void SerializeThenDeserialize()
+    public void MemoryStream()
     {
-        for (var i = 0; i < Count; i++)
+        _stream5.Seek(0, SeekOrigin.Begin);
+        if (_stream1 is MemoryStream ms)
         {
-            JsonHelper.Deserialize<Price>(JsonHelper.Serialize(Price));
+            ms.ToArray();
         }
     }
 
     [Benchmark]
-    public void DeepCopy()
+    public void CopyToMemoryStream()
     {
-        for (var i = 0; i < Count; i++)
-        {
-            DeepCopier.Copy(Price);
-        }
+        _stream5.Seek(0, SeekOrigin.Begin);
+        using var memoryStream = new MemoryStream();
+        _stream2.CopyTo(memoryStream);
+        memoryStream.ToArray();
+    }
+
+    [Benchmark]
+    public void UsePipeReader()
+    {
+        _stream5.Seek(0, SeekOrigin.Begin);
+        var pipeline = PipeReader.Create(_stream3);
+        pipeline.TryRead(out var result);
+        result.Buffer.ToArray();
+    }
+
+    [Benchmark]
+    public void UseRead()
+    {
+        _stream5.Seek(0, SeekOrigin.Begin);
+        var bytes = new byte[_stream4.Length];
+        _stream4.Read(bytes, 0, bytes.Length);
+        _stream4.Seek(0, SeekOrigin.Begin);
+    }
+
+    [Benchmark]
+    public void BinaryReader()
+    {
+        _stream5.Seek(0, SeekOrigin.Begin);
+        var reader = new BinaryReader(_stream5);
+        reader.ReadBytes((int)_stream5.Length);
     }
 }
 

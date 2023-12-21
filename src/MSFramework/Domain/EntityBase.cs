@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Reflection;
-using MicroserviceFramework.Collections.Generic;
 
 namespace MicroserviceFramework.Domain;
 
@@ -11,12 +10,7 @@ namespace MicroserviceFramework.Domain;
 [Serializable]
 public abstract class EntityBase : IEntity
 {
-    private readonly List<DomainEvent> _domainEvents;
-
-    protected EntityBase()
-    {
-        _domainEvents = new List<DomainEvent>();
-    }
+    private readonly List<DomainEvent> _domainEvents = [];
 
     /// <summary>
     /// 添加领域事件
@@ -46,18 +40,6 @@ public abstract class EntityBase : IEntity
     /// 清空领域事件
     /// </summary>
     public void ClearDomainEvents() => _domainEvents.Clear();
-
-    /// <inheritdoc/>
-    public override string ToString()
-    {
-        return $"[ENTITY: {GetType().Name}] Keys = {GetKeys().JoinString(", ")}";
-    }
-
-    /// <summary>
-    /// 获取主键
-    /// </summary>
-    /// <returns></returns>
-    public abstract object[] GetKeys();
 }
 
 /// <summary>
@@ -75,15 +57,6 @@ public abstract class EntityBase<TKey> : EntityBase, IEntity<TKey> where TKey : 
     {
         get => _id;
         protected set => _id = value;
-    }
-
-    /// <summary>
-    /// 获取主键
-    /// </summary>
-    /// <returns></returns>
-    public override object[] GetKeys()
-    {
-        return new object[] { Id };
     }
 
     protected EntityBase(TKey id)

@@ -43,6 +43,8 @@ public class Order : CreationAggregateRoot, IOptimisticLock
 
     public string Description { get; private set; }
 
+    public User Operator { get; private set; }
+
     /// <summary>
     /// 测试 List 的 JSON
     /// </summary>
@@ -67,6 +69,11 @@ public class Order : CreationAggregateRoot, IOptimisticLock
         }
     }
 
+    public void SetOperator(User user)
+    {
+        Operator = user;
+    }
+
     public void AddExtra(string key, string value)
     {
         _extras.Add(new OrderExtra(key, value));
@@ -79,10 +86,10 @@ public class Order : CreationAggregateRoot, IOptimisticLock
 
     private Order(ObjectId id) : base(id)
     {
-        _items = new List<OrderItem>();
-        _listJson = new HashSet<string>();
+        _items = [];
+        _listJson = [];
         _dictJson = new Dictionary<string, string>();
-        _extras = new List<OrderExtra>();
+        _extras = [];
         AddDomainEvent(new OrderCreatedDomainEvent
         {
             Id = id.ToString(), CreationTime = DateTimeOffset.Now, Name = "test"
@@ -136,7 +143,7 @@ public class Order : CreationAggregateRoot, IOptimisticLock
         else
         {
             //add validated new order item
-            var product = OrderProduct.Create(productId, productName, pictureUrl);
+            var product = new OrderProduct(productId, productName, pictureUrl);
             var orderItem = OrderItem.Create(this, product, unitPrice, units, discount);
             _items.Add(orderItem);
             return orderItem;

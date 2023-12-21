@@ -6,17 +6,13 @@ namespace MicroserviceFramework.Domain;
 /// <summary>
 /// 含最后修改人信息的实体
 /// </summary>
-public abstract class ModificationEntity : ModificationEntity<ObjectId>
-{
-    protected ModificationEntity(ObjectId id) : base(id)
-    {
-    }
-}
+public abstract class ModificationEntity(ObjectId id) : ModificationEntity<ObjectId>(id);
 
 /// <summary>
 /// 含最后修改人信息的实体
 /// </summary>
-public abstract class ModificationEntity<TKey> : CreationEntity<TKey>, IModification where TKey : IEquatable<TKey>
+public abstract class ModificationEntity<TKey>(TKey id) : CreationEntity<TKey>(id), IModification
+    where TKey : IEquatable<TKey>
 {
     /// <summary>
     /// 最后修改人标识
@@ -39,9 +35,5 @@ public abstract class ModificationEntity<TKey> : CreationEntity<TKey>, IModifica
         LastModificationTime = lastModificationTime == default ? DateTimeOffset.Now : lastModificationTime;
         LastModifierId = lastModifierId;
         LastModifierName = lastModifierName;
-    }
-
-    protected ModificationEntity(TKey id) : base(id)
-    {
     }
 }

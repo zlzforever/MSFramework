@@ -1,74 +1,89 @@
 using System;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
+using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Infrastructure;
+using Npgsql.EntityFrameworkCore.PostgreSQL.Infrastructure.Internal;
 
 namespace MicroserviceFramework.Ef.PostgreSql;
 
 public static class ServiceCollectionExtensions
 {
-    public static EntityFrameworkBuilder AddNpgsql<TDbContext>(
-        this EntityFrameworkBuilder builder, IConfiguration configuration,
-        Action<NpgsqlDbContextOptionsBuilder> configure = null) where TDbContext : DbContextBase
+    public static NpgsqlDbContextOptionsBuilder UseRemoveForeignKeyService(this NpgsqlDbContextOptionsBuilder options)
     {
-        builder.Services.AddNpgsql<TDbContext>(configuration, configure);
-        return builder;
+        MigrationsSqlGenerator.RemoveForeignKey = true;
+        var ops = (IRelationalDbContextOptionsBuilderInfrastructure)options;
+        ops.OptionsBuilder.ReplaceService<IMigrationsSqlGenerator, MigrationsSqlGenerator>();
+        return options;
     }
 
-    public static EntityFrameworkBuilder AddNpgsql<TDbContext1, TDbContext2>(
-        this EntityFrameworkBuilder builder, IConfiguration configuration,
-        Action<NpgsqlDbContextOptionsBuilder> configure = null) where TDbContext1 : DbContextBase
-        where TDbContext2 : DbContextBase
+    public static NpgsqlDbContextOptionsBuilder UseRemoveExternalEntityService(
+        this NpgsqlDbContextOptionsBuilder options)
     {
-        builder.Services.AddNpgsql<TDbContext1>(configuration, configure);
-        builder.Services.AddNpgsql<TDbContext2>(configuration, configure);
-        return builder;
+        MigrationsSqlGenerator.RemoveExternalEntity = true;
+        var ops = (IRelationalDbContextOptionsBuilderInfrastructure)options;
+        ops.OptionsBuilder.ReplaceService<IMigrationsSqlGenerator, MigrationsSqlGenerator>();
+        return options;
     }
 
-    public static EntityFrameworkBuilder AddNpgsql<TDbContext1, TDbContext2, TDbContext3>(
-        this EntityFrameworkBuilder builder, IConfiguration configuration,
-        Action<NpgsqlDbContextOptionsBuilder> configure = null) where TDbContext1 : DbContextBase
-        where TDbContext2 : DbContextBase
-        where TDbContext3 : DbContextBase
+    public static void LoadFromConfiguration(this NpgsqlDbContextOptionsBuilder builder,
+        IServiceProvider provider)
     {
-        builder.Services.AddNpgsql<TDbContext1>(configuration, configure);
-        builder.Services.AddNpgsql<TDbContext2>(configuration, configure);
-        builder.Services.AddNpgsql<TDbContext3>(configuration, configure);
+        var dbContextSettingsList = provider.GetRequiredService<IOptions<DbContextSettingsList>>().Value;
+        var dbContextOptionsBuilder = ((IRelationalDbContextOptionsBuilderInfrastructure)builder).OptionsBuilder;
+        var contextType = dbContextOptionsBuilder.Options.ContextType;
 
-        return builder;
+        var option = dbContextSettingsList.Get(contextType);
+        var entryAssemblyName = !string.IsNullOrWhiteSpace(option.MigrationsAssembly)
+            ? option.MigrationsAssembly
+            : contextType.Assembly.GetName().Name;
+
+        var migrationsHistoryTable = string.IsNullOrWhiteSpace(option.TablePrefix)
+            ? EfUtilities.MigrationsHistoryTable
+            : $"{option.TablePrefix}migrations_history";
+        dbContextOptionsBuilder.EnableSensitiveDataLogging(option.EnableSensitiveDataLogging);
+
+#pragma warning disable EF1001
+        dbContextOptionsBuilder.SetConnectionString<NpgsqlOptionsExtension>(option.ConnectionString);
+#pragma warning restore EF1001
+        builder.MigrationsHistoryTable(migrationsHistoryTable);
+        builder.MaxBatchSize(option.MaxBatchSize);
+        builder.MigrationsAssembly(entryAssemblyName);
+        builder.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery);
     }
 
-    public static IServiceCollection AddNpgsql<TDbContext>(
-        this IServiceCollection services, IConfiguration configuration,
-        Action<NpgsqlDbContextOptionsBuilder> configure = null) where TDbContext : DbContextBase
-    {
-        var action = new Action<DbContextOptionsBuilder>(x =>
-        {
-            var dbContextType = typeof(TDbContext);
-
-            var optionDict = configuration.GetSection("DbContexts").Get<DbContextConfigurationCollection>();
-            var option = optionDict.Get(dbContextType);
-            var entryAssemblyName = !string.IsNullOrWhiteSpace(option.MigrationsAssembly)
-                ? option.MigrationsAssembly
-                : dbContextType.Assembly.GetName().Name;
-
-            x.UseNpgsql(option.ConnectionString, options =>
-                {
-                    var migrationsHistoryTable = string.IsNullOrWhiteSpace(option.TablePrefix)
-                        ? EfDefaults.MigrationsHistoryTable
-                        : $"{option.TablePrefix}migrations_history";
-                    options.MigrationsHistoryTable(migrationsHistoryTable);
-                    options.MaxBatchSize(option.MaxBatchSize);
-                    options.MigrationsAssembly(entryAssemblyName);
-                    options.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery);
-
-                    configure?.Invoke(options);
-                })
-                ;
-        });
-
-        services.AddDbContext<TDbContext>(action);
-        return services;
-    }
+    // public static IServiceCollection AddNpgsql<TDbContext>(
+    //     this IServiceCollection services, IConfiguration configuration,
+    //     Action<NpgsqlDbContextOptionsBuilder> configure = null) where TDbContext : DbContextBase
+    // {
+    //     var action = new Action<DbContextOptionsBuilder>(x =>
+    //     {
+    //         var dbContextType = typeof(TDbContext);
+    //
+    //         var optionDict = configuration.GetSection("DbContexts").Get<DbContextSettingsDict>();
+    //         var option = optionDict.Get(dbContextType);
+    //         var entryAssemblyName = !string.IsNullOrWhiteSpace(option.MigrationsAssembly)
+    //             ? option.MigrationsAssembly
+    //             : dbContextType.Assembly.GetName().Name;
+    //
+    //         x.UseNpgsql(option.ConnectionString, options =>
+    //             {
+    //                 var migrationsHistoryTable = string.IsNullOrWhiteSpace(option.TablePrefix)
+    //                     ? EfUtilities.MigrationsHistoryTable
+    //                     : $"{option.TablePrefix}migrations_history";
+    //                 options.MigrationsHistoryTable(migrationsHistoryTable);
+    //                 options.MaxBatchSize(option.MaxBatchSize);
+    //                 options.MigrationsAssembly(entryAssemblyName);
+    //                 options.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery);
+    //
+    //                 configure?.Invoke(options);
+    //             })
+    //             ;
+    //     });
+    //
+    //     services.AddDbContext<TDbContext>(action);
+    //     return services;
+    // }
 }

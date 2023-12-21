@@ -27,7 +27,7 @@ public class CreateProjectCommandHandler
     }
 
     public async Task<Dto.V10.CreateProductOut> HandleAsync(CreateProjectCommand command,
-        CancellationToken cancellationToken = new CancellationToken())
+        CancellationToken cancellationToken = new())
     {
         Check.NotNull(command, nameof(command));
         var product = Product.New(command.Name, command.Price, command.Type);

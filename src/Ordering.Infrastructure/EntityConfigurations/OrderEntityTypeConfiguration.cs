@@ -30,6 +30,8 @@ public class OrderEntityTypeConfiguration : EntityTypeConfigurationBase<Order, O
         builder.Property(x => x.DictJson).UseJson();
         builder.Property(x => x.Extras).UseJson();
 
+        builder.HasOne(x => x.Operator).WithMany();
+
         builder.HasMany(x => x.Items).WithOne(x => x.Order)
             .OnDelete(DeleteBehavior.ClientCascade);
 

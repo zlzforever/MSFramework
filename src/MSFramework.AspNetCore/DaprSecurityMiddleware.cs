@@ -1,4 +1,3 @@
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using MicroserviceFramework.AspNetCore.Extensions;
@@ -8,7 +7,7 @@ using Microsoft.AspNetCore.Http.Extensions;
 using Microsoft.AspNetCore.Http.Features;
 using Microsoft.Extensions.Logging;
 
-namespace MicroserviceFramework.AspNetCore.Filters;
+namespace MicroserviceFramework.AspNetCore;
 
 /// <summary>
 /// 在网关层需要把 Pubsubname/traceparent 过滤掉，不允许外部请求带这两个请求头
@@ -17,24 +16,15 @@ namespace MicroserviceFramework.AspNetCore.Filters;
 /// 404： 错误被记录下来，信息被删除
 /// other: 警告被记录并重试消息
 /// </summary>
-public class DaprSecurityMiddleware
+public class DaprSecurityMiddleware(RequestDelegate next, ILogger<DaprSecurityMiddleware> logger)
 {
-    private readonly RequestDelegate _next;
-    private readonly ILogger<DaprSecurityMiddleware> _logger;
-
-    public DaprSecurityMiddleware(RequestDelegate next, ILogger<DaprSecurityMiddleware> logger)
-    {
-        _next = next;
-        _logger = logger;
-    }
-
     public async Task InvokeAsync(HttpContext context)
     {
         var endpoint = context.Features.Get<IEndpointFeature>()?.Endpoint;
 
         if (endpoint == null)
         {
-            await _next(context);
+            await next(context);
             return;
         }
 
@@ -46,7 +36,7 @@ public class DaprSecurityMiddleware
 
         if (!isTopic)
         {
-            await _next(context);
+            await next(context);
             return;
         }
 
@@ -58,7 +48,7 @@ public class DaprSecurityMiddleware
             // 仅限内部请求可以访问
             if (ip.IsPrivate())
             {
-                await _next(context);
+                await next(context);
                 return;
             }
         }
@@ -66,6 +56,6 @@ public class DaprSecurityMiddleware
         context.Response.StatusCode = 403;
         await context.Response.CompleteAsync();
 
-        _logger.LogError("Executing dapr subscribe {Action} forbidden", context.Request.GetDisplayUrl());
+        logger.LogError("Executing dapr subscribe {Action} forbidden", context.Request.GetDisplayUrl());
     }
 }

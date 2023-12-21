@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Threading.Tasks;
-using DotNetCore.CAP;
 using MicroserviceFramework;
 using MicroserviceFramework.AspNetCore;
 using MicroserviceFramework.AspNetCore.Extensions;
@@ -12,7 +11,6 @@ using MicroserviceFramework.Domain;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using MongoDB.Bson;
-using Ordering.Application.Events;
 using Ordering.Domain.AggregateRoots;
 using Ordering.Domain.Repositories;
 using Ordering.Infrastructure;
@@ -22,34 +20,19 @@ namespace Ordering.API.Controllers;
 
 [Route("api/v1.0/[controller]")]
 [ApiController]
-public class ProductController : ApiControllerBase
+public class ProductController(
+    IProductRepository productRepository,
+    IObjectAssembler mapper,
+    IUnitOfWork unitOfWork,
+    OrderingContext orderingContext,
+    ILogger<ProductController> logger)
+    : ApiControllerBase
 {
-    private readonly IProductRepository _productRepository;
-    private readonly IObjectAssembler _mapper;
-    private readonly IUnitOfWork _unitOfWork;
-    private readonly ICapPublisher _capBus;
-    private readonly OrderingContext _orderingContext;
-    private readonly ILogger<ProductController> _logger;
-
-    public ProductController(IProductRepository productRepository,
-        IObjectAssembler mapper, IUnitOfWork unitOfWork, ICapPublisher capBus, OrderingContext orderingContext,
-        ILogger<ProductController> logger)
-    {
-        _productRepository = productRepository;
-        _mapper = mapper;
-        _unitOfWork = unitOfWork;
-        _capBus = capBus;
-        _orderingContext = orderingContext;
-        _logger = logger;
-    }
-
-    [HttpGet("objectid")]
     [HttpGet("id")]
     public ObjectId Get()
     {
         return ObjectId.GenerateNewId();
     }
-
 
     [HttpGet("modalState")]
     public bool ModalState([Required] string id)
@@ -82,19 +65,19 @@ public class ProductController : ApiControllerBase
     //[AccessControl("查看第一个产品", "产品")]
     public ProductOut GetFirst()
     {
-        var queryable = from p in _orderingContext.Set<Product>()
-                        join u in _orderingContext.Set<User>() on p.CreatorId equals u.Id
-                        select new ProductOut { Name = p.Name, Price = p.Price, CreatorName = u.Name };
+        var queryable = from p in orderingContext.Set<Product>()
+            join u in orderingContext.Set<User>() on p.CreatorId equals Convert.ToString(u.Id)
+            select new ProductOut { Name = p.Name, Price = p.Price, CreatorName = u.Name };
         return queryable.FirstOrDefault();
     }
 
 
     [HttpGet("PagedQuery")]
     //[AccessControl("查询产品", "产品")]
-    public async Task<PagedResult<ProductDTO>> GetPagedQuery()
+    public async Task<PaginationResult<ProductDTO>> GetPagedQuery()
     {
-        var a = await _productRepository.PagedQueryAsync(0, 10);
-        var b = new PagedResult<ProductDTO>(a.Page, a.Limit, a.Total, _mapper.To<List<ProductDTO>>(a.Data));
+        var a = await productRepository.PagedQueryAsync(0, 10);
+        var b = new PaginationResult<ProductDTO>(a.Page, a.Limit, a.Total, mapper.To<List<ProductDTO>>(a.Data));
         return b;
     }
 
@@ -143,15 +126,15 @@ public class ProductController : ApiControllerBase
     [HttpGet]
     public Product GetAsync(ObjectId productId)
     {
-        return _productRepository.Find(productId);
+        return productRepository.Find(productId);
     }
 
     [HttpDelete]
     //[AccessControl("删除产品", "产品")]
     public Product DeleteAsync(ObjectId productId)
     {
-        var product = _productRepository.Find(productId);
-        _productRepository.Delete(product);
+        var product = productRepository.Find(productId);
+        productRepository.Delete(product);
         return product;
     }
 
@@ -160,13 +143,13 @@ public class ProductController : ApiControllerBase
     {
         var prod = Product.Create(vo.Name, new Random().Next(100, 10000));
         prod.SetCreation("1", "1");
-        await _productRepository.AddAsync(prod);
-        await _unitOfWork.SaveChangesAsync();
+        await productRepository.AddAsync(prod);
+        await unitOfWork.SaveChangesAsync();
 
         var prod2 = Product.Create(vo.Name, new Random().Next(100, 10000));
         prod2.SetCreation("1", "1");
-        await _productRepository.AddAsync(prod2);
-        await _unitOfWork.SaveChangesAsync();
+        await productRepository.AddAsync(prod2);
+        await unitOfWork.SaveChangesAsync();
         return prod;
     }
 
@@ -214,10 +197,10 @@ public class ProductController : ApiControllerBase
     // }
 
     [HttpGet("testPaged")]
-    public PagedResult<A> TestPagedResult()
+    public PaginationResult<A> TestPagedResult()
     {
-        return new PagedResult<A>(0, 1, 10,
-            new List<A> { new A() { Id = "1", Name = "A1" }, new A() { Id = "2", Name = "A2" }, });
+        return new PaginationResult<A>(0, 1, 10,
+            [new A { Id = "1", Name = "A1" }, new A { Id = "2", Name = "A2" }]);
     }
 }
 

@@ -4,17 +4,10 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace MicroserviceFramework.Ef;
 
-public class DbContextFactory
+public class DbContextFactory(IServiceProvider serviceProvider)
 {
-    private readonly IEntityConfigurationTypeFinder _entityConfigurationTypeFinder;
-    private readonly IServiceProvider _serviceProvider;
-
-    public DbContextFactory(IServiceProvider serviceProvider)
-    {
-        _entityConfigurationTypeFinder = serviceProvider
-            .GetRequiredService<IEntityConfigurationTypeFinder>();
-        _serviceProvider = serviceProvider;
-    }
+    private readonly IEntityConfigurationTypeFinder _entityConfigurationTypeFinder = serviceProvider
+        .GetRequiredService<IEntityConfigurationTypeFinder>();
 
     /// <summary>
     /// 获取指定数据实体的上下文类型
@@ -34,14 +27,14 @@ public class DbContextFactory
             return null;
         }
 
-        return (DbContextBase)_serviceProvider.GetRequiredService(dbContextType);
+        return (DbContextBase)serviceProvider.GetRequiredService(dbContextType);
     }
 
     public IEnumerable<DbContextBase> GetAllDbContexts()
     {
         foreach (var dbContextType in _entityConfigurationTypeFinder.GetAllDbContextTypes())
         {
-            var dbContext = _serviceProvider.GetService(dbContextType);
+            var dbContext = serviceProvider.GetService(dbContextType);
             if (dbContext != null)
             {
                 yield return (DbContextBase)dbContext;

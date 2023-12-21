@@ -5,5 +5,5 @@ namespace MicroserviceFramework.Auditing;
 
 public interface IAuditingStore
 {
-    Task AddAsync(object sender, AuditOperation auditOperation);
+    Task AddAsync(AuditOperation auditOperation);
 }

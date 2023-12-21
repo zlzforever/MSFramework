@@ -4,9 +4,7 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 namespace MicroserviceFramework.Ef;
 
 public abstract class EntityTypeConfigurationBase<TEntity> : EntityTypeConfigurationBase<TEntity, DefaultDbContext>
-    where TEntity : class, IEntity
-{
-}
+    where TEntity : class, IEntity;
 
 /// <summary>
 /// 数据实体映射配置基类

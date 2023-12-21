@@ -2,12 +2,7 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace MicroserviceFramework;
 
-public class MicroserviceFrameworkBuilder
+public class MicroserviceFrameworkBuilder(IServiceCollection services)
 {
-    public MicroserviceFrameworkBuilder(IServiceCollection services)
-    {
-        Services = services;
-    }
-
-    public IServiceCollection Services { get; }
+    public IServiceCollection Services { get; } = services;
 }

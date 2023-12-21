@@ -2,7 +2,9 @@ using System;
 
 namespace MicroserviceFramework;
 
-public class MicroserviceFrameworkException : ApplicationException
+public class MicroserviceFrameworkException(int code, string message, Exception innerException = null)
+    : ApplicationException(message,
+        innerException)
 {
     public MicroserviceFrameworkException() : this(1, null)
     {
@@ -12,11 +14,5 @@ public class MicroserviceFrameworkException : ApplicationException
     {
     }
 
-    public MicroserviceFrameworkException(int code, string message, Exception innerException = null) : base(message,
-        innerException)
-    {
-        Code = code;
-    }
-
-    public int Code { get; private set; }
+    public int Code { get; private set; } = code;
 }

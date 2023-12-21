@@ -11,7 +11,7 @@ namespace Template.API;
 
 public static class Program
 {
-    public static async Task Main(string[] args)
+    public static Task Main(string[] args)
     {
         AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
         AppContext.SetSwitch("Npgsql.DisableDateTimeInfinityConversions", true);
@@ -23,7 +23,7 @@ public static class Program
         var webApplicationBuilder = CreateWebApplicationBuilder(args);
         var web = webApplicationBuilder.Build();
         web.Configure();
-        await web.RunAsync();
+        return web.RunAsync();
     }
 
     public static WebApplicationBuilder CreateWebApplicationBuilder(string[] args)

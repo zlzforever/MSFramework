@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
-        <TargetFramework>net6.0</TargetFramework>
+        <TargetFramework>net8.0</TargetFramework>
     </PropertyGroup>
 
     <ItemGroup>
@@ -9,7 +9,7 @@
     </ItemGroup>
 
     <ItemGroup>
-        <PackageReference Include="MSFramework.Ef" Version="0.15.1-beta33" />
-        <PackageReference Include="MSFramework.Ef.MySql" Version="0.15.1-beta33" />
+        <PackageReference Include="MSFramework.Ef" Version="0.15.1-beta42" />
+        <PackageReference Include="MSFramework.Ef.MySql" Version="0.15.1-beta42" />
     </ItemGroup>
 </Project>

@@ -56,12 +56,10 @@ public static class EnumerableExtensions
         foreach (var item in enumerable)
         {
             var key = selector(item);
-            if (d.Contains(key))
+            if (!d.Add(key))
             {
                 return true;
             }
-
-            d.Add(key);
         }
 
         return false;

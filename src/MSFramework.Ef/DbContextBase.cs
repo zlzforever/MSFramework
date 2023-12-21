@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
@@ -17,7 +16,6 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
-using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using MongoDB.Bson;
 
@@ -25,48 +23,39 @@ namespace MicroserviceFramework.Ef;
 
 public abstract class DbContextBase : DbContext
 {
-    private readonly ILoggerFactory _loggerFactory;
-    private readonly ILogger _logger;
     private readonly ISession _session;
-    private readonly DbContextConfigurationCollection _entityFrameworkOptions;
+    private readonly DbContextSettingsList _entityFrameworkOptions;
     private IEntityConfigurationTypeFinder _entityConfigurationTypeFinder;
     private readonly IMediator _mediator;
+
+    public static Type AuditingDbContextType;
 
     /// <summary>
     /// 初始化一个<see cref="DbContextBase"/>类型的新实例
     /// </summary>
     protected DbContextBase(DbContextOptions options,
-        IOptions<DbContextConfigurationCollection> entityFrameworkOptions,
+        IOptions<DbContextSettingsList> entityFrameworkOptions,
         IMediator mediator,
-        ISession session, ILoggerFactory loggerFactory)
+        ISession session)
         : base(options)
     {
         _mediator = mediator;
         _entityFrameworkOptions = entityFrameworkOptions.Value;
         _session = session;
-        _loggerFactory = loggerFactory;
-        _logger = loggerFactory.CreateLogger(GetType());
     }
 
-    /// <summary>
-    /// 每次新 DbContext 对象都会调用
-    /// </summary>
-    /// <param name="optionsBuilder"></param>
-    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-    {
-        base.OnConfiguring(optionsBuilder);
-
-        var option = _entityFrameworkOptions.Get(GetType());
-
-        Database.AutoTransactionBehavior = option.AutoTransactionBehavior;
-
-        if (option.EnableSensitiveDataLogging)
-        {
-            optionsBuilder.EnableSensitiveDataLogging();
-        }
-
-        optionsBuilder.UseLoggerFactory(_loggerFactory);
-    }
+    // /// <summary>
+    // /// 每次新 DbContext 对象都会调用
+    // /// </summary>
+    // /// <param name="optionsBuilder"></param>
+    // protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+    // {
+    //     base.OnConfiguring(optionsBuilder);
+    //
+    //     var option = _entityFrameworkOptions.Get(GetType());
+    //     Database.AutoTransactionBehavior = option.AutoTransactionBehavior;
+    //     optionsBuilder.UseLoggerFactory(_loggerFactory);
+    // }
 
     /// <summary>
     /// 只会调用一次，创建上下文数据模型时，对各个实体类的数据库映射细节进行配置
@@ -81,34 +70,29 @@ public abstract class DbContextBase : DbContext
 
         var entityTypeConfigurations = _entityConfigurationTypeFinder
             .GetEntityTypeConfigurations(contextType);
-        var count = 0;
-        var stringBuilder = new StringBuilder();
 
         foreach (var entityTypeConfiguration in entityTypeConfigurations)
         {
             entityTypeConfiguration.Value.MethodInfo.Invoke(modelBuilder,
                 new[] { entityTypeConfiguration.Value.EntityTypeConfiguration });
-
-            stringBuilder.Append(stringBuilder.Length == 0
-                ? $"{entityTypeConfiguration.Value.EntityType.FullName}"
-                : $"、{entityTypeConfiguration.Value.EntityType.FullName}");
-
-            count++;
         }
 
-        if (entityTypeConfigurations.All(x => x.Value.EntityType != typeof(AuditOperation)))
+        if (AuditingDbContextType == contextType)
         {
-            modelBuilder.ApplyConfiguration(AuditOperationConfiguration.Instance);
-        }
+            if (entityTypeConfigurations.All(x => x.Value.EntityType != typeof(AuditOperation)))
+            {
+                modelBuilder.ApplyConfiguration(AuditOperationConfiguration.Instance);
+            }
 
-        if (entityTypeConfigurations.All(x => x.Value.EntityType != typeof(AuditEntity)))
-        {
-            modelBuilder.ApplyConfiguration(AuditEntityConfiguration.Instance);
-        }
+            if (entityTypeConfigurations.All(x => x.Value.EntityType != typeof(AuditEntity)))
+            {
+                modelBuilder.ApplyConfiguration(AuditEntityConfiguration.Instance);
+            }
 
-        if (entityTypeConfigurations.All(x => x.Value.EntityType != typeof(AuditProperty)))
-        {
-            modelBuilder.ApplyConfiguration(AuditPropertyConfiguration.Instance);
+            if (entityTypeConfigurations.All(x => x.Value.EntityType != typeof(AuditProperty)))
+            {
+                modelBuilder.ApplyConfiguration(AuditPropertyConfiguration.Instance);
+            }
         }
 
         var option = _entityFrameworkOptions.Get(GetType());
@@ -212,9 +196,6 @@ public abstract class DbContextBase : DbContext
                 }
             }
         }
-
-        _logger.LogInformation("将 {EntityCount} 个实体 {EntityTypes} 注册到上下文 {DbContextType} 中", count, stringBuilder,
-            contextType);
     }
 
     public IEnumerable<AuditEntity> GetAuditEntities()
@@ -235,7 +216,6 @@ public abstract class DbContextBase : DbContext
             }
         }
     }
-
 
     public override async Task<int> SaveChangesAsync(bool acceptAllChangesOnSuccess,
         CancellationToken cancellationToken = new())

@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace MicroserviceFramework.AspNetCore.Extensions;
 
-public static class ContextExtensions
+public static class HttpContextExtensions
 {
     public static string GetRemoteIpAddress(this ActionContext context)
     {

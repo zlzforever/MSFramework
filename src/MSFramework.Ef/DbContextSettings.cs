@@ -5,14 +5,14 @@ using Microsoft.EntityFrameworkCore;
 namespace MicroserviceFramework.Ef;
 
 [SuppressMessage("ReSharper", "UnusedAutoPropertyAccessor.Global")]
-public class DbContextConfiguration
+public class DbContextSettings
 {
     private Type _type;
 
     /// <summary>
-    /// 初始化一个<see cref="DbContextConfiguration"/>类型的新实例
+    /// 初始化一个<see cref="DbContextSettings"/>类型的新实例
     /// </summary>
-    public DbContextConfiguration()
+    public DbContextSettings()
     {
         AutoMigrationEnabled = false;
         AutoTransactionBehavior = AutoTransactionBehavior.WhenNeeded;

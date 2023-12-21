@@ -13,7 +13,25 @@ public abstract class EfRepository<TEntity, TKey> : IRepository<TEntity, TKey>, 
     private readonly DbSet<TEntity> _dbSet;
     private readonly DbContextBase _dbContext;
 
-    protected IQueryable<TEntity> Store => _store ??= IncludeAllNavigations(_dbSet);
+    protected virtual IQueryable<TEntity> Store
+    {
+        get
+        {
+            if (_store != null)
+            {
+                return _store;
+            }
+
+            var queryable = BuildQueryable(_dbSet);
+            _store = queryable;
+
+            return _store;
+        }
+    }
+
+    protected DbSet<TEntity> DbSet => _dbSet;
+
+    protected DbContextBase DbContext => _dbContext;
 
     protected bool? UseQuerySplittingBehavior { get; init; }
 
@@ -30,23 +48,15 @@ public abstract class EfRepository<TEntity, TKey> : IRepository<TEntity, TKey>, 
     /// </summary>
     /// <param name="dbSet"></param>
     /// <returns></returns>
-    protected virtual IQueryable<TEntity> IncludeAllNavigations(DbSet<TEntity> dbSet)
+    protected virtual IQueryable<TEntity> BuildQueryable(DbSet<TEntity> dbSet)
     {
         var queryable = dbSet.AsQueryable();
-
         var navigations = dbSet.EntityType.GetNavigations();
-        queryable = navigations.Aggregate(queryable, (current, navigation) =>
-        {
-            // TODO: 如何递归全部聚合
-            // navigation.TargetEntityType.GetNavigations();
-            return current.Include(navigation.Name);
-        });
+        queryable = navigations.Aggregate(queryable, (current, navigation) => current.Include(navigation.Name));
 
         return !UseQuerySplittingBehavior.HasValue ? queryable :
             UseQuerySplittingBehavior.Value ? queryable.AsSplitQuery() : queryable.AsSingleQuery();
     }
-
-
 
     public virtual TEntity Find(TKey id)
     {

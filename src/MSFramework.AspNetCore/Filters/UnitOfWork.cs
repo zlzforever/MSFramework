@@ -7,14 +7,9 @@ using Microsoft.Extensions.Logging;
 
 namespace MicroserviceFramework.AspNetCore.Filters;
 
-public class UnitOfWork : IAsyncActionFilter, IOrderedFilter
+internal class UnitOfWork(ILogger<UnitOfWork> logger) : IAsyncActionFilter, IOrderedFilter
 {
-    private readonly ILogger _logger;
-
-    public UnitOfWork(ILogger<UnitOfWork> logger)
-    {
-        _logger = logger;
-    }
+    private readonly ILogger _logger = logger;
 
     public async Task OnActionExecutionAsync(ActionExecutingContext context, ActionExecutionDelegate next)
     {
@@ -28,7 +23,7 @@ public class UnitOfWork : IAsyncActionFilter, IOrderedFilter
             return;
         }
 
-        if (context.HasAttribute<NoneUnitOfWork>())
+        if (context.HasAttribute<SkipUnitOfWork>())
         {
             return;
         }

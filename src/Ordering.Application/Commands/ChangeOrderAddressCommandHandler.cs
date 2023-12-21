@@ -5,15 +5,9 @@ using Ordering.Domain.Repositories;
 
 namespace Ordering.Application.Commands;
 
-public class ChangeOrderAddressCommandHandler : IRequestHandler<ChangeOrderAddressCommand>
+public class ChangeOrderAddressCommandHandler(IOrderingRepository orderRepository)
+    : IRequestHandler<ChangeOrderAddressCommand>
 {
-    private readonly IOrderingRepository _orderRepository;
-
-    public ChangeOrderAddressCommandHandler(IOrderingRepository orderRepository)
-    {
-        _orderRepository = orderRepository;
-    }
-
     /// <summary>
     /// Handler which processes the command when
     /// customer executes cancel order from app
@@ -23,7 +17,7 @@ public class ChangeOrderAddressCommandHandler : IRequestHandler<ChangeOrderAddre
     /// <returns></returns>
     public async Task HandleAsync(ChangeOrderAddressCommand command, CancellationToken cancellationToken)
     {
-        var order = await _orderRepository.FindAsync(command.OrderId);
+        var order = await orderRepository.FindAsync(command.OrderId);
         order?.SetAddress(command.NewAddress);
     }
 }

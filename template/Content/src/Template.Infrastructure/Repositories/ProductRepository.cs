@@ -6,18 +6,13 @@ using MongoDB.Bson;
 using Template.Domain.Aggregates.Project;
 using Template.Domain.Repositories;
 
-namespace Template.Infrastructure.Repositories
-{
-    public class ProductRepository
-        : EfRepository<Product, ObjectId>, IProductRepository
-    {
-        public ProductRepository(DbContextFactory dbContextFactory) : base(dbContextFactory)
-        {
-        }
+namespace Template.Infrastructure.Repositories;
 
-        public async Task<Product> GetByNameAsync(string name)
-        {
-            return await Store.FirstOrDefaultAsync(x => x.Name == name);
-        }
+public class ProductRepository(DbContextFactory dbContextFactory)
+    : EfRepository<Product, ObjectId>(dbContextFactory), IProductRepository
+{
+    public Task<Product> GetByNameAsync(string name)
+    {
+        return Store.FirstOrDefaultAsync(x => x.Name == name);
     }
 }

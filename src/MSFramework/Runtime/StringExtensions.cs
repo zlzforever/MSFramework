@@ -1,4 +1,3 @@
-using System.Collections.Generic;
 using System.Globalization;
 using System.Text;
 
@@ -6,16 +5,16 @@ namespace MicroserviceFramework.Runtime;
 
 public static class StringExtensions
 {
-    public static string ToHex(this IEnumerable<byte> bytes)
-    {
-        var builder = new StringBuilder();
-        foreach (var b in bytes)
-        {
-            builder.Append($"{b:x2}");
-        }
-
-        return builder.ToString();
-    }
+    // public static string ToHex(this IEnumerable<byte> bytes)
+    // {
+    //     var builder = new StringBuilder();
+    //     foreach (var b in bytes)
+    //     {
+    //         builder.Append($"{b:x2}");
+    //     }
+    //
+    //     return builder.ToString();
+    // }
 
     public static bool IsNullOrEmpty(this string value)
     {

@@ -2,12 +2,12 @@ using Xunit;
 
 namespace MSFramework.Tests;
 
-public class PagedResultTests
+public class PaginationResultTests
 {
     [Fact]
     public void PagedResultSerialize1()
     {
-//         var result = new PagedResult(1, 10, 100, null);
+//         var result = new PaginationResult(1, 10, 100, null);
 //         var json = JsonSerializer.Serialize(result);
 //
 //         Assert.Equal("""
@@ -25,7 +25,7 @@ public class PagedResultTests
     [Fact]
     public void PagedResultSerialize2()
     {
-//         var result = new PagedResult(1, 10, 100, null);
+//         var result = new PaginationResult(1, 10, 100, null);
 //
 //         using var stream = new MemoryStream();
 //         using var writer = new Utf8JsonWriter(stream);

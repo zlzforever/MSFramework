@@ -5,19 +5,12 @@ using Microsoft.Extensions.Options;
 
 namespace DotNetCore.CAP.Dapr;
 
-public class DaprConsumerClientFactory : IConsumerClientFactory
+public class DaprConsumerClientFactory(
+    IOptionsMonitor<DaprOptions> daprOptions,
+    ILoggerFactory loggerFactory)
+    : IConsumerClientFactory
 {
     public static Action<string, string, string, Delegate> MapEndpointRoute;
-
-    private readonly IOptionsMonitor<DaprOptions> _daprOptions;
-    private readonly ILoggerFactory _loggerFactory;
-
-    public DaprConsumerClientFactory(IOptionsMonitor<DaprOptions> daprOptions,
-        ILoggerFactory loggerFactory)
-    {
-        _daprOptions = daprOptions;
-        _loggerFactory = loggerFactory;
-    }
 
     public IConsumerClient Create(string groupId)
     {
@@ -28,8 +21,8 @@ public class DaprConsumerClientFactory : IConsumerClientFactory
                 throw new ArgumentNullException(nameof(MapEndpointRoute));
             }
 
-            var logger = _loggerFactory.CreateLogger<DaprConsumerClient>();
-            return new DaprConsumerClient(groupId, _daprOptions, MapEndpointRoute, logger);
+            var logger = loggerFactory.CreateLogger<DaprConsumerClient>();
+            return new DaprConsumerClient(groupId, daprOptions, MapEndpointRoute, logger);
         }
         catch (Exception e)
         {
