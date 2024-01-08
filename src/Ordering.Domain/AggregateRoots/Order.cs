@@ -39,9 +39,9 @@ public class Order : CreationAggregateRoot, IOptimisticLock
     /// <summary>
     /// 购买人员
     /// </summary>
-    public string BuyerId { get; private set; }
+    public string BuyerId2 { get; private set; }
 
-    public string Description { get; private set; }
+    public string Description2 { get; private set; }
 
     public User Operator { get; private set; }
 
@@ -103,8 +103,8 @@ public class Order : CreationAggregateRoot, IOptimisticLock
     ) : this(ObjectId.GenerateNewId())
     {
         Address = address;
-        BuyerId = userId;
-        Description = description;
+        BuyerId2 = userId;
+        Description2 = description;
         Status = OrderStatus.Submitted;
 
         // Add the OrderStarterDomainEvent to the domain events collection
@@ -171,7 +171,7 @@ public class Order : CreationAggregateRoot, IOptimisticLock
             AddDomainEvent(new OrderStatusChangedToStockConfirmedDomainEvent(Id));
 
             Status = OrderStatus.StockConfirmed;
-            Description = "All the items were confirmed with available stock.";
+            Description2 = "All the items were confirmed with available stock.";
         }
     }
 
@@ -182,7 +182,7 @@ public class Order : CreationAggregateRoot, IOptimisticLock
             AddDomainEvent(new OrderStatusChangedToPaidDomainEvent(Id, Items));
 
             Status = OrderStatus.Paid;
-            Description =
+            Description2 =
                 "The payment was performed at a simulated \"American Bank checking bank account ending on XX35071\"";
         }
     }
@@ -200,7 +200,7 @@ public class Order : CreationAggregateRoot, IOptimisticLock
         }
 
         Status = OrderStatus.Shipped;
-        Description = "The order was shipped.";
+        Description2 = "The order was shipped.";
         AddDomainEvent(new OrderShippedDomainEvent(this));
     }
 
@@ -213,7 +213,7 @@ public class Order : CreationAggregateRoot, IOptimisticLock
         }
 
         Status = OrderStatus.Cancelled;
-        Description = $"The order was cancelled.";
+        Description2 = $"The order was cancelled.";
         AddDomainEvent(new OrderCancelledDomainEvent(this));
     }
 
@@ -228,7 +228,7 @@ public class Order : CreationAggregateRoot, IOptimisticLock
                 .Select(c => c.Product.Name);
 
             var itemsStockRejectedDescription = string.Join(", ", itemsStockRejectedProductNames);
-            Description = $"The product items don't have stock: ({itemsStockRejectedDescription}).";
+            Description2 = $"The product items don't have stock: ({itemsStockRejectedDescription}).";
         }
     }
 

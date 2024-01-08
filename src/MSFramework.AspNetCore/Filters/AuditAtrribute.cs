@@ -42,9 +42,15 @@ internal class Audit(ILogger<Audit> logger) : ActionFilterAttribute
 
         await base.OnActionExecutionAsync(context, next);
 
-        logger.LogDebug("审计过滤器执行结束");
         // comment: 必须使用 HTTP request scope 的 uow manager 才能获取到审计对象
         // comment: 只有有变化的数据才会尝试获取变更对象
+    }
+
+    public override void OnActionExecuted(ActionExecutedContext context)
+    {
+        base.OnActionExecuted(context);
+
+        logger.LogDebug("审计过滤器执行结束");
     }
 
     private AuditOperation CreateAuditedOperation(ActionExecutingContext context, DateTimeOffset creationTime)

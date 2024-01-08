@@ -5,14 +5,14 @@ using System.Threading;
 using System.Threading.Tasks;
 using MicroserviceFramework;
 using MicroserviceFramework.AspNetCore;
-using MicroserviceFramework.EventBus;
 using MicroserviceFramework.Extensions.DependencyInjection;
+using MicroserviceFramework.LocalEvent;
 using Microsoft.Extensions.DependencyInjection;
 using Xunit;
 
 namespace MSFramework.Tests;
 
-public class EventBusTests
+public class EventBusImplTests
 {
     public record Event1 : EventBase
     {
@@ -20,11 +20,10 @@ public class EventBusTests
         public int Order { get; set; }
     }
 
-    public class SingleHandlerEventHandler() : IEventHandler<Event1>
+    public class SingleHandlerEventHandler : IEventHandler<Event1>
     {
-        public Task HandleAsync(Event1 @event)
+        public Task HandleAsync(Event1 @event, CancellationToken cancellationToken)
         {
-            var b = Thread.CurrentPrincipal;
             Event1.Output.Append(@event.Order).Append(", ");
             return Task.CompletedTask;
         }
@@ -35,7 +34,7 @@ public class EventBusTests
     }
 
     [Fact]
-    public void SingleSubscribeEvent()
+    public async Task SingleSubscribeEvent()
     {
         for (var i = 0; i < 40; ++i)
         {
@@ -51,16 +50,20 @@ public class EventBusTests
                 x.UseDependencyInjectionLoader();
                 x.UseLocalEventPublisher();
             });
-
+            serviceCollection.AddSingleton<EventConsumeService>();
             var provider = serviceCollection.BuildServiceProvider();
             provider.UseMicroserviceFramework();
 
+            var backgroundService = provider.GetRequiredService<EventConsumeService>();
+            backgroundService.StartAsync(default).GetAwaiter();
+            await Task.Delay(100);
+
             var eventBus = provider.GetRequiredService<IEventPublisher>();
 
-            eventBus.Publish(new Event1 { Order = 1 });
-            Thread.Sleep(25);
-            eventBus.Publish(new Event1 { Order = 2 });
-            Thread.Sleep(25);
+            await eventBus.PublishAsync(new Event1 { Order = 1 });
+            Thread.Sleep(20);
+            await eventBus.PublishAsync(new Event1 { Order = 2 });
+            Thread.Sleep(20);
             Assert.Equal("1, 2, ", Event1.Output.ToString());
         }
     }
@@ -72,7 +75,7 @@ public class EventBusTests
     // public void EventName()
     // {
     //     var name = typeof(Event1).GetEventName();
-    //     Assert.Equal("MSFramework.Tests.EventBusTests+Event1", name);
+    //     Assert.Equal("MSFramework.Tests.EventBusImplTests+Event1", name);
     //
     //     var name2 = typeof(Event2).GetEventName();
     //     Assert.Equal("event2", name2);
@@ -86,7 +89,7 @@ public class EventBusTests
 
     public class EventHandler31 : IEventHandler<Event3>
     {
-        public Task HandleAsync(Event3 @event)
+        public Task HandleAsync(Event3 @event, CancellationToken cancellationToken)
         {
             lock (Event3.Output)
             {
@@ -103,7 +106,7 @@ public class EventBusTests
 
     public class EventHandler32 : IEventHandler<Event3>
     {
-        public Task HandleAsync(Event3 @event)
+        public Task HandleAsync(Event3 @event, CancellationToken cancellationToken)
         {
             lock (Event3.Output)
             {
@@ -132,21 +135,23 @@ public class EventBusTests
                 x.UseLocalEventPublisher();
                 x.UseAspNetCore();
             });
-
+            serviceCollection.AddSingleton<EventConsumeService>();
             var provider = serviceCollection.BuildServiceProvider();
             provider.UseMicroserviceFramework();
 
+            var backgroundService = provider.GetRequiredService<EventConsumeService>();
+            await backgroundService.StartAsync(default);
+            await Task.Delay(100);
 
             var eventBus = provider.GetRequiredService<IEventPublisher>();
-
-            eventBus.Publish(new Event3 { Order = 1 });
+            await eventBus.PublishAsync(new Event3 { Order = 1 });
             Thread.Sleep(20);
-            eventBus.Publish(new Event3 { Order = 2 });
+            await eventBus.PublishAsync(new Event3 { Order = 2 });
             Thread.Sleep(20);
             Assert.Equal("1, 1, 2, 2, ", Event3.Output.ToString());
 
-            var handler = provider.GetRequiredService<IEventHandler<Event3>>();
-            await handler.HandleAsync(new Event3 { Order = 3 });
+            // var handler = provider.GetRequiredService<IEventHandler<Event3>>();
+            // await handler.HandleAsync(new Event3 { Order = 3 });
         }
     }
 }

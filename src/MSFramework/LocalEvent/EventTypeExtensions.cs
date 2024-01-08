@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Reflection;
 using MicroserviceFramework.Utils;
 
-namespace MicroserviceFramework.EventBus;
+namespace MicroserviceFramework.LocalEvent;
 
 public static class EventTypeExtensions
 {

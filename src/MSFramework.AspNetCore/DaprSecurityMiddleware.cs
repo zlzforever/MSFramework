@@ -1,7 +1,7 @@
 using System.Linq;
+using System.Net;
 using System.Threading.Tasks;
 using MicroserviceFramework.AspNetCore.Extensions;
-using MicroserviceFramework.Extensions;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.Extensions;
 using Microsoft.AspNetCore.Http.Features;
@@ -10,7 +10,8 @@ using Microsoft.Extensions.Logging;
 namespace MicroserviceFramework.AspNetCore;
 
 /// <summary>
-/// 在网关层需要把 Pubsubname/traceparent 过滤掉，不允许外部请求带这两个请求头
+/// 使用 DAPR_API_TOKEN 环境变量来控制访问 dapr 的权限
+/// 然后限制 topic 的  action 只能是内部访问（sidecar)
 /// dapr
 /// 20X： 消费成功
 /// 404： 错误被记录下来，信息被删除
@@ -40,17 +41,12 @@ public class DaprSecurityMiddleware(RequestDelegate next, ILogger<DaprSecurityMi
             return;
         }
 
-        // 必须带有 Pubsubname/traceparent， 否者必定是非法请求
-        if (!string.IsNullOrEmpty(context.Request.Headers["Pubsubname"])
-            && !string.IsNullOrEmpty(context.Request.Headers["traceparent"]))
+        var ip = context.GetRemoteIpAddress();
+        // 仅限内部请求可以访问
+        if (IPAddress.IsLoopback(ip))
         {
-            var ip = context.GetRemoteIpAddress();
-            // 仅限内部请求可以访问
-            if (ip.IsPrivate())
-            {
-                await next(context);
-                return;
-            }
+            await next(context);
+            return;
         }
 
         context.Response.StatusCode = 403;

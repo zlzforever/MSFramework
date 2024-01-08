@@ -36,7 +36,7 @@ internal class EfUnitOfWork : IUnitOfWork
         Check.NotNull(factory, nameof(factory));
 
         var auditingStores = _serviceProvider.GetServices<IAuditingStore>().ToList();
-        if (auditingStores.Count <= 0)
+        if (auditingStores.Count == 0)
         {
             return;
         }
@@ -48,7 +48,6 @@ internal class EfUnitOfWork : IUnitOfWork
                 return;
             }
 
-            var auditOperation = factory();
             dbContextBase.SavingChanges += async (sender, _) =>
             {
                 if (sender is not DbContextBase db)
@@ -56,6 +55,11 @@ internal class EfUnitOfWork : IUnitOfWork
                     return;
                 }
 
+                // 一定要每次保存都创建新的审计对象
+                // 如， 用户自己 save change 一次， 此时 audit operation 已经创建了
+                // 再次调用 save change 时， 复用同一个 audit operation， 会导致数据重复, 保存失败
+                // TODO: entities 为空时要不要保存？
+                var auditOperation = factory();
                 var entities = db.GetAuditEntities();
                 auditOperation.AddEntities(entities);
                 auditOperation.End();
@@ -68,6 +72,8 @@ internal class EfUnitOfWork : IUnitOfWork
                 foreach (var auditingStore in auditingStores)
                 {
                     await auditingStore.AddAsync(auditOperation);
+                    // 不用再单独 commit 了， 和当前请求是同一个 dbcontext
+                    // await auditingStore.CommitAsync();
                 }
             };
         }

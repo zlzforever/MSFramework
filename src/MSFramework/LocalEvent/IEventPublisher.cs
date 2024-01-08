@@ -1,4 +1,6 @@
-﻿namespace MicroserviceFramework.EventBus;
+﻿using System.Threading.Tasks;
+
+namespace MicroserviceFramework.LocalEvent;
 
 /// <summary>
 /// 事件发布器
@@ -16,5 +18,5 @@ public interface IEventPublisher
     /// <param name="event"></param>
     /// <typeparam name="TEvent"></typeparam>
     /// <returns></returns>
-    void Publish<TEvent>(TEvent @event) where TEvent : EventBase;
+    Task PublishAsync<TEvent>(TEvent @event) where TEvent : EventBase;
 }

@@ -1,5 +1,5 @@
 using System;
-using MicroserviceFramework.EventBus;
+using MicroserviceFramework.LocalEvent;
 
 namespace Ordering.Application.Events;
 

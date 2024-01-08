@@ -1,7 +1,8 @@
 using System;
+using System.Threading;
 using System.Threading.Tasks;
 
-namespace MicroserviceFramework.EventBus;
+namespace MicroserviceFramework.LocalEvent;
 
 /// <summary>
 /// 事件处理器
@@ -10,5 +11,5 @@ namespace MicroserviceFramework.EventBus;
 public interface IEventHandler<in TEvent> : IDisposable
     where TEvent : EventBase
 {
-    Task HandleAsync(TEvent @event);
+    Task HandleAsync(TEvent @event, CancellationToken cancellationToken = default);
 }

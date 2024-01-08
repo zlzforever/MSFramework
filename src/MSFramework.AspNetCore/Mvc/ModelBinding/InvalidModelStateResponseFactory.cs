@@ -19,7 +19,7 @@ public static class InvalidModelStateResponseFactory
                     .Select(y => y.ErrorMessage)
             });
 
-        return new BadRequestObjectResult(new ApiResultWithErrors
+        return new ObjectResult(new ApiResultWithErrors
         {
             Code = 1, Success = false, Msg = "数据校验不通过", Errors = errors
         });

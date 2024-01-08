@@ -47,4 +47,6 @@ public interface ISession
     /// 主要用于权限系统进行检测
     /// </summary>
     IReadOnlyCollection<string> Subjects { get; }
+
+    void Override(ISession session);
 }

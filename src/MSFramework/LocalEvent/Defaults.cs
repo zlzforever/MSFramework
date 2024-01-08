@@ -1,6 +1,6 @@
 using System;
 
-namespace MicroserviceFramework.EventBus;
+namespace MicroserviceFramework.LocalEvent;
 
 internal static class Defaults
 {

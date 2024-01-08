@@ -22,8 +22,8 @@ public class OrderEntityTypeConfiguration : EntityTypeConfigurationBase<Order, O
             x.Property(y => y.Street).HasMaxLength(200).IsRequired();
         });
 
-        builder.Property(x => x.Description).HasMaxLength(2000).IsRequired(false);
-        builder.Property(x => x.BuyerId).IsRequired().HasMaxLength(36);
+        builder.Property(x => x.Description2).HasMaxLength(2000).IsRequired(false);
+        builder.Property(x => x.BuyerId2).IsRequired().HasMaxLength(36);
         builder.Property(x => x.Status).UseEnumeration().HasMaxLength(20).IsRequired();
         // 若类型不一致，则需要主动设置
         builder.Property(x => x.ListJson).UseJson(typeof(HashSet<string>));

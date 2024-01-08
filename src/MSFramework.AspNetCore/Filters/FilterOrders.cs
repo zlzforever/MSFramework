@@ -8,7 +8,7 @@ namespace MicroserviceFramework.AspNetCore.Filters;
 public static class Constants
 {
     public const int GlobalException = 0;
-    public const int ResponseWrapper = 1001;
+    public const int ResponseWrapper = 0;
     public const int UnitOfWork = 1002;
     public const int Audit = 1003;
 

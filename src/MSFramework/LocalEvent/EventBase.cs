@@ -1,7 +1,7 @@
 using System;
 using MongoDB.Bson;
 
-namespace MicroserviceFramework.EventBus;
+namespace MicroserviceFramework.LocalEvent;
 
 /// <summary>
 /// 事件基类

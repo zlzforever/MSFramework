@@ -10,11 +10,9 @@ using MicroserviceFramework.AspNetCore.Swagger;
 using MicroserviceFramework.Auditing.Loki;
 using MicroserviceFramework.AutoMapper;
 using MicroserviceFramework.Ef;
-using MicroserviceFramework.Ef.MySql;
 using MicroserviceFramework.Ef.PostgreSql;
-using MicroserviceFramework.Ef.SqlServer;
-using MicroserviceFramework.EventBus;
 using MicroserviceFramework.Extensions.DependencyInjection;
+using MicroserviceFramework.LocalEvent;
 using MicroserviceFramework.Text.Json;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.EntityFrameworkCore;
@@ -22,7 +20,6 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
 using Microsoft.OpenApi.Models;
 using Ordering.Domain.AggregateRoots;
 using Ordering.Infrastructure;
@@ -175,7 +172,6 @@ public static class Startup
 
     public static void Configure(this WebApplication app)
     {
-        var b = app.Services.CreateScope().ServiceProvider.GetRequiredService<IOptions<DbContextSettingsList>>().Value;
         var env = app.Services.GetRequiredService<IHostEnvironment>();
         if (env.IsDevelopment())
         {

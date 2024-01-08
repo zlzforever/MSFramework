@@ -75,16 +75,23 @@ public static class ServiceCollectionExtensions
         logger.LogInformation(
             "发现初始化器: {Initializers}", string.Join(" -> ", initializers.Select(x => x.GetType().FullName)));
 
-        var hostApplicationLifetime = applicationServices.GetRequiredService<IHostApplicationLifetime>();
-        using var combinedCancellationTokenSource =
-            CancellationTokenSource.CreateLinkedTokenSource(hostApplicationLifetime.ApplicationStopping);
-        var combinedCancellationToken = combinedCancellationTokenSource.Token;
-        // await _hostLifetime.WaitForStartAsync(combinedCancellationToken).ConfigureAwait(false);
-        combinedCancellationToken.ThrowIfCancellationRequested();
+        CancellationToken cancellationToken;
+        var hostApplicationLifetime = applicationServices.GetService<IHostApplicationLifetime>();
+        if (hostApplicationLifetime != null)
+        {
+            using var combinedCancellationTokenSource =
+                CancellationTokenSource.CreateLinkedTokenSource(hostApplicationLifetime.ApplicationStopping);
+            cancellationToken = combinedCancellationTokenSource.Token;
+            cancellationToken.ThrowIfCancellationRequested();
+        }
+        else
+        {
+            cancellationToken = new CancellationToken();
+        }
 
         foreach (var hostedService in initializers)
         {
-            hostedService.StartAsync(combinedCancellationToken).ConfigureAwait(false).GetAwaiter();
+            hostedService.StartAsync(cancellationToken).ConfigureAwait(false).GetAwaiter();
         }
     }
 

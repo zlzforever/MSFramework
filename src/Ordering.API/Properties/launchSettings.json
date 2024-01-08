@@ -4,7 +4,8 @@
     "Ordering.API": {
       "commandName": "Project",
       "environmentVariables": {
-        "ASPNETCORE_ENVIRONMENT": "Development"
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        "DAPR_API_TOKEN": "Av388TRzGlRcLG08vecZ0Q=="
       }
     }
   }

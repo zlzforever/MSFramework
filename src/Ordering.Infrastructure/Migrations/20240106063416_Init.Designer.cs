@@ -12,7 +12,7 @@ using Ordering.Infrastructure;
 namespace Ordering.Infrastructure.Migrations
 {
     [DbContext(typeof(OrderingContext))]
-    [Migration("20231217151730_Init")]
+    [Migration("20240106063416_Init")]
     partial class Init
     {
         /// <inheritdoc />
@@ -115,7 +115,8 @@ namespace Ordering.Infrastructure.Migrations
                         .HasColumnName("lng");
 
                     b.Property<string>("TraceId")
-                        .HasColumnType("text")
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)")
                         .HasColumnName("trace_id");
 
                     b.Property<string>("Url")
@@ -180,11 +181,11 @@ namespace Ordering.Infrastructure.Migrations
                         .HasColumnType("character varying(36)")
                         .HasColumnName("id");
 
-                    b.Property<string>("BuyerId")
+                    b.Property<string>("BuyerId2")
                         .IsRequired()
                         .HasMaxLength(36)
                         .HasColumnType("character varying(36)")
-                        .HasColumnName("buyer_id");
+                        .HasColumnName("buyer_id2");
 
                     b.Property<string>("ConcurrencyStamp")
                         .IsConcurrencyToken()
@@ -206,10 +207,10 @@ namespace Ordering.Infrastructure.Migrations
                         .HasColumnType("character varying(256)")
                         .HasColumnName("creator_name");
 
-                    b.Property<string>("Description")
+                    b.Property<string>("Description2")
                         .HasMaxLength(2000)
                         .HasColumnType("character varying(2000)")
-                        .HasColumnName("description");
+                        .HasColumnName("description2");
 
                     b.Property<string>("DictJson")
                         .HasColumnType("JSONB")

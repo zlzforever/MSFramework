@@ -21,7 +21,7 @@ internal class GlobalExceptionFilter(ILogger<GlobalExceptionFilter> logger) : IE
         if (context.Exception is MicroserviceFrameworkFriendlyException e)
         {
             context.HttpContext.Response.StatusCode = 200;
-            context.Result = new BadRequestObjectResult(new ApiResult
+            context.Result = new ObjectResult(new ApiResult
             {
                 Success = false, Msg = e.Message, Code = e.Code, Data = null
             });

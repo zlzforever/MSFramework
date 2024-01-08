@@ -1,3 +1,4 @@
+using System;
 using System.Threading.Tasks;
 using MicroserviceFramework.Auditing;
 using MicroserviceFramework.Auditing.Model;

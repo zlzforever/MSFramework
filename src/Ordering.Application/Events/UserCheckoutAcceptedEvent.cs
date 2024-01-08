@@ -1,6 +1,6 @@
 using System;
 using System.Collections.Generic;
-using MicroserviceFramework.EventBus;
+using MicroserviceFramework.LocalEvent;
 
 namespace Ordering.Application.Events;
 

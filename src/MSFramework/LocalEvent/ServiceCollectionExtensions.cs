@@ -2,13 +2,14 @@ using System.Linq;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 
-namespace MicroserviceFramework.EventBus;
+namespace MicroserviceFramework.LocalEvent;
 
 public static class ServiceCollectionExtensions
 {
     public static IServiceCollection AddLocalEventPublisher(this IServiceCollection services)
     {
         services.TryAddScoped<IEventPublisher, LocalEventPublisher>();
+        services.AddHostedService<EventConsumeService>();
 
         MicroserviceFrameworkLoaderContext.Get(services).ResolveType += type =>
         {
@@ -19,12 +20,11 @@ public static class ServiceCollectionExtensions
             foreach (var serviceType in serviceTypes)
             {
                 var eventType = serviceType.GetGenericArguments()[0];
-                var descriptor =
-                    new ServiceDescriptor(Defaults.EventHandlerType.MakeGenericType(eventType), type,
-                        ServiceLifetime.Scoped);
-                services.TryAddEnumerable(descriptor);
+                EventHandlerStore.Add(eventType, type);
+                services.TryAddScoped(type);
             }
         };
+
         return services;
     }
 

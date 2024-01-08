@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.IO;
 using System.Threading.Tasks;
 using MicroserviceFramework.AspNetCore;
@@ -12,6 +13,18 @@ namespace MSFramework.AspNetCore.Test;
 [ApiController]
 public class ApiResultController : ApiControllerBase
 {
+    [HttpPost("validation")]
+    public int Validation([FromQuery, Required] int id)
+    {
+        return 1;
+    }
+
+    [HttpGet("452")]
+    public IActionResult Status()
+    {
+        return new StatusCodeResult(452);
+    }
+
     [HttpGet("int")]
     public int Get()
     {

@@ -1,6 +1,7 @@
+using System.Threading;
 using System.Threading.Tasks;
 using MicroserviceFramework.Application;
-using MicroserviceFramework.EventBus;
+using MicroserviceFramework.LocalEvent;
 using MicroserviceFramework.Mediator;
 using Microsoft.Extensions.Logging;
 using Ordering.Application.Events;
@@ -17,7 +18,7 @@ public class UserCheckoutAcceptedEventHandler(
     private readonly IMediator _mediator = mediator;
     private readonly ISession _session = session;
 
-    public Task HandleAsync(UserCheckoutAcceptedEvent @event)
+    public Task HandleAsync(UserCheckoutAcceptedEvent @event, CancellationToken cancellationToken)
     {
         // await _mediator.Send(new CreateOrderCommand(@event.OrderItems.Select(x =>
         // 		new CreateOrderCommand.OrderItemDTO

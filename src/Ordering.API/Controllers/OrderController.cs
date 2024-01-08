@@ -29,7 +29,7 @@ public class OrderController(
     IOrderingRepository orderRepository,
     IOrderingQuery orderingQuery,
     OrderingContext dbContext,
-    IUnitOfWork unitOfWorkManager,
+    IUnitOfWork unitOfWork,
     IExternalEntityRepository<User, int> externalEntityRepository,
     IObjectAssembler objectAssembler,
     IMediator mediator,
@@ -41,6 +41,7 @@ public class OrderController(
     public async Task<(OrderDto Order1, OrderDto Order2)> TestCreate()
     {
         var order1 = await AddAsync();
+        await unitOfWork.SaveChangesAsync();
         var order2 = await AddAsync();
         Logger.LogInformation("{TraceIdentifier}: Create test order completed", Session.TraceIdentifier);
         return (objectAssembler.To<OrderDto>(order1), objectAssembler.To<OrderDto>(order2));
@@ -77,19 +78,19 @@ public class OrderController(
 
     [Topic("rabbitmq-pubsub", Names.OrderCreatedEvent, "biz.ordering.dead-letter", false)]
     [HttpPost("OnOrderCreated")]
-    public Task OnOrderCreatedAsync([FromBody] E e)
+    public Task<bool> OnOrderCreatedAsync([FromBody] E e)
     {
         var a = jsonSerializer.Serialize(e);
         Console.WriteLine(a);
         logger.LogInformation(a);
-        return Task.CompletedTask;
+        return Task.FromResult(true);
     }
 
     public class E
     {
         public string Id { get; set; }
         public string Name { get; set; }
-        public long CreationTime { get; set; }
+        public string CreationTime { get; set; }
     }
 
     #region Command
@@ -140,7 +141,7 @@ public class OrderController(
         }
 
         order.AddEvent();
-        await unitOfWorkManager.SaveChangesAsync();
+        await unitOfWork.SaveChangesAsync();
         var orders = await dbContext.Set<Order>().ToListAsync();
         return orders.Select(x => objectAssembler.To<OrderDto>(x));
     }
