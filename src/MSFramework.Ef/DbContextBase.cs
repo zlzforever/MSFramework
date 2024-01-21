@@ -269,15 +269,15 @@ public abstract class DbContextBase : DbContext
             switch (entry.State)
             {
                 case EntityState.Added:
-                    ApplyConceptsForAddedEntity(entry, userId, _session.UserName);
+                    ApplyConceptsForAddedEntity(entry, userId, _session.UserDisplayName);
                     changed = true;
                     break;
                 case EntityState.Modified:
-                    ApplyConceptsForModifiedEntity(entry, userId, _session.UserName);
+                    ApplyConceptsForModifiedEntity(entry, userId, _session.UserDisplayName);
                     changed = true;
                     break;
                 case EntityState.Deleted:
-                    ApplyConceptsForDeletedEntity(entry, userId, _session.UserName);
+                    ApplyConceptsForDeletedEntity(entry, userId, _session.UserDisplayName);
                     changed = true;
                     break;
                 case EntityState.Detached:

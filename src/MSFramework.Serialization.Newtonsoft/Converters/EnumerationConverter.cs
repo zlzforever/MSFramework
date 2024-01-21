@@ -30,27 +30,24 @@ public class EnumerationConverter : JsonConverter
     {
         var token = JToken.Load(reader);
         var value = token.ToString();
+        // var isNullable = objectType.IsGenericType && objectType.GetGenericTypeDefinition() == typeof(Nullable<>);
+        // var enumType = objectType;
+        // if (isNullable)
+        // {
+        //     enumType = objectType.GetGenericArguments().FirstOrDefault();
+        // }
 
-        var isNullable = objectType.IsGenericType && objectType.GetGenericTypeDefinition() == typeof(Nullable<>);
-        var enumType = objectType;
-        if (isNullable)
+        if (token.Type == JTokenType.None
+            || token.Type == JTokenType.Null
+            || token.Type == JTokenType.Undefined
+            || string.IsNullOrEmpty(value))
         {
-            enumType = objectType.GetGenericArguments().FirstOrDefault();
-        }
-
-        if (string.IsNullOrWhiteSpace(value))
-        {
-            if (isNullable)
-            {
-                return null;
-            }
-
-            throw new MicroserviceFrameworkException(122, $"{reader.Path} 不支持空值");
+            return null;
         }
 
         try
         {
-            var enumeration = Enumeration.GetAll(enumType).FirstOrDefault(i => i.Id == value);
+            var enumeration = Enumeration.GetAll(objectType).FirstOrDefault(i => i.Id == value);
             if (enumeration != null)
             {
                 return enumeration;

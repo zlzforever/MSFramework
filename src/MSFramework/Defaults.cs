@@ -8,6 +8,11 @@ public static class Defaults
 {
     public static IJsonSerializer JsonSerializer;
 
+    public static class Headers
+    {
+        public const string InternalCall = "Internal-Call";
+    }
+
     public static class Types
     {
         public static readonly Type String = typeof(string);

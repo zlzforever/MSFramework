@@ -17,17 +17,8 @@ internal sealed class ResponseWrapperFilter(ILogger<ResponseWrapperFilter> logge
     {
         logger.LogDebug("开始执行返回结果过滤器");
 
-        // dapr 调用不包装 APIResult
-        var invokeFromDapr = !string.IsNullOrEmpty(context.HttpContext.Request.Headers["Pubsubname"])
-                             && !string.IsNullOrEmpty(context.HttpContext.Request.Headers["traceparent"]);
-        if (invokeFromDapr)
-        {
-            await next();
-            return;
-        }
-
         // 服务调用不做 APIResult 包装
-        if (context.HttpContext.Request.Headers.TryGetValue("service-invocation", out var value))
+        if (context.HttpContext.Request.Headers.TryGetValue(Defaults.Headers.InternalCall, out var value))
         {
             if ("true".Equals(value, StringComparison.OrdinalIgnoreCase))
             {
