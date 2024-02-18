@@ -11,7 +11,8 @@ internal class GlobalExceptionFilter(ILogger<GlobalExceptionFilter> logger) : IE
 {
     public void OnException(ExceptionContext context)
     {
-        logger.LogError(context.Exception, "请求 {Url} 异常", context.HttpContext.Request.GetDisplayUrl());
+        logger.LogError(context.Exception, "请求 {Method} {Url} 异常", context.HttpContext.Request.Method,
+            context.HttpContext.Request.GetDisplayUrl());
 
         if (context.ExceptionHandled)
         {

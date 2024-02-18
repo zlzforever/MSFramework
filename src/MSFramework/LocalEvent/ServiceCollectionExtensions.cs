@@ -1,3 +1,4 @@
+using System;
 using System.Linq;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
@@ -28,8 +29,21 @@ public static class ServiceCollectionExtensions
         return services;
     }
 
-    public static MicroserviceFrameworkBuilder UseLocalEventPublisher(this MicroserviceFrameworkBuilder builder)
+    public static MicroserviceFrameworkBuilder UseLocalEventPublisher(this MicroserviceFrameworkBuilder builder,
+        Action<LocalEventOptions> configure = null)
     {
+        if (configure != null)
+        {
+            builder.Services.Configure(configure);
+        }
+        else
+        {
+            builder.Services.Configure<LocalEventOptions>(options =>
+            {
+                options.EnableAuditing = false;
+            });
+        }
+
         builder.Services.AddLocalEventPublisher();
         return builder;
     }

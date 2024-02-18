@@ -2,15 +2,20 @@ using System;
 using System.Threading;
 using System.Threading.Tasks;
 using MicroserviceFramework.Application;
+using MicroserviceFramework.Auditing.Model;
 using MicroserviceFramework.Domain;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using MongoDB.Bson;
 
 namespace MicroserviceFramework.LocalEvent;
 
-public class EventConsumeService(IServiceProvider serviceProvider, ILogger<EventConsumeService> logger)
+public class EventConsumeService(
+    IServiceProvider serviceProvider,
+    ILogger<EventConsumeService> logger,
+    IOptions<LocalEventOptions> localEventOptions)
     : BackgroundService
 {
     protected override Task ExecuteAsync(CancellationToken stoppingToken)
@@ -46,11 +51,18 @@ public class EventConsumeService(IServiceProvider serviceProvider, ILogger<Event
                                 return;
                             }
 
+                            var session = services.GetService<ISession>();
                             // 覆盖 session 对象
                             if (state.Session != null)
                             {
-                                var session = services.GetService<ISession>();
                                 session?.Override(state.Session);
+                            }
+
+                            if (localEventOptions.Value.EnableAuditing)
+                            {
+                                var unitOfWork = services.GetService<IUnitOfWork>();
+                                unitOfWork?.SetAuditOperationFactory(() =>
+                                    CreateAuditedOperation(session, handlerName));
                             }
 
                             if (descriptor.HandleMethod.Invoke(handler, [state.EventData, stoppingToken]) is not Task
@@ -86,5 +98,13 @@ public class EventConsumeService(IServiceProvider serviceProvider, ILogger<Event
                 }
             }
         }, stoppingToken);
+    }
+
+    private AuditOperation CreateAuditedOperation(ISession session, string handlerType)
+    {
+        var auditedOperation = new AuditOperation(handlerType, null, null, null, null,
+            null, null, session.TraceIdentifier);
+        auditedOperation.SetCreation(session.UserId, session.UserDisplayName, DateTimeOffset.Now);
+        return auditedOperation;
     }
 }
