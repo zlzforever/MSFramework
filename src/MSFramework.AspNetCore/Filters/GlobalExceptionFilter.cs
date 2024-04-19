@@ -20,10 +20,11 @@ internal class GlobalExceptionFilter(ILogger<GlobalExceptionFilter> logger) : IE
             return;
         }
 
-        if (context.Exception is UnauthorizedAccessException)
+        if (context.Exception is UnauthorizedAccessException uae)
         {
             context.HttpContext.Response.StatusCode = 403;
-            context.Result = new ObjectResult(new ApiResult { Success = false, Msg = "访问受限", Code = 403, Data = null });
+            context.Result =
+                new ObjectResult(new ApiResult { Success = false, Msg = uae.Message, Code = 403, Data = null });
         }
         else if (context.Exception is MicroserviceFrameworkFriendlyException e)
         {
