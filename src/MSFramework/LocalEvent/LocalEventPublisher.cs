@@ -14,6 +14,6 @@ internal class LocalEventPublisher(
     {
         Check.NotNull(@event, nameof(@event));
         var session = serviceProvider.GetService<ISession>();
-        await EventBusImpl.EventChannel.Writer.WriteAsync((session, @event));
+        await LocalEventService.EventChannel.Writer.WriteAsync((session, @event));
     }
 }

@@ -48,5 +48,5 @@ public interface ISession
     /// </summary>
     IReadOnlyCollection<string> Subjects { get; }
 
-    void Override(ISession session);
+    void Load(ISession session);
 }

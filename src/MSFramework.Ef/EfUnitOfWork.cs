@@ -29,7 +29,7 @@ internal class EfUnitOfWork : IUnitOfWork
         _serviceProvider = serviceProvider;
     }
 
-    public event Func<Task> SavedChanges;
+    public event Action SavedChanges;
 
     public void SetAuditOperationFactory(Func<AuditOperation> factory)
     {
@@ -86,6 +86,6 @@ internal class EfUnitOfWork : IUnitOfWork
             await dbContext.SaveChangesAsync(cancellationToken);
         }
 
-        SavedChanges?.Invoke().ConfigureAwait(true).GetAwaiter();
+        SavedChanges?.Invoke();
     }
 }

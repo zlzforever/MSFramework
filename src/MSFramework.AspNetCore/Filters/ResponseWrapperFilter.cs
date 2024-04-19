@@ -34,8 +34,8 @@ internal sealed class ResponseWrapperFilter(ILogger<ResponseWrapperFilter> logge
             var objectResult = (ObjectResult)context.Result;
             if (objectResult.Value is ProblemDetails problemDetails)
             {
-                var num = problemDetails.Status ?? 200;
-                var success = HttpUtil.IsSuccessStatusCode(num);
+                var code = problemDetails.Status ?? 200;
+                var success = HttpUtil.IsSuccessStatusCode(code);
                 if (success)
                 {
                     context.Result = new ObjectResult(new ApiResult { Data = objectResult.Value, Msg = string.Empty });
@@ -44,10 +44,10 @@ internal sealed class ResponseWrapperFilter(ILogger<ResponseWrapperFilter> logge
                 {
                     context.Result = new ObjectResult(new ApiResult
                     {
-                        Success = HttpUtil.IsSuccessStatusCode(num),
+                        Success = HttpUtil.IsSuccessStatusCode(code),
                         Code = -1,
                         Msg = problemDetails.Title ?? string.Empty
-                    }) { StatusCode = num };
+                    }) { StatusCode = code };
                 }
             }
             else if (objectResult.Value is ApiResult)

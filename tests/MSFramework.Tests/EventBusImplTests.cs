@@ -50,11 +50,11 @@ public class EventBusImplTests
                 x.UseDependencyInjectionLoader();
                 x.UseLocalEventPublisher();
             });
-            serviceCollection.AddSingleton<EventConsumeService>();
+            serviceCollection.AddSingleton<LocalEventService>();
             var provider = serviceCollection.BuildServiceProvider();
             provider.UseMicroserviceFramework();
 
-            var backgroundService = provider.GetRequiredService<EventConsumeService>();
+            var backgroundService = provider.GetRequiredService<LocalEventService>();
             backgroundService.StartAsync(default).GetAwaiter();
             await Task.Delay(100);
 
@@ -135,11 +135,11 @@ public class EventBusImplTests
                 x.UseLocalEventPublisher();
                 x.UseAspNetCore();
             });
-            serviceCollection.AddSingleton<EventConsumeService>();
+            serviceCollection.AddSingleton<LocalEventService>();
             var provider = serviceCollection.BuildServiceProvider();
             provider.UseMicroserviceFramework();
 
-            var backgroundService = provider.GetRequiredService<EventConsumeService>();
+            var backgroundService = provider.GetRequiredService<LocalEventService>();
             await backgroundService.StartAsync(default);
             await Task.Delay(100);
 

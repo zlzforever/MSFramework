@@ -29,7 +29,7 @@ public static class EventTypeExtensions
 
         if (!eventType.IsEvent())
         {
-            throw new ArgumentException($"{eventType.Name} 不是一个事件类型");
+            throw new ArgumentException($"{eventType.Name} 不是事件类型");
         }
 
         return EventMetadata.GetOrAdd(eventType,

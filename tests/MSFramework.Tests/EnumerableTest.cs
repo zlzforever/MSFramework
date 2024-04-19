@@ -23,11 +23,11 @@ public class EnumerableTest
     public void Join()
     {
         var list = new List<string> { "1", "2" };
-        var str = list.JoinString(", ");
+        var str = list.JoinSeparator(", ");
         Assert.Equal("1, 2", str);
 
         var list2 = new List<A> { new A { Name = "1" }, new A { Name = "2" } };
-        var str2 = list2.JoinString(", ", x => x.Name);
+        var str2 = list2.JoinSeparator(", ", x => x.Name);
         Assert.Equal("1, 2", str2);
     }
 

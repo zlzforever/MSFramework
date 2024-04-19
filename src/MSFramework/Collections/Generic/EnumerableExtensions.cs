@@ -15,12 +15,12 @@ public static class EnumerableExtensions
     /// <param name="enumerable"> 要处理的集合 </param>
     /// <param name="separator"> 分隔符，默认为逗号 </param>
     /// <returns> 拼接后的字符串 </returns>
-    public static string JoinString<T>(this IEnumerable<T> enumerable, string separator)
+    public static string JoinSeparator<T>(this IEnumerable<T> enumerable, string separator)
     {
         return string.Join(separator, enumerable);
     }
 
-    public static string JoinString<T, TProperty>(this IEnumerable<T> enumerable,
+    public static string JoinSeparator<T, TProperty>(this IEnumerable<T> enumerable,
         string separator, Func<T, TProperty> selector)
     {
         return string.Join(separator, enumerable.Select(selector));

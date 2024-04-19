@@ -12,7 +12,10 @@ namespace MicroserviceFramework.Domain;
 /// </summary>
 public interface IUnitOfWork
 {
-    event Func<Task> SavedChanges;
+    /// <summary>
+    /// 注册保存事件
+    /// </summary>
+    event Action SavedChanges;
 
     /// <summary>
     /// 设置审计信息

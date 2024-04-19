@@ -1,5 +1,6 @@
 using System;
 using System.Threading;
+using System.Threading.Channels;
 using System.Threading.Tasks;
 using MicroserviceFramework.Application;
 using MicroserviceFramework.Auditing.Model;
@@ -12,21 +13,25 @@ using MongoDB.Bson;
 
 namespace MicroserviceFramework.LocalEvent;
 
-public class EventConsumeService(
+public class LocalEventService(
     IServiceProvider serviceProvider,
-    ILogger<EventConsumeService> logger,
+    ILogger<LocalEventService> logger,
     IOptions<LocalEventOptions> localEventOptions)
     : BackgroundService
 {
+    internal static readonly Channel<(ISession Session, EventBase EventData)>
+        EventChannel =
+            Channel.CreateUnbounded<(ISession, EventBase)>();
+
     protected override Task ExecuteAsync(CancellationToken stoppingToken)
     {
         return Task.Factory.StartNew(async () =>
         {
-            logger.LogInformation("事件消费服务启动");
+            logger.LogInformation("本地消费服务启动");
 
-            while (await EventBusImpl.EventChannel.Reader.WaitToReadAsync(stoppingToken))
+            while (await EventChannel.Reader.WaitToReadAsync(stoppingToken))
             {
-                while (EventBusImpl.EventChannel.Reader.TryRead(out var state))
+                while (EventChannel.Reader.TryRead(out var state))
                 {
                     try
                     {
@@ -41,7 +46,7 @@ public class EventConsumeService(
                         {
                             var handlerName = descriptor.HandlerType.FullName;
 
-                            logger.LogInformation("{TraceId}, 处理器 {HandlerType} 执行开始", traceId, handlerName);
+                            logger.LogDebug("{TraceId}, 处理器 {HandlerType} 执行开始", traceId, handlerName);
 
                             using var scope = serviceProvider.CreateScope();
                             var services = scope.ServiceProvider;
@@ -55,7 +60,7 @@ public class EventConsumeService(
                             // 覆盖 session 对象
                             if (state.Session != null)
                             {
-                                session?.Override(state.Session);
+                                session?.Load(state.Session);
                             }
 
                             if (localEventOptions.Value.EnableAuditing)
@@ -80,7 +85,7 @@ public class EventConsumeService(
                                     await unitOfWork.SaveChangesAsync(stoppingToken);
                                 }
 
-                                logger.LogInformation(
+                                logger.LogDebug(
                                     "{TraceId}, 处理器 {HandlerType} 执行结束", traceId, handlerName);
                             }
                             catch (Exception e)

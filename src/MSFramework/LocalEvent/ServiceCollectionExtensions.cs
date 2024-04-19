@@ -10,7 +10,7 @@ public static class ServiceCollectionExtensions
     public static IServiceCollection AddLocalEventPublisher(this IServiceCollection services)
     {
         services.TryAddScoped<IEventPublisher, LocalEventPublisher>();
-        services.AddHostedService<EventConsumeService>();
+        services.AddHostedService<LocalEventService>();
 
         MicroserviceFrameworkLoaderContext.Get(services).ResolveType += type =>
         {

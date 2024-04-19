@@ -95,7 +95,7 @@ public class HttpSession : ISession
 
     public IReadOnlyCollection<string> Subjects { get; private set; }
 
-    public void Override(ISession session)
+    public void Load(ISession session)
     {
         TraceIdentifier = session.TraceIdentifier;
         UserId = session.UserId;

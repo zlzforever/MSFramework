@@ -18,7 +18,7 @@ public class ApplicationInfo
             ? hostEnvironment.ApplicationName
             : applicationName;
         applicationName = string.IsNullOrWhiteSpace(applicationName)
-            ? Assembly.GetEntryAssembly()?.FullName
+            ? Assembly.GetEntryAssembly()?.GetName().Name
             : applicationName;
         Name = applicationName;
     }
