@@ -5,6 +5,7 @@ using System.IO;
 using System.Threading.Tasks;
 using MicroserviceFramework.AspNetCore;
 using MicroserviceFramework.Common;
+using MicroserviceFramework.Domain;
 using Microsoft.AspNetCore.Mvc;
 
 namespace MSFramework.AspNetCore.Test;
@@ -13,6 +14,21 @@ namespace MSFramework.AspNetCore.Test;
 [ApiController]
 public class ApiResultController : ApiControllerBase
 {
+    public class EnumInput
+    {
+        /// <summary>
+        ///
+        /// </summary>
+        [Required]
+        public State State { get; set; }
+    }
+
+    [HttpPost("enum")]
+    public int ValidationEnum([FromBody] EnumInput input)
+    {
+        return 1;
+    }
+
     [HttpPost("validation")]
     public int Validation([FromQuery, Required] int id)
     {

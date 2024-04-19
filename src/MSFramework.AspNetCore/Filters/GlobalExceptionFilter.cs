@@ -1,3 +1,4 @@
+using System;
 using MicroserviceFramework.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.Extensions;
@@ -19,7 +20,12 @@ internal class GlobalExceptionFilter(ILogger<GlobalExceptionFilter> logger) : IE
             return;
         }
 
-        if (context.Exception is MicroserviceFrameworkFriendlyException e)
+        if (context.Exception is UnauthorizedAccessException)
+        {
+            context.HttpContext.Response.StatusCode = 403;
+            context.Result = new ObjectResult(new ApiResult { Success = false, Msg = "访问受限", Code = 403, Data = null });
+        }
+        else if (context.Exception is MicroserviceFrameworkFriendlyException e)
         {
             context.HttpContext.Response.StatusCode = 200;
             context.Result = new ObjectResult(new ApiResult

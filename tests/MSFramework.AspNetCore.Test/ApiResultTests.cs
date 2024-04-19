@@ -10,6 +10,30 @@ public class ApiResultTests(ITestOutputHelper output) : BaseTest
     private readonly ITestOutputHelper _output = output;
 
     [Fact]
+    public async Task ValidationEnum()
+    {
+        var json = """
+                   {
+                     "state": "Ok"
+                   }
+                   """;
+        var result1 = await Client
+            .PostAsync("/apiResult/enum", new StringContent(json, System.Text.Encoding.UTF8, "application/json"));
+        var text1 = await result1.Content.ReadAsStringAsync();
+        Assert.Equal(200, (int)result1.StatusCode);
+
+
+        var result2 = await Client
+            .PostAsync("/apiResult/enum", new StringContent("""
+                                                            {
+                                                              "state": "Error"
+                                                            }
+                                                            """, System.Text.Encoding.UTF8, "application/json"));
+        var text2 = await result2.Content.ReadAsStringAsync();
+        Assert.Equal(200, (int)result2.StatusCode);
+    }
+
+    [Fact]
     public async Task Validation()
     {
         var result = await Client.PostAsync("/apiResult/validation", new StringContent(""));
@@ -19,6 +43,7 @@ public class ApiResultTests(ITestOutputHelper output) : BaseTest
                      {"errors":[{"name":"id","messages":["The id field is required."]}],"success":false,"code":1,"msg":"数据校验不通过","data":null}
                      """, text);
     }
+
 
     [Fact]
     public async Task Return452()
