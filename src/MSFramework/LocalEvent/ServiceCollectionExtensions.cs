@@ -11,17 +11,17 @@ public static class ServiceCollectionExtensions
     {
         services.TryAddScoped<IEventPublisher, LocalEventPublisher>();
         services.AddHostedService<LocalEventService>();
-
+        var handlerInterface = typeof(IEventHandler<>);
         MicroserviceFrameworkLoaderContext.Get(services).ResolveType += type =>
         {
             var serviceTypes = type
                 .GetInterfaces()
-                .Where(i => i.IsGenericType && i.GetGenericTypeDefinition() == Defaults.EventHandlerType);
+                .Where(i => i.IsGenericType && i.GetGenericTypeDefinition() == handlerInterface);
 
             foreach (var serviceType in serviceTypes)
             {
                 var eventType = serviceType.GetGenericArguments()[0];
-                EventHandlerStore.Add(eventType, type);
+                LocalEventService.Register(eventType, type);
                 services.TryAddScoped(type);
             }
         };

@@ -1,6 +1,6 @@
 using System;
+using System.Collections.Generic;
 using System.Threading;
-using System.Threading.Channels;
 using System.Threading.Tasks;
 using MicroserviceFramework.Application;
 using MicroserviceFramework.Auditing.Model;
@@ -19,28 +19,42 @@ public class LocalEventService(
     IOptions<LocalEventOptions> localEventOptions)
     : BackgroundService
 {
-    internal static readonly Channel<(ISession Session, EventBase EventData)>
-        EventChannel =
-            Channel.CreateUnbounded<(ISession, EventBase)>();
+    private static readonly Dictionary<Type, HashSet<EventDescriptor>> Descriptors =
+        new();
+
+    public static void Register(Type eventType, Type handlerType)
+    {
+        var method = handlerType.GetMethod("HandleAsync", [eventType, typeof(CancellationToken)]);
+        if (method == null)
+        {
+            throw new ArgumentException($"事件处理器 {handlerType.FullName} 没有实现事件 {eventType.FullName} 的处理方法");
+        }
+
+        if (!Descriptors.ContainsKey(eventType))
+        {
+            Descriptors.Add(eventType, new HashSet<EventDescriptor>());
+        }
+
+        Descriptors[eventType].Add(new EventDescriptor(handlerType, method));
+    }
 
     protected override Task ExecuteAsync(CancellationToken stoppingToken)
     {
         return Task.Factory.StartNew(async () =>
         {
-            logger.LogInformation("本地消费服务启动");
+            logger.LogInformation("本地事件消费服务启动");
 
-            while (await EventChannel.Reader.WaitToReadAsync(stoppingToken))
+            while (await LocalEventPublisher.EventChannel.Reader.WaitToReadAsync(stoppingToken))
             {
-                while (EventChannel.Reader.TryRead(out var state))
+                while (LocalEventPublisher.EventChannel.Reader.TryRead(out var entry))
                 {
                     try
                     {
-                        var traceId = state.Session == null
+                        var traceId = entry.Session == null
                             ? ObjectId.GenerateNewId().ToString()
-                            : state.Session.TraceIdentifier;
-                        var eventType = state.EventData.GetType();
-
-                        var descriptors = EventHandlerStore.Get(eventType);
+                            : entry.Session.TraceIdentifier;
+                        var eventType = entry.EventData.GetType();
+                        var descriptors = GetDescriptors(eventType);
 
                         foreach (var descriptor in descriptors)
                         {
@@ -58,9 +72,9 @@ public class LocalEventService(
 
                             var session = services.GetService<ISession>();
                             // 覆盖 session 对象
-                            if (state.Session != null)
+                            if (entry.Session != null)
                             {
-                                session?.Load(state.Session);
+                                session?.Load(entry.Session);
                             }
 
                             if (localEventOptions.Value.EnableAuditing)
@@ -70,7 +84,7 @@ public class LocalEventService(
                                     CreateAuditedOperation(session, handlerName));
                             }
 
-                            if (descriptor.HandleMethod.Invoke(handler, [state.EventData, stoppingToken]) is not Task
+                            if (descriptor.HandleMethod.Invoke(handler, [entry.EventData, stoppingToken]) is not Task
                                 task)
                             {
                                 continue;
@@ -98,11 +112,21 @@ public class LocalEventService(
                     catch (Exception e)
                     {
                         logger.LogError(e, "处理事件失败: {EventData}",
-                            MicroserviceFramework.Defaults.JsonSerializer.Serialize(state));
+                            Defaults.JsonSerializer.Serialize(entry));
                     }
                 }
             }
         }, stoppingToken);
+    }
+
+    private static IReadOnlyCollection<EventDescriptor> GetDescriptors(Type eventType)
+    {
+        if (!Descriptors.TryGetValue(eventType, out var value))
+        {
+            return Array.Empty<EventDescriptor>();
+        }
+
+        return value;
     }
 
     private AuditOperation CreateAuditedOperation(ISession session, string handlerType)

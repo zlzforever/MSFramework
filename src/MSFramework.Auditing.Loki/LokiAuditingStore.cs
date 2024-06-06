@@ -43,9 +43,9 @@ public class LokiAuditingStore : IAuditingStore
             new("StartTime", new ScalarValue(auditOperation.CreationTime.Value.ToString("yyyy-MM-dd HH:mm:ss"))),
             new("EndTime", new ScalarValue(auditOperation.EndTime.ToString("yyyy-MM-dd HH:mm:ss"))),
             new("Elapsed", new ScalarValue(auditOperation.Elapsed)),
-            new("TraceId", new ScalarValue(auditOperation.TraceId)),
-            new("UserId", new ScalarValue(auditOperation.CreatorId)),
-            new("Id", new ScalarValue(auditOperation.Id)),
+            // new("TraceId", new ScalarValue(auditOperation.TraceId)),
+            // new("UserId", new ScalarValue(auditOperation.CreatorId)),
+            new("OperationId", new ScalarValue(auditOperation.Id)),
             new("Classification", new ScalarValue("Auditing"))
         };
         var auditOperationEvent = new LogEvent(DateTimeOffset.Now, LogEventLevel.Information, null, OperationTemplate,
@@ -56,22 +56,20 @@ public class LokiAuditingStore : IAuditingStore
         {
             var properties = new List<LogEventProperty>
             {
-                new("Url", new ScalarValue(auditOperation.Url)),
-                new("IP", new ScalarValue(auditOperation.IP)),
-                new("OperationId", new ScalarValue(auditEntity.Id)),
-                new("Type", new ScalarValue(auditEntity.Type)),
-                new("EntityId", new ScalarValue(auditEntity.EntityId)),
+                new("OperationId", new ScalarValue(auditOperation.Id)),
                 new("OperationType", new ScalarValue(auditEntity.OperationType.Id)),
+                new("EntityId", new ScalarValue(auditEntity.EntityId)),
+                new("Type", new ScalarValue(auditEntity.Type)),
                 new("Classification", new ScalarValue("Auditing")),
-                new("TraceId", new ScalarValue(auditOperation.TraceId)),
-                new("UserId", new ScalarValue(auditOperation.CreatorId)),
+                // new("TraceId", new ScalarValue(auditOperation.TraceId)),
+                // new("UserId", new ScalarValue(auditOperation.CreatorId)),
             };
 
             foreach (var property in auditEntity.Properties)
             {
                 properties.Add(new LogEventProperty($"{property.Name}_Type", new ScalarValue(property.Type)));
-                properties.Add(new LogEventProperty($"{property.Name}_OriginalValue",
-                    new ScalarValue(property.OriginalValue)));
+                // properties.Add(new LogEventProperty($"{property.Name}_OriginalValue",
+                //     new ScalarValue(property.OriginalValue)));
                 properties.Add(new LogEventProperty($"{property.Name}_NewValue", new ScalarValue(property.NewValue)));
             }
 
