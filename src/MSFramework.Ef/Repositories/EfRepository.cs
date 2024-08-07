@@ -31,7 +31,7 @@ public abstract class EfRepository<TEntity, TKey> : IRepository<TEntity, TKey>, 
 
     protected DbSet<TEntity> DbSet => _dbSet;
 
-    protected DbContextBase DbContext => _dbContext;
+    public DbContext DbContext => _dbContext;
 
     protected bool? UseQuerySplittingBehavior { get; init; }
 
@@ -142,12 +142,6 @@ public abstract class EfRepository<TEntity, TKey> : IRepository<TEntity, TKey>, 
     //
     // 	return entity;
     // }
-
-
-    public DbContextBase GetDbContext()
-    {
-        return _dbContext;
-    }
 
     public DbSet<TEntity> GetDbSet()
     {

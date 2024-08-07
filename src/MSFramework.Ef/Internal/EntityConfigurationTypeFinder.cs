@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using MicroserviceFramework.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
 
 namespace MicroserviceFramework.Ef.Internal;
@@ -15,30 +14,30 @@ internal sealed class EntityConfigurationTypeFinder : IEntityConfigurationTypeFi
         EntityRegistersDict;
 
     private static readonly Dictionary<Type, Type> EntityMapDbContextDict;
-    private static readonly Dictionary<string, Type> EntityNameMapEntityTypeDict;
-    private static readonly Dictionary<Type, EntityTypeConfigurationMetadata> Empty;
+    // private static readonly Dictionary<string, Type> EntityNameMapEntityTypeDict;
     private static readonly HashSet<Type> DbContextTypes;
 
     static EntityConfigurationTypeFinder()
     {
         EntityRegistersDict = new Dictionary<Type, Dictionary<Type, EntityTypeConfigurationMetadata>>();
         EntityMapDbContextDict = new Dictionary<Type, Type>();
-        EntityNameMapEntityTypeDict = new();
-        Empty = new Dictionary<Type, EntityTypeConfigurationMetadata>();
+        // EntityNameMapEntityTypeDict = new();
         DbContextTypes = [];
+        var createEntityTypeBuilderMethod = typeof(ModelBuilder)
+            .GetMethods().First(x => x.Name == "Entity" && x.GetGenericArguments().Length == 1);
 
         var assemblies = Utils.Runtime.GetAllAssemblies();
 
         var types = assemblies.SelectMany(assembly => assembly.DefinedTypes).Where(type =>
-            type.IsClass && !type.IsAbstract && !type.IsGenericTypeDefinition).ToArray();
+            type.IsClass && !type.IsAbstract && !type.IsGenericTypeDefinition);
 
-        var applyConfigurationMethod = typeof(ModelBuilder)
-            .GetMethods()
-            .Single(
-                e => e.Name == "ApplyConfiguration"
-                     && e.ContainsGenericParameters
-                     && e.GetParameters().SingleOrDefault()?.ParameterType.GetGenericTypeDefinition()
-                     == typeof(IEntityTypeConfiguration<>));
+        // var applyConfigurationMethod = typeof(ModelBuilder)
+        //     .GetMethods()
+        //     .Single(
+        //         e => e.Name == "ApplyConfiguration"
+        //              && e.ContainsGenericParameters
+        //              && e.GetParameters().SingleOrDefault()?.ParameterType.GetGenericTypeDefinition()
+        //              == typeof(IEntityTypeConfiguration<>));
 
         foreach (var constructableType in types)
         {
@@ -67,18 +66,23 @@ internal sealed class EntityConfigurationTypeFinder : IEntityConfigurationTypeFi
                             new Dictionary<Type, EntityTypeConfigurationMetadata>());
                     }
 
-                    configuration ??= Activator.CreateInstance(constructableType);
+                    var dict = EntityRegistersDict[dbContextType];
 
-                    if (EntityRegistersDict[dbContextType].ContainsKey(entityType))
+                    if (dict.ContainsKey(entityType))
                     {
                         throw new MicroserviceFrameworkException($"类型 {entityType}, {dbContextType} 已经注册");
                     }
 
-                    var methodInfo = applyConfigurationMethod.MakeGenericMethod(entityType);
-                    EntityRegistersDict[dbContextType].Add(entityType,
-                        new EntityTypeConfigurationMetadata(entityType, methodInfo, configuration));
-                    EntityMapDbContextDict.AddOrUpdate(entityType, dbContextType);
-                    EntityNameMapEntityTypeDict.TryAdd(entityType.FullName, entityType);
+                    var configureMethodInfo = typeof(IEntityTypeConfiguration<>) // IEntityTypeConfiguration<TEntity>
+                        .MakeGenericType(entityType)
+                        .GetMethod("Configure");
+
+                    configuration ??= Activator.CreateInstance(constructableType);
+                    var metadata = new EntityTypeConfigurationMetadata(entityType, configureMethodInfo,
+                        createEntityTypeBuilderMethod.MakeGenericMethod(entityType), configuration);
+                    dict.Add(entityType, metadata);
+                    EntityMapDbContextDict.TryAdd(entityType, dbContextType);
+                    // EntityNameMapEntityTypeDict.TryAdd(entityType.FullName, entityType);
                     DbContextTypes.Add(dbContextType);
                 }
 
@@ -99,21 +103,21 @@ internal sealed class EntityConfigurationTypeFinder : IEntityConfigurationTypeFi
         }
     }
 
-    public Type GetEntityType(string name)
-    {
-        return EntityNameMapEntityTypeDict.TryGetValue(name, out var value) ? value : null;
-    }
+    // public Type GetEntityType(string name)
+    // {
+    //     return EntityNameMapEntityTypeDict.TryGetValue(name, out var value) ? value : null;
+    // }
 
     /// <summary>
     /// 获取指定上下文类型的实体配置注册信息
     /// </summary>
     /// <param name="dbContextType">数据上下文类型</param>
     /// <returns></returns>
-    public Dictionary<Type, EntityTypeConfigurationMetadata> GetEntityTypeConfigurations(Type dbContextType)
+    public IEnumerable<EntityTypeConfigurationMetadata> GetEntityTypeConfigurations(Type dbContextType)
     {
         return EntityRegistersDict.TryGetValue(dbContextType, out var value)
-            ? value
-            : Empty;
+            ? value.Values
+            : Enumerable.Empty<EntityTypeConfigurationMetadata>();
     }
 
     /// <summary>
@@ -123,13 +127,12 @@ internal sealed class EntityConfigurationTypeFinder : IEntityConfigurationTypeFi
     /// <returns>数据上下文类型</returns>
     public Type GetDbContextTypeForEntity(Type entityType)
     {
-        if (!EntityMapDbContextDict.ContainsKey(entityType))
+        if (!EntityMapDbContextDict.TryGetValue(entityType, out var entity))
         {
-            throw new MicroserviceFrameworkException(
-                "未发现任何数据库上下文实体映射配置");
+            throw new MicroserviceFrameworkException("未发现任何数据库上下文实体映射配置");
         }
 
-        return EntityMapDbContextDict[entityType];
+        return entity;
     }
 
     public IEnumerable<Type> GetAllDbContextTypes()

@@ -7,7 +7,7 @@ namespace MSFramework.Tests;
 public class DateTimeTests
 {
     [Fact]
-    public void A()
+    public void ToUnixTimeSeconds()
     {
         var unixTime = 1689262630;
         var dt = DateTimeOffset.FromUnixTimeSeconds(unixTime).LocalDateTime;

@@ -21,7 +21,7 @@ public static class InvalidModelStateResponseFactory
 
         return new ObjectResult(new ApiResultWithErrors
         {
-            Code = 1, Success = false, Msg = "数据校验不通过", Errors = errors
+            Msg = "数据校验不通过", Errors = errors
         });
     };
 }

@@ -1,5 +1,3 @@
-using System.Net;
-
 namespace MicroserviceFramework.Utils;
 
 public static class HttpUtil

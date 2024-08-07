@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text.Json;
@@ -7,9 +8,9 @@ using MicroserviceFramework.AspNetCore;
 using MicroserviceFramework.AspNetCore.Filters;
 using MicroserviceFramework.AspNetCore.Mvc.ModelBinding;
 using MicroserviceFramework.AspNetCore.Swagger;
-using MicroserviceFramework.Auditing.Loki;
 using MicroserviceFramework.AutoMapper;
 using MicroserviceFramework.Ef;
+using MicroserviceFramework.Ef.MySql;
 using MicroserviceFramework.Ef.PostgreSql;
 using MicroserviceFramework.Extensions.DependencyInjection;
 using MicroserviceFramework.LocalEvent;
@@ -123,29 +124,36 @@ public static class Startup
             );
         });
 
+        var dbContextSettingsList = configuration.GetSection("DbContexts").Get<List<DbContextSettings>>();
+        var dbContextSettings = dbContextSettingsList[0];
         services.AddDbContext<OrderingContext>((provider, x) =>
         {
             var loggerFactory = provider.GetRequiredService<ILoggerFactory>();
             x.UseLoggerFactory(loggerFactory);
-            x.UseNpgsql(y =>
+
+            if ("mysql".Equals(dbContextSettings.DatabaseType, StringComparison.OrdinalIgnoreCase))
             {
-                y.LoadFromConfiguration(provider);
-                y.UseRemoveForeignKeyService();
-                y.UseRemoveExternalEntityService();
-            });
-            // x.UseMySql(provider, y =>
-            // {
-            //     y.LoadFromConfiguration(provider);
-            //     y.UseRemoveForeignKeyService();
-            //     y.UseRemoveExternalEntityService();
-            // });
-            // x.UseSqlServer(y =>
-            // {
-            //     y.LoadFromConfiguration(provider);
-            //     y.UseRemoveForeignKeyService();
-            //     y.UseRemoveExternalEntityService();
-            // });
+                x.UseMySql(ServerVersion.AutoDetect(dbContextSettings.ConnectionString), y =>
+                {
+                    y.Load(dbContextSettings);
+                    y.UseRemoveForeignKeyService();
+                    y.UseRemoveExternalEntityService();
+                });
+            }
+            else
+            {
+                x.UseNpgsql(y =>
+                {
+                    y.Load(dbContextSettings);
+                    y.UseRemoveForeignKeyService();
+                    y.UseRemoveExternalEntityService();
+                });
+            }
         });
+
+
+        services.AddDbContext<TestDbContext>(x =>
+            x.UseNpgsql());
 
         // services.AddAssemblyScanPrefix("Ordering");
         // services.AddDependencyInjectionLoader();
@@ -161,8 +169,8 @@ public static class Startup
             builder.UseDependencyInjectionLoader();
             builder.UseOptionsType(configuration);
             builder.UseAutoMapperObjectAssembler();
-            builder.UseEfAuditing<OrderingContext>();
-            builder.UseLokiAuditing();
+            // builder.UseEfAuditing<IOrderingContext>();
+            // builder.UseLokiAuditing();
             builder.UseLocalEventPublisher();
             builder.UseAspNetCore();
             // builder.UseNewtonsoftJsonHelper(settings);
@@ -181,6 +189,7 @@ public static class Startup
             //启用中间件服务对swagger-ui，指定Swagger JSON终结点
             app.UseSwaggerUI(c => { c.SwaggerEndpoint("/swagger/v1.0/swagger.json", "Ordering API V1.0"); });
         }
+
         // else
         // {
         //     // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.

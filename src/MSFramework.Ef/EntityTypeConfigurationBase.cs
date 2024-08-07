@@ -1,4 +1,5 @@
 using MicroserviceFramework.Domain;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace MicroserviceFramework.Ef;
@@ -14,7 +15,7 @@ public abstract class EntityTypeConfigurationBase<TEntity> : EntityTypeConfigura
 public abstract class EntityTypeConfigurationBase<TEntity, TDbContext> :
     IEntityTypeConfiguration<TEntity, TDbContext>
     where TEntity : class, IEntity
-    where TDbContext : DbContextBase
+    where TDbContext : DbContext
 {
     /// <summary>
     /// 重写以实现实体类型各个属性的数据库配置

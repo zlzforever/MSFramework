@@ -7,8 +7,7 @@ A micro service template
 ### Add EF migrations
 
 ```
-$ cd src/Ordering.Api
-$ dotnet ef migrations add Init  --context OrderingContext -p ../Ordering.Infrastructure
+dotnet ef migrations add Init -s src/Ordering.Api -c OrderingContext -p src/Ordering.Infrastructure
 ```
 
 ### 实践说明

@@ -6,6 +6,14 @@ namespace MicroserviceFramework.Ef.Extensions;
 
 public static class EntityTypeBuilderExtensions
 {
+    public static void ConfigureFullAuditing<TEntity>(this EntityTypeBuilder<TEntity> builder)
+        where TEntity : class, ICreation, IModification, IDeletion
+    {
+        builder.ConfigureCreation();
+        builder.ConfigureModification();
+        builder.ConfigureDeletion();
+    }
+
     public static void ConfigureCreation<TEntity>(this EntityTypeBuilder<TEntity> builder)
         where TEntity : class, ICreation
     {

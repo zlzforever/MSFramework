@@ -37,7 +37,6 @@ public static class DictionaryExtensions
         {
             return v;
         }
-
         return dictionary[key] = value;
     }
 

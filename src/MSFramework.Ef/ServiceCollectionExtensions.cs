@@ -13,17 +13,17 @@ namespace MicroserviceFramework.Ef;
 public static class ServiceCollectionExtensions
 {
     public static IServiceCollection AddEfAuditing<TDbContext>(this IServiceCollection services)
-        where TDbContext : DbContextBase
+        where TDbContext : DbContext
     {
-        DbContextBase.AuditingDbContextType = typeof(TDbContext);
+        EfUtilities.AuditingDbContextType = typeof(TDbContext);
         services.AddScoped<IAuditingStore, EfAuditingStore<TDbContext>>();
         return services;
     }
 
     public static MicroserviceFrameworkBuilder UseEfAuditing<TDbContext>(this MicroserviceFrameworkBuilder builder)
-        where TDbContext : DbContextBase
+        where TDbContext : DbContext
     {
-        DbContextBase.AuditingDbContextType = typeof(TDbContext);
+        EfUtilities.AuditingDbContextType = typeof(TDbContext);
         builder.Services.AddScoped<IAuditingStore, EfAuditingStore<TDbContext>>();
         return builder;
     }

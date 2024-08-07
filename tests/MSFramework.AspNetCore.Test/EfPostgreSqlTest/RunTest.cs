@@ -39,9 +39,10 @@ public class RunTest(ITestOutputHelper output)
                         services.AddRouting(x => { x.LowercaseUrls = true; });
                         services.AddDbContext<TestDataContext>((provider, x) =>
                         {
+                            var configuration = provider.GetRequiredService<IConfiguration>();
                             x.UseNpgsql(y =>
                             {
-                                y.LoadFromConfiguration(provider);
+                                y.Load(configuration.GetSection("DbContexts:0").Get<DbContextSettings>());
                             });
                         });
 

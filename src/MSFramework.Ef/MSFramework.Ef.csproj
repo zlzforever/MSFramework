@@ -17,4 +17,15 @@
   <ItemGroup>
     <Compile Remove="Repositories\NavigationLoader.cs" />
   </ItemGroup>
+  <ItemGroup>
+    <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleToAttribute">
+      <_Parameter1>MSFramework.Ef.MySql</_Parameter1>
+    </AssemblyAttribute>
+    <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleToAttribute">
+      <_Parameter1>MSFramework.Ef.PostgreSql</_Parameter1>
+    </AssemblyAttribute>
+    <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleToAttribute">
+      <_Parameter1>MSFramework.Ef.SqlServer</_Parameter1>
+    </AssemblyAttribute>
+  </ItemGroup>
 </Project>

@@ -1,8 +1,5 @@
 using System;
-using System.Net;
-using System.Net.Http;
 using System.Threading.Tasks;
-using System.Web;
 using MicroserviceFramework.AspNetCore.Mvc;
 using MicroserviceFramework.Utils;
 using Microsoft.AspNetCore.Mvc;
@@ -29,33 +26,38 @@ internal sealed class ResponseWrapperFilter(ILogger<ResponseWrapperFilter> logge
 
         // comments by lewis at 20240103
         // 只能使用 type 比较， 不能使用 is， 不然如 BadRequestObjectResult 也会被二次包装
-        if (context.Result.GetType() == typeof(ObjectResult))
+        if (context.Result is ObjectResult objectResult)
         {
-            var objectResult = (ObjectResult)context.Result;
-            if (objectResult.Value is ProblemDetails problemDetails)
+            var declaredType = objectResult.DeclaredType ?? objectResult.Value?.GetType();
+            if (declaredType == null)
+            {
+            }
+            else if (objectResult.Value is ProblemDetails problemDetails)
             {
                 var code = problemDetails.Status ?? 200;
                 var success = HttpUtil.IsSuccessStatusCode(code);
                 if (success)
                 {
-                    context.Result = new ObjectResult(new ApiResult { Data = objectResult.Value, Msg = string.Empty });
+                    objectResult.Value = new ApiResult { Data = objectResult.Value, Msg = string.Empty };
+                    objectResult.DeclaredType = ApiResult.Type;
                 }
                 else
                 {
-                    context.Result = new ObjectResult(new ApiResult
+                    objectResult.Value = new ApiResult
                     {
-                        Success = HttpUtil.IsSuccessStatusCode(code),
-                        Code = -1,
-                        Msg = problemDetails.Title ?? string.Empty
-                    }) { StatusCode = code };
+                        Success = false, Code = -1, Msg = problemDetails.Title ?? string.Empty
+                    };
+                    objectResult.StatusCode = code;
+                    objectResult.DeclaredType = ApiResult.Type;
                 }
             }
-            else if (objectResult.Value is ApiResult)
+            else if (ApiResult.IsApiResult(declaredType))
             {
             }
             else
             {
-                context.Result = new ObjectResult(new ApiResult { Data = objectResult.Value, Msg = string.Empty });
+                objectResult.Value = new ApiResult { Data = objectResult.Value, Msg = string.Empty };
+                objectResult.DeclaredType = ApiResult.Type;
             }
         }
         else if (context.Result is EmptyResult)
@@ -63,7 +65,8 @@ internal sealed class ResponseWrapperFilter(ILogger<ResponseWrapperFilter> logge
             context.Result = new ObjectResult(ApiResult.Ok);
         }
 
-        logger.LogDebug("执行返回结果过滤器结束");
         await next();
+
+        logger.LogDebug("执行返回结果过滤器结束");
     }
 }

@@ -1,13 +1,16 @@
-using System;
+using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 
 namespace MicroserviceFramework.Ef;
 
 [SuppressMessage("ReSharper", "UnusedAutoPropertyAccessor.Global")]
-public class DbContextSettings
+public class DbContextSettings : IDbContextOptionsExtension
 {
-    private Type _type;
+    // private Type _type;
 
     /// <summary>
     /// 初始化一个<see cref="DbContextSettings"/>类型的新实例
@@ -18,41 +21,46 @@ public class DbContextSettings
         AutoTransactionBehavior = AutoTransactionBehavior.WhenNeeded;
         EnableSensitiveDataLogging = false;
         UseUnderScoreCase = true;
+        Info = new ExtensionInfo(this);
     }
 
-    /// <summary>
-    /// 获取 上下文类型
-    /// </summary>
-    public Type GetDbContextType()
-    {
-        if (_type != null)
-        {
-            return _type;
-        }
+    // /// <summary>
+    // /// 获取 上下文类型
+    // /// </summary>
+    // public Type GetDbContextType()
+    // {
+    //     if (_type != null)
+    //     {
+    //         return _type;
+    //     }
+    //
+    //     _type = string.IsNullOrEmpty(DbContextTypeName) ? null : Type.GetType(DbContextTypeName);
+    //     if (_type == null)
+    //     {
+    //         throw new ArithmeticException($"找不到类型 {DbContextTypeName}");
+    //     }
+    //
+    //     return _type;
+    // }
 
-        _type = string.IsNullOrEmpty(DbContextTypeName) ? null : Type.GetType(DbContextTypeName);
-        if (_type == null)
-        {
-            throw new ArithmeticException($"找不到类型 {DbContextTypeName}");
-        }
-
-        return _type;
-    }
-
-    /// <summary>
-    /// 获取或设置 上下文类型全名
-    /// </summary>
-    public string DbContextTypeName { get; set; }
+    // /// <summary>
+    // /// 获取或设置 上下文类型全名
+    // /// </summary>
+    // public string DbContextTypeName { get; set; }
 
     /// <summary>
     /// 获取或设置 连接字符串
     /// </summary>
     public string ConnectionString { get; set; }
 
+    public bool EnableDetailedErrors { get; set; }
+
     /// <summary>
     /// 批量提交
     /// </summary>
     public int MaxBatchSize { get; set; } = 100;
+
+    public int CommandTimeout { get; set; } = 30;
 
     /// <summary>
     /// 启用事务
@@ -88,4 +96,59 @@ public class DbContextSettings
     /// 数据库前缀
     /// </summary>
     public string TablePrefix { get; set; }
+
+    public string DatabaseType { get; set; }
+    public int LoggingCacheTime { get; set; }
+    public bool EnableServiceProviderCaching { get; set; }
+    public bool EnableThreadSafetyChecks { get; set; }
+    public string QuerySplittingBehavior { get; set; }
+    public string MigrationsHistoryTable { get; set; }
+    public DbContextOptionsExtensionInfo Info { get; }
+
+    public void ApplyServices(IServiceCollection services)
+    {
+        services.TryAddSingleton(this);
+    }
+
+    public void Validate(IDbContextOptions options)
+    {
+    }
+
+    private class ExtensionInfo(DbContextSettings extension) : DbContextOptionsExtensionInfo(extension)
+    {
+        public override bool IsDatabaseProvider => false;
+        public override string LogFragment => "Using DbContextSettings";
+
+        public override int GetServiceProviderHashCode()
+        {
+            return extension.GetHashCode();
+        }
+
+        public override bool ShouldUseSameServiceProvider(DbContextOptionsExtensionInfo other)
+        {
+            return other is ExtensionInfo;
+        }
+
+        public override void PopulateDebugInfo(IDictionary<string, string> debugInfo)
+        {
+            debugInfo["DbContextSettings"] = "1";
+        }
+    }
+
+    public string GetMigrationsHistoryTable()
+    {
+        string migrationsHistoryTable;
+        if (!string.IsNullOrWhiteSpace(MigrationsHistoryTable))
+        {
+            migrationsHistoryTable = $"{TablePrefix}{MigrationsHistoryTable}";
+        }
+        else
+        {
+            migrationsHistoryTable = string.IsNullOrWhiteSpace(TablePrefix)
+                ? EfUtilities.MigrationsHistoryTable
+                : $"{TablePrefix}migrations_history";
+        }
+
+        return migrationsHistoryTable;
+    }
 }

@@ -5,11 +5,13 @@ using Ordering.Domain.AggregateRoots;
 
 namespace Ordering.Infrastructure.EntityConfigurations;
 
-public class OrderItemEntityTypeConfiguration : EntityTypeConfigurationBase<OrderItem, OrderingContext>
+public class OrderItemEntityTypeConfiguration
+    : EntityTypeConfigurationBase<OrderItem, OrderingContext>
 {
     public override void Configure(EntityTypeBuilder<OrderItem> builder)
     {
         ConfigureDefaultIdentifier(builder);
+
 
         builder.OwnsOne(x => x.Product, y =>
         {

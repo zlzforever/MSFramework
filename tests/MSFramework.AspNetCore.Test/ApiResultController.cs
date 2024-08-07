@@ -4,8 +4,8 @@ using System.ComponentModel.DataAnnotations;
 using System.IO;
 using System.Threading.Tasks;
 using MicroserviceFramework.AspNetCore;
+using MicroserviceFramework.AspNetCore.Mvc;
 using MicroserviceFramework.Common;
-using MicroserviceFramework.Domain;
 using Microsoft.AspNetCore.Mvc;
 
 namespace MSFramework.AspNetCore.Test;
@@ -152,5 +152,17 @@ public class ApiResultController : ApiControllerBase
     public IActionResult GetEmptyResult()
     {
         return new EmptyResult();
+    }
+
+    [HttpGet("apiResult")]
+    public ApiResult GetApiResult()
+    {
+        return new ApiResult() { Data = 1 };
+    }
+
+    [HttpGet("apiResultGeneric")]
+    public ApiResult<int> GetApiResultGeneric()
+    {
+        return new ApiResult<int>(1);
     }
 }

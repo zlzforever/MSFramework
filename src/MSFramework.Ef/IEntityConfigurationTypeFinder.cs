@@ -14,7 +14,7 @@ public interface IEntityConfigurationTypeFinder
     /// </summary>
     /// <param name="dbContextType">数据上下文类型</param>
     /// <returns></returns>
-    Dictionary<Type, EntityTypeConfigurationMetadata> GetEntityTypeConfigurations(Type dbContextType);
+    IEnumerable<EntityTypeConfigurationMetadata> GetEntityTypeConfigurations(Type dbContextType);
 
     /// <summary>
     /// 获取 实体类所属的数据上下文类
@@ -32,9 +32,14 @@ public interface IEntityConfigurationTypeFinder
     bool HasDbContextForEntity<T>();
 }
 
-public struct EntityTypeConfigurationMetadata(Type entityType, MethodInfo methodInfo, object entityTypeConfiguration)
+public struct EntityTypeConfigurationMetadata(
+    Type entityType,
+    MethodInfo configureMethodInfo,
+    MethodInfo createEntityTypeBuilderMethod,
+    object entityTypeConfiguration)
 {
     public readonly Type EntityType = entityType;
-    public readonly MethodInfo MethodInfo = methodInfo;
+    public readonly MethodInfo ConfigureMethodInfo = configureMethodInfo;
+    public readonly MethodInfo CreateEntityTypeBuilderMethod = createEntityTypeBuilderMethod;
     public readonly object EntityTypeConfiguration = entityTypeConfiguration;
 }

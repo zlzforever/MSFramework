@@ -195,4 +195,22 @@ public class ApiResultTests(ITestOutputHelper output) : BaseTest
                      {"success":true,"code":0,"msg":"","data":null}
                      """, result1);
     }
+
+    [Fact]
+    public async Task GetApiResult()
+    {
+        var result1 = await Client.GetStringAsync("/apiResult/apiResult");
+        Assert.Equal("""
+                     {"success":true,"code":0,"msg":"","data":1}
+                     """, result1);
+    }
+
+    [Fact]
+    public async Task GetApiResultGeneric()
+    {
+        var result1 = await Client.GetStringAsync("/apiResult/apiResultGeneric");
+        Assert.Equal("""
+                     {"success":true,"code":0,"msg":"","data":1}
+                     """, result1);
+    }
 }

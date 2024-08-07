@@ -46,7 +46,10 @@ public class Startup(IConfiguration configuration)
         services.AddRouting(x => { x.LowercaseUrls = true; });
         services.AddDbContext<TestDataContext>((provider, x) =>
         {
-            x.UseNpgsql(y => y.LoadFromConfiguration(provider));
+            x.UseNpgsql(y =>
+            {
+                y.Load(configuration.GetSection("DbContexts:0").Get<DbContextSettings>());
+            });
         });
 
         services.AddMicroserviceFramework(builder =>

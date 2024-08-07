@@ -16,17 +16,13 @@ namespace MicroserviceFramework.Ef;
 internal class EfUnitOfWork : IUnitOfWork
 {
     private readonly DbContextFactory _dbContextFactory;
-    private readonly IServiceProvider _serviceProvider;
 
     /// <summary>
     /// 初始化工作单元管理器
     /// </summary>
-    public EfUnitOfWork(
-        DbContextFactory dbContextFactory,
-        IServiceProvider serviceProvider)
+    public EfUnitOfWork(DbContextFactory dbContextFactory)
     {
         _dbContextFactory = dbContextFactory;
-        _serviceProvider = serviceProvider;
     }
 
     public event Action SavedChanges;
@@ -35,7 +31,7 @@ internal class EfUnitOfWork : IUnitOfWork
     {
         Check.NotNull(factory, nameof(factory));
 
-        var auditingStores = _serviceProvider.GetServices<IAuditingStore>().ToList();
+        var auditingStores = _dbContextFactory.ServiceProvider.GetServices<IAuditingStore>().ToList();
         if (auditingStores.Count == 0)
         {
             return;
@@ -72,7 +68,7 @@ internal class EfUnitOfWork : IUnitOfWork
                 foreach (var auditingStore in auditingStores)
                 {
                     await auditingStore.AddAsync(auditOperation);
-                    // 不用再单独 commit 了， 和当前请求是同一个 dbcontext
+                    // 不用再单独 commit 了， 和当前请求是同一个 dbContext
                     // await auditingStore.CommitAsync();
                 }
             };

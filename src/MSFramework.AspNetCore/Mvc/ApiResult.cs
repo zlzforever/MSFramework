@@ -1,8 +1,9 @@
+using System;
 using System.Text.Json;
 
 namespace MicroserviceFramework.AspNetCore.Mvc;
 
-internal class ApiResult<T>(T data)
+public class ApiResult<T>(T data)
 {
     /// <summary>
     /// 是否成功
@@ -36,11 +37,39 @@ internal class ApiResult<T>(T data)
     }
 }
 
-internal class ApiResult : ApiResult<object>
+public class ApiResult : ApiResult<object>
 {
+    public static readonly Type Type = typeof(ApiResult);
+    public static readonly Type GenericType = typeof(ApiResult<>);
+
     public static readonly ApiResult Ok = new() { Code = 0, Success = true, Msg = string.Empty, Data = null };
 
     public static readonly ApiResult Error = new() { Code = 1, Success = false, Msg = "服务器内部错误", Data = null };
+
+    public static bool IsApiResult(Type type)
+    {
+        if (type == null)
+        {
+            return false;
+        }
+
+        if (type == Type)
+        {
+            return true;
+        }
+
+        if (type == ApiResultWithErrors.ApiResultWithErrorsType)
+        {
+            return true;
+        }
+
+        if (type.IsGenericType && type.GetGenericTypeDefinition() == GenericType)
+        {
+            return true;
+        }
+
+        return false;
+    }
 
     public override string ToString()
     {

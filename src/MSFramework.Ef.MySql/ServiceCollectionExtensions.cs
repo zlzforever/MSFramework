@@ -1,9 +1,6 @@
-using System;
-using Microsoft.EntityFrameworkCore;
+using MicroserviceFramework.Ef.Extensions;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Migrations;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Options;
 using Pomelo.EntityFrameworkCore.MySql.Infrastructure.Internal;
 
 namespace MicroserviceFramework.Ef.MySql;
@@ -27,40 +24,25 @@ public static class ServiceCollectionExtensions
         return options;
     }
 
-    public static DbContextOptionsBuilder UseMySql(
-        this DbContextOptionsBuilder optionsBuilder, IServiceProvider provider,
-        Action<MySqlDbContextOptionsBuilder> mySqlOptionsAction = null)
+    // public static DbContextOptionsBuilder UseMySql(
+    //     this DbContextOptionsBuilder optionsBuilder, IServiceProvider provider,
+    //     Action<MySqlDbContextOptionsBuilder> mySqlOptionsAction = null)
+    // {
+    //     var contextType = optionsBuilder.Options.ContextType;
+    //     var dbContextSettingsList = provider.GetRequiredService<IOptions<DbContextSettingsList>>().Value;
+    //     var option = dbContextSettingsList.Get(contextType);
+    //     optionsBuilder.UseMySql(ServerVersion.AutoDetect(option.ConnectionString), mySqlOptionsAction);
+    //     return optionsBuilder;
+    // }
+
+    public static void Load(this MySqlDbContextOptionsBuilder builder,
+        DbContextSettings settings)
     {
-        var contextType = optionsBuilder.Options.ContextType;
-        var dbContextSettingsList = provider.GetRequiredService<IOptions<DbContextSettingsList>>().Value;
-        var option = dbContextSettingsList.Get(contextType);
-        optionsBuilder.UseMySql(ServerVersion.AutoDetect(option.ConnectionString), mySqlOptionsAction);
-        return optionsBuilder;
-    }
-
-    public static void LoadFromConfiguration(this MySqlDbContextOptionsBuilder builder,
-        IServiceProvider provider)
-    {
-        var dbContextOptionsBuilder = ((IRelationalDbContextOptionsBuilderInfrastructure)builder).OptionsBuilder;
-        var contextType = dbContextOptionsBuilder.Options.ContextType;
-        var dbContextSettingsList = provider.GetRequiredService<IOptions<DbContextSettingsList>>().Value;
-        var option = dbContextSettingsList.Get(contextType);
-        var entryAssemblyName = !string.IsNullOrWhiteSpace(option.MigrationsAssembly)
-            ? option.MigrationsAssembly
-            : contextType.Assembly.GetName().Name;
-
-        var migrationsHistoryTable = string.IsNullOrWhiteSpace(option.TablePrefix)
-            ? EfUtilities.MigrationsHistoryTable
-            : $"{option.TablePrefix}migrations_history";
-        dbContextOptionsBuilder.EnableSensitiveDataLogging(option.EnableSensitiveDataLogging);
-
 #pragma warning disable EF1001
-        dbContextOptionsBuilder.SetConnectionString<MySqlOptionsExtension>(option.ConnectionString);
+        var dbContextOptionsBuilder = ((IRelationalDbContextOptionsBuilderInfrastructure)builder).OptionsBuilder;
+        builder.LoadDbContextSettings<MySqlDbContextOptionsBuilder, MySqlOptionsExtension>(settings);
+        dbContextOptionsBuilder.SetConnectionString<MySqlOptionsExtension>(settings.ConnectionString);
 #pragma warning restore EF1001
-        builder.MigrationsHistoryTable(migrationsHistoryTable);
-        builder.MaxBatchSize(option.MaxBatchSize);
-        builder.MigrationsAssembly(entryAssemblyName);
-        builder.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery);
     }
 
     // public static EntityFrameworkBuilder AddMySql<TDbContext>(

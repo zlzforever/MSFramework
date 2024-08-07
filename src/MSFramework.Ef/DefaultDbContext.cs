@@ -1,7 +1,6 @@
 using MicroserviceFramework.Application;
 using MicroserviceFramework.Mediator;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Options;
 
 namespace MicroserviceFramework.Ef;
 
@@ -10,7 +9,6 @@ namespace MicroserviceFramework.Ef;
 /// </summary>
 public class DefaultDbContext(
     DbContextOptions options,
-    IOptions<DbContextSettingsList> entityFrameworkOptions,
     IMediator domainEventDispatcher,
     ISession session)
-    : DbContextBase(options, entityFrameworkOptions, domainEventDispatcher, session);
+    : DbContextBase(options, domainEventDispatcher, session);

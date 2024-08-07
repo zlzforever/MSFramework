@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
@@ -16,7 +17,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
-using Microsoft.Extensions.Options;
+using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using MongoDB.Bson;
 
 namespace MicroserviceFramework.Ef;
@@ -24,23 +25,20 @@ namespace MicroserviceFramework.Ef;
 public abstract class DbContextBase : DbContext
 {
     private readonly ISession _session;
-    private readonly DbContextSettingsList _entityFrameworkOptions;
     private IEntityConfigurationTypeFinder _entityConfigurationTypeFinder;
     private readonly IMediator _mediator;
 
-    public static Type AuditingDbContextType;
+    // private readonly ConcurrentDictionary<Type, List<Type>> _contextInterfaceTypes = new();
 
     /// <summary>
     /// 初始化一个<see cref="DbContextBase"/>类型的新实例
     /// </summary>
     protected DbContextBase(DbContextOptions options,
-        IOptions<DbContextSettingsList> entityFrameworkOptions,
         IMediator mediator,
         ISession session)
         : base(options)
     {
         _mediator = mediator;
-        _entityFrameworkOptions = entityFrameworkOptions.Value;
         _session = session;
     }
 
@@ -63,40 +61,68 @@ public abstract class DbContextBase : DbContext
     /// <param name="modelBuilder">上下文数据模型构建器</param>
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        var settings = this.GetService<DbContextSettings>();
+        if (settings == null)
+        {
+            throw new ArgumentNullException(nameof(DbContextSettings));
+        }
+
         _entityConfigurationTypeFinder = this.GetService<IEntityConfigurationTypeFinder>();
 
         //通过实体配置信息将实体注册到当前上下文
         var contextType = GetType();
+
+        // var interfaces = _contextInterfaceTypes.GetOrAdd(contextType, type =>
+        // {
+        //     var baseType = typeof(IDbContext);
+        //     var list = type.GetInterfaces()
+        //         .Where(x => baseType.IsAssignableFrom(x)).ToList();
+        //     list.Add(type);
+        //     return list;
+        // });
+
+        // foreach (var type in interfaces)
+        // {
+        //     var entityTypeConfigurations = _entityConfigurationTypeFinder
+        //         .GetEntityTypeConfigurations(type);
+        //
+        //     foreach (var entityTypeConfiguration in entityTypeConfigurations)
+        //     {
+        //         entityTypeConfiguration.Value.MethodInfo.Invoke(modelBuilder,
+        //             [entityTypeConfiguration.Value.EntityTypeConfiguration]);
+        //     }
+        // }
+
+        modelBuilder.HasAnnotation("DatabaseType", settings.DatabaseType);
 
         var entityTypeConfigurations = _entityConfigurationTypeFinder
             .GetEntityTypeConfigurations(contextType);
 
         foreach (var entityTypeConfiguration in entityTypeConfigurations)
         {
-            entityTypeConfiguration.Value.MethodInfo.Invoke(modelBuilder,
-                new[] { entityTypeConfiguration.Value.EntityTypeConfiguration });
+            var createEntityTypeBuilderMethod = entityTypeConfiguration.CreateEntityTypeBuilderMethod;
+            var entityTypeBuilder = (EntityTypeBuilder)createEntityTypeBuilderMethod.Invoke(modelBuilder,
+                []);
+            if (entityTypeBuilder == null)
+            {
+                continue;
+            }
+
+            // entityTypeBuilder.Metadata.AddAnnotation("DatabaseType", settings.DatabaseType);
+            entityTypeConfiguration.ConfigureMethodInfo.Invoke(
+                entityTypeConfiguration.EntityTypeConfiguration,
+                [entityTypeBuilder]);
         }
 
-        if (AuditingDbContextType == contextType)
+
+        if (EfUtilities.AuditingDbContextType == contextType)
         {
-            if (entityTypeConfigurations.All(x => x.Value.EntityType != typeof(AuditOperation)))
-            {
-                modelBuilder.ApplyConfiguration(AuditOperationConfiguration.Instance);
-            }
-
-            if (entityTypeConfigurations.All(x => x.Value.EntityType != typeof(AuditEntity)))
-            {
-                modelBuilder.ApplyConfiguration(AuditEntityConfiguration.Instance);
-            }
-
-            if (entityTypeConfigurations.All(x => x.Value.EntityType != typeof(AuditProperty)))
-            {
-                modelBuilder.ApplyConfiguration(AuditPropertyConfiguration.Instance);
-            }
+            AuditOperationConfiguration.Instance.Configure(modelBuilder.Entity<AuditOperation>());
+            AuditEntityConfiguration.Instance.Configure(modelBuilder.Entity<AuditEntity>());
+            AuditPropertyConfiguration.Instance.Configure(modelBuilder.Entity<AuditProperty>());
         }
 
-        var option = _entityFrameworkOptions.Get(GetType());
-        var tablePrefix = option.TablePrefix?.Trim();
+        var tablePrefix = settings.TablePrefix?.Trim();
 
         foreach (var entityType in modelBuilder.Model.GetEntityTypes())
         {
@@ -109,12 +135,12 @@ public abstract class DbContextBase : DbContext
                 // 只有在用户没有设置自定义表名的情况下，才会自动调整表名
                 if (defaultTableName == tableName)
                 {
-                    if (option.UseUnderScoreCase)
+                    if (settings.UseUnderScoreCase)
                     {
                         tableName = tableName.ToSnakeCase();
                     }
 
-                    if (!string.IsNullOrWhiteSpace(tablePrefix))
+                    if (!string.IsNullOrEmpty(tablePrefix))
                     {
                         tableName = tablePrefix + tableName;
                     }
@@ -178,11 +204,11 @@ public abstract class DbContextBase : DbContext
                     property.IsNullable = true;
                 }
 
-                if (option.UseUnderScoreCase)
+                if (settings.UseUnderScoreCase)
                 {
                     var storeObjectIdentifier = StoreObjectIdentifier.Create(entityType, StoreObjectType.Table);
                     var propertyName = property.GetColumnName(storeObjectIdentifier.GetValueOrDefault());
-                    if (!string.IsNullOrEmpty(propertyName) && propertyName.StartsWith("_"))
+                    if (!string.IsNullOrEmpty(propertyName) && propertyName.StartsWith('_'))
                     {
                         propertyName = propertyName.Substring(1, propertyName.Length - 1);
                     }

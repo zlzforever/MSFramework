@@ -1,10 +1,7 @@
-using System;
-using Microsoft.EntityFrameworkCore;
+using MicroserviceFramework.Ef.Extensions;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.SqlServer.Infrastructure.Internal;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Options;
 
 namespace MicroserviceFramework.Ef.SqlServer;
 
@@ -28,29 +25,14 @@ public static class ServiceCollectionExtensions
         return options;
     }
 
-    public static void LoadFromConfiguration(this SqlServerDbContextOptionsBuilder builder,
-        IServiceProvider provider)
+    public static void Load(this SqlServerDbContextOptionsBuilder builder,
+        DbContextSettings settings)
     {
-        var dbContextOptionsBuilder = ((IRelationalDbContextOptionsBuilderInfrastructure)builder).OptionsBuilder;
-        var contextType = dbContextOptionsBuilder.Options.ContextType;
-        var dbContextSettingsList = provider.GetRequiredService<IOptions<DbContextSettingsList>>().Value;
-        var option = dbContextSettingsList.Get(contextType);
-        var entryAssemblyName = !string.IsNullOrWhiteSpace(option.MigrationsAssembly)
-            ? option.MigrationsAssembly
-            : contextType.Assembly.GetName().Name;
-
-        var migrationsHistoryTable = string.IsNullOrWhiteSpace(option.TablePrefix)
-            ? EfUtilities.MigrationsHistoryTable
-            : $"{option.TablePrefix}migrations_history";
-        dbContextOptionsBuilder.EnableSensitiveDataLogging(option.EnableSensitiveDataLogging);
-
 #pragma warning disable EF1001
-        dbContextOptionsBuilder.SetConnectionString<SqlServerOptionsExtension>(option.ConnectionString);
+        builder.LoadDbContextSettings<SqlServerDbContextOptionsBuilder, SqlServerOptionsExtension>(settings);
+        var dbContextOptionsBuilder = ((IRelationalDbContextOptionsBuilderInfrastructure)builder).OptionsBuilder;
+        dbContextOptionsBuilder.SetConnectionString<SqlServerOptionsExtension>(settings.ConnectionString);
 #pragma warning restore EF1001
-        builder.MigrationsHistoryTable(migrationsHistoryTable);
-        builder.MaxBatchSize(option.MaxBatchSize);
-        builder.MigrationsAssembly(entryAssemblyName);
-        builder.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery);
     }
 
     // public static EntityFrameworkBuilder AddSqlServer<TDbContext>(

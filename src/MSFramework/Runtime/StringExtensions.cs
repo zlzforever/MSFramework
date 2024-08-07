@@ -30,7 +30,7 @@ public static class StringExtensions
 
     public static unsafe string ToCamelCase(this string value)
     {
-        if (string.IsNullOrWhiteSpace(value) || value.Length < 2)
+        if (string.IsNullOrWhiteSpace(value))
         {
             return value;
         }

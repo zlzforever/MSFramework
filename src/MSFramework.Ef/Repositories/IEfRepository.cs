@@ -1,6 +1,8 @@
+using Microsoft.EntityFrameworkCore;
+
 namespace MicroserviceFramework.Ef.Repositories;
 
 public interface IEfRepository
 {
-    DbContextBase GetDbContext();
+    DbContext DbContext { get; }
 }

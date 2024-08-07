@@ -1,14 +1,12 @@
 using MicroserviceFramework.Auditing.Model;
 using MicroserviceFramework.Ef.Extensions;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace MicroserviceFramework.Ef.Auditing.Configuration;
 
-public class AuditOperationConfiguration
-    : IEntityTypeConfiguration<AuditOperation>
+internal class AuditOperationConfiguration
 {
-    public static readonly AuditOperationConfiguration Instance = new();
+    internal static readonly AuditOperationConfiguration Instance = new();
 
     public void Configure(EntityTypeBuilder<AuditOperation> builder)
     {

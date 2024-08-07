@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using MicroserviceFramework.Common;
 using MicroserviceFramework.Ef;
 using MicroserviceFramework.Ef.Extensions;
 using Microsoft.EntityFrameworkCore;
@@ -26,9 +27,9 @@ public class OrderEntityTypeConfiguration : EntityTypeConfigurationBase<Order, O
         builder.Property(x => x.BuyerId2).IsRequired().HasMaxLength(36);
         builder.Property(x => x.Status).UseEnumeration().HasMaxLength(20).IsRequired();
         // 若类型不一致，则需要主动设置
-        builder.Property(x => x.ListJson).UseJson(typeof(HashSet<string>));
-        builder.Property(x => x.DictJson).UseJson();
-        builder.Property(x => x.Extras).UseJson();
+        builder.Property(x => x.ListJson).UseJson(typeof(HashSet<string>), JsonDataType.JSON);
+        builder.Property(x => x.DictJson).UseJson(JsonDataType.JSON);
+        builder.Property(x => x.Extras).UseJson(JsonDataType.JSON);
 
         builder.HasOne(x => x.Operator).WithMany();
 
