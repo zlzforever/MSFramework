@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text.Json;
@@ -14,6 +15,8 @@ using MicroserviceFramework.Ef.MySql;
 using MicroserviceFramework.Extensions.DependencyInjection;
 using MicroserviceFramework.Text.Json;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
@@ -94,13 +97,16 @@ public static class StartupExtensions
                 );
             });
 
+            var dbContextSettingsList = configuration.GetSection("DbContexts").Get<List<DbContextSettings>>();
+            var dbContextSettings = dbContextSettingsList[0];
+
             services.AddDbContext<TemplateDbContext>((provider, x) =>
             {
                 var loggerFactory = provider.GetRequiredService<ILoggerFactory>();
                 x.UseLoggerFactory(loggerFactory);
-                x.UseMySql(provider, y =>
+                x.UseMySql(ServerVersion.AutoDetect(dbContextSettings.ConnectionString), y =>
                 {
-                    y.LoadFromConfiguration(provider);
+                    y.Load(dbContextSettings);
                     y.UseRemoveForeignKeyService();
                     y.UseRemoveExternalEntityService();
                 });
@@ -226,7 +232,8 @@ public static class StartupExtensions
                 .MinimumLevel.Override("System", LogEventLevel.Warning)
                 .MinimumLevel.Override("Microsoft.AspNetCore.Authentication", LogEventLevel.Warning)
                 .Enrich.FromLogContext()
-                .WriteTo.Console().WriteTo.RollingFile(logFile)
+                .WriteTo.Console()
+                .WriteTo.Async(x => x.File(logFile, rollingInterval: RollingInterval.Day))
                 .CreateLogger();
         }
     }
