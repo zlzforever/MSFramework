@@ -8,6 +8,7 @@
 
     <ItemGroup>
         <PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="8.0.7" />
+        <PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" Version="8.0.7" />
         <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="8.0.4" />
         <PackageReference Include="Microsoft.Extensions.Configuration" Version="8.0.0" />
         <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="8.0.0" />
@@ -27,6 +28,7 @@
       <ProjectReference Include="..\..\src\MSFramework.AspNetCore\MSFramework.AspNetCore.csproj" />
       <ProjectReference Include="..\..\src\MSFramework.Auditing.Loki\MSFramework.Auditing.Loki.csproj" />
       <ProjectReference Include="..\..\src\MSFramework.AutoMapper\MSFramework.AutoMapper.csproj" />
+      <ProjectReference Include="..\..\src\MSFramework.Ef\MSFramework.Ef.csproj" />
       <ProjectReference Include="..\..\src\MSFramework.Serialization.Newtonsoft\MSFramework.Serialization.Newtonsoft.csproj" />
       <ProjectReference Include="..\..\src\MSFramework\MSFramework.csproj" />
     </ItemGroup>
