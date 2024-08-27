@@ -7,11 +7,13 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\MSFramework\MSFramework.csproj" />
+    <ProjectReference Include="..\MSFramework\MSFramework.csproj"/>
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Serilog" Version="3.1.1" />
+    <PackageReference Include="Serilog.Sinks.Grafana.Loki" Version="8.3.0"/>
+    <PackageReference Include="Serilog.Sinks.Async" Version="2.0.0"/>
+    <PackageReference Include="Serilog.Sinks.File" Version="6.0.0"/>
   </ItemGroup>
   <Import Project="../../package.props"/>
 </Project>

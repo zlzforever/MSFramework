@@ -133,7 +133,7 @@ public class EventBusImplTests
             {
                 x.UseDependencyInjectionLoader();
                 x.UseLocalEventPublisher();
-                x.UseAspNetCore();
+                x.UseAspNetCoreExtension();
             });
             serviceCollection.AddSingleton<LocalEventService>();
             var provider = serviceCollection.BuildServiceProvider();

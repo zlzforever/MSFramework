@@ -59,7 +59,7 @@ public class Startup(IConfiguration configuration)
             builder.UseOptionsType(configuration);
             builder.UseAutoMapperObjectAssembler();
             builder.UseLocalEventPublisher();
-            builder.UseAspNetCore();
+            builder.UseAspNetCoreExtension();
             builder.UseEntityFramework();
         });
     }

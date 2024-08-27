@@ -30,17 +30,17 @@ public static class ServiceCollectionExtensions
 
     public static MicroserviceFrameworkBuilder UseEntityFramework(this MicroserviceFrameworkBuilder builder)
     {
-        builder.Services.UseEntityFramework();
+        builder.Services.AddEntityFrameworkExtension();
         return builder;
     }
 
-    public static IServiceCollection UseEntityFramework(this IServiceCollection services)
+    public static IServiceCollection AddEntityFrameworkExtension(this IServiceCollection services)
     {
-        services.AddMemoryCache();
         services.TryAddSingleton<IEntityConfigurationTypeFinder, EntityConfigurationTypeFinder>();
         services.TryAddScoped<DbContextFactory>();
         services.TryAddScoped<IUnitOfWork, EfUnitOfWork>();
         services.TryAddScoped(typeof(IExternalEntityRepository<,>), typeof(ExternalEntityRepository<,>));
+        // services.TryAddSingleton<IScopeServiceProvider, NullScopeServiceProvider>();
         return services;
     }
 

@@ -15,13 +15,14 @@ public class OrderCreatedDomainEventHandler(
 {
     public Task HandleAsync(OrderCreatedDomainEvent @event, CancellationToken cancellationToken = default)
     {
-        unitOfWork.SavedChanges +=
-            async () =>
-            {
-                // await daprClient.PublishEventAsync("rabbitmq-pubsub", Names.OrderCreatedEvent,
-                //     new { @event.Id, @event.Name, @event.CreationTime }, cancellationToken: cancellationToken);
-                logger.LogInformation("Publish OrderCreatedEvent");
-            };
+        // unitOfWork.SavedChanges +=
+        //     async () =>
+        //     {
+        //         // await daprClient.PublishEventAsync("rabbitmq-pubsub", Names.OrderCreatedEvent,
+        //         //     new { @event.Id, @event.Name, @event.CreationTime }, cancellationToken: cancellationToken);
+        //         logger.LogInformation("Publish OrderCreatedEvent");
+        //     };
+        logger.LogInformation("Publish OrderCreatedEvent");
         return Task.CompletedTask;
     }
 }

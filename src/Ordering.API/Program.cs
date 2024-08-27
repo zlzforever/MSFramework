@@ -14,6 +14,7 @@ public class Program
 
     public static Task Main(string[] args)
     {
+
         Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
 
         AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);

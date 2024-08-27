@@ -1,4 +1,6 @@
+using MicroserviceFramework.Common;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
 
 namespace MicroserviceFramework.Auditing.Loki;
 
@@ -6,7 +8,12 @@ public static class ServiceCollectionExtensions
 {
     public static IServiceCollection AddLokiAuditing(this IServiceCollection services)
     {
-        services.AddSingleton<IAuditingStore, LokiAuditingStore>();
+        services.AddSingleton(provider =>
+        {
+            var options = provider.GetRequiredService<IOptions<LokiOptions>>().Value;
+            var app = provider.GetRequiredService<ApplicationInfo>();
+            return LokiAuditingStore.Create(options, app.Name);
+        });
         // builder.Services.AddSingleton(provider =>
         // {
         //     var serilogOptions = provider.GetRequiredService<IOptions<SerilogOptions>>().Value;

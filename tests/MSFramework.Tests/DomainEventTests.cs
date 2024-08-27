@@ -71,7 +71,7 @@ public class DomainEventTests
         serviceCollection.AddMicroserviceFramework(x =>
         {
             x.UseDependencyInjectionLoader();
-            x.UseAspNetCore();
+            x.UseAspNetCoreExtension();
         });
         serviceCollection.AddLogging(x => x.AddConsole());
         var serviceProvider = serviceCollection.BuildServiceProvider();
@@ -92,7 +92,7 @@ public class DomainEventTests
         serviceCollection.AddMicroserviceFramework(x =>
         {
             x.UseDependencyInjectionLoader();
-            x.UseAspNetCore();
+            x.UseAspNetCoreExtension();
         });
         serviceCollection.AddLogging(x => x.AddConsole());
         var serviceProvider = serviceCollection.BuildServiceProvider();
@@ -113,7 +113,7 @@ public class DomainEventTests
         serviceCollection.AddMicroserviceFramework(x =>
         {
             x.UseDependencyInjectionLoader();
-            x.UseAspNetCore();
+            x.UseAspNetCoreExtension();
         });
         serviceCollection.AddLogging(x => x.AddConsole());
         var serviceProvider = serviceCollection.BuildServiceProvider();

@@ -15,6 +15,40 @@ namespace Ordering.Infrastructure.Migrations
                 .Annotation("MySql:CharSet", "utf8mb4");
 
             migrationBuilder.CreateTable(
+                name: "ordering_audit_operation",
+                columns: table => new
+                {
+                    id = table.Column<string>(type: "varchar(36)", maxLength: 36, nullable: false)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    url = table.Column<string>(type: "varchar(1024)", maxLength: 1024, nullable: true)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    ip = table.Column<string>(type: "varchar(256)", maxLength: 256, nullable: true)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    device_id = table.Column<string>(type: "varchar(36)", maxLength: 36, nullable: true)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    device_model = table.Column<string>(type: "varchar(256)", maxLength: 256, nullable: true)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    lat = table.Column<double>(type: "double", nullable: true),
+                    lng = table.Column<double>(type: "double", nullable: true),
+                    user_agent = table.Column<string>(type: "varchar(1024)", maxLength: 1024, nullable: true)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    end_time = table.Column<long>(type: "bigint", nullable: false, defaultValue: 0L),
+                    elapsed = table.Column<int>(type: "int", nullable: false),
+                    trace_id = table.Column<string>(type: "varchar(64)", maxLength: 64, nullable: true)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    creation_time = table.Column<long>(type: "bigint", nullable: true),
+                    creator_id = table.Column<string>(type: "varchar(36)", maxLength: 36, nullable: true)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    creator_name = table.Column<string>(type: "varchar(256)", maxLength: 256, nullable: true)
+                        .Annotation("MySql:CharSet", "utf8mb4")
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_ordering_audit_operation", x => x.id);
+                })
+                .Annotation("MySql:CharSet", "utf8mb4");
+
+            migrationBuilder.CreateTable(
                 name: "ordering_product",
                 columns: table => new
                 {
@@ -49,6 +83,32 @@ namespace Ordering.Infrastructure.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_user", x => x.id);
+                })
+                .Annotation("MySql:CharSet", "utf8mb4");
+
+            migrationBuilder.CreateTable(
+                name: "ordering_audit_entity",
+                columns: table => new
+                {
+                    id = table.Column<string>(type: "varchar(36)", maxLength: 36, nullable: false)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    operation_id = table.Column<string>(type: "varchar(36)", nullable: true)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    type = table.Column<string>(type: "varchar(256)", maxLength: 256, nullable: true)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    entity_id = table.Column<string>(type: "varchar(36)", maxLength: 36, nullable: true)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    operation_type = table.Column<string>(type: "varchar(256)", maxLength: 256, nullable: true)
+                        .Annotation("MySql:CharSet", "utf8mb4")
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_ordering_audit_entity", x => x.id);
+                    table.ForeignKey(
+                        name: "FK_ordering_audit_entity_ordering_audit_operation_operation_id",
+                        column: x => x.operation_id,
+                        principalTable: "ordering_audit_operation",
+                        principalColumn: "id");
                 })
                 .Annotation("MySql:CharSet", "utf8mb4");
 
@@ -101,6 +161,34 @@ namespace Ordering.Infrastructure.Migrations
                 .Annotation("MySql:CharSet", "utf8mb4");
 
             migrationBuilder.CreateTable(
+                name: "ordering_audit_property",
+                columns: table => new
+                {
+                    id = table.Column<string>(type: "varchar(36)", maxLength: 36, nullable: false)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    entity_id = table.Column<string>(type: "varchar(36)", nullable: true)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    name = table.Column<string>(type: "varchar(256)", maxLength: 256, nullable: true)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    type = table.Column<string>(type: "varchar(256)", maxLength: 256, nullable: true)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    original_value = table.Column<string>(type: "longtext", nullable: true)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    new_value = table.Column<string>(type: "longtext", nullable: true)
+                        .Annotation("MySql:CharSet", "utf8mb4")
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_ordering_audit_property", x => x.id);
+                    table.ForeignKey(
+                        name: "FK_ordering_audit_property_ordering_audit_entity_entity_id",
+                        column: x => x.entity_id,
+                        principalTable: "ordering_audit_entity",
+                        principalColumn: "id");
+                })
+                .Annotation("MySql:CharSet", "utf8mb4");
+
+            migrationBuilder.CreateTable(
                 name: "ordering_order_item",
                 columns: table => new
                 {
@@ -130,6 +218,31 @@ namespace Ordering.Infrastructure.Migrations
                 .Annotation("MySql:CharSet", "utf8mb4");
 
             migrationBuilder.CreateIndex(
+                name: "IX_ordering_audit_entity_entity_id",
+                table: "ordering_audit_entity",
+                column: "entity_id");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ordering_audit_entity_operation_id",
+                table: "ordering_audit_entity",
+                column: "operation_id");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ordering_audit_operation_creator_id",
+                table: "ordering_audit_operation",
+                column: "creator_id");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ordering_audit_operation_end_time",
+                table: "ordering_audit_operation",
+                column: "end_time");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ordering_audit_property_entity_id",
+                table: "ordering_audit_property",
+                column: "entity_id");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_ordering_order_creation_time",
                 table: "ordering_order",
                 column: "creation_time");
@@ -154,13 +267,22 @@ namespace Ordering.Infrastructure.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
+                name: "ordering_audit_property");
+
+            migrationBuilder.DropTable(
                 name: "ordering_order_item");
 
             migrationBuilder.DropTable(
                 name: "ordering_product");
 
             migrationBuilder.DropTable(
+                name: "ordering_audit_entity");
+
+            migrationBuilder.DropTable(
                 name: "ordering_order");
+
+            migrationBuilder.DropTable(
+                name: "ordering_audit_operation");
 
             migrationBuilder.DropTable(
                 name: "user");

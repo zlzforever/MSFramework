@@ -10,6 +10,12 @@ A micro service template
 dotnet ef migrations add Init -s src/Ordering.Api -c OrderingContext -p src/Ordering.Infrastructure
 ```
 
+### Static model
+
+``` 
+dotnet ef dbcontext optimize -s src/Ordering.Api -c OrderingContext -p src/Ordering.Infrastructure -o MyFolder -n My.Namespace 
+```
+
 ### 实践说明
 
 + 建议使用 schema 参数来进行隔离， 不再使用 table prefix 进行隔离

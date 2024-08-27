@@ -1,5 +1,3 @@
-using System;
-using System.Linq;
 using System.Reflection;
 using MicroserviceFramework.Domain;
 using Microsoft.Extensions.DependencyInjection;
@@ -11,7 +9,15 @@ public static class ServiceCollectionExtensions
 {
     public static MicroserviceFrameworkBuilder UseAutoMapperObjectAssembler(this MicroserviceFrameworkBuilder builder)
     {
-        return builder.UseAutoMapperObjectAssembler(Utils.Runtime.GetAllAssemblies());
+        builder.Services.AddAutoMapperObjectAssembler();
+        return builder;
+    }
+
+    public static IServiceCollection AddAutoMapperObjectAssembler(this IServiceCollection services)
+    {
+        services.TryAddScoped<IObjectAssembler, AutoMapperObjectAssembler>();
+        services.AddAutoMapper(Utils.Runtime.GetAllAssemblies());
+        return services;
     }
 
     public static MicroserviceFrameworkBuilder UseAutoMapperObjectAssembler(this MicroserviceFrameworkBuilder builder,
@@ -20,11 +26,5 @@ public static class ServiceCollectionExtensions
         builder.Services.TryAddScoped<IObjectAssembler, AutoMapperObjectAssembler>();
         builder.Services.AddAutoMapper(assemblies);
         return builder;
-    }
-
-    public static MicroserviceFrameworkBuilder UseAutoMapperObjectAssembler(this MicroserviceFrameworkBuilder builder,
-        params Type[] types)
-    {
-        return builder.UseAutoMapperObjectAssembler(types.Select(x => x.Assembly).ToArray());
     }
 }

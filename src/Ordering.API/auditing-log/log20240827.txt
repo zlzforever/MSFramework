@@ -1,0 +1,14 @@
+2024-08-27 11:21:16.544 +08:00 [INF] ::1 -  POST http://localhost:5001/api/v1.0/orders/createTest [2024-08-27 11:21:16] 269
+2024-08-27 11:21:16.546 +08:00 [INF] {IP:l} - {UserId:l} {Url:l} Ordering.Domain.AggregateRoots.Order 66cd462cc401c3485b5716bb Add
+2024-08-27 11:21:16.546 +08:00 [INF] {IP:l} - {UserId:l} {Url:l} Ordering.Domain.AggregateRoots.Address 66cd462cc401c3485b5716bb Add
+2024-08-27 11:21:16.546 +08:00 [INF] {IP:l} - {UserId:l} {Url:l} Ordering.Domain.AggregateRoots.OrderItem 66cd462cc401c3485b5716bc Add
+2024-08-27 11:21:16.546 +08:00 [INF] {IP:l} - {UserId:l} {Url:l} Ordering.Domain.AggregateRoots.OrderProduct 66cd462cc401c3485b5716bc Add
+2024-08-27 11:21:16.546 +08:00 [INF] {IP:l} - {UserId:l} {Url:l} Ordering.Domain.AggregateRoots.OrderItem 66cd462cc401c3485b5716bd Add
+2024-08-27 11:21:16.546 +08:00 [INF] {IP:l} - {UserId:l} {Url:l} Ordering.Domain.AggregateRoots.OrderProduct 66cd462cc401c3485b5716bd Add
+2024-08-27 11:21:16.801 +08:00 [INF] ::1 -  POST http://localhost:5001/api/v1.0/orders/createTest [2024-08-27 11:21:16] 556
+2024-08-27 11:21:16.801 +08:00 [INF] {IP:l} - {UserId:l} {Url:l} Ordering.Domain.AggregateRoots.OrderProduct 66cd462cc401c3485b5716e8 Add
+2024-08-27 11:21:16.801 +08:00 [INF] {IP:l} - {UserId:l} {Url:l} Ordering.Domain.AggregateRoots.OrderItem 66cd462cc401c3485b5716e8 Add
+2024-08-27 11:21:16.801 +08:00 [INF] {IP:l} - {UserId:l} {Url:l} Ordering.Domain.AggregateRoots.OrderProduct 66cd462cc401c3485b5716e7 Add
+2024-08-27 11:21:16.801 +08:00 [INF] {IP:l} - {UserId:l} {Url:l} Ordering.Domain.AggregateRoots.OrderItem 66cd462cc401c3485b5716e7 Add
+2024-08-27 11:21:16.801 +08:00 [INF] {IP:l} - {UserId:l} {Url:l} Ordering.Domain.AggregateRoots.Address 66cd462cc401c3485b5716e6 Add
+2024-08-27 11:21:16.801 +08:00 [INF] {IP:l} - {UserId:l} {Url:l} Ordering.Domain.AggregateRoots.Order 66cd462cc401c3485b5716e6 Add

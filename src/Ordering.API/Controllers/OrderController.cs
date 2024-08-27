@@ -71,7 +71,7 @@ public class OrderController(
         order.SetOperator(user1);
 
         logger.LogInformation("{TraceIdentifier}: Create test order", Session.TraceIdentifier);
-        logger.LogError(new Exception("test"), "{TraceIdentifier}: Create test order", Session.TraceIdentifier);
+
         await orderRepository.AddAsync(order);
         return order;
     }

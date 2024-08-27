@@ -38,7 +38,7 @@ public class ConfigExtensionTest(ITestOutputHelper output)
                             x.UseOptionsType(context.Configuration);
                         });
                         services.AddRouting(x => { x.LowercaseUrls = true; });
-                        services.AddMicroserviceFramework(builder => { builder.UseAspNetCore(); });
+                        services.AddMicroserviceFramework(builder => { builder.UseAspNetCoreExtension(); });
                     })
                     .Configure(app =>
                     {

@@ -49,7 +49,7 @@ public class RunTest(ITestOutputHelper output)
                         services.AddMicroserviceFramework(builder =>
                         {
                             builder.UseOptionsType(context.Configuration);
-                            builder.UseAspNetCore();
+                            builder.UseAspNetCoreExtension();
                             builder.UseEntityFramework();
                         });
                     })

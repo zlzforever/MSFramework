@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using MicroserviceFramework.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
 
 namespace MicroserviceFramework.Ef.Internal;
@@ -10,18 +11,18 @@ namespace MicroserviceFramework.Ef.Internal;
 /// </summary>
 internal sealed class EntityConfigurationTypeFinder : IEntityConfigurationTypeFinder
 {
+    private static readonly Dictionary<Type, Type> EntityMapDbContextDict;
+
     private static readonly Dictionary<Type, Dictionary<Type, EntityTypeConfigurationMetadata>>
         EntityRegistersDict;
 
-    private static readonly Dictionary<Type, Type> EntityMapDbContextDict;
     // private static readonly Dictionary<string, Type> EntityNameMapEntityTypeDict;
     private static readonly HashSet<Type> DbContextTypes;
 
     static EntityConfigurationTypeFinder()
     {
-        EntityRegistersDict = new Dictionary<Type, Dictionary<Type, EntityTypeConfigurationMetadata>>();
         EntityMapDbContextDict = new Dictionary<Type, Type>();
-        // EntityNameMapEntityTypeDict = new();
+        EntityRegistersDict = new Dictionary<Type, Dictionary<Type, EntityTypeConfigurationMetadata>>();
         DbContextTypes = [];
         var createEntityTypeBuilderMethod = typeof(ModelBuilder)
             .GetMethods().First(x => x.Name == "Entity" && x.GetGenericArguments().Length == 1);
@@ -60,27 +61,22 @@ internal sealed class EntityConfigurationTypeFinder : IEntityConfigurationTypeFi
                 {
                     var entityType = type.GetGenericArguments()[0];
                     var dbContextType = type.GetGenericArguments()[1];
-                    if (!EntityRegistersDict.ContainsKey(dbContextType))
-                    {
-                        EntityRegistersDict.Add(dbContextType,
-                            new Dictionary<Type, EntityTypeConfigurationMetadata>());
-                    }
 
-                    var dict = EntityRegistersDict[dbContextType];
+                    var dict = EntityRegistersDict.GetOrAdd(dbContextType,
+                        new Dictionary<Type, EntityTypeConfigurationMetadata>());
 
                     if (dict.ContainsKey(entityType))
                     {
                         throw new MicroserviceFrameworkException($"类型 {entityType}, {dbContextType} 已经注册");
                     }
 
+                    configuration ??= Activator.CreateInstance(constructableType);
                     var configureMethodInfo = typeof(IEntityTypeConfiguration<>) // IEntityTypeConfiguration<TEntity>
                         .MakeGenericType(entityType)
                         .GetMethod("Configure");
-
-                    configuration ??= Activator.CreateInstance(constructableType);
                     var metadata = new EntityTypeConfigurationMetadata(entityType, configureMethodInfo,
                         createEntityTypeBuilderMethod.MakeGenericMethod(entityType), configuration);
-                    dict.Add(entityType, metadata);
+                    EntityRegistersDict[dbContextType].Add(entityType, metadata);
                     EntityMapDbContextDict.TryAdd(entityType, dbContextType);
                     // EntityNameMapEntityTypeDict.TryAdd(entityType.FullName, entityType);
                     DbContextTypes.Add(dbContextType);

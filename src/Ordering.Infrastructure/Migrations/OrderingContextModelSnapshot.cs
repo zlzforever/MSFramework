@@ -18,10 +18,159 @@ namespace Ordering.Infrastructure.Migrations
 #pragma warning disable 612, 618
             modelBuilder
                 .HasAnnotation("DatabaseType", "mysql")
-                .HasAnnotation("ProductVersion", "8.0.4")
+                .HasAnnotation("ProductVersion", "8.0.8")
                 .HasAnnotation("Relational:MaxIdentifierLength", 64);
 
             MySqlModelBuilderExtensions.AutoIncrementColumns(modelBuilder);
+
+            modelBuilder.Entity("MicroserviceFramework.Auditing.Model.AuditEntity", b =>
+                {
+                    b.Property<string>("Id")
+                        .HasMaxLength(36)
+                        .HasColumnType("varchar(36)")
+                        .HasColumnName("id");
+
+                    b.Property<string>("EntityId")
+                        .HasMaxLength(36)
+                        .HasColumnType("varchar(36)")
+                        .HasColumnName("entity_id");
+
+                    b.Property<string>("OperationId")
+                        .HasColumnType("varchar(36)")
+                        .HasColumnName("operation_id");
+
+                    b.Property<string>("OperationType")
+                        .HasMaxLength(256)
+                        .HasColumnType("varchar(256)")
+                        .HasColumnName("operation_type");
+
+                    b.Property<string>("Type")
+                        .HasMaxLength(256)
+                        .HasColumnType("varchar(256)")
+                        .HasColumnName("type");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("EntityId");
+
+                    b.HasIndex("OperationId");
+
+                    b.ToTable("ordering_audit_entity");
+                });
+
+            modelBuilder.Entity("MicroserviceFramework.Auditing.Model.AuditOperation", b =>
+                {
+                    b.Property<string>("Id")
+                        .HasMaxLength(36)
+                        .HasColumnType("varchar(36)")
+                        .HasColumnName("id");
+
+                    b.Property<long?>("CreationTime")
+                        .HasColumnType("bigint")
+                        .HasColumnName("creation_time");
+
+                    b.Property<string>("CreatorId")
+                        .HasMaxLength(36)
+                        .HasColumnType("varchar(36)")
+                        .HasColumnName("creator_id");
+
+                    b.Property<string>("CreatorName")
+                        .HasMaxLength(256)
+                        .HasColumnType("varchar(256)")
+                        .HasColumnName("creator_name");
+
+                    b.Property<string>("DeviceId")
+                        .HasMaxLength(36)
+                        .HasColumnType("varchar(36)")
+                        .HasColumnName("device_id");
+
+                    b.Property<string>("DeviceModel")
+                        .HasMaxLength(256)
+                        .HasColumnType("varchar(256)")
+                        .HasColumnName("device_model");
+
+                    b.Property<int>("Elapsed")
+                        .HasColumnType("int")
+                        .HasColumnName("elapsed");
+
+                    b.Property<long>("EndTime")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint")
+                        .HasDefaultValue(0L)
+                        .HasColumnName("end_time");
+
+                    b.Property<string>("IP")
+                        .HasMaxLength(256)
+                        .HasColumnType("varchar(256)")
+                        .HasColumnName("ip");
+
+                    b.Property<double?>("Lat")
+                        .HasColumnType("double")
+                        .HasColumnName("lat");
+
+                    b.Property<double?>("Lng")
+                        .HasColumnType("double")
+                        .HasColumnName("lng");
+
+                    b.Property<string>("TraceId")
+                        .HasMaxLength(64)
+                        .HasColumnType("varchar(64)")
+                        .HasColumnName("trace_id");
+
+                    b.Property<string>("Url")
+                        .HasMaxLength(1024)
+                        .HasColumnType("varchar(1024)")
+                        .HasColumnName("url");
+
+                    b.Property<string>("UserAgent")
+                        .HasMaxLength(1024)
+                        .HasColumnType("varchar(1024)")
+                        .HasColumnName("user_agent");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CreatorId");
+
+                    b.HasIndex("EndTime");
+
+                    b.ToTable("ordering_audit_operation");
+                });
+
+            modelBuilder.Entity("MicroserviceFramework.Auditing.Model.AuditProperty", b =>
+                {
+                    b.Property<string>("Id")
+                        .HasMaxLength(36)
+                        .HasColumnType("varchar(36)")
+                        .HasColumnName("id");
+
+                    b.Property<string>("EntityId")
+                        .HasColumnType("varchar(36)")
+                        .HasColumnName("entity_id");
+
+                    b.Property<string>("Name")
+                        .HasMaxLength(256)
+                        .HasColumnType("varchar(256)")
+                        .HasColumnName("name");
+
+                    b.Property<string>("NewValue")
+                        .HasColumnType("longtext")
+                        .HasColumnName("new_value");
+
+                    b.Property<string>("OriginalValue")
+                        .HasColumnType("longtext")
+                        .HasColumnName("original_value");
+
+                    b.Property<string>("Type")
+                        .HasMaxLength(256)
+                        .HasColumnType("varchar(256)")
+                        .HasColumnName("type");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("EntityId");
+
+                    b.ToTable("ordering_audit_property");
+                });
 
             modelBuilder.Entity("Ordering.Domain.AggregateRoots.Order", b =>
                 {
@@ -182,6 +331,24 @@ namespace Ordering.Infrastructure.Migrations
                     b.ToTable("user", (string)null);
                 });
 
+            modelBuilder.Entity("MicroserviceFramework.Auditing.Model.AuditEntity", b =>
+                {
+                    b.HasOne("MicroserviceFramework.Auditing.Model.AuditOperation", "Operation")
+                        .WithMany("Entities")
+                        .HasForeignKey("OperationId");
+
+                    b.Navigation("Operation");
+                });
+
+            modelBuilder.Entity("MicroserviceFramework.Auditing.Model.AuditProperty", b =>
+                {
+                    b.HasOne("MicroserviceFramework.Auditing.Model.AuditEntity", "Entity")
+                        .WithMany("Properties")
+                        .HasForeignKey("EntityId");
+
+                    b.Navigation("Entity");
+                });
+
             modelBuilder.Entity("Ordering.Domain.AggregateRoots.Order", b =>
                 {
                     b.HasOne("Ordering.Domain.AggregateRoots.User", "Operator")
@@ -280,6 +447,16 @@ namespace Ordering.Infrastructure.Migrations
                     b.Navigation("Order");
 
                     b.Navigation("Product");
+                });
+
+            modelBuilder.Entity("MicroserviceFramework.Auditing.Model.AuditEntity", b =>
+                {
+                    b.Navigation("Properties");
+                });
+
+            modelBuilder.Entity("MicroserviceFramework.Auditing.Model.AuditOperation", b =>
+                {
+                    b.Navigation("Entities");
                 });
 
             modelBuilder.Entity("Ordering.Domain.AggregateRoots.Order", b =>

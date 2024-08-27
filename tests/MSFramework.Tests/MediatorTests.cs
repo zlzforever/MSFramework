@@ -101,7 +101,7 @@ public class MediatorTests
         serviceCollection.AddMicroserviceFramework(x =>
         {
             x.UseDependencyInjectionLoader();
-            x.UseAspNetCore();
+            x.UseAspNetCoreExtension();
         });
         serviceCollection.AddLogging(x => x.AddConsole());
         var serviceProvider = serviceCollection.BuildServiceProvider();
@@ -122,7 +122,7 @@ public class MediatorTests
         serviceCollection.AddMicroserviceFramework(x =>
         {
             x.UseDependencyInjectionLoader();
-            x.UseAspNetCore();
+            x.UseAspNetCoreExtension();
         });
         var serviceProvider = serviceCollection.BuildServiceProvider();
         serviceProvider.UseMicroserviceFramework();
@@ -143,7 +143,7 @@ public class MediatorTests
         serviceCollection.AddMicroserviceFramework(x =>
         {
             x.UseDependencyInjectionLoader();
-            x.UseAspNetCore();
+            x.UseAspNetCoreExtension();
         });
         serviceCollection.AddLogging(x => x.AddConsole());
         var serviceProvider = serviceCollection.BuildServiceProvider();
@@ -166,7 +166,7 @@ public class MediatorTests
         serviceCollection.AddMicroserviceFramework(x =>
         {
             x.UseDependencyInjectionLoader();
-            x.UseAspNetCore();
+            x.UseAspNetCoreExtension();
         });
         serviceCollection.AddLogging(x => x.AddConsole());
 

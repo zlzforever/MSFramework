@@ -8,6 +8,7 @@ using MicroserviceFramework.AspNetCore;
 using MicroserviceFramework.AspNetCore.Filters;
 using MicroserviceFramework.AspNetCore.Mvc.ModelBinding;
 using MicroserviceFramework.AspNetCore.Swagger;
+using MicroserviceFramework.Auditing.Loki;
 using MicroserviceFramework.AutoMapper;
 using MicroserviceFramework.Ef;
 using MicroserviceFramework.Ef.MySql;
@@ -62,7 +63,7 @@ public static class Startup
                 .MinimumLevel.Override("System", LogEventLevel.Warning)
                 .MinimumLevel.Override("Microsoft.AspNetCore.Authentication", LogEventLevel.Warning)
                 .Enrich.FromLogContext()
-                .WriteTo.Console()
+                .WriteTo.Async(x => x.File("auditing/log.txt", rollingInterval: RollingInterval.Day))
                 .CreateLogger();
         }
     });
@@ -126,7 +127,8 @@ public static class Startup
 
         var dbContextSettingsList = configuration.GetSection("DbContexts").Get<List<DbContextSettings>>();
         var dbContextSettings = dbContextSettingsList[0];
-        services.AddDbContext<OrderingContext>((provider, x) =>
+
+        services.AddDbContextPool<OrderingContext>((provider, x) =>
         {
             var loggerFactory = provider.GetRequiredService<ILoggerFactory>();
             x.UseLoggerFactory(loggerFactory);
@@ -151,29 +153,32 @@ public static class Startup
             }
         });
 
-
         services.AddDbContext<TestDbContext>(x =>
             x.UseNpgsql());
 
         // services.AddAssemblyScanPrefix("Ordering");
+        // services.AddScopeServiceProvider();
         // services.AddDependencyInjectionLoader();
         // services.AddOptionsType(configuration);
+        // services.AddAspNetCoreExtension();
+        // services.AddAutoMapperObjectAssembler();
         // services.AddEfAuditing<OrderingContext>();
-        // services.AddLocalEventPublisher();
         // services.AddLokiAuditing();
-        // services.AddAspNetCore();
+        // services.AddLocalEventPublisher();
+        // services.AddAspNetCoreExtension();
+        // services.AddEntityFrameworkExtension();
 
         services.AddMicroserviceFramework(builder =>
         {
             builder.UseAssemblyScanPrefix("Ordering");
+            builder.UseScopeServiceProvider();
             builder.UseDependencyInjectionLoader();
             builder.UseOptionsType(configuration);
             builder.UseAutoMapperObjectAssembler();
-            // builder.UseEfAuditing<IOrderingContext>();
-            // builder.UseLokiAuditing();
+            builder.UseEfAuditing<OrderingContext>();
+            builder.UseLokiAuditing();
             builder.UseLocalEventPublisher();
-            builder.UseAspNetCore();
-            // builder.UseNewtonsoftJsonHelper(settings);
+            builder.UseAspNetCoreExtension();
             builder.UseEntityFramework();
         });
     });

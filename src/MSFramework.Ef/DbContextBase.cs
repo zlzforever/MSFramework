@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Reflection;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
@@ -18,28 +17,28 @@ using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using Microsoft.Extensions.Logging;
 using MongoDB.Bson;
 
 namespace MicroserviceFramework.Ef;
 
 public abstract class DbContextBase : DbContext
 {
-    private readonly ISession _session;
-    private IEntityConfigurationTypeFinder _entityConfigurationTypeFinder;
-    private readonly IMediator _mediator;
+    // private readonly ISession _session;
+    //
+    // // private IEntityConfigurationTypeFinder _entityConfigurationTypeFinder;
+    // private readonly IMediator _mediator;
 
     // private readonly ConcurrentDictionary<Type, List<Type>> _contextInterfaceTypes = new();
 
     /// <summary>
     /// 初始化一个<see cref="DbContextBase"/>类型的新实例
     /// </summary>
-    protected DbContextBase(DbContextOptions options,
-        IMediator mediator,
-        ISession session)
+    protected DbContextBase(DbContextOptions options)
         : base(options)
     {
-        _mediator = mediator;
-        _session = session;
+        // _mediator = mediator;
+        // _session = session;
     }
 
     // /// <summary>
@@ -61,13 +60,16 @@ public abstract class DbContextBase : DbContext
     /// <param name="modelBuilder">上下文数据模型构建器</param>
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        var logger = this.GetService<ILoggerFactory>().CreateLogger("DbContextBase");
+        logger.LogDebug("OnModelCreating 1: " + DateTimeOffset.Now.ToUnixTimeMilliseconds());
         var settings = this.GetService<DbContextSettings>();
         if (settings == null)
         {
             throw new ArgumentNullException(nameof(DbContextSettings));
         }
 
-        _entityConfigurationTypeFinder = this.GetService<IEntityConfigurationTypeFinder>();
+        logger.LogDebug("OnModelCreating 2: " + DateTimeOffset.Now.ToUnixTimeMilliseconds());
+        var entityConfigurationTypeFinder = this.GetService<IEntityConfigurationTypeFinder>();
 
         //通过实体配置信息将实体注册到当前上下文
         var contextType = GetType();
@@ -95,26 +97,32 @@ public abstract class DbContextBase : DbContext
 
         modelBuilder.HasAnnotation("DatabaseType", settings.DatabaseType);
 
-        var entityTypeConfigurations = _entityConfigurationTypeFinder
-            .GetEntityTypeConfigurations(contextType);
+        var entityTypeConfigurations = entityConfigurationTypeFinder.GetEntityTypeConfigurations(contextType);
+        logger.LogDebug("OnModelCreating 3: " + DateTimeOffset.Now.ToUnixTimeMilliseconds());
 
         foreach (var entityTypeConfiguration in entityTypeConfigurations)
         {
+            // modelBuilder.Entity(entityTypeConfiguration.EntityType, entityTypeBuilder =>
+            // {
+            //     entityTypeConfiguration.ConfigureMethodInfo.Invoke(
+            //         entityTypeConfiguration.EntityTypeConfiguration,
+            //         [entityTypeBuilder]);
+            // });
             var createEntityTypeBuilderMethod = entityTypeConfiguration.CreateEntityTypeBuilderMethod;
             var entityTypeBuilder = (EntityTypeBuilder)createEntityTypeBuilderMethod.Invoke(modelBuilder,
                 []);
-            if (entityTypeBuilder == null)
-            {
-                continue;
-            }
-
-            // entityTypeBuilder.Metadata.AddAnnotation("DatabaseType", settings.DatabaseType);
+            // if (entityTypeBuilder == null)
+            // {
+            //     continue;
+            // }
+            //
+            // // entityTypeBuilder.Metadata.AddAnnotation("DatabaseType", settings.DatabaseType);
             entityTypeConfiguration.ConfigureMethodInfo.Invoke(
                 entityTypeConfiguration.EntityTypeConfiguration,
                 [entityTypeBuilder]);
         }
 
-
+        logger.LogDebug("OnModelCreating 4: " + DateTimeOffset.Now.ToUnixTimeMilliseconds());
         if (EfUtilities.AuditingDbContextType == contextType)
         {
             AuditOperationConfiguration.Instance.Configure(modelBuilder.Entity<AuditOperation>());
@@ -123,7 +131,7 @@ public abstract class DbContextBase : DbContext
         }
 
         var tablePrefix = settings.TablePrefix?.Trim();
-
+        logger.LogDebug("OnModelCreating 5: " + DateTimeOffset.Now.ToUnixTimeMilliseconds());
         foreach (var entityType in modelBuilder.Model.GetEntityTypes())
         {
             // owned 的类型是合并到其主表中，所以没有 table name，schema 的说法
@@ -222,6 +230,8 @@ public abstract class DbContextBase : DbContext
                 }
             }
         }
+
+        logger.LogDebug("OnModelCreating 6: " + DateTimeOffset.Now.ToUnixTimeMilliseconds());
     }
 
     public IEnumerable<AuditEntity> GetAuditEntities()
@@ -246,12 +256,19 @@ public abstract class DbContextBase : DbContext
     public override async Task<int> SaveChangesAsync(bool acceptAllChangesOnSuccess,
         CancellationToken cancellationToken = new())
     {
-        // 若是有领域事件则分发出去
-        // 领域事件可能导致别聚合调用当前 DbContext 并改变状态，或者添加新的事件
-        var domainEvents = GetDomainEvents();
-        foreach (var @event in domainEvents)
+        var logger = this.GetService<ILoggerFactory>().CreateLogger("DbContextBase");
+        logger.LogDebug("SaveChangesAsync 1: " + DateTimeOffset.Now.ToUnixTimeMilliseconds());
+        var scopeServiceProvider = this.GetService<ScopeServiceProvider>();
+        var mediator = scopeServiceProvider.GetService<IMediator>();
+        if (mediator != null)
         {
-            await _mediator.PublishAsync(@event, cancellationToken);
+            // 若是有领域事件则分发出去
+            // 领域事件可能导致别聚合调用当前 DbContext 并改变状态，或者添加新的事件
+            var domainEvents = GetDomainEvents();
+            foreach (var @event in domainEvents)
+            {
+                await mediator.PublishAsync(@event, cancellationToken);
+            }
         }
 
         var effectedCount = 0;
@@ -261,17 +278,24 @@ public abstract class DbContextBase : DbContext
             return effectedCount;
         }
 
-        return await base.SaveChangesAsync(acceptAllChangesOnSuccess, cancellationToken);
+        var r = await base.SaveChangesAsync(acceptAllChangesOnSuccess, cancellationToken);
+        logger.LogDebug("SaveChangesAsync 2: " + DateTimeOffset.Now.ToUnixTimeMilliseconds());
+        return r;
     }
 
     public override int SaveChanges(bool acceptAllChangesOnSuccess)
     {
-        // 若是有领域事件则分发出去
-        // 领域事件可能导致别聚合调用当前 DbContext 并改变状态，或者添加新的事件
-        var domainEvents = GetDomainEvents();
-        foreach (var @event in domainEvents)
+        var scopeServiceProvider = this.GetService<ScopeServiceProvider>();
+        var mediator = scopeServiceProvider.GetService<IMediator>();
+        if (mediator != null)
         {
-            _mediator.PublishAsync(@event).ConfigureAwait(false);
+            // 若是有领域事件则分发出去
+            // 领域事件可能导致别聚合调用当前 DbContext 并改变状态，或者添加新的事件
+            var domainEvents = GetDomainEvents();
+            foreach (var @event in domainEvents)
+            {
+                mediator.PublishAsync(@event).ConfigureAwait(false);
+            }
         }
 
         var effectedCount = 0;
@@ -281,7 +305,10 @@ public abstract class DbContextBase : DbContext
 
     protected virtual bool ApplyConcepts()
     {
-        var userId = _session.UserId;
+        var scopeServiceProvider = this.GetService<ScopeServiceProvider>();
+        var session = scopeServiceProvider.GetService<ISession>();
+        var userId = session?.UserId;
+        var name = session?.UserDisplayName;
         var changed = false;
 
         foreach (var entry in ChangeTracker.Entries())
@@ -295,15 +322,15 @@ public abstract class DbContextBase : DbContext
             switch (entry.State)
             {
                 case EntityState.Added:
-                    ApplyConceptsForAddedEntity(entry, userId, _session.UserDisplayName);
+                    ApplyConceptsForAddedEntity(entry, userId, name);
                     changed = true;
                     break;
                 case EntityState.Modified:
-                    ApplyConceptsForModifiedEntity(entry, userId, _session.UserDisplayName);
+                    ApplyConceptsForModifiedEntity(entry, userId, name);
                     changed = true;
                     break;
                 case EntityState.Deleted:
-                    ApplyConceptsForDeletedEntity(entry, userId, _session.UserDisplayName);
+                    ApplyConceptsForDeletedEntity(entry, userId, name);
                     changed = true;
                     break;
                 case EntityState.Detached:

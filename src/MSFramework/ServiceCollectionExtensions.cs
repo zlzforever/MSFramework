@@ -4,6 +4,7 @@ using System.Runtime.CompilerServices;
 using System.Threading;
 using MicroserviceFramework.Common;
 using MicroserviceFramework.Extensions.Options;
+using MicroserviceFramework.Runtime;
 using MicroserviceFramework.Serialization;
 using MicroserviceFramework.Text.Json;
 using MicroserviceFramework.Utils;
@@ -35,13 +36,18 @@ public static class ServiceCollectionExtensions
         return builder;
     }
 
+    /// <summary>
+    ///
+    /// </summary>
+    /// <param name="services"></param>
+    /// <param name="builderAction"></param>
     public static void AddMicroserviceFramework(this IServiceCollection services,
         Action<MicroserviceFrameworkBuilder> builderAction = null)
     {
         var builder = new MicroserviceFrameworkBuilder(services);
 
         builder.Services.TryAddSingleton<ApplicationInfo>();
-
+        builder.Services.TryAddSingleton<ScopeServiceProvider>();
         // 放到后面，加载优先级更高
         builderAction?.Invoke(builder);
 
@@ -95,6 +101,12 @@ public static class ServiceCollectionExtensions
         }
     }
 
+    /// <summary>
+    ///
+    /// </summary>
+    /// <param name="services"></param>
+    /// <param name="prefixes"></param>
+    /// <returns></returns>
     public static IServiceCollection AddAssemblyScanPrefix(this IServiceCollection services,
         params string[] prefixes)
     {

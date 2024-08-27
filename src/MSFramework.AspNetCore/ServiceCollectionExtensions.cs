@@ -1,5 +1,6 @@
 using System;
 using MicroserviceFramework.AspNetCore.Mvc.ModelBinding;
+using MicroserviceFramework.Runtime;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -12,9 +13,20 @@ namespace MicroserviceFramework.AspNetCore;
 
 public static class ServiceCollectionExtensions
 {
-    public static IServiceCollection AddAspNetCore(this IServiceCollection services)
+    public static IServiceCollection AddScopeServiceProvider(this IServiceCollection services)
     {
-        services.AddHttpContextAccessor();
+        services.TryAddScoped<ScopeServiceProvider, HttpContextScopeServiceProvider>();
+        return services;
+    }
+
+    public static MicroserviceFrameworkBuilder UseScopeServiceProvider(this MicroserviceFrameworkBuilder builder)
+    {
+        builder.Services.AddScopeServiceProvider();
+        return builder;
+    }
+
+    public static IServiceCollection AddAspNetCoreExtension(this IServiceCollection services)
+    {
         services.TryAddScoped<ISession>(provider =>
             HttpSession.Create(provider.GetRequiredService<IHttpContextAccessor>()));
         services.TryAddSingleton(x =>
@@ -41,15 +53,16 @@ public static class ServiceCollectionExtensions
     /// </summary>
     /// <param name="builder"></param>
     /// <returns></returns>
-    public static MicroserviceFrameworkBuilder UseAspNetCore(this MicroserviceFrameworkBuilder builder)
+    public static MicroserviceFrameworkBuilder UseAspNetCoreExtension(this MicroserviceFrameworkBuilder builder)
     {
-        builder.Services.AddAspNetCore();
+        builder.Services.AddAspNetCoreExtension();
         return builder;
     }
 
-    public static void UseMicroserviceFramework(this IApplicationBuilder builder)
+    public static IApplicationBuilder UseMicroserviceFramework(this IApplicationBuilder builder)
     {
         builder.ApplicationServices.UseMicroserviceFramework();
+        return builder;
     }
 
     public static IMvcBuilder ConfigureInvalidModelStateResponse(this IMvcBuilder builder)
