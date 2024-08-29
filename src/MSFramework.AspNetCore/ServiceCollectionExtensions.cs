@@ -15,7 +15,7 @@ public static class ServiceCollectionExtensions
 {
     public static IServiceCollection AddScopeServiceProvider(this IServiceCollection services)
     {
-        services.TryAddScoped<ScopeServiceProvider, HttpContextScopeServiceProvider>();
+        services.TryAddSingleton<ScopeServiceProvider, HttpContextScopeServiceProvider>();
         return services;
     }
 
