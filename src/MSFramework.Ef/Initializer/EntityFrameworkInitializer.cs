@@ -13,6 +13,11 @@ public class EntityFrameworkInitializer(IServiceProvider serviceProvider, ILogge
 {
     public async Task StartAsync(CancellationToken cancellationToken)
     {
+        if (Defaults.IsInTests)
+        {
+            return;
+        }
+
         try
         {
             logger.LogInformation("开始 EF 初始化...");
@@ -23,7 +28,6 @@ public class EntityFrameworkInitializer(IServiceProvider serviceProvider, ILogge
             {
                 throw new MicroserviceFrameworkException("未能找到数据上下文配置");
             }
-
 
             foreach (var option in list)
             {

@@ -1,4 +1,6 @@
 using System;
+using System.Linq;
+using System.Reflection;
 using MicroserviceFramework.Serialization;
 using MongoDB.Bson;
 
@@ -7,6 +9,13 @@ namespace MicroserviceFramework;
 public static class Defaults
 {
     public static IJsonSerializer JsonSerializer;
+    public static readonly bool IsInTests;
+
+    static Defaults()
+    {
+        string[] names = ["ReSharperTestRunner", "testhost"];
+        IsInTests = names.Contains(Assembly.GetEntryAssembly()?.GetName().Name);
+    }
 
     public static class Headers
     {

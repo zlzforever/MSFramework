@@ -1,5 +1,5 @@
 using System;
-using System.Collections.Generic;
+using System.Collections.Concurrent;
 using System.Linq;
 using System.Reflection;
 using MicroserviceFramework.Domain;
@@ -10,24 +10,20 @@ namespace MicroserviceFramework.Ef.Extensions;
 
 public static class EnumerationPropertyExtensions
 {
-    private static readonly Dictionary<Type, ConstructorInfo> ConstructorInfoCache = new();
+    private static readonly ConcurrentDictionary<Type, ConstructorInfo> ConstructorInfoCache = new();
 
     public static PropertyBuilder<TProperty> UseEnumeration<TProperty>(this PropertyBuilder<TProperty> builder)
         where TProperty : Enumeration
     {
         var type = typeof(TProperty);
-        ConstructorInfo constructorInfo;
-        if (ConstructorInfoCache.TryGetValue(type, out var c))
+        var constructorInfo = ConstructorInfoCache.GetOrAdd(type, t =>
         {
-            constructorInfo = c;
-        }
-        else
-        {
-            constructorInfo = typeof(TProperty).GetTypeInfo().DeclaredConstructors
+            var v = t.GetTypeInfo().DeclaredConstructors
                 .FirstOrDefault(x =>
-                    x.GetParameters().Length == 2 && x.GetParameters().All(y => y.ParameterType == typeof(string)));
-            ConstructorInfoCache.Add(type, constructorInfo);
-        }
+                    x.GetParameters().Length == 2 && x.GetParameters()
+                        .All(y => y.ParameterType == typeof(string)));
+            return v;
+        });
 
         builder.HasConversion(new ValueConverter<TProperty, string>(
             v => v.Id,
