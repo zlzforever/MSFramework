@@ -3,7 +3,7 @@ using MongoDB.Bson;
 
 namespace Ordering.Domain.AggregateRoots;
 
-public class OrderItem : EntityBase<ObjectId>
+public class OrderItem : EntityBase<string>
 {
     public Order Order { get; private set; }
 
@@ -27,7 +27,7 @@ public class OrderItem : EntityBase<ObjectId>
     /// </summary>
     public decimal Discount { get; private set; }
 
-    private OrderItem(ObjectId id) : base(id)
+    private OrderItem(string id) : base(id)
     {
     }
 
@@ -44,7 +44,7 @@ public class OrderItem : EntityBase<ObjectId>
             throw new OrderingDomainException("The total of order item is lower than applied discount");
         }
 
-        var item = new OrderItem(ObjectId.GenerateNewId())
+        var item = new OrderItem(ObjectId.GenerateNewId().ToString())
         {
             Order = order,
             Product = product,

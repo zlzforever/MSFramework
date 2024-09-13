@@ -13,7 +13,9 @@ dotnet ef migrations add Init -s src/Ordering.Api -c OrderingContext -p src/Orde
 ### Static model
 
 ``` 
-dotnet ef dbcontext optimize -s src/Ordering.Api -c OrderingContext -p src/Ordering.Infrastructure -o MyFolder -n My.Namespace 
+dotnet ef dbcontext optimize -s src/Ordering.Api \
+  -c OrderingContext -p src/Ordering.Infrastructure \
+  -o CompileModels -n Ordering.Infrastructure.CompileModels
 ```
 
 ### 实践说明

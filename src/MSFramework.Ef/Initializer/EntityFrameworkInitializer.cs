@@ -8,9 +8,19 @@ using Microsoft.Extensions.Logging;
 
 namespace MicroserviceFramework.Ef.Initializer;
 
+/// <summary>
+///
+/// </summary>
+/// <param name="serviceProvider"></param>
+/// <param name="logger"></param>
 public class EntityFrameworkInitializer(IServiceProvider serviceProvider, ILogger<EntityFrameworkInitializer> logger)
     : IInitializerBase
 {
+    /// <summary>
+    ///
+    /// </summary>
+    /// <param name="cancellationToken"></param>
+    /// <exception cref="MicroserviceFrameworkException"></exception>
     public async Task StartAsync(CancellationToken cancellationToken)
     {
         if (Defaults.IsInTests)
@@ -79,5 +89,8 @@ public class EntityFrameworkInitializer(IServiceProvider serviceProvider, ILogge
         }
     }
 
+    /// <summary>
+    ///
+    /// </summary>
     public int Order => int.MinValue;
 }

@@ -3,8 +3,18 @@ using System.Linq.Expressions;
 
 namespace MicroserviceFramework.Linq.Expression;
 
+/// <summary>
+///
+/// </summary>
 public static class ExpressionExtension
 {
+    /// <summary>
+    ///
+    /// </summary>
+    /// <param name="expr1"></param>
+    /// <param name="expr2"></param>
+    /// <typeparam name="T"></typeparam>
+    /// <returns></returns>
     public static Expression<Func<T, bool>> Or<T>(this Expression<Func<T, bool>> expr1,
         Expression<Func<T, bool>> expr2)
     {

@@ -3,8 +3,17 @@ using System.Linq;
 
 namespace MicroserviceFramework.Runtime;
 
+/// <summary>
+///
+/// </summary>
 public static class TypeExtensions
 {
+    /// <summary>
+    ///
+    /// </summary>
+    /// <param name="type"></param>
+    /// <param name="excludeInterfaces"></param>
+    /// <returns></returns>
     public static Type[] GetInterfacesExcludeBy(this Type type, params Type[] excludeInterfaces)
     {
         var types = type.GetInterfaces();

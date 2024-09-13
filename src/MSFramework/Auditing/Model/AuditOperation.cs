@@ -5,7 +5,10 @@ using MongoDB.Bson;
 
 namespace MicroserviceFramework.Auditing.Model;
 
-public class AuditOperation : CreationAggregateRoot<ObjectId>
+/// <summary>
+///
+/// </summary>
+public class AuditOperation : CreationAggregateRoot<string>
 {
     /// <summary>
     /// 操作路径
@@ -57,15 +60,29 @@ public class AuditOperation : CreationAggregateRoot<ObjectId>
     /// </summary>
     public int Elapsed { get; private set; }
 
+    /// <summary>
+    /// 跟踪标识
+    /// </summary>
     public string TraceId { get; private set; }
 
-    private AuditOperation() : base(ObjectId.GenerateNewId())
+    private AuditOperation(string id) : base(id)
     {
         Entities = new List<AuditEntity>();
     }
 
+    /// <summary>
+    ///
+    /// </summary>
+    /// <param name="url"></param>
+    /// <param name="userAgent"></param>
+    /// <param name="ip"></param>
+    /// <param name="deviceModel"></param>
+    /// <param name="deviceId"></param>
+    /// <param name="lat"></param>
+    /// <param name="lng"></param>
+    /// <param name="traceId"></param>
     public AuditOperation(string url, string userAgent, string ip, string deviceModel, string deviceId, double? lat,
-        double? lng, string traceId) : this()
+        double? lng, string traceId) : this(ObjectId.GenerateNewId().ToString())
     {
         IP = ip;
         Url = url;
@@ -77,6 +94,10 @@ public class AuditOperation : CreationAggregateRoot<ObjectId>
         TraceId = traceId;
     }
 
+    /// <summary>
+    ///
+    /// </summary>
+    /// <param name="entities"></param>
     public void AddEntities(IEnumerable<AuditEntity> entities)
     {
         foreach (var entity in entities)
@@ -86,6 +107,9 @@ public class AuditOperation : CreationAggregateRoot<ObjectId>
         }
     }
 
+    /// <summary>
+    ///
+    /// </summary>
     public void End()
     {
         EndTime = DateTimeOffset.Now;
@@ -99,6 +123,10 @@ public class AuditOperation : CreationAggregateRoot<ObjectId>
         }
     }
 
+    /// <summary>
+    ///
+    /// </summary>
+    /// <returns></returns>
     public override string ToString()
     {
         return

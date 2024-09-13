@@ -1,37 +1,51 @@
 using System;
+using MicroserviceFramework.Ef.Internal;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace MicroserviceFramework.Ef.Extensions;
 
+/// <summary>
+///
+/// </summary>
 public static class UnixTimePropertyExtensions
 {
+    /// <summary>
+    ///
+    /// </summary>
+    /// <param name="builder"></param>
+    /// <param name="milliseconds"></param>
+    /// <returns></returns>
     public static PropertyBuilder<DateTimeOffset?> UseUnixTime(this PropertyBuilder<DateTimeOffset?> builder,
         bool milliseconds = false)
     {
-        builder.HasConversion(new ValueConverter<DateTimeOffset?, long?>(
-            v => v.HasValue
-                ? milliseconds ? v.Value.ToUnixTimeMilliseconds() : v.Value.ToUnixTimeSeconds()
-                : default,
-            v => v.HasValue
-                ? milliseconds
-                    ? DateTimeOffset.FromUnixTimeMilliseconds(v.Value).ToLocalTime()
-                    : DateTimeOffset.FromUnixTimeSeconds(v.Value).ToLocalTime()
-                : default));
+        // var converter = new ValueConverter<DateTimeOffset?, long?>(
+        //     v => v.HasValue
+        //         ? milliseconds ? v.Value.ToUnixTimeMilliseconds() : v.Value.ToUnixTimeSeconds()
+        //         : default,
+        //     v => v.HasValue
+        //         ? milliseconds
+        //             ? DateTimeOffset.FromUnixTimeMilliseconds(v.Value).ToLocalTime()
+        //             : DateTimeOffset.FromUnixTimeSeconds(v.Value).ToLocalTime()
+        //         : default);
+        // builder.Metadata.SetValueConverter(converter);
+        builder.Metadata.SetValueConverter(new NullableDateTimeOffsetToLongConverter(milliseconds));
+        builder.HasColumnType("bigint");
         return builder;
     }
 
+    /// <summary>
+    ///
+    /// </summary>
+    /// <param name="builder"></param>
+    /// <param name="milliseconds"></param>
+    /// <returns></returns>
     public static PropertyBuilder<DateTimeOffset> UseUnixTime(this PropertyBuilder<DateTimeOffset> builder,
         bool milliseconds = false)
     {
-        builder.HasConversion(new ValueConverter<DateTimeOffset, long>(
-            v => milliseconds ? v.ToUnixTimeMilliseconds() : v.ToUnixTimeSeconds(),
-            v => milliseconds
-                ? DateTimeOffset.FromUnixTimeMilliseconds(v)
-                : DateTimeOffset.FromUnixTimeSeconds(v).ToLocalTime()));
         builder.IsRequired();
-        builder.HasDefaultValue(DateTimeOffset.UnixEpoch);
+        builder.HasColumnType("bigint");
+        builder.Metadata.SetValueConverter(new DateTimeOffsetToLongConverter(milliseconds));
         return builder;
     }
 }

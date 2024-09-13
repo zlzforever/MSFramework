@@ -4,12 +4,12 @@ using MongoDB.Bson;
 namespace MicroserviceFramework.Domain;
 
 /// <summary>
-/// 含删除人信息的实体
+/// 含删除审计信息的实体
 /// </summary>
 public abstract class DeletionEntity(ObjectId id) : DeletionEntity<ObjectId>(id);
 
 /// <summary>
-/// 含删除人信息的实体
+/// 含删除审计信息的实体
 /// </summary>
 public abstract class DeletionEntity<TKey>(TKey id) : ModificationEntity<TKey>(id), IDeletion
     where TKey : IEquatable<TKey>
@@ -34,6 +34,12 @@ public abstract class DeletionEntity<TKey>(TKey id) : ModificationEntity<TKey>(i
     /// </summary>
     public DateTimeOffset? DeletionTime { get; private set; }
 
+    /// <summary>
+    /// 设置删除审计信息
+    /// </summary>
+    /// <param name="deleterId">删除人标识</param>
+    /// <param name="deleterName">删除人名称</param>
+    /// <param name="deletionTime">删除时间</param>
     public virtual void SetDeletion(string deleterId, string deleterName, DateTimeOffset deletionTime = default)
     {
         // 删除只能一次操作， 因此如果已经有值， 不能再做设置

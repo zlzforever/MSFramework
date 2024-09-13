@@ -8,6 +8,9 @@ using System.Threading.Tasks;
 
 namespace MicroserviceFramework.Utils;
 
+/// <summary>
+///
+/// </summary>
 public static class Cryptography
 {
     /// <summary>
@@ -21,12 +24,22 @@ public static class Cryptography
         return ComputeMD5(encoding.GetBytes(value));
     }
 
+    /// <summary>
+    ///
+    /// </summary>
+    /// <param name="data"></param>
+    /// <returns></returns>
     public static string ComputeMD5(byte[] data)
     {
         var bytes = MD5.HashData(data);
         return Convert.ToHexString(bytes);
     }
 
+    /// <summary>
+    ///
+    /// </summary>
+    /// <param name="stream"></param>
+    /// <returns></returns>
     public static async Task<string> ComputeMD5Async(Stream stream)
     {
         var bytes = await MD5.HashDataAsync(stream);

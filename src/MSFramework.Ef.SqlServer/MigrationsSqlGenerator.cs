@@ -10,14 +10,31 @@ using Microsoft.Extensions.Logging;
 
 namespace MicroserviceFramework.Ef.SqlServer;
 
+/// <summary>
+///
+/// </summary>
+/// <param name="dependencies"></param>
+/// <param name="commandBatchPreparer"></param>
 public class MigrationsSqlGenerator(
     MigrationsSqlGeneratorDependencies dependencies,
     ICommandBatchPreparer commandBatchPreparer)
     : SqlServerMigrationsSqlGenerator(dependencies, commandBatchPreparer)
 {
+    /// <summary>
+    ///
+    /// </summary>
     public static bool RemoveForeignKey;
+    /// <summary>
+    ///
+    /// </summary>
     public static bool RemoveExternalEntity;
 
+    /// <summary>
+    ///
+    /// </summary>
+    /// <param name="operation"></param>
+    /// <param name="model"></param>
+    /// <param name="builder"></param>
     protected override void Generate(
         MigrationOperation operation,
         IModel model,

@@ -49,7 +49,7 @@ public class ProductController(
     }
 
     [HttpPost("objectid/{id}")]
-    public MyBody Post([FromRoute] ObjectId id, [FromBody] MyBody body)
+    public MyBody Post([FromRoute] string id, [FromBody] MyBody body)
     {
         body.Id = id;
         return body;
@@ -124,14 +124,14 @@ public class ProductController(
     }
 
     [HttpGet]
-    public Product GetAsync(ObjectId productId)
+    public Product GetAsync(string productId)
     {
         return productRepository.Find(productId);
     }
 
     [HttpDelete]
     //[AccessControl("删除产品", "产品")]
-    public Product DeleteAsync(ObjectId productId)
+    public Product DeleteAsync(string productId)
     {
         var product = productRepository.Find(productId);
         productRepository.Delete(product);
@@ -241,7 +241,7 @@ public class ProductDTO
 
 public class MyBody
 {
-    public ObjectId Id { get; set; }
-    public ObjectId MyId { get; set; }
+    public string Id { get; set; }
+    public string MyId { get; set; }
     public string Name { get; set; }
 }

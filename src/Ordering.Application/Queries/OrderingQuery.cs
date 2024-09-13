@@ -1,7 +1,6 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
-using MongoDB.Bson;
 using Ordering.Domain.AggregateRoots;
 using Ordering.Infrastructure;
 
@@ -16,7 +15,7 @@ public class OrderingQuery(OrderingContext context) : IOrderingQuery
         return await _orderSet.ToListAsync();
     }
 
-    public async Task<Order> GetAsync(ObjectId orderId)
+    public async Task<Order> GetAsync(string orderId)
     {
         var order = await _orderSet
             .Include("Items")

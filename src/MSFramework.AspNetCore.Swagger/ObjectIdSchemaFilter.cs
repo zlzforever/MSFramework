@@ -5,8 +5,16 @@ using Swashbuckle.AspNetCore.SwaggerGen;
 
 namespace MicroserviceFramework.AspNetCore.Swagger;
 
+/// <summary>
+///
+/// </summary>
 public class ObjectIdSchemaFilter : ISchemaFilter
 {
+    /// <summary>
+    ///
+    /// </summary>
+    /// <param name="schema"></param>
+    /// <param name="context"></param>
     public void Apply(OpenApiSchema schema, SchemaFilterContext context)
     {
         if (context.Type == typeof(ObjectId))

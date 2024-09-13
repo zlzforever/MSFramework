@@ -4,6 +4,9 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace MicroserviceFramework;
 
+/// <summary>
+///
+/// </summary>
 public class MicroserviceFrameworkLoaderContext
 {
     private static readonly ConcurrentDictionary<IServiceCollection, MicroserviceFrameworkLoaderContext> Contexts =
@@ -13,13 +16,24 @@ public class MicroserviceFrameworkLoaderContext
     {
     }
 
+    /// <summary>
+    ///
+    /// </summary>
     public event Action<Type> ResolveType;
 
+    /// <summary>
+    ///
+    /// </summary>
+    /// <param name="serviceCollection"></param>
+    /// <returns></returns>
     public static MicroserviceFrameworkLoaderContext Get(IServiceCollection serviceCollection)
     {
         return Contexts.GetOrAdd(serviceCollection, _ => new MicroserviceFrameworkLoaderContext());
     }
 
+    /// <summary>
+    ///
+    /// </summary>
     public void LoadTypes()
     {
         if (ResolveType == null)

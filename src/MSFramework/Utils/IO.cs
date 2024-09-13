@@ -3,8 +3,18 @@ using System.IO;
 namespace MicroserviceFramework.Utils;
 
 // ReSharper disable once InconsistentNaming
+/// <summary>
+///
+/// </summary>
 public class IO
 {
+    /// <summary>
+    ///
+    /// </summary>
+    /// <param name="sourceDir"></param>
+    /// <param name="destinationDir"></param>
+    /// <param name="recursive"></param>
+    /// <exception cref="DirectoryNotFoundException"></exception>
     public static void CopyDirectory(string sourceDir, string destinationDir, bool recursive)
     {
         // Get information about the source directory

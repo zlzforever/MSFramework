@@ -5,8 +5,16 @@ using Microsoft.Extensions.DependencyInjection.Extensions;
 
 namespace MicroserviceFramework.LocalEvent;
 
+/// <summary>
+///
+/// </summary>
 public static class ServiceCollectionExtensions
 {
+    /// <summary>
+    ///
+    /// </summary>
+    /// <param name="services"></param>
+    /// <returns></returns>
     public static IServiceCollection AddLocalEventPublisher(this IServiceCollection services)
     {
         services.TryAddScoped<IEventPublisher, LocalEventPublisher>();
@@ -29,6 +37,12 @@ public static class ServiceCollectionExtensions
         return services;
     }
 
+    /// <summary>
+    ///
+    /// </summary>
+    /// <param name="builder"></param>
+    /// <param name="configure"></param>
+    /// <returns></returns>
     public static MicroserviceFrameworkBuilder UseLocalEventPublisher(this MicroserviceFrameworkBuilder builder,
         Action<LocalEventOptions> configure = null)
     {

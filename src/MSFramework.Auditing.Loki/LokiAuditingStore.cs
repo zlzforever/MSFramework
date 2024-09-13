@@ -11,6 +11,9 @@ using Serilog.Sinks.Grafana.Loki;
 
 namespace MicroserviceFramework.Auditing.Loki;
 
+/// <summary>
+///
+/// </summary>
 public class LokiAuditingStore : IAuditingStore
 {
     private readonly ILogger _logger;
@@ -57,6 +60,11 @@ public class LokiAuditingStore : IAuditingStore
         return store;
     }
 
+    /// <summary>
+    ///
+    /// </summary>
+    /// <param name="auditOperation"></param>
+    /// <returns></returns>
     public Task AddAsync(AuditOperation auditOperation)
     {
         if (_logger == null)

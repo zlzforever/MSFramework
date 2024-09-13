@@ -2,6 +2,9 @@ using System;
 
 namespace MicroserviceFramework.Domain;
 
+/// <summary>
+/// 修改审计信息接口
+/// </summary>
 public interface IModification
 {
     /// <summary>
@@ -20,7 +23,7 @@ public interface IModification
     string LastModifierName { get; }
 
     /// <summary>
-    /// 设置最后修改信息
+    /// 设置修改审计信息
     /// </summary>
     /// <param name="lastModifierId">最后修改人标识</param>
     /// <param name="lastModifierName">最后修改时间</param>

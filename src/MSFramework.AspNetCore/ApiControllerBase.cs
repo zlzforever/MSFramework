@@ -5,11 +5,17 @@ using Microsoft.Extensions.Logging;
 
 namespace MicroserviceFramework.AspNetCore;
 
+/// <summary>
+///
+/// </summary>
 public abstract class ApiControllerBase : ControllerBase
 {
     private ILogger _logger;
     private ISession _session;
 
+    /// <summary>
+    ///
+    /// </summary>
     protected ISession Session
     {
         get
@@ -19,6 +25,9 @@ public abstract class ApiControllerBase : ControllerBase
         }
     }
 
+    /// <summary>
+    ///
+    /// </summary>
     protected ILogger Logger
     {
         get

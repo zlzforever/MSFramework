@@ -4,12 +4,12 @@ using MongoDB.Bson;
 namespace MicroserviceFramework.Domain;
 
 /// <summary>
-/// 含创建人信息的实体
+/// 含创建审计信息的实体
 /// </summary>
 public abstract class CreationEntity(ObjectId id) : CreationEntity<ObjectId>(id);
 
 /// <summary>
-/// 含创建人信息的实体
+/// 含创建审计信息的实体
 /// </summary>
 public abstract class CreationEntity<TKey>(TKey id) :
     EntityBase<TKey>(id), ICreation
@@ -30,6 +30,12 @@ public abstract class CreationEntity<TKey>(TKey id) :
     /// </summary>
     public string CreatorName { get; private set; }
 
+    /// <summary>
+    /// 设置创建审计信息
+    /// </summary>
+    /// <param name="creatorId">创建人标识</param>
+    /// <param name="creatorName">创建人名称</param>
+    /// <param name="creationTime">创建时间</param>
     public virtual void SetCreation(string creatorId, string creatorName, DateTimeOffset creationTime = default)
     {
         // 创建只能一次操作， 因此如果已经有值， 不能再做设置

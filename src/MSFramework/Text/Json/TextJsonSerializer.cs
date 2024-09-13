@@ -6,8 +6,16 @@ using MicroserviceFramework.Text.Json.Converters;
 
 namespace MicroserviceFramework.Text.Json;
 
+/// <summary>
+///
+/// </summary>
+/// <param name="options"></param>
 public class TextJsonSerializer(JsonSerializerOptions options) : IJsonSerializer
 {
+    /// <summary>
+    ///
+    /// </summary>
+    /// <returns></returns>
     public static JsonSerializerOptions CreateDefaultOptions()
     {
         var options = new JsonSerializerOptions();
@@ -20,6 +28,10 @@ public class TextJsonSerializer(JsonSerializerOptions options) : IJsonSerializer
         return options;
     }
 
+    /// <summary>
+    ///
+    /// </summary>
+    /// <returns></returns>
     public static IJsonSerializer Create()
     {
         var options = CreateDefaultOptions();
@@ -31,26 +43,54 @@ public class TextJsonSerializer(JsonSerializerOptions options) : IJsonSerializer
         return new TextJsonSerializer(options);
     }
 
+    /// <summary>
+    ///
+    /// </summary>
+    /// <param name="obj"></param>
+    /// <returns></returns>
     public string Serialize(object obj)
     {
         return JsonSerializer.Serialize(obj, options);
     }
 
+    /// <summary>
+    ///
+    /// </summary>
+    /// <param name="obj"></param>
+    /// <returns></returns>
     public byte[] SerializeToUtf8Bytes(object obj)
     {
         return JsonSerializer.SerializeToUtf8Bytes(obj, options);
     }
 
+    /// <summary>
+    ///
+    /// </summary>
+    /// <param name="json"></param>
+    /// <typeparam name="T"></typeparam>
+    /// <returns></returns>
     public T Deserialize<T>(string json)
     {
         return JsonSerializer.Deserialize<T>(json, options);
     }
 
+    /// <summary>
+    ///
+    /// </summary>
+    /// <param name="json"></param>
+    /// <typeparam name="T"></typeparam>
+    /// <returns></returns>
     public T Deserialize<T>(Stream json)
     {
         return JsonSerializer.Deserialize<T>(json, options);
     }
 
+    /// <summary>
+    ///
+    /// </summary>
+    /// <param name="json"></param>
+    /// <param name="returnType"></param>
+    /// <returns></returns>
     public object Deserialize(string json, Type returnType)
     {
         return JsonSerializer.Deserialize(json, returnType, options);

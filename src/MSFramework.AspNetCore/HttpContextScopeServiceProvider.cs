@@ -1,13 +1,22 @@
-using MicroserviceFramework.Runtime;
+using MicroserviceFramework.Extensions.DependencyInjection;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace MicroserviceFramework.AspNetCore;
 
+/// <summary>
+///
+/// </summary>
+/// <param name="httpContextAccessor"></param>
 public class HttpContextScopeServiceProvider(IHttpContextAccessor httpContextAccessor)
-    : ScopeServiceProvider
+    : IScopeServiceProvider
 {
-    public override T GetService<T>()
+    /// <summary>
+    ///
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
+    /// <returns></returns>
+    public T GetService<T>()
     {
         return httpContextAccessor.HttpContext == null
             ? default

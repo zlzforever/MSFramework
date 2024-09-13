@@ -23,6 +23,10 @@ public interface IEntityConfigurationTypeFinder
     /// <returns>数据上下文类型</returns>
     Type GetDbContextTypeForEntity(Type entityType);
 
+    /// <summary>
+    ///
+    /// </summary>
+    /// <returns></returns>
     IEnumerable<Type> GetAllDbContextTypes();
 
     /// <summary>
@@ -32,14 +36,33 @@ public interface IEntityConfigurationTypeFinder
     bool HasDbContextForEntity<T>();
 }
 
+/// <summary>
+///
+/// </summary>
+/// <param name="entityType"></param>
+/// <param name="configureMethodInfo"></param>
+/// <param name="createEntityTypeBuilderMethod"></param>
+/// <param name="entityTypeConfiguration"></param>
 public struct EntityTypeConfigurationMetadata(
     Type entityType,
     MethodInfo configureMethodInfo,
     MethodInfo createEntityTypeBuilderMethod,
-    object entityTypeConfiguration)
+    IEntityTypeConfiguration entityTypeConfiguration)
 {
+    /// <summary>
+    ///
+    /// </summary>
     public readonly Type EntityType = entityType;
+    /// <summary>
+    ///
+    /// </summary>
     public readonly MethodInfo ConfigureMethodInfo = configureMethodInfo;
+    /// <summary>
+    ///
+    /// </summary>
     public readonly MethodInfo CreateEntityTypeBuilderMethod = createEntityTypeBuilderMethod;
-    public readonly object EntityTypeConfiguration = entityTypeConfiguration;
+    /// <summary>
+    ///
+    /// </summary>
+    public readonly IEntityTypeConfiguration EntityTypeConfiguration = entityTypeConfiguration;
 }

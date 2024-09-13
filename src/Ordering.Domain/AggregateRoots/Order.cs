@@ -9,7 +9,7 @@ using Ordering.Domain.AggregateRoots.Events;
 namespace Ordering.Domain.AggregateRoots;
 
 [Description("订单表")]
-public class Order : CreationAggregateRoot, IOptimisticLock
+public class Order : DeletionAggregateRoot<string>, IOptimisticLock
 {
     private readonly HashSet<string> _listJson;
     private readonly Dictionary<string, string> _dictJson;
@@ -84,23 +84,20 @@ public class Order : CreationAggregateRoot, IOptimisticLock
         _dictJson.TryAdd(key, value);
     }
 
-    private Order(ObjectId id) : base(id)
+    private Order(string id) : base(id)
     {
         _items = [];
         _listJson = [];
         _dictJson = new Dictionary<string, string>();
         _extras = [];
-        AddDomainEvent(new OrderCreatedDomainEvent
-        {
-            Id = id.ToString(), CreationTime = DateTimeOffset.Now, Name = "test"
-        });
+        AddDomainEvent(new OrderCreatedDomainEvent { Id = id, CreationTime = DateTimeOffset.Now, Name = "test" });
     }
 
     private Order(
         string userId,
         Address address,
         string description
-    ) : this(ObjectId.GenerateNewId())
+    ) : this(ObjectId.GenerateNewId().ToString())
     {
         Address = address;
         BuyerId2 = userId;

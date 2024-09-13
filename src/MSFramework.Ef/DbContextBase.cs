@@ -10,18 +10,21 @@ using MicroserviceFramework.Domain;
 using MicroserviceFramework.Ef.Auditing.Configuration;
 using MicroserviceFramework.Ef.Extensions;
 using MicroserviceFramework.Ef.Internal;
+using MicroserviceFramework.Extensions.DependencyInjection;
 using MicroserviceFramework.Mediator;
 using MicroserviceFramework.Runtime;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
-using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using Microsoft.Extensions.Logging;
+using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using MongoDB.Bson;
 
 namespace MicroserviceFramework.Ef;
 
+/// <summary>
+///
+/// </summary>
 public abstract class DbContextBase : DbContext
 {
     // private readonly ISession _session;
@@ -60,15 +63,12 @@ public abstract class DbContextBase : DbContext
     /// <param name="modelBuilder">上下文数据模型构建器</param>
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        var logger = this.GetService<ILoggerFactory>().CreateLogger("DbContextBase");
-        logger.LogDebug("OnModelCreating 1: " + DateTimeOffset.Now.ToUnixTimeMilliseconds());
         var settings = this.GetService<DbContextSettings>();
         if (settings == null)
         {
             throw new ArgumentNullException(nameof(DbContextSettings));
         }
 
-        logger.LogDebug("OnModelCreating 2: " + DateTimeOffset.Now.ToUnixTimeMilliseconds());
         var entityConfigurationTypeFinder = this.GetService<IEntityConfigurationTypeFinder>();
 
         //通过实体配置信息将实体注册到当前上下文
@@ -98,31 +98,11 @@ public abstract class DbContextBase : DbContext
         modelBuilder.HasAnnotation("DatabaseType", settings.DatabaseType);
 
         var entityTypeConfigurations = entityConfigurationTypeFinder.GetEntityTypeConfigurations(contextType);
-        logger.LogDebug("OnModelCreating 3: " + DateTimeOffset.Now.ToUnixTimeMilliseconds());
-
         foreach (var entityTypeConfiguration in entityTypeConfigurations)
         {
-            // modelBuilder.Entity(entityTypeConfiguration.EntityType, entityTypeBuilder =>
-            // {
-            //     entityTypeConfiguration.ConfigureMethodInfo.Invoke(
-            //         entityTypeConfiguration.EntityTypeConfiguration,
-            //         [entityTypeBuilder]);
-            // });
-            var createEntityTypeBuilderMethod = entityTypeConfiguration.CreateEntityTypeBuilderMethod;
-            var entityTypeBuilder = (EntityTypeBuilder)createEntityTypeBuilderMethod.Invoke(modelBuilder,
-                []);
-            // if (entityTypeBuilder == null)
-            // {
-            //     continue;
-            // }
-            //
-            // // entityTypeBuilder.Metadata.AddAnnotation("DatabaseType", settings.DatabaseType);
-            entityTypeConfiguration.ConfigureMethodInfo.Invoke(
-                entityTypeConfiguration.EntityTypeConfiguration,
-                [entityTypeBuilder]);
+            entityTypeConfiguration.EntityTypeConfiguration.Configure(modelBuilder);
         }
 
-        logger.LogDebug("OnModelCreating 4: " + DateTimeOffset.Now.ToUnixTimeMilliseconds());
         if (EfUtilities.AuditingDbContextType == contextType)
         {
             AuditOperationConfiguration.Instance.Configure(modelBuilder.Entity<AuditOperation>());
@@ -131,7 +111,6 @@ public abstract class DbContextBase : DbContext
         }
 
         var tablePrefix = settings.TablePrefix?.Trim();
-        logger.LogDebug("OnModelCreating 5: " + DateTimeOffset.Now.ToUnixTimeMilliseconds());
         foreach (var entityType in modelBuilder.Model.GetEntityTypes())
         {
             // owned 的类型是合并到其主表中，所以没有 table name，schema 的说法
@@ -194,9 +173,13 @@ public abstract class DbContextBase : DbContext
                 //     }
                 // }
 
-                if (typeof(IDeletion).IsAssignableFrom(entityType.ClrType))
+                // 使用编译模型不能使用全局过滤器
+                if (!settings.UseCompiledModel)
                 {
-                    entityType.AddSoftDeleteQueryFilter();
+                    if (typeof(IDeletion).IsAssignableFrom(entityType.ClrType))
+                    {
+                        entityType.AddSoftDeleteQueryFilter();
+                    }
                 }
             }
 
@@ -228,12 +211,22 @@ public abstract class DbContextBase : DbContext
                 {
                     property.SetValueConverter(new ObjectIdToStringConverter());
                 }
+                else if (property.ClrType.IsAssignableTo(typeof(Enumeration)))
+                {
+                    var t = typeof(EnumerationToStringConverter<>)
+                        .MakeGenericType(property.ClrType);
+                    var converter =
+                        (ValueConverter)Activator.CreateInstance(t);
+                    property.SetValueConverter(converter);
+                }
             }
         }
-
-        logger.LogDebug("OnModelCreating 6: " + DateTimeOffset.Now.ToUnixTimeMilliseconds());
     }
 
+    /// <summary>
+    ///
+    /// </summary>
+    /// <returns></returns>
     public IEnumerable<AuditEntity> GetAuditEntities()
     {
         foreach (var entry in ChangeTracker.Entries())
@@ -253,12 +246,16 @@ public abstract class DbContextBase : DbContext
         }
     }
 
+    /// <summary>
+    ///
+    /// </summary>
+    /// <param name="acceptAllChangesOnSuccess"></param>
+    /// <param name="cancellationToken"></param>
+    /// <returns></returns>
     public override async Task<int> SaveChangesAsync(bool acceptAllChangesOnSuccess,
         CancellationToken cancellationToken = new())
     {
-        var logger = this.GetService<ILoggerFactory>().CreateLogger("DbContextBase");
-        logger.LogDebug("SaveChangesAsync 1: " + DateTimeOffset.Now.ToUnixTimeMilliseconds());
-        var scopeServiceProvider = this.GetService<ScopeServiceProvider>();
+        var scopeServiceProvider = this.GetService<IScopeServiceProvider>();
         var mediator = scopeServiceProvider.GetService<IMediator>();
         if (mediator != null)
         {
@@ -279,13 +276,17 @@ public abstract class DbContextBase : DbContext
         }
 
         var r = await base.SaveChangesAsync(acceptAllChangesOnSuccess, cancellationToken);
-        logger.LogDebug("SaveChangesAsync 2: " + DateTimeOffset.Now.ToUnixTimeMilliseconds());
         return r;
     }
 
+    /// <summary>
+    ///
+    /// </summary>
+    /// <param name="acceptAllChangesOnSuccess"></param>
+    /// <returns></returns>
     public override int SaveChanges(bool acceptAllChangesOnSuccess)
     {
-        var scopeServiceProvider = this.GetService<ScopeServiceProvider>();
+        var scopeServiceProvider = this.GetService<IScopeServiceProvider>();
         var mediator = scopeServiceProvider.GetService<IMediator>();
         if (mediator != null)
         {
@@ -303,9 +304,14 @@ public abstract class DbContextBase : DbContext
         return !changed ? effectedCount : base.SaveChanges(acceptAllChangesOnSuccess);
     }
 
+    /// <summary>
+    ///
+    /// </summary>
+    /// <returns></returns>
+    /// <exception cref="ArgumentOutOfRangeException"></exception>
     protected virtual bool ApplyConcepts()
     {
-        var scopeServiceProvider = this.GetService<ScopeServiceProvider>();
+        var scopeServiceProvider = this.GetService<IScopeServiceProvider>();
         var session = scopeServiceProvider.GetService<ISession>();
         var userId = session?.UserId;
         var name = session?.UserDisplayName;
@@ -345,6 +351,13 @@ public abstract class DbContextBase : DbContext
         return changed;
     }
 
+    /// <summary>
+    ///
+    /// </summary>
+    /// <param name="entry"></param>
+    /// <param name="operationType"></param>
+    /// <returns></returns>
+    /// <exception cref="ArgumentOutOfRangeException"></exception>
     protected virtual AuditEntity GetAuditEntity(EntityEntry entry, OperationType operationType)
     {
         var type = entry.Entity.GetType();
@@ -435,6 +448,12 @@ public abstract class DbContextBase : DbContext
             : value.ToString();
     }
 
+    /// <summary>
+    ///
+    /// </summary>
+    /// <param name="entry"></param>
+    /// <param name="userId"></param>
+    /// <param name="userName"></param>
     protected virtual void ApplyConceptsForAddedEntity(EntityEntry entry, string userId, string userName)
     {
         if (entry.Entity is ICreation entity)
@@ -443,6 +462,12 @@ public abstract class DbContextBase : DbContext
         }
     }
 
+    /// <summary>
+    ///
+    /// </summary>
+    /// <param name="entry"></param>
+    /// <param name="userId"></param>
+    /// <param name="userName"></param>
     protected virtual void ApplyConceptsForModifiedEntity(EntityEntry entry, string userId, string userName)
     {
         if (entry.Entity is IModification entity)
@@ -451,6 +476,12 @@ public abstract class DbContextBase : DbContext
         }
     }
 
+    /// <summary>
+    ///
+    /// </summary>
+    /// <param name="entry"></param>
+    /// <param name="userId"></param>
+    /// <param name="userName"></param>
     protected virtual void ApplyConceptsForDeletedEntity(EntityEntry entry, string userId, string userName)
     {
         if (entry.Entity is not IDeletion entity)

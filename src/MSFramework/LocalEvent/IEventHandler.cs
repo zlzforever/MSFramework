@@ -10,5 +10,11 @@ namespace MicroserviceFramework.LocalEvent;
 public interface IEventHandler<in TEvent>
     where TEvent : EventBase
 {
+    /// <summary>
+    ///
+    /// </summary>
+    /// <param name="event"></param>
+    /// <param name="cancellationToken"></param>
+    /// <returns></returns>
     Task HandleAsync(TEvent @event, CancellationToken cancellationToken = default);
 }

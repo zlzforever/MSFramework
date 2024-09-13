@@ -4,7 +4,6 @@ using System.Runtime.CompilerServices;
 using System.Threading;
 using MicroserviceFramework.Common;
 using MicroserviceFramework.Extensions.Options;
-using MicroserviceFramework.Runtime;
 using MicroserviceFramework.Serialization;
 using MicroserviceFramework.Text.Json;
 using MicroserviceFramework.Utils;
@@ -21,6 +20,9 @@ using Microsoft.Extensions.Logging;
 
 namespace MicroserviceFramework;
 
+/// <summary>
+///
+/// </summary>
 public static class ServiceCollectionExtensions
 {
     /// <summary>
@@ -47,7 +49,6 @@ public static class ServiceCollectionExtensions
         var builder = new MicroserviceFrameworkBuilder(services);
 
         builder.Services.TryAddSingleton<ApplicationInfo>();
-        builder.Services.TryAddSingleton<ScopeServiceProvider>();
         // 放到后面，加载优先级更高
         builderAction?.Invoke(builder);
 
@@ -57,6 +58,10 @@ public static class ServiceCollectionExtensions
         MicroserviceFrameworkLoaderContext.Get(services).LoadTypes();
     }
 
+    /// <summary>
+    ///
+    /// </summary>
+    /// <param name="applicationServices"></param>
     public static void UseMicroserviceFramework(this IServiceProvider applicationServices)
     {
         var defaultJsonSerializer = applicationServices.GetService<IJsonSerializer>();

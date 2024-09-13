@@ -4,8 +4,16 @@ using Microsoft.Extensions.Options;
 
 namespace MicroserviceFramework.Auditing.Loki;
 
+/// <summary>
+///
+/// </summary>
 public static class ServiceCollectionExtensions
 {
+    /// <summary>
+    ///
+    /// </summary>
+    /// <param name="services"></param>
+    /// <returns></returns>
     public static IServiceCollection AddLokiAuditing(this IServiceCollection services)
     {
         services.AddSingleton(provider =>

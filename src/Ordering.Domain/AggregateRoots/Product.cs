@@ -5,15 +5,15 @@ using Ordering.Domain.AggregateRoots.Events;
 
 namespace Ordering.Domain.AggregateRoots;
 
-public class Product : CreationAggregateRoot, IOptimisticLock
+public class Product : CreationAggregateRoot<string>, IOptimisticLock
 {
-    private Product(ObjectId id) : base(id)
+    private Product(string id) : base(id)
     {
     }
 
     public static Product Create(string name, int price)
     {
-        var product = new Product(ObjectId.GenerateNewId()) { Name = name, Price = price };
+        var product = new Product(ObjectId.GenerateNewId().ToString()) { Name = name, Price = price };
         product.AddDomainEvent(new ProjectCreatedEvent
         {
             Id = product.Id,
@@ -26,7 +26,7 @@ public class Product : CreationAggregateRoot, IOptimisticLock
 
     public static Product CreateWithoutEvent(string name, int price)
     {
-        var product = new Product(ObjectId.GenerateNewId()) { Name = name, Price = price };
+        var product = new Product(ObjectId.GenerateNewId().ToString()) { Name = name, Price = price };
         return product;
     }
 

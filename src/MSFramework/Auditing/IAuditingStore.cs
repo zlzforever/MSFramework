@@ -8,5 +8,10 @@ namespace MicroserviceFramework.Auditing;
 /// </summary>
 public interface IAuditingStore
 {
+    /// <summary>
+    /// 添加审计日志
+    /// </summary>
+    /// <param name="auditOperation"></param>
+    /// <returns></returns>
     Task AddAsync(AuditOperation auditOperation);
 }

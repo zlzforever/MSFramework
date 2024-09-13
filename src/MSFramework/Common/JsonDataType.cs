@@ -6,6 +6,13 @@ namespace MicroserviceFramework.Common;
 /// </summary>
 public enum JsonDataType
 {
+    /// <summary>
+    ///
+    /// </summary>
     JSON,
+
+    /// <summary>
+    ///
+    /// </summary>
     JSONB
 }

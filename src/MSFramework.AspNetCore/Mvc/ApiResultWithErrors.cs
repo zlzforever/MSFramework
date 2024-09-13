@@ -6,6 +6,10 @@ namespace MicroserviceFramework.AspNetCore.Mvc;
 internal class ApiResultWithErrors : ApiResult
 {
     public static readonly Type ApiResultWithErrorsType = typeof(ApiResultWithErrors);
+
+    /// <summary>
+    /// 错误信息
+    /// </summary>
     public object Errors { get; set; }
 
     public ApiResultWithErrors()

@@ -5,6 +5,9 @@ using Microsoft.Extensions.DependencyInjection.Extensions;
 
 namespace MicroserviceFramework.Text.Json;
 
+/// <summary>
+///
+/// </summary>
 public static class ServiceCollectionExtensions
 {
     /// <summary>

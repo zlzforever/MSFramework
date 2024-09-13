@@ -9,6 +9,12 @@ namespace MicroserviceFramework.Security.Claims;
 /// </summary>
 public static class ClaimsPrincipalExtensions
 {
+    /// <summary>
+    ///
+    /// </summary>
+    /// <param name="principal"></param>
+    /// <param name="claims"></param>
+    /// <returns></returns>
     public static string GetValue(this ClaimsPrincipal principal, params string[] claims)
     {
         if (principal == null)

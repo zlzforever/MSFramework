@@ -4,8 +4,16 @@ using MongoDB.Bson;
 
 namespace MicroserviceFramework.AspNetCore.Mvc.ModelBinding;
 
+/// <summary>
+///
+/// </summary>
 public class ObjectIdModelBinder : IModelBinder
 {
+    /// <summary>
+    ///
+    /// </summary>
+    /// <param name="bindingContext"></param>
+    /// <returns></returns>
     public Task BindModelAsync(ModelBindingContext bindingContext)
     {
         var value = bindingContext.ValueProvider.GetValue(bindingContext.FieldName).FirstValue;

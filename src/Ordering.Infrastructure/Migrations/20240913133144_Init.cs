@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore.Metadata;
+﻿using System;
+using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
@@ -32,11 +33,11 @@ namespace Ordering.Infrastructure.Migrations
                     lng = table.Column<double>(type: "double", nullable: true),
                     user_agent = table.Column<string>(type: "varchar(1024)", maxLength: 1024, nullable: true)
                         .Annotation("MySql:CharSet", "utf8mb4"),
-                    end_time = table.Column<long>(type: "bigint", nullable: false, defaultValue: 0L),
+                    end_time = table.Column<long>(type: "bigint", nullable: false),
                     elapsed = table.Column<int>(type: "int", nullable: false),
                     trace_id = table.Column<string>(type: "varchar(64)", maxLength: 64, nullable: true)
                         .Annotation("MySql:CharSet", "utf8mb4"),
-                    creation_time = table.Column<long>(type: "bigint", nullable: true),
+                    creation_time = table.Column<DateTimeOffset>(type: "datetime(6)", nullable: true),
                     creator_id = table.Column<string>(type: "varchar(36)", maxLength: 36, nullable: true)
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     creator_name = table.Column<string>(type: "varchar(256)", maxLength: 256, nullable: true)
@@ -59,7 +60,7 @@ namespace Ordering.Infrastructure.Migrations
                     price = table.Column<int>(type: "int", nullable: false),
                     concurrency_stamp = table.Column<string>(type: "varchar(36)", maxLength: 36, nullable: true)
                         .Annotation("MySql:CharSet", "utf8mb4"),
-                    creation_time = table.Column<long>(type: "bigint", nullable: true),
+                    creation_time = table.Column<DateTimeOffset>(type: "datetime(6)", nullable: true),
                     creator_id = table.Column<string>(type: "varchar(36)", maxLength: 36, nullable: true)
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     creator_name = table.Column<string>(type: "varchar(256)", maxLength: 256, nullable: true)
@@ -143,11 +144,22 @@ namespace Ordering.Infrastructure.Migrations
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     concurrency_stamp = table.Column<string>(type: "varchar(36)", maxLength: 36, nullable: true)
                         .Annotation("MySql:CharSet", "utf8mb4"),
-                    creation_time = table.Column<long>(type: "bigint", nullable: true),
+                    creation_time = table.Column<DateTimeOffset>(type: "datetime(6)", nullable: true),
                     creator_id = table.Column<string>(type: "varchar(36)", maxLength: 36, nullable: true)
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     creator_name = table.Column<string>(type: "varchar(256)", maxLength: 256, nullable: true)
-                        .Annotation("MySql:CharSet", "utf8mb4")
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    last_modifier_id = table.Column<string>(type: "longtext", nullable: true)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    last_modifier_name = table.Column<string>(type: "longtext", nullable: true)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    last_modification_time = table.Column<DateTimeOffset>(type: "datetime(6)", nullable: true),
+                    is_deleted = table.Column<bool>(type: "tinyint(1)", nullable: false),
+                    deleter_id = table.Column<string>(type: "longtext", nullable: true)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    deleter_name = table.Column<string>(type: "longtext", nullable: true)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    deletion_time = table.Column<DateTimeOffset>(type: "datetime(6)", nullable: true)
                 },
                 constraints: table =>
                 {

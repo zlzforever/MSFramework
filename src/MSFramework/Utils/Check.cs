@@ -9,6 +9,14 @@ namespace MicroserviceFramework.Utils;
 /// </summary>
 public static class Check
 {
+    /// <summary>
+    ///
+    /// </summary>
+    /// <param name="value"></param>
+    /// <param name="parameterName"></param>
+    /// <typeparam name="T"></typeparam>
+    /// <returns></returns>
+    /// <exception cref="ArgumentNullException"></exception>
     public static T NotNull<T>(T value, string parameterName)
     {
         if (value == null)
@@ -19,6 +27,15 @@ public static class Check
         return value;
     }
 
+    /// <summary>
+    ///
+    /// </summary>
+    /// <param name="value"></param>
+    /// <param name="parameterName"></param>
+    /// <param name="message"></param>
+    /// <typeparam name="T"></typeparam>
+    /// <returns></returns>
+    /// <exception cref="ArgumentNullException"></exception>
     public static T NotNull<T>(T value, string parameterName, string message)
     {
         if (value == null)
@@ -29,6 +46,13 @@ public static class Check
         return value;
     }
 
+    /// <summary>
+    ///
+    /// </summary>
+    /// <param name="value"></param>
+    /// <param name="parameterName"></param>
+    /// <returns></returns>
+    /// <exception cref="ArgumentException"></exception>
     public static string NotNullOrEmpty(string value, string parameterName)
     {
         if (string.IsNullOrEmpty(value))
@@ -39,6 +63,14 @@ public static class Check
         return value;
     }
 
+    /// <summary>
+    ///
+    /// </summary>
+    /// <param name="value"></param>
+    /// <param name="parameterName"></param>
+    /// <typeparam name="T"></typeparam>
+    /// <returns></returns>
+    /// <exception cref="ArgumentException"></exception>
     public static ICollection<T> NotNullOrEmpty<T>(ICollection<T> value, string parameterName)
     {
         if (value.IsNullOrEmpty())

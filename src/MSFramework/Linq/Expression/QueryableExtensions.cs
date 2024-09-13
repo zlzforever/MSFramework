@@ -6,8 +6,19 @@ using MicroserviceFramework.Utils;
 
 namespace MicroserviceFramework.Linq.Expression;
 
+/// <summary>
+///
+/// </summary>
 public static class PagedQueryExtensions
 {
+    /// <summary>
+    /// 分页查询
+    /// </summary>
+    /// <param name="queryable"></param>
+    /// <param name="page"></param>
+    /// <param name="limit"></param>
+    /// <typeparam name="TEntity"></typeparam>
+    /// <returns></returns>
     public static Task<PaginationResult<TEntity>> PagedQueryAsync<TEntity>(
         this IQueryable<TEntity> queryable,
         int page, int limit)
@@ -24,6 +35,16 @@ public static class PagedQueryExtensions
         return Task.FromResult(new PaginationResult<TEntity>(page, limit, total, data));
     }
 
+    /// <summary>
+    /// 分页查询
+    /// </summary>
+    /// <param name="queryable"></param>
+    /// <param name="page"></param>
+    /// <param name="limit"></param>
+    /// <param name="mapper"></param>
+    /// <typeparam name="TEntity"></typeparam>
+    /// <typeparam name="TDto"></typeparam>
+    /// <returns></returns>
     public static Task<PaginationResult<TDto>> PagedQueryAsync<TEntity, TDto>(
         this IQueryable<TEntity> queryable,
         int page, int limit, Func<TEntity, TDto> mapper)

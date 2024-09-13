@@ -12,6 +12,12 @@ using Pomelo.EntityFrameworkCore.MySql.Migrations;
 
 namespace MicroserviceFramework.Ef.MySql;
 
+/// <summary>
+///
+/// </summary>
+/// <param name="dependencies"></param>
+/// <param name="commandBatchPreparer"></param>
+/// <param name="options"></param>
 public class MigrationsSqlGenerator(
     MigrationsSqlGeneratorDependencies dependencies,
     ICommandBatchPreparer commandBatchPreparer,
@@ -20,9 +26,22 @@ public class MigrationsSqlGenerator(
 #pragma warning restore EF1001
     : MySqlMigrationsSqlGenerator(dependencies, commandBatchPreparer, options)
 {
+    /// <summary>
+    /// 是否删除外键
+    /// </summary>
     public static bool RemoveForeignKey;
+
+    /// <summary>
+    /// 是否删除外部实体
+    /// </summary>
     public static bool RemoveExternalEntity;
 
+    /// <summary>
+    ///
+    /// </summary>
+    /// <param name="operation"></param>
+    /// <param name="model"></param>
+    /// <param name="builder"></param>
     protected override void Generate(
         MigrationOperation operation,
         IModel model,

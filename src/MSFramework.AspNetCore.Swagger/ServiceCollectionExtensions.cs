@@ -10,8 +10,17 @@ using Swashbuckle.AspNetCore.SwaggerGen;
 
 namespace MicroserviceFramework.AspNetCore.Swagger;
 
+/// <summary>
+///
+/// </summary>
 public static class ServiceCollectionExtensions
 {
+    /// <summary>
+    ///
+    /// </summary>
+    /// <param name="options"></param>
+    /// <param name="assembly"></param>
+    /// <returns></returns>
     public static SwaggerGenOptions MapEnumerationType(this SwaggerGenOptions options, Assembly assembly)
     {
         var enumTypes = assembly.GetTypes().Where(i => i.IsSubclassOf(typeof(Enumeration)));
@@ -30,6 +39,11 @@ public static class ServiceCollectionExtensions
         return options;
     }
 
+    /// <summary>
+    ///
+    /// </summary>
+    /// <param name="options"></param>
+    /// <returns></returns>
     public static SwaggerGenOptions SupportObjectId(this SwaggerGenOptions options)
     {
         options.SchemaFilter<ObjectIdSchemaFilter>();

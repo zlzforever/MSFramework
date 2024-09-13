@@ -4,8 +4,16 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace MicroserviceFramework.Ef.Extensions;
 
+/// <summary>
+///
+/// </summary>
 public static class EntityTypeBuilderExtensions
 {
+    /// <summary>
+    ///
+    /// </summary>
+    /// <param name="builder"></param>
+    /// <typeparam name="TEntity"></typeparam>
     public static void ConfigureFullAuditing<TEntity>(this EntityTypeBuilder<TEntity> builder)
         where TEntity : class, ICreation, IModification, IDeletion
     {
@@ -14,6 +22,11 @@ public static class EntityTypeBuilderExtensions
         builder.ConfigureDeletion();
     }
 
+    /// <summary>
+    ///
+    /// </summary>
+    /// <param name="builder"></param>
+    /// <typeparam name="TEntity"></typeparam>
     public static void ConfigureCreation<TEntity>(this EntityTypeBuilder<TEntity> builder)
         where TEntity : class, ICreation
     {
@@ -25,6 +38,11 @@ public static class EntityTypeBuilderExtensions
         // builder.HasIndex(x => x.CreationTime);
     }
 
+    /// <summary>
+    ///
+    /// </summary>
+    /// <param name="builder"></param>
+    /// <typeparam name="TEntity"></typeparam>
     public static void ConfigureModification<TEntity>(this EntityTypeBuilder<TEntity> builder)
         where TEntity : class, IModification
     {
@@ -36,6 +54,11 @@ public static class EntityTypeBuilderExtensions
         // builder.HasIndex(x => x.LastModificationTime);
     }
 
+    /// <summary>
+    ///
+    /// </summary>
+    /// <param name="builder"></param>
+    /// <typeparam name="TEntity"></typeparam>
     public static void ConfigureDeletion<TEntity>(this EntityTypeBuilder<TEntity> builder)
         where TEntity : class, IDeletion
     {

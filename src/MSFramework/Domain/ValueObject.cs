@@ -5,6 +5,10 @@ namespace MicroserviceFramework.Domain;
 /// </summary>
 public abstract record ValueObject
 {
+    /// <summary>
+    ///
+    /// </summary>
+    /// <returns></returns>
     public ValueObject Copy()
     {
         return this with { };

@@ -7,8 +7,18 @@ using Newtonsoft.Json.Linq;
 
 namespace MicroserviceFramework.Serialization.Newtonsoft.Converters;
 
+/// <summary>
+///
+/// </summary>
 public class EnumerationConverter : JsonConverter
 {
+    /// <summary>
+    ///
+    /// </summary>
+    /// <param name="writer"></param>
+    /// <param name="value"></param>
+    /// <param name="serializer"></param>
+    /// <exception cref="MicroserviceFrameworkException"></exception>
     public override void WriteJson(JsonWriter writer, object? value, JsonSerializer serializer)
     {
         if (value == null)
@@ -25,6 +35,15 @@ public class EnumerationConverter : JsonConverter
         }
     }
 
+    /// <summary>
+    ///
+    /// </summary>
+    /// <param name="reader"></param>
+    /// <param name="objectType"></param>
+    /// <param name="existingValue"></param>
+    /// <param name="serializer"></param>
+    /// <returns></returns>
+    /// <exception cref="MicroserviceFrameworkException"></exception>
     public override object? ReadJson(JsonReader reader, Type objectType, object? existingValue,
         JsonSerializer serializer)
     {
@@ -63,6 +82,11 @@ public class EnumerationConverter : JsonConverter
         throw new MicroserviceFrameworkException(122, $"{reader.Path} 不支持绑定值 {value}");
     }
 
+    /// <summary>
+    ///
+    /// </summary>
+    /// <param name="objectType"></param>
+    /// <returns></returns>
     public override bool CanConvert(Type objectType)
     {
         return objectType.IsSubclassOf(typeof(Enumeration));

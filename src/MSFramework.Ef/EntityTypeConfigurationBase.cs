@@ -4,8 +4,8 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace MicroserviceFramework.Ef;
 
-public abstract class EntityTypeConfigurationBase<TEntity> : EntityTypeConfigurationBase<TEntity, DefaultDbContext>
-    where TEntity : class, IEntity;
+// public abstract class EntityTypeConfigurationBase<TEntity> : EntityTypeConfigurationBase<TEntity, DefaultDbContext>
+//     where TEntity : class, IEntity;
 
 /// <summary>
 /// 数据实体映射配置基类
@@ -18,11 +18,25 @@ public abstract class EntityTypeConfigurationBase<TEntity, TDbContext> :
     where TDbContext : DbContext
 {
     /// <summary>
+    ///
+    /// </summary>
+    /// <param name="modelBuilder"></param>
+    public void Configure(ModelBuilder modelBuilder)
+    {
+        var builder = modelBuilder.Entity<TEntity>();
+        Configure(builder);
+    }
+
+    /// <summary>
     /// 重写以实现实体类型各个属性的数据库配置
     /// </summary>
     /// <param name="builder">实体类型创建器</param>
     public abstract void Configure(EntityTypeBuilder<TEntity> builder);
 
+    /// <summary>
+    ///
+    /// </summary>
+    /// <param name="builder"></param>
     protected void ConfigureDefaultIdentifier(EntityTypeBuilder<TEntity> builder)
     {
         var propertyBuilder = builder.Property("Id");
@@ -35,6 +49,10 @@ public abstract class EntityTypeConfigurationBase<TEntity, TDbContext> :
         }
     }
 
+    /// <summary>
+    ///
+    /// </summary>
+    /// <returns></returns>
     public override string ToString()
     {
         return $"DbContext: {typeof(TDbContext)}, EntityType: {typeof(TEntity)}";

@@ -2,6 +2,9 @@ using System;
 
 namespace MicroserviceFramework.Domain;
 
+/// <summary>
+/// 删除审计信息接口
+/// </summary>
 public interface IDeletion
 {
     /// <summary>
@@ -25,7 +28,7 @@ public interface IDeletion
     DateTimeOffset? DeletionTime { get; }
 
     /// <summary>
-    /// 设置删除信息
+    /// 设置删除审计信息
     /// </summary>
     /// <param name="deleterId">删除人标识</param>
     /// <param name="deleterName">删除人名称</param>

@@ -5,6 +5,9 @@ using Newtonsoft.Json.Serialization;
 
 namespace MicroserviceFramework.Serialization.Newtonsoft;
 
+/// <summary>
+///
+/// </summary>
 public static class ServiceCollectionExtensions
 {
     /// <summary>

@@ -1,7 +1,6 @@
 using System;
 using MicroserviceFramework.Common;
 using MicroserviceFramework.Serialization;
-using MicroserviceFramework.Text.Json;
 using MicroserviceFramework.Utils;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
@@ -9,20 +8,31 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace MicroserviceFramework.Ef.Extensions;
 
+/// <summary>
+///
+/// </summary>
 public static class JsonPropertyBuilderExtensions
 {
+    /// <summary>
+    ///
+    /// </summary>
+    /// <param name="builder"></param>
+    /// <param name="databaseType"></param>
+    /// <param name="jsonHelper"></param>
+    /// <typeparam name="TProperty"></typeparam>
+    /// <returns></returns>
     public static PropertyBuilder<TProperty> UseJson<TProperty>(
         this PropertyBuilder<TProperty> builder,
-        JsonDataType databaseType = JsonDataType.JSONB, IJsonSerializer jsonHelper = null) where TProperty : class
+        JsonDataType databaseType = JsonDataType.JSONB) where TProperty : class
     {
-        var jsonSerializer = GetJsonSerializer(jsonHelper);
-
-        var comparer = CreateValueComparer<TProperty>(jsonSerializer);
+        var comparer = CreateValueComparer<TProperty>(typeof(TProperty));
         var propertyBuilder = builder
             .UsePropertyAccessMode(PropertyAccessMode.PreferField)
             .HasColumnType(databaseType == JsonDataType.JSON ? "JSON" : "JSONB");
-        propertyBuilder.HasConversion(x => jsonSerializer.Serialize(x),
-            x => jsonSerializer.Deserialize<TProperty>(x));
+        propertyBuilder.HasConversion(x => Defaults.JsonSerializer.Serialize(x),
+            x => Defaults.JsonSerializer.Deserialize<TProperty>(x));
+        // var converter = new JsonToStringConverter<TProperty>();
+        // propertyBuilder.Metadata.SetValueConverter(converter);
         propertyBuilder.Metadata.SetValueComparer(comparer);
         return propertyBuilder;
     }
@@ -44,13 +54,15 @@ public static class JsonPropertyBuilderExtensions
         where TProperty : class
     {
         Check.NotNull(fieldType, nameof(fieldType));
-        var jsonSerializer = GetJsonSerializer(jsonHelper);
-        var comparer = CreateValueComparer<TProperty>(jsonSerializer, fieldType);
+        var comparer = CreateValueComparer<TProperty>(fieldType);
         var propertyBuilder = builder
             .UsePropertyAccessMode(PropertyAccessMode.PreferField)
             .HasColumnType(databaseType == JsonDataType.JSON ? "JSON" : "JSONB");
-        propertyBuilder.HasConversion(x => jsonSerializer.Serialize(x),
-            x => jsonSerializer.Deserialize(x, fieldType) as TProperty);
+        propertyBuilder.HasConversion(x => Defaults.JsonSerializer.Serialize(x),
+            x => Defaults.JsonSerializer.Deserialize(x, fieldType) as TProperty);
+        // var converterType = typeof(JsonToStringConverter<>).MakeGenericType(fieldType);
+        // var converter = (ValueConverter)Activator.CreateInstance(converterType);
+        // propertyBuilder.Metadata.SetValueConverter(converter);
         propertyBuilder.Metadata.SetValueComparer(comparer);
 
         return builder;
@@ -66,22 +78,15 @@ public static class JsonPropertyBuilderExtensions
     //     return builder;
     // }
 
-    private static ValueComparer<TProperty> CreateValueComparer<TProperty>(IJsonSerializer jsonHelper,
-        Type fieldType = null)
+    private static ValueComparer<TProperty> CreateValueComparer<TProperty>(
+        Type fieldType)
         where TProperty : class
     {
         return new ValueComparer<TProperty>
         (
-            (l, r) => jsonHelper.Serialize(l) ==
-                      jsonHelper.Serialize(r),
-            v => v == null ? 0 : jsonHelper.Serialize(v).GetHashCode(),
-            v => jsonHelper.Deserialize(jsonHelper.Serialize(v),
-                fieldType ?? typeof(TProperty)) as TProperty);
-    }
-
-    private static IJsonSerializer GetJsonSerializer(IJsonSerializer jsonSerializer = null)
-    {
-        return jsonSerializer ??
-               (Defaults.JsonSerializer == null ? TextJsonSerializer.Create() : Defaults.JsonSerializer);
+            (l, r) => Defaults.JsonSerializer.Serialize(l) ==
+                      Defaults.JsonSerializer.Serialize(r),
+            v => v == null ? 0 : Defaults.JsonSerializer.Serialize(v).GetHashCode(),
+            v => Defaults.JsonSerializer.Deserialize(Defaults.JsonSerializer.Serialize(v), fieldType) as TProperty);
     }
 }

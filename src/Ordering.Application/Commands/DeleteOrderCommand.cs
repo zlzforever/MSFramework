@@ -1,6 +1,5 @@
 using System.ComponentModel.DataAnnotations;
 using MicroserviceFramework.Mediator;
-using MongoDB.Bson;
 
 namespace Ordering.Application.Commands;
 
@@ -10,5 +9,5 @@ public record DeleteOrderCommand : Request
     ///
     /// </summary>
     [Required]
-    public ObjectId OrderId { get; set; }
+    public string OrderId { get; set; }
 }

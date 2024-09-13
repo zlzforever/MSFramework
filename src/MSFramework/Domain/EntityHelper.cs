@@ -7,7 +7,7 @@ namespace MicroserviceFramework.Domain;
 /// <summary>
 /// Some helper methods for entities.
 /// </summary>
-public static class EntityHelper
+internal static class EntityHelper
 {
     public static bool HasDefaultId<TKey>(IEntity<TKey> entity) where TKey : IEquatable<TKey>
     {

@@ -20,6 +20,15 @@ public static class EnumerableExtensions
         return string.Join(separator, enumerable);
     }
 
+    /// <summary>
+    ///
+    /// </summary>
+    /// <param name="enumerable"></param>
+    /// <param name="separator"></param>
+    /// <param name="selector"></param>
+    /// <typeparam name="T"></typeparam>
+    /// <typeparam name="TProperty"></typeparam>
+    /// <returns></returns>
     public static string JoinSeparator<T, TProperty>(this IEnumerable<T> enumerable,
         string separator, Func<T, TProperty> selector)
     {

@@ -4,14 +4,13 @@ using MicroserviceFramework.Common;
 using MicroserviceFramework.Ef;
 using MicroserviceFramework.Ef.Repositories;
 using MicroserviceFramework.Linq.Expression;
-using MongoDB.Bson;
 using Ordering.Domain.AggregateRoots;
 using Ordering.Domain.Repositories;
 
 namespace Ordering.Infrastructure.Repositories;
 
 public class ProductRepository(DbContextFactory dbContextFactory)
-    : EfRepository<Product, ObjectId>(dbContextFactory), IProductRepository
+    : EfRepository<Product, string>(dbContextFactory), IProductRepository
 {
     public Product GetFirst()
     {

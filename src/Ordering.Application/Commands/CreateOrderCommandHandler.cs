@@ -1,14 +1,13 @@
 using System.Threading;
 using System.Threading.Tasks;
 using MicroserviceFramework.Mediator;
-using MongoDB.Bson;
 using Ordering.Domain.AggregateRoots;
 using Ordering.Domain.Repositories;
 
 namespace Ordering.Application.Commands;
 
 public class CreateOrderCommandHandler(IOrderingRepository orderRepository)
-    : IRequestHandler<CreateOrderCommand, ObjectId>
+    : IRequestHandler<CreateOrderCommand, string>
 {
     /// <summary>
     /// Handler which processes the command when
@@ -17,7 +16,7 @@ public class CreateOrderCommandHandler(IOrderingRepository orderRepository)
     /// <param name="command"></param>
     /// <param name="cancellationToken"></param>
     /// <returns></returns>
-    public async Task<ObjectId> HandleAsync(CreateOrderCommand command, CancellationToken cancellationToken)
+    public async Task<string> HandleAsync(CreateOrderCommand command, CancellationToken cancellationToken)
     {
         var order = Order.Create(
             command.UserId,

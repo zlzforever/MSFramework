@@ -13,6 +13,12 @@ using MongoDB.Bson;
 
 namespace MicroserviceFramework.LocalEvent;
 
+/// <summary>
+///
+/// </summary>
+/// <param name="serviceProvider"></param>
+/// <param name="logger"></param>
+/// <param name="localEventOptions"></param>
 public class LocalEventService(
     IServiceProvider serviceProvider,
     ILogger<LocalEventService> logger,
@@ -22,6 +28,12 @@ public class LocalEventService(
     private static readonly Dictionary<Type, HashSet<EventDescriptor>> Descriptors =
         new();
 
+    /// <summary>
+    ///
+    /// </summary>
+    /// <param name="eventType"></param>
+    /// <param name="handlerType"></param>
+    /// <exception cref="ArgumentException"></exception>
     public static void Register(Type eventType, Type handlerType)
     {
         var method = handlerType.GetMethod("HandleAsync", [eventType, typeof(CancellationToken)]);
@@ -38,6 +50,11 @@ public class LocalEventService(
         Descriptors[eventType].Add(new EventDescriptor(handlerType, method));
     }
 
+    /// <summary>
+    ///
+    /// </summary>
+    /// <param name="stoppingToken"></param>
+    /// <returns></returns>
     protected override Task ExecuteAsync(CancellationToken stoppingToken)
     {
         return Task.Factory.StartNew(async () =>

@@ -7,7 +7,6 @@ rm -rf src/MSFramework.Ef/bin/Release
 rm -rf src/MSFramework.Ef.MySql/bin/Release
 rm -rf src/MSFramework.Ef.PostgreSql/bin/Release
 rm -rf src/MSFramework.Ef.SqlServer/bin/Release
-rm -rf src/MSFramework.EventBus.RabbitMQ/bin/Release
 rm -rf src/MSFramework.Ef.Design/bin/Release
 rm -rf src/MSFramework.AspNetCore.Swagger/bin/Release
 rm -rf src/MSFramework.Serialization.Newtonsoft/bin/Release

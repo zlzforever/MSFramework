@@ -1,6 +1,5 @@
 using System.Collections.Generic;
 using MicroserviceFramework.Mediator;
-using MongoDB.Bson;
 
 namespace Ordering.Application.Commands;
 
@@ -13,7 +12,7 @@ public record CreateOrderCommand(
     string Country,
     string ZipCode,
     string Description)
-    : Request<ObjectId>
+    : Request<string>
 {
     public string UserId { get; set; } = UserId;
 

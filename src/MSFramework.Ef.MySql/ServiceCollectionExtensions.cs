@@ -5,8 +5,16 @@ using Pomelo.EntityFrameworkCore.MySql.Infrastructure.Internal;
 
 namespace MicroserviceFramework.Ef.MySql;
 
+/// <summary>
+///
+/// </summary>
 public static class ServiceCollectionExtensions
 {
+    /// <summary>
+    ///
+    /// </summary>
+    /// <param name="options"></param>
+    /// <returns></returns>
     public static MySqlDbContextOptionsBuilder UseRemoveForeignKeyService(this MySqlDbContextOptionsBuilder options)
     {
         MigrationsSqlGenerator.RemoveForeignKey = true;
@@ -15,6 +23,11 @@ public static class ServiceCollectionExtensions
         return options;
     }
 
+    /// <summary>
+    ///
+    /// </summary>
+    /// <param name="options"></param>
+    /// <returns></returns>
     public static MySqlDbContextOptionsBuilder UseRemoveExternalEntityService(
         this MySqlDbContextOptionsBuilder options)
     {
@@ -35,6 +48,11 @@ public static class ServiceCollectionExtensions
     //     return optionsBuilder;
     // }
 
+    /// <summary>
+    ///
+    /// </summary>
+    /// <param name="builder"></param>
+    /// <param name="settings"></param>
     public static void Load(this MySqlDbContextOptionsBuilder builder,
         DbContextSettings settings)
     {

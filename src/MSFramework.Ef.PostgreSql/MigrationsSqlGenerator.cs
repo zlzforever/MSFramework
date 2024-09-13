@@ -11,6 +11,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Migrations;
 
 namespace MicroserviceFramework.Ef.PostgreSql;
 
+/// <summary>
+///
+/// </summary>
+/// <param name="dependencies"></param>
+/// <param name="npgsqlSingletonOptions"></param>
 public class MigrationsSqlGenerator(
     MigrationsSqlGeneratorDependencies dependencies,
 #pragma warning disable EF1001
@@ -18,9 +23,21 @@ public class MigrationsSqlGenerator(
 #pragma warning restore EF1001
     : NpgsqlMigrationsSqlGenerator(dependencies, npgsqlSingletonOptions)
 {
+    /// <summary>
+    ///
+    /// </summary>
     public static bool RemoveForeignKey;
+    /// <summary>
+    ///
+    /// </summary>
     public static bool RemoveExternalEntity;
 
+    /// <summary>
+    ///
+    /// </summary>
+    /// <param name="operation"></param>
+    /// <param name="model"></param>
+    /// <param name="builder"></param>
     protected override void Generate(
         MigrationOperation operation,
         IModel model,

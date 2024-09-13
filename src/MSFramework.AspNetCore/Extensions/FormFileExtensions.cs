@@ -5,8 +5,17 @@ using Microsoft.AspNetCore.Http;
 
 namespace MicroserviceFramework.AspNetCore.Extensions;
 
+/// <summary>
+///
+/// </summary>
 public static class FormFileExtensions
 {
+    /// <summary>
+    ///
+    /// </summary>
+    /// <param name="formFile"></param>
+    /// <param name="interval"></param>
+    /// <returns></returns>
     public static async Task<(string FileName, string Path)> SaveAsync(this IFormFile formFile,
         string interval = "upload")
     {

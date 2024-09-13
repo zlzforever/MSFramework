@@ -1,9 +1,8 @@
 using MicroserviceFramework.Mediator;
-using MongoDB.Bson;
 
 namespace Ordering.Application.Commands;
 
-public record CancelOrderCommand(ObjectId OrderId) : Request<ObjectId>
+public record CancelOrderCommand(string OrderId) : Request<string>
 {
-    public ObjectId OrderId { get; private set; } = OrderId;
+    public string OrderId { get; private set; } = OrderId;
 }

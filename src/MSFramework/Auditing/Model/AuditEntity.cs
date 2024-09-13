@@ -5,8 +5,17 @@ using MongoDB.Bson;
 
 namespace MicroserviceFramework.Auditing.Model;
 
-public class AuditEntity : EntityBase<ObjectId>
+/// <summary>
+///
+/// </summary>
+public class AuditEntity : EntityBase<string>
 {
+    /// <summary>
+    ///
+    /// </summary>
+    /// <param name="typeName"></param>
+    /// <param name="entityId"></param>
+    /// <param name="operationType"></param>
     public AuditEntity(string typeName, string entityId, OperationType operationType) : this()
     {
         Type = typeName;
@@ -14,7 +23,7 @@ public class AuditEntity : EntityBase<ObjectId>
         OperationType = operationType;
     }
 
-    private AuditEntity() : base(ObjectId.GenerateNewId())
+    private AuditEntity() : base(ObjectId.GenerateNewId().ToString())
     {
         Properties = new List<AuditProperty>();
     }
@@ -45,6 +54,10 @@ public class AuditEntity : EntityBase<ObjectId>
     /// </summary>
     public ICollection<AuditProperty> Properties { get; private set; }
 
+    /// <summary>
+    ///
+    /// </summary>
+    /// <param name="properties"></param>
     public void AddProperties(IEnumerable<AuditProperty> properties)
     {
         foreach (var property in properties)
@@ -54,6 +67,10 @@ public class AuditEntity : EntityBase<ObjectId>
         }
     }
 
+    /// <summary>
+    ///
+    /// </summary>
+    /// <returns></returns>
     public override string ToString()
     {
         return

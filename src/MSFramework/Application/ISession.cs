@@ -48,5 +48,9 @@ public interface ISession
     /// </summary>
     IReadOnlyCollection<string> Subjects { get; }
 
+    /// <summary>
+    /// 覆盖当前用户的信息
+    /// </summary>
+    /// <param name="session"></param>
     void Load(ISession session);
 }

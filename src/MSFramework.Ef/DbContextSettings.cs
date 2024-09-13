@@ -7,6 +7,9 @@ using Microsoft.Extensions.DependencyInjection.Extensions;
 
 namespace MicroserviceFramework.Ef;
 
+/// <summary>
+///
+/// </summary>
 [SuppressMessage("ReSharper", "UnusedAutoPropertyAccessor.Global")]
 public class DbContextSettings : IDbContextOptionsExtension
 {
@@ -53,6 +56,9 @@ public class DbContextSettings : IDbContextOptionsExtension
     /// </summary>
     public string ConnectionString { get; set; }
 
+    /// <summary>
+    ///
+    /// </summary>
     public bool EnableDetailedErrors { get; set; }
 
     /// <summary>
@@ -60,6 +66,9 @@ public class DbContextSettings : IDbContextOptionsExtension
     /// </summary>
     public int MaxBatchSize { get; set; } = 100;
 
+    /// <summary>
+    ///
+    /// </summary>
     public int CommandTimeout { get; set; } = 30;
 
     /// <summary>
@@ -82,6 +91,9 @@ public class DbContextSettings : IDbContextOptionsExtension
     /// </summary>
     public bool EnableSensitiveDataLogging { get; set; }
 
+    /// <summary>
+    ///
+    /// </summary>
     public string MigrationsAssembly { get; set; }
 
     // comments: 禁止使用全局 schema 配置
@@ -97,19 +109,59 @@ public class DbContextSettings : IDbContextOptionsExtension
     /// </summary>
     public string TablePrefix { get; set; }
 
+    /// <summary>
+    ///
+    /// </summary>
     public string DatabaseType { get; set; }
+
+    /// <summary>
+    ///
+    /// </summary>
     public int LoggingCacheTime { get; set; }
+
+    /// <summary>
+    ///
+    /// </summary>
     public bool EnableServiceProviderCaching { get; set; }
+
+    /// <summary>
+    ///
+    /// </summary>
     public bool EnableThreadSafetyChecks { get; set; }
+
+    /// <summary>
+    ///
+    /// </summary>
     public string QuerySplittingBehavior { get; set; }
+
+    /// <summary>
+    ///
+    /// </summary>
     public string MigrationsHistoryTable { get; set; }
+
+    /// <summary>
+    ///
+    /// </summary>
     public DbContextOptionsExtensionInfo Info { get; }
 
+    /// <summary>
+    /// 使用编译模型
+    /// </summary>
+    public bool UseCompiledModel { get; set; } = false;
+
+    /// <summary>
+    ///
+    /// </summary>
+    /// <param name="services"></param>
     public void ApplyServices(IServiceCollection services)
     {
         services.TryAddSingleton(this);
     }
 
+    /// <summary>
+    ///
+    /// </summary>
+    /// <param name="options"></param>
     public void Validate(IDbContextOptions options)
     {
     }
@@ -135,6 +187,10 @@ public class DbContextSettings : IDbContextOptionsExtension
         }
     }
 
+    /// <summary>
+    ///
+    /// </summary>
+    /// <returns></returns>
     public string GetMigrationsHistoryTable()
     {
         string migrationsHistoryTable;

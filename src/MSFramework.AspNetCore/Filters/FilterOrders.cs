@@ -7,11 +7,29 @@ namespace MicroserviceFramework.AspNetCore.Filters;
 /// </summary>
 public static class Constants
 {
+    /// <summary>
+    ///
+    /// </summary>
     public const int GlobalException = 0;
+
+    /// <summary>
+    ///
+    /// </summary>
     public const int ResponseWrapper = 0;
+
+    /// <summary>
+    ///
+    /// </summary>
     public const int UnitOfWork = 1002;
+
+    /// <summary>
+    ///
+    /// </summary>
     public const int Audit = 1003;
 
+    /// <summary>
+    /// 
+    /// </summary>
     public static readonly HashSet<string> CommandMethods;
 
     static Constants()

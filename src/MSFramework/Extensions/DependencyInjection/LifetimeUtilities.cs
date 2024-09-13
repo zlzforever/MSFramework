@@ -3,7 +3,7 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace MicroserviceFramework.Extensions.DependencyInjection;
 
-public static class LifetimeUtilities
+internal static class LifetimeUtilities
 {
     public static ServiceLifetime? GetLifetime(Type type)
     {

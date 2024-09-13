@@ -4,12 +4,22 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace MicroserviceFramework.Ef;
 
+/// <summary>
+///
+/// </summary>
 public class DbContextFactory
 {
     private readonly IEntityConfigurationTypeFinder _entityConfigurationTypeFinder;
 
+    /// <summary>
+    ///
+    /// </summary>
     public IServiceProvider ServiceProvider { get; }
 
+    /// <summary>
+    ///
+    /// </summary>
+    /// <param name="serviceProvider"></param>
     public DbContextFactory(IServiceProvider serviceProvider)
     {
         ServiceProvider = serviceProvider;
@@ -28,6 +38,11 @@ public class DbContextFactory
         return GetDbContext(dbContextType);
     }
 
+    /// <summary>
+    ///
+    /// </summary>
+    /// <param name="dbContextType"></param>
+    /// <returns></returns>
     public DbContextBase GetDbContext(Type dbContextType)
     {
         if (dbContextType == null)
@@ -38,6 +53,10 @@ public class DbContextFactory
         return (DbContextBase)ServiceProvider.GetRequiredService(dbContextType);
     }
 
+    /// <summary>
+    ///
+    /// </summary>
+    /// <returns></returns>
     public IEnumerable<DbContextBase> GetAllDbContexts()
     {
         foreach (var dbContextType in _entityConfigurationTypeFinder.GetAllDbContextTypes())
@@ -50,6 +69,11 @@ public class DbContextFactory
         }
     }
 
+    /// <summary>
+    ///
+    /// </summary>
+    /// <typeparam name="TEntity"></typeparam>
+    /// <returns></returns>
     public DbContextBase GetDbContextOrDefault<TEntity>()
     {
         if (!_entityConfigurationTypeFinder.HasDbContextForEntity<TEntity>())

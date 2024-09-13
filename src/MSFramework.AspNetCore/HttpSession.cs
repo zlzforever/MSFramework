@@ -10,6 +10,9 @@ using ISession = MicroserviceFramework.Application.ISession;
 
 namespace MicroserviceFramework.AspNetCore;
 
+/// <summary>
+///
+/// </summary>
 public class HttpSession : ISession
 {
     private static readonly HashSet<string> ChineseCultures =
@@ -26,6 +29,11 @@ public class HttpSession : ISession
         "zh-Hans"
     ];
 
+    /// <summary>
+    ///
+    /// </summary>
+    /// <param name="accessor"></param>
+    /// <returns></returns>
     public static HttpSession Create(IHttpContextAccessor accessor)
     {
         if (accessor?.HttpContext == null)
@@ -79,22 +87,51 @@ public class HttpSession : ISession
         return session;
     }
 
+    /// <summary>
+    /// 当前请求的跟踪标识
+    /// </summary>
     public string TraceIdentifier { get; private set; }
 
+    /// <summary>
+    /// 用户标识
+    /// </summary>
     public string UserId { get; private set; }
 
+    /// <summary>
+    /// 用户名
+    /// </summary>
     public string UserName { get; private set; }
 
+    /// <summary>
+    /// 用户邮箱
+    /// </summary>
     public string Email { get; private set; }
 
+    /// <summary>
+    /// 用户电话
+    /// </summary>
     public string PhoneNumber { get; private set; }
 
+    /// <summary>
+    /// 用户的显示名称
+    /// </summary>
     public string UserDisplayName { get; private set; }
 
+    /// <summary>
+    /// 用户所具有的角色
+    /// </summary>
     public IReadOnlyCollection<string> Roles { get; private set; }
 
+    /// <summary>
+    /// 用户所具有的主体：ID + 角色
+    /// 主要用于权限系统进行检测
+    /// </summary>
     public IReadOnlyCollection<string> Subjects { get; private set; }
 
+    /// <summary>
+    /// 覆盖当前用户的信息
+    /// </summary>
+    /// <param name="session"></param>
     public void Load(ISession session)
     {
         TraceIdentifier = session.TraceIdentifier;

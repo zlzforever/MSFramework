@@ -8,8 +8,18 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace MicroserviceFramework.Extensions.DependencyInjection;
 
+/// <summary>
+///
+/// </summary>
 public static class ServiceCollectionExtensions
 {
+    /// <summary>
+    /// 添加自动依赖注入组件，扫描程序集中的类型，对实现了
+    /// IScopeDependency、ISingletonDependency、ITransientDependency
+    /// 接口的类型， 自动注入到依赖注入中
+    /// </summary>
+    /// <param name="services"></param>
+    /// <returns></returns>
     public static IServiceCollection AddDependencyInjectionLoader(
         this IServiceCollection services)
     {
@@ -26,7 +36,7 @@ public static class ServiceCollectionExtensions
     }
 
     /// <summary>
-    /// 使用自动依赖注入组件， 扫描程序集中的类型， 对实现了
+    /// 使用自动依赖注入组件，扫描程序集中的类型，对实现了
     /// IScopeDependency、ISingletonDependency、ITransientDependency
     /// 接口的类型， 自动注入到依赖注入中
     /// </summary>

@@ -2,6 +2,9 @@ using System;
 
 namespace MicroserviceFramework.Domain;
 
+/// <summary>
+///
+/// </summary>
 public interface IExternalEntity;
 
 /// <summary>

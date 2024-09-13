@@ -47,7 +47,7 @@ internal sealed class EntityConfigurationTypeFinder : IEntityConfigurationTypeFi
                 continue;
             }
 
-            object configuration = null;
+            IEntityTypeConfiguration configuration = null;
             foreach (var type in constructableType.GetInterfaces())
             {
                 if (!type.IsGenericType)
@@ -70,12 +70,13 @@ internal sealed class EntityConfigurationTypeFinder : IEntityConfigurationTypeFi
                         throw new MicroserviceFrameworkException($"类型 {entityType}, {dbContextType} 已经注册");
                     }
 
-                    configuration ??= Activator.CreateInstance(constructableType);
+                    configuration ??= (IEntityTypeConfiguration)Activator.CreateInstance(constructableType);
                     var configureMethodInfo = typeof(IEntityTypeConfiguration<>) // IEntityTypeConfiguration<TEntity>
                         .MakeGenericType(entityType)
                         .GetMethod("Configure");
                     var metadata = new EntityTypeConfigurationMetadata(entityType, configureMethodInfo,
-                        createEntityTypeBuilderMethod.MakeGenericMethod(entityType), configuration);
+                        createEntityTypeBuilderMethod.MakeGenericMethod(entityType),
+                        configuration);
                     EntityRegistersDict[dbContextType].Add(entityType, metadata);
                     EntityMapDbContextDict.TryAdd(entityType, dbContextType);
                     // EntityNameMapEntityTypeDict.TryAdd(entityType.FullName, entityType);

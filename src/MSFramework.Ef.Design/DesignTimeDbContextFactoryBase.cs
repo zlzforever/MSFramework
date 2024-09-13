@@ -25,7 +25,15 @@ public abstract class DesignTimeDbContextFactoryBase<TDbContext> :
             .ServiceProvider.GetRequiredService(typeof(TDbContext));
     }
 
+    /// <summary>
+    ///
+    /// </summary>
+    /// <returns></returns>
     protected abstract IServiceProvider GetServiceProvider();
 
+    /// <summary>
+    ///
+    /// </summary>
+    /// <param name="serviceCollection"></param>
     public abstract void ConfigureDesignTimeServices(IServiceCollection serviceCollection);
 }

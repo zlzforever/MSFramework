@@ -5,14 +5,27 @@ using Microsoft.Extensions.DependencyInjection.Extensions;
 
 namespace MicroserviceFramework.AutoMapper;
 
+/// <summary>
+///
+/// </summary>
 public static class ServiceCollectionExtensions
 {
+    /// <summary>
+    ///
+    /// </summary>
+    /// <param name="builder"></param>
+    /// <returns></returns>
     public static MicroserviceFrameworkBuilder UseAutoMapperObjectAssembler(this MicroserviceFrameworkBuilder builder)
     {
         builder.Services.AddAutoMapperObjectAssembler();
         return builder;
     }
 
+    /// <summary>
+    ///
+    /// </summary>
+    /// <param name="services"></param>
+    /// <returns></returns>
     public static IServiceCollection AddAutoMapperObjectAssembler(this IServiceCollection services)
     {
         services.TryAddScoped<IObjectAssembler, AutoMapperObjectAssembler>();
@@ -20,6 +33,12 @@ public static class ServiceCollectionExtensions
         return services;
     }
 
+    /// <summary>
+    ///
+    /// </summary>
+    /// <param name="builder"></param>
+    /// <param name="assemblies"></param>
+    /// <returns></returns>
     public static MicroserviceFrameworkBuilder UseAutoMapperObjectAssembler(this MicroserviceFrameworkBuilder builder,
         params Assembly[] assemblies)
     {

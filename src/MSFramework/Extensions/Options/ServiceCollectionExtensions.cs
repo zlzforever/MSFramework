@@ -7,6 +7,9 @@ using Microsoft.Extensions.Options;
 
 namespace MicroserviceFramework.Extensions.Options;
 
+/// <summary>
+///
+/// </summary>
 public static class ServiceCollectionExtensions
 {
     private static void AddOptionsType(this IServiceCollection services, Type optionsType,
@@ -48,6 +51,12 @@ public static class ServiceCollectionExtensions
             _ => namedConfigureFromConfigurationOptions);
     }
 
+    /// <summary>
+    ///
+    /// </summary>
+    /// <param name="services"></param>
+    /// <param name="configuration"></param>
+    /// <returns></returns>
     public static IServiceCollection AddOptionsType(this IServiceCollection services, IConfiguration configuration)
     {
         services.AddOptions();

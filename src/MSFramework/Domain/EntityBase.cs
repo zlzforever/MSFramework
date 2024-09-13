@@ -59,11 +59,21 @@ public abstract class EntityBase<TKey> : EntityBase, IEntity<TKey> where TKey : 
         protected set => _id = value;
     }
 
+    /// <summary>
+    ///
+    /// </summary>
+    /// <param name="id"></param>
     protected EntityBase(TKey id)
     {
         Id = id;
     }
 
+    /// <summary>
+    ///
+    /// </summary>
+    /// <param name="left"></param>
+    /// <param name="right"></param>
+    /// <returns></returns>
     public static bool operator ==(EntityBase<TKey> left, EntityBase<TKey> right)
     {
         if (Equals(left, null))
@@ -74,16 +84,32 @@ public abstract class EntityBase<TKey> : EntityBase, IEntity<TKey> where TKey : 
         return left.Equals(right);
     }
 
+    /// <summary>
+    ///
+    /// </summary>
+    /// <param name="left"></param>
+    /// <param name="right"></param>
+    /// <returns></returns>
     public static bool operator !=(EntityBase<TKey> left, EntityBase<TKey> right)
     {
         return !(left == right);
     }
 
+    /// <summary>
+    ///
+    /// </summary>
+    /// <param name="other"></param>
+    /// <returns></returns>
     public bool Equals(TKey other)
     {
         return !Equals(null, other) && Equals(Id, other);
     }
 
+    /// <summary>
+    ///
+    /// </summary>
+    /// <param name="obj"></param>
+    /// <returns></returns>
     public override bool Equals(object obj)
     {
         if (obj is not EntityBase<TKey> other)
@@ -121,6 +147,10 @@ public abstract class EntityBase<TKey> : EntityBase, IEntity<TKey> where TKey : 
         return Id.Equals(other.Id);
     }
 
+    /// <summary>
+    ///
+    /// </summary>
+    /// <returns></returns>
     public override int GetHashCode()
     {
         return Id == null ? 0 : Id.GetHashCode();

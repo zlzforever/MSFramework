@@ -5,13 +5,26 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace MicroserviceFramework.AspNetCore.Extensions;
 
+/// <summary>
+///
+/// </summary>
 public static class HttpContextExtensions
 {
+    /// <summary>
+    ///
+    /// </summary>
+    /// <param name="context"></param>
+    /// <returns></returns>
     public static string GetRemoteIpAddress(this ActionContext context)
     {
         return context.HttpContext.GetRemoteIpAddressString();
     }
 
+    /// <summary>
+    ///
+    /// </summary>
+    /// <param name="context"></param>
+    /// <returns></returns>
     public static string GetRemoteIpAddressString(this HttpContext context)
     {
         var forwardedFor = context.Request.Headers["X-Forwarded-For"].FirstOrDefault();
@@ -23,6 +36,11 @@ public static class HttpContextExtensions
         return forwardedFor;
     }
 
+    /// <summary>
+    ///
+    /// </summary>
+    /// <param name="context"></param>
+    /// <returns></returns>
     public static IPAddress GetRemoteIpAddress(this HttpContext context)
     {
         var forwardedFor = context.Request.Headers["X-Forwarded-For"].FirstOrDefault();

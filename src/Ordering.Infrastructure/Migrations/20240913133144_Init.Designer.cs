@@ -12,7 +12,7 @@ using Ordering.Infrastructure;
 namespace Ordering.Infrastructure.Migrations
 {
     [DbContext(typeof(OrderingContext))]
-    [Migration("20240826084034_Init")]
+    [Migration("20240913133144_Init")]
     partial class Init
     {
         /// <inheritdoc />
@@ -68,8 +68,8 @@ namespace Ordering.Infrastructure.Migrations
                         .HasColumnType("varchar(36)")
                         .HasColumnName("id");
 
-                    b.Property<long?>("CreationTime")
-                        .HasColumnType("bigint")
+                    b.Property<DateTimeOffset?>("CreationTime")
+                        .HasColumnType("datetime(6)")
                         .HasColumnName("creation_time");
 
                     b.Property<string>("CreatorId")
@@ -97,9 +97,7 @@ namespace Ordering.Infrastructure.Migrations
                         .HasColumnName("elapsed");
 
                     b.Property<long>("EndTime")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("bigint")
-                        .HasDefaultValue(0L)
                         .HasColumnName("end_time");
 
                     b.Property<string>("IP")
@@ -194,8 +192,8 @@ namespace Ordering.Infrastructure.Migrations
                         .HasColumnType("varchar(36)")
                         .HasColumnName("concurrency_stamp");
 
-                    b.Property<long?>("CreationTime")
-                        .HasColumnType("bigint")
+                    b.Property<DateTimeOffset?>("CreationTime")
+                        .HasColumnType("datetime(6)")
                         .HasColumnName("creation_time");
 
                     b.Property<string>("CreatorId")
@@ -207,6 +205,18 @@ namespace Ordering.Infrastructure.Migrations
                         .HasMaxLength(256)
                         .HasColumnType("varchar(256)")
                         .HasColumnName("creator_name");
+
+                    b.Property<string>("DeleterId")
+                        .HasColumnType("longtext")
+                        .HasColumnName("deleter_id");
+
+                    b.Property<string>("DeleterName")
+                        .HasColumnType("longtext")
+                        .HasColumnName("deleter_name");
+
+                    b.Property<DateTimeOffset?>("DeletionTime")
+                        .HasColumnType("datetime(6)")
+                        .HasColumnName("deletion_time");
 
                     b.Property<string>("Description2")
                         .HasMaxLength(2000)
@@ -220,6 +230,22 @@ namespace Ordering.Infrastructure.Migrations
                     b.Property<string>("Extras")
                         .HasColumnType("JSON")
                         .HasColumnName("extras");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("tinyint(1)")
+                        .HasColumnName("is_deleted");
+
+                    b.Property<DateTimeOffset?>("LastModificationTime")
+                        .HasColumnType("datetime(6)")
+                        .HasColumnName("last_modification_time");
+
+                    b.Property<string>("LastModifierId")
+                        .HasColumnType("longtext")
+                        .HasColumnName("last_modifier_id");
+
+                    b.Property<string>("LastModifierName")
+                        .HasColumnType("longtext")
+                        .HasColumnName("last_modifier_name");
 
                     b.Property<string>("ListJson")
                         .HasColumnType("JSON")
@@ -287,8 +313,8 @@ namespace Ordering.Infrastructure.Migrations
                         .HasColumnType("varchar(36)")
                         .HasColumnName("concurrency_stamp");
 
-                    b.Property<long?>("CreationTime")
-                        .HasColumnType("bigint")
+                    b.Property<DateTimeOffset?>("CreationTime")
+                        .HasColumnType("datetime(6)")
                         .HasColumnName("creation_time");
 
                     b.Property<string>("CreatorId")

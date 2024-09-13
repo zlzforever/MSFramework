@@ -10,8 +10,17 @@ using Microsoft.Extensions.DependencyInjection.Extensions;
 
 namespace MicroserviceFramework.Ef;
 
+/// <summary>
+///
+/// </summary>
 public static class ServiceCollectionExtensions
 {
+    /// <summary>
+    ///
+    /// </summary>
+    /// <param name="services"></param>
+    /// <typeparam name="TDbContext"></typeparam>
+    /// <returns></returns>
     public static IServiceCollection AddEfAuditing<TDbContext>(this IServiceCollection services)
         where TDbContext : DbContext
     {
@@ -20,6 +29,12 @@ public static class ServiceCollectionExtensions
         return services;
     }
 
+    /// <summary>
+    ///
+    /// </summary>
+    /// <param name="builder"></param>
+    /// <typeparam name="TDbContext"></typeparam>
+    /// <returns></returns>
     public static MicroserviceFrameworkBuilder UseEfAuditing<TDbContext>(this MicroserviceFrameworkBuilder builder)
         where TDbContext : DbContext
     {
@@ -28,12 +43,22 @@ public static class ServiceCollectionExtensions
         return builder;
     }
 
+    /// <summary>
+    ///
+    /// </summary>
+    /// <param name="builder"></param>
+    /// <returns></returns>
     public static MicroserviceFrameworkBuilder UseEntityFramework(this MicroserviceFrameworkBuilder builder)
     {
         builder.Services.AddEntityFrameworkExtension();
         return builder;
     }
 
+    /// <summary>
+    ///
+    /// </summary>
+    /// <param name="services"></param>
+    /// <returns></returns>
     public static IServiceCollection AddEntityFrameworkExtension(this IServiceCollection services)
     {
         services.TryAddSingleton<IEntityConfigurationTypeFinder, EntityConfigurationTypeFinder>();
@@ -44,6 +69,13 @@ public static class ServiceCollectionExtensions
         return services;
     }
 
+    /// <summary>
+    ///
+    /// </summary>
+    /// <param name="builder"></param>
+    /// <param name="connectionString"></param>
+    /// <typeparam name="T"></typeparam>
+    /// <exception cref="MicroserviceFrameworkException"></exception>
     public static void SetConnectionString<T>(this DbContextOptionsBuilder builder, string connectionString) where T :
         class,
         IDbContextOptionsExtension

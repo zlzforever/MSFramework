@@ -4,6 +4,9 @@ using Microsoft.EntityFrameworkCore.Infrastructure;
 
 namespace MicroserviceFramework.Ef.Extensions;
 
+/// <summary>
+///
+/// </summary>
 public static class RelationalDbContextOptionsBuilderExtensions
 {
     internal static void LoadDbContextSettings<TDbContextOptionsBuilder, TOptionsExtension>(

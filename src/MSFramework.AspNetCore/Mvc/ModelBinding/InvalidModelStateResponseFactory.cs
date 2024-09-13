@@ -6,8 +6,14 @@ using Microsoft.AspNetCore.Mvc.ModelBinding;
 
 namespace MicroserviceFramework.AspNetCore.Mvc.ModelBinding;
 
+/// <summary>
+///
+/// </summary>
 public static class InvalidModelStateResponseFactory
 {
+    /// <summary>
+    ///
+    /// </summary>
     public static readonly Func<ActionContext, IActionResult> Instance = context =>
     {
         var errors = context.ModelState.Where(x =>

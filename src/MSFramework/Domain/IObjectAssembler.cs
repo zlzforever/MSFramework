@@ -8,9 +8,30 @@ namespace MicroserviceFramework.Domain;
 /// </summary>
 public interface IObjectAssembler
 {
+    /// <summary>
+    /// 转换对象
+    /// </summary>
+    /// <param name="source">源对象</param>
+    /// <typeparam name="TDestination">目标对象类型</typeparam>
+    /// <returns></returns>
     TDestination To<TDestination>(object source);
 
+    /// <summary>
+    /// 转换对象
+    /// </summary>
+    /// <param name="source">源对象</param>
+    /// <typeparam name="TSource">源对象类型</typeparam>
+    /// <typeparam name="TDestination">目标对象类型</typeparam>
+    /// <returns></returns>
     TDestination To<TSource, TDestination>(TSource source);
 
+    /// <summary>
+    /// 转换对象
+    /// </summary>
+    /// <param name="source">源对象</param>
+    /// <param name="destination">目标对象</param>
+    /// <typeparam name="TSource">源对象类型</typeparam>
+    /// <typeparam name="TDestination">目标对象类型</typeparam>
+    /// <returns></returns>
     TDestination To<TSource, TDestination>(TSource source, TDestination destination);
 }

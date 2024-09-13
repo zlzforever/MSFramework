@@ -11,6 +11,9 @@ using Swashbuckle.AspNetCore.SwaggerGen;
 
 namespace MicroserviceFramework.AspNetCore.Swagger;
 
+/// <summary>
+///
+/// </summary>
 public class ObjectIdOperationFilter : IOperationFilter
 {
     //prop names we want to ignore
@@ -25,6 +28,10 @@ public class ObjectIdOperationFilter : IOperationFilter
 
     private readonly IEnumerable<XPathNavigator> _xmlNavigators;
 
+    /// <summary>
+    ///
+    /// </summary>
+    /// <param name="filePaths"></param>
     public ObjectIdOperationFilter(IEnumerable<string> filePaths)
     {
         _xmlNavigators = filePaths != null
@@ -32,6 +39,11 @@ public class ObjectIdOperationFilter : IOperationFilter
             : Array.Empty<XPathNavigator>();
     }
 
+    /// <summary>
+    ///
+    /// </summary>
+    /// <param name="operation"></param>
+    /// <param name="context"></param>
     public void Apply(OpenApiOperation operation, OperationFilterContext context)
     {
         //for very parameter in operation check if any fields we want to ignore

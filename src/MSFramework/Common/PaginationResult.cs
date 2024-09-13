@@ -14,17 +14,17 @@ public class PaginationResult<TEntity>(int page, int limit, int total, List<TEnt
     public List<TEntity> Data { get; } = data ?? [];
 
     /// <summary>
-    /// 总计
+    /// 数据总量
     /// </summary>
     public int Total { get; } = total;
 
     /// <summary>
-    /// 当前页数
+    /// 当前页
     /// </summary>
     public int Page { get; } = page;
 
     /// <summary>
-    /// 每页数据量
+    /// 分页数据量
     /// </summary>
     public int Limit { get; } = limit;
 }

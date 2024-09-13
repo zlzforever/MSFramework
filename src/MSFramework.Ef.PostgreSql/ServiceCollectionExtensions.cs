@@ -6,8 +6,16 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Infrastructure.Internal;
 
 namespace MicroserviceFramework.Ef.PostgreSql;
 
+/// <summary>
+///
+/// </summary>
 public static class ServiceCollectionExtensions
 {
+    /// <summary>
+    ///
+    /// </summary>
+    /// <param name="options"></param>
+    /// <returns></returns>
     public static NpgsqlDbContextOptionsBuilder UseRemoveForeignKeyService(this NpgsqlDbContextOptionsBuilder options)
     {
         MigrationsSqlGenerator.RemoveForeignKey = true;
@@ -16,6 +24,11 @@ public static class ServiceCollectionExtensions
         return options;
     }
 
+    /// <summary>
+    ///
+    /// </summary>
+    /// <param name="options"></param>
+    /// <returns></returns>
     public static NpgsqlDbContextOptionsBuilder UseRemoveExternalEntityService(
         this NpgsqlDbContextOptionsBuilder options)
     {
@@ -25,6 +38,11 @@ public static class ServiceCollectionExtensions
         return options;
     }
 
+    /// <summary>
+    ///
+    /// </summary>
+    /// <param name="builder"></param>
+    /// <param name="settings"></param>
     public static void Load(this NpgsqlDbContextOptionsBuilder builder,
         DbContextSettings settings)
     {

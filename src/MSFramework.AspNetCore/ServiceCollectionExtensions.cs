@@ -1,6 +1,6 @@
 using System;
 using MicroserviceFramework.AspNetCore.Mvc.ModelBinding;
-using MicroserviceFramework.Runtime;
+using MicroserviceFramework.Extensions.DependencyInjection;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -11,20 +11,38 @@ using ISession = MicroserviceFramework.Application.ISession;
 
 namespace MicroserviceFramework.AspNetCore;
 
+/// <summary>
+///
+/// </summary>
 public static class ServiceCollectionExtensions
 {
+    /// <summary>
+    ///
+    /// </summary>
+    /// <param name="services"></param>
+    /// <returns></returns>
     public static IServiceCollection AddScopeServiceProvider(this IServiceCollection services)
     {
-        services.TryAddSingleton<ScopeServiceProvider, HttpContextScopeServiceProvider>();
+        services.AddSingleton<IScopeServiceProvider, HttpContextScopeServiceProvider>();
         return services;
     }
 
+    /// <summary>
+    ///
+    /// </summary>
+    /// <param name="builder"></param>
+    /// <returns></returns>
     public static MicroserviceFrameworkBuilder UseScopeServiceProvider(this MicroserviceFrameworkBuilder builder)
     {
         builder.Services.AddScopeServiceProvider();
         return builder;
     }
 
+    /// <summary>
+    ///
+    /// </summary>
+    /// <param name="services"></param>
+    /// <returns></returns>
     public static IServiceCollection AddAspNetCoreExtension(this IServiceCollection services)
     {
         services.TryAddScoped<ISession>(provider =>
@@ -59,12 +77,22 @@ public static class ServiceCollectionExtensions
         return builder;
     }
 
+    /// <summary>
+    ///
+    /// </summary>
+    /// <param name="builder"></param>
+    /// <returns></returns>
     public static IApplicationBuilder UseMicroserviceFramework(this IApplicationBuilder builder)
     {
         builder.ApplicationServices.UseMicroserviceFramework();
         return builder;
     }
 
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="builder"></param>
+    /// <returns></returns>
     public static IMvcBuilder ConfigureInvalidModelStateResponse(this IMvcBuilder builder)
     {
         builder.ConfigureApiBehaviorOptions(x =>

@@ -12,7 +12,6 @@ using MicroserviceFramework.Serialization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
-using MongoDB.Bson;
 using Ordering.Application.Commands;
 using Ordering.Application.Dto;
 using Ordering.Application.Events;
@@ -101,7 +100,7 @@ public class OrderController(
     /// <returns></returns>
     [HttpPost]
     //[AccessControl("创建订单")]
-    public async Task<ObjectId> CreateAsync([FromBody] CreateOrderCommand command)
+    public async Task<string> CreateAsync([FromBody] CreateOrderCommand command)
     {
         return await mediator.SendAsync(command);
     }
@@ -113,7 +112,7 @@ public class OrderController(
     }
 
     [HttpPut("{orderId}/address")]
-    public Task ChangeAddressAsync([FromRoute] ObjectId orderId,
+    public Task ChangeAddressAsync([FromRoute] string orderId,
         [FromBody] ChangeOrderAddressCommand command)
     {
         command.OrderId = orderId;
@@ -125,7 +124,7 @@ public class OrderController(
     #region QUERY
 
     [HttpGet("{orderId}")]
-    public async Task<OrderDto> GetAsync([FromRoute, Required] ObjectId orderId)
+    public async Task<OrderDto> GetAsync([FromRoute, Required] string orderId)
     {
         var order = await orderingQuery.GetAsync(orderId);
         return objectAssembler.To<OrderDto>(order);

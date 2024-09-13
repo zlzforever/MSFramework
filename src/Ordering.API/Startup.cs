@@ -27,6 +27,7 @@ using Ordering.Domain.AggregateRoots;
 using Ordering.Infrastructure;
 using Serilog;
 using Serilog.Events;
+using MicroserviceFramework.Ef.Extensions;
 
 namespace Ordering.API;
 
@@ -132,9 +133,13 @@ public static class Startup
         {
             var loggerFactory = provider.GetRequiredService<ILoggerFactory>();
             x.UseLoggerFactory(loggerFactory);
-
             if ("mysql".Equals(dbContextSettings.DatabaseType, StringComparison.OrdinalIgnoreCase))
             {
+                if (dbContextSettings.UseCompiledModel)
+                {
+                    x.LoadModel("Ordering.Infrastructure.CompileModels.OrderingContextModel, Ordering.Infrastructure");
+                }
+
                 x.UseMySql(ServerVersion.AutoDetect(dbContextSettings.ConnectionString), y =>
                 {
                     y.Load(dbContextSettings);
@@ -200,6 +205,7 @@ public static class Startup
         //     // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
         //     app.UseHsts();
         // }
+        var dbContext = app.Services.CreateScope().ServiceProvider.GetRequiredService<OrderingContext>();
 
         app.UseRouting();
         app.UseHealthChecks("/healthcheck");

@@ -5,8 +5,16 @@ using Microsoft.EntityFrameworkCore.SqlServer.Infrastructure.Internal;
 
 namespace MicroserviceFramework.Ef.SqlServer;
 
+/// <summary>
+///
+/// </summary>
 public static class ServiceCollectionExtensions
 {
+    /// <summary>
+    ///
+    /// </summary>
+    /// <param name="options"></param>
+    /// <returns></returns>
     public static SqlServerDbContextOptionsBuilder UseRemoveForeignKeyService(
         this SqlServerDbContextOptionsBuilder options)
     {
@@ -16,6 +24,11 @@ public static class ServiceCollectionExtensions
         return options;
     }
 
+    /// <summary>
+    ///
+    /// </summary>
+    /// <param name="options"></param>
+    /// <returns></returns>
     public static SqlServerDbContextOptionsBuilder UseRemoveExternalEntityService(
         this SqlServerDbContextOptionsBuilder options)
     {
@@ -25,6 +38,11 @@ public static class ServiceCollectionExtensions
         return options;
     }
 
+    /// <summary>
+    ///
+    /// </summary>
+    /// <param name="builder"></param>
+    /// <param name="settings"></param>
     public static void Load(this SqlServerDbContextOptionsBuilder builder,
         DbContextSettings settings)
     {

@@ -7,14 +7,21 @@ namespace MicroserviceFramework.Auditing.Model;
 /// <summary>
 /// 实体属性审计信息
 /// </summary>
-public class AuditProperty : EntityBase<ObjectId>
+public class AuditProperty : EntityBase<string>
 {
-    private AuditProperty() : base(ObjectId.GenerateNewId())
+    private AuditProperty(string id) : base(id)
     {
     }
 
+    /// <summary>
+    ///
+    /// </summary>
+    /// <param name="propertyName"></param>
+    /// <param name="propertyType"></param>
+    /// <param name="originalValue"></param>
+    /// <param name="newValue"></param>
     public AuditProperty(string propertyName, string propertyType, string originalValue, string newValue)
-        : this()
+        : this(ObjectId.GenerateNewId().ToString())
     {
         Name = propertyName;
         Type = propertyType;
@@ -48,6 +55,10 @@ public class AuditProperty : EntityBase<ObjectId>
     /// </summary>
     public string NewValue { get; private set; }
 
+    /// <summary>
+    ///
+    /// </summary>
+    /// <returns></returns>
     public override string ToString()
     {
         return

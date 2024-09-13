@@ -4,11 +4,22 @@ using MicroserviceFramework.Utils;
 
 namespace MicroserviceFramework.Ef.Repositories;
 
+/// <summary>
+///
+/// </summary>
+/// <param name="dbContextFactory"></param>
+/// <typeparam name="TEntity"></typeparam>
+/// <typeparam name="TKey"></typeparam>
 public class ExternalEntityRepository<TEntity, TKey>(DbContextFactory dbContextFactory)
     : IExternalEntityRepository<TEntity, TKey>
     where TEntity : ExternalEntity<TKey>
     where TKey : IEquatable<TKey>
 {
+    /// <summary>
+    ///
+    /// </summary>
+    /// <param name="factory"></param>
+    /// <returns></returns>
     public TEntity GetOrCreate(Func<TEntity> factory)
     {
         Check.NotNull(factory, nameof(factory));

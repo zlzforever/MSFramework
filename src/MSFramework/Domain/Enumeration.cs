@@ -10,13 +10,24 @@ namespace MicroserviceFramework.Domain;
 /// </summary>
 public abstract class Enumeration(string id, string name)
 {
+    /// <summary>
+    /// 标识
+    /// </summary>
     public string Id { get; } = id;
+
+    /// <summary>
+    /// 名称
+    /// </summary>
     public string Name { get; } = name;
 
+    /// <summary>
+    ///
+    /// </summary>
+    /// <returns></returns>
     public override string ToString() => Id;
 
     /// <summary>
-    /// 获取枚举下的所有类型
+    /// 获取枚举类型下的所有类型
     /// </summary>
     /// <typeparam name="T">枚举类型</typeparam>
     /// <returns></returns>
@@ -27,7 +38,7 @@ public abstract class Enumeration(string id, string name)
     }
 
     /// <summary>
-    /// 获取枚举下的所有类型
+    /// 获取枚举类型下的所有类型
     /// </summary>
     /// <param name="type">枚举类型</param>
     /// <returns></returns>
@@ -38,6 +49,11 @@ public abstract class Enumeration(string id, string name)
             .Where(i => i.FieldType.IsSubclassOf(typeof(Enumeration))).Select(f => (Enumeration)f.GetValue(null));
     }
 
+    /// <summary>
+    ///
+    /// </summary>
+    /// <param name="obj"></param>
+    /// <returns></returns>
     public override bool Equals(object obj)
     {
         var otherValue = obj as Enumeration;
@@ -51,12 +67,28 @@ public abstract class Enumeration(string id, string name)
         return typeMatches && valueMatches;
     }
 
+    /// <summary>
+    ///
+    /// </summary>
+    /// <param name="a"></param>
+    /// <param name="b"></param>
+    /// <returns></returns>
     public static bool operator ==(Enumeration a, Enumeration b)
         => Equals(a, b);
 
+    /// <summary>
+    ///
+    /// </summary>
+    /// <param name="a"></param>
+    /// <param name="b"></param>
+    /// <returns></returns>
     public static bool operator !=(Enumeration a, Enumeration b)
         => !Equals(a, b);
 
+    /// <summary>
+    ///
+    /// </summary>
+    /// <returns></returns>
     public override int GetHashCode() => Id.GetHashCode();
 
 

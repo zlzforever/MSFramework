@@ -4,13 +4,32 @@ using Newtonsoft.Json;
 
 namespace MicroserviceFramework.Serialization.Newtonsoft.Converters;
 
+/// <summary>
+///
+/// </summary>
 public class ObjectIdConverter : JsonConverter<ObjectId>
 {
+    /// <summary>
+    ///
+    /// </summary>
+    /// <param name="writer"></param>
+    /// <param name="value"></param>
+    /// <param name="serializer"></param>
     public override void WriteJson(JsonWriter writer, ObjectId value, JsonSerializer serializer)
     {
         writer.WriteValue(value.ToString());
     }
 
+    /// <summary>
+    ///
+    /// </summary>
+    /// <param name="reader"></param>
+    /// <param name="objectType"></param>
+    /// <param name="existingValue"></param>
+    /// <param name="hasExistingValue"></param>
+    /// <param name="serializer"></param>
+    /// <returns></returns>
+    /// <exception cref="JsonSerializationException"></exception>
     public override ObjectId ReadJson(JsonReader reader, Type objectType, ObjectId existingValue,
         bool hasExistingValue,
         JsonSerializer serializer)

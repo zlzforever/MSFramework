@@ -3,8 +3,16 @@ using System.Net.Sockets;
 
 namespace MicroserviceFramework.Extensions;
 
+/// <summary>
+///
+/// </summary>
 public static class IPAddressExtensions
 {
+    /// <summary>
+    ///
+    /// </summary>
+    /// <param name="address"></param>
+    /// <returns></returns>
     public static bool IsPrivate(this IPAddress address)
     {
         if (IPAddress.IsLoopback(address))

@@ -6,6 +6,9 @@ using Microsoft.Extensions.DependencyModel;
 
 namespace MicroserviceFramework.Utils;
 
+/// <summary>
+///
+/// </summary>
 public static class Runtime
 {
     private static readonly Lazy<Assembly[]> Assemblies;
@@ -54,6 +57,10 @@ public static class Runtime
         return Assemblies.Value;
     }
 
+    /// <summary>
+    ///
+    /// </summary>
+    /// <returns></returns>
     public static IReadOnlyCollection<Type> GetAllTypes()
     {
         return Types.Value;

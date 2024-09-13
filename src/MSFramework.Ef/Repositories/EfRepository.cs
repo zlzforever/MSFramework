@@ -6,6 +6,11 @@ using Microsoft.EntityFrameworkCore;
 
 namespace MicroserviceFramework.Ef.Repositories;
 
+/// <summary>
+///
+/// </summary>
+/// <typeparam name="TEntity"></typeparam>
+/// <typeparam name="TKey"></typeparam>
 public abstract class EfRepository<TEntity, TKey> : IRepository<TEntity, TKey>, IEfRepository
     where TEntity : class, IAggregateRoot<TKey> where TKey : IEquatable<TKey>
 {
@@ -13,6 +18,9 @@ public abstract class EfRepository<TEntity, TKey> : IRepository<TEntity, TKey>, 
     private readonly DbSet<TEntity> _dbSet;
     private readonly DbContextBase _dbContext;
 
+    /// <summary>
+    ///
+    /// </summary>
     protected virtual IQueryable<TEntity> Store
     {
         get
@@ -29,12 +37,25 @@ public abstract class EfRepository<TEntity, TKey> : IRepository<TEntity, TKey>, 
         }
     }
 
+    /// <summary>
+    ///
+    /// </summary>
     protected DbSet<TEntity> DbSet => _dbSet;
 
+    /// <summary>
+    ///
+    /// </summary>
     public DbContext DbContext => _dbContext;
 
+    /// <summary>
+    ///
+    /// </summary>
     protected bool? UseQuerySplittingBehavior { get; init; }
 
+    /// <summary>
+    ///
+    /// </summary>
+    /// <param name="dbContextFactory"></param>
     protected EfRepository(DbContextFactory dbContextFactory)
     {
         _dbContext = dbContextFactory.GetDbContext<TEntity>();
@@ -58,37 +79,68 @@ public abstract class EfRepository<TEntity, TKey> : IRepository<TEntity, TKey>, 
             UseQuerySplittingBehavior.Value ? queryable.AsSplitQuery() : queryable.AsSingleQuery();
     }
 
+    /// <summary>
+    ///
+    /// </summary>
+    /// <param name="id"></param>
+    /// <returns></returns>
     public virtual TEntity Find(TKey id)
     {
         return Store.FirstOrDefault(x => x.Id.Equals(id));
     }
 
+    /// <summary>
+    ///
+    /// </summary>
+    /// <param name="id"></param>
+    /// <returns></returns>
     public virtual async Task<TEntity> FindAsync(TKey id)
     {
         return await Store.FirstOrDefaultAsync(x => x.Id.Equals(id));
     }
 
+    /// <summary>
+    ///
+    /// </summary>
+    /// <param name="entity"></param>
     public virtual void Add(TEntity entity)
     {
         _dbSet.Add(entity);
     }
 
+    /// <summary>
+    ///
+    /// </summary>
+    /// <param name="entity"></param>
     public virtual async Task AddAsync(TEntity entity)
     {
         await _dbSet.AddAsync(entity);
     }
 
+    /// <summary>
+    ///
+    /// </summary>
+    /// <param name="entity"></param>
     public virtual void Delete(TEntity entity)
     {
         _dbSet.Remove(entity);
     }
 
+    /// <summary>
+    ///
+    /// </summary>
+    /// <param name="entity"></param>
+    /// <returns></returns>
     public virtual Task DeleteAsync(TEntity entity)
     {
         Delete(entity);
         return Task.CompletedTask;
     }
 
+    /// <summary>
+    ///
+    /// </summary>
+    /// <param name="id"></param>
     public virtual void Delete(TKey id)
     {
         var entity = Find(id);
@@ -98,6 +150,10 @@ public abstract class EfRepository<TEntity, TKey> : IRepository<TEntity, TKey>, 
         }
     }
 
+    /// <summary>
+    ///
+    /// </summary>
+    /// <param name="id"></param>
     public virtual async Task DeleteAsync(TKey id)
     {
         var entity = await FindAsync(id);
@@ -143,6 +199,10 @@ public abstract class EfRepository<TEntity, TKey> : IRepository<TEntity, TKey>, 
     // 	return entity;
     // }
 
+    /// <summary>
+    ///
+    /// </summary>
+    /// <returns></returns>
     public DbSet<TEntity> GetDbSet()
     {
         return _dbSet;

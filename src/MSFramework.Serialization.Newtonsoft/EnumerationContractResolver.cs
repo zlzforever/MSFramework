@@ -5,8 +5,16 @@ using Newtonsoft.Json.Serialization;
 
 namespace MicroserviceFramework.Serialization.Newtonsoft;
 
+/// <summary>
+///
+/// </summary>
 public class EnumerationContractResolver : DefaultContractResolver
 {
+    /// <summary>
+    ///
+    /// </summary>
+    /// <param name="objectType"></param>
+    /// <returns></returns>
     protected override JsonContract CreateContract(Type objectType)
     {
         var contract = base.CreateContract(objectType);
