@@ -56,7 +56,7 @@ namespace Ordering.Infrastructure.CompileModels
                 propertyInfo: typeof(CreationEntity<string>).GetProperty("CreationTime", BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly),
                 fieldInfo: typeof(CreationEntity<string>).GetField("<CreationTime>k__BackingField", BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.DeclaredOnly),
                 nullable: true);
-            creationTime.TypeMapping = MySqlDateTimeOffsetTypeMapping.Default.Clone(
+            creationTime.TypeMapping = MySqlLongTypeMapping.Default.Clone(
                 comparer: new ValueComparer<DateTimeOffset?>(
                     (Nullable<DateTimeOffset> v1, Nullable<DateTimeOffset> v2) => v1.HasValue && v2.HasValue && ((DateTimeOffset)v1).EqualsExact((DateTimeOffset)v2) || !v1.HasValue && !v2.HasValue,
                     (Nullable<DateTimeOffset> v) => v.HasValue ? ((DateTimeOffset)v).GetHashCode() : 0,
@@ -65,15 +65,21 @@ namespace Ordering.Infrastructure.CompileModels
                     (Nullable<DateTimeOffset> v1, Nullable<DateTimeOffset> v2) => v1.HasValue && v2.HasValue && ((DateTimeOffset)v1).EqualsExact((DateTimeOffset)v2) || !v1.HasValue && !v2.HasValue,
                     (Nullable<DateTimeOffset> v) => v.HasValue ? ((DateTimeOffset)v).GetHashCode() : 0,
                     (Nullable<DateTimeOffset> v) => v.HasValue ? (Nullable<DateTimeOffset>)(DateTimeOffset)v : default(Nullable<DateTimeOffset>)),
-                providerValueComparer: new ValueComparer<DateTimeOffset?>(
-                    (Nullable<DateTimeOffset> v1, Nullable<DateTimeOffset> v2) => v1.HasValue && v2.HasValue && ((DateTimeOffset)v1).EqualsExact((DateTimeOffset)v2) || !v1.HasValue && !v2.HasValue,
-                    (Nullable<DateTimeOffset> v) => v.HasValue ? ((DateTimeOffset)v).GetHashCode() : 0,
-                    (Nullable<DateTimeOffset> v) => v.HasValue ? (Nullable<DateTimeOffset>)(DateTimeOffset)v : default(Nullable<DateTimeOffset>)),
-                mappingInfo: new RelationalTypeMappingInfo(
-                    storeTypeName: "datetime(6)",
-                    precision: 6));
+                providerValueComparer: new ValueComparer<long>(
+                    (long v1, long v2) => v1 == v2,
+                    (long v) => v.GetHashCode(),
+                    (long v) => v),
+                converter: new ValueConverter<DateTimeOffset?, long>(
+                    (Nullable<DateTimeOffset> v) => v.HasValue ? false ? v.Value.ToUnixTimeMilliseconds() : v.Value.ToUnixTimeSeconds() : 0L,
+                    (long v) => v <= 0L ? null : (Nullable<DateTimeOffset>)(false ? DateTimeOffset.FromUnixTimeMilliseconds(v) : DateTimeOffset.FromUnixTimeSeconds(v))),
+                jsonValueReaderWriter: new JsonConvertedValueReaderWriter<DateTimeOffset?, long>(
+                    JsonInt64ReaderWriter.Instance,
+                    new ValueConverter<DateTimeOffset?, long>(
+                        (Nullable<DateTimeOffset> v) => v.HasValue ? false ? v.Value.ToUnixTimeMilliseconds() : v.Value.ToUnixTimeSeconds() : 0L,
+                        (long v) => v <= 0L ? null : (Nullable<DateTimeOffset>)(false ? DateTimeOffset.FromUnixTimeMilliseconds(v) : DateTimeOffset.FromUnixTimeSeconds(v)))));
             creationTime.AddAnnotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.None);
             creationTime.AddAnnotation("Relational:ColumnName", "creation_time");
+            creationTime.AddAnnotation("Relational:ColumnType", "bigint");
 
             var creatorId = runtimeEntityType.AddProperty(
                 "CreatorId",
@@ -230,6 +236,7 @@ namespace Ordering.Infrastructure.CompileModels
             endTime.SetSentinelFromProviderValue(-62135596800L);
             endTime.AddAnnotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.None);
             endTime.AddAnnotation("Relational:ColumnName", "end_time");
+            endTime.AddAnnotation("Relational:ColumnType", "bigint");
 
             var iP = runtimeEntityType.AddProperty(
                 "IP",

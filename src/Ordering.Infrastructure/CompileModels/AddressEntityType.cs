@@ -6,6 +6,7 @@ using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Storage;
 using Ordering.Domain.AggregateRoots;
+using Ordering.Domain.AggregateRoots.Order;
 using Pomelo.EntityFrameworkCore.MySql.Storage.Internal;
 
 #pragma warning disable 219, 612, 618
@@ -40,8 +41,8 @@ namespace Ordering.Infrastructure.CompileModels
                     (string v) => v.GetHashCode(),
                     (string v) => v),
                 mappingInfo: new RelationalTypeMappingInfo(
-                    storeTypeName: "varchar(36)",
-                    size: 36));
+                    storeTypeName: "varchar(255)",
+                    size: 255));
             orderId.AddAnnotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.None);
             orderId.AddAnnotation("Relational:ColumnName", "id");
 

@@ -11,18 +11,21 @@ namespace MicroserviceFramework.Utils;
 /// </summary>
 public static class Runtime
 {
-    private static readonly Lazy<Assembly[]> Assemblies;
-    private static readonly Lazy<Type[]> Types;
+    private static readonly Lazy<List<Assembly>> Assemblies;
+    private static readonly Lazy<List<Type>> Types;
     internal static readonly HashSet<string> StartsWith;
 
     static Runtime()
     {
-        StartsWith = ["MSFramework", "Newtonsoft.Json"];
-        Assemblies = new Lazy<Assembly[]>(() =>
+        // StartsWith = ["MSFramework", "Newtonsoft.Json"];
+        StartsWith = ["MSFramework"];
+        // 分析器不会输出程序集文件
+        var analyzerAssemblyList = new[] { "MSFramework.Analyzers", "MSFramework.Ef.Analyzers" };
+        Assemblies = new Lazy<List<Assembly>>(() =>
         {
             if (DependencyContext.Default == null)
             {
-                return Array.Empty<Assembly>();
+                return [];
             }
 
             var list = new List<Assembly>();
@@ -32,7 +35,7 @@ public static class Runtime
                             || StartsWith.Any(y => x.Name.StartsWith(y)));
             foreach (var lib in libraries)
             {
-                if (lib.Type == "reference")
+                if (lib.Type == "reference" || analyzerAssemblyList.Contains(lib.Name))
                 {
                     continue;
                 }
@@ -41,18 +44,17 @@ public static class Runtime
                 list.Add(assembly);
             }
 
-            return list.ToArray();
+            return list;
         });
-        Types = new Lazy<Type[]>(() =>
-            (from assembly in GetAllAssemblies() from type in assembly.DefinedTypes select type.AsType())
-            .ToArray());
+        Types = new Lazy<List<Type>>(() =>
+            (from assembly in GetAllAssemblies() from type in assembly.DefinedTypes select type.AsType()).ToList());
     }
 
     /// <summary>
     /// 获取项目程序集，排除所有的系统程序集(Microsoft.***、System.***等)、Nuget下载包
     /// </summary>
     /// <returns></returns>
-    public static Assembly[] GetAllAssemblies()
+    public static IReadOnlyCollection<Assembly> GetAllAssemblies()
     {
         return Assemblies.Value;
     }

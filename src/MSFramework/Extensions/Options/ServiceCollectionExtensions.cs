@@ -16,14 +16,14 @@ public static class ServiceCollectionExtensions
         IConfiguration config,
         Action<BinderOptions> configureBinder)
     {
-        ArgumentNullException.ThrowIfNull(services);
+        // ArgumentNullException.ThrowIfNull(services);
 
         if (optionsType.IsAbstract || !optionsType.IsClass)
         {
             throw new ArgumentException("配置类型必需是类");
         }
 
-        ArgumentNullException.ThrowIfNull(config);
+        // ArgumentNullException.ThrowIfNull(config);
 
         var configurationChangeTokenSourceType =
             typeof(ConfigurationChangeTokenSource<>).MakeGenericType(optionsType);
@@ -61,24 +61,24 @@ public static class ServiceCollectionExtensions
     {
         services.AddOptions();
 
-        MicroserviceFrameworkLoaderContext.Get(services).ResolveType += type =>
+        foreach (var type in Utils.Runtime.GetAllTypes())
         {
             if (!(!type.IsAbstract && type.IsClass))
             {
-                return;
+                continue;
             }
 
             var attribute = type.GetCustomAttribute<OptionsTypeAttribute>();
             if (attribute == null)
             {
-                return;
+                continue;
             }
 
             var section = string.IsNullOrWhiteSpace(attribute.Section)
                 ? configuration
                 : configuration.GetSection(attribute.Section);
             services.AddOptionsType(type, section, _ => { });
-        };
+        }
 
         return services;
     }

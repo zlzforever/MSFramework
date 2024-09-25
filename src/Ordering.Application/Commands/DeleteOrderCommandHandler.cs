@@ -1,11 +1,11 @@
 using System.Threading;
 using System.Threading.Tasks;
 using MicroserviceFramework.Mediator;
-using Ordering.Domain.Repositories;
+using Ordering.Domain.Repositories.Order;
 
 namespace Ordering.Application.Commands;
 
-public class DeleteOrderCommandHandler(IOrderingRepository orderRepository) : IRequestHandler<DeleteOrderCommand>
+public class DeleteOrderCommandHandler(IOrderRepository orderRepository) : IRequestHandler<DeleteOrderCommand>
 {
     /// <summary>
     /// Handler which processes the command when

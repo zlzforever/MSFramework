@@ -11,7 +11,7 @@ namespace MicroserviceFramework.Ef.Repositories;
 /// </summary>
 /// <typeparam name="TEntity"></typeparam>
 /// <typeparam name="TKey"></typeparam>
-public abstract class EfRepository<TEntity, TKey> : IRepository<TEntity, TKey>, IEfRepository
+public class EfRepository<TEntity, TKey> : IRepository<TEntity, TKey>, IEfRepository
     where TEntity : class, IAggregateRoot<TKey> where TKey : IEquatable<TKey>
 {
     private IQueryable<TEntity> _store;
@@ -50,13 +50,13 @@ public abstract class EfRepository<TEntity, TKey> : IRepository<TEntity, TKey>, 
     /// <summary>
     ///
     /// </summary>
-    protected bool? UseQuerySplittingBehavior { get; init; }
+    public bool? UseQuerySplittingBehavior { get; init; }
 
     /// <summary>
     ///
     /// </summary>
     /// <param name="dbContextFactory"></param>
-    protected EfRepository(DbContextFactory dbContextFactory)
+    public EfRepository(DbContextFactory dbContextFactory)
     {
         _dbContext = dbContextFactory.GetDbContext<TEntity>();
         _dbSet = _dbContext.Set<TEntity>();

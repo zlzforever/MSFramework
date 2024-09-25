@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
-using Ordering.Domain.AggregateRoots;
+using Ordering.Domain.AggregateRoots.Order;
 using Ordering.Infrastructure;
 
 namespace Ordering.Application.Queries;

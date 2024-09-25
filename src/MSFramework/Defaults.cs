@@ -1,6 +1,7 @@
 using System;
 using System.Linq;
 using System.Reflection;
+using MicroserviceFramework.Domain;
 using MicroserviceFramework.Serialization;
 using MongoDB.Bson;
 
@@ -15,6 +16,7 @@ public static class Defaults
     ///
     /// </summary>
     public static IJsonSerializer JsonSerializer;
+
     /// <summary>
     ///
     /// </summary>
@@ -46,13 +48,30 @@ public static class Defaults
         ///
         /// </summary>
         public static readonly Type String = typeof(string);
+
         /// <summary>
         ///
         /// </summary>
         public static readonly Type Guid = typeof(Guid);
+
         /// <summary>
         ///
         /// </summary>
         public static readonly Type ObjectId = typeof(ObjectId);
+
+        /// <summary>
+        ///
+        /// </summary>
+        public static readonly Type OptimisticLock = typeof(IOptimisticLock);
+
+        /// <summary>
+        ///
+        /// </summary>
+        public static readonly Type Entity = typeof(IEntity);
+
+        /// <summary>
+        ///
+        /// </summary>
+        public static readonly Type Repository = typeof(IRepository);
     }
 }

@@ -54,8 +54,8 @@ public static class ServiceCollectionExtensions
 
         builder.UseTextJsonSerializer();
 
-        // 请保证这在最后， 不然类型扫描事件的注册会晚于扫描
-        MicroserviceFrameworkLoaderContext.Get(services).LoadTypes();
+        // // 保证这在最后， 不然类型扫描事件的注册会晚于扫描
+        // MicroserviceFrameworkLoaderContext.Get(services).LoadTypes();
     }
 
     /// <summary>
@@ -107,7 +107,7 @@ public static class ServiceCollectionExtensions
     }
 
     /// <summary>
-    ///
+    /// 注意：此方法必须第一个调用
     /// </summary>
     /// <param name="services"></param>
     /// <param name="prefixes"></param>
@@ -127,7 +127,8 @@ public static class ServiceCollectionExtensions
 
     /// <summary>
     /// 指定工具类 RuntimeUtilities 中扫描程序集的前缀
-    /// 整个框架对程序集的扫描， 类型的发现都通过 RuntimeUtilities 来实现， 即受此前缀影响
+    /// 整个框架对程序集的扫描，类型的发现都通过 RuntimeUtilities 来实现，即受此前缀影响
+    /// 注意：此方法必须第一个调用
     /// </summary>
     /// <param name="builder"></param>
     /// <param name="prefixes"></param>

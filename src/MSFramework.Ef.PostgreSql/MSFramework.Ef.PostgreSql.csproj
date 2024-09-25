@@ -5,6 +5,7 @@
     <RootNamespace>MicroserviceFramework.Ef.PostgreSql</RootNamespace>
   </PropertyGroup>
   <Import Project="../../package.props" />
+  <Import Project="../../version.props"/>
   <ItemGroup>
     <ProjectReference Include="..\MSFramework.Ef\MSFramework.Ef.csproj" />
   </ItemGroup>

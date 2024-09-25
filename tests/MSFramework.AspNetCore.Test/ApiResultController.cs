@@ -7,12 +7,14 @@ using MicroserviceFramework.AspNetCore;
 using MicroserviceFramework.AspNetCore.Mvc;
 using MicroserviceFramework.Common;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Options;
+using Newtonsoft.Json;
 
 namespace MSFramework.AspNetCore.Test;
 
 [Route("[controller]")]
 [ApiController]
-public class ApiResultController : ApiControllerBase
+public class ApiResultController(IOptions<JsonSerializerSettings> options) : ApiControllerBase
 {
     public class EnumInput
     {
@@ -21,6 +23,12 @@ public class ApiResultController : ApiControllerBase
         /// </summary>
         [Required]
         public State State { get; set; }
+    }
+
+    [HttpGet("newtonsoftJson")]
+    public string GetNewtonsoftJson()
+    {
+        return JsonConvert.SerializeObject(new { A = "he", b = 12 }, options.Value);
     }
 
     [HttpPost("enum")]

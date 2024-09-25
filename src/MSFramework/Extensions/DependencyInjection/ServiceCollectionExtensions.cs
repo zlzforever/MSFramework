@@ -23,14 +23,14 @@ public static class ServiceCollectionExtensions
     public static IServiceCollection AddDependencyInjectionLoader(
         this IServiceCollection services)
     {
-        MicroserviceFrameworkLoaderContext.Get(services).ResolveType += type =>
+        foreach (var type in Utils.Runtime.GetAllTypes())
         {
             var lifetime = LifetimeUtilities.GetLifetime(type);
             if (lifetime.HasValue)
             {
                 services.RegisterDependencyInjection(type, lifetime.Value);
             }
-        };
+        }
 
         return services;
     }

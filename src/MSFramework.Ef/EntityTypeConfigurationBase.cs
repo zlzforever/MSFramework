@@ -36,17 +36,10 @@ public abstract class EntityTypeConfigurationBase<TEntity, TDbContext> :
     /// <summary>
     ///
     /// </summary>
-    /// <param name="builder"></param>
-    protected void ConfigureDefaultIdentifier(EntityTypeBuilder<TEntity> builder)
+    /// <param name="_"></param>
+    protected void ConfigureDefaultIdentifier(EntityTypeBuilder<TEntity> _)
     {
-        var propertyBuilder = builder.Property("Id");
-
-        var primaryKeyType = propertyBuilder.Metadata.ClrType;
-        if (primaryKeyType == Defaults.Types.String || primaryKeyType == Defaults.Types.Guid ||
-            primaryKeyType == Defaults.Types.ObjectId)
-        {
-            propertyBuilder.ValueGeneratedNever().HasMaxLength(36);
-        }
+        // var propertyBuilder = builder.Property("Id");
     }
 
     /// <summary>

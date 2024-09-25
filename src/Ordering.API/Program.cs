@@ -9,12 +9,8 @@ namespace Ordering.API;
 
 public class Program
 {
-    record A(string v);
-
-
     public static Task Main(string[] args)
     {
-
         Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
 
         AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);

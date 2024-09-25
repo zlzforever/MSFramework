@@ -14,6 +14,13 @@ internal sealed class ResponseWrapperFilter(ILogger<ResponseWrapperFilter> logge
     {
         logger.LogDebug("开始执行返回结果过滤器");
 
+        // 若是用户自行写入了响应， 不可再次修改
+        if (context.HttpContext.Response.HasStarted)
+        {
+            await next();
+            return;
+        }
+
         // 服务调用不做 APIResult 包装
         if (context.HttpContext.Request.Headers.TryGetValue(Defaults.Headers.InternalCall, out var value))
         {

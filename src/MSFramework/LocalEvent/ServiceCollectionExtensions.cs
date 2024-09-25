@@ -20,7 +20,8 @@ public static class ServiceCollectionExtensions
         services.TryAddScoped<IEventPublisher, LocalEventPublisher>();
         services.AddHostedService<LocalEventService>();
         var handlerInterface = typeof(IEventHandler<>);
-        MicroserviceFrameworkLoaderContext.Get(services).ResolveType += type =>
+
+        foreach (var type in Utils.Runtime.GetAllTypes())
         {
             var serviceTypes = type
                 .GetInterfaces()
@@ -32,7 +33,7 @@ public static class ServiceCollectionExtensions
                 LocalEventService.Register(eventType, type);
                 services.TryAddScoped(type);
             }
-        };
+        }
 
         return services;
     }

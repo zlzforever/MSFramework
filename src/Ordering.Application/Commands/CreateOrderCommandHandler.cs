@@ -1,12 +1,12 @@
 using System.Threading;
 using System.Threading.Tasks;
 using MicroserviceFramework.Mediator;
-using Ordering.Domain.AggregateRoots;
-using Ordering.Domain.Repositories;
+using Ordering.Domain.AggregateRoots.Order;
+using Ordering.Domain.Repositories.Order;
 
 namespace Ordering.Application.Commands;
 
-public class CreateOrderCommandHandler(IOrderingRepository orderRepository)
+public class CreateOrderCommandHandler(IOrderRepository orderRepository)
     : IRequestHandler<CreateOrderCommand, string>
 {
     /// <summary>
@@ -33,6 +33,6 @@ public class CreateOrderCommandHandler(IOrderingRepository orderRepository)
         }
 
         await orderRepository.AddAsync(order);
-        return order.Id;
+        return order.Id.ToString();
     }
 }

@@ -1,4 +1,6 @@
 using System;
+using System.IO;
+using System.Reflection;
 using MicroserviceFramework.AspNetCore.Mvc.ModelBinding;
 using MicroserviceFramework.Extensions.DependencyInjection;
 using Microsoft.AspNetCore.Builder;
@@ -50,17 +52,23 @@ public static class ServiceCollectionExtensions
         services.TryAddSingleton(x =>
             x.GetRequiredService<IOptions<JsonOptions>>().Value.JsonSerializerOptions);
 
-        var jsonSerializerSettingsType = Type.GetType("Newtonsoft.Json.JsonSerializerSettings, Newtonsoft.Json");
-        var jsonOptionsType =
-            Type.GetType(
-                "Microsoft.AspNetCore.Mvc.MvcNewtonsoftJsonOptions, Microsoft.AspNetCore.Mvc.NewtonsoftJson");
-        if (jsonSerializerSettingsType != null && jsonOptionsType != null)
+        var file = "Microsoft.AspNetCore.Mvc.NewtonsoftJson.dll";
+        if (File.Exists(file))
         {
-            services.TryAddSingleton(jsonSerializerSettingsType, (x) =>
+            Assembly.LoadFrom(file);
+            var jsonOptionsType =
+                Type.GetType(
+                    "Microsoft.AspNetCore.Mvc.MvcNewtonsoftJsonOptions, Microsoft.AspNetCore.Mvc.NewtonsoftJson");
+            var jsonSerializerSettingsType = Type.GetType("Newtonsoft.Json.JsonSerializerSettings, Newtonsoft.Json");
+
+            if (jsonSerializerSettingsType != null && jsonOptionsType != null)
             {
-                var type = typeof(IOptions<>).MakeGenericType(jsonOptionsType);
-                return ((dynamic)x.GetRequiredService(type)).Value.SerializerSettings;
-            });
+                services.TryAddSingleton(jsonSerializerSettingsType, (x) =>
+                {
+                    var type = typeof(IOptions<>).MakeGenericType(jsonOptionsType);
+                    return ((dynamic)x.GetRequiredService(type)).Value.SerializerSettings;
+                });
+            }
         }
 
         return services;
@@ -89,7 +97,7 @@ public static class ServiceCollectionExtensions
     }
 
     /// <summary>
-    /// 
+    ///
     /// </summary>
     /// <param name="builder"></param>
     /// <returns></returns>

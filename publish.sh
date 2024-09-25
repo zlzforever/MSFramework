@@ -12,6 +12,8 @@ rm -rf src/MSFramework.AspNetCore.Swagger/bin/Release
 rm -rf src/MSFramework.Serialization.Newtonsoft/bin/Release
 rm -rf src/DotNetCore.CAP.Dapr/bin/Release
 rm -rf src/MSFramework.Auditing.Loki/bin/Release
+rm -rf src/MSFramework.Analyzers/bin/Release
+rm -rf src/MSFramework.Ef.Analyzers/bin/Release
 dotnet build -c Release
 dotnet pack -c Release
 echo $NUGET_SERVER
@@ -28,3 +30,5 @@ dotnet nuget push src/MSFramework.AspNetCore.Swagger/bin/Release/*.nupkg  -s $NU
 dotnet nuget push src/MSFramework.Serialization.Newtonsoft/bin/Release/*.nupkg  -s $NUGET_SERVER -k $NUGET_KEY --skip-duplicate
 dotnet nuget push src/DotNetCore.CAP.Dapr/bin/Release/*.nupkg  -s $NUGET_SERVER -k $NUGET_KEY --skip-duplicate
 dotnet nuget push src/MSFramework.Auditing.Loki/bin/Release/*.nupkg  -s $NUGET_SERVER -k $NUGET_KEY --skip-duplicate
+dotnet nuget push src/MSFramework.Analyzers/bin/Release/*.nupkg  -s $NUGET_SERVER -k $NUGET_KEY --skip-duplicate
+dotnet nuget push src/MSFramework.Ef.Analyzers/bin/Release/*.nupkg  -s $NUGET_SERVER -k $NUGET_KEY --skip-duplicate

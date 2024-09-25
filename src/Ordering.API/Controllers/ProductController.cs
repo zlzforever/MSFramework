@@ -8,6 +8,7 @@ using MicroserviceFramework.AspNetCore;
 using MicroserviceFramework.AspNetCore.Extensions;
 using MicroserviceFramework.Common;
 using MicroserviceFramework.Domain;
+using MicroserviceFramework.Linq.Expression;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using MongoDB.Bson;
@@ -76,7 +77,7 @@ public class ProductController(
     //[AccessControl("查询产品", "产品")]
     public async Task<PaginationResult<ProductDTO>> GetPagedQuery()
     {
-        var a = await productRepository.PagedQueryAsync(0, 10);
+        var a = await orderingContext.Set<Product>().PagedQueryAsync(0, 10);
         var b = new PaginationResult<ProductDTO>(a.Page, a.Limit, a.Total, mapper.To<List<ProductDTO>>(a.Data));
         return b;
     }
@@ -197,14 +198,14 @@ public class ProductController(
     // }
 
     [HttpGet("testPaged")]
-    public PaginationResult<A> TestPagedResult()
+    public PaginationResult<TestData> TestPagedResult()
     {
-        return new PaginationResult<A>(0, 1, 10,
-            [new A { Id = "1", Name = "A1" }, new A { Id = "2", Name = "A2" }]);
+        return new PaginationResult<TestData>(0, 1, 10,
+            [new TestData { Id = "1", Name = "A1" }, new TestData { Id = "2", Name = "A2" }]);
     }
 }
 
-public class A
+public class TestData
 {
     public string Id { get; set; }
     public string Name { get; set; }

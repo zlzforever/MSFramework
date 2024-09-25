@@ -11,12 +11,13 @@ namespace Benchmark;
 public class MyClass
 {
     static readonly byte[] Data = Encoding.UTF8.GetBytes("Hello World!");
-
+#pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
     private Stream _stream1;
     private Stream _stream2;
     private Stream _stream3;
     private Stream _stream4;
     private Stream _stream5;
+#pragma warning restore CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
 
     [GlobalSetup]
     public void Setup()
@@ -61,7 +62,7 @@ public class MyClass
     {
         _stream5.Seek(0, SeekOrigin.Begin);
         var bytes = new byte[_stream4.Length];
-        _stream4.Read(bytes, 0, bytes.Length);
+        _ = _stream4.Read(bytes, 0, bytes.Length);
         _stream4.Seek(0, SeekOrigin.Begin);
     }
 

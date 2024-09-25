@@ -5,7 +5,7 @@
     <RootNamespace>MicroserviceFramework.AspNetCore</RootNamespace>
   </PropertyGroup>
   <Import Project="../../package.props" />
-
+  <Import Project="../../version.props"/>
   <ItemGroup>
     <ProjectReference Include="..\MSFramework\MSFramework.csproj" />
   </ItemGroup>

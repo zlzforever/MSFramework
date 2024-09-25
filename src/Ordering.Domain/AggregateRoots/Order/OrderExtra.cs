@@ -1,4 +1,4 @@
-namespace Ordering.Domain.AggregateRoots;
+namespace Ordering.Domain.AggregateRoots.Order;
 
 public class OrderExtra(string key, string value)
 {

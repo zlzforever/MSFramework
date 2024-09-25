@@ -1,7 +1,7 @@
 using MicroserviceFramework.Domain;
 using MongoDB.Bson;
 
-namespace Ordering.Domain.AggregateRoots;
+namespace Ordering.Domain.AggregateRoots.Order;
 
 public class OrderItem : EntityBase<string>
 {

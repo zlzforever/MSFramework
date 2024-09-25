@@ -2,12 +2,15 @@
 
   <PropertyGroup>
     <TargetFramework>net8.0</TargetFramework>
-    <IsPackable>true</IsPackable>
+    <ImplicitUsings>enable</ImplicitUsings>
+<!--    <EmitCompilerGeneratedFiles>true</EmitCompilerGeneratedFiles>-->
+<!--    <CompilerGeneratedFilesOutputPath>Generated\Repositories</CompilerGeneratedFilesOutputPath>-->
   </PropertyGroup>
   <ItemGroup>
+    <ProjectReference Include="..\MSFramework.Ef\MSFramework.Ef.csproj"/>
     <ProjectReference Include="..\MSFramework.Ef.MySql\MSFramework.Ef.MySql.csproj"/>
     <ProjectReference Include="..\MSFramework.Ef.PostgreSql\MSFramework.Ef.PostgreSql.csproj"/>
-    <ProjectReference Include="..\MSFramework.Ef\MSFramework.Ef.csproj"/>
+    <ProjectReference Include="..\MSFramework.Ef.Analyzers\MSFramework.Ef.Analyzers.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
     <ProjectReference Include="..\Ordering.Domain\Ordering.Domain.csproj"/>
   </ItemGroup>
   <ItemGroup>

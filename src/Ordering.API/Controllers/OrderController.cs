@@ -17,7 +17,8 @@ using Ordering.Application.Dto;
 using Ordering.Application.Events;
 using Ordering.Application.Queries;
 using Ordering.Domain.AggregateRoots;
-using Ordering.Domain.Repositories;
+using Ordering.Domain.AggregateRoots.Order;
+using Ordering.Domain.Repositories.Order;
 using Ordering.Infrastructure;
 
 namespace Ordering.API.Controllers;
@@ -25,7 +26,7 @@ namespace Ordering.API.Controllers;
 [Route("api/v1.0/orders")]
 [ApiController]
 public class OrderController(
-    IOrderingRepository orderRepository,
+    IOrderRepository orderRepository,
     IOrderingQuery orderingQuery,
     OrderingContext dbContext,
     IUnitOfWork unitOfWork,

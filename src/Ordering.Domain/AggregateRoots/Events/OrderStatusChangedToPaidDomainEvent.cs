@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using MicroserviceFramework.Domain;
+using Ordering.Domain.AggregateRoots.Order;
 
 namespace Ordering.Domain.AggregateRoots.Events;
 

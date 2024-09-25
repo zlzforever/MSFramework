@@ -2,16 +2,14 @@
 
   <PropertyGroup>
     <TargetFramework>net8.0</TargetFramework>
-    <IsPackable>true</IsPackable>
+    <ImplicitUsings>enable</ImplicitUsings>
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\MSFramework\MSFramework.csproj" />
+    <ProjectReference Include="..\MSFramework.Analyzers\MSFramework.Analyzers.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="true" />
+    <ProjectReference Include="..\MSFramework\MSFramework.csproj"/>
   </ItemGroup>
 
-  <ItemGroup>
-    <Compile Remove="AggregateRoots\TrackedDictionary.cs" />
-  </ItemGroup>
   <ItemGroup>
     <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleToAttribute">
       <_Parameter1>Ordering.Infrastructure</_Parameter1>
@@ -19,6 +17,6 @@
 
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Abstractions" Version="8.0.8" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Abstractions" Version="8.0.8"/>
   </ItemGroup>
 </Project>

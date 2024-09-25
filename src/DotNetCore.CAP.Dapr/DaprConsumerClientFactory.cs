@@ -5,13 +5,28 @@ using Microsoft.Extensions.Options;
 
 namespace DotNetCore.CAP.Dapr;
 
+/// <summary>
+///
+/// </summary>
+/// <param name="daprOptions"></param>
+/// <param name="loggerFactory"></param>
 public class DaprConsumerClientFactory(
     IOptionsMonitor<DaprOptions> daprOptions,
     ILoggerFactory loggerFactory)
     : IConsumerClientFactory
 {
+    /// <summary>
+    ///
+    /// </summary>
     public static Action<string, string, string, Delegate> MapEndpointRoute;
 
+    /// <summary>
+    ///
+    /// </summary>
+    /// <param name="groupId"></param>
+    /// <returns></returns>
+    /// <exception cref="ArgumentNullException"></exception>
+    /// <exception cref="BrokerConnectionException"></exception>
     public IConsumerClient Create(string groupId)
     {
         try

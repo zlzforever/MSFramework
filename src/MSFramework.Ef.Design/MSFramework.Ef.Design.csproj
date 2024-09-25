@@ -5,12 +5,10 @@
     <AssemblyName>MSFramework.Ef.Design</AssemblyName>
     <RootNamespace>MicroserviceFramework.Ef.Design</RootNamespace>
   </PropertyGroup>
-  <Import Project="../../package.props" />
+  <Import Project="../../package.props"/>
+  <Import Project="../../version.props"/>
   <ItemGroup>
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="8.0.4">
-      <PrivateAssets>all</PrivateAssets>
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-    </PackageReference>
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="8.0.8" />
+<!--    <PackageReference Include="Microsoft.CodeAnalysis.Analyzers" Version="3.3.4"/>-->
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="8.0.8"/>
   </ItemGroup>
 </Project>

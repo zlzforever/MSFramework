@@ -3,6 +3,9 @@ using System.Runtime.InteropServices;
 
 namespace DotNetCore.CAP.Dapr;
 
+/// <summary>
+///
+/// </summary>
 [StructLayout(LayoutKind.Auto)]
 public record DaprTransportMessage
 {

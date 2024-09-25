@@ -23,11 +23,10 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.OpenApi.Models;
-using Ordering.Domain.AggregateRoots;
+using Ordering.Domain.AggregateRoots.Order;
 using Ordering.Infrastructure;
 using Serilog;
 using Serilog.Events;
-using MicroserviceFramework.Ef.Extensions;
 
 namespace Ordering.API;
 
@@ -135,10 +134,10 @@ public static class Startup
             x.UseLoggerFactory(loggerFactory);
             if ("mysql".Equals(dbContextSettings.DatabaseType, StringComparison.OrdinalIgnoreCase))
             {
-                if (dbContextSettings.UseCompiledModel)
-                {
-                    x.LoadModel("Ordering.Infrastructure.CompileModels.OrderingContextModel, Ordering.Infrastructure");
-                }
+                // if (dbContextSettings.UseCompiledModel)
+                // {
+                //     x.LoadModel("Ordering.Infrastructure.CompileModels.OrderingContextModel, Ordering.Infrastructure");
+                // }
 
                 x.UseMySql(ServerVersion.AutoDetect(dbContextSettings.ConnectionString), y =>
                 {
@@ -172,19 +171,28 @@ public static class Startup
         // services.AddLocalEventPublisher();
         // services.AddAspNetCoreExtension();
         // services.AddEntityFrameworkExtension();
+        // NatashaManagement.Preheating<NatashaDomainCreator>();
+        // DynamicCompileUtil.CreateType = (script) =>
+        // {
+        //     var builder = NClass.DefaultDomain()
+        //         .ConfigBuilder(opt => opt.UseSmartMode())
+        //         .HiddenNamespace();
+        //     builder.BodyScript.Append(script);
+        //     return builder.GetType();
+        // };
 
         services.AddMicroserviceFramework(builder =>
         {
             builder.UseAssemblyScanPrefix("Ordering");
-            builder.UseScopeServiceProvider();
             builder.UseDependencyInjectionLoader();
             builder.UseOptionsType(configuration);
             builder.UseAutoMapperObjectAssembler();
-            builder.UseEfAuditing<OrderingContext>();
             builder.UseLokiAuditing();
             builder.UseLocalEventPublisher();
             builder.UseAspNetCoreExtension();
+            builder.UseScopeServiceProvider();
             builder.UseEntityFramework();
+            builder.UseEfAuditing<OrderingContext>();
         });
     });
 

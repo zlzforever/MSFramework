@@ -1,5 +1,5 @@
 using MicroserviceFramework.Mediator;
-using Ordering.Domain.AggregateRoots;
+using Ordering.Domain.AggregateRoots.Order;
 
 namespace Ordering.Application.Commands;
 

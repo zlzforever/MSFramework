@@ -1,11 +1,11 @@
 using System.Threading;
 using System.Threading.Tasks;
 using MicroserviceFramework.Mediator;
-using Ordering.Domain.Repositories;
+using Ordering.Domain.Repositories.Order;
 
 namespace Ordering.Application.Commands;
 
-public class ChangeOrderAddressCommandHandler(IOrderingRepository orderRepository)
+public class ChangeOrderAddressCommandHandler(IOrderRepository orderRepository)
     : IRequestHandler<ChangeOrderAddressCommand>
 {
     /// <summary>

@@ -1,6 +1,6 @@
 using MicroserviceFramework.Domain;
 
-namespace Ordering.Domain.AggregateRoots;
+namespace Ordering.Domain.AggregateRoots.Order;
 
 public class OrderStatus : Enumeration
 {

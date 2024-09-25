@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Concurrent;
 using System.Linq.Expressions;
 using System.Reflection;
 using MicroserviceFramework.Domain;
@@ -9,8 +10,10 @@ namespace MicroserviceFramework.Ef.Extensions;
 /// <summary>
 ///
 /// </summary>
-public static class SoftDeleteQueryExtension
+public static class SoftDeleteQueryExtensions
 {
+    private static readonly ConcurrentDictionary<Type, LambdaExpression> MethodInfoCache = new();
+
     /// <summary>
     ///
     /// </summary>
@@ -26,26 +29,33 @@ public static class SoftDeleteQueryExtension
     /// <summary>
     ///
     /// </summary>
-    /// <param name="_"></param>
     /// <param name="type"></param>
     /// <returns></returns>
     /// <exception cref="ArgumentException"></exception>
     public static LambdaExpression GetSoftDeleteQueryFilter(Type type)
     {
-        var method = typeof(SoftDeleteQueryExtension)
-            .GetMethod(nameof(GetDeleteFilter),
-                BindingFlags.NonPublic | BindingFlags.Static);
-        if (method == null)
+        return MethodInfoCache.GetOrAdd(type, t =>
         {
-            throw new ArgumentException("GetSoftDeleteFilter method not found");
-        }
+            var method = typeof(SoftDeleteQueryExtensions)
+                .GetMethod(nameof(GetDeleteFilter),
+                    BindingFlags.Public | BindingFlags.Static);
+            if (method == null)
+            {
+                throw new ArgumentException("GetSoftDeleteFilter method not found");
+            }
 
-        var methodToCall = method.MakeGenericMethod(type);
-        var filter = methodToCall.Invoke(null, Array.Empty<object>());
-        return (LambdaExpression)filter;
+            var methodToCall = method.MakeGenericMethod(t);
+            var filter = methodToCall.Invoke(null, []);
+            return (LambdaExpression)filter;
+        });
     }
 
-    private static LambdaExpression GetDeleteFilter<TEntity>()
+    /// <summary>
+    ///
+    /// </summary>
+    /// <typeparam name="TEntity"></typeparam>
+    /// <returns></returns>
+    public static LambdaExpression GetDeleteFilter<TEntity>()
         where TEntity : class, IDeletion
     {
         Expression<Func<TEntity, bool>> filter = x => !x.IsDeleted;

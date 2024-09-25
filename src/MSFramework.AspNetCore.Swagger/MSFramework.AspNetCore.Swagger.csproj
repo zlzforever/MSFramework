@@ -6,6 +6,7 @@
     <RootNamespace>MicroserviceFramework.AspNetCore.Swagger</RootNamespace>
   </PropertyGroup>
   <Import Project="../../package.props" />
+  <Import Project="../../version.props"/>
   <ItemGroup>
     <PackageReference Include="Swashbuckle.AspNetCore.SwaggerGen" Version="6.7.0" />
     <PackageReference Include="Swashbuckle.AspNetCore.SwaggerUI" Version="6.7.0" />

@@ -12,6 +12,13 @@ using Microsoft.Extensions.Options;
 
 namespace DotNetCore.CAP.Dapr;
 
+/// <summary>
+///
+/// </summary>
+/// <param name="groupId"></param>
+/// <param name="daprOptions"></param>
+/// <param name="configureApi"></param>
+/// <param name="logger"></param>
 public class DaprConsumerClient(
     string groupId,
     IOptionsMonitor<DaprOptions> daprOptions,
@@ -21,8 +28,16 @@ public class DaprConsumerClient(
 {
     private readonly DaprOptions _daprOptions = daprOptions.CurrentValue;
 
+    /// <summary>
+    ///
+    /// </summary>
     public BrokerAddress BrokerAddress => new("Dapr", null);
 
+    /// <summary>
+    ///
+    /// </summary>
+    /// <param name="topics"></param>
+    /// <exception cref="ArgumentNullException"></exception>
     public void Subscribe(IEnumerable<string> topics)
     {
         if (topics == null)
@@ -47,6 +62,11 @@ public class DaprConsumerClient(
         }
     }
 
+    /// <summary>
+    ///
+    /// </summary>
+    /// <param name="timeout"></param>
+    /// <param name="cancellationToken"></param>
     public void Listening(TimeSpan timeout, CancellationToken cancellationToken)
     {
     }
@@ -72,10 +92,19 @@ public class DaprConsumerClient(
         }
     }
 
+    /// <summary>
+    ///
+    /// </summary>
     public void Dispose()
     {
     }
 
+    /// <summary>
+    ///
+    /// </summary>
     public Func<TransportMessage, object, Task> OnMessageCallback { get; set; }
+    /// <summary>
+    ///
+    /// </summary>
     public Action<LogMessageEventArgs> OnLogCallback { get; set; }
 }

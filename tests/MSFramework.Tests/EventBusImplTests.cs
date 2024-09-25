@@ -135,6 +135,7 @@ public class EventBusImplTests
                 x.UseLocalEventPublisher();
                 x.UseAspNetCoreExtension();
             });
+            serviceCollection.AddHttpContextAccessor();
             serviceCollection.AddSingleton<LocalEventService>();
             var provider = serviceCollection.BuildServiceProvider();
             provider.UseMicroserviceFramework();

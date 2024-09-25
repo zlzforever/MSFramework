@@ -68,10 +68,11 @@ public class ApiResultTests(ITestOutputHelper output) : BaseTest
     [Fact]
     public async Task ReturnString()
     {
-        var result = await Client.GetStringAsync("/apiResult/string");
+        var response = await Client.SendAsync(new HttpRequestMessage(HttpMethod.Get, "apiResult/string"));
+        var str = await response.Content.ReadAsStringAsync();
         Assert.Equal("""
                      {"success":true,"code":0,"msg":"","data":"AAABBB"}
-                     """, result);
+                     """, str);
     }
 
     [Fact]
@@ -200,6 +201,15 @@ public class ApiResultTests(ITestOutputHelper output) : BaseTest
     public async Task GetApiResult()
     {
         var result1 = await Client.GetStringAsync("/apiResult/apiResult");
+        Assert.Equal("""
+                     {"success":true,"code":0,"msg":"","data":1}
+                     """, result1);
+    }
+
+    [Fact]
+    public async Task GetNewtonsoftJsonApiResult()
+    {
+        var result1 = await Client.GetStringAsync("/apiResult/newtonsoftJson");
         Assert.Equal("""
                      {"success":true,"code":0,"msg":"","data":1}
                      """, result1);

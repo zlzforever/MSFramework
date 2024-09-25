@@ -25,6 +25,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		localhost.conf = localhost.conf
 		publish_nuget_packages.sh = publish_nuget_packages.sh
 		dapr.yaml = dapr.yaml
+		version.props = version.props
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{BC00DC54-17AB-455D-AE75-FDF74923FC13}"
@@ -80,6 +81,10 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "components", "components", 
 		dapr\components\statestore.yml = dapr\components\statestore.yml
 		dapr\components\resiliency.yaml = dapr\components\resiliency.yaml
 	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MSFramework.Analyzers", "src\MSFramework.Analyzers\MSFramework.Analyzers.csproj", "{55D1D27F-E787-49D0-A1AA-A581FE85DED5}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MSFramework.Ef.Analyzers", "src\MSFramework.Ef.Analyzers\MSFramework.Ef.Analyzers.csproj", "{9BB88FC2-6626-4B5B-9B3D-43D074DCBE0F}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -163,6 +168,14 @@ Global
 		{AF6DD5F0-039B-444E-AF8E-756D9A0F0AA6}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{AF6DD5F0-039B-444E-AF8E-756D9A0F0AA6}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{AF6DD5F0-039B-444E-AF8E-756D9A0F0AA6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{55D1D27F-E787-49D0-A1AA-A581FE85DED5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{55D1D27F-E787-49D0-A1AA-A581FE85DED5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{55D1D27F-E787-49D0-A1AA-A581FE85DED5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{55D1D27F-E787-49D0-A1AA-A581FE85DED5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9BB88FC2-6626-4B5B-9B3D-43D074DCBE0F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9BB88FC2-6626-4B5B-9B3D-43D074DCBE0F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9BB88FC2-6626-4B5B-9B3D-43D074DCBE0F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9BB88FC2-6626-4B5B-9B3D-43D074DCBE0F}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -191,6 +204,8 @@ Global
 		{FDE60B8F-232B-41FE-858C-22EF86821902} = {AFD16F00-F810-4A3C-BA74-59BBFBC2469D}
 		{AF6DD5F0-039B-444E-AF8E-756D9A0F0AA6} = {AFD16F00-F810-4A3C-BA74-59BBFBC2469D}
 		{16BD64FC-C046-41E1-B96E-1BD843429DA7} = {FCE8D042-DFE3-45F2-B625-47982AD2441B}
+		{55D1D27F-E787-49D0-A1AA-A581FE85DED5} = {AFD16F00-F810-4A3C-BA74-59BBFBC2469D}
+		{9BB88FC2-6626-4B5B-9B3D-43D074DCBE0F} = {AFD16F00-F810-4A3C-BA74-59BBFBC2469D}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {BE296FC5-5695-4FE5-9BAE-7168B9BACB47}

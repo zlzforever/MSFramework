@@ -41,7 +41,7 @@ namespace Ordering.Infrastructure.Migrations
 
                     b.Property<string>("OperationType")
                         .HasMaxLength(256)
-                        .HasColumnType("varchar(256)")
+                        .HasColumnType("varchar")
                         .HasColumnName("operation_type");
 
                     b.Property<string>("Type")
@@ -65,8 +65,8 @@ namespace Ordering.Infrastructure.Migrations
                         .HasColumnType("varchar(36)")
                         .HasColumnName("id");
 
-                    b.Property<DateTimeOffset?>("CreationTime")
-                        .HasColumnType("datetime(6)")
+                    b.Property<long?>("CreationTime")
+                        .HasColumnType("bigint")
                         .HasColumnName("creation_time");
 
                     b.Property<string>("CreatorId")
@@ -170,18 +170,17 @@ namespace Ordering.Infrastructure.Migrations
                     b.ToTable("ordering_audit_property");
                 });
 
-            modelBuilder.Entity("Ordering.Domain.AggregateRoots.Order", b =>
+            modelBuilder.Entity("Ordering.Domain.AggregateRoots.Order.Order", b =>
                 {
                     b.Property<string>("Id")
-                        .HasMaxLength(36)
-                        .HasColumnType("varchar(36)")
+                        .HasColumnType("varchar(255)")
                         .HasColumnName("id");
 
-                    b.Property<string>("BuyerId2")
+                    b.Property<string>("BuyerId")
                         .IsRequired()
                         .HasMaxLength(36)
                         .HasColumnType("varchar(36)")
-                        .HasColumnName("buyer_id2");
+                        .HasColumnName("buyer_id");
 
                     b.Property<string>("ConcurrencyStamp")
                         .IsConcurrencyToken()
@@ -189,8 +188,8 @@ namespace Ordering.Infrastructure.Migrations
                         .HasColumnType("varchar(36)")
                         .HasColumnName("concurrency_stamp");
 
-                    b.Property<DateTimeOffset?>("CreationTime")
-                        .HasColumnType("datetime(6)")
+                    b.Property<long?>("CreationTime")
+                        .HasColumnType("bigint")
                         .HasColumnName("creation_time");
 
                     b.Property<string>("CreatorId")
@@ -215,10 +214,10 @@ namespace Ordering.Infrastructure.Migrations
                         .HasColumnType("datetime(6)")
                         .HasColumnName("deletion_time");
 
-                    b.Property<string>("Description2")
+                    b.Property<string>("Description")
                         .HasMaxLength(2000)
                         .HasColumnType("varchar(2000)")
-                        .HasColumnName("description2");
+                        .HasColumnName("description");
 
                     b.Property<string>("DictJson")
                         .HasColumnType("JSON")
@@ -255,8 +254,14 @@ namespace Ordering.Infrastructure.Migrations
                     b.Property<string>("Status")
                         .IsRequired()
                         .HasMaxLength(20)
-                        .HasColumnType("varchar(20)")
+                        .HasColumnType("varchar")
                         .HasColumnName("status");
+
+                    b.Property<string>("TestId")
+                        .IsRequired()
+                        .HasMaxLength(36)
+                        .HasColumnType("varchar")
+                        .HasColumnName("test_id");
 
                     b.HasKey("Id");
 
@@ -267,11 +272,10 @@ namespace Ordering.Infrastructure.Migrations
                     b.ToTable("ordering_order");
                 });
 
-            modelBuilder.Entity("Ordering.Domain.AggregateRoots.OrderItem", b =>
+            modelBuilder.Entity("Ordering.Domain.AggregateRoots.Order.OrderItem", b =>
                 {
                     b.Property<string>("Id")
-                        .HasMaxLength(36)
-                        .HasColumnType("varchar(36)")
+                        .HasColumnType("varchar(255)")
                         .HasColumnName("id");
 
                     b.Property<decimal>("Discount")
@@ -279,7 +283,7 @@ namespace Ordering.Infrastructure.Migrations
                         .HasColumnName("discount");
 
                     b.Property<string>("OrderId")
-                        .HasColumnType("varchar(36)")
+                        .HasColumnType("varchar(255)")
                         .HasColumnName("order_id");
 
                     b.Property<decimal>("UnitPrice")
@@ -300,8 +304,7 @@ namespace Ordering.Infrastructure.Migrations
             modelBuilder.Entity("Ordering.Domain.AggregateRoots.Product", b =>
                 {
                     b.Property<string>("Id")
-                        .HasMaxLength(36)
-                        .HasColumnType("varchar(36)")
+                        .HasColumnType("varchar(255)")
                         .HasColumnName("id");
 
                     b.Property<string>("ConcurrencyStamp")
@@ -310,8 +313,8 @@ namespace Ordering.Infrastructure.Migrations
                         .HasColumnType("varchar(36)")
                         .HasColumnName("concurrency_stamp");
 
-                    b.Property<DateTimeOffset?>("CreationTime")
-                        .HasColumnType("datetime(6)")
+                    b.Property<long?>("CreationTime")
+                        .HasColumnType("bigint")
                         .HasColumnName("creation_time");
 
                     b.Property<string>("CreatorId")
@@ -375,16 +378,16 @@ namespace Ordering.Infrastructure.Migrations
                     b.Navigation("Entity");
                 });
 
-            modelBuilder.Entity("Ordering.Domain.AggregateRoots.Order", b =>
+            modelBuilder.Entity("Ordering.Domain.AggregateRoots.Order.Order", b =>
                 {
                     b.HasOne("Ordering.Domain.AggregateRoots.User", "Operator")
                         .WithMany()
                         .HasForeignKey("OperatorId");
 
-                    b.OwnsOne("Ordering.Domain.AggregateRoots.Address", "Address", b1 =>
+                    b.OwnsOne("Ordering.Domain.AggregateRoots.Order.Address", "Address", b1 =>
                         {
                             b1.Property<string>("OrderId")
-                                .HasColumnType("varchar(36)")
+                                .HasColumnType("varchar(255)")
                                 .HasColumnName("id");
 
                             b1.Property<string>("City")
@@ -430,17 +433,17 @@ namespace Ordering.Infrastructure.Migrations
                     b.Navigation("Operator");
                 });
 
-            modelBuilder.Entity("Ordering.Domain.AggregateRoots.OrderItem", b =>
+            modelBuilder.Entity("Ordering.Domain.AggregateRoots.Order.OrderItem", b =>
                 {
-                    b.HasOne("Ordering.Domain.AggregateRoots.Order", "Order")
+                    b.HasOne("Ordering.Domain.AggregateRoots.Order.Order", "Order")
                         .WithMany("Items")
                         .HasForeignKey("OrderId")
                         .OnDelete(DeleteBehavior.ClientCascade);
 
-                    b.OwnsOne("Ordering.Domain.AggregateRoots.OrderProduct", "Product", b1 =>
+                    b.OwnsOne("Ordering.Domain.AggregateRoots.Order.OrderProduct", "Product", b1 =>
                         {
                             b1.Property<string>("OrderItemId")
-                                .HasColumnType("varchar(36)")
+                                .HasColumnType("varchar(255)")
                                 .HasColumnName("id");
 
                             b1.Property<string>("Name")
@@ -485,7 +488,7 @@ namespace Ordering.Infrastructure.Migrations
                     b.Navigation("Entities");
                 });
 
-            modelBuilder.Entity("Ordering.Domain.AggregateRoots.Order", b =>
+            modelBuilder.Entity("Ordering.Domain.AggregateRoots.Order.Order", b =>
                 {
                     b.Navigation("Items");
                 });

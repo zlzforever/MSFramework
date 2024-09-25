@@ -8,6 +8,7 @@ using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Storage;
 using Ordering.Domain.AggregateRoots;
+using Ordering.Domain.AggregateRoots.Order;
 using Pomelo.EntityFrameworkCore.MySql.Storage.Internal;
 
 #pragma warning disable 219, 612, 618
@@ -29,8 +30,7 @@ namespace Ordering.Infrastructure.CompileModels
                 typeof(string),
                 propertyInfo: typeof(EntityBase<string>).GetProperty("Id", BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly),
                 fieldInfo: typeof(EntityBase<string>).GetField("_id", BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.DeclaredOnly),
-                afterSaveBehavior: PropertySaveBehavior.Throw,
-                maxLength: 36);
+                afterSaveBehavior: PropertySaveBehavior.Throw);
             id.TypeMapping = MySqlStringTypeMapping.Default.Clone(
                 comparer: new ValueComparer<string>(
                     (string v1, string v2) => v1 == v2,
@@ -45,8 +45,8 @@ namespace Ordering.Infrastructure.CompileModels
                     (string v) => v.GetHashCode(),
                     (string v) => v),
                 mappingInfo: new RelationalTypeMappingInfo(
-                    storeTypeName: "varchar(36)",
-                    size: 36));
+                    storeTypeName: "varchar(255)",
+                    size: 255));
             id.AddAnnotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.None);
             id.AddAnnotation("Relational:ColumnName", "id");
 
@@ -90,8 +90,8 @@ namespace Ordering.Infrastructure.CompileModels
                     (string v) => v.GetHashCode(),
                     (string v) => v),
                 mappingInfo: new RelationalTypeMappingInfo(
-                    storeTypeName: "varchar(36)",
-                    size: 36));
+                    storeTypeName: "varchar(255)",
+                    size: 255));
             orderId.AddAnnotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.None);
             orderId.AddAnnotation("Relational:ColumnName", "order_id");
 

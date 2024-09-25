@@ -4,7 +4,7 @@ using MicroserviceFramework.Ef;
 using MicroserviceFramework.Ef.Extensions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using Ordering.Domain.AggregateRoots;
+using Ordering.Domain.AggregateRoots.Order;
 
 namespace Ordering.Infrastructure.EntityConfigurations;
 
@@ -22,9 +22,9 @@ public class OrderEntityTypeConfiguration : EntityTypeConfigurationBase<Order, O
             x.Property(y => y.State).HasMaxLength(200).IsRequired();
             x.Property(y => y.Street).HasMaxLength(200).IsRequired();
         });
-
-        builder.Property(x => x.Description2).HasMaxLength(2000).IsRequired(false);
-        builder.Property(x => x.BuyerId2).IsRequired().HasMaxLength(36);
+        builder.Property(x => x.TestId);
+        builder.Property(x => x.Description).HasMaxLength(2000).IsRequired(false);
+        builder.Property(x => x.BuyerId).IsRequired().HasMaxLength(36);
         builder.Property(x => x.Status).HasMaxLength(20).IsRequired();
         builder.Property(x => x.ListJson).UseJson(typeof(HashSet<string>), JsonDataType.JSON);
         builder.Property(x => x.DictJson).UseJson(JsonDataType.JSON);

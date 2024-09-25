@@ -4,19 +4,21 @@
     <AssemblyName>MSFramework.Ef</AssemblyName>
     <RootNamespace>MicroserviceFramework.Ef</RootNamespace>
   </PropertyGroup>
-  <Import Project="../../package.props" />
+  <Import Project="../../package.props"/>
+  <Import Project="../../version.props"/>
   <ItemGroup>
-    <ProjectReference Include="..\MSFramework\MSFramework.csproj" />
+    <ProjectReference Include="..\MSFramework\MSFramework.csproj"/>
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="8.0.8" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="8.0.8" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="8.0.8"/>
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="8.0.8"/>
+    <PackageReference Include="Microsoft.CodeAnalysis.Analyzers"
+                      Version="3.3.4" PrivateAssets="all"/>
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp"
+                      Version="4.5.0" PrivateAssets="all"/>
   </ItemGroup>
-
-  <ItemGroup>
-    <Compile Remove="Repositories\NavigationLoader.cs" />
-  </ItemGroup>
+  
   <ItemGroup>
     <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleToAttribute">
       <_Parameter1>MSFramework.Ef.MySql</_Parameter1>

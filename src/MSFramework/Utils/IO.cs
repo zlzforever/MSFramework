@@ -30,7 +30,9 @@ public class IO
         var dirs = dir.GetDirectories();
 
         // Create the destination directory
+#pragma warning disable RS1035
         Directory.CreateDirectory(destinationDir);
+#pragma warning restore RS1035
 
         // Get the files in the source directory and copy to the destination directory
         foreach (var file in dir.GetFiles())

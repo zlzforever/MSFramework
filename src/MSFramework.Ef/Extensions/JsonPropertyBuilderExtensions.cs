@@ -18,7 +18,6 @@ public static class JsonPropertyBuilderExtensions
     /// </summary>
     /// <param name="builder"></param>
     /// <param name="databaseType"></param>
-    /// <param name="jsonHelper"></param>
     /// <typeparam name="TProperty"></typeparam>
     /// <returns></returns>
     public static PropertyBuilder<TProperty> UseJson<TProperty>(
@@ -31,8 +30,6 @@ public static class JsonPropertyBuilderExtensions
             .HasColumnType(databaseType == JsonDataType.JSON ? "JSON" : "JSONB");
         propertyBuilder.HasConversion(x => Defaults.JsonSerializer.Serialize(x),
             x => Defaults.JsonSerializer.Deserialize<TProperty>(x));
-        // var converter = new JsonToStringConverter<TProperty>();
-        // propertyBuilder.Metadata.SetValueConverter(converter);
         propertyBuilder.Metadata.SetValueComparer(comparer);
         return propertyBuilder;
     }
@@ -60,9 +57,6 @@ public static class JsonPropertyBuilderExtensions
             .HasColumnType(databaseType == JsonDataType.JSON ? "JSON" : "JSONB");
         propertyBuilder.HasConversion(x => Defaults.JsonSerializer.Serialize(x),
             x => Defaults.JsonSerializer.Deserialize(x, fieldType) as TProperty);
-        // var converterType = typeof(JsonToStringConverter<>).MakeGenericType(fieldType);
-        // var converter = (ValueConverter)Activator.CreateInstance(converterType);
-        // propertyBuilder.Metadata.SetValueConverter(converter);
         propertyBuilder.Metadata.SetValueComparer(comparer);
 
         return builder;

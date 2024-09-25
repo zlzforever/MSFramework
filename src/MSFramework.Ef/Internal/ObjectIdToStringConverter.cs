@@ -15,5 +15,5 @@ public class ObjectIdToStringConverter()
         => v => v.ToString();
 
     private static Expression<Func<string, ObjectId>> ToObjectId()
-        => v => v == null ? default : new ObjectId(v);
+        => v => v == null ? default : ObjectId.Parse(v);
 }

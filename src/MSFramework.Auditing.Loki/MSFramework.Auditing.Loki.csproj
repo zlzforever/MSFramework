@@ -5,7 +5,6 @@
     <AssemblyName>MSFramework.Auditing.Loki</AssemblyName>
     <RootNamespace>MicroserviceFramework.Auditing.Loki</RootNamespace>
   </PropertyGroup>
-
   <ItemGroup>
     <ProjectReference Include="..\MSFramework\MSFramework.csproj"/>
   </ItemGroup>
@@ -16,4 +15,5 @@
     <PackageReference Include="Serilog.Sinks.File" Version="6.0.0"/>
   </ItemGroup>
   <Import Project="../../package.props"/>
+  <Import Project="../../version.props"/>
 </Project>

@@ -51,7 +51,9 @@ public class Startup(IConfiguration configuration)
                 y.Load(configuration.GetSection("DbContexts:0").Get<DbContextSettings>());
             });
         });
+        // Microsoft.AspNetCore.Mvc.MvcNewtonsoftJsonOptions
 
+        services.AddHttpContextAccessor();
         services.AddMicroserviceFramework(builder =>
         {
             builder.UseAssemblyScanPrefix("MSFramework.AspNetCore.Test");
@@ -60,6 +62,7 @@ public class Startup(IConfiguration configuration)
             builder.UseAutoMapperObjectAssembler();
             builder.UseLocalEventPublisher();
             builder.UseAspNetCoreExtension();
+            builder.UseScopeServiceProvider();
             builder.UseEntityFramework();
         });
     }
@@ -68,8 +71,6 @@ public class Startup(IConfiguration configuration)
     public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
     {
         app.UseRouting();
-
-
         app.UseEndpoints(builder =>
         {
             builder.MapControllers();

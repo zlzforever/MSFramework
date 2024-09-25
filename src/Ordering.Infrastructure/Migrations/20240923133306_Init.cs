@@ -37,7 +37,7 @@ namespace Ordering.Infrastructure.Migrations
                     elapsed = table.Column<int>(type: "int", nullable: false),
                     trace_id = table.Column<string>(type: "varchar(64)", maxLength: 64, nullable: true)
                         .Annotation("MySql:CharSet", "utf8mb4"),
-                    creation_time = table.Column<DateTimeOffset>(type: "datetime(6)", nullable: true),
+                    creation_time = table.Column<long>(type: "bigint", nullable: true),
                     creator_id = table.Column<string>(type: "varchar(36)", maxLength: 36, nullable: true)
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     creator_name = table.Column<string>(type: "varchar(256)", maxLength: 256, nullable: true)
@@ -53,14 +53,14 @@ namespace Ordering.Infrastructure.Migrations
                 name: "ordering_product",
                 columns: table => new
                 {
-                    id = table.Column<string>(type: "varchar(36)", maxLength: 36, nullable: false)
+                    id = table.Column<string>(type: "varchar(255)", nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     name = table.Column<string>(type: "varchar(256)", maxLength: 256, nullable: true)
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     price = table.Column<int>(type: "int", nullable: false),
                     concurrency_stamp = table.Column<string>(type: "varchar(36)", maxLength: 36, nullable: true)
                         .Annotation("MySql:CharSet", "utf8mb4"),
-                    creation_time = table.Column<DateTimeOffset>(type: "datetime(6)", nullable: true),
+                    creation_time = table.Column<long>(type: "bigint", nullable: true),
                     creator_id = table.Column<string>(type: "varchar(36)", maxLength: 36, nullable: true)
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     creator_name = table.Column<string>(type: "varchar(256)", maxLength: 256, nullable: true)
@@ -117,7 +117,7 @@ namespace Ordering.Infrastructure.Migrations
                 name: "ordering_order",
                 columns: table => new
                 {
-                    id = table.Column<string>(type: "varchar(36)", maxLength: 36, nullable: false)
+                    id = table.Column<string>(type: "varchar(255)", nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     address_street = table.Column<string>(type: "varchar(200)", maxLength: 200, nullable: true)
                         .Annotation("MySql:CharSet", "utf8mb4"),
@@ -129,11 +129,13 @@ namespace Ordering.Infrastructure.Migrations
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     address_zip_code = table.Column<string>(type: "varchar(20)", maxLength: 20, nullable: true)
                         .Annotation("MySql:CharSet", "utf8mb4"),
+                    test_id = table.Column<string>(type: "varchar(36)", maxLength: 36, nullable: false)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
                     status = table.Column<string>(type: "varchar(20)", maxLength: 20, nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
-                    buyer_id2 = table.Column<string>(type: "varchar(36)", maxLength: 36, nullable: false)
+                    buyer_id = table.Column<string>(type: "varchar(36)", maxLength: 36, nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
-                    description2 = table.Column<string>(type: "varchar(2000)", maxLength: 2000, nullable: true)
+                    description = table.Column<string>(type: "varchar(2000)", maxLength: 2000, nullable: true)
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     operator_id = table.Column<int>(type: "int", nullable: true),
                     list_json = table.Column<string>(type: "JSON", nullable: true)
@@ -144,7 +146,7 @@ namespace Ordering.Infrastructure.Migrations
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     concurrency_stamp = table.Column<string>(type: "varchar(36)", maxLength: 36, nullable: true)
                         .Annotation("MySql:CharSet", "utf8mb4"),
-                    creation_time = table.Column<DateTimeOffset>(type: "datetime(6)", nullable: true),
+                    creation_time = table.Column<long>(type: "bigint", nullable: true),
                     creator_id = table.Column<string>(type: "varchar(36)", maxLength: 36, nullable: true)
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     creator_name = table.Column<string>(type: "varchar(256)", maxLength: 256, nullable: true)
@@ -204,9 +206,9 @@ namespace Ordering.Infrastructure.Migrations
                 name: "ordering_order_item",
                 columns: table => new
                 {
-                    id = table.Column<string>(type: "varchar(36)", maxLength: 36, nullable: false)
+                    id = table.Column<string>(type: "varchar(255)", nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
-                    order_id = table.Column<string>(type: "varchar(36)", nullable: true)
+                    order_id = table.Column<string>(type: "varchar(255)", nullable: true)
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     product_id = table.Column<string>(type: "varchar(36)", maxLength: 36, nullable: true)
                         .Annotation("MySql:CharSet", "utf8mb4"),

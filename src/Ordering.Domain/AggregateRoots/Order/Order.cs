@@ -6,7 +6,7 @@ using MicroserviceFramework.Domain;
 using MongoDB.Bson;
 using Ordering.Domain.AggregateRoots.Events;
 
-namespace Ordering.Domain.AggregateRoots;
+namespace Ordering.Domain.AggregateRoots.Order;
 
 [Description("订单表")]
 public class Order : DeletionAggregateRoot<string>, IOptimisticLock
@@ -26,6 +26,8 @@ public class Order : DeletionAggregateRoot<string>, IOptimisticLock
     /// </summary>
     public Address Address { get; private set; }
 
+    public ObjectId TestId { get; private set; }
+
     /// <summary>
     /// 订单项
     /// </summary>
@@ -39,9 +41,9 @@ public class Order : DeletionAggregateRoot<string>, IOptimisticLock
     /// <summary>
     /// 购买人员
     /// </summary>
-    public string BuyerId2 { get; private set; }
+    public string BuyerId { get; private set; }
 
-    public string Description2 { get; private set; }
+    public string Description { get; private set; }
 
     public User Operator { get; private set; }
 
@@ -90,33 +92,24 @@ public class Order : DeletionAggregateRoot<string>, IOptimisticLock
         _listJson = [];
         _dictJson = new Dictionary<string, string>();
         _extras = [];
+        TestId = ObjectId.GenerateNewId();
         AddDomainEvent(new OrderCreatedDomainEvent { Id = id, CreationTime = DateTimeOffset.Now, Name = "test" });
-    }
-
-    private Order(
-        string userId,
-        Address address,
-        string description
-    ) : this(ObjectId.GenerateNewId().ToString())
-    {
-        Address = address;
-        BuyerId2 = userId;
-        Description2 = description;
-        Status = OrderStatus.Submitted;
-
-        // Add the OrderStarterDomainEvent to the domain events collection
-        // to be raised/dispatched when comitting changes into the Database [ After DbContext.SaveChanges() ]
-        var orderStartedDomainEvent = new OrderStartedDomainEvent(this, userId);
-        AddDomainEvent(orderStartedDomainEvent);
     }
 
     public static Order Create(string buyerId,
         Address address,
         string description)
     {
-        return new Order(buyerId,
-            address,
-            description);
+        var order = new Order(ObjectId.GenerateNewId().ToString())
+        {
+            Address = address, BuyerId = buyerId, Description = description, Status = OrderStatus.Submitted
+        };
+
+        // Add the OrderStarterDomainEvent to the domain events collection
+        // to be raised/dispatched when comitting changes into the Database [ After DbContext.SaveChanges() ]
+        var orderStartedDomainEvent = new OrderStartedDomainEvent(order, buyerId);
+        order.AddDomainEvent(orderStartedDomainEvent);
+        return order;
     }
 
     public OrderItem AddItem(string productId, string productName, string pictureUrl, decimal unitPrice,
@@ -168,7 +161,7 @@ public class Order : DeletionAggregateRoot<string>, IOptimisticLock
             AddDomainEvent(new OrderStatusChangedToStockConfirmedDomainEvent(Id));
 
             Status = OrderStatus.StockConfirmed;
-            Description2 = "All the items were confirmed with available stock.";
+            Description = "All the items were confirmed with available stock.";
         }
     }
 
@@ -179,7 +172,7 @@ public class Order : DeletionAggregateRoot<string>, IOptimisticLock
             AddDomainEvent(new OrderStatusChangedToPaidDomainEvent(Id, Items));
 
             Status = OrderStatus.Paid;
-            Description2 =
+            Description =
                 "The payment was performed at a simulated \"American Bank checking bank account ending on XX35071\"";
         }
     }
@@ -197,7 +190,7 @@ public class Order : DeletionAggregateRoot<string>, IOptimisticLock
         }
 
         Status = OrderStatus.Shipped;
-        Description2 = "The order was shipped.";
+        Description = "The order was shipped.";
         AddDomainEvent(new OrderShippedDomainEvent(this));
     }
 
@@ -210,7 +203,7 @@ public class Order : DeletionAggregateRoot<string>, IOptimisticLock
         }
 
         Status = OrderStatus.Cancelled;
-        Description2 = $"The order was cancelled.";
+        Description = $"The order was cancelled.";
         AddDomainEvent(new OrderCancelledDomainEvent(this));
     }
 
@@ -225,7 +218,7 @@ public class Order : DeletionAggregateRoot<string>, IOptimisticLock
                 .Select(c => c.Product.Name);
 
             var itemsStockRejectedDescription = string.Join(", ", itemsStockRejectedProductNames);
-            Description2 = $"The product items don't have stock: ({itemsStockRejectedDescription}).";
+            Description = $"The product items don't have stock: ({itemsStockRejectedDescription}).";
         }
     }
 

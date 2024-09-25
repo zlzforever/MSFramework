@@ -1,5 +1,5 @@
 ﻿using System.Collections.Generic;
-using Ordering.Domain.AggregateRoots;
+using Ordering.Domain.AggregateRoots.Order;
 
 namespace Ordering.Application.Dto;
 

@@ -155,7 +155,7 @@ namespace Ordering.Infrastructure.CompileModels
             var defaultTableMappings0 = new List<TableMappingBase<ColumnMappingBase>>();
             auditOperation.SetRuntimeAnnotation("Relational:DefaultMappings", defaultTableMappings0);
             var microserviceFrameworkAuditingModelAuditOperationTableBase = new TableBase("MicroserviceFramework.Auditing.Model.AuditOperation", null, relationalModel);
-            var creation_timeColumnBase = new ColumnBase<ColumnMappingBase>("creation_time", "datetime(6)", microserviceFrameworkAuditingModelAuditOperationTableBase)
+            var creation_timeColumnBase = new ColumnBase<ColumnMappingBase>("creation_time", "bigint", microserviceFrameworkAuditingModelAuditOperationTableBase)
             {
                 IsNullable = true
             };
@@ -240,7 +240,7 @@ namespace Ordering.Infrastructure.CompileModels
             var ordering_audit_operationTable = new Table("ordering_audit_operation", null, relationalModel);
             var idColumn0 = new Column("id", "varchar(36)", ordering_audit_operationTable);
             ordering_audit_operationTable.Columns.Add("id", idColumn0);
-            var creation_timeColumn = new Column("creation_time", "datetime(6)", ordering_audit_operationTable)
+            var creation_timeColumn = new Column("creation_time", "bigint", ordering_audit_operationTable)
             {
                 IsNullable = true
             };
@@ -457,7 +457,7 @@ namespace Ordering.Infrastructure.CompileModels
             orderingDomainAggregateRootsAddressTableBase.Columns.Add("address_street", address_streetColumnBase);
             var address_zip_codeColumnBase = new ColumnBase<ColumnMappingBase>("address_zip_code", "varchar(20)", orderingDomainAggregateRootsAddressTableBase);
             orderingDomainAggregateRootsAddressTableBase.Columns.Add("address_zip_code", address_zip_codeColumnBase);
-            var idColumnBase2 = new ColumnBase<ColumnMappingBase>("id", "varchar(36)", orderingDomainAggregateRootsAddressTableBase);
+            var idColumnBase2 = new ColumnBase<ColumnMappingBase>("id", "varchar(255)", orderingDomainAggregateRootsAddressTableBase);
             orderingDomainAggregateRootsAddressTableBase.Columns.Add("id", idColumnBase2);
             relationalModel.DefaultTables.Add("Ordering.Domain.AggregateRoots.Address", orderingDomainAggregateRootsAddressTableBase);
             var orderingDomainAggregateRootsAddressMappingBase = new TableMappingBase<ColumnMappingBase>(address, orderingDomainAggregateRootsAddressTableBase, true);
@@ -473,7 +473,7 @@ namespace Ordering.Infrastructure.CompileModels
             var tableMappings2 = new List<TableMapping>();
             address.SetRuntimeAnnotation("Relational:TableMappings", tableMappings2);
             var ordering_orderTable = new Table("ordering_order", null, relationalModel);
-            var idColumn2 = new Column("id", "varchar(36)", ordering_orderTable);
+            var idColumn2 = new Column("id", "varchar(255)", ordering_orderTable);
             ordering_orderTable.Columns.Add("id", idColumn2);
             var address_cityColumn = new Column("address_city", "varchar(200)", ordering_orderTable)
             {
@@ -507,7 +507,7 @@ namespace Ordering.Infrastructure.CompileModels
                 IsNullable = true
             };
             ordering_orderTable.Columns.Add("concurrency_stamp", concurrency_stampColumn);
-            var creation_timeColumn0 = new Column("creation_time", "datetime(6)", ordering_orderTable)
+            var creation_timeColumn0 = new Column("creation_time", "bigint", ordering_orderTable)
             {
                 IsNullable = true
             };
@@ -641,7 +641,7 @@ namespace Ordering.Infrastructure.CompileModels
                 IsNullable = true
             };
             orderingDomainAggregateRootsOrderTableBase.Columns.Add("concurrency_stamp", concurrency_stampColumnBase);
-            var creation_timeColumnBase0 = new ColumnBase<ColumnMappingBase>("creation_time", "datetime(6)", orderingDomainAggregateRootsOrderTableBase)
+            var creation_timeColumnBase0 = new ColumnBase<ColumnMappingBase>("creation_time", "bigint", orderingDomainAggregateRootsOrderTableBase)
             {
                 IsNullable = true
             };
@@ -686,7 +686,7 @@ namespace Ordering.Infrastructure.CompileModels
                 IsNullable = true
             };
             orderingDomainAggregateRootsOrderTableBase.Columns.Add("extras", extrasColumnBase);
-            var idColumnBase3 = new ColumnBase<ColumnMappingBase>("id", "varchar(36)", orderingDomainAggregateRootsOrderTableBase);
+            var idColumnBase3 = new ColumnBase<ColumnMappingBase>("id", "varchar(255)", orderingDomainAggregateRootsOrderTableBase);
             orderingDomainAggregateRootsOrderTableBase.Columns.Add("id", idColumnBase3);
             var is_deletedColumnBase = new ColumnBase<ColumnMappingBase>("is_deleted", "tinyint(1)", orderingDomainAggregateRootsOrderTableBase);
             orderingDomainAggregateRootsOrderTableBase.Columns.Add("is_deleted", is_deletedColumnBase);
@@ -776,9 +776,9 @@ namespace Ordering.Infrastructure.CompileModels
             var orderingDomainAggregateRootsOrderItemTableBase = new TableBase("Ordering.Domain.AggregateRoots.OrderItem", null, relationalModel);
             var discountColumnBase = new ColumnBase<ColumnMappingBase>("discount", "decimal(65,30)", orderingDomainAggregateRootsOrderItemTableBase);
             orderingDomainAggregateRootsOrderItemTableBase.Columns.Add("discount", discountColumnBase);
-            var idColumnBase4 = new ColumnBase<ColumnMappingBase>("id", "varchar(36)", orderingDomainAggregateRootsOrderItemTableBase);
+            var idColumnBase4 = new ColumnBase<ColumnMappingBase>("id", "varchar(255)", orderingDomainAggregateRootsOrderItemTableBase);
             orderingDomainAggregateRootsOrderItemTableBase.Columns.Add("id", idColumnBase4);
-            var order_idColumnBase = new ColumnBase<ColumnMappingBase>("order_id", "varchar(36)", orderingDomainAggregateRootsOrderItemTableBase)
+            var order_idColumnBase = new ColumnBase<ColumnMappingBase>("order_id", "varchar(255)", orderingDomainAggregateRootsOrderItemTableBase)
             {
                 IsNullable = true
             };
@@ -800,11 +800,11 @@ namespace Ordering.Infrastructure.CompileModels
             var tableMappings4 = new List<TableMapping>();
             orderItem.SetRuntimeAnnotation("Relational:TableMappings", tableMappings4);
             var ordering_order_itemTable = new Table("ordering_order_item", null, relationalModel);
-            var idColumn3 = new Column("id", "varchar(36)", ordering_order_itemTable);
+            var idColumn3 = new Column("id", "varchar(255)", ordering_order_itemTable);
             ordering_order_itemTable.Columns.Add("id", idColumn3);
             var discountColumn = new Column("discount", "decimal(65,30)", ordering_order_itemTable);
             ordering_order_itemTable.Columns.Add("discount", discountColumn);
-            var order_idColumn = new Column("order_id", "varchar(36)", ordering_order_itemTable)
+            var order_idColumn = new Column("order_id", "varchar(255)", ordering_order_itemTable)
             {
                 IsNullable = true
             };
@@ -875,7 +875,7 @@ namespace Ordering.Infrastructure.CompileModels
             var defaultTableMappings5 = new List<TableMappingBase<ColumnMappingBase>>();
             orderProduct.SetRuntimeAnnotation("Relational:DefaultMappings", defaultTableMappings5);
             var orderingDomainAggregateRootsOrderProductTableBase = new TableBase("Ordering.Domain.AggregateRoots.OrderProduct", null, relationalModel);
-            var idColumnBase5 = new ColumnBase<ColumnMappingBase>("id", "varchar(36)", orderingDomainAggregateRootsOrderProductTableBase);
+            var idColumnBase5 = new ColumnBase<ColumnMappingBase>("id", "varchar(255)", orderingDomainAggregateRootsOrderProductTableBase);
             orderingDomainAggregateRootsOrderProductTableBase.Columns.Add("id", idColumnBase5);
             var product_idColumnBase = new ColumnBase<ColumnMappingBase>("product_id", "varchar(36)", orderingDomainAggregateRootsOrderProductTableBase);
             orderingDomainAggregateRootsOrderProductTableBase.Columns.Add("product_id", product_idColumnBase);
@@ -923,7 +923,7 @@ namespace Ordering.Infrastructure.CompileModels
                 IsNullable = true
             };
             orderingDomainAggregateRootsProductTableBase.Columns.Add("concurrency_stamp", concurrency_stampColumnBase0);
-            var creation_timeColumnBase1 = new ColumnBase<ColumnMappingBase>("creation_time", "datetime(6)", orderingDomainAggregateRootsProductTableBase)
+            var creation_timeColumnBase1 = new ColumnBase<ColumnMappingBase>("creation_time", "bigint", orderingDomainAggregateRootsProductTableBase)
             {
                 IsNullable = true
             };
@@ -938,7 +938,7 @@ namespace Ordering.Infrastructure.CompileModels
                 IsNullable = true
             };
             orderingDomainAggregateRootsProductTableBase.Columns.Add("creator_name", creator_nameColumnBase1);
-            var idColumnBase6 = new ColumnBase<ColumnMappingBase>("id", "varchar(36)", orderingDomainAggregateRootsProductTableBase);
+            var idColumnBase6 = new ColumnBase<ColumnMappingBase>("id", "varchar(255)", orderingDomainAggregateRootsProductTableBase);
             orderingDomainAggregateRootsProductTableBase.Columns.Add("id", idColumnBase6);
             var nameColumnBase0 = new ColumnBase<ColumnMappingBase>("name", "varchar(256)", orderingDomainAggregateRootsProductTableBase)
             {
@@ -962,14 +962,14 @@ namespace Ordering.Infrastructure.CompileModels
             var tableMappings6 = new List<TableMapping>();
             product.SetRuntimeAnnotation("Relational:TableMappings", tableMappings6);
             var ordering_productTable = new Table("ordering_product", null, relationalModel);
-            var idColumn4 = new Column("id", "varchar(36)", ordering_productTable);
+            var idColumn4 = new Column("id", "varchar(255)", ordering_productTable);
             ordering_productTable.Columns.Add("id", idColumn4);
             var concurrency_stampColumn0 = new Column("concurrency_stamp", "varchar(36)", ordering_productTable)
             {
                 IsNullable = true
             };
             ordering_productTable.Columns.Add("concurrency_stamp", concurrency_stampColumn0);
-            var creation_timeColumn1 = new Column("creation_time", "datetime(6)", ordering_productTable)
+            var creation_timeColumn1 = new Column("creation_time", "bigint", ordering_productTable)
             {
                 IsNullable = true
             };

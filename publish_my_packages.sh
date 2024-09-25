@@ -21,6 +21,8 @@ rm -rf src/MSFramework.AspNetCore.Swagger/bin/Release
 rm -rf src/MSFramework.Serialization.Newtonsoft/bin/Release
 rm -rf src/DotNetCore.CAP.Dapr/bin/Release
 rm -rf src/MSFramework.Auditing.Loki/bin/Release
+rm -rf src/MSFramework.Analyzers/bin/Release
+rm -rf src/MSFramework.Ef.Analyzers/bin/Release
 dotnet build -c Release
 dotnet pack -c Release
 
@@ -36,4 +38,6 @@ push_to_nuget "src/MSFramework.AspNetCore.Swagger/bin/Release/"
 push_to_nuget "src/MSFramework.Serialization.Newtonsoft/bin/Release/"
 push_to_nuget "src/DotNetCore.CAP.Dapr/bin/Release/"
 push_to_nuget "src/MSFramework.Auditing.Loki/bin/Release/"
+push_to_nuget "src/MSFramework.Analyzers/bin/Release/"
+push_to_nuget "src/MSFramework.Ef.Analyzers/bin/Release/"
 
