@@ -31,6 +31,7 @@ public static class UnixTimePropertyExtensions
         // builder.Metadata.SetValueConverter(converter);
         builder.Metadata.SetValueConverter(new NullableDateTimeOffsetToLongConverter(milliseconds));
         builder.HasColumnType("bigint");
+        builder.IsRequired(false);
         return builder;
     }
 
@@ -45,6 +46,7 @@ public static class UnixTimePropertyExtensions
     {
         builder.IsRequired();
         builder.HasColumnType("bigint");
+        builder.HasDefaultValue(DateTimeOffset.UnixEpoch);
         builder.Metadata.SetValueConverter(new DateTimeOffsetToLongConverter(milliseconds));
         return builder;
     }

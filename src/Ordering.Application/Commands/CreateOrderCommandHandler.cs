@@ -20,7 +20,14 @@ public class CreateOrderCommandHandler(IOrderRepository orderRepository)
     {
         var order = Order.Create(
             command.UserId,
-            new Address(command.Street, command.City, command.State, command.Country, command.ZipCode),
+            new Address
+            {
+                Street = command.Street,
+                City = command.City,
+                State = command.State,
+                Country = command.Country,
+                ZipCode = command.ZipCode
+            },
             command.Description
         );
 

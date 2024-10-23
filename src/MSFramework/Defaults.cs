@@ -73,5 +73,10 @@ public static class Defaults
         ///
         /// </summary>
         public static readonly Type Repository = typeof(IRepository);
+
+        /// <summary>
+        ///
+        /// </summary>
+        public static readonly Type ValueObject = typeof(ValueObject);
     }
 }

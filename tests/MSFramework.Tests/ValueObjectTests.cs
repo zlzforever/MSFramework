@@ -16,30 +16,14 @@ public class ValueObjectTests
     }
 
     public record Address(string Street, string City, string State, string Country, string ZipCode)
-        : ValueObject
-    {
-        public string Street { get; private set; } = Street;
-        public string City { get; private set; } = City;
-        public string State { get; private set; } = State;
-        public string Country { get; private set; } = Country;
-        public string ZipCode { get; private set; } = ZipCode;
+        : ValueObject;
 
-
-        //
-        // protected override IEnumerable<object> GetEqualityComponents()
-        // {
-        //     yield return Street;
-        //     yield return City;
-        //     yield return State;
-        //     yield return Country;
-        //     yield return ZipCode;
-        // }
-    }
 
     [Fact]
     public void ValueObjectEqual()
     {
         var address1 = new Address("a", "b", "c", "d", "e");
+
         var address2 = new Address("a", "b", "c", "d", "e");
         Assert.True(address1 == address2);
         Assert.True(address1.Equals(address2));
@@ -57,7 +41,8 @@ public class ValueObjectTests
     public void ValueObjectCopy()
     {
         var address1 = new Address("a", "b", "c", "d", "e");
-        var address2 = address1.Copy();
+        var address2 = (Address)address1.Copy();
+
         Assert.True(Equals(address1, address2));
     }
 
@@ -66,6 +51,7 @@ public class ValueObjectTests
     {
         var v1 = new V1("a").ToString();
         var v2 = new Address("a", "b", "c", "d", "f").ToString();
+
         Assert.Equal("V1 { V = a }", v1);
         Assert.Equal("Address { Street = a, City = b, State = c, Country = d, ZipCode = f }", v2);
     }

@@ -3,6 +3,7 @@ using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Threading;
 using MicroserviceFramework.Common;
+using MicroserviceFramework.Domain;
 using MicroserviceFramework.Extensions.Options;
 using MicroserviceFramework.Serialization;
 using MicroserviceFramework.Text.Json;
@@ -47,7 +48,6 @@ public static class ServiceCollectionExtensions
         Action<MicroserviceFrameworkBuilder> builderAction = null)
     {
         var builder = new MicroserviceFrameworkBuilder(services);
-
         builder.Services.TryAddSingleton<ApplicationInfo>();
         // 放到后面，加载优先级更高
         builderAction?.Invoke(builder);

@@ -49,9 +49,17 @@ public class OrderController(
 
     private async Task<Order> AddAsync()
     {
+        var address = new Address
+        {
+            Street = "Street",
+            City = "City",
+            State = "State",
+            Country = "Country",
+            ZipCode = "ZipCode"
+        };
         var order = Order.Create(
             "1",
-            new Address("Street", "City", "State", "Country", "ZipCode"),
+            address,
             "Description");
         order.AddItem("100049450275",
             "英特尔(Intel) i5-13400F 13代 酷睿 处理器 10核16线程 睿频至高可达4.6Ghz 20M三级缓存 台式机CPU",
