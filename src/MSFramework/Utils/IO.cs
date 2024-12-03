@@ -1,4 +1,5 @@
 using System.IO;
+using System.Threading.Tasks;
 
 namespace MicroserviceFramework.Utils;
 
@@ -6,19 +7,55 @@ namespace MicroserviceFramework.Utils;
 /// <summary>
 ///
 /// </summary>
-public class IO
+public static class IO
 {
     /// <summary>
-    ///
+    /// 流保存到文件
     /// </summary>
-    /// <param name="sourceDir"></param>
-    /// <param name="destinationDir"></param>
-    /// <param name="recursive"></param>
+    /// <param name="stream"></param>
+    /// <param name="path"></param>
+    public static void SaveToFile(this Stream stream, string path)
+    {
+        using var fileStream = File.Open(path, FileMode.OpenOrCreate);
+        stream.CopyTo(fileStream);
+    }
+
+    /// <summary>
+    /// 流转换成 byte[]
+    /// </summary>
+    /// <param name="stream"></param>
+    public static async Task<byte[]> ToArrayAsync(this Stream stream)
+    {
+        stream.Seek(0, SeekOrigin.Begin);
+        var bytes = new byte[stream.Length];
+        _ = await stream.ReadAsync(bytes);
+        return bytes;
+    }
+
+    /// <summary>
+    /// 流转换成 byte[]
+    /// </summary>
+    /// <param name="stream"></param>
+    /// <returns></returns>
+    public static byte[] ToArray(this Stream stream)
+    {
+        stream.Seek(0, SeekOrigin.Begin);
+        var bytes = new byte[stream.Length];
+        _ = stream.Read(bytes);
+        return bytes;
+    }
+
+    /// <summary>
+    /// 复制文件夹
+    /// </summary>
+    /// <param name="source">源文件夹</param>
+    /// <param name="destination">目标文件夹</param>
+    /// <param name="recursive">是否递归复制</param>
     /// <exception cref="DirectoryNotFoundException"></exception>
-    public static void CopyDirectory(string sourceDir, string destinationDir, bool recursive)
+    public static void CopyDirectory(string source, string destination, bool recursive)
     {
         // Get information about the source directory
-        var dir = new DirectoryInfo(sourceDir);
+        var dir = new DirectoryInfo(source);
 
         // Check if the source directory exists
         if (!dir.Exists)
@@ -31,13 +68,13 @@ public class IO
 
         // Create the destination directory
 #pragma warning disable RS1035
-        Directory.CreateDirectory(destinationDir);
+        Directory.CreateDirectory(destination);
 #pragma warning restore RS1035
 
         // Get the files in the source directory and copy to the destination directory
         foreach (var file in dir.GetFiles())
         {
-            var targetFilePath = Path.Combine(destinationDir, file.Name);
+            var targetFilePath = Path.Combine(destination, file.Name);
             file.CopyTo(targetFilePath);
         }
 
@@ -46,7 +83,7 @@ public class IO
         {
             foreach (var subDir in dirs)
             {
-                var newDestinationDir = Path.Combine(destinationDir, subDir.Name);
+                var newDestinationDir = Path.Combine(destination, subDir.Name);
                 CopyDirectory(subDir.FullName, newDestinationDir, true);
             }
         }

@@ -8,6 +8,11 @@ using BenchmarkDotNet.Running;
 
 namespace Benchmark;
 
+public class MyMemoryStream(byte[] bytes) : MemoryStream(bytes)
+{
+    public int Name { get; set; }
+}
+
 public class MyClass
 {
     static readonly byte[] Data = Encoding.UTF8.GetBytes("Hello World!");
@@ -22,11 +27,11 @@ public class MyClass
     [GlobalSetup]
     public void Setup()
     {
-        _stream1 = new MemoryStream(Data);
-        _stream2 = new MemoryStream(Data);
-        _stream3 = new MemoryStream(Data);
-        _stream4 = new MemoryStream(Data);
-        _stream5 = new MemoryStream(Data);
+        _stream1 = new MyMemoryStream(Data);
+        _stream2 = new MyMemoryStream(Data);
+        _stream3 = new MyMemoryStream(Data);
+        _stream4 = new MyMemoryStream(Data);
+        _stream5 = new MyMemoryStream(Data);
     }
 
     [Benchmark]

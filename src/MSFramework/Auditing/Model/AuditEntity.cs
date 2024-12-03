@@ -6,7 +6,7 @@ using MongoDB.Bson;
 namespace MicroserviceFramework.Auditing.Model;
 
 /// <summary>
-///
+/// 实体审计信息
 /// </summary>
 public class AuditEntity : EntityBase<string>
 {
