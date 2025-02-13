@@ -21,6 +21,7 @@ public static class ServiceCollectionExtensions
         services.AddHostedService<LocalEventService>();
         var handlerInterface = typeof(IEventHandler<>);
 
+        var store = new EventDescriptorStore();
         foreach (var type in Utils.Runtime.GetAllTypes())
         {
             var serviceTypes = type
@@ -30,11 +31,12 @@ public static class ServiceCollectionExtensions
             foreach (var serviceType in serviceTypes)
             {
                 var eventType = serviceType.GetGenericArguments()[0];
-                LocalEventService.Register(eventType, type);
+                store.Register(eventType, type);
                 services.TryAddScoped(type);
             }
         }
 
+        services.AddSingleton(store);
         return services;
     }
 

@@ -3,4 +3,9 @@ using System.Reflection;
 
 namespace MicroserviceFramework.LocalEvent;
 
-internal record EventDescriptor(Type HandlerType, MethodInfo HandleMethod);
+/// <summary>
+///
+/// </summary>
+/// <param name="HandlerType"></param>
+/// <param name="HandleMethod"></param>
+public record EventDescriptor(Type HandlerType, MethodInfo HandleMethod);

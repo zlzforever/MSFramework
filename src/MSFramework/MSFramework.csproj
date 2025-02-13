@@ -22,7 +22,4 @@
       <_Parameter1>MSFramework.Ef</_Parameter1>
     </AssemblyAttribute>
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Domain\SourceGenerator\" />
-  </ItemGroup>
 </Project>

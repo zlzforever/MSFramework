@@ -54,7 +54,7 @@ internal class Mediator(IServiceProvider serviceProvider) : IMediator
     {
         if (request == null)
         {
-            return default;
+            return null;
         }
 
         var requestType = request.GetType();

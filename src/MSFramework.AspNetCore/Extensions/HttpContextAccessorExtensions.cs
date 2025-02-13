@@ -1,49 +1,31 @@
-// using System;
-// using System.Collections.Generic;
-// using MicroserviceFramework.AspNetCore.Mvc;
-// using Microsoft.AspNetCore.Http;
-//
-// namespace MicroserviceFramework.AspNetCore.Extensions;
-//
-// public static class HttpContextAccessorExtensions
-// {
-//     public static void WriteError(this IHttpContextAccessor accessor, int code, string msg,
-//         Dictionary<string, IEnumerable<string>> errors = null)
-//     {
-//         if (accessor == null)
-//         {
-//             throw new ArgumentNullException(nameof(accessor));
-//         }
-//
-//         accessor.HttpContext.WriteError(code, msg, errors);
-//     }
-//
-//     public static void WriteError(this HttpContext context, int code, string msg,
-//         Dictionary<string, IEnumerable<string>> errors = null)
-//     {
-//         if (context == null)
-//         {
-//             throw new ArgumentNullException(nameof(context));
-//         }
-//
-//         context.Response.StatusCode = 400;
-//         if (errors == null || errors.Count == 0)
-//         {
-//             context.Response.WriteAsJsonAsync(new ApiResult { Code = code, Success = false, Data = null, Msg = msg });
-//         }
-//         else
-//         {
-//
-//             context.Response.WriteAsJsonAsync(new ApiResultWithErrors
-//             {
-//                 Code = code,
-//                 Success = false,
-//                 Data = null,
-//                 Msg = msg,
-//                 Errors = errors
-//             });
-//         }
-//
-//         context.Items["WriteError"] = true;
-//     }
-// }
+using System.Threading.Tasks;
+using Microsoft.AspNetCore.Http;
+
+namespace MicroserviceFramework.AspNetCore.Extensions;
+
+/// <summary>
+///
+/// </summary>
+public static class HttpContextAccessorExtensions
+{
+    /// <summary>
+    ///
+    /// </summary>
+    /// <param name="httpContextAccessor"></param>
+    /// <returns></returns>
+    public static async Task<string> GetBodyTextAsync(this IHttpContextAccessor httpContextAccessor)
+    {
+        if (httpContextAccessor.HttpContext == null)
+        {
+            return null;
+        }
+
+        var request = httpContextAccessor.HttpContext.Request;
+        request.EnableBuffering();
+        var reader = new System.IO.StreamReader(request.Body);
+        // comments by lewis: 一定要使用异步， 同步会阻塞操作
+        var text = await reader.ReadToEndAsync();
+        request.Body.Position = 0;
+        return text;
+    }
+}

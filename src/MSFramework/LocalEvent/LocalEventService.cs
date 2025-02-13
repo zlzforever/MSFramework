@@ -18,38 +18,14 @@ namespace MicroserviceFramework.LocalEvent;
 /// </summary>
 /// <param name="serviceProvider"></param>
 /// <param name="logger"></param>
-/// <param name="localEventOptions"></param>
+/// <param name="options"></param>
 public class LocalEventService(
     IServiceProvider serviceProvider,
     ILogger<LocalEventService> logger,
-    IOptions<LocalEventOptions> localEventOptions)
+    EventDescriptorStore descriptorStore,
+    IOptions<LocalEventOptions> options)
     : BackgroundService
 {
-    private static readonly Dictionary<Type, HashSet<EventDescriptor>> Descriptors =
-        new();
-
-    /// <summary>
-    ///
-    /// </summary>
-    /// <param name="eventType"></param>
-    /// <param name="handlerType"></param>
-    /// <exception cref="ArgumentException"></exception>
-    public static void Register(Type eventType, Type handlerType)
-    {
-        var method = handlerType.GetMethod("HandleAsync", [eventType, typeof(CancellationToken)]);
-        if (method == null)
-        {
-            throw new ArgumentException($"事件处理器 {handlerType.FullName} 没有实现事件 {eventType.FullName} 的处理方法");
-        }
-
-        if (!Descriptors.ContainsKey(eventType))
-        {
-            Descriptors.Add(eventType, new HashSet<EventDescriptor>());
-        }
-
-        Descriptors[eventType].Add(new EventDescriptor(handlerType, method));
-    }
-
     /// <summary>
     ///
     /// </summary>
@@ -71,7 +47,7 @@ public class LocalEventService(
                             ? ObjectId.GenerateNewId().ToString()
                             : entry.Session.TraceIdentifier;
                         var eventType = entry.EventData.GetType();
-                        var descriptors = GetDescriptors(eventType);
+                        var descriptors = descriptorStore.GetList(eventType);
 
                         foreach (var descriptor in descriptors)
                         {
@@ -94,7 +70,7 @@ public class LocalEventService(
                                 session?.Load(entry.Session);
                             }
 
-                            if (localEventOptions.Value.EnableAuditing)
+                            if (options.Value.EnableAuditing)
                             {
                                 var unitOfWork = services.GetService<IUnitOfWork>();
                                 unitOfWork?.SetAuditOperationFactory(() =>
@@ -136,15 +112,6 @@ public class LocalEventService(
         }, stoppingToken);
     }
 
-    private static IReadOnlyCollection<EventDescriptor> GetDescriptors(Type eventType)
-    {
-        if (!Descriptors.TryGetValue(eventType, out var value))
-        {
-            return Array.Empty<EventDescriptor>();
-        }
-
-        return value;
-    }
 
     private AuditOperation CreateAuditedOperation(ISession session, string handlerType)
     {

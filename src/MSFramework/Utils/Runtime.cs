@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Reflection;
 using Microsoft.Extensions.DependencyModel;
@@ -28,8 +29,9 @@ public static class Runtime
                 return [];
             }
 
-            var list = new List<Assembly>();
-
+            var dict = new Dictionary<string, Assembly>();
+            var loadedAssemblies = AppDomain.CurrentDomain.GetAssemblies()
+                .ToDictionary(x => x.FullName, x => x);
             var libraries = DependencyContext.Default.CompileLibraries
                 .Where(x => x.Type == "project"
                             || StartsWith.Any(y => x.Name.StartsWith(y)));
@@ -40,11 +42,47 @@ public static class Runtime
                     continue;
                 }
 
-                var assembly = AppDomain.CurrentDomain.Load(new AssemblyName(lib.Name));
-                list.Add(assembly);
+                if (!loadedAssemblies.TryGetValue(lib.Name, out var assembly))
+                {
+                    assembly = AppDomain.CurrentDomain.Load(new AssemblyName(lib.Name));
+                    loadedAssemblies.Add(lib.Name, assembly);
+                }
+
+                dict.TryAdd(lib.Name, assembly);
             }
 
-            return list;
+            var files = Directory.GetFiles(AppDomain.CurrentDomain.BaseDirectory, "*.dll",
+                SearchOption.TopDirectoryOnly).ToList();
+            var pluginsPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Plugins");
+            if (Directory.Exists(pluginsPath))
+            {
+                files.AddRange(Directory.GetFiles(pluginsPath, "*.dll",
+                    SearchOption.TopDirectoryOnly));
+            }
+
+            foreach (var file in files)
+            {
+                var name = Path.GetFileNameWithoutExtension(file);
+                if (analyzerAssemblyList.Contains(name))
+                {
+                    continue;
+                }
+
+                if (!StartsWith.Any(y => name.StartsWith(y)))
+                {
+                    continue;
+                }
+
+                if (dict.ContainsKey(name))
+                {
+                    continue;
+                }
+
+                var assembly = AppDomain.CurrentDomain.Load(AssemblyName.GetAssemblyName(file));
+                dict.TryAdd(name, assembly);
+            }
+
+            return dict.Values.ToList();
         });
         Types = new Lazy<List<Type>>(() =>
             (from assembly in GetAllAssemblies() from type in assembly.DefinedTypes select type.AsType()).ToList());
