@@ -5,23 +5,23 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Dapper" Version="2.1.35"/>
-    <PackageReference Include="Microsoft.AspNetCore.Mvc.Core" Version="2.2.5"/>
+    <PackageReference Include="Dapper" Version="2.1.66" />
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.Core" Version="2.3.0" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3"/>
-    <PackageReference Include="Serilog.AspNetCore" Version="8.0.2"/>
+    <PackageReference Include="Serilog.AspNetCore" Version="9.0.0" />
+    <PackageReference Include="Serilog.Sinks.ClickHouse2" Version="1.0.1" />
     <PackageReference Include="Serilog.Sinks.Grafana.Loki" Version="8.3.0"/>
     <PackageReference Include="Serilog.Enrichers.Environment" Version="3.0.1"/>
     <PackageReference Include="Serilog.Enrichers.Thread" Version="4.0.0"/>
     <PackageReference Include="Serilog.Expressions" Version="5.0.0"/>
-    <PackageReference Include="Serilog.Sinks.Async" Version="2.0.0"/>
-    <PackageReference Include="xunit.assert" Version="2.9.0"/>
+    <PackageReference Include="Serilog.Sinks.Async" Version="2.1.0" />
+    <PackageReference Include="xunit.assert" Version="2.9.3" />
     <!--    <PackageReference Include="DotNetCore.Natasha.CSharp.Compiler.Domain" Version="8.0.0" />-->
     <!--    <PackageReference Include="DotNetCore.Natasha.CSharp.Template.Core" Version="8.0.0" />-->
     <!--    <PackageReference Include="DotNetCore.Compile.Environment" Version="3.2.0"/>-->
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\MSFramework.AspNetCore.Swagger\MSFramework.AspNetCore.Swagger.csproj"/>
     <ProjectReference Include="..\MSFramework.AspNetCore\MSFramework.AspNetCore.csproj"/>
     <ProjectReference Include="..\MSFramework.Auditing.Loki\MSFramework.Auditing.Loki.csproj"/>
     <ProjectReference Include="..\MSFramework.AutoMapper\MSFramework.AutoMapper.csproj"/>
@@ -40,5 +40,7 @@
   <ItemGroup>
     <Folder Include="logs\"/>
   </ItemGroup>
+
+ 
 
 </Project>

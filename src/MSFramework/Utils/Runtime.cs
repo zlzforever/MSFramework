@@ -12,26 +12,35 @@ namespace MicroserviceFramework.Utils;
 /// </summary>
 public static class Runtime
 {
-    private static readonly Lazy<List<Assembly>> Assemblies;
-    private static readonly Lazy<List<Type>> Types;
-    internal static readonly HashSet<string> StartsWith;
+    private static readonly List<Assembly> Assemblies;
+    private static readonly List<Type> Types;
+
+    /// <summary>
+    ///
+    /// </summary>
+    public static readonly HashSet<string> StartsWith;
+
+    /// <summary>
+    ///
+    /// </summary>
+    public static readonly HashSet<string> ExcludeWith;
 
     static Runtime()
     {
         // StartsWith = ["MSFramework", "Newtonsoft.Json"];
         StartsWith = ["MSFramework"];
+        ExcludeWith = [];
         // 分析器不会输出程序集文件
         var analyzerAssemblyList = new[] { "MSFramework.Analyzers", "MSFramework.Ef.Analyzers" };
-        Assemblies = new Lazy<List<Assembly>>(() =>
+        if (DependencyContext.Default != null)
         {
-            if (DependencyContext.Default == null)
+            var dict = new Dictionary<string, Assembly>();
+            var loadedAssemblies = new Dictionary<string, Assembly>();
+            foreach (var assembly in AppDomain.CurrentDomain.GetAssemblies())
             {
-                return [];
+                loadedAssemblies.TryAdd(assembly.GetName().Name, assembly);
             }
 
-            var dict = new Dictionary<string, Assembly>();
-            var loadedAssemblies = AppDomain.CurrentDomain.GetAssemblies()
-                .ToDictionary(x => x.FullName, x => x);
             var libraries = DependencyContext.Default.CompileLibraries
                 .Where(x => x.Type == "project"
                             || StartsWith.Any(y => x.Name.StartsWith(y)));
@@ -42,10 +51,19 @@ public static class Runtime
                     continue;
                 }
 
+                if (ExcludeWith.Any(y => lib.Name.StartsWith(y)))
+                {
+                    continue;
+                }
+
                 if (!loadedAssemblies.TryGetValue(lib.Name, out var assembly))
                 {
-                    assembly = AppDomain.CurrentDomain.Load(new AssemblyName(lib.Name));
-                    loadedAssemblies.Add(lib.Name, assembly);
+                    var path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, $"{lib.Name}.dll");
+                    if (File.Exists(path))
+                    {
+                        assembly = AppDomain.CurrentDomain.Load(new AssemblyName(lib.Name));
+                        loadedAssemblies.TryAdd(lib.Name, assembly);
+                    }
                 }
 
                 dict.TryAdd(lib.Name, assembly);
@@ -73,6 +91,11 @@ public static class Runtime
                     continue;
                 }
 
+                if (ExcludeWith.Any(y => name.StartsWith(y)))
+                {
+                    continue;
+                }
+
                 if (dict.ContainsKey(name))
                 {
                     continue;
@@ -82,10 +105,22 @@ public static class Runtime
                 dict.TryAdd(name, assembly);
             }
 
-            return dict.Values.ToList();
-        });
-        Types = new Lazy<List<Type>>(() =>
-            (from assembly in GetAllAssemblies() from type in assembly.DefinedTypes select type.AsType()).ToList());
+            Assemblies = dict.Values.Where(x => x != null).ToList();
+        }
+        else
+        {
+            Assemblies = new List<Assembly>();
+        }
+
+        Types = new List<Type>();
+
+        foreach (var assembly in Assemblies)
+        {
+            foreach (var definedType in assembly.DefinedTypes)
+            {
+                Types.Add(definedType.AsType());
+            }
+        }
     }
 
     /// <summary>
@@ -94,7 +129,7 @@ public static class Runtime
     /// <returns></returns>
     public static IReadOnlyCollection<Assembly> GetAllAssemblies()
     {
-        return Assemblies.Value;
+        return Assemblies;
     }
 
     /// <summary>
@@ -103,6 +138,6 @@ public static class Runtime
     /// <returns></returns>
     public static IReadOnlyCollection<Type> GetAllTypes()
     {
-        return Types.Value;
+        return Types;
     }
 }

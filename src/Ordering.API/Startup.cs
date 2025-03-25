@@ -7,7 +7,7 @@ using MicroserviceFramework;
 using MicroserviceFramework.AspNetCore;
 using MicroserviceFramework.AspNetCore.Filters;
 using MicroserviceFramework.AspNetCore.Mvc.ModelBinding;
-using MicroserviceFramework.AspNetCore.Swagger;
+// using MicroserviceFramework.AspNetCore.Swagger;
 using MicroserviceFramework.Auditing.Loki;
 using MicroserviceFramework.AutoMapper;
 using MicroserviceFramework.Ef;
@@ -22,11 +22,11 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using Microsoft.OpenApi.Models;
 using Ordering.Domain.AggregateRoots.Order;
 using Ordering.Infrastructure;
 using Serilog;
 using Serilog.Events;
+using Serilog.Sinks.ClickHouse;
 
 namespace Ordering.API;
 
@@ -40,7 +40,9 @@ public static class Startup
         if (serilogSection.GetChildren().Any())
         {
             Log.Logger = new LoggerConfiguration().ReadFrom
-                .Configuration(configuration)
+                .Configuration(configuration).WriteTo
+                .ClickHouse("http://localhost:8123", "logs", "application_log",
+                    "default", "xxx", "ordering-api")
                 .CreateLogger();
         }
         else
@@ -105,13 +107,13 @@ public static class Startup
                 x.UseHttpEndpoint("http://localhost:5101");
                 x.UseGrpcEndpoint("http://localhost:5102");
             });
-        services.AddSwaggerGen(x =>
-        {
-            x.SwaggerDoc("v1.0", new OpenApiInfo { Version = "v1.0", Description = "Ordering API V1.0" });
-            x.CustomSchemaIds(type => type.FullName?.Replace("+", "."));
-            x.MapEnumerationType(typeof(Address).Assembly);
-            x.SupportObjectId();
-        });
+        // services.AddSwaggerGen(x =>
+        // {
+        //     x.SwaggerDoc("v1.0", new OpenApiInfo { Version = "v1.0", Description = "Ordering API V1.0" });
+        //     x.CustomSchemaIds(type => type.FullName?.Replace("+", "."));
+        //     x.MapEnumerationType(typeof(Address).Assembly);
+        //     x.SupportObjectId();
+        // });
         services.AddHealthChecks();
 
         services.AddCors(option =>
@@ -202,10 +204,10 @@ public static class Startup
         if (env.IsDevelopment())
         {
             app.UseDeveloperExceptionPage();
-            //启用中间件服务生成Swagger作为JSON终结点
-            app.UseSwagger();
-            //启用中间件服务对swagger-ui，指定Swagger JSON终结点
-            app.UseSwaggerUI(c => { c.SwaggerEndpoint("/swagger/v1.0/swagger.json", "Ordering API V1.0"); });
+            // //启用中间件服务生成Swagger作为JSON终结点
+            // app.UseSwagger();
+            // //启用中间件服务对swagger-ui，指定Swagger JSON终结点
+            // app.UseSwaggerUI(c => { c.SwaggerEndpoint("/swagger/v1.0/swagger.json", "Ordering API V1.0"); });
         }
 
         // else

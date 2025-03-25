@@ -11,7 +11,6 @@ public class NugetTests(ITestOutputHelper outputHelper)
     [Fact(Skip = "ABC")]
     public async Task UnList()
     {
-        return;
         var numberList = new[]
         {
             "0.15.2",

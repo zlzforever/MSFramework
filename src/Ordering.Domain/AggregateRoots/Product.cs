@@ -1,4 +1,3 @@
-using System;
 using MicroserviceFramework.Domain;
 using MongoDB.Bson;
 using Ordering.Domain.AggregateRoots.Events;

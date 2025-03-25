@@ -85,6 +85,9 @@ public class ProductController(
     [HttpGet("Error")]
     public int GetErrorAsync()
     {
+        logger.LogError(
+            "Test {String} {Bool} {Int} {Double} {Byte} {Decimal} {Float} {Short} {Long} {DateTime} {Guid}",
+            "String", true, 1, 1.1d, 1, 1.1m, 1.1f, 1, 1, DateTime.Now, Guid.NewGuid());
         throw new Exception("I am an error");
     }
 

@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Serilog;
+using Serilog.Debugging;
 
 namespace Ordering.API;
 
@@ -20,6 +21,7 @@ public class Program
         var webApplicationBuilder = CreateWebApplicationBuilder(args);
         var web = webApplicationBuilder.Build();
         web.Configure();
+        SelfLog.Enable(Console.WriteLine);
         return web.RunAsync();
     }
 

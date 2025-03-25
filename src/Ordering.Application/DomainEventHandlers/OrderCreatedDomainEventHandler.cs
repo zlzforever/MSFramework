@@ -8,9 +8,7 @@ using Ordering.Domain.AggregateRoots.Events;
 namespace Ordering.Application.DomainEventHandlers;
 
 public class OrderCreatedDomainEventHandler(
-    ILogger<OrderCreatedDomainEventHandler> logger,
-    IUnitOfWork unitOfWork,
-    DaprClient daprClient)
+    ILogger<OrderCreatedDomainEventHandler> logger)
     : IDomainEventHandler<OrderCreatedDomainEvent>
 {
     public Task HandleAsync(OrderCreatedDomainEvent @event, CancellationToken cancellationToken = default)

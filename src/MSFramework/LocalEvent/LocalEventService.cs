@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using MicroserviceFramework.Application;
@@ -18,6 +17,7 @@ namespace MicroserviceFramework.LocalEvent;
 /// </summary>
 /// <param name="serviceProvider"></param>
 /// <param name="logger"></param>
+/// <param name="descriptorStore"></param>
 /// <param name="options"></param>
 public class LocalEventService(
     IServiceProvider serviceProvider,

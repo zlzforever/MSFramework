@@ -3,7 +3,6 @@ using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Threading;
 using MicroserviceFramework.Common;
-using MicroserviceFramework.Domain;
 using MicroserviceFramework.Extensions.Options;
 using MicroserviceFramework.Serialization;
 using MicroserviceFramework.Text.Json;
