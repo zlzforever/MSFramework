@@ -6,4 +6,4 @@ namespace MicroserviceFramework.AspNetCore.Filters;
 ///
 /// </summary>
 [AttributeUsage(AttributeTargets.Class | AttributeTargets.Method)]
-public sealed class SkipUnitOfWork : Attribute;
+public sealed class NonUnitOfWork : Attribute;

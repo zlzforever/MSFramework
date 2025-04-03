@@ -76,7 +76,7 @@ public class LokiAuditingStore : IAuditingStore
 
         var auditOperationProperties = new List<LogEventProperty>
         {
-            new("Url", new ScalarValue(auditOperation.Url ?? string.Empty)),
+            new("Url", new ScalarValue(auditOperation.Path ?? string.Empty)),
             new("IP", new ScalarValue(auditOperation.IP ?? string.Empty)),
             new("DeviceId", new ScalarValue(auditOperation.DeviceId ?? string.Empty)),
             new("DeviceModel", new ScalarValue(auditOperation.DeviceModel ?? string.Empty)),

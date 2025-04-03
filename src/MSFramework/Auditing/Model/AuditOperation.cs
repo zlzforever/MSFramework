@@ -13,7 +13,7 @@ public class AuditOperation : CreationAggregateRoot<string>
     /// <summary>
     /// 操作路径
     /// </summary>
-    public string Url { get; private set; }
+    public string Path { get; private set; }
 
     /// <summary>
     /// 操作的 IP 地址
@@ -85,7 +85,7 @@ public class AuditOperation : CreationAggregateRoot<string>
         double? lng, string traceId) : this(ObjectId.GenerateNewId().ToString())
     {
         IP = ip;
-        Url = url;
+        Path = url;
         UserAgent = userAgent;
         DeviceModel = deviceModel;
         DeviceId = deviceId;

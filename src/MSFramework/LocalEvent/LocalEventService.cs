@@ -35,7 +35,7 @@ public class LocalEventService(
     {
         return Task.Factory.StartNew(async () =>
         {
-            logger.LogInformation("本地事件消费服务启动");
+            logger.LogInformation("本地事件服务启动");
 
             while (await LocalEventPublisher.EventChannel.Reader.WaitToReadAsync(stoppingToken))
             {
@@ -53,7 +53,7 @@ public class LocalEventService(
                         {
                             var handlerName = descriptor.HandlerType.FullName;
 
-                            logger.LogDebug("{TraceId}, 处理器 {HandlerType} 执行开始", traceId, handlerName);
+                            logger.LogDebug("{TraceId}, 事件处理器 {HandlerType} 执行开始", traceId, handlerName);
 
                             using var scope = serviceProvider.CreateScope();
                             var services = scope.ServiceProvider;
@@ -77,7 +77,8 @@ public class LocalEventService(
                                     CreateAuditedOperation(session, handlerName));
                             }
 
-                            if (descriptor.HandleMethod.Invoke(handler, [entry.EventData, stoppingToken]) is not Task
+                            if (descriptor.HandleMethod.Invoke(handler, [entry.EventData, CancellationToken.None]) is
+                                not Task
                                 task)
                             {
                                 continue;
@@ -89,15 +90,15 @@ public class LocalEventService(
                                 var unitOfWork = services.GetService<IUnitOfWork>();
                                 if (unitOfWork != null)
                                 {
-                                    await unitOfWork.SaveChangesAsync(stoppingToken);
+                                    await unitOfWork.SaveChangesAsync(CancellationToken.None);
                                 }
 
                                 logger.LogDebug(
-                                    "{TraceId}, 处理器 {HandlerType} 执行结束", traceId, handlerName);
+                                    "{TraceId}, 事件处理器 {HandlerType} 执行结束", traceId, handlerName);
                             }
                             catch (Exception e)
                             {
-                                logger.LogError(e, "{TraceId}, 处理器 {HandlerType} 执行失败",
+                                logger.LogError(e, "{TraceId}, 事件处理器 {HandlerType} 执行失败",
                                     traceId, handlerName);
                             }
                         }
@@ -112,6 +113,17 @@ public class LocalEventService(
         }, stoppingToken);
     }
 
+    /// <summary>
+    ///
+    /// </summary>
+    /// <param name="cancellationToken"></param>
+    /// <returns></returns>
+    public override async Task StopAsync(CancellationToken cancellationToken)
+    {
+        logger.LogInformation("开始关闭本地事件服务");
+        await base.StopAsync(cancellationToken);
+        logger.LogInformation("关闭本地事件服务完成");
+    }
 
     private AuditOperation CreateAuditedOperation(ISession session, string handlerType)
     {

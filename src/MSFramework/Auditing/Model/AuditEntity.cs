@@ -16,14 +16,15 @@ public class AuditEntity : EntityBase<string>
     /// <param name="typeName"></param>
     /// <param name="entityId"></param>
     /// <param name="operationType"></param>
-    public AuditEntity(string typeName, string entityId, OperationType operationType) : this()
+    public AuditEntity(string typeName, string entityId, OperationType operationType) : this(ObjectId.GenerateNewId()
+        .ToString())
     {
         Type = typeName;
         EntityId = entityId;
         OperationType = operationType;
     }
 
-    private AuditEntity() : base(ObjectId.GenerateNewId().ToString())
+    private AuditEntity(string id) : base(id)
     {
         Properties = new List<AuditProperty>();
     }

@@ -16,15 +16,15 @@ public class AuditProperty : EntityBase<string>
     /// <summary>
     ///
     /// </summary>
-    /// <param name="propertyName"></param>
-    /// <param name="propertyType"></param>
+    /// <param name="name"></param>
+    /// <param name="type"></param>
     /// <param name="originalValue"></param>
     /// <param name="newValue"></param>
-    public AuditProperty(string propertyName, string propertyType, string originalValue, string newValue)
+    public AuditProperty(string name, string type, string originalValue, string newValue)
         : this(ObjectId.GenerateNewId().ToString())
     {
-        Name = propertyName;
-        Type = propertyType;
+        Name = name;
+        Type = type;
         OriginalValue = originalValue;
         NewValue = newValue;
     }

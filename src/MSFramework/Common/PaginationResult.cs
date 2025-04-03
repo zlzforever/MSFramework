@@ -11,7 +11,7 @@ public class PaginationResult<TEntity>(int page, int limit, int total, List<TEnt
     /// <summary>
     /// 数据列表
     /// </summary>
-    public List<TEntity> Data { get; } = data ?? [];
+    public ICollection<TEntity> Data { get; } = data ?? [];
 
     /// <summary>
     /// 数据总量

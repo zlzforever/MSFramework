@@ -96,7 +96,7 @@ public static class ServiceCollectionExtensions
         }
         else
         {
-            cancellationToken = new CancellationToken();
+            cancellationToken = CancellationToken.None;
         }
 
         foreach (var hostedService in initializers)

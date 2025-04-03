@@ -74,7 +74,7 @@ public class RepositoryInterfaceGenerator : IIncrementalGenerator
         });
     }
 
-    public class Model(string @namespace, string className, string key)
+    private class Model(string @namespace, string className, string key)
     {
         public string Namespace { get; set; } = @namespace;
         public string ClassName { get; set; } = className;

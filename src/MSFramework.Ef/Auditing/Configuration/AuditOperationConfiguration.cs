@@ -19,7 +19,7 @@ internal class AuditOperationConfiguration
         builder.Property(x => x.Lat);
         builder.Property(x => x.Lng);
         builder.Property(x => x.UserAgent).HasMaxLength(1024);
-        builder.Property(x => x.Url).HasMaxLength(1024);
+        builder.Property(x => x.Path).HasMaxLength(1024);
         builder.Property(x => x.Elapsed);
         builder.Property(x => x.EndTime).UseUnixTime();
         builder.Property(x => x.TraceId).HasMaxLength(64);

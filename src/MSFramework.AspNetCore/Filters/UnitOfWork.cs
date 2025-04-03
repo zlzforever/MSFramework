@@ -23,7 +23,7 @@ internal class UnitOfWork(ILogger<UnitOfWork> logger) : IAsyncActionFilter, IOrd
             return;
         }
 
-        if (context.HasAttribute<SkipUnitOfWork>())
+        if (context.HasAttribute<NonUnitOfWork>())
         {
             return;
         }

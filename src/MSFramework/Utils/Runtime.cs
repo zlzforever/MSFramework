@@ -29,7 +29,7 @@ public static class Runtime
     {
         // StartsWith = ["MSFramework", "Newtonsoft.Json"];
         StartsWith = ["MSFramework"];
-        ExcludeWith = [];
+        ExcludeWith = [""];
         // 分析器不会输出程序集文件
         var analyzerAssemblyList = new[] { "MSFramework.Analyzers", "MSFramework.Ef.Analyzers" };
         if (DependencyContext.Default != null)
