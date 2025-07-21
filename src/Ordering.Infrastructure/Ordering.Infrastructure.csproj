@@ -1,12 +1,17 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net8.0</TargetFramework>
+    <TargetFramework>net9.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
+    <EmitCompilerGeneratedFiles>true</EmitCompilerGeneratedFiles>
 <!--    <EmitCompilerGeneratedFiles>true</EmitCompilerGeneratedFiles>-->
 <!--    <CompilerGeneratedFilesOutputPath>Generated\Repositories</CompilerGeneratedFilesOutputPath>-->
+    <!-- 明确指定要使用的Roslyn编译器版本 -->
+    <RoslynCompilerVersion>4.14.0</RoslynCompilerVersion>
   </PropertyGroup>
   <ItemGroup>
+    <!-- 添加对特定版本编译器的引用 -->
+    <PackageReference Include="Microsoft.Net.Compilers.Toolset" Version="4.14.0" PrivateAssets="all" />
     <ProjectReference Include="..\MSFramework.Ef\MSFramework.Ef.csproj"/>
     <ProjectReference Include="..\MSFramework.Ef.MySql\MSFramework.Ef.MySql.csproj"/>
     <ProjectReference Include="..\MSFramework.Ef.PostgreSql\MSFramework.Ef.PostgreSql.csproj"/>
@@ -14,6 +19,9 @@
     <ProjectReference Include="..\Ordering.Domain\Ordering.Domain.csproj"/>
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="9.0.3" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="9.0.7" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Migrations\" />
   </ItemGroup>
 </Project>

@@ -3,8 +3,16 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace MicroserviceFramework.Extensions.DependencyInjection;
 
-internal static class LifetimeUtilities
+/// <summary>
+///
+/// </summary>
+public static class LifetimeUtilities
 {
+    /// <summary>
+    ///
+    /// </summary>
+    /// <param name="type"></param>
+    /// <returns></returns>
     public static ServiceLifetime? GetLifetime(Type type)
     {
         if (type.IsAbstract || type.IsInterface)

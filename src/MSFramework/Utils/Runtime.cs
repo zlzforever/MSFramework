@@ -12,24 +12,24 @@ namespace MicroserviceFramework.Utils;
 /// </summary>
 public static class Runtime
 {
-    private static readonly List<Assembly> Assemblies;
-    private static readonly List<Type> Types;
+    private static readonly List<Assembly> Assemblies = new();
+    private static readonly List<Type> Types = new();
 
     /// <summary>
     ///
     /// </summary>
-    public static readonly HashSet<string> StartsWith;
+    public static readonly HashSet<string> StartsWith = ["MSFramework"];
 
     /// <summary>
     ///
     /// </summary>
-    public static readonly HashSet<string> ExcludeWith;
+    public static readonly HashSet<string> ExcludeWith = new();
 
-    static Runtime()
+    internal static void Load()
     {
-        // StartsWith = ["MSFramework", "Newtonsoft.Json"];
-        StartsWith = ["MSFramework"];
-        ExcludeWith = [""];
+        Assemblies.Clear();
+        Types.Clear();
+
         // 分析器不会输出程序集文件
         var analyzerAssemblyList = new[] { "MSFramework.Analyzers", "MSFramework.Ef.Analyzers" };
         if (DependencyContext.Default != null)
@@ -105,14 +105,8 @@ public static class Runtime
                 dict.TryAdd(name, assembly);
             }
 
-            Assemblies = dict.Values.Where(x => x != null).ToList();
+            Assemblies.AddRange(dict.Values.Where(x => x != null));
         }
-        else
-        {
-            Assemblies = new List<Assembly>();
-        }
-
-        Types = new List<Type>();
 
         foreach (var assembly in Assemblies)
         {

@@ -122,8 +122,12 @@ public class LokiAuditingStore : IAuditingStore
         return Task.CompletedTask;
     }
 
-    // public Task CommitAsync()
-    // {
-    //     return Task.CompletedTask;
-    // }
+    /// <summary>
+    ///
+    /// </summary>
+    /// <returns></returns>
+    public Task CommitAsync()
+    {
+        return Task.CompletedTask;
+    }
 }

@@ -136,6 +136,7 @@ public static class ServiceCollectionExtensions
         params string[] prefixes)
     {
         builder.Services.AddAssemblyScanPrefix(prefixes);
+        Utils.Runtime.Load();
         return builder;
     }
 

@@ -1,11 +1,16 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net8.0</TargetFramework>
+    <TargetFramework>net9.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
+    <EmitCompilerGeneratedFiles>true</EmitCompilerGeneratedFiles>
+    <!-- 明确指定要使用的Roslyn编译器版本 -->
+    <RoslynCompilerVersion>4.14.0</RoslynCompilerVersion>
   </PropertyGroup>
 
   <ItemGroup>
+    <!-- 添加对特定版本编译器的引用 -->
+    <PackageReference Include="Microsoft.Net.Compilers.Toolset" Version="4.14.0" PrivateAssets="all" />
     <ProjectReference Include="..\MSFramework.Analyzers\MSFramework.Analyzers.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="true" />
     <ProjectReference Include="..\MSFramework\MSFramework.csproj"/>
   </ItemGroup>
@@ -17,6 +22,6 @@
 
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Abstractions" Version="9.0.3" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Abstractions" Version="9.0.7" />
   </ItemGroup>
 </Project>

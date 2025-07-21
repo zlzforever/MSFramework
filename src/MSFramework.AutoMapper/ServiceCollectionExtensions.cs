@@ -43,7 +43,7 @@ public static class ServiceCollectionExtensions
         params Assembly[] assemblies)
     {
         builder.Services.TryAddScoped<IObjectAssembler, AutoMapperObjectAssembler>();
-        builder.Services.AddAutoMapper(assemblies);
+        builder.Services.AddAutoMapper( assemblies);
         return builder;
     }
 }

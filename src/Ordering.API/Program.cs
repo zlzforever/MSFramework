@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
+using MicroserviceFramework.Utils;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Serilog;
@@ -13,6 +14,8 @@ public class Program
 {
     public static Task Main(string[] args)
     {
+        Runtime.ExcludeWith.Add("MSFramework.AspNetCore.Test");
+
         Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
 
         AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);

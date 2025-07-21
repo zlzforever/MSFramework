@@ -14,4 +14,10 @@ public interface IAuditingStore
     /// <param name="auditOperation"></param>
     /// <returns></returns>
     Task AddAsync(AuditOperation auditOperation);
+
+    /// <summary>
+    ///
+    /// </summary>
+    /// <returns></returns>
+    Task CommitAsync();
 }

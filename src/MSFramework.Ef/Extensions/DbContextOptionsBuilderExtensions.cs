@@ -45,10 +45,13 @@ public static class DbContextOptionsBuilderExtensions
                 }
 
                 var e = (RuntimeEntityType)entity;
-                var filter = SoftDeleteQueryExtensions.GetSoftDeleteQueryFilter(e.ClrType);
 #pragma warning disable EF1001
-                e.AddAnnotation(CoreAnnotationNames.QueryFilter, filter);
+                if (e.FindAnnotation(CoreAnnotationNames.QueryFilter) == null)
+                {
+                    var filter = SoftDeleteQueryExtensions.GetSoftDeleteQueryFilter(e.ClrType);
+                    e.AddAnnotation(CoreAnnotationNames.QueryFilter, filter);
 #pragma warning restore EF1001
+                }
             }
 
             return model;
