@@ -1,4 +1,3 @@
-using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
 using MicroserviceFramework.Extensions.DependencyInjection;
@@ -8,22 +7,22 @@ namespace MicroserviceFramework;
 /// <summary>
 ///
 /// </summary>
-public abstract class Initializer : IInitializer
+internal interface IInitializerBase : ISingletonDependency
 {
     /// <summary>
     ///
     /// </summary>
     /// <param name="cancellationToken"></param>
     /// <returns></returns>
-    public abstract Task StartAsync(CancellationToken cancellationToken);
+    Task StartAsync(CancellationToken cancellationToken);
 
     /// <summary>
     /// 同步启动
     /// </summary>
-    public bool Synchronized { get; protected init; }
+    bool Synchronized { get; }
 
     /// <summary>
     ///
     /// </summary>
-    public int Order { get; protected init; }
+    public int Order { get; }
 }
