@@ -4,15 +4,14 @@ using MicroserviceFramework;
 
 namespace Ordering.API;
 
-public class TestInitializer : Initializer
+public class TestInitializerBase : InitializerBase
 {
-    public TestInitializer()
+    public TestInitializerBase()
     {
         Order = 1;
     }
 
-    public override Task StartAsync(CancellationToken cancellationToken)
+    public override void Start()
     {
-        return Task.CompletedTask;
     }
 }

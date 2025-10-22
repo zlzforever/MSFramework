@@ -2,7 +2,7 @@
 // using System.Collections.Generic;
 // using System.Threading.Tasks;
 // using MicroserviceFramework;
-// using MicroserviceFramework.Initializer;
+// using MicroserviceFramework.InitializerBase;
 // using Microsoft.Extensions.DependencyInjection;
 // using Xunit;
 //

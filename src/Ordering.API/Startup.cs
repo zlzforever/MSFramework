@@ -26,7 +26,6 @@ using Ordering.Domain.AggregateRoots.Order;
 using Ordering.Infrastructure;
 using Serilog;
 using Serilog.Events;
-using Serilog.Sinks.ClickHouse;
 
 namespace Ordering.API;
 
@@ -40,9 +39,7 @@ public static class Startup
         if (serilogSection.GetChildren().Any())
         {
             Log.Logger = new LoggerConfiguration().ReadFrom
-                .Configuration(configuration).WriteTo
-                .ClickHouse("http://localhost:8123", "logs", "application_log",
-                    "default", "xxx", "ordering-api")
+                .Configuration(configuration)
                 .CreateLogger();
         }
         else

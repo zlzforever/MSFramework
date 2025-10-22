@@ -8,14 +8,13 @@ namespace MicroserviceFramework;
 /// <summary>
 ///
 /// </summary>
-public abstract class Initializer : IInitializer
+public abstract class InitializerBase : IInitializer
 {
     /// <summary>
     ///
     /// </summary>
-    /// <param name="cancellationToken"></param>
     /// <returns></returns>
-    public abstract Task StartAsync(CancellationToken cancellationToken);
+    public abstract void Start();
 
     /// <summary>
     /// 同步启动

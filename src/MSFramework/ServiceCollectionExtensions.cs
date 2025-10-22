@@ -80,28 +80,18 @@ public static class ServiceCollectionExtensions
 
         var logger = loggerFactory.CreateLogger("MicroserviceFramework");
 
-        var initializers = applicationServices.GetServices<IInitializerBase>()
-            .OrderBy(x => x.Order).ToList();
-        logger.LogInformation(
-            "发现初始化器: {Initializers}", string.Join(" -> ", initializers.Select(x => x.GetType().FullName)));
+        var initializers = applicationServices.GetServices<IInitializer>()
+            .OrderByDescending(x => x.Order).ToList();
 
-        CancellationToken cancellationToken;
-        var hostApplicationLifetime = applicationServices.GetService<IHostApplicationLifetime>();
-        if (hostApplicationLifetime != null)
+        if (initializers.Count > 0)
         {
-            using var combinedCancellationTokenSource =
-                CancellationTokenSource.CreateLinkedTokenSource(hostApplicationLifetime.ApplicationStopping);
-            cancellationToken = combinedCancellationTokenSource.Token;
-            cancellationToken.ThrowIfCancellationRequested();
-        }
-        else
-        {
-            cancellationToken = CancellationToken.None;
-        }
-
-        foreach (var hostedService in initializers)
-        {
-            hostedService.StartAsync(cancellationToken).ConfigureAwait(false).GetAwaiter();
+            logger.LogInformation(
+                "发现同步初始化器: {Initializers}",
+                string.Join(" -> ", initializers.Select(x => x.GetType().FullName)));
+            foreach (var initializer in initializers)
+            {
+                initializer.Start();
+            }
         }
     }
 

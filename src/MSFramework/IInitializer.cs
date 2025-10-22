@@ -7,19 +7,13 @@ namespace MicroserviceFramework;
 /// <summary>
 ///
 /// </summary>
-internal interface IInitializerBase : ISingletonDependency
+internal interface IInitializer : ISingletonDependency
 {
     /// <summary>
     ///
     /// </summary>
-    /// <param name="cancellationToken"></param>
     /// <returns></returns>
-    Task StartAsync(CancellationToken cancellationToken);
-
-    /// <summary>
-    /// 同步启动
-    /// </summary>
-    bool Synchronized { get; }
+    void Start();
 
     /// <summary>
     ///

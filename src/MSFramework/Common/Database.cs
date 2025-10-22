@@ -188,5 +188,15 @@ public enum Database
     /// <summary>
     ///
     /// </summary>
-    OpenGauss
+    OpenGauss,
+
+    /// <summary>
+    /// 瀚高
+    /// </summary>
+    HighGo,
+
+    /// <summary>
+    ///
+    /// </summary>
+    OceanBase
 }
