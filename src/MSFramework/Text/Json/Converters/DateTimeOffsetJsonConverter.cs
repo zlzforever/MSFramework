@@ -18,7 +18,18 @@ public class DateTimeOffsetJsonConverter : JsonConverter<DateTimeOffset>
     /// <returns></returns>
     public override DateTimeOffset Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
     {
-        return reader.TryGetInt32(out var v) ? DateTimeOffset.FromUnixTimeSeconds(v) : DateTimeOffset.UnixEpoch;
+        if (reader.TokenType == JsonTokenType.String)
+        {
+            var value = reader.GetString();
+            return string.IsNullOrEmpty(value) ? DateTimeOffset.MinValue : DateTimeOffset.Parse(value);
+        }
+
+        if (reader.TokenType == JsonTokenType.Number)
+        {
+            return reader.TryGetInt32(out var v) ? DateTimeOffset.FromUnixTimeSeconds(v) : DateTimeOffset.UnixEpoch;
+        }
+
+        throw new NotSupportedException("不支持的数据类型");
     }
 
     /// <summary>

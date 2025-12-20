@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Security.Claims;
+using System.Text;
 using MicroserviceFramework.AspNetCore.IdentityModel;
 using MicroserviceFramework.Security.Claims;
 using Microsoft.AspNetCore.Http;
@@ -54,9 +55,11 @@ public class HttpSession : ISession
         name = string.IsNullOrEmpty(name) ? userName : name;
         var userDisplayName = name;
 
+        var traceId = accessor.HttpContext.TraceIdentifier;
+
         var session = new HttpSession
         {
-            TraceIdentifier = accessor.HttpContext.TraceIdentifier,
+            TraceIdentifier = traceId,
             UserId = accessor.HttpContext.User.GetValue(ClaimTypes.NameIdentifier, JwtClaimTypes.Subject),
             UserName = userName,
             Email = accessor.HttpContext.User.GetValue(ClaimTypes.Email, JwtClaimTypes.Email),
@@ -142,5 +145,18 @@ public class HttpSession : ISession
         UserDisplayName = session.UserDisplayName;
         Roles = session.Roles;
         Subjects = session.Subjects;
+    }
+
+    private static string GetHeaderValue(IHeaderDictionary dict, params string[] headers)
+    {
+        foreach (var header in headers)
+        {
+            if (dict.TryGetValue(header, out var value))
+            {
+                return value;
+            }
+        }
+
+        return null;
     }
 }

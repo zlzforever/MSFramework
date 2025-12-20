@@ -19,7 +19,20 @@ public class DateTimeJsonConverter : JsonConverter<DateTime>
     /// <returns></returns>
     public override DateTime Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
     {
-        return reader.TryGetInt32(out var v) ? DateTimeOffset.FromUnixTimeSeconds(v).LocalDateTime : DateTime.UnixEpoch;
+        if (reader.TokenType == JsonTokenType.String)
+        {
+            var value = reader.GetString();
+            return string.IsNullOrEmpty(value) ? DateTime.MinValue : DateTime.Parse(value);
+        }
+
+        if (reader.TokenType == JsonTokenType.Number)
+        {
+            return reader.TryGetInt32(out var v)
+                ? DateTimeOffset.FromUnixTimeSeconds(v).LocalDateTime
+                : DateTime.UnixEpoch;
+        }
+
+        throw new NotSupportedException("不支持的数据类型");
     }
 
     /// <summary>

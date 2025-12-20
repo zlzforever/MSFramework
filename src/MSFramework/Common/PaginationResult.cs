@@ -6,12 +6,12 @@ namespace MicroserviceFramework.Common;
 /// 分页结果包装类
 /// </summary>
 /// <typeparam name="TEntity"></typeparam>
-public class PaginationResult<TEntity>(int page, int limit, int total, List<TEntity> data)
+public class PaginationResult<TEntity>(int page, int limit, int total, IEnumerable<TEntity> data)
 {
     /// <summary>
     /// 数据列表
     /// </summary>
-    public ICollection<TEntity> Data { get; } = data ?? [];
+    public IEnumerable<TEntity> Data { get; } = data ?? [];
 
     /// <summary>
     /// 数据总量

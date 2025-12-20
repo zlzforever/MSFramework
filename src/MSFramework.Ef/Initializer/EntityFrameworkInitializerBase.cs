@@ -48,7 +48,8 @@ public class EntityFrameworkInitializerBase
         var list = scope.ServiceProvider.GetServices<DbContextOptions>().ToList();
         if (list.Count == 0)
         {
-            throw new MicroserviceFrameworkException("未能找到数据上下文配置");
+            _logger.LogInformation("EF 初始化结束: 未能找到数据上下文配置");
+            return;
         }
 
         foreach (var option in list)
