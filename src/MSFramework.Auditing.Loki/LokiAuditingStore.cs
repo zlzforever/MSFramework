@@ -123,7 +123,7 @@ public class LokiAuditingStore : IAuditingStore
     }
 
     /// <summary>
-    ///
+    /// 这方法，不需要做提交，Serilog 有缓存、批次管理
     /// </summary>
     /// <returns></returns>
     public Task CommitAsync()

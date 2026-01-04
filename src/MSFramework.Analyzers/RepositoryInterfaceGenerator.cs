@@ -16,7 +16,7 @@ public class RepositoryInterfaceGenerator : IIncrementalGenerator
     {
         var pipeline = context.SyntaxProvider.CreateSyntaxProvider(
             static (syntaxNode, _) => syntaxNode.IsKind(SyntaxKind.ClassDeclaration),
-            static (GeneratorSyntaxContext context, CancellationToken cancellationToken) =>
+            static (context, cancellationToken) =>
             {
                 var classDeclarationSyntax = (ClassDeclarationSyntax)context.Node;
                 var assemblyClassTypeSymbol =

@@ -3,7 +3,7 @@ namespace MicroserviceFramework.Utils;
 /// <summary>
 ///
 /// </summary>
-public static class HttpUtil
+public static class HttpUtils
 {
     /// <summary>
     ///

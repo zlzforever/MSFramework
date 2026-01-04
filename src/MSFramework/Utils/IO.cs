@@ -9,40 +9,41 @@ namespace MicroserviceFramework.Utils;
 /// </summary>
 public static class IO
 {
-    /// <summary>
-    /// 流保存到文件
-    /// </summary>
     /// <param name="stream"></param>
-    /// <param name="path"></param>
-    public static void SaveToFile(this Stream stream, string path)
+    extension(Stream stream)
     {
-        using var fileStream = File.Open(path, FileMode.OpenOrCreate);
-        stream.CopyTo(fileStream);
-    }
+        /// <summary>
+        /// 流保存到文件
+        /// </summary>
+        /// <param name="path"></param>
+        public void SaveToFile(string path)
+        {
+            using var fileStream = File.Open(path, FileMode.OpenOrCreate);
+            stream.CopyTo(fileStream);
+        }
 
-    /// <summary>
-    /// 流转换成 byte[]
-    /// </summary>
-    /// <param name="stream"></param>
-    public static async Task<byte[]> ToArrayAsync(this Stream stream)
-    {
-        stream.Seek(0, SeekOrigin.Begin);
-        var bytes = new byte[stream.Length];
-        _ = await stream.ReadAsync(bytes);
-        return bytes;
-    }
+        /// <summary>
+        /// 流转换成 byte[]
+        /// </summary>
+        public async Task<byte[]> ToArrayAsync()
+        {
+            stream.Seek(0, SeekOrigin.Begin);
+            var bytes = new byte[stream.Length];
+            _ = await stream.ReadAsync(bytes);
+            return bytes;
+        }
 
-    /// <summary>
-    /// 流转换成 byte[]
-    /// </summary>
-    /// <param name="stream"></param>
-    /// <returns></returns>
-    public static byte[] ToArray(this Stream stream)
-    {
-        stream.Seek(0, SeekOrigin.Begin);
-        var bytes = new byte[stream.Length];
-        _ = stream.Read(bytes);
-        return bytes;
+        /// <summary>
+        /// 流转换成 byte[]
+        /// </summary>
+        /// <returns></returns>
+        public byte[] ToArray()
+        {
+            stream.Seek(0, SeekOrigin.Begin);
+            var bytes = new byte[stream.Length];
+            _ = stream.Read(bytes);
+            return bytes;
+        }
     }
 
     /// <summary>

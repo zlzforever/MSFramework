@@ -1,8 +1,10 @@
 using System;
-using System.Linq;
+using System.Collections.Generic;
+using System.IO;
 using System.Reflection;
 using MicroserviceFramework.Domain;
 using MicroserviceFramework.Serialization;
+using Microsoft.Extensions.Logging;
 using MongoDB.Bson;
 
 namespace MicroserviceFramework;
@@ -20,11 +22,21 @@ public static class Defaults
     /// <summary>
     ///
     /// </summary>
+    public static ILogger Logger;
+
+    /// <summary>
+    ///
+    /// </summary>
     public static readonly bool IsInTests;
+
+    /// <summary>
+    ///
+    /// </summary>
+    public static readonly string OSSDirectory = Path.Combine(AppContext.BaseDirectory, "wwwroot", "oss");
 
     static Defaults()
     {
-        string[] names = ["ReSharperTestRunner", "testhost"];
+        List<string> names = ["ReSharperTestRunner", "testhost"];
         IsInTests = names.Contains(Assembly.GetEntryAssembly()?.GetName().Name);
     }
 

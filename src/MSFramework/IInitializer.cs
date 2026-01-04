@@ -1,5 +1,3 @@
-using System.Threading;
-using System.Threading.Tasks;
 using MicroserviceFramework.Extensions.DependencyInjection;
 
 namespace MicroserviceFramework;

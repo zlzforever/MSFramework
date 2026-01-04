@@ -2,7 +2,7 @@ using MicroserviceFramework.Extensions.Options;
 
 namespace MSFramework.AspNetCore.Test.Extensions;
 
-[OptionsType("TestConfigModel")]
+[AutoOptions(Section = "TestConfigModel")]
 public class TestConfigModel
 {
     public string Name { get; set; }

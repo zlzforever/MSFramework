@@ -9,7 +9,6 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
-using MongoDB.Bson;
 
 namespace MicroserviceFramework.Ef;
 
@@ -18,43 +17,31 @@ namespace MicroserviceFramework.Ef;
 /// </summary>
 public static partial class ServiceCollectionExtensions
 {
-    /// <summary>
-    ///
-    /// </summary>
-    /// <param name="services"></param>
-    /// <typeparam name="TDbContext"></typeparam>
-    /// <returns></returns>
-    public static IServiceCollection AddEfAuditing<TDbContext>(this IServiceCollection services)
-        where TDbContext : DbContext
-    {
-        EfUtilities.AuditingDbContextType = typeof(TDbContext);
-        services.AddScoped<IAuditingStore, EfAuditingStore<TDbContext>>();
-        return services;
-    }
-
-    /// <summary>
-    ///
-    /// </summary>
     /// <param name="builder"></param>
-    /// <typeparam name="TDbContext"></typeparam>
-    /// <returns></returns>
-    public static MicroserviceFrameworkBuilder UseEfAuditing<TDbContext>(this MicroserviceFrameworkBuilder builder)
-        where TDbContext : DbContext
+    extension(MicroserviceFrameworkBuilder builder)
     {
-        EfUtilities.AuditingDbContextType = typeof(TDbContext);
-        builder.Services.AddScoped<IAuditingStore, EfAuditingStore<TDbContext>>();
-        return builder;
-    }
+        /// <summary>
+        ///
+        /// </summary>
+        /// <typeparam name="TDbContext"></typeparam>
+        /// <returns></returns>
+        public MicroserviceFrameworkBuilder UseEfAuditing<TDbContext>()
+            where TDbContext : DbContext
+        {
+            EfUtilities.AuditingDbContextType = typeof(TDbContext);
+            builder.Services.AddScoped<IAuditingStore, EfAuditingStore<TDbContext>>();
+            return builder;
+        }
 
-    /// <summary>
-    ///
-    /// </summary>
-    /// <param name="builder"></param>
-    /// <returns></returns>
-    public static MicroserviceFrameworkBuilder UseEntityFramework(this MicroserviceFrameworkBuilder builder)
-    {
-        builder.Services.AddEntityFrameworkExtension();
-        return builder;
+        /// <summary>
+        ///
+        /// </summary>
+        /// <returns></returns>
+        public MicroserviceFrameworkBuilder UseEntityFramework()
+        {
+            builder.Services.AddEntityFrameworkExtension();
+            return builder;
+        }
     }
 
     /// <summary>
@@ -95,26 +82,28 @@ public static partial class ServiceCollectionExtensions
                     x.IsInterface && x.GetGenericTypeDefinition() == typeof(IRepository<,>));
                 if (repoInterfaceType != null)
                 {
-                    // 若有自定义实现， 则已经自动注入
-                    if (services.Any(x => x.ServiceType == type))
-                    {
-                        continue;
-                    }
+                    // TODO:
 
-                    var entityType = repoInterfaceType.GetGenericArguments()[0].FullName;
-                    var entityKeyType = repoInterfaceType.GetGenericArguments()[1].FullName;
-                    var name = ObjectId.GenerateNewId().ToString();
-                    var script = $$"""
-                                   public class R_{{name}}_Repo
-                                       : MicroserviceFramework.Ef.Repositories.EfRepository<{{entityType}},
-                                        {{entityKeyType}}>, {{type.FullName}}
-                                   {
-                                       public R_{{name}}_Repo(MicroserviceFramework.Ef.DbContextFactory context) : base(context)
-                                       {
-                                           UseQuerySplittingBehavior = true;
-                                       }
-                                   }
-                                   """;
+                    // // 若有自定义实现， 则已经自动注入
+                    // if (services.Any(x => x.ServiceType == type))
+                    // {
+                    //     continue;
+                    // }
+
+                    // var entityType = repoInterfaceType.GetGenericArguments()[0].FullName;
+                    // var entityKeyType = repoInterfaceType.GetGenericArguments()[1].FullName;
+                    // var name = ObjectId.GenerateNewId().ToString();
+//                     var script = $$"""
+//                                    public class R_{{name}}_Repo
+//                                        : MicroserviceFramework.Ef.Repositories.EfRepository<{{entityType}},
+//                                         {{entityKeyType}}>, {{type.FullName}}
+//                                    {
+//                                        public R_{{name}}_Repo(MicroserviceFramework.Ef.DbContextFactory context) : base(context)
+//                                        {
+//                                            UseQuerySplittingBehavior = true;
+//                                        }
+//                                    }
+//                                    """;
                     // var repoType = DynamicCompileUtil.CreateType(script);
                     // services.AddScoped(type, repoType);
                 }

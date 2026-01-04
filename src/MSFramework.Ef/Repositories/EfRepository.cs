@@ -14,7 +14,6 @@ namespace MicroserviceFramework.Ef.Repositories;
 public class EfRepository<TEntity, TKey> : IRepository<TEntity, TKey>, IEfRepository
     where TEntity : class, IAggregateRoot<TKey> where TKey : IEquatable<TKey>
 {
-    private IQueryable<TEntity> _store;
     private readonly DbSet<TEntity> _dbSet;
     private readonly DbContextBase _dbContext;
 
@@ -25,15 +24,15 @@ public class EfRepository<TEntity, TKey> : IRepository<TEntity, TKey>, IEfReposi
     {
         get
         {
-            if (_store != null)
+            if (field != null)
             {
-                return _store;
+                return field;
             }
 
             var queryable = BuildQueryable(_dbSet);
-            _store = queryable;
+            field = queryable;
 
-            return _store;
+            return field;
         }
     }
 

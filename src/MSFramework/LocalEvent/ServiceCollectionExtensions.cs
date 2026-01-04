@@ -11,14 +11,15 @@ namespace MicroserviceFramework.LocalEvent;
 public static class ServiceCollectionExtensions
 {
     /// <summary>
-    ///
+    /// 不适合对所有 IServiceCollection 开放，若没有 Utils.Runtime 支持，注册不进去
     /// </summary>
     /// <param name="services"></param>
     /// <returns></returns>
-    public static IServiceCollection AddLocalEventPublisher(this IServiceCollection services)
+    private static void AddLocalEventPublisher(this IServiceCollection services)
     {
         services.TryAddScoped<IEventPublisher, LocalEventPublisher>();
-        services.AddHostedService<LocalEventService>();
+        services.AddHostedService<LocalEventBackgroundService>();
+
         var handlerInterface = typeof(IEventHandler<>);
 
         var store = new EventDescriptorStore();
@@ -36,8 +37,7 @@ public static class ServiceCollectionExtensions
             }
         }
 
-        services.AddSingleton(store);
-        return services;
+        services.TryAddSingleton(store);
     }
 
     /// <summary>

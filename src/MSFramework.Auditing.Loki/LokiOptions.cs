@@ -8,7 +8,7 @@ namespace MicroserviceFramework.Auditing.Loki;
 /// <summary>
 ///
 /// </summary>
-[OptionsType("LokiAuditing")]
+[AutoOptions(Section = "LokiAuditing")]
 [SuppressMessage("ReSharper", "CollectionNeverUpdated.Global")]
 [SuppressMessage("ReSharper", "UnusedAutoPropertyAccessor.Global")]
 public class LokiOptions

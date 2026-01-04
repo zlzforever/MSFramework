@@ -7,7 +7,6 @@ using System.Threading.Tasks;
 using MicroserviceFramework.Application;
 using MicroserviceFramework.Auditing.Model;
 using MicroserviceFramework.Domain;
-using MicroserviceFramework.Ef.Auditing.Configuration;
 using MicroserviceFramework.Ef.Extensions;
 using MicroserviceFramework.Ef.Internal;
 using MicroserviceFramework.Extensions.DependencyInjection;
@@ -96,21 +95,16 @@ public abstract class DbContextBase : DbContext
 
         modelBuilder.HasAnnotation("DatabaseType", settings.DatabaseType);
 
-        var tablePrefix = settings.TablePrefix?.Trim();
         var entityTypeConfigurations = entityConfigurationTypeFinder.GetEntityTypeConfigurations(contextType);
         foreach (var entityTypeConfiguration in entityTypeConfigurations)
         {
             entityTypeConfiguration.EntityTypeConfiguration.Configure(modelBuilder);
         }
 
-        // 建议审计统一在一个 DbContext 中进行存储
-        if (EfUtilities.AuditingDbContextType == contextType)
-        {
-            AuditOperationConfiguration.Instance.Configure(modelBuilder.Entity<AuditOperation>());
-            AuditEntityConfiguration.Instance.Configure(modelBuilder.Entity<AuditEntity>());
-            AuditPropertyConfiguration.Instance.Configure(modelBuilder.Entity<AuditProperty>());
-        }
+        // 需要保证执行顺序，使用虚方法较为合适
+        ApplyConfiguration(modelBuilder);
 
+        var tablePrefix = settings.TablePrefix?.Trim();
         foreach (var mutableEntityType in modelBuilder.Model.GetEntityTypes())
         {
             // owned 的类型是合并到其主表中， 所以没有 table name，schema 的说法
@@ -248,11 +242,23 @@ public abstract class DbContextBase : DbContext
     /// <summary>
     ///
     /// </summary>
+    /// <param name="modelBuilder"></param>
+    protected abstract void ApplyConfiguration(ModelBuilder modelBuilder);
+
+    /// <summary>
+    ///
+    /// </summary>
     /// <returns></returns>
     public IEnumerable<AuditEntity> GetAuditEntities()
     {
         foreach (var entry in ChangeTracker.Entries())
         {
+            // 审计对象不被审计
+            if (entry.Entity is IAuditObject)
+            {
+                continue;
+            }
+
             var auditEntity = entry.State switch
             {
                 EntityState.Added => GetAuditEntity(entry, OperationType.Add),

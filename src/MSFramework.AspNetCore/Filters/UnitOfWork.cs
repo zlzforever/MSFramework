@@ -23,7 +23,8 @@ internal class UnitOfWork(ILogger<UnitOfWork> logger) : IAsyncActionFilter, IOrd
             return;
         }
 
-        if (context.HasAttribute<NonUnitOfWork>())
+        // TODO 每次反射 Attribute 开销太大
+        if (context.HasAttribute<NoUnitOfWork>())
         {
             return;
         }

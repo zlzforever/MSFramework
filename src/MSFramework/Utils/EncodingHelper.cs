@@ -39,6 +39,17 @@ public static class EncodingHelper
     ///
     /// </summary>
     /// <param name="bytes"></param>
+    /// <returns></returns>
+    public static string GetString(ReadOnlySpan<byte> bytes)
+    {
+        return GetString(bytes, "UTF-8", "GB2312", "GBK");
+    }
+
+
+    /// <summary>
+    ///
+    /// </summary>
+    /// <param name="bytes"></param>
     /// <param name="encodingNames"></param>
     /// <returns></returns>
     /// <exception cref="MicroserviceFrameworkException"></exception>
@@ -59,16 +70,6 @@ public static class EncodingHelper
         }
 
         throw new MicroserviceFrameworkException("无法解码文件");
-    }
-
-    /// <summary>
-    ///
-    /// </summary>
-    /// <param name="bytes"></param>
-    /// <returns></returns>
-    public static string GetString(ReadOnlySpan<byte> bytes)
-    {
-        return GetString(bytes, "UTF-8", "GB2312", "GBK");
     }
 
     /// <summary>

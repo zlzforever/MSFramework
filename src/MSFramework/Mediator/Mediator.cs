@@ -12,6 +12,7 @@ namespace MicroserviceFramework.Mediator;
 /// </summary>
 internal class Mediator(IServiceProvider serviceProvider) : IMediator
 {
+    // TODO: 可以考虑启动时全加载
     private static readonly Lazy<ConcurrentDictionary<Type, (Type Interface, MethodInfo Method)>> HandlerCache = new();
 
     /// <summary>
@@ -69,8 +70,8 @@ internal class Mediator(IServiceProvider serviceProvider) : IMediator
                 $"创建处理器 IRequestHandler<{requestType.FullName}, {responseType.FullName}> 失败");
         }
 
-        var invokeResult = method.Invoke(handler, new object[] { request, cancellationToken });
-        if (invokeResult is Task<TResponse> task)
+        var result = method.Invoke(handler, new object[] { request, cancellationToken });
+        if (result is Task<TResponse> task)
         {
             return task;
         }

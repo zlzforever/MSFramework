@@ -8,7 +8,7 @@ namespace MicroserviceFramework.Domain;
 /// <summary>
 /// 工作单元
 /// </summary>
-public interface IUnitOfWork
+public interface IUnitOfWork : IDisposable
 {
     /// <summary>
     /// 注册保存事件
@@ -16,10 +16,16 @@ public interface IUnitOfWork
     event Action SavedChanges;
 
     /// <summary>
+    ///
+    /// </summary>
+    /// <returns></returns>
+    AuditOperation GetAuditOperation();
+
+    /// <summary>
     /// 设置审计信息
     /// </summary>
-    /// <param name="factory"></param>
-    void SetAuditOperationFactory(Func<AuditOperation> factory);
+    /// <param name="auditOperation"></param>
+    void SetAuditOperation(AuditOperation auditOperation);
 
     /// <summary>
     /// 保存工作单元

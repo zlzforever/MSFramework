@@ -1,4 +1,6 @@
 using System;
+using System.Collections.Concurrent;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
@@ -10,43 +12,84 @@ namespace MicroserviceFramework.AspNetCore.Extensions;
 /// </summary>
 public static class FormFileExtensions
 {
+    private static readonly ConcurrentDictionary<string, bool> VirtualFolderState = new();
+
     /// <summary>
     ///
     /// </summary>
     /// <param name="formFile"></param>
     /// <param name="interval"></param>
-    /// <param name="createDirectory">是否自动创建文件夹</param>
     /// <returns></returns>
-    public static async Task<SaveFileInfo> SaveAsync(this IFormFile formFile,
-        string interval = "upload", bool createDirectory = false)
+    public static async Task<SaveResult> SaveAsync(this IFormFile formFile,
+        string interval = "upload")
     {
         var extension = Path.GetExtension(formFile.FileName);
-
         var date = $"{DateTime.Now:yyyMMdd}";
-        var directory = Path.Combine(AppContext.BaseDirectory, "wwwroot", interval, date);
-
-        // comments by lewis at 20250403 如果大量调用， 都判断目录是否存在， 会影响性能， 由业务方自己创建
-        if (createDirectory && !Directory.Exists(directory))
+        var intervalDirectory = Path.Combine(interval, date);
+        var virtualDirectory = Path.Combine(AppContext.BaseDirectory, "wwwroot", intervalDirectory);
+        VirtualFolderState.GetOrAdd(virtualDirectory, path =>
         {
-            Directory.CreateDirectory(directory);
-        }
+            if (!Directory.Exists(path))
+            {
+                Directory.CreateDirectory(path!);
+            }
+
+            return true;
+        });
 
         await using var stream = formFile.OpenReadStream();
+        // 使用流式接口，增强性能
         var md5 = await Utils.Cryptography.ComputeMD5Async(stream);
+        var level1 = md5.Substring(0, 2);
+        var level2 = md5.Substring(2, 2);
         var fileName = $"{md5}{extension}";
-        var relativePath = Path.Combine(interval, date, fileName);
-
-        var absolutePath = Path.Combine(directory, fileName);
-        if (File.Exists(absolutePath))
+        // upload/20251225/C4CA4238A0B923820DCC509A6F75849B.txt
+        var virtualPath = Path.Combine(virtualDirectory, fileName);
+        var intervalPath = Path.Combine(intervalDirectory, fileName);
+        var groupPath = Path.Combine(Defaults.OSSDirectory, level1, level2);
+        var physicalPath = Path.Combine(groupPath, fileName);
+        if (!File.Exists(virtualPath))
         {
-            return new SaveFileInfo { Name = formFile.FileName, Path = relativePath };
+            // wwwroot/oss/C4/CA/C4CA4238A0B923820DCC509A6F75849B.txt
+            VirtualFolderState.GetOrAdd(groupPath, path =>
+            {
+                if (!Directory.Exists(path))
+                {
+                    Directory.CreateDirectory(path!);
+                }
+
+                return true;
+            });
+            await using (Stream outStream = File.OpenWrite(physicalPath))
+            {
+                await stream.CopyToAsync(outStream);
+            }
+
+            File.CreateSymbolicLink(virtualPath, physicalPath);
         }
 
-        await using (Stream outStream = File.OpenWrite(absolutePath))
-        {
-            await stream.CopyToAsync(outStream);
-        }
-
-        return new SaveFileInfo { Name = formFile.FileName, Path = relativePath };
+        return new SaveResult { Name = formFile.FileName, Path = intervalPath, PhysicalPath = physicalPath };
     }
+}
+
+/// <summary>
+///
+/// </summary>
+[SuppressMessage("ReSharper", "UnusedAutoPropertyAccessor.Global")]
+public class SaveResult
+{
+    /// <summary>
+    ///
+    /// </summary>
+    public string Name { get; set; }
+
+    /// <summary>
+    ///
+    /// </summary>
+    public string Path { get; set; }
+
+    /// <summary>
+    ///
+    /// </summary>
+    public string PhysicalPath { get; set; }
 }

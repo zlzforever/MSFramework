@@ -20,14 +20,6 @@ public class EfAuditingStore<TDbContext>(TDbContext dbContext) : IAuditingStore
     public async Task AddAsync(AuditOperation auditOperation)
     {
         await dbContext.AddAsync(auditOperation);
-    }
-
-    /// <summary>
-    ///
-    /// </summary>
-    /// <returns></returns>
-    public Task CommitAsync()
-    {
-        return dbContext.SaveChangesAsync();
+        await dbContext.SaveChangesAsync();
     }
 }

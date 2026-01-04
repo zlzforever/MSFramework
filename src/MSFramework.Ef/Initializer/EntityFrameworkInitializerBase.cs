@@ -1,7 +1,5 @@
 using System;
 using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -26,7 +24,6 @@ public class EntityFrameworkInitializerBase
         ILogger<EntityFrameworkInitializerBase> logger)
     {
         Order = int.MaxValue;
-        Synchronized = true;
         _serviceProvider = serviceProvider;
         _logger = logger;
     }

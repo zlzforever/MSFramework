@@ -1,4 +1,6 @@
-﻿using System.Net.Http;
+﻿using System.IO;
+using System.Net.Http;
+using MicroserviceFramework;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.TestHost;
 using Microsoft.Extensions.Configuration;
@@ -12,12 +14,17 @@ public abstract class BaseTest
 
     protected BaseTest()
     {
+        if (!Directory.Exists(Defaults.OSSDirectory))
+        {
+            Directory.CreateDirectory(Defaults.OSSDirectory);
+        }
+
         // Arrange
         Server = new TestServer(new WebHostBuilder()
             .ConfigureAppConfiguration(builder =>
             {
                 builder.AddJsonFile("appsettings.json");
-            } )
+            })
             .UseStartup<Startup>());
         Client = Server.CreateClient();
     }

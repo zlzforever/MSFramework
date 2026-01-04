@@ -23,8 +23,8 @@ public class DictionaryTests
     {
         var dict = new Dictionary<string, string>();
         dict.AddOrUpdate("a", "b");
-        Assert.Equal("b", dict.GetOrDefault("a"));
-        Assert.Null(dict.GetOrDefault("aaa"));
+        Assert.Equal("b", dict.GetValueOrDefault("a"));
+        Assert.Null(dict.GetValueOrDefault("aaa"));
     }
 
     [Fact]
@@ -32,6 +32,6 @@ public class DictionaryTests
     {
         var dict = new Dictionary<string, string>();
         dict.GetOrAdd("a", "b");
-        Assert.Equal("b", dict.GetOrDefault("a"));
+        Assert.Equal("b", dict.GetValueOrDefault("a"));
     }
 }

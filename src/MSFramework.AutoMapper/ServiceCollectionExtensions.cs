@@ -29,7 +29,9 @@ public static class ServiceCollectionExtensions
     public static IServiceCollection AddAutoMapperObjectAssembler(this IServiceCollection services)
     {
         services.TryAddScoped<IObjectAssembler, AutoMapperObjectAssembler>();
-        services.AddAutoMapper(Utils.Runtime.GetAllAssemblies());
+        services.AddAutoMapper(_ =>
+        {
+        }, Utils.Runtime.GetAllAssemblies());
         return services;
     }
 
@@ -43,7 +45,9 @@ public static class ServiceCollectionExtensions
         params Assembly[] assemblies)
     {
         builder.Services.TryAddScoped<IObjectAssembler, AutoMapperObjectAssembler>();
-        builder.Services.AddAutoMapper( assemblies);
+        builder.Services.AddAutoMapper(_ =>
+        {
+        }, assemblies);
         return builder;
     }
 }

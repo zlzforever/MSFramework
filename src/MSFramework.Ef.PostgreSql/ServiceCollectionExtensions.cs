@@ -11,31 +11,32 @@ namespace MicroserviceFramework.Ef.PostgreSql;
 /// </summary>
 public static class ServiceCollectionExtensions
 {
-    /// <summary>
-    ///
-    /// </summary>
     /// <param name="options"></param>
-    /// <returns></returns>
-    public static NpgsqlDbContextOptionsBuilder UseRemoveForeignKeyService(this NpgsqlDbContextOptionsBuilder options)
+    extension(NpgsqlDbContextOptionsBuilder options)
     {
-        MigrationsSqlGenerator.RemoveForeignKey = true;
-        var ops = (IRelationalDbContextOptionsBuilderInfrastructure)options;
-        ops.OptionsBuilder.ReplaceService<IMigrationsSqlGenerator, MigrationsSqlGenerator>();
-        return options;
-    }
+        /// <summary>
+        ///
+        /// </summary>
+        /// <returns></returns>
+        public NpgsqlDbContextOptionsBuilder UseRemoveForeignKeyService()
+        {
+            MigrationsSqlGenerator.RemoveForeignKey = true;
+            var ops = (IRelationalDbContextOptionsBuilderInfrastructure)options;
+            ops.OptionsBuilder.ReplaceService<IMigrationsSqlGenerator, MigrationsSqlGenerator>();
+            return options;
+        }
 
-    /// <summary>
-    ///
-    /// </summary>
-    /// <param name="options"></param>
-    /// <returns></returns>
-    public static NpgsqlDbContextOptionsBuilder UseRemoveExternalEntityService(
-        this NpgsqlDbContextOptionsBuilder options)
-    {
-        MigrationsSqlGenerator.RemoveExternalEntity = true;
-        var ops = (IRelationalDbContextOptionsBuilderInfrastructure)options;
-        ops.OptionsBuilder.ReplaceService<IMigrationsSqlGenerator, MigrationsSqlGenerator>();
-        return options;
+        /// <summary>
+        ///
+        /// </summary>
+        /// <returns></returns>
+        public NpgsqlDbContextOptionsBuilder UseRemoveExternalEntityService()
+        {
+            MigrationsSqlGenerator.RemoveExternalEntity = true;
+            var ops = (IRelationalDbContextOptionsBuilderInfrastructure)options;
+            ops.OptionsBuilder.ReplaceService<IMigrationsSqlGenerator, MigrationsSqlGenerator>();
+            return options;
+        }
     }
 
     /// <summary>

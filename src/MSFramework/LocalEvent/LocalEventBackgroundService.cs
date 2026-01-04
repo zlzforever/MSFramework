@@ -19,9 +19,9 @@ namespace MicroserviceFramework.LocalEvent;
 /// <param name="logger"></param>
 /// <param name="descriptorStore"></param>
 /// <param name="options"></param>
-public class LocalEventService(
+public class LocalEventBackgroundService(
     IServiceProvider serviceProvider,
-    ILogger<LocalEventService> logger,
+    ILogger<LocalEventBackgroundService> logger,
     EventDescriptorStore descriptorStore,
     IOptions<LocalEventOptions> options)
     : BackgroundService
@@ -72,9 +72,9 @@ public class LocalEventService(
 
                             if (options.Value.EnableAuditing)
                             {
+                                var auditOperation = CreateAuditedOperation(session, handlerName);
                                 var unitOfWork = services.GetService<IUnitOfWork>();
-                                unitOfWork?.SetAuditOperationFactory(() =>
-                                    CreateAuditedOperation(session, handlerName));
+                                unitOfWork?.SetAuditOperation(auditOperation);
                             }
 
                             if (descriptor.HandleMethod.Invoke(handler, [entry.EventData, CancellationToken.None]) is
@@ -120,7 +120,7 @@ public class LocalEventService(
     /// <returns></returns>
     public override async Task StopAsync(CancellationToken cancellationToken)
     {
-        logger.LogInformation("开始关闭本地事件服务");
+        logger.LogDebug("开始关闭本地事件服务");
         await base.StopAsync(cancellationToken);
         logger.LogInformation("关闭本地事件服务完成");
     }

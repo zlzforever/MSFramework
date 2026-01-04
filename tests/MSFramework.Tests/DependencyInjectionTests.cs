@@ -49,7 +49,10 @@ public class DependencyInjectionTests
     public void ScopeTest()
     {
         var serviceCollection = new ServiceCollection();
-        serviceCollection.AddMicroserviceFramework(x => { x.UseDependencyInjectionLoader(); });
+        serviceCollection.AddMicroserviceFramework(x =>
+        {
+            x.UseDependencyInjectionLoader();
+        });
 
         var serviceProvider = serviceCollection.BuildServiceProvider();
 
@@ -76,7 +79,10 @@ public class DependencyInjectionTests
     public void MultiInjectionTest()
     {
         var serviceCollection = new ServiceCollection();
-        serviceCollection.AddMicroserviceFramework(x => { x.UseDependencyInjectionLoader(); });
+        serviceCollection.AddMicroserviceFramework(x =>
+        {
+            x.UseDependencyInjectionLoader();
+        });
 
         var serviceProvider = serviceCollection.BuildServiceProvider();
         var scope1 = serviceProvider.CreateScope();

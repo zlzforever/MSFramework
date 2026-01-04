@@ -8,7 +8,7 @@ namespace MicroserviceFramework.Auditing.Model;
 /// <summary>
 /// 操作审计信息
 /// </summary>
-public class AuditOperation : CreationAggregateRoot<string>
+public class AuditOperation : CreationAggregateRoot<string>, IAuditObject
 {
     /// <summary>
     /// 操作路径
@@ -132,4 +132,14 @@ public class AuditOperation : CreationAggregateRoot<string>
         return
             $"[ENTITY: {GetType().Name}] Id = {Id}; {{ 'Ip': {IP}, 'UserAgent': {UserAgent}, 'EndedTime': {EndTime:yyyy-MM-dd HH:mm:ss}, 'Elapsed': {Elapsed} }}";
     }
+
+    // /// <summary>
+    // ///
+    // /// </summary>
+    // /// <returns></returns>
+    // /// <exception cref="NotImplementedException"></exception>
+    // public AuditOperation Clone()
+    // {
+    //     return new AuditOperation(Path, UserAgent, IP, DeviceModel, DeviceId, Lat, Lng, TraceId);
+    // }
 }

@@ -31,6 +31,51 @@ public class DaprConsumerClient(
     /// <summary>
     ///
     /// </summary>
+    /// <param name="topics"></param>
+    /// <returns></returns>
+    /// <exception cref="NotImplementedException"></exception>
+    public Task SubscribeAsync(IEnumerable<string> topics)
+    {
+        throw new NotImplementedException();
+    }
+
+    /// <summary>
+    ///
+    /// </summary>
+    /// <param name="timeout"></param>
+    /// <param name="cancellationToken"></param>
+    /// <returns></returns>
+    /// <exception cref="NotImplementedException"></exception>
+    public Task ListeningAsync(TimeSpan timeout, CancellationToken cancellationToken)
+    {
+        throw new NotImplementedException();
+    }
+
+    /// <summary>
+    ///
+    /// </summary>
+    /// <param name="sender"></param>
+    /// <returns></returns>
+    /// <exception cref="NotImplementedException"></exception>
+    public Task CommitAsync(object sender)
+    {
+        throw new NotImplementedException();
+    }
+
+    /// <summary>
+    ///
+    /// </summary>
+    /// <param name="sender"></param>
+    /// <returns></returns>
+    /// <exception cref="NotImplementedException"></exception>
+    public Task RejectAsync(object sender)
+    {
+        throw new NotImplementedException();
+    }
+
+    /// <summary>
+    ///
+    /// </summary>
     public BrokerAddress BrokerAddress => new("Dapr", null);
 
     /// <summary>
@@ -103,8 +148,19 @@ public class DaprConsumerClient(
     ///
     /// </summary>
     public Func<TransportMessage, object, Task> OnMessageCallback { get; set; }
+
     /// <summary>
     ///
     /// </summary>
     public Action<LogMessageEventArgs> OnLogCallback { get; set; }
+
+    /// <summary>
+    ///
+    /// </summary>
+    /// <returns></returns>
+    /// <exception cref="NotImplementedException"></exception>
+    public ValueTask DisposeAsync()
+    {
+        throw new NotImplementedException();
+    }
 }

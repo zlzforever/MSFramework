@@ -31,6 +31,7 @@ public class ObjectAssembler
     public void NullTo()
     {
         var service = new ServiceCollection();
+        service.AddLogging();
         service.AddMicroserviceFramework(x =>
         {
             x.UseAutoMapperObjectAssembler();
@@ -45,6 +46,7 @@ public class ObjectAssembler
     public void To()
     {
         var service = new ServiceCollection();
+        service.AddLogging();
         service.AddMicroserviceFramework(x =>
         {
             x.UseAutoMapperObjectAssembler();

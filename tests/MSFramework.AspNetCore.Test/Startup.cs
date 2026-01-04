@@ -56,7 +56,6 @@ public class Startup(IConfiguration configuration)
         services.AddHttpContextAccessor();
         services.AddMicroserviceFramework(builder =>
         {
-            builder.UseAssemblyScanPrefix("MSFramework.AspNetCore.Test");
             builder.UseDependencyInjectionLoader();
             builder.UseOptionsType(configuration);
             builder.UseAutoMapperObjectAssembler();
@@ -64,7 +63,7 @@ public class Startup(IConfiguration configuration)
             builder.UseAspNetCoreExtension();
             builder.UseScopeServiceProvider();
             builder.UseEntityFramework();
-        });
+        }, "MSFramework.AspNetCore.Test");
     }
 
     // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

@@ -1,3 +1,4 @@
+using System;
 using MicroserviceFramework.Common;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
@@ -14,6 +15,7 @@ public static class ServiceCollectionExtensions
     /// </summary>
     /// <param name="services"></param>
     /// <returns></returns>
+    [Obsolete("不方便创建索引， 因此考虑使用 PG 存 JSONB 为好")]
     public static IServiceCollection AddLokiAuditing(this IServiceCollection services)
     {
         services.AddSingleton(provider =>

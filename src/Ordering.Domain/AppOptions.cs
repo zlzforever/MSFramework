@@ -3,7 +3,7 @@ using Microsoft.Extensions.Configuration;
 
 namespace Ordering.Domain;
 
-[OptionsType]
+[AutoOptions]
 public class AppOptions(IConfiguration configuration)
 {
     public string Audience { get; set; }
@@ -11,7 +11,7 @@ public class AppOptions(IConfiguration configuration)
     public string DefaultConnectionString => configuration["DbContexts:OrderingContext:ConnectionString"];
 }
 
-[OptionsType("Email")]
+[AutoOptions(Section = "Email")]
 public class EmailOptions
 {
     public string Address { get; set; }

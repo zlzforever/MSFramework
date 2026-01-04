@@ -1,4 +1,5 @@
 using System;
+using System.Threading.Tasks;
 using DotNetCore.CAP.Transport;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -43,5 +44,17 @@ public class DaprConsumerClientFactory(
         {
             throw new BrokerConnectionException(e);
         }
+    }
+
+    /// <summary>
+    ///
+    /// </summary>
+    /// <param name="groupName"></param>
+    /// <param name="groupConcurrent"></param>
+    /// <returns></returns>
+    /// <exception cref="NotImplementedException"></exception>
+    public Task<IConsumerClient> CreateAsync(string groupName, byte groupConcurrent)
+    {
+        throw new NotImplementedException();
     }
 }

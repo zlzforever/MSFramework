@@ -19,52 +19,52 @@ public static class StringExtensions
     //     return builder.ToString();
     // }
 
-    /// <summary>
-    ///
-    /// </summary>
     /// <param name="value"></param>
-    /// <returns></returns>
-    public static bool IsNullOrEmpty(this string value)
+    extension(string value)
     {
-        return string.IsNullOrEmpty(value);
-    }
-
-    /// <summary>
-    ///
-    /// </summary>
-    /// <param name="value"></param>
-    /// <returns></returns>
-    public static bool IsNullOrWhiteSpace(this string value)
-    {
-        return string.IsNullOrWhiteSpace(value);
-    }
-
-    /// <summary>
-    ///
-    /// </summary>
-    /// <param name="s"></param>
-    /// <returns></returns>
-    public static string ToSnakeCase(this string s) => ToSeparatedCase(s, '_');
-
-    /// <summary>
-    ///
-    /// </summary>
-    /// <param name="value"></param>
-    /// <returns></returns>
-    public static unsafe string ToCamelCase(this string value)
-    {
-        if (string.IsNullOrWhiteSpace(value))
+        /// <summary>
+        ///
+        /// </summary>
+        /// <returns></returns>
+        public bool IsNullOrEmpty()
         {
+            return string.IsNullOrEmpty(value);
+        }
+
+        /// <summary>
+        ///
+        /// </summary>
+        /// <returns></returns>
+        public bool IsNullOrWhiteSpace()
+        {
+            return string.IsNullOrWhiteSpace(value);
+        }
+
+        /// <summary>
+        ///
+        /// </summary>
+        /// <returns></returns>
+        public string ToSnakeCase() => ToSeparatedCase(value, '_');
+
+        /// <summary>
+        ///
+        /// </summary>
+        /// <returns></returns>
+        public unsafe string ToCamelCase()
+        {
+            if (string.IsNullOrWhiteSpace(value))
+            {
+                return value;
+            }
+
+            fixed (char* chr = value)
+            {
+                var valueChar = *chr;
+                *chr = char.ToLowerInvariant(valueChar);
+            }
+
             return value;
         }
-
-        fixed (char* chr = value)
-        {
-            var valueChar = *chr;
-            *chr = char.ToLowerInvariant(valueChar);
-        }
-
-        return value;
     }
 
     private enum SeparatedCaseState

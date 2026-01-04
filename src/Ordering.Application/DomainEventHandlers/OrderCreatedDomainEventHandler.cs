@@ -1,6 +1,5 @@
 ﻿using System.Threading;
 using System.Threading.Tasks;
-using Dapr.Client;
 using MicroserviceFramework.Domain;
 using Microsoft.Extensions.Logging;
 using Ordering.Domain.AggregateRoots.Events;

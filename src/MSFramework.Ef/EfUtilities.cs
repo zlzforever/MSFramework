@@ -12,14 +12,16 @@ public static class EfUtilities
     ///
     /// </summary>
     public const string MigrationsHistoryTable = "___ef_migrations_history";
+
     /// <summary>
     ///
     /// </summary>
     public static readonly bool IsDesignTime;
+
     /// <summary>
     ///
     /// </summary>
-    public static Type AuditingDbContextType;
+    internal static Type AuditingDbContextType;
 
     static EfUtilities()
     {

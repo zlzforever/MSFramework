@@ -11,30 +11,32 @@ namespace MicroserviceFramework.AspNetCore.Extensions;
 /// </summary>
 public static class ActionDescriptorExtensions
 {
-    /// <summary>
-    ///
-    /// </summary>
     /// <param name="context"></param>
-    /// <typeparam name="T"></typeparam>
-    /// <returns></returns>
-    public static bool HasAttribute<T>(this ActionExecutingContext context) where T : Attribute
+    extension(ActionExecutingContext context)
     {
-        var controllerAction = (ControllerActionDescriptor)context.ActionDescriptor;
-        var ignoreAuditAttribute = controllerAction.MethodInfo.GetCustomAttribute<T>();
-        return ignoreAuditAttribute != null;
-    }
+        /// <summary>
+        ///
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <returns></returns>
+        public bool HasAttribute<T>() where T : Attribute
+        {
+            var controllerAction = (ControllerActionDescriptor)context.ActionDescriptor;
+            var ignoreAuditAttribute = controllerAction.MethodInfo.GetCustomAttribute<T>();
+            return ignoreAuditAttribute != null;
+        }
 
-    /// <summary>
-    ///
-    /// </summary>
-    /// <param name="context"></param>
-    /// <param name="type"></param>
-    /// <returns></returns>
-    public static bool HasAttribute(this ActionExecutingContext context, string type)
-    {
-        var controllerAction = (ControllerActionDescriptor)context.ActionDescriptor;
-        var attributes = controllerAction.MethodInfo.GetCustomAttributes();
-        var has = attributes.Any(x => x.GetType().FullName == type);
-        return has;
+        /// <summary>
+        ///
+        /// </summary>
+        /// <param name="type"></param>
+        /// <returns></returns>
+        public bool HasAttribute(string type)
+        {
+            var controllerAction = (ControllerActionDescriptor)context.ActionDescriptor;
+            var attributes = controllerAction.MethodInfo.GetCustomAttributes();
+            var has = attributes.Any(x => x.GetType().FullName == type);
+            return has;
+        }
     }
 }

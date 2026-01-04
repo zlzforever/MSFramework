@@ -18,7 +18,7 @@ namespace Ordering.Infrastructure.Migrations
 #pragma warning disable 612, 618
             modelBuilder
                 .HasAnnotation("DatabaseType", null)
-                .HasAnnotation("ProductVersion", "9.0.6")
+                .HasAnnotation("ProductVersion", "9.0.11")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
@@ -55,7 +55,7 @@ namespace Ordering.Infrastructure.Migrations
 
                     b.HasIndex("OperationId");
 
-                    b.ToTable("socodb_audit_entity");
+                    b.ToTable("ordering_audit_entity");
                 });
 
             modelBuilder.Entity("MicroserviceFramework.Auditing.Model.AuditOperation", b =>
@@ -133,7 +133,7 @@ namespace Ordering.Infrastructure.Migrations
 
                     b.HasIndex("EndTime");
 
-                    b.ToTable("socodb_audit_operation");
+                    b.ToTable("ordering_audit_operation");
                 });
 
             modelBuilder.Entity("MicroserviceFramework.Auditing.Model.AuditProperty", b =>
@@ -169,7 +169,7 @@ namespace Ordering.Infrastructure.Migrations
 
                     b.HasIndex("EntityId");
 
-                    b.ToTable("socodb_audit_property");
+                    b.ToTable("ordering_audit_property");
                 });
 
             modelBuilder.Entity("Ordering.Domain.AggregateRoots.Order.Order", b =>
@@ -271,7 +271,7 @@ namespace Ordering.Infrastructure.Migrations
 
                     b.HasIndex("OperatorId");
 
-                    b.ToTable("socodb_order");
+                    b.ToTable("ordering_order");
                 });
 
             modelBuilder.Entity("Ordering.Domain.AggregateRoots.Order.OrderItem", b =>
@@ -300,7 +300,7 @@ namespace Ordering.Infrastructure.Migrations
 
                     b.HasIndex("OrderId");
 
-                    b.ToTable("socodb_order_item");
+                    b.ToTable("ordering_order_item");
                 });
 
             modelBuilder.Entity("Ordering.Domain.AggregateRoots.Product", b =>
@@ -340,7 +340,7 @@ namespace Ordering.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("socodb_product");
+                    b.ToTable("ordering_product");
                 });
 
             modelBuilder.Entity("Ordering.Domain.AggregateRoots.User", b =>
@@ -424,7 +424,7 @@ namespace Ordering.Infrastructure.Migrations
 
                             b1.HasKey("OrderId");
 
-                            b1.ToTable("socodb_order");
+                            b1.ToTable("ordering_order");
 
                             b1.WithOwner()
                                 .HasForeignKey("OrderId");
@@ -469,7 +469,7 @@ namespace Ordering.Infrastructure.Migrations
 
                             b1.HasIndex("ProductId");
 
-                            b1.ToTable("socodb_order_item");
+                            b1.ToTable("ordering_order_item");
 
                             b1.WithOwner()
                                 .HasForeignKey("OrderItemId");

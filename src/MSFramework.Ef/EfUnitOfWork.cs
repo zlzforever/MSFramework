@@ -1,12 +1,8 @@
 using System;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using MicroserviceFramework.Auditing;
 using MicroserviceFramework.Auditing.Model;
 using MicroserviceFramework.Domain;
-using MicroserviceFramework.Utils;
-using Microsoft.Extensions.DependencyInjection;
 
 namespace MicroserviceFramework.Ef;
 
@@ -16,6 +12,7 @@ namespace MicroserviceFramework.Ef;
 internal class EfUnitOfWork : IUnitOfWork
 {
     private readonly DbContextFactory _dbContextFactory;
+    private AuditOperation _auditOperation;
 
     /// <summary>
     /// 初始化工作单元管理器
@@ -25,52 +22,37 @@ internal class EfUnitOfWork : IUnitOfWork
         _dbContextFactory = dbContextFactory;
     }
 
+    /// <summary>
+    /// 所有 DbContext 保存完成后调用
+    /// </summary>
     public event Action SavedChanges;
 
-    public void SetAuditOperationFactory(Func<AuditOperation> factory)
+    public AuditOperation GetAuditOperation()
     {
-        Check.NotNull(factory, nameof(factory));
+        return _auditOperation;
+    }
 
-        var auditingStores = _dbContextFactory.ServiceProvider.GetServices<IAuditingStore>().ToList();
-        if (auditingStores.Count == 0)
+    public void SetAuditOperation(AuditOperation auditOperation)
+    {
+        if (auditOperation == null)
         {
             return;
         }
 
+        _auditOperation = auditOperation;
         foreach (var dbContextBase in _dbContextFactory.GetAllDbContexts())
         {
-            if (dbContextBase.Model.FindEntityType(typeof(AuditOperation)) == null)
-            {
-                return;
-            }
-
-            dbContextBase.SavingChanges += async (sender, _) =>
+            // 对于不同 DbContext，应该把其下面的 Entity 归到对应的审计日志下面
+            dbContextBase.SavingChanges += (sender, _) =>
             {
                 if (sender is not DbContextBase db)
                 {
                     return;
                 }
 
-                // 一定要每次保存都创建新的审计对象
-                // 如， 用户自己 save change 一次， 此时 audit operation 已经创建了
-                // 再次调用 save change 时， 复用同一个 audit operation， 会导致数据重复, 保存失败
-                // TODO: entities 为空时要不要保存？
-                var auditOperation = factory();
                 var entities = db.GetAuditEntities();
                 auditOperation.AddEntities(entities);
                 auditOperation.End();
-
-                if (!auditOperation.Entities.Any())
-                {
-                    return;
-                }
-
-                foreach (var auditingStore in auditingStores)
-                {
-                    await auditingStore.AddAsync(auditOperation);
-                    // 不用再单独 commit 了， 和当前请求是同一个 dbContext
-                    // await auditingStore.CommitAsync();
-                }
             };
         }
     }
@@ -83,5 +65,10 @@ internal class EfUnitOfWork : IUnitOfWork
         }
 
         SavedChanges?.Invoke();
+    }
+
+    public void Dispose()
+    {
+        SavedChanges = null;
     }
 }

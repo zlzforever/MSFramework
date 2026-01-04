@@ -71,6 +71,11 @@ public static class ServiceCollectionExtensions
             }
         }
 
+        if (!Directory.Exists(Defaults.OSSDirectory))
+        {
+            Directory.CreateDirectory(Defaults.OSSDirectory);
+        }
+
         return services;
     }
 

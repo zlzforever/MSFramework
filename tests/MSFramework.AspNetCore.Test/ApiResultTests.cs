@@ -211,7 +211,7 @@ public class ApiResultTests(ITestOutputHelper output) : BaseTest
     {
         var result1 = await Client.GetStringAsync("/apiResult/newtonsoftJson");
         Assert.Equal("""
-                     {"success":true,"code":0,"msg":"","data":1}
+                     {"success":true,"code":0,"msg":"","data":"{\"A\":\"he\",\"b\":12}"}
                      """, result1);
     }
 

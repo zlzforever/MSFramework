@@ -1,5 +1,3 @@
-using Ordering.Domain.Repositories;
-
 namespace Ordering.Infrastructure.Repositories.Order;
 
 public partial class OrderRepository

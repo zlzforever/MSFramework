@@ -10,31 +10,32 @@ namespace MicroserviceFramework.Ef.MySql;
 /// </summary>
 public static class ServiceCollectionExtensions
 {
-    /// <summary>
-    ///
-    /// </summary>
     /// <param name="options"></param>
-    /// <returns></returns>
-    public static MySqlDbContextOptionsBuilder UseRemoveForeignKeyService(this MySqlDbContextOptionsBuilder options)
+    extension(MySqlDbContextOptionsBuilder options)
     {
-        MigrationsSqlGenerator.RemoveForeignKey = true;
-        var ops = (IRelationalDbContextOptionsBuilderInfrastructure)options;
-        ops.OptionsBuilder.ReplaceService<IMigrationsSqlGenerator, MigrationsSqlGenerator>();
-        return options;
-    }
+        /// <summary>
+        ///
+        /// </summary>
+        /// <returns></returns>
+        public MySqlDbContextOptionsBuilder UseRemoveForeignKeyService()
+        {
+            MigrationsSqlGenerator.RemoveForeignKey = true;
+            var ops = (IRelationalDbContextOptionsBuilderInfrastructure)options;
+            ops.OptionsBuilder.ReplaceService<IMigrationsSqlGenerator, MigrationsSqlGenerator>();
+            return options;
+        }
 
-    /// <summary>
-    ///
-    /// </summary>
-    /// <param name="options"></param>
-    /// <returns></returns>
-    public static MySqlDbContextOptionsBuilder UseRemoveExternalEntityService(
-        this MySqlDbContextOptionsBuilder options)
-    {
-        MigrationsSqlGenerator.RemoveExternalEntity = true;
-        var ops = (IRelationalDbContextOptionsBuilderInfrastructure)options;
-        ops.OptionsBuilder.ReplaceService<IMigrationsSqlGenerator, MigrationsSqlGenerator>();
-        return options;
+        /// <summary>
+        ///
+        /// </summary>
+        /// <returns></returns>
+        public MySqlDbContextOptionsBuilder UseRemoveExternalEntityService()
+        {
+            MigrationsSqlGenerator.RemoveExternalEntity = true;
+            var ops = (IRelationalDbContextOptionsBuilderInfrastructure)options;
+            ops.OptionsBuilder.ReplaceService<IMigrationsSqlGenerator, MigrationsSqlGenerator>();
+            return options;
+        }
     }
 
     // public static DbContextOptionsBuilder UseMySql(

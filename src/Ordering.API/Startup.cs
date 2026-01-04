@@ -22,7 +22,6 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using Ordering.Domain.AggregateRoots.Order;
 using Ordering.Infrastructure;
 using Serilog;
 using Serilog.Events;
@@ -73,7 +72,6 @@ public static class Startup
 
         services.AddHttpClient();
         services.AddHttpContextAccessor();
-
         services.AddControllers(x =>
             {
                 x.Filters.AddUnitOfWork();
@@ -182,17 +180,16 @@ public static class Startup
 
         services.AddMicroserviceFramework(builder =>
         {
-            builder.UseAssemblyScanPrefix("Ordering");
             builder.UseDependencyInjectionLoader();
             builder.UseOptionsType(configuration);
             builder.UseAutoMapperObjectAssembler();
             builder.UseLokiAuditing();
+            builder.UseEfAuditing<OrderingContext>();
             builder.UseLocalEventPublisher();
             builder.UseAspNetCoreExtension();
             builder.UseScopeServiceProvider();
             builder.UseEntityFramework();
-            builder.UseEfAuditing<OrderingContext>();
-        });
+        }, "Ordering");
     });
 
     public static void Configure(this WebApplication app)

@@ -42,7 +42,7 @@ internal sealed class ResponseWrapperFilter(ILogger<ResponseWrapperFilter> logge
             else if (objectResult.Value is ProblemDetails problemDetails)
             {
                 var code = problemDetails.Status ?? 200;
-                var success = HttpUtil.IsSuccessStatusCode(code);
+                var success = HttpUtils.IsSuccessStatusCode(code);
                 if (success)
                 {
                     objectResult.Value = new ApiResult { Data = objectResult.Value, Msg = string.Empty };

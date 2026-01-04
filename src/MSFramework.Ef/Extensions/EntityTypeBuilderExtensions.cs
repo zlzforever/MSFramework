@@ -10,11 +10,11 @@ namespace MicroserviceFramework.Ef.Extensions;
 public static class EntityTypeBuilderExtensions
 {
     /// <summary>
-    ///
+    /// 设置所有用户审计表
     /// </summary>
     /// <param name="builder"></param>
     /// <typeparam name="TEntity"></typeparam>
-    public static void ConfigureFullAuditing<TEntity>(this EntityTypeBuilder<TEntity> builder)
+    public static void ConfigureAuditProperties<TEntity>(this EntityTypeBuilder<TEntity> builder)
         where TEntity : class, ICreation, IModification, IDeletion
     {
         builder.ConfigureCreation();

@@ -15,5 +15,5 @@ public class EnumerationToStringConverter<T>()
         => v => v.ToString();
 
     private static Expression<Func<string, T>> ToEnumeration()
-        => v => string.IsNullOrEmpty(v) ? default : Enumeration.FromValue<T>(v);
+        => v => string.IsNullOrEmpty(v) ? null : Enumeration.FromValue<T>(v);
 }

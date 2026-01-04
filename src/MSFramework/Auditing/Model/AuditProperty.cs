@@ -7,7 +7,7 @@ namespace MicroserviceFramework.Auditing.Model;
 /// <summary>
 /// 实体属性审计信息
 /// </summary>
-public class AuditProperty : EntityBase<string>
+public class AuditProperty : EntityBase<string>, IAuditObject
 {
     private AuditProperty(string id) : base(id)
     {
@@ -36,22 +36,22 @@ public class AuditProperty : EntityBase<string>
     public virtual AuditEntity Entity { get; internal set; }
 
     /// <summary>
-    /// 获取或设置 字段
+    /// 字段
     /// </summary>
     public string Name { get; private set; }
 
     /// <summary>
-    /// 获取或设置 数据类型
+    /// 数据类型
     /// </summary>
     public string Type { get; private set; }
 
     /// <summary>
-    /// 获取或设置 旧值
+    /// 旧值
     /// </summary>
     public string OriginalValue { get; private set; }
 
     /// <summary>
-    /// 获取或设置 新值
+    /// 新值
     /// </summary>
     public string NewValue { get; private set; }
 

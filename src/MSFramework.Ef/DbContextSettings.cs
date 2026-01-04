@@ -147,7 +147,7 @@ public class DbContextSettings : IDbContextOptionsExtension
     /// <summary>
     /// 使用编译模型
     /// </summary>
-    public bool UseCompiledModel { get; set; } = false;
+    public bool UseCompiledModel { get; set; }
 
     /// <summary>
     ///

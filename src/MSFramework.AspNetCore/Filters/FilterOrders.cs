@@ -20,15 +20,15 @@ public static class Constants
     /// <summary>
     ///
     /// </summary>
-    public const int UnitOfWork = 1002;
+    public const int UnitOfWork = 1003;
 
     /// <summary>
     ///
     /// </summary>
-    public const int Audit = 1003;
+    public const int Audit = 1002;
 
     /// <summary>
-    /// 
+    ///
     /// </summary>
     public static readonly HashSet<string> CommandMethods;
 

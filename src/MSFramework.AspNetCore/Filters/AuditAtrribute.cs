@@ -1,7 +1,10 @@
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using MicroserviceFramework.Application;
 using MicroserviceFramework.AspNetCore.Extensions;
+using MicroserviceFramework.Auditing;
 using MicroserviceFramework.Auditing.Model;
 using MicroserviceFramework.Domain;
 using Microsoft.AspNetCore.Http.Extensions;
@@ -12,33 +15,31 @@ using Microsoft.Extensions.Logging;
 namespace MicroserviceFramework.AspNetCore.Filters;
 
 /// <summary>
-///
+/// Audit 先于 UnitOfWork 执行，则 UnitOfWork 先于 Audit 结束（SaveChange)
+/// UnitOfWork 提交完成后，则 DbContext ChangeObject 状态变清除，此时保存审计信息不会干扰业务，即便保存失败也没有关系。
 /// </summary>
 [AttributeUsage(AttributeTargets.Class | AttributeTargets.Method)]
 internal class Audit(ILogger<Audit> logger) : ActionFilterAttribute
 {
+    private List<IAuditingStore> _auditingStores;
+    private AuditOperation _auditOperation;
+
     public override async Task OnActionExecutionAsync(ActionExecutingContext context, ActionExecutionDelegate next)
     {
         logger.LogDebug("审计过滤器执行开始");
 
-        if (!Constants.CommandMethods.Contains(context.HttpContext.Request.Method))
-        {
-            await base.OnActionExecutionAsync(context, next);
-            return;
-        }
-
         var services = context.HttpContext.RequestServices;
-
         var unitOfWork = services.GetService<IUnitOfWork>();
-        if (unitOfWork == null)
+
+        if (Constants.CommandMethods.Contains(context.HttpContext.Request.Method))
         {
-            await base.OnActionExecutionAsync(context, next);
-            return;
+            _auditingStores = services.GetServices<IAuditingStore>().ToList();
+            if (_auditingStores.Any())
+            {
+                _auditOperation = CreateAuditOperation(context, DateTimeOffset.Now);
+                unitOfWork.SetAuditOperation(_auditOperation);
+            }
         }
-
-        var creationTime = DateTimeOffset.Now;
-
-        unitOfWork.SetAuditOperationFactory(() => CreateAuditedOperation(context, creationTime));
 
         await base.OnActionExecutionAsync(context, next);
 
@@ -46,14 +47,29 @@ internal class Audit(ILogger<Audit> logger) : ActionFilterAttribute
         // comment: 只有有变化的数据才会尝试获取变更对象
     }
 
-    public override void OnActionExecuted(ActionExecutedContext context)
+    public override async Task OnResultExecutionAsync(ResultExecutingContext context, ResultExecutionDelegate next)
     {
-        base.OnActionExecuted(context);
+        await base.OnResultExecutionAsync(context, next);
+
+        if (_auditOperation != null)
+        {
+            foreach (var auditingStore in _auditingStores)
+            {
+                try
+                {
+                    await auditingStore.AddAsync(_auditOperation);
+                }
+                catch (Exception ex)
+                {
+                    logger.LogError(ex, "保存审计信息失败");
+                }
+            }
+        }
 
         logger.LogDebug("审计过滤器执行结束");
     }
 
-    private AuditOperation CreateAuditedOperation(ActionExecutingContext context, DateTimeOffset creationTime)
+    private AuditOperation CreateAuditOperation(ActionExecutingContext context, DateTimeOffset creationTime)
     {
         var ua = context.HttpContext.Request.Headers["User-Agent"].ToString();
         var ip = context.GetRemoteIpAddress();

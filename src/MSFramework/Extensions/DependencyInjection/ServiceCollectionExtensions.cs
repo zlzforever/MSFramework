@@ -14,28 +14,6 @@ namespace MicroserviceFramework.Extensions.DependencyInjection;
 public static class ServiceCollectionExtensions
 {
     /// <summary>
-    /// 添加自动依赖注入组件，扫描程序集中的类型，对实现了
-    /// IScopeDependency、ISingletonDependency、ITransientDependency
-    /// 接口的类型， 自动注入到依赖注入中
-    /// </summary>
-    /// <param name="services"></param>
-    /// <returns></returns>
-    public static IServiceCollection AddDependencyInjectionLoader(
-        this IServiceCollection services)
-    {
-        foreach (var type in Utils.Runtime.GetAllTypes())
-        {
-            var lifetime = LifetimeUtilities.GetLifetime(type);
-            if (lifetime.HasValue)
-            {
-                services.RegisterDependencyInjection(type, lifetime.Value);
-            }
-        }
-
-        return services;
-    }
-
-    /// <summary>
     /// 使用自动依赖注入组件，扫描程序集中的类型，对实现了
     /// IScopeDependency、ISingletonDependency、ITransientDependency
     /// 接口的类型， 自动注入到依赖注入中
@@ -45,7 +23,16 @@ public static class ServiceCollectionExtensions
     public static MicroserviceFrameworkBuilder UseDependencyInjectionLoader(
         this MicroserviceFrameworkBuilder builder)
     {
-        builder.Services.AddDependencyInjectionLoader();
+        var types = Utils.Runtime.GetAllTypes();
+        foreach (var type in types)
+        {
+            var lifetime = LifetimeUtilities.GetLifetime(type);
+            if (lifetime.HasValue)
+            {
+                builder.Services.RegisterDependencyInjection(type, lifetime.Value);
+            }
+        }
+
         return builder;
     }
 

@@ -7,14 +7,14 @@ using Xunit;
 
 namespace MSFramework.Tests;
 
-[OptionsType]
+[AutoOptions]
 public class MyOptions
 {
     public string Name { get; set; }
     public int Age { get; set; }
 }
 
-[OptionsType("Person")]
+[AutoOptions(Section = "Person")]
 public class Person
 {
     public string Name { get; set; }

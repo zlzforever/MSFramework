@@ -14,9 +14,10 @@ public static class Runtime
 {
     private static readonly List<Assembly> Assemblies = new();
     private static readonly List<Type> Types = new();
+    private static readonly object Locker = new object();
 
     /// <summary>
-    ///
+    /// 请在 AddMicroserviceFramework 前添加前缀
     /// </summary>
     public static readonly HashSet<string> StartsWith = ["MSFramework"];
 
@@ -27,92 +28,96 @@ public static class Runtime
 
     internal static void Load()
     {
-        Assemblies.Clear();
-        Types.Clear();
-
-        // 分析器不会输出程序集文件
-        var analyzerAssemblyList = new[] { "MSFramework.Analyzers", "MSFramework.Ef.Analyzers" };
-        if (DependencyContext.Default != null)
+        lock (Locker)
         {
-            var dict = new Dictionary<string, Assembly>();
-            var loadedAssemblies = new Dictionary<string, Assembly>();
-            foreach (var assembly in AppDomain.CurrentDomain.GetAssemblies())
-            {
-                loadedAssemblies.TryAdd(assembly.GetName().Name, assembly);
-            }
+            Assemblies.Clear();
+            Types.Clear();
 
-            var libraries = DependencyContext.Default.CompileLibraries
-                .Where(x => x.Type == "project"
-                            || StartsWith.Any(y => x.Name.StartsWith(y)));
-            foreach (var lib in libraries)
+            // 分析器不会输出程序集文件
+            var analyzerAssemblyList = new[] { "MSFramework.Analyzers", "MSFramework.Ef.Analyzers" };
+            if (DependencyContext.Default != null)
             {
-                if (lib.Type == "reference" || analyzerAssemblyList.Contains(lib.Name))
+                var dict = new Dictionary<string, Assembly>();
+                var loadedAssemblies = new Dictionary<string, Assembly>();
+                foreach (var assembly in AppDomain.CurrentDomain.GetAssemblies())
                 {
-                    continue;
+                    var name = assembly.GetName().Name;
+                    loadedAssemblies.TryAdd(name, assembly);
                 }
 
-                if (ExcludeWith.Any(y => lib.Name.StartsWith(y)))
+                var libraries = DependencyContext.Default.CompileLibraries
+                    .Where(x => x.Type == "project"
+                                || StartsWith.Any(y => x.Name.StartsWith(y)));
+                foreach (var lib in libraries)
                 {
-                    continue;
-                }
-
-                if (!loadedAssemblies.TryGetValue(lib.Name, out var assembly))
-                {
-                    var path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, $"{lib.Name}.dll");
-                    if (File.Exists(path))
+                    if (lib.Type == "reference" || analyzerAssemblyList.Contains(lib.Name))
                     {
-                        assembly = AppDomain.CurrentDomain.Load(new AssemblyName(lib.Name));
-                        loadedAssemblies.TryAdd(lib.Name, assembly);
+                        continue;
                     }
+
+                    if (ExcludeWith.Any(y => lib.Name.StartsWith(y)))
+                    {
+                        continue;
+                    }
+
+                    if (!loadedAssemblies.TryGetValue(lib.Name, out var assembly))
+                    {
+                        var path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, $"{lib.Name}.dll");
+                        if (File.Exists(path))
+                        {
+                            assembly = AppDomain.CurrentDomain.Load(new AssemblyName(lib.Name));
+                            loadedAssemblies.TryAdd(lib.Name, assembly);
+                        }
+                    }
+
+                    dict.TryAdd(lib.Name, assembly);
                 }
 
-                dict.TryAdd(lib.Name, assembly);
+                var files = Directory.GetFiles(AppDomain.CurrentDomain.BaseDirectory, "*.dll",
+                    SearchOption.TopDirectoryOnly).ToList();
+                var pluginsPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Plugins");
+                if (Directory.Exists(pluginsPath))
+                {
+                    files.AddRange(Directory.GetFiles(pluginsPath, "*.dll",
+                        SearchOption.TopDirectoryOnly));
+                }
+
+                foreach (var file in files)
+                {
+                    var name = Path.GetFileNameWithoutExtension(file);
+                    if (analyzerAssemblyList.Contains(name))
+                    {
+                        continue;
+                    }
+
+                    if (!StartsWith.Any(y => name.StartsWith(y)))
+                    {
+                        continue;
+                    }
+
+                    if (ExcludeWith.Any(y => name.StartsWith(y)))
+                    {
+                        continue;
+                    }
+
+                    if (dict.ContainsKey(name))
+                    {
+                        continue;
+                    }
+
+                    var assembly = AppDomain.CurrentDomain.Load(AssemblyName.GetAssemblyName(file));
+                    dict.TryAdd(name, assembly);
+                }
+
+                Assemblies.AddRange(dict.Values.Where(x => x != null));
             }
 
-            var files = Directory.GetFiles(AppDomain.CurrentDomain.BaseDirectory, "*.dll",
-                SearchOption.TopDirectoryOnly).ToList();
-            var pluginsPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Plugins");
-            if (Directory.Exists(pluginsPath))
+            foreach (var assembly in Assemblies)
             {
-                files.AddRange(Directory.GetFiles(pluginsPath, "*.dll",
-                    SearchOption.TopDirectoryOnly));
-            }
-
-            foreach (var file in files)
-            {
-                var name = Path.GetFileNameWithoutExtension(file);
-                if (analyzerAssemblyList.Contains(name))
+                foreach (var definedType in assembly.DefinedTypes)
                 {
-                    continue;
+                    Types.Add(definedType.AsType());
                 }
-
-                if (!StartsWith.Any(y => name.StartsWith(y)))
-                {
-                    continue;
-                }
-
-                if (ExcludeWith.Any(y => name.StartsWith(y)))
-                {
-                    continue;
-                }
-
-                if (dict.ContainsKey(name))
-                {
-                    continue;
-                }
-
-                var assembly = AppDomain.CurrentDomain.Load(AssemblyName.GetAssemblyName(file));
-                dict.TryAdd(name, assembly);
-            }
-
-            Assemblies.AddRange(dict.Values.Where(x => x != null));
-        }
-
-        foreach (var assembly in Assemblies)
-        {
-            foreach (var definedType in assembly.DefinedTypes)
-            {
-                Types.Add(definedType.AsType());
             }
         }
     }
@@ -123,7 +128,10 @@ public static class Runtime
     /// <returns></returns>
     public static IReadOnlyCollection<Assembly> GetAllAssemblies()
     {
-        return Assemblies;
+        lock (Locker)
+        {
+            return Assemblies.AsReadOnly();
+        }
     }
 
     /// <summary>
@@ -132,6 +140,9 @@ public static class Runtime
     /// <returns></returns>
     public static IReadOnlyCollection<Type> GetAllTypes()
     {
-        return Types;
+        lock (Locker)
+        {
+            return Types.AsReadOnly();
+        }
     }
 }
