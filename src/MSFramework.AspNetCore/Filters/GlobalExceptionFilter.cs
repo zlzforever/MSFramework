@@ -56,6 +56,8 @@ internal class GlobalExceptionFilter(ILogger<GlobalExceptionFilter> logger) : IE
                 {
                     Success = false, Msg = "系统内部错误", Code = StatusCodes.Status500InternalServerError, Data = null
                 });
+            logger.LogError(context.Exception, "请求 {Method} {Url} 异常", context.HttpContext.Request.Method,
+                context.HttpContext.Request.GetDisplayUrl());
         }
 
         context.ExceptionHandled = true;

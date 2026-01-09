@@ -36,14 +36,12 @@ public class AutoOptionsAttribute : Attribute
     /// </value>
     public bool ErrorOnUnknownConfiguration { get; set; }
 
-    // /// <summary>
-    // /// 配置模型标志
-    // /// </summary>
-    // /// <param name="name">定位对应的配置子节点</param>
-    // /// <param name="section"></param>
-    // public AutoOptionsAttribute( )
-    // {
-    //     Name = name;
-    //     Section = section;
-    // }
+    /// <summary>
+    /// 配置模型标志
+    /// </summary>
+    /// <param name="section"></param>
+    public AutoOptionsAttribute(string section = "")
+    {
+        Section = section;
+    }
 }
