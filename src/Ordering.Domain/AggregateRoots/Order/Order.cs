@@ -38,11 +38,10 @@ public class Order : DeletionAggregateRoot<string>, IOptimisticLock
     /// <summary>
     /// 购买人员
     /// </summary>
+    // public UserInfo Buyer { get; private set; }
     public string BuyerId { get; private set; }
 
     public string Description { get; private set; }
-
-    public User Operator { get; private set; }
 
     /// <summary>
     /// 测试 List 的 JSON
@@ -68,10 +67,10 @@ public class Order : DeletionAggregateRoot<string>, IOptimisticLock
         }
     }
 
-    public void SetOperator(User user)
-    {
-        Operator = user;
-    }
+    // public void SetOperator(UserInfo user)
+    // {
+    //     Operator = user;
+    // }
 
     public void AddExtra(string key, string value)
     {
@@ -108,6 +107,22 @@ public class Order : DeletionAggregateRoot<string>, IOptimisticLock
         order.AddDomainEvent(orderStartedDomainEvent);
         return order;
     }
+
+    // public static Order Create(UserInfo buyer,
+    //     Address address,
+    //     string description)
+    // {
+    //     var order = new Order(ObjectId.GenerateNewId().ToString())
+    //     {
+    //         Address = address, Buyer = buyer, Description = description, Status = OrderStatus.Submitted
+    //     };
+    //
+    //     // Add the OrderStarterDomainEvent to the domain events collection
+    //     // to be raised/dispatched when comitting changes into the Database [ After DbContext.SaveChanges() ]
+    //     var orderStartedDomainEvent = new OrderStartedDomainEvent(order, buyer.Id.ToString());
+    //     order.AddDomainEvent(orderStartedDomainEvent);
+    //     return order;
+    // }
 
     public OrderItem AddItem(string productId, string productName, string pictureUrl, decimal unitPrice,
         int units = 1, decimal discount = 0)

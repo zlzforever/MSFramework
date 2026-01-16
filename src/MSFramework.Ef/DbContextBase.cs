@@ -71,28 +71,6 @@ public abstract class DbContextBase : DbContext
 
         //通过实体配置信息将实体注册到当前上下文
         var contextType = GetType();
-
-        // var interfaces = _contextInterfaceTypes.GetOrAdd(contextType, type =>
-        // {
-        //     var baseType = typeof(IDbContext);
-        //     var list = type.GetInterfaces()
-        //         .Where(x => baseType.IsAssignableFrom(x)).ToList();
-        //     list.Add(type);
-        //     return list;
-        // });
-
-        // foreach (var type in interfaces)
-        // {
-        //     var entityTypeConfigurations = _entityConfigurationTypeFinder
-        //         .GetEntityTypeConfigurations(type);
-        //
-        //     foreach (var entityTypeConfiguration in entityTypeConfigurations)
-        //     {
-        //         entityTypeConfiguration.Value.MethodInfo.Invoke(modelBuilder,
-        //             [entityTypeConfiguration.Value.EntityTypeConfiguration]);
-        //     }
-        // }
-
         modelBuilder.HasAnnotation("DatabaseType", settings.DatabaseType);
 
         var entityTypeConfigurations = entityConfigurationTypeFinder.GetEntityTypeConfigurations(contextType);
@@ -104,30 +82,12 @@ public abstract class DbContextBase : DbContext
         // 需要保证执行顺序，使用虚方法较为合适
         ApplyConfiguration(modelBuilder);
 
-        var tablePrefix = settings.TablePrefix?.Trim();
         foreach (var mutableEntityType in modelBuilder.Model.GetEntityTypes())
         {
             // owned 的类型是合并到其主表中， 所以没有 table name，schema 的说法
             if (!mutableEntityType.IsOwned())
             {
-                var defaultTableName = mutableEntityType.GetDefaultTableName();
-                var tableName = mutableEntityType.GetTableName();
-
-                // 只有在用户没有设置自定义表名的情况下，才会自动调整表名
-                if (defaultTableName == tableName)
-                {
-                    if (settings.UseUnderScoreCase)
-                    {
-                        tableName = tableName.ToSnakeCase();
-                    }
-
-                    if (!string.IsNullOrEmpty(tablePrefix))
-                    {
-                        tableName = tablePrefix + tableName;
-                    }
-
-                    mutableEntityType.SetTableName(tableName);
-                }
+                RenameTableName(mutableEntityType, settings);
 
                 // 编译模型不支持使用全局过滤器
                 if (!settings.UseCompiledModel &&
@@ -136,47 +96,27 @@ public abstract class DbContextBase : DbContext
                     mutableEntityType.AddSoftDeleteQueryFilter();
                 }
 
-                // 继承了实体 & 有 ID 属性 & 未设置主键的实体， 需要自动注入主键
-                // 如果有属性 ID， 且已经注入， 且实体已经有主键， 则不需要再管 ID 属性
-                var idPropertyInfo = mutableEntityType.ClrType.GetProperties()
-                    .FirstOrDefault(x => "id".Equals(x.Name, StringComparison.OrdinalIgnoreCase));
-                if (Defaults.Types.Entity.IsAssignableFrom(mutableEntityType.ClrType) && idPropertyInfo != null &&
-                    mutableEntityType.FindPrimaryKey() == null)
-                {
-                    var propertyBuilder =
-                        mutableEntityType.AddProperty(idPropertyInfo.Name);
-                    propertyBuilder.IsPrimaryKey();
-                }
+                // comment: 只要有 ID 属性，EF 为自动认为其是主键，以下代码失效
+                // // 继承了实体 & 有 ID 属性 & 未设置主键的实体， 需要自动注入主键
+                // // 如果有属性 ID， 且已经注入， 且实体已经有主键， 则不需要再管 ID 属性
+                // var identityProperty = mutableEntityType.ClrType.GetProperties()
+                //     .FirstOrDefault(x => "id".Equals(x.Name, StringComparison.OrdinalIgnoreCase));
+                // if (identityProperty != null &&
+                //     Defaults.Types.Entity.IsAssignableFrom(mutableEntityType.ClrType) &&
+                //     mutableEntityType.FindPrimaryKey() == null)
+                // {
+                //     var propertyBuilder =
+                //         mutableEntityType.AddProperty(identityProperty.Name);
+                //     propertyBuilder.IsPrimaryKey();
+                // }
             }
 
             var optimisticLockTable = Defaults.Types.OptimisticLock.IsAssignableFrom(mutableEntityType.ClrType);
             var enumerationToStringConverterType = typeof(EnumerationToStringConverter<>);
             foreach (var property in mutableEntityType.GetProperties())
             {
-                if (optimisticLockTable && property.Name == nameof(IOptimisticLock.ConcurrencyStamp))
-                {
-                    var maxLength = property.GetMaxLength();
-                    if (maxLength == null)
-                    {
-                        property.SetMaxLength(36);
-                    }
-
-                    property.IsConcurrencyToken = true;
-                    property.IsNullable = true;
-                }
-
-                if (settings.UseUnderScoreCase)
-                {
-                    var storeObjectIdentifier = StoreObjectIdentifier.Table(mutableEntityType.GetTableName(),
-                        mutableEntityType.GetSchema());
-                    var propertyName = property.GetColumnName(storeObjectIdentifier);
-                    if (!string.IsNullOrEmpty(propertyName) && propertyName.StartsWith('_'))
-                    {
-                        propertyName = propertyName.Substring(1, propertyName.Length - 1);
-                    }
-
-                    property.SetColumnName(propertyName.ToSnakeCase());
-                }
+                SetOptimisticLock(optimisticLockTable, property);
+                OverwriteColumnName(settings, mutableEntityType, property);
 
                 if (property.ClrType == Defaults.Types.ObjectId)
                 {
@@ -236,6 +176,75 @@ public abstract class DbContextBase : DbContext
                     property.SetValueConverter(converter);
                 }
             }
+        }
+    }
+
+    private void OverwriteColumnName(DbContextSettings settings, IMutableEntityType mutableEntityType,
+        IMutableProperty property)
+    {
+        if (!settings.UseUnderScoreCase)
+        {
+            return;
+        }
+
+        var storeObjectIdentifier = StoreObjectIdentifier.Table(mutableEntityType.GetTableName(),
+            mutableEntityType.GetSchema());
+        var propertyName = property.GetColumnName(storeObjectIdentifier);
+
+        var columnName = property.GetColumnName();
+        if (string.IsNullOrEmpty(columnName))
+        {
+            throw new ArgumentException(
+                $"Entity {mutableEntityType.Name} Property {property.Name} without column name");
+        }
+
+        if (columnName.StartsWith('_'))
+        {
+            columnName = columnName.Substring(1, columnName.Length - 1);
+        }
+
+        property.SetColumnName(columnName.ToSnakeCase());
+    }
+
+    private void SetOptimisticLock(bool optimisticLockTable, IMutableProperty property)
+    {
+        if (optimisticLockTable && property.Name == nameof(IOptimisticLock.ConcurrencyStamp))
+        {
+            var maxLength = property.GetMaxLength();
+            if (maxLength == null)
+            {
+                property.SetMaxLength(36);
+            }
+
+            property.IsConcurrencyToken = true;
+            property.IsNullable = true;
+        }
+    }
+
+    /// <summary>
+    ///
+    /// </summary>
+    /// <param name="mutableEntityType"></param>
+    /// <param name="settings"></param>
+    protected virtual void RenameTableName(IMutableEntityType mutableEntityType, DbContextSettings settings)
+    {
+        var defaultTableName = mutableEntityType.GetDefaultTableName();
+        var tableName = mutableEntityType.GetTableName();
+
+        // 只有在用户没有设置自定义表名的情况下，才会自动调整表名
+        if (defaultTableName == tableName)
+        {
+            if (settings.UseUnderScoreCase)
+            {
+                tableName = tableName.ToSnakeCase();
+            }
+
+            if (!string.IsNullOrEmpty(settings.TablePrefix))
+            {
+                tableName = settings.TablePrefix + tableName;
+            }
+
+            mutableEntityType.SetTableName(tableName);
         }
     }
 

@@ -67,7 +67,7 @@ public class ProductController(
     public ProductOut GetFirst()
     {
         var queryable = from p in orderingContext.Set<Product>()
-            join u in orderingContext.Set<User>() on p.CreatorId equals Convert.ToString(u.Id)
+            join u in orderingContext.Set<UserInfo>() on p.CreatorId equals Convert.ToString(u.Id)
             select new ProductOut { Name = p.Name, Price = p.Price, CreatorName = u.Name };
         return queryable.FirstOrDefault();
     }

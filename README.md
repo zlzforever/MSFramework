@@ -19,6 +19,8 @@ dotnet ef dbcontext optimize -s src/Ordering.Api \
   -o CompileModels -n Ordering.Infrastructure.CompileModels
 ```
 
+ 
+
 ### 实践说明
 
 + 建议使用 schema 参数来进行隔离， 不再使用 table prefix 进行隔离

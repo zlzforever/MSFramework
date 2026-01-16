@@ -6,6 +6,7 @@ namespace MicroserviceFramework.Ef;
 
 /// <summary>
 /// 定义实体类配置类型查找器
+/// 全局单例
 /// </summary>
 public interface IEntityConfigurationTypeFinder
 {
@@ -53,14 +54,17 @@ public struct EntityTypeConfigurationMetadata(
     ///
     /// </summary>
     public readonly Type EntityType = entityType;
+
     /// <summary>
     ///
     /// </summary>
     public readonly MethodInfo ConfigureMethodInfo = configureMethodInfo;
+
     /// <summary>
     ///
     /// </summary>
     public readonly MethodInfo CreateEntityTypeBuilderMethod = createEntityTypeBuilderMethod;
+
     /// <summary>
     ///
     /// </summary>

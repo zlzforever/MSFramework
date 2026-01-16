@@ -10,8 +10,7 @@ public class ProductConfiguration
 {
     public override void Configure(EntityTypeBuilder<Product> builder)
     {
-        ConfigureDefaultIdentifier(builder);
-
+        builder.Property(x => x.Id).HasMaxLength(36);
         builder.Property(x => x.Name).HasMaxLength(256);
 
         builder.ConfigureCreation();

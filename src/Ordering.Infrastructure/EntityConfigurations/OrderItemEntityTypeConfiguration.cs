@@ -10,9 +10,7 @@ public class OrderItemEntityTypeConfiguration
 {
     public override void Configure(EntityTypeBuilder<OrderItem> builder)
     {
-        ConfigureDefaultIdentifier(builder);
-
-
+        builder.Property(x => x.Id).HasMaxLength(36);
         builder.OwnsOne(x => x.Product, y =>
         {
             y.Property(x => x.ProductId).HasColumnName("ProductId").HasMaxLength(36).IsRequired();

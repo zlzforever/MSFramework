@@ -84,6 +84,11 @@ public static class Defaults
         /// <summary>
         ///
         /// </summary>
+        public static readonly Type ExternalEntity = typeof(IExternalEntity);
+
+        /// <summary>
+        ///
+        /// </summary>
         public static readonly Type Repository = typeof(IRepository);
 
         /// <summary>

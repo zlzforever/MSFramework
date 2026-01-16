@@ -6,7 +6,6 @@ using System.Threading.Tasks;
 using Dapr;
 using MicroserviceFramework.AspNetCore;
 using MicroserviceFramework.Domain;
-using MicroserviceFramework.Ef.Repositories;
 using MicroserviceFramework.Mediator;
 using MicroserviceFramework.Serialization;
 using Microsoft.AspNetCore.Mvc;
@@ -30,7 +29,7 @@ public class OrderController(
     IOrderingQuery orderingQuery,
     OrderingContext dbContext,
     IUnitOfWork unitOfWork,
-    IExternalEntityRepository<User, int> externalEntityRepository,
+    IExternalEntityRepository<UserInfo, string> externalEntityRepository,
     IObjectAssembler objectAssembler,
     IMediator mediator,
     ILogger<OrderController> logger,
@@ -40,14 +39,15 @@ public class OrderController(
     [HttpPost("createTest")]
     public async Task<(OrderDto Order1, OrderDto Order2)> TestCreate()
     {
-        var order1 = await AddAsync();
+        var user1 = externalEntityRepository.Load(UserInfo.Create("1", "Lewis"));
+        var order1 = await AddAsync(user1);
         await unitOfWork.SaveChangesAsync();
-        var order2 = await AddAsync();
+        var order2 = await AddAsync(user1);
         Logger.LogInformation("{TraceIdentifier}: Create test order completed", Session.TraceIdentifier);
         return (objectAssembler.To<OrderDto>(order1), objectAssembler.To<OrderDto>(order2));
     }
 
-    private async Task<Order> AddAsync()
+    private async Task<Order> AddAsync(UserInfo user1)
     {
         var address = new Address
         {
@@ -57,8 +57,9 @@ public class OrderController(
             Country = "Country",
             ZipCode = "ZipCode"
         };
+
         var order = Order.Create(
-            "1",
+            user1.Id,
             address,
             "Description");
         order.AddItem("100049450275",
@@ -74,9 +75,6 @@ public class OrderController(
         order.AddExtra("RGB", "ARGB");
         order.AddKeyValue("test1", "value1");
         order.AddKeyValue("test2", "value2");
-
-        var user1 = externalEntityRepository.GetOrCreate(() => new User(1) { Name = "Lewis" });
-        order.SetOperator(user1);
 
         logger.LogInformation("{TraceIdentifier}: Create test order", Session.TraceIdentifier);
 

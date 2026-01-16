@@ -1,6 +1,7 @@
 using System.Threading;
 using System.Threading.Tasks;
 using MicroserviceFramework.Mediator;
+using Ordering.Domain.AggregateRoots;
 using Ordering.Domain.AggregateRoots.Order;
 using Ordering.Domain.Repositories.Order;
 
@@ -18,6 +19,7 @@ public class CreateOrderCommandHandler(IOrderRepository orderRepository)
     /// <returns></returns>
     public async Task<string> HandleAsync(CreateOrderCommand command, CancellationToken cancellationToken)
     {
+        // Microsoft.EntityFrameworkCore.ChangeTracking.Internal.StateManager
         var order = Order.Create(
             command.UserId,
             new Address

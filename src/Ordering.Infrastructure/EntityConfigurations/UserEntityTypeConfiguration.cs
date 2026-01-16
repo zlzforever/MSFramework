@@ -6,13 +6,12 @@ using Ordering.Domain.AggregateRoots;
 namespace Ordering.Infrastructure.EntityConfigurations;
 
 public class UserEntityTypeConfiguration
-    : EntityTypeConfigurationBase<User, OrderingContext>
+    : EntityTypeConfigurationBase<UserInfo, OrderingContext>
 {
-    public override void Configure(EntityTypeBuilder<User> builder)
+    public override void Configure(EntityTypeBuilder<UserInfo> builder)
     {
-        ConfigureDefaultIdentifier(builder);
-
-        builder.ToTable("user");
+        builder.Property(x => x.Id).HasMaxLength(36);
+        builder.ToTable("user", t => t.ExcludeFromMigrations());
         builder.Property(x => x.Name).HasMaxLength(256);
     }
 }

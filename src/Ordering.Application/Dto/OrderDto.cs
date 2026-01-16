@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using Ordering.Domain.AggregateRoots;
 using Ordering.Domain.AggregateRoots.Order;
 
 namespace Ordering.Application.Dto;
@@ -6,6 +7,7 @@ namespace Ordering.Application.Dto;
 public class OrderDto
 {
     public string Id { get; set; }
+
     /// <summary>
     /// Address is a Value Object pattern example persisted as EF Core 2.0 owned entity
     /// </summary>
@@ -24,7 +26,12 @@ public class OrderDto
     /// <summary>
     /// 购买人员
     /// </summary>
-    public string BuyerId { get; set; }
+    public UserInfo Buyer { get; set; }
+
+    /// <summary>
+    /// 操作人员
+    /// </summary>
+    public UserInfo Operator { get; set; }
 
     public string Description { get; set; }
 

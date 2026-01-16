@@ -19,7 +19,7 @@ namespace Ordering.Infrastructure.CompileModels
         {
             var runtimeEntityType = model.AddEntityType(
                 "Ordering.Domain.AggregateRoots.User",
-                typeof(User),
+                typeof(UserInfo),
                 baseEntityType);
 
             var id = runtimeEntityType.AddProperty(
@@ -49,8 +49,8 @@ namespace Ordering.Infrastructure.CompileModels
             var name = runtimeEntityType.AddProperty(
                 "Name",
                 typeof(string),
-                propertyInfo: typeof(User).GetProperty("Name", BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly),
-                fieldInfo: typeof(User).GetField("<Name>k__BackingField", BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.DeclaredOnly),
+                propertyInfo: typeof(UserInfo).GetProperty("Name", BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly),
+                fieldInfo: typeof(UserInfo).GetField("<Name>k__BackingField", BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.DeclaredOnly),
                 nullable: true,
                 maxLength: 256);
             name.TypeMapping = MySqlStringTypeMapping.Default.Clone(

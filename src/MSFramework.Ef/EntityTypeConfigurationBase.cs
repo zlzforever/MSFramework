@@ -25,6 +25,11 @@ public abstract class EntityTypeConfigurationBase<TEntity, TDbContext> :
     {
         var builder = modelBuilder.Entity<TEntity>();
         Configure(builder);
+
+        if (typeof(TEntity).IsAssignableTo(Defaults.Types.ExternalEntity))
+        {
+            builder.Metadata.SetIsTableExcludedFromMigrations(true);
+        }
     }
 
     /// <summary>

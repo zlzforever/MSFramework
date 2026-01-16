@@ -545,7 +545,7 @@ namespace Ordering.Infrastructure.CompileModels
             var @operator = declaringEntityType.AddNavigation("Operator",
                 runtimeForeignKey,
                 onDependent: true,
-                typeof(User),
+                typeof(UserInfo),
                 propertyInfo: typeof(Order).GetProperty("Operator", BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly),
                 fieldInfo: typeof(Order).GetField("<Operator>k__BackingField", BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.DeclaredOnly));
 

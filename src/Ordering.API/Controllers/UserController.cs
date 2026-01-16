@@ -13,9 +13,9 @@ namespace Ordering.API.Controllers;
 public class UserController(OrderingContext orderingContext) : ApiControllerBase
 {
     [HttpGet("all")]
-    public List<User> GetAllListAsync()
+    public List<UserInfo> GetAllListAsync()
     {
-        return orderingContext.Set<User>()
+        return orderingContext.Set<UserInfo>()
             .AsNoTracking().ToList();
     }
 }
