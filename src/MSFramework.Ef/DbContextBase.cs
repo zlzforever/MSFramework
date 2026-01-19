@@ -117,107 +117,8 @@ public abstract class DbContextBase : DbContext
             {
                 SetOptimisticLock(optimisticLockTable, property);
                 OverwriteColumnName(settings, mutableEntityType, property);
-
-                if (property.ClrType == Defaults.Types.ObjectId)
-                {
-                    property.SetValueConverter(new ObjectIdToStringConverter());
-                    var maxLength = property.GetMaxLength();
-                    switch (maxLength)
-                    {
-                        case null:
-                            property.SetMaxLength(36);
-                            break;
-                        case < 24:
-                            throw new ArgumentException("ObjectId 长度不能小于 24");
-                    }
-
-                    var columnType = property.GetColumnType();
-                    if (string.IsNullOrEmpty(columnType))
-                    {
-                        property.SetColumnType("varchar");
-                    }
-
-                    property.ValueGenerated = ValueGenerated.Never;
-                }
-                else if (property.ClrType == Defaults.Types.Guid)
-                {
-                    var maxLength = property.GetMaxLength();
-                    switch (maxLength)
-                    {
-                        case null:
-                            property.SetMaxLength(36);
-                            break;
-                        case < 36:
-                            throw new ArgumentException("Guid 长度不能小于 36");
-                    }
-
-                    var columnType = property.GetColumnType();
-                    if (string.IsNullOrEmpty(columnType))
-                    {
-                        property.SetColumnType("varchar");
-                    }
-                }
-                else if (property.ClrType.IsAssignableTo(typeof(Enumeration)))
-                {
-                    var columnType = property.GetColumnType();
-                    if (string.IsNullOrEmpty(columnType))
-                    {
-                        property.SetColumnType("varchar");
-                    }
-
-                    var maxLength = property.GetMaxLength();
-                    if (maxLength == null)
-                    {
-                        property.SetMaxLength(256);
-                    }
-
-                    var converterType = enumerationToStringConverterType.MakeGenericType(property.ClrType);
-                    var converter = (ValueConverter)Activator.CreateInstance(converterType);
-                    property.SetValueConverter(converter);
-                }
+                AutoColumnType(property, enumerationToStringConverterType);
             }
-        }
-    }
-
-    private void OverwriteColumnName(DbContextSettings settings, IMutableEntityType mutableEntityType,
-        IMutableProperty property)
-    {
-        if (!settings.UseUnderScoreCase)
-        {
-            return;
-        }
-
-        var storeObjectIdentifier = StoreObjectIdentifier.Table(mutableEntityType.GetTableName(),
-            mutableEntityType.GetSchema());
-        var propertyName = property.GetColumnName(storeObjectIdentifier);
-
-        var columnName = property.GetColumnName();
-        if (string.IsNullOrEmpty(columnName))
-        {
-            throw new ArgumentException(
-                $"Entity {mutableEntityType.Name} Property {property.Name} without column name");
-        }
-
-        if (columnName.StartsWith('_'))
-        {
-            columnName = columnName.Substring(1, columnName.Length - 1);
-        }
-
-        property.SetColumnName(columnName.ToSnakeCase());
-    }
-
-    private void SetOptimisticLock(bool optimisticLockTable, IMutableProperty property)
-    {
-        if (optimisticLockTable && property.Name == nameof(IOptimisticLock.ConcurrencyStamp))
-        {
-            var maxLength = property.GetMaxLength();
-            if (maxLength == null)
-            {
-                property.SetMaxLength(36);
-            }
-
-            property.IsConcurrencyToken = true;
-            property.IsNullable = true;
         }
     }
 
@@ -258,7 +159,7 @@ public abstract class DbContextBase : DbContext
     ///
     /// </summary>
     /// <returns></returns>
-    public IEnumerable<AuditEntity> GetAuditEntities()
+    public virtual IEnumerable<AuditEntity> GetAuditEntities()
     {
         foreach (var entry in ChangeTracker.Entries())
         {
@@ -555,5 +456,113 @@ public abstract class DbContextBase : DbContext
         }
 
         return domainEvents;
+    }
+
+    private void AutoColumnType(IMutableProperty property, Type enumerationToStringConverterType)
+    {
+        if (property.ClrType == Defaults.Types.ObjectId)
+        {
+            property.SetValueConverter(new ObjectIdToStringConverter());
+            var maxLength = property.GetMaxLength();
+            switch (maxLength)
+            {
+                case null:
+                    property.SetMaxLength(36);
+                    break;
+                case < 24:
+                    throw new ArgumentException("ObjectId 长度不能小于 24");
+            }
+
+            var columnType = property.GetColumnType();
+            if (string.IsNullOrEmpty(columnType))
+            {
+                property.SetColumnType("varchar");
+            }
+
+            property.ValueGenerated = ValueGenerated.Never;
+        }
+        else if (property.ClrType == Defaults.Types.Guid)
+        {
+            var maxLength = property.GetMaxLength();
+            switch (maxLength)
+            {
+                case null:
+                    property.SetMaxLength(36);
+                    break;
+                case < 36:
+                    throw new ArgumentException("Guid 长度不能小于 36");
+            }
+
+            var columnType = property.GetColumnType();
+            if (string.IsNullOrEmpty(columnType))
+            {
+                property.SetColumnType("varchar");
+            }
+        }
+        else if (property.ClrType.IsAssignableTo(typeof(Enumeration)))
+        {
+            var columnType = property.GetColumnType();
+            if (string.IsNullOrEmpty(columnType))
+            {
+                property.SetColumnType("varchar");
+            }
+
+            var maxLength = property.GetMaxLength();
+            if (maxLength == null)
+            {
+                property.SetMaxLength(256);
+            }
+
+            var converterType = enumerationToStringConverterType.MakeGenericType(property.ClrType);
+            var converter = (ValueConverter)Activator.CreateInstance(converterType);
+            property.SetValueConverter(converter);
+        }
+    }
+
+    private void OverwriteColumnName(DbContextSettings settings, IMutableEntityType mutableEntityType,
+        IMutableProperty property)
+    {
+        if (!settings.UseUnderScoreCase)
+        {
+            return;
+        }
+
+        var tableName = mutableEntityType.GetTableName();
+        if (string.IsNullOrEmpty(tableName))
+        {
+            throw new ArgumentException("MutableEntityType.GetTableName() returns null.");
+        }
+
+        var storeObjectIdentifier = StoreObjectIdentifier.Table(tableName,
+            mutableEntityType.GetSchema());
+        var columnName = property.GetColumnName(storeObjectIdentifier);
+
+        if (string.IsNullOrEmpty(columnName))
+        {
+            throw new ArgumentException(
+                $"Entity {mutableEntityType.Name} Property {property.Name} without column name");
+        }
+
+        if (columnName.StartsWith('_'))
+        {
+            columnName = columnName.Substring(1, columnName.Length - 1);
+        }
+
+        property.SetColumnName(columnName.ToSnakeCase());
+    }
+
+    private void SetOptimisticLock(bool optimisticLockTable, IMutableProperty property)
+    {
+        if (optimisticLockTable && property.Name == nameof(IOptimisticLock.ConcurrencyStamp))
+        {
+            var maxLength = property.GetMaxLength();
+            if (maxLength == null)
+            {
+                property.SetMaxLength(36);
+            }
+
+            property.IsConcurrencyToken = true;
+            property.IsNullable = true;
+        }
     }
 }

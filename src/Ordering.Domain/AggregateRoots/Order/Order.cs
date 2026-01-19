@@ -8,9 +8,9 @@ namespace Ordering.Domain.AggregateRoots.Order;
 [Description("订单表")]
 public class Order : DeletionAggregateRoot<string>, IOptimisticLock
 {
-    private readonly HashSet<string> _listJson;
-    private readonly Dictionary<string, string> _dictJson;
-    private readonly List<OrderExtra> _extras;
+    private readonly HashSet<string> _list;
+    private readonly Dictionary<string, string> _dict;
+    private readonly List<ExtraInfo> _extra;
 
     // DDD Patterns comment
     // Using a private collection field, better for DDD Aggregate's encapsulation
@@ -22,8 +22,6 @@ public class Order : DeletionAggregateRoot<string>, IOptimisticLock
     /// Address is a Value Object pattern example persisted as EF Core 2.0 owned entity
     /// </summary>
     public Address Address { get; private set; }
-
-    public ObjectId TestId { get; private set; }
 
     /// <summary>
     /// 订单项
@@ -38,91 +36,76 @@ public class Order : DeletionAggregateRoot<string>, IOptimisticLock
     /// <summary>
     /// 购买人员
     /// </summary>
-    // public UserInfo Buyer { get; private set; }
-    public string BuyerId { get; private set; }
+    public UserInfo Buyer { get; private set; }
 
+    /// <summary>
+    /// 描述信息
+    /// </summary>
     public string Description { get; private set; }
+
+    /// <summary>
+    /// 测试自动设置长度
+    /// </summary>
+    public ObjectId TestId { get; private set; }
 
     /// <summary>
     /// 测试 List 的 JSON
     /// </summary>
-    public IReadOnlyCollection<string> ListJson => _listJson;
+    public IReadOnlyCollection<string> List => _list;
 
     /// <summary>
     /// 测试对象列表的 JSON 存储
     /// </summary>
-    public IReadOnlyCollection<OrderExtra> Extras => _extras;
+    public IReadOnlyCollection<ExtraInfo> Extra => _extra;
 
     /// <summary>
     /// 用于测试字典 JSON 在 EF 中的序列化与反序列化
     /// KEY 的大小写差异
     /// </summary>
-    public IReadOnlyDictionary<string, string> DictJson => _dictJson;
+    public IReadOnlyDictionary<string, string> Dict => _dict;
 
     public void SetList(IEnumerable<string> list)
     {
         foreach (var item in list)
         {
-            _listJson.Add(item);
+            _list.Add(item);
         }
     }
 
-    // public void SetOperator(UserInfo user)
-    // {
-    //     Operator = user;
-    // }
-
     public void AddExtra(string key, string value)
     {
-        _extras.Add(new OrderExtra(key, value));
+        _extra.Add(new ExtraInfo(key, value));
     }
 
-    public void AddKeyValue(string key, string value)
+    public void AddKeyValuePair(string key, string value)
     {
-        _dictJson.TryAdd(key, value);
+        _dict.TryAdd(key, value);
     }
 
     private Order(string id) : base(id)
     {
         _items = [];
-        _listJson = [];
-        _dictJson = new Dictionary<string, string>();
-        _extras = [];
+        _list = [];
+        _dict = new Dictionary<string, string>();
+        _extra = [];
         TestId = ObjectId.GenerateNewId();
-        AddDomainEvent(new OrderCreatedDomainEvent { Id = id, CreationTime = DateTimeOffset.Now, Name = "test" });
     }
 
-    public static Order Create(string buyerId,
+    public static Order Create(UserInfo buyer,
         Address address,
         string description)
     {
         var order = new Order(ObjectId.GenerateNewId().ToString())
         {
-            Address = address, BuyerId = buyerId, Description = description, Status = OrderStatus.Submitted
+            Address = address, Buyer = buyer, Description = description, Status = OrderStatus.Submitted
         };
 
         // Add the OrderStarterDomainEvent to the domain events collection
-        // to be raised/dispatched when comitting changes into the Database [ After DbContext.SaveChanges() ]
-        var orderStartedDomainEvent = new OrderStartedDomainEvent(order, buyerId);
+        // to be raised/dispatched when committing changes into the Database [ After DbContext.SaveChanges() ]
+        var orderStartedDomainEvent = new OrderStartedDomainEvent(order, buyer.Id);
         order.AddDomainEvent(orderStartedDomainEvent);
         return order;
     }
-
-    // public static Order Create(UserInfo buyer,
-    //     Address address,
-    //     string description)
-    // {
-    //     var order = new Order(ObjectId.GenerateNewId().ToString())
-    //     {
-    //         Address = address, Buyer = buyer, Description = description, Status = OrderStatus.Submitted
-    //     };
-    //
-    //     // Add the OrderStarterDomainEvent to the domain events collection
-    //     // to be raised/dispatched when comitting changes into the Database [ After DbContext.SaveChanges() ]
-    //     var orderStartedDomainEvent = new OrderStartedDomainEvent(order, buyer.Id.ToString());
-    //     order.AddDomainEvent(orderStartedDomainEvent);
-    //     return order;
-    // }
 
     public OrderItem AddItem(string productId, string productName, string pictureUrl, decimal unitPrice,
         int units = 1, decimal discount = 0)
@@ -145,7 +128,7 @@ public class Order : DeletionAggregateRoot<string>, IOptimisticLock
         else
         {
             //add validated new order item
-            var product = new OrderProduct(productId, productName, pictureUrl);
+            var product = new Product(productId, productName, pictureUrl);
             var orderItem = OrderItem.Create(this, product, unitPrice, units, discount);
             _items.Add(orderItem);
             return orderItem;
@@ -157,53 +140,9 @@ public class Order : DeletionAggregateRoot<string>, IOptimisticLock
         Address = newAddress ?? throw new ArgumentException(nameof(newAddress));
     }
 
-    public void SetAwaitingValidationStatus()
-    {
-        if (Equals(Status, OrderStatus.Submitted))
-        {
-            AddDomainEvent(new OrderStatusChangedToAwaitingValidationDomainEvent(Id, Items));
-            Status = OrderStatus.AwaitingValidation;
-        }
-    }
-
-    public void SetStockConfirmedStatus()
-    {
-        if (Equals(Status, OrderStatus.AwaitingValidation))
-        {
-            AddDomainEvent(new OrderStatusChangedToStockConfirmedDomainEvent(Id));
-
-            Status = OrderStatus.StockConfirmed;
-            Description = "All the items were confirmed with available stock.";
-        }
-    }
-
-    public void SetPaidStatus()
-    {
-        if (Equals(Status, OrderStatus.StockConfirmed))
-        {
-            AddDomainEvent(new OrderStatusChangedToPaidDomainEvent(Id, Items));
-
-            Status = OrderStatus.Paid;
-            Description =
-                "The payment was performed at a simulated \"American Bank checking bank account ending on XX35071\"";
-        }
-    }
-
     public void AddEvent()
     {
         AddDomainEvent(new EmptyEvent());
-    }
-
-    public void SetShippedStatus()
-    {
-        if (!Equals(Status, OrderStatus.Paid))
-        {
-            StatusChangeException(OrderStatus.Shipped);
-        }
-
-        Status = OrderStatus.Shipped;
-        Description = "The order was shipped.";
-        AddDomainEvent(new OrderShippedDomainEvent(this));
     }
 
     public void SetCancelledStatus()
@@ -217,21 +156,6 @@ public class Order : DeletionAggregateRoot<string>, IOptimisticLock
         Status = OrderStatus.Cancelled;
         Description = $"The order was cancelled.";
         AddDomainEvent(new OrderCancelledDomainEvent(this));
-    }
-
-    public void SetCancelledStatusWhenStockIsRejected(IEnumerable<string> orderStockRejectedItems)
-    {
-        if (Equals(Status, OrderStatus.AwaitingValidation))
-        {
-            Status = OrderStatus.Cancelled;
-
-            var itemsStockRejectedProductNames = Items
-                .Where(c => orderStockRejectedItems.Contains(c.Product.ProductId))
-                .Select(c => c.Product.Name);
-
-            var itemsStockRejectedDescription = string.Join(", ", itemsStockRejectedProductNames);
-            Description = $"The product items don't have stock: ({itemsStockRejectedDescription}).";
-        }
     }
 
     private void StatusChangeException(OrderStatus orderStatusToChange)

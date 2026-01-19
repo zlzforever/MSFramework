@@ -62,9 +62,10 @@ public class EfRepository<TEntity, TKey> : IRepository<TEntity, TKey>, IEfReposi
     }
 
     /// <summary>
-    /// 若 UseQuerySplittingBehavior 为空，则使用 OnConfiguring 中的 UseQuerySplittingBehavior 全局设置，默认是 SingleQuery
+    /// 若 UseQuerySplittingBehavior 为空，则使用全局设置，默认是 SingleQuery
     /// 建议 2 个或以上的 1:N 关系则使用 SplitQuery 来避免笛卡尔积爆炸，其它情况使用 SingleQuery
     /// 即其他情况使用默认配置，仅在聚合根有较多 1:N 的关系时重载 UseQuerySplittingBehavior = true 来优化查询
+    /// 默认会 include 第一级导航属性
     /// </summary>
     /// <param name="dbSet"></param>
     /// <returns></returns>

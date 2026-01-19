@@ -1,11 +1,9 @@
 using MicroserviceFramework.Domain;
-using MicroserviceFramework.Ef.Repositories;
 using Microsoft.Extensions.DependencyInjection;
+using MSFramework.AspNetCore.Test.DataModel;
 using Xunit;
 
 namespace MSFramework.AspNetCore.Test;
-
-public class ExternalUser(string id) : ExternalEntity<string>(id);
 
 public class ExternalEntityTests : BaseTest
 {

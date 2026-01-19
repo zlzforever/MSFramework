@@ -5,12 +5,11 @@ using MSFramework.AspNetCore.Test.EfPostgreSqlTest.Infrastructure;
 
 namespace MSFramework.AspNetCore.Test.EfPostgreSqlTest.EntityConfiguration;
 
-public class TestDataConfiguration : EntityTypeConfigurationBase<TestData, TestDataContext>
+public class ExternalUserConfiguration
+    : EntityTypeConfigurationBase<ExternalUser, TestDataContext>
 {
-    public override void Configure(EntityTypeBuilder<TestData> builder)
+    public override void Configure(EntityTypeBuilder<ExternalUser> builder)
     {
         ConfigureDefaultIdentifier(builder);
-
-        builder.Property(x => x.Id).HasMaxLength(36);
     }
 }

@@ -14,6 +14,7 @@ internal class AuditOperationConfiguration
 
         builder.Property(x => x.Id).ValueGeneratedNever().HasMaxLength(36);
         builder.Property(x => x.IP).HasMaxLength(256);
+        builder.Property(x => x.Method).HasMaxLength(12);
         builder.Property(x => x.DeviceId).HasMaxLength(36);
         builder.Property(x => x.DeviceModel).HasMaxLength(256);
         builder.Property(x => x.Lat);

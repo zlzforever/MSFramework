@@ -12,7 +12,6 @@ namespace MicroserviceFramework.Ef;
 internal class EfUnitOfWork : IUnitOfWork
 {
     private readonly DbContextFactory _dbContextFactory;
-    private AuditOperation _auditOperation;
 
     /// <summary>
     /// 初始化工作单元管理器
@@ -27,22 +26,20 @@ internal class EfUnitOfWork : IUnitOfWork
     /// </summary>
     public event Action SavedChanges;
 
-    public AuditOperation GetAuditOperation()
-    {
-        return _auditOperation;
-    }
+    // public AuditOperation GetAuditOperation()
+    // {
+    //     return _auditOperation;
+    // }
 
-    public void SetAuditOperation(AuditOperation auditOperation)
+    public void RegisterAuditOperation(AuditOperation auditOperation)
     {
         if (auditOperation == null)
         {
             return;
         }
 
-        _auditOperation = auditOperation;
         foreach (var dbContextBase in _dbContextFactory.GetAllDbContexts())
         {
-            // 对于不同 DbContext，应该把其下面的 Entity 归到对应的审计日志下面
             dbContextBase.SavingChanges += (sender, _) =>
             {
                 if (sender is not DbContextBase db)
@@ -52,7 +49,6 @@ internal class EfUnitOfWork : IUnitOfWork
 
                 var entities = db.GetAuditEntities();
                 auditOperation.AddEntities(entities);
-                auditOperation.End();
             };
         }
     }

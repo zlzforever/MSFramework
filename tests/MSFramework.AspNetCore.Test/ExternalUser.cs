@@ -1,2 +1,0 @@
-namespace MSFramework.AspNetCore.Test;
-

@@ -14,29 +14,29 @@ public static class ServiceCollectionExtensions
     /// <param name="options"></param>
     extension(NpgsqlDbContextOptionsBuilder options)
     {
-        /// <summary>
-        ///
-        /// </summary>
-        /// <returns></returns>
-        public NpgsqlDbContextOptionsBuilder UseRemoveForeignKeyService()
-        {
-            MigrationsSqlGenerator.RemoveForeignKey = true;
-            var ops = (IRelationalDbContextOptionsBuilderInfrastructure)options;
-            ops.OptionsBuilder.ReplaceService<IMigrationsSqlGenerator, MigrationsSqlGenerator>();
-            return options;
-        }
+        // /// <summary>
+        // ///
+        // /// </summary>
+        // /// <returns></returns>
+        // public NpgsqlDbContextOptionsBuilder UseRemoveForeignKeyService()
+        // {
+        //     // MigrationsSqlGenerator.RemoveForeignKey = true;
+        //     var ops = (IRelationalDbContextOptionsBuilderInfrastructure)options;
+        //     ops.OptionsBuilder.ReplaceService<IMigrationsSqlGenerator, MigrationsSqlGenerator>();
+        //     return options;
+        // }
 
-        /// <summary>
-        ///
-        /// </summary>
-        /// <returns></returns>
-        public NpgsqlDbContextOptionsBuilder UseRemoveExternalEntityService()
-        {
-            MigrationsSqlGenerator.RemoveExternalEntity = true;
-            var ops = (IRelationalDbContextOptionsBuilderInfrastructure)options;
-            ops.OptionsBuilder.ReplaceService<IMigrationsSqlGenerator, MigrationsSqlGenerator>();
-            return options;
-        }
+        // /// <summary>
+        // ///
+        // /// </summary>
+        // /// <returns></returns>
+        // public NpgsqlDbContextOptionsBuilder UseRemoveExternalEntityService()
+        // {
+        //     MigrationsSqlGenerator.RemoveExternalEntity = true;
+        //     var ops = (IRelationalDbContextOptionsBuilderInfrastructure)options;
+        //     ops.OptionsBuilder.ReplaceService<IMigrationsSqlGenerator, MigrationsSqlGenerator>();
+        //     return options;
+        // }
     }
 
     /// <summary>

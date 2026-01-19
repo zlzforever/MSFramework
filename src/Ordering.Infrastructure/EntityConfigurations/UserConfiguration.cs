@@ -5,7 +5,7 @@ using Ordering.Domain.AggregateRoots;
 
 namespace Ordering.Infrastructure.EntityConfigurations;
 
-public class UserEntityTypeConfiguration
+public class UserConfiguration
     : EntityTypeConfigurationBase<UserInfo, OrderingContext>
 {
     public override void Configure(EntityTypeBuilder<UserInfo> builder)

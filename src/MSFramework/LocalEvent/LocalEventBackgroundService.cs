@@ -74,7 +74,7 @@ public class LocalEventBackgroundService(
                             {
                                 var auditOperation = CreateAuditedOperation(session, handlerName);
                                 var unitOfWork = services.GetService<IUnitOfWork>();
-                                unitOfWork?.SetAuditOperation(auditOperation);
+                                unitOfWork?.RegisterAuditOperation(auditOperation);
                             }
 
                             if (descriptor.HandleMethod.Invoke(handler, [entry.EventData, CancellationToken.None]) is
@@ -128,7 +128,7 @@ public class LocalEventBackgroundService(
     private AuditOperation CreateAuditedOperation(ISession session, string handlerType)
     {
         var auditedOperation = new AuditOperation(handlerType, null, null, null, null,
-            null, null, session.TraceIdentifier);
+            null, null, session.TraceIdentifier, "Local");
         auditedOperation.SetCreation(session.UserId, session.UserDisplayName, DateTimeOffset.Now);
         return auditedOperation;
     }

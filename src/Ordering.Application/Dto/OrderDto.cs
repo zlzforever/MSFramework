@@ -28,28 +28,23 @@ public class OrderDto
     /// </summary>
     public UserInfo Buyer { get; set; }
 
-    /// <summary>
-    /// 操作人员
-    /// </summary>
-    public UserInfo Operator { get; set; }
-
     public string Description { get; set; }
 
     /// <summary>
     /// 测试 List 的 JSON
     /// </summary>
-    public List<string> ListJson { get; set; }
+    public List<string> List { get; set; }
 
     /// <summary>
     /// 测试对象列表的 JSON 存储
     /// </summary>
-    public List<OrderExtraDto> Extras { get; set; }
+    public List<OrderExtraDto> Extra { get; set; }
 
     /// <summary>
     /// 用于测试字典 JSON 在 EF 中的序列化与反序列化
     /// KEY 的大小写差异
     /// </summary>
-    public Dictionary<string, string> DictJson { get; set; }
+    public Dictionary<string, string> Dict { get; set; }
 
     public class OrderExtraDto
     {

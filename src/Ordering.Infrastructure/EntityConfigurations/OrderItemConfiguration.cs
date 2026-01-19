@@ -5,7 +5,7 @@ using Ordering.Domain.AggregateRoots.Order;
 
 namespace Ordering.Infrastructure.EntityConfigurations;
 
-public class OrderItemEntityTypeConfiguration
+public class OrderItemConfiguration
     : EntityTypeConfigurationBase<OrderItem, OrderingContext>
 {
     public override void Configure(EntityTypeBuilder<OrderItem> builder)
@@ -21,6 +21,6 @@ public class OrderItemEntityTypeConfiguration
         });
         builder.Property(x => x.Discount);
         builder.Property(x => x.Units);
-        builder.Property(x => x.UnitPrice);
+        builder.Property(x => x.Price);
     }
 }

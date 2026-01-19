@@ -18,11 +18,6 @@ public static class EfUtilities
     /// </summary>
     public static readonly bool IsDesignTime;
 
-    /// <summary>
-    ///
-    /// </summary>
-    internal static Type AuditingDbContextType;
-
     static EfUtilities()
     {
         IsDesignTime = "ef" == Assembly.GetEntryAssembly()?.GetName().Name?.ToLower();

@@ -23,21 +23,25 @@ internal class Audit(ILogger<Audit> logger) : ActionFilterAttribute
 {
     private List<IAuditingStore> _auditingStores;
     private AuditOperation _auditOperation;
+    private IServiceScope _serviceScope;
 
     public override async Task OnActionExecutionAsync(ActionExecutingContext context, ActionExecutionDelegate next)
     {
-        logger.LogDebug("审计过滤器执行开始");
+        logger.LogDebug("开始执行审计过滤器");
 
         var services = context.HttpContext.RequestServices;
         var unitOfWork = services.GetService<IUnitOfWork>();
 
         if (Constants.CommandMethods.Contains(context.HttpContext.Request.Method))
         {
-            _auditingStores = services.GetServices<IAuditingStore>().ToList();
+            // 使用独立 scope 保存审计数据，不干扰 HTTP context 下的 DbContext
+            // HTTP context 下的 DbContext 注册了 UOW 下的 SavingChanges 事件
+            _serviceScope = Defaults.ServiceProvider.CreateScope();
+            _auditingStores = _serviceScope.ServiceProvider.GetServices<IAuditingStore>().ToList();
             if (_auditingStores.Any())
             {
                 _auditOperation = CreateAuditOperation(context, DateTimeOffset.Now);
-                unitOfWork.SetAuditOperation(_auditOperation);
+                unitOfWork.RegisterAuditOperation(_auditOperation);
             }
         }
 
@@ -53,6 +57,7 @@ internal class Audit(ILogger<Audit> logger) : ActionFilterAttribute
 
         if (_auditOperation != null)
         {
+            _auditOperation.End();
             foreach (var auditingStore in _auditingStores)
             {
                 try
@@ -66,14 +71,15 @@ internal class Audit(ILogger<Audit> logger) : ActionFilterAttribute
             }
         }
 
-        logger.LogDebug("审计过滤器执行结束");
+        _serviceScope?.Dispose();
+        logger.LogDebug("结束执行审计过滤器");
     }
 
     private AuditOperation CreateAuditOperation(ActionExecutingContext context, DateTimeOffset creationTime)
     {
         var ua = context.HttpContext.Request.Headers["User-Agent"].ToString();
         var ip = context.GetRemoteIpAddress();
-        var url = $"{context.HttpContext.Request.Method} {context.HttpContext.Request.GetDisplayUrl()}";
+        var url = context.HttpContext.Request.GetDisplayUrl();
         var deviceId = context.HttpContext.Request.Query["deviceId"].ToString();
         deviceId = deviceId == string.Empty ? null : deviceId;
 
@@ -95,7 +101,7 @@ internal class Audit(ILogger<Audit> logger) : ActionFilterAttribute
         }
 
         var auditedOperation = new AuditOperation(url, ua, ip, deviceModel, deviceId,
-            lat, lng, context.HttpContext.TraceIdentifier);
+            lat, lng, context.HttpContext.TraceIdentifier, context.HttpContext.Request.Method);
         auditedOperation.SetCreation(user.UserId, user.UserDisplayName, creationTime);
         return auditedOperation;
     }

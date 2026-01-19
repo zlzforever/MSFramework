@@ -135,12 +135,9 @@ public static class Startup
                 // {
                 //     x.LoadModel("Ordering.Infrastructure.CompileModels.OrderingContextModel, Ordering.Infrastructure");
                 // }
-
                 x.UseMySql(ServerVersion.AutoDetect(dbContextSettings.ConnectionString), y =>
                 {
                     y.Load(dbContextSettings);
-                    y.UseRemoveForeignKeyService();
-                    y.UseRemoveExternalEntityService();
                 });
             }
             else
@@ -148,8 +145,6 @@ public static class Startup
                 x.UseNpgsql(y =>
                 {
                     y.Load(dbContextSettings);
-                    y.UseRemoveForeignKeyService();
-                    y.UseRemoveExternalEntityService();
                 });
             }
         });
@@ -183,7 +178,6 @@ public static class Startup
             builder.UseDependencyInjectionLoader();
             builder.UseOptionsType(configuration);
             builder.UseAutoMapperObjectAssembler();
-            builder.UseLokiAuditing();
             builder.UseEfAuditing<OrderingContext>();
             builder.UseLocalEventPublisher();
             builder.UseAspNetCoreExtension();

@@ -49,7 +49,6 @@ public class ExternalEntityRepository<TEntity, TKey>
     /// </summary>
     /// <param name="entity"></param>
     /// <returns></returns>
-    /// <exception cref="NotImplementedException"></exception>
     public TEntity Load(TEntity entity)
     {
         Check.NotNull(entity, nameof(entity));

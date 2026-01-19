@@ -34,6 +34,11 @@ public static class Defaults
     /// </summary>
     public static readonly string OSSDirectory = Path.Combine(AppContext.BaseDirectory, "wwwroot", "oss");
 
+    /// <summary>
+    ///
+    /// </summary>
+    public static IServiceProvider ServiceProvider;
+
     static Defaults()
     {
         List<string> names = ["ReSharperTestRunner", "testhost"];

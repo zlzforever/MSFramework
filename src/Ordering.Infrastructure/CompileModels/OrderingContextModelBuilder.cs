@@ -836,7 +836,7 @@ namespace Ordering.Infrastructure.CompileModels
             pK_ordering_order_item.MappedKeys.Add(pK_ordering_order_itemUc);
             RelationalModel.GetOrCreateUniqueConstraints(pK_ordering_order_itemUc).Add(pK_ordering_order_item);
             var pK_ordering_order_itemUc0 = RelationalModel.GetKey(this,
-                "Ordering.Domain.AggregateRoots.OrderProduct",
+                "Ordering.Domain.AggregateRoots.Product",
                 new[] { "OrderItemId" });
             pK_ordering_order_item.MappedKeys.Add(pK_ordering_order_itemUc0);
             RelationalModel.GetOrCreateUniqueConstraints(pK_ordering_order_itemUc0).Add(pK_ordering_order_item);
@@ -852,7 +852,7 @@ namespace Ordering.Infrastructure.CompileModels
             var iX_ordering_order_item_product_id = new TableIndex(
             "IX_ordering_order_item_product_id", ordering_order_itemTable, new[] { product_idColumn }, false);
             var iX_ordering_order_item_product_idIx = RelationalModel.GetIndex(this,
-                "Ordering.Domain.AggregateRoots.OrderProduct",
+                "Ordering.Domain.AggregateRoots.Product",
                 new[] { "ProductId" });
             iX_ordering_order_item_product_id.MappedIndexes.Add(iX_ordering_order_item_product_idIx);
             RelationalModel.GetOrCreateTableIndexes(iX_ordering_order_item_product_idIx).Add(iX_ordering_order_item_product_id);
@@ -870,11 +870,11 @@ namespace Ordering.Infrastructure.CompileModels
             RelationalModel.CreateColumnMapping(unit_priceColumn, orderItem.FindProperty("UnitPrice")!, ordering_order_itemTableMapping);
             RelationalModel.CreateColumnMapping(unitsColumn, orderItem.FindProperty("Units")!, ordering_order_itemTableMapping);
 
-            var orderProduct = FindEntityType("Ordering.Domain.AggregateRoots.OrderProduct")!;
+            var orderProduct = FindEntityType("Ordering.Domain.AggregateRoots.Product")!;
 
             var defaultTableMappings5 = new List<TableMappingBase<ColumnMappingBase>>();
             orderProduct.SetRuntimeAnnotation("Relational:DefaultMappings", defaultTableMappings5);
-            var orderingDomainAggregateRootsOrderProductTableBase = new TableBase("Ordering.Domain.AggregateRoots.OrderProduct", null, relationalModel);
+            var orderingDomainAggregateRootsOrderProductTableBase = new TableBase("Ordering.Domain.AggregateRoots.Product", null, relationalModel);
             var idColumnBase5 = new ColumnBase<ColumnMappingBase>("id", "varchar(255)", orderingDomainAggregateRootsOrderProductTableBase);
             orderingDomainAggregateRootsOrderProductTableBase.Columns.Add("id", idColumnBase5);
             var product_idColumnBase = new ColumnBase<ColumnMappingBase>("product_id", "varchar(36)", orderingDomainAggregateRootsOrderProductTableBase);
@@ -886,7 +886,7 @@ namespace Ordering.Infrastructure.CompileModels
                 IsNullable = true
             };
             orderingDomainAggregateRootsOrderProductTableBase.Columns.Add("product_picture_url", product_picture_urlColumnBase);
-            relationalModel.DefaultTables.Add("Ordering.Domain.AggregateRoots.OrderProduct", orderingDomainAggregateRootsOrderProductTableBase);
+            relationalModel.DefaultTables.Add("Ordering.Domain.AggregateRoots.Product", orderingDomainAggregateRootsOrderProductTableBase);
             var orderingDomainAggregateRootsOrderProductMappingBase = new TableMappingBase<ColumnMappingBase>(orderProduct, orderingDomainAggregateRootsOrderProductTableBase, true);
             orderingDomainAggregateRootsOrderProductTableBase.AddTypeMapping(orderingDomainAggregateRootsOrderProductMappingBase, false);
             defaultTableMappings5.Add(orderingDomainAggregateRootsOrderProductMappingBase);
@@ -904,7 +904,7 @@ namespace Ordering.Infrastructure.CompileModels
             ordering_order_itemTable.AddTypeMapping(ordering_order_itemTableMapping0, true);
             tableMappings5.Add(ordering_order_itemTableMapping0);
             ordering_order_itemTable.AddRowInternalForeignKey(orderProduct, RelationalModel.GetForeignKey(this,
-                "Ordering.Domain.AggregateRoots.OrderProduct",
+                "Ordering.Domain.AggregateRoots.Product",
                 new[] { "OrderItemId" },
                 "Ordering.Domain.AggregateRoots.OrderItem",
                 new[] { "Id" }));

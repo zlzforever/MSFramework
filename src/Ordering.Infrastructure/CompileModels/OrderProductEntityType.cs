@@ -8,6 +8,7 @@ using Microsoft.EntityFrameworkCore.Storage;
 using Ordering.Domain.AggregateRoots;
 using Ordering.Domain.AggregateRoots.Order;
 using Pomelo.EntityFrameworkCore.MySql.Storage.Internal;
+using Product = Ordering.Domain.AggregateRoots.Order.Product;
 
 #pragma warning disable 219, 612, 618
 #nullable disable
@@ -19,8 +20,8 @@ namespace Ordering.Infrastructure.CompileModels
         public static RuntimeEntityType Create(RuntimeModel model, RuntimeEntityType baseEntityType = null)
         {
             var runtimeEntityType = model.AddEntityType(
-                "Ordering.Domain.AggregateRoots.OrderProduct",
-                typeof(OrderProduct),
+                "Ordering.Domain.AggregateRoots.Product",
+                typeof(Product),
                 baseEntityType);
 
             var orderItemId = runtimeEntityType.AddProperty(
@@ -49,8 +50,8 @@ namespace Ordering.Infrastructure.CompileModels
             var name = runtimeEntityType.AddProperty(
                 "Name",
                 typeof(string),
-                propertyInfo: typeof(OrderProduct).GetProperty("Name", BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly),
-                fieldInfo: typeof(OrderProduct).GetField("<Name>k__BackingField", BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.DeclaredOnly),
+                propertyInfo: typeof(Product).GetProperty("Name", BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly),
+                fieldInfo: typeof(Product).GetField("<Name>k__BackingField", BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.DeclaredOnly),
                 maxLength: 255);
             name.TypeMapping = MySqlStringTypeMapping.Default.Clone(
                 comparer: new ValueComparer<string>(
@@ -74,8 +75,8 @@ namespace Ordering.Infrastructure.CompileModels
             var pictureUrl = runtimeEntityType.AddProperty(
                 "PictureUrl",
                 typeof(string),
-                propertyInfo: typeof(OrderProduct).GetProperty("PictureUrl", BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly),
-                fieldInfo: typeof(OrderProduct).GetField("<PictureUrl>k__BackingField", BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.DeclaredOnly),
+                propertyInfo: typeof(Product).GetProperty("PictureUrl", BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly),
+                fieldInfo: typeof(Product).GetField("<PictureUrl>k__BackingField", BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.DeclaredOnly),
                 nullable: true,
                 maxLength: 300);
             pictureUrl.TypeMapping = MySqlStringTypeMapping.Default.Clone(
@@ -100,8 +101,8 @@ namespace Ordering.Infrastructure.CompileModels
             var productId = runtimeEntityType.AddProperty(
                 "ProductId",
                 typeof(string),
-                propertyInfo: typeof(OrderProduct).GetProperty("ProductId", BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly),
-                fieldInfo: typeof(OrderProduct).GetField("<ProductId>k__BackingField", BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.DeclaredOnly),
+                propertyInfo: typeof(Product).GetProperty("ProductId", BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly),
+                fieldInfo: typeof(Product).GetField("<ProductId>k__BackingField", BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.DeclaredOnly),
                 maxLength: 36);
             productId.TypeMapping = MySqlStringTypeMapping.Default.Clone(
                 comparer: new ValueComparer<string>(
@@ -145,7 +146,7 @@ namespace Ordering.Infrastructure.CompileModels
             var product = principalEntityType.AddNavigation("Product",
                 runtimeForeignKey,
                 onDependent: false,
-                typeof(OrderProduct),
+                typeof(Product),
                 propertyInfo: typeof(OrderItem).GetProperty("Product", BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly),
                 fieldInfo: typeof(OrderItem).GetField("<Product>k__BackingField", BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.DeclaredOnly),
                 eagerLoaded: true);

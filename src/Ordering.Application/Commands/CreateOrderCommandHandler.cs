@@ -21,7 +21,7 @@ public class CreateOrderCommandHandler(IOrderRepository orderRepository)
     {
         // Microsoft.EntityFrameworkCore.ChangeTracking.Internal.StateManager
         var order = Order.Create(
-            command.UserId,
+            UserInfo.Create(command.UserId, ""),
             new Address
             {
                 Street = command.Street,

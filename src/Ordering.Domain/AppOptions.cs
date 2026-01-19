@@ -4,11 +4,9 @@ using Microsoft.Extensions.Configuration;
 namespace Ordering.Domain;
 
 [AutoOptions]
-public class AppOptions(IConfiguration configuration)
+public class AppOptions
 {
-    public string Audience { get; set; }
-
-    public string DefaultConnectionString => configuration["DbContexts:OrderingContext:ConnectionString"];
+    public string ApiName { get; set; }
 }
 
 [AutoOptions(Section = "Email")]

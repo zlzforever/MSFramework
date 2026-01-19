@@ -16,16 +16,10 @@ public interface IUnitOfWork : IDisposable
     event Action SavedChanges;
 
     /// <summary>
-    ///
-    /// </summary>
-    /// <returns></returns>
-    AuditOperation GetAuditOperation();
-
-    /// <summary>
     /// 设置审计信息
     /// </summary>
     /// <param name="auditOperation"></param>
-    void SetAuditOperation(AuditOperation auditOperation);
+    void RegisterAuditOperation(AuditOperation auditOperation);
 
     /// <summary>
     /// 保存工作单元

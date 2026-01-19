@@ -10,14 +10,11 @@ public class DesignTimeDbContextFactory : DesignTimeDbContextFactoryBase<Orderin
 {
     protected override IServiceProvider GetServiceProvider()
     {
-        Console.WriteLine("CreateServiceProvider");
         return Program.CreateWebApplicationBuilder(Array.Empty<string>()).Build().Services;
     }
 
     public override void ConfigureDesignTimeServices(IServiceCollection serviceCollection)
     {
-        Console.WriteLine("ConfigureDesignTimeServices");
         serviceCollection.AddLogging(x => { x.AddConsole(); });
-        serviceCollection.ClearForeignKeys();
     }
 }

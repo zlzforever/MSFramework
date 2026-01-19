@@ -319,28 +319,28 @@ namespace Ordering.Infrastructure.CompileModels
 
             var extras = runtimeEntityType.AddProperty(
                 "Extras",
-                typeof(IReadOnlyCollection<OrderExtra>),
+                typeof(IReadOnlyCollection<ExtraInfo>),
                 propertyInfo: typeof(Order).GetProperty("Extras", BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly),
                 fieldInfo: typeof(Order).GetField("_extras", BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.DeclaredOnly),
                 nullable: true);
             extras.TypeMapping = MySqlJsonTypeMapping<string>.Default.Clone(
-                comparer: new ValueComparer<IReadOnlyCollection<OrderExtra>>(
-                    (IReadOnlyCollection<OrderExtra> l, IReadOnlyCollection<OrderExtra> r) => Defaults.JsonSerializer.Serialize(l) == Defaults.JsonSerializer.Serialize(r),
-                    (IReadOnlyCollection<OrderExtra> v) => v == null ? 0 : Defaults.JsonSerializer.Serialize(v).GetHashCode(),
-                    (IReadOnlyCollection<OrderExtra> v) => Defaults.JsonSerializer.Deserialize(Defaults.JsonSerializer.Serialize(v), typeof(IReadOnlyCollection<OrderExtra>)) as IReadOnlyCollection<OrderExtra>),
-                keyComparer: new ValueComparer<IReadOnlyCollection<OrderExtra>>(
-                    (IReadOnlyCollection<OrderExtra> l, IReadOnlyCollection<OrderExtra> r) => Defaults.JsonSerializer.Serialize(l) == Defaults.JsonSerializer.Serialize(r),
-                    (IReadOnlyCollection<OrderExtra> v) => v == null ? 0 : Defaults.JsonSerializer.Serialize(v).GetHashCode(),
-                    (IReadOnlyCollection<OrderExtra> v) => Defaults.JsonSerializer.Deserialize(Defaults.JsonSerializer.Serialize(v), typeof(IReadOnlyCollection<OrderExtra>)) as IReadOnlyCollection<OrderExtra>),
+                comparer: new ValueComparer<IReadOnlyCollection<ExtraInfo>>(
+                    (IReadOnlyCollection<ExtraInfo> l, IReadOnlyCollection<ExtraInfo> r) => Defaults.JsonSerializer.Serialize(l) == Defaults.JsonSerializer.Serialize(r),
+                    (IReadOnlyCollection<ExtraInfo> v) => v == null ? 0 : Defaults.JsonSerializer.Serialize(v).GetHashCode(),
+                    (IReadOnlyCollection<ExtraInfo> v) => Defaults.JsonSerializer.Deserialize(Defaults.JsonSerializer.Serialize(v), typeof(IReadOnlyCollection<ExtraInfo>)) as IReadOnlyCollection<ExtraInfo>),
+                keyComparer: new ValueComparer<IReadOnlyCollection<ExtraInfo>>(
+                    (IReadOnlyCollection<ExtraInfo> l, IReadOnlyCollection<ExtraInfo> r) => Defaults.JsonSerializer.Serialize(l) == Defaults.JsonSerializer.Serialize(r),
+                    (IReadOnlyCollection<ExtraInfo> v) => v == null ? 0 : Defaults.JsonSerializer.Serialize(v).GetHashCode(),
+                    (IReadOnlyCollection<ExtraInfo> v) => Defaults.JsonSerializer.Deserialize(Defaults.JsonSerializer.Serialize(v), typeof(IReadOnlyCollection<ExtraInfo>)) as IReadOnlyCollection<ExtraInfo>),
                 providerValueComparer: new ValueComparer<string>(
                     (string v1, string v2) => v1 == v2,
                     (string v) => v.GetHashCode(),
                     (string v) => v),
                 mappingInfo: new RelationalTypeMappingInfo(
                     storeTypeName: "JSON"),
-                converter: new ValueConverter<IReadOnlyCollection<OrderExtra>, string>(
-                    (IReadOnlyCollection<OrderExtra> x) => Defaults.JsonSerializer.Serialize(x),
-                    (string x) => Defaults.JsonSerializer.Deserialize<IReadOnlyCollection<OrderExtra>>(x)));
+                converter: new ValueConverter<IReadOnlyCollection<ExtraInfo>, string>(
+                    (IReadOnlyCollection<ExtraInfo> x) => Defaults.JsonSerializer.Serialize(x),
+                    (string x) => Defaults.JsonSerializer.Deserialize<IReadOnlyCollection<ExtraInfo>>(x)));
             extras.AddAnnotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.None);
             extras.AddAnnotation("Relational:ColumnName", "extras");
             extras.AddAnnotation("Relational:ColumnType", "JSON");

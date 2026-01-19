@@ -13,29 +13,29 @@ public static class ServiceCollectionExtensions
     /// <param name="options"></param>
     extension(SqlServerDbContextOptionsBuilder options)
     {
-        /// <summary>
-        ///
-        /// </summary>
-        /// <returns></returns>
-        public SqlServerDbContextOptionsBuilder UseRemoveForeignKeyService()
-        {
-            MigrationsSqlGenerator.RemoveForeignKey = true;
-            var ops = (IRelationalDbContextOptionsBuilderInfrastructure)options;
-            ops.OptionsBuilder.ReplaceService<IMigrationsSqlGenerator, MigrationsSqlGenerator>();
-            return options;
-        }
+        // /// <summary>
+        // ///
+        // /// </summary>
+        // /// <returns></returns>
+        // public SqlServerDbContextOptionsBuilder UseRemoveForeignKeyService()
+        // {
+        //     MigrationsSqlGenerator.RemoveForeignKey = true;
+        //     var ops = (IRelationalDbContextOptionsBuilderInfrastructure)options;
+        //     ops.OptionsBuilder.ReplaceService<IMigrationsSqlGenerator, MigrationsSqlGenerator>();
+        //     return options;
+        // }
 
-        /// <summary>
-        ///
-        /// </summary>
-        /// <returns></returns>
-        public SqlServerDbContextOptionsBuilder UseRemoveExternalEntityService()
-        {
-            MigrationsSqlGenerator.RemoveExternalEntity = true;
-            var ops = (IRelationalDbContextOptionsBuilderInfrastructure)options;
-            ops.OptionsBuilder.ReplaceService<IMigrationsSqlGenerator, MigrationsSqlGenerator>();
-            return options;
-        }
+        // /// <summary>
+        // ///
+        // /// </summary>
+        // /// <returns></returns>
+        // public SqlServerDbContextOptionsBuilder UseRemoveExternalEntityService()
+        // {
+        //     MigrationsSqlGenerator.RemoveExternalEntity = true;
+        //     var ops = (IRelationalDbContextOptionsBuilderInfrastructure)options;
+        //     ops.OptionsBuilder.ReplaceService<IMigrationsSqlGenerator, MigrationsSqlGenerator>();
+        //     return options;
+        // }
     }
 
     /// <summary>

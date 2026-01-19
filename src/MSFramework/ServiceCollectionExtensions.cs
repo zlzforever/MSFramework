@@ -68,6 +68,7 @@ public static class ServiceCollectionExtensions
     {
         var defaultJsonSerializer = applicationServices.GetService<IJsonSerializer>();
         Defaults.JsonSerializer = defaultJsonSerializer ?? TextJsonSerializer.Create();
+        Defaults.ServiceProvider = applicationServices;
 
         var loggerFactory = applicationServices.GetService<ILoggerFactory>();
         if (loggerFactory == null)

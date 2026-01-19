@@ -16,6 +16,11 @@ public class AuditOperation : CreationAggregateRoot<string>, IAuditObject
     public string Path { get; private set; }
 
     /// <summary>
+    /// 操作方法
+    /// </summary>
+    public string Method { get; private set; }
+
+    /// <summary>
     /// 操作的 IP 地址
     /// </summary>
     public string IP { get; private set; }
@@ -81,8 +86,9 @@ public class AuditOperation : CreationAggregateRoot<string>, IAuditObject
     /// <param name="lat"></param>
     /// <param name="lng"></param>
     /// <param name="traceId"></param>
+    /// <param name="method"></param>
     public AuditOperation(string url, string userAgent, string ip, string deviceModel, string deviceId, double? lat,
-        double? lng, string traceId) : this(ObjectId.GenerateNewId().ToString())
+        double? lng, string traceId, string method) : this(ObjectId.GenerateNewId().ToString())
     {
         IP = ip;
         Path = url;
@@ -92,6 +98,7 @@ public class AuditOperation : CreationAggregateRoot<string>, IAuditObject
         Lat = lat;
         Lng = lng;
         TraceId = traceId;
+        Method = method;
     }
 
     /// <summary>

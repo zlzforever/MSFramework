@@ -8,8 +8,8 @@ public class AutoMapperProfile : Profile
     public AutoMapperProfile()
     {
         CreateMap<Order, OrderDto>();
-        CreateMap<OrderExtra, OrderDto.OrderExtraDto>();
+        CreateMap<ExtraInfo, OrderDto.OrderExtraDto>();
         CreateMap<OrderItem, OrderItemDto>();
-        CreateMap<OrderProduct, OrderItemDto.OrderProductDto>();
+        CreateMap<Product, OrderItemDto.OrderProductDto>();
     }
 }

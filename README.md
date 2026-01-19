@@ -9,6 +9,10 @@ A micro service template
 ```
 dotnet ef migrations add Init -s src/Ordering.Api \
     -c OrderingContext -p src/Ordering.Infrastructure
+    
+ dotnet ef migrations script -s src/Ordering.Api \
+    -c OrderingContext -p src/Ordering.Infrastructure   
+    
 ```
 
 ### Static model

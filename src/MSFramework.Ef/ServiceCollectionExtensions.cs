@@ -28,7 +28,7 @@ public static partial class ServiceCollectionExtensions
         public MicroserviceFrameworkBuilder UseEfAuditing<TDbContext>()
             where TDbContext : DbContext
         {
-            EfUtilities.AuditingDbContextType = typeof(TDbContext);
+            // EfUtilities.AuditingDbContextType = typeof(TDbContext);
             builder.Services.AddScoped<IAuditingStore, EfAuditingStore<TDbContext>>();
             return builder;
         }

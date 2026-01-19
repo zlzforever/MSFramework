@@ -1,3 +1,4 @@
+using System;
 using MicroserviceFramework.Ef.Extensions;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Migrations;
@@ -13,29 +14,31 @@ public static class ServiceCollectionExtensions
     /// <param name="options"></param>
     extension(MySqlDbContextOptionsBuilder options)
     {
-        /// <summary>
-        ///
-        /// </summary>
-        /// <returns></returns>
-        public MySqlDbContextOptionsBuilder UseRemoveForeignKeyService()
-        {
-            MigrationsSqlGenerator.RemoveForeignKey = true;
-            var ops = (IRelationalDbContextOptionsBuilderInfrastructure)options;
-            ops.OptionsBuilder.ReplaceService<IMigrationsSqlGenerator, MigrationsSqlGenerator>();
-            return options;
-        }
+        // /// <summary>
+        // ///
+        // /// </summary>
+        // /// <returns></returns>
+        // public MySqlDbContextOptionsBuilder UseRemoveForeignKeyService()
+        // {
+        //     // MigrationsSqlGenerator.RemoveForeignKey = true;
+        //     // Console.WriteLine("Set MigrationsSqlGenerator.RemoveForeignKey ");
+        //     // var ops = (IRelationalDbContextOptionsBuilderInfrastructure)options;
+        //     // ops.OptionsBuilder.ReplaceService<IMigrationsSqlGenerator, MigrationsSqlGenerator>();
+        //
+        //     return options;
+        // }
 
-        /// <summary>
-        ///
-        /// </summary>
-        /// <returns></returns>
-        public MySqlDbContextOptionsBuilder UseRemoveExternalEntityService()
-        {
-            MigrationsSqlGenerator.RemoveExternalEntity = true;
-            var ops = (IRelationalDbContextOptionsBuilderInfrastructure)options;
-            ops.OptionsBuilder.ReplaceService<IMigrationsSqlGenerator, MigrationsSqlGenerator>();
-            return options;
-        }
+        // /// <summary>
+        // ///
+        // /// </summary>
+        // /// <returns></returns>
+        // public MySqlDbContextOptionsBuilder UseRemoveExternalEntityService()
+        // {
+        //     MigrationsSqlGenerator.RemoveExternalEntity = true;
+        //     var ops = (IRelationalDbContextOptionsBuilderInfrastructure)options;
+        //     ops.OptionsBuilder.ReplaceService<IMigrationsSqlGenerator, MigrationsSqlGenerator>();
+        //     return options;
+        // }
     }
 
     // public static DbContextOptionsBuilder UseMySql(
@@ -62,6 +65,7 @@ public static class ServiceCollectionExtensions
         builder.LoadDbContextSettings<MySqlDbContextOptionsBuilder, MySqlOptionsExtension>(settings);
         dbContextOptionsBuilder.SetConnectionString<MySqlOptionsExtension>(settings.ConnectionString);
 #pragma warning restore EF1001
+        // 替换 MigrationsModelDiffer 服务
     }
 
     // public static EntityFrameworkBuilder AddMySql<TDbContext>(

@@ -10,12 +10,12 @@ public class OrderItem : EntityBase<string>
     /// <summary>
     /// 销售产品
     /// </summary>
-    public OrderProduct Product { get; private set; }
+    public Product Product { get; private set; }
 
     /// <summary>
     /// 单价
     /// </summary>
-    public decimal UnitPrice { get; private set; }
+    public decimal Price { get; private set; }
 
     /// <summary>
     /// 数量
@@ -31,7 +31,7 @@ public class OrderItem : EntityBase<string>
     {
     }
 
-    public static OrderItem Create(Order order, OrderProduct product, decimal unitPrice,
+    public static OrderItem Create(Order order, Product product, decimal unitPrice,
         int units, decimal discount)
     {
         if (units <= 0)
@@ -48,7 +48,7 @@ public class OrderItem : EntityBase<string>
         {
             Order = order,
             Product = product,
-            UnitPrice = unitPrice,
+            Price = unitPrice,
             Discount = discount,
             Units = units
         };

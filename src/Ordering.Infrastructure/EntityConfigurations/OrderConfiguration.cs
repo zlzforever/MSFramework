@@ -7,7 +7,7 @@ using Ordering.Domain.AggregateRoots.Order;
 
 namespace Ordering.Infrastructure.EntityConfigurations;
 
-public class OrderEntityTypeConfiguration : EntityTypeConfigurationBase<Order, OrderingContext>
+public class OrderConfiguration : EntityTypeConfigurationBase<Order, OrderingContext>
 {
     public override void Configure(EntityTypeBuilder<Order> builder)
     {
@@ -23,14 +23,13 @@ public class OrderEntityTypeConfiguration : EntityTypeConfigurationBase<Order, O
         // 测试 Object  会自动设置长度
         builder.Property(x => x.TestId);
         builder.Property(x => x.Description).HasMaxLength(2000).IsRequired(false);
-        builder.Property(x => x.BuyerId).HasMaxLength(36);
-        // builder.HasOne(x => x.Buyer)
-        //     .WithMany().HasForeignKey("buyer_id").OnDelete(DeleteBehavior.NoAction);
+        builder.HasOne(x => x.Buyer)
+            .WithMany();
         // 测试枚举是否正常
         builder.Property(x => x.Status).HasMaxLength(20).IsRequired();
-        builder.Property(x => x.ListJson).UseJson(typeof(HashSet<string>), JsonDataType.JSON);
-        builder.Property(x => x.DictJson).UseJson(JsonDataType.JSON);
-        builder.Property(x => x.Extras).UseJson(JsonDataType.JSON);
+        builder.Property(x => x.List).UseJson(typeof(HashSet<string>), JsonDataType.JSON);
+        builder.Property(x => x.Dict).UseJson(JsonDataType.JSON);
+        builder.Property(x => x.Extra).UseJson(JsonDataType.JSON);
         builder.HasMany(x => x.Items).WithOne(x => x.Order);
 
         // var navigation = builder.Metadata.FindNavigation(nameof(Order.Items));

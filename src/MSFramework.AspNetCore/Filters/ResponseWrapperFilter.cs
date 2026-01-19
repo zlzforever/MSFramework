@@ -74,6 +74,6 @@ internal sealed class ResponseWrapperFilter(ILogger<ResponseWrapperFilter> logge
 
         await next();
 
-        logger.LogDebug("执行返回结果过滤器结束");
+        logger.LogDebug("结束执行返回结果过滤器");
     }
 }
