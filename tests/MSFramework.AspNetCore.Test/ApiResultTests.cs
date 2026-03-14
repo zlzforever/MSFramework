@@ -1,4 +1,5 @@
-﻿using System.Net.Http;
+﻿using System;
+using System.Net.Http;
 using System.Threading.Tasks;
 using Xunit;
 using Xunit.Abstractions;
@@ -97,19 +98,23 @@ public class ApiResultTests(ITestOutputHelper output) : BaseTest
     [Fact]
     public async Task ReturnDateTimeOffset()
     {
+        var t = new DateTimeOffset(2023, 07, 13, 23,
+            26, 0, DateTimeOffset.Now.Offset);
         var result1 = await Client.GetStringAsync("/apiResult/dateTimeOffset");
-        Assert.Equal("""
-                     {"success":true,"code":0,"msg":"","data":1689261960}
-                     """, result1);
+        Assert.Equal($$"""
+                       {"success":true,"code":0,"msg":"","data":{{t.ToUnixTimeSeconds()}}}
+                       """, result1);
 
         var result2 = await Client.GetStringAsync("/apiResult/nullableDateTimeOffset1");
         Assert.Equal("""
                      {"success":true,"code":0,"msg":"","data":null}
                      """, result2);
 
+        var t3 = new DateTimeOffset(2023, 07, 13, 23,
+            26, 0, DateTimeOffset.Now.Offset);
         var result3 = await Client.GetStringAsync("/apiResult/nullableDateTimeOffset2");
-        Assert.Equal("""
-                     {"success":true,"code":0,"msg":"","data":1689261960}
+        Assert.Equal($$"""
+                     {"success":true,"code":0,"msg":"","data":{{t3.ToUnixTimeSeconds()}}}
                      """, result3);
     }
 
