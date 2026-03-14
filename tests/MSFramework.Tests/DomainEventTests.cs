@@ -16,6 +16,10 @@ public record DomainEvent4 : DomainEvent
     public static int Count;
 }
 
+public interface IUseless
+{
+}
+
 public class DomainEvent4Handler : IDomainEventHandler<DomainEvent4>
 {
     public Task HandleAsync(DomainEvent4 @event, CancellationToken cancellationToken = default)
@@ -36,7 +40,7 @@ public record DomainEvent3 : DomainEvent
     public static int Count;
 }
 
-public class DomainEvent31Handler : IDomainEventHandler<DomainEvent3>
+public class DomainEvent31Handler : IDomainEventHandler<DomainEvent3>, IUseless
 {
     public Task HandleAsync(DomainEvent3 @event, CancellationToken cancellationToken = default)
     {
@@ -49,7 +53,7 @@ public class DomainEvent31Handler : IDomainEventHandler<DomainEvent3>
     }
 }
 
-public class DomainEvent32Handler : IDomainEventHandler<DomainEvent3>
+public class DomainEvent32Handler : IDomainEventHandler<DomainEvent3>, IUseless
 {
     public Task HandleAsync(DomainEvent3 @event, CancellationToken cancellationToken = default)
     {

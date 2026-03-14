@@ -1,5 +1,6 @@
 using System;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace MicroserviceFramework.AspNetCore.Mvc;
 
@@ -13,21 +14,25 @@ public class ApiResult<T>(T data)
     /// <summary>
     /// 是否成功
     /// </summary>
+    [JsonPropertyName("success")]
     public bool Success { get; set; } = true;
 
     /// <summary>
     /// 业务代码
     /// </summary>
+    [JsonPropertyName("code")]
     public int Code { get; set; }
 
     /// <summary>
     /// 消息
     /// </summary>
+    [JsonPropertyName("msg")]
     public string Msg { get; set; } = string.Empty;
 
     /// <summary>
     /// 数据对象
     /// </summary>
+    [JsonPropertyName("data")]
     public T Data { get; set; } = data;
 
     /// <summary>

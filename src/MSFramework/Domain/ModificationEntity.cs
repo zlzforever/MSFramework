@@ -38,7 +38,7 @@ public abstract class ModificationEntity<TKey>(TKey id) : CreationEntity<TKey>(i
     public virtual void SetModification(string lastModifierId, string lastModifierName,
         DateTimeOffset lastModificationTime = default)
     {
-        LastModificationTime = lastModificationTime == default ? DateTimeOffset.Now : lastModificationTime;
+        LastModificationTime = lastModificationTime == default ? DateTimeOffset.UtcNow : lastModificationTime;
         LastModifierId = lastModifierId;
         LastModifierName = lastModifierName;
     }

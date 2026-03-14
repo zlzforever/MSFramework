@@ -72,10 +72,10 @@ public class EnumerationConverter : JsonConverter
                 return enumeration;
             }
         }
-        catch (Exception)
+        catch (Exception ex)
         {
             // 异常数据，不允许绑定
-            throw new MicroserviceFrameworkException(122, $"{reader.Path} 不支持绑定值 {value}");
+            throw new MicroserviceFrameworkException(122, $"{reader.Path} 不支持绑定值 {value}", ex);
         }
 
         // 异常数据，不允许绑定

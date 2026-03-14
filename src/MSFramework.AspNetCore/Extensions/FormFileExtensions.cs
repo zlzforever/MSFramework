@@ -23,8 +23,12 @@ public static class FormFileExtensions
     public static async Task<SaveResult> SaveAsync(this IFormFile formFile,
         string interval = "upload")
     {
+        if (interval.Contains("..") || interval.Contains('/') || interval.Contains('\\'))
+        {
+            throw new ArgumentException("Invalid interval path");
+        }
         var extension = Path.GetExtension(formFile.FileName);
-        var date = $"{DateTime.Now:yyyMMdd}";
+        var date = $"{DateTimeOffset.UtcNow:yyyMMdd}";
         var intervalDirectory = Path.Combine(interval, date);
         var virtualDirectory = Path.Combine(AppContext.BaseDirectory, "wwwroot", intervalDirectory);
         VirtualFolderState.GetOrAdd(virtualDirectory, path =>

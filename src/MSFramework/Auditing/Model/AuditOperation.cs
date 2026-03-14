@@ -119,7 +119,7 @@ public class AuditOperation : CreationAggregateRoot<string>, IAuditObject
     /// </summary>
     public void End()
     {
-        EndTime = DateTimeOffset.Now;
+        EndTime = DateTimeOffset.UtcNow;
         if (!CreationTime.HasValue)
         {
             Elapsed = 0;

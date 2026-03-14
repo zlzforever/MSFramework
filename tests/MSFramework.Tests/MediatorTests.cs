@@ -76,6 +76,29 @@ public class Command3Handler : IRequestHandler<Command3, int>
     }
 }
 
+public record Command4 : Request
+{
+    public static int Count;
+}
+
+public class Command4Handler1 : IRequestHandler<Command4>
+{
+    public Task HandleAsync(Command4 command, CancellationToken cancellationToken = default)
+    {
+        Command4.Count += 1;
+        return Task.FromResult(Command4.Count);
+    }
+}
+
+public class Command4Handler2 : IRequestHandler<Command4>
+{
+    public Task HandleAsync(Command4 command, CancellationToken cancellationToken = default)
+    {
+        Command4.Count += 1;
+        return Task.FromResult(Command4.Count);
+    }
+}
+
 public class MediatorTests
 {
     public record A
@@ -86,16 +109,12 @@ public class MediatorTests
     [Fact]
     public void RecordReadonly()
     {
-        var a = new A
-        {
-            Name = "a"
-        };
+        var a = new A { Name = "a" };
         a.Name = "b";
-
     }
 
     [Fact]
-    public async Task RequestToMultiHandlersTest()
+    public async Task RequestSendToMultiHandlersTest()
     {
         var serviceCollection = new ServiceCollection();
         serviceCollection.AddMicroserviceFramework(x =>
@@ -112,6 +131,25 @@ public class MediatorTests
         Assert.Equal(1, Command1.Count);
         await mediator.SendAsync(new Command1());
         Assert.Equal(2, Command1.Count);
+    }
+
+    [Fact]
+    public async Task PublishToMultiHandlersTest()
+    {
+        var serviceCollection = new ServiceCollection();
+        serviceCollection.AddMicroserviceFramework(x =>
+        {
+            x.UseDependencyInjectionLoader();
+            x.UseAspNetCoreExtension();
+        });
+        serviceCollection.AddLogging(x => x.AddConsole());
+        var serviceProvider = serviceCollection.BuildServiceProvider();
+        serviceProvider.UseMicroserviceFramework();
+
+        var mediator = serviceProvider.GetRequiredService<IMediator>();
+        await mediator.PublishAsync(new Command4());
+
+        Assert.Equal(2, Command4.Count);
     }
 
     [Fact]

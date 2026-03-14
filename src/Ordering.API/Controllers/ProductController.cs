@@ -67,8 +67,8 @@ public class ProductController(
     public ProductOut GetFirst()
     {
         var queryable = from p in orderingContext.Set<Product>()
-            join u in orderingContext.Set<UserInfo>() on p.CreatorId equals Convert.ToString(u.Id)
-            select new ProductOut { Name = p.Name, Price = p.Price, CreatorName = u.Name };
+                        join u in orderingContext.Set<UserInfo>() on p.CreatorId equals Convert.ToString(u.Id)
+                        select new ProductOut { Name = p.Name, Price = p.Price, CreatorName = u.Name };
         return queryable.FirstOrDefault();
     }
 
@@ -87,7 +87,7 @@ public class ProductController(
     {
         logger.LogError(
             "Test {String} {Bool} {Int} {Double} {Byte} {Decimal} {Float} {Short} {Long} {DateTime} {Guid}",
-            "String", true, 1, 1.1d, 1, 1.1m, 1.1f, 1, 1, DateTime.Now, Guid.NewGuid());
+            "String", true, 1, 1.1d, 1, 1.1m, 1.1f, 1, 1, DateTime.UtcNow, Guid.NewGuid());
         throw new Exception("I am an error");
     }
 
@@ -194,7 +194,7 @@ public class ProductController(
     //     await dbContext.AddAsync(prod);
     //
     //     await _capBus.PublishAsync(Names.ProjectCreateFailedEvent,
-    //         new { prod.Id, prod.Name, CreationTime = DateTimeOffset.Now });
+    //         new { prod.Id, prod.Name, CreationTime = DateTimeOffset.UtcNow });
     //
     //     await dbContext.SaveChangesAsync();
     //     return Ok();

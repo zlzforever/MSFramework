@@ -68,29 +68,37 @@ public static class ServiceCollectionExtensions
             return;
         }
 
+        interfaceTypes = interfaceTypes.Where(interfaceType => !(interfaceType.IsGenericType &&
+                                                                 interfaceType.GetGenericTypeDefinition() ==
+                                                                 typeof(IDomainEventHandler<>))).ToArray();
         for (var i = 0; i < interfaceTypes.Length; i++)
         {
             var interfaceType = interfaceTypes[i];
 
+            // IDomainEventHandler 继承自 IRequestHandler，不需要重复注册
+            if (interfaceType.IsGenericType &&
+                interfaceType.GetGenericTypeDefinition() == typeof(IDomainEventHandler<>))
+            {
+                continue;
+            }
+
             // 瞬时生命周期每次获取对象都是新的，因此实现的接口每个注册一次即可
             if (lifetime == ServiceLifetime.Transient)
             {
-                services.TryAdd(
+                services.Add(
                     new ServiceDescriptor(interfaceType, implementationType, ServiceLifetime.Transient));
             }
             else
             {
                 if (i == 0)
                 {
-                    services.TryAdd(
+                    services.Add(
                         new ServiceDescriptor(interfaceType, implementationType, lifetime));
                 }
                 else
                 {
-                    //有多个接口时， 后边的接口注册使用第一个接口的实例， 保证同个实现类的多个接口获得同一个实例
-                    var firstInterfaceType = interfaceTypes[0];
-                    services.TryAdd(new ServiceDescriptor(interfaceType,
-                        provider => provider.GetService(firstInterfaceType), lifetime));
+                    services.Add(new ServiceDescriptor(interfaceType,
+                        provider => provider.GetService(interfaceTypes[0]), lifetime));
                 }
             }
         }

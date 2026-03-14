@@ -31,86 +31,83 @@ public class LocalEventBackgroundService(
     /// </summary>
     /// <param name="stoppingToken"></param>
     /// <returns></returns>
-    protected override Task ExecuteAsync(CancellationToken stoppingToken)
+    protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        return Task.Factory.StartNew(async () =>
+        logger.LogInformation("本地事件服务启动");
+
+        while (await LocalEventPublisher.EventChannel.Reader.WaitToReadAsync(stoppingToken))
         {
-            logger.LogInformation("本地事件服务启动");
-
-            while (await LocalEventPublisher.EventChannel.Reader.WaitToReadAsync(stoppingToken))
+            while (LocalEventPublisher.EventChannel.Reader.TryRead(out var entry))
             {
-                while (LocalEventPublisher.EventChannel.Reader.TryRead(out var entry))
+                try
                 {
-                    try
+                    var traceId = entry.Session == null
+                        ? ObjectId.GenerateNewId().ToString()
+                        : entry.Session.TraceIdentifier;
+                    var eventType = entry.EventData.GetType();
+                    var descriptors = descriptorStore.GetList(eventType);
+
+                    foreach (var descriptor in descriptors)
                     {
-                        var traceId = entry.Session == null
-                            ? ObjectId.GenerateNewId().ToString()
-                            : entry.Session.TraceIdentifier;
-                        var eventType = entry.EventData.GetType();
-                        var descriptors = descriptorStore.GetList(eventType);
+                        var handlerName = descriptor.HandlerType.FullName;
 
-                        foreach (var descriptor in descriptors)
+                        logger.LogDebug("{TraceId}, 事件处理器 {HandlerType} 执行开始", traceId, handlerName);
+
+                        using var scope = serviceProvider.CreateScope();
+                        var services = scope.ServiceProvider;
+                        var handler = services.GetService(descriptor.HandlerType);
+                        if (handler == null)
                         {
-                            var handlerName = descriptor.HandlerType.FullName;
+                            return;
+                        }
 
-                            logger.LogDebug("{TraceId}, 事件处理器 {HandlerType} 执行开始", traceId, handlerName);
+                        var session = services.GetService<ISession>();
+                        // 覆盖 session 对象
+                        if (entry.Session != null)
+                        {
+                            session?.Load(entry.Session);
+                        }
 
-                            using var scope = serviceProvider.CreateScope();
-                            var services = scope.ServiceProvider;
-                            var handler = services.GetService(descriptor.HandlerType);
-                            if (handler == null)
+                        if (options.Value.EnableAuditing)
+                        {
+                            var auditOperation = CreateAuditedOperation(session, handlerName);
+                            var unitOfWork = services.GetService<IUnitOfWork>();
+                            unitOfWork?.RegisterAuditOperation(auditOperation);
+                        }
+
+                        if (descriptor.HandleMethod.Invoke(handler, [entry.EventData, stoppingToken]) is
+                            not Task
+                            task)
+                        {
+                            continue;
+                        }
+
+                        try
+                        {
+                            await task;
+                            var unitOfWork = services.GetService<IUnitOfWork>();
+                            if (unitOfWork != null)
                             {
-                                return;
+                                await unitOfWork.SaveChangesAsync(stoppingToken);
                             }
 
-                            var session = services.GetService<ISession>();
-                            // 覆盖 session 对象
-                            if (entry.Session != null)
-                            {
-                                session?.Load(entry.Session);
-                            }
-
-                            if (options.Value.EnableAuditing)
-                            {
-                                var auditOperation = CreateAuditedOperation(session, handlerName);
-                                var unitOfWork = services.GetService<IUnitOfWork>();
-                                unitOfWork?.RegisterAuditOperation(auditOperation);
-                            }
-
-                            if (descriptor.HandleMethod.Invoke(handler, [entry.EventData, CancellationToken.None]) is
-                                not Task
-                                task)
-                            {
-                                continue;
-                            }
-
-                            try
-                            {
-                                await task;
-                                var unitOfWork = services.GetService<IUnitOfWork>();
-                                if (unitOfWork != null)
-                                {
-                                    await unitOfWork.SaveChangesAsync(CancellationToken.None);
-                                }
-
-                                logger.LogDebug(
-                                    "{TraceId}, 事件处理器 {HandlerType} 执行结束", traceId, handlerName);
-                            }
-                            catch (Exception e)
-                            {
-                                logger.LogError(e, "{TraceId}, 事件处理器 {HandlerType} 执行失败",
-                                    traceId, handlerName);
-                            }
+                            logger.LogDebug(
+                                "{TraceId}, 事件处理器 {HandlerType} 执行结束", traceId, handlerName);
+                        }
+                        catch (Exception e)
+                        {
+                            logger.LogError(e, "{TraceId}, 事件处理器 {HandlerType} 执行失败",
+                                traceId, handlerName);
                         }
                     }
-                    catch (Exception e)
-                    {
-                        logger.LogError(e, "处理事件失败: {EventData}",
-                            Defaults.JsonSerializer.Serialize(entry));
-                    }
+                }
+                catch (Exception e)
+                {
+                    logger.LogError(e, "处理事件失败: {EventData}",
+                        Defaults.JsonSerializer.Serialize(entry));
                 }
             }
-        }, stoppingToken);
+        }
     }
 
     /// <summary>
@@ -129,7 +126,7 @@ public class LocalEventBackgroundService(
     {
         var auditedOperation = new AuditOperation(handlerType, null, null, null, null,
             null, null, session.TraceIdentifier, "Local");
-        auditedOperation.SetCreation(session.UserId, session.UserDisplayName, DateTimeOffset.Now);
+        auditedOperation.SetCreation(session.UserId, session.UserDisplayName, DateTimeOffset.UtcNow);
         return auditedOperation;
     }
 }

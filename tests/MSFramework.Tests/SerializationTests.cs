@@ -178,8 +178,8 @@ public class SerializationTests
     [Fact]
     public void DatetimeOffsetTest()
     {
-        var a = System.Text.Json.JsonSerializer.Serialize(DateTimeOffset.Now);
-        var b = JsonConvert.SerializeObject(DateTimeOffset.Now);
+        var a = System.Text.Json.JsonSerializer.Serialize(DateTimeOffset.UtcNow);
+        var b = JsonConvert.SerializeObject(DateTimeOffset.UtcNow);
         Assert.Contains("T", a);
         Assert.Contains("T", b);
     }

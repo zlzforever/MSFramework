@@ -40,7 +40,7 @@ internal class Audit(ILogger<Audit> logger) : ActionFilterAttribute
             _auditingStores = _serviceScope.ServiceProvider.GetServices<IAuditingStore>().ToList();
             if (_auditingStores.Any())
             {
-                _auditOperation = CreateAuditOperation(context, DateTimeOffset.Now);
+                _auditOperation = CreateAuditOperation(context, DateTimeOffset.UtcNow);
                 unitOfWork.RegisterAuditOperation(_auditOperation);
             }
         }

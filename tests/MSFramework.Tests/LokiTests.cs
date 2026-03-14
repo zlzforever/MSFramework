@@ -16,7 +16,7 @@ public class LokiTests
     public async Task Send()
     {
         var client = new HttpClient();
-        var timestamp = DateTimeOffset.Now.ToUnixTimeMilliseconds() + "000000";
+        var timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() + "000000";
 
         var log =
             $$"""{"streams": [{ "stream": { "foo": "bar2" }, "values": [ [ "{{timestamp}}", "A=B C=E" ] ] }, { "stream": { "foo": "bar2" }, "values": [ [ "{{timestamp}}", "F=G H=J" ] ] }]}""";
@@ -30,7 +30,7 @@ public class LokiTests
     {
         var properties = new List<LogEventProperty> { new("DeviceId", new ScalarValue(ObjectId.GenerateNewId())), };
         var template = new MessageTemplate("{DeviceId}", Array.Empty<MessageTemplateToken>());
-        var logEvent = new LogEvent(DateTimeOffset.Now, LogEventLevel.Information, null, template, properties);
+        var logEvent = new LogEvent(DateTimeOffset.UtcNow, LogEventLevel.Information, null, template, properties);
         var message = logEvent.MessageTemplate.Render(logEvent.Properties);
 
     }
