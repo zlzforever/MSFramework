@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Net.Http;
 using System.Threading.Tasks;
+using MicroserviceFramework.Extensions;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -79,20 +80,24 @@ public class ApiResultTests(ITestOutputHelper output) : BaseTest
     [Fact]
     public async Task ReturnDatetime()
     {
+        var t1 = new DateTime(2023, 07, 13, 23,
+            26, 0);
         var result1 = await Client.GetStringAsync("/apiResult/dateTime");
-        Assert.Equal("""
-                     {"success":true,"code":0,"msg":"","data":1689261960}
-                     """, result1);
+        Assert.Equal($$"""
+                       {"success":true,"code":0,"msg":"","data":{{t1.ToUnixTimeSeconds()}}}
+                       """, result1);
 
         var result2 = await Client.GetStringAsync("/apiResult/nullableDateTime1");
         Assert.Equal("""
                      {"success":true,"code":0,"msg":"","data":null}
                      """, result2);
 
+        var t3 = new DateTime(2023, 07, 13, 23,
+            26, 0);
         var result3 = await Client.GetStringAsync("/apiResult/nullableDateTime2");
-        Assert.Equal("""
-                     {"success":true,"code":0,"msg":"","data":1689261960}
-                     """, result3);
+        Assert.Equal($$"""
+                       {"success":true,"code":0,"msg":"","data":{{t3.ToUnixTimeSeconds()}}}
+                       """, result3);
     }
 
     [Fact]
@@ -114,8 +119,8 @@ public class ApiResultTests(ITestOutputHelper output) : BaseTest
             26, 0, DateTimeOffset.Now.Offset);
         var result3 = await Client.GetStringAsync("/apiResult/nullableDateTimeOffset2");
         Assert.Equal($$"""
-                     {"success":true,"code":0,"msg":"","data":{{t3.ToUnixTimeSeconds()}}}
-                     """, result3);
+                       {"success":true,"code":0,"msg":"","data":{{t3.ToUnixTimeSeconds()}}}
+                       """, result3);
     }
 
 //     [Fact]
