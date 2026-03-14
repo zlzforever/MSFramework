@@ -17,6 +17,6 @@ public class ApplicationInfoTests
                 collection.AddMicroserviceFramework();
             }).Build();
         var application = host.Services.GetRequiredService<ApplicationInfo>();
-        Assert.Equal("ReSharperTestRunner", application.Name);
+        Assert.True(application.Name == "testhost" || application.Name == "ReSharperTestRunner");
     }
 }

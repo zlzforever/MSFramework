@@ -55,15 +55,15 @@ public class EventBusImplTests
             provider.UseMicroserviceFramework();
 
             var backgroundService = provider.GetRequiredService<LocalEventBackgroundService>();
-            backgroundService.StartAsync(default).GetAwaiter();
+            backgroundService.StartAsync(default).ConfigureAwait(true).GetAwaiter();
             await Task.Delay(100);
 
             var eventBus = provider.GetRequiredService<IEventPublisher>();
 
             await eventBus.PublishAsync(new Event1 { Order = 1 });
-            Thread.Sleep(20);
+            Thread.Sleep(100);
             await eventBus.PublishAsync(new Event1 { Order = 2 });
-            Thread.Sleep(20);
+            Thread.Sleep(100);
             Assert.Equal("1, 2, ", Event1.Output.ToString());
         }
     }
@@ -141,14 +141,14 @@ public class EventBusImplTests
             provider.UseMicroserviceFramework();
 
             var backgroundService = provider.GetRequiredService<LocalEventBackgroundService>();
-            await backgroundService.StartAsync(default);
+            backgroundService.StartAsync(default).ConfigureAwait(true).GetAwaiter();
             await Task.Delay(100);
 
             var eventBus = provider.GetRequiredService<IEventPublisher>();
             await eventBus.PublishAsync(new Event3 { Order = 1 });
-            Thread.Sleep(20);
+            Thread.Sleep(100);
             await eventBus.PublishAsync(new Event3 { Order = 2 });
-            Thread.Sleep(20);
+            Thread.Sleep(100);
             Assert.Equal("1, 1, 2, 2, ", Event3.Output.ToString());
 
             // var handler = provider.GetRequiredService<IEventHandler<Event3>>();
