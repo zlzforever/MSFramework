@@ -10,10 +10,10 @@
     <ProjectReference Include="..\MSFramework.AspNetCore\MSFramework.AspNetCore.csproj"/>
     <ProjectReference Include="..\MSFramework.AutoMapper\MSFramework.AutoMapper.csproj" />
     <ProjectReference Include="..\Ordering.Domain\Ordering.Domain.csproj"/>
-    <ProjectReference Include="..\Ordering.Infrastructure\Ordering.Infrastructure.csproj"/>
   </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="Dapr.AspNetCore" Version="1.16.1" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="9.0.11" />
   </ItemGroup>
 </Project>

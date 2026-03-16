@@ -1,15 +1,13 @@
 using System.Threading;
 using System.Threading.Tasks;
 using MicroserviceFramework.Domain;
-using MicroserviceFramework.Ef;
 using Ordering.Domain.AggregateRoots.Events;
 
 namespace Ordering.Application.DomainEventHandlers;
 
-public class OrderShippedDomainEventHandler(DbContextFactory dbContextFactory)
+public class OrderShippedDomainEventHandler()
     : IDomainEventHandler<OrderShippedDomainEvent>
 {
-    private readonly DbContextFactory _dbContextFactory = dbContextFactory;
 
     public void Dispose()
     {

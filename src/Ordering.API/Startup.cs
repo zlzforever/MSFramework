@@ -8,7 +8,6 @@ using MicroserviceFramework.AspNetCore;
 using MicroserviceFramework.AspNetCore.Filters;
 using MicroserviceFramework.AspNetCore.Mvc.ModelBinding;
 // using MicroserviceFramework.AspNetCore.Swagger;
-using MicroserviceFramework.Auditing.Loki;
 using MicroserviceFramework.AutoMapper;
 using MicroserviceFramework.Ef;
 using MicroserviceFramework.Ef.MySql;
@@ -22,6 +21,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Ordering.Application;
 using Ordering.Infrastructure;
 using Serilog;
 using Serilog.Events;
@@ -87,28 +87,11 @@ public static class Startup
                 options.JsonSerializerOptions.AddDefaultConverters();
                 options.JsonSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
             })
-            // .AddNewtonsoftJson(x =>
-            // {
-            //     x.SerializerSettings.Converters.Add(new ObjectIdConverter());
-            //     x.SerializerSettings.Converters.Add(new EnumerationConverter());
-            //     // x.SerializerSettings.ContractResolver = new CompositeContractResolver
-            //     // {
-            //     //     new EnumerationContractResolver(), new CamelCasePropertyNamesContractResolver()
-            //     // };
-            //     settings = x.SerializerSettings;
-            // })
             .AddDapr(x =>
             {
                 x.UseHttpEndpoint("http://localhost:5101");
                 x.UseGrpcEndpoint("http://localhost:5102");
             });
-        // services.AddSwaggerGen(x =>
-        // {
-        //     x.SwaggerDoc("v1.0", new OpenApiInfo { Version = "v1.0", Description = "Ordering API V1.0" });
-        //     x.CustomSchemaIds(type => type.FullName?.Replace("+", "."));
-        //     x.MapEnumerationType(typeof(Address).Assembly);
-        //     x.SupportObjectId();
-        // });
         services.AddHealthChecks();
 
         services.AddCors(option =>
@@ -152,27 +135,6 @@ public static class Startup
         services.AddDbContext<TestDbContext>(x =>
             x.UseNpgsql());
 
-        // services.AddAssemblyScanPrefix("Ordering");
-        // services.AddScopeServiceProvider();
-        // services.AddDependencyInjectionLoader();
-        // services.AddOptionsType(configuration);
-        // services.AddAspNetCoreExtension();
-        // services.AddAutoMapperObjectAssembler();
-        // services.AddEfAuditing<OrderingContext>();
-        // services.AddLokiAuditing();
-        // services.AddLocalEventPublisher();
-        // services.AddAspNetCoreExtension();
-        // services.AddEntityFrameworkExtension();
-        // NatashaManagement.Preheating<NatashaDomainCreator>();
-        // DynamicCompileUtil.CreateType = (script) =>
-        // {
-        //     var builder = NClass.DefaultDomain()
-        //         .ConfigBuilder(opt => opt.UseSmartMode())
-        //         .HiddenNamespace();
-        //     builder.BodyScript.Append(script);
-        //     return builder.GetType();
-        // };
-
         services.AddMicroserviceFramework(builder =>
         {
             builder.UseDependencyInjectionLoader();
@@ -184,6 +146,8 @@ public static class Startup
             builder.UseScopeServiceProvider();
             builder.UseEntityFramework();
         }, "Ordering");
+
+        services.AddScoped<IDbContextFactory, EfDbContextFactory>();
     });
 
     public static void Configure(this WebApplication app)
@@ -192,18 +156,7 @@ public static class Startup
         if (env.IsDevelopment())
         {
             app.UseDeveloperExceptionPage();
-            // //启用中间件服务生成Swagger作为JSON终结点
-            // app.UseSwagger();
-            // //启用中间件服务对swagger-ui，指定Swagger JSON终结点
-            // app.UseSwaggerUI(c => { c.SwaggerEndpoint("/swagger/v1.0/swagger.json", "Ordering API V1.0"); });
         }
-
-        // else
-        // {
-        //     // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
-        //     app.UseHsts();
-        // }
-        var dbContext = app.Services.CreateScope().ServiceProvider.GetRequiredService<OrderingContext>();
 
         app.UseRouting();
         app.UseHealthChecks("/healthcheck");
@@ -214,54 +167,6 @@ public static class Startup
         app.UseDaprSecurity();
         app.UseCloudEvents();
         app.MapSubscribeHandler();
-
-        // app.UseDaprCap();
-
-        // app.Use(async (context, next) =>
-        // {
-        //     var capPublisher = context.RequestServices.GetService<ICapPublisher>();
-        //     if (capPublisher == null)
-        //     {
-        //         await next();
-        //     }
-        //     else
-        //     {
-        //         var logger = context.RequestServices.GetRequiredService<ILoggerFactory>()
-        //             .CreateLogger("CAP.TransactionFilter");
-        //
-        //         var dbContext = context.RequestServices.GetRequiredService<OrderingContext>();
-        //         logger.LogDebug("开启 CAP EF 事务");
-        //
-        //         await using var transaction = dbContext.Database.BeginTransaction(capPublisher);
-        //
-        //         await next.Invoke();
-        //
-        //         // 200 说明执行成功， 没有异常
-        //         if (context.Response.StatusCode == 200)
-        //         {
-        //             await transaction.CommitAsync();
-        //             logger.LogDebug("提交 CAP EF 事务成功");
-        //         }
-        //         else
-        //         {
-        //             await transaction.RollbackAsync();
-        //             logger.LogDebug("回滚 CAP EF 事务成功");
-        //         }
-        //     }
-        // });
-
-        // 中间件顺序
-        // ExceptionHandler
-        // HSTS
-        // HttpsRedirection
-        // StaticFiles
-        // Routing
-        // Cors
-        // Authentication
-        // Authorization
-        // CustomMiddleware
-        // EndpointRouting
-
         app.MapDefaultControllerRoute().RequireCors("___my_cors");
         app.UseMicroserviceFramework();
 

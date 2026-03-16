@@ -42,7 +42,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="auditing-log\" />
     <Folder Include="logs\"/>
   </ItemGroup>
 
