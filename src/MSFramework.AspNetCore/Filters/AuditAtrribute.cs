@@ -90,6 +90,7 @@ internal class Audit(ILogger<Audit> logger) : ActionFilterAttribute
         double? lng = double.TryParse(context.HttpContext.Request.Query["lng"].ToString(), out var n) ? n : null;
 
         (string UserId, string UserDisplayName) user = default;
+        string traceId = null;
         if (context.HttpContext.User.Identity is { IsAuthenticated: true })
         {
             var session = context.HttpContext.RequestServices.GetService<ISession>();
@@ -97,11 +98,16 @@ internal class Audit(ILogger<Audit> logger) : ActionFilterAttribute
             {
                 user.UserId = session.UserId;
                 user.UserDisplayName = session.UserDisplayName;
+                traceId = session.TraceIdentifier;
             }
+        }
+        else
+        {
+            traceId = context.HttpContext.TraceIdentifier;
         }
 
         var auditedOperation = new AuditOperation(url, ua, ip, deviceModel, deviceId,
-            lat, lng, context.HttpContext.TraceIdentifier, context.HttpContext.Request.Method);
+            lat, lng, traceId, context.HttpContext.Request.Method);
         auditedOperation.SetCreation(user.UserId, user.UserDisplayName, creationTime);
         return auditedOperation;
     }

@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
 using System.Security.Claims;
@@ -54,7 +55,9 @@ public class HttpSession : ISession
         name = string.IsNullOrEmpty(name) ? userName : name;
         var userDisplayName = name;
 
-        var traceId = accessor.HttpContext.TraceIdentifier;
+        var traceId = Activity.Current == null
+            ? accessor.HttpContext.TraceIdentifier
+            : Activity.Current.TraceId.ToString();
 
         var session = new HttpSession
         {
