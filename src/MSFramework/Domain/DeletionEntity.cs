@@ -40,7 +40,7 @@ public abstract class DeletionEntity<TKey>(TKey id) : ModificationEntity<TKey>(i
     /// <param name="deleterId">删除人标识</param>
     /// <param name="deleterName">删除人名称</param>
     /// <param name="deletionTime">删除时间</param>
-    public virtual void SetDeletion(string deleterId, string deleterName, DateTimeOffset deletionTime = default)
+    public virtual void SetDeletion(string deleterId, string deleterName, DateTimeOffset? deletionTime = null)
     {
         // 删除只能一次操作， 因此如果已经有值， 不能再做设置
         // 若更新成功为 true， 则不会发生再次更新的情况
@@ -50,7 +50,7 @@ public abstract class DeletionEntity<TKey>(TKey id) : ModificationEntity<TKey>(i
         }
 
         IsDeleted = true;
-        DeletionTime = deletionTime == default ? DateTimeOffset.UtcNow : deletionTime;
+        DeletionTime = deletionTime ?? DateTimeOffset.UtcNow;
         DeleterId = deleterId;
         DeleterName = deleterName;
 

@@ -19,7 +19,7 @@ namespace MicroserviceFramework.AspNetCore.Filters;
 /// UnitOfWork 提交完成后，则 DbContext ChangeObject 状态变清除，此时保存审计信息不会干扰业务，即便保存失败也没有关系。
 /// </summary>
 [AttributeUsage(AttributeTargets.Class | AttributeTargets.Method)]
-internal class Audit(ILogger<Audit> logger) : ActionFilterAttribute
+internal class Audit(ILogger<Audit> logger, IServiceScopeFactory scopeFactory) : ActionFilterAttribute
 {
     private List<IAuditingStore> _auditingStores;
     private AuditOperation _auditOperation;
@@ -36,7 +36,7 @@ internal class Audit(ILogger<Audit> logger) : ActionFilterAttribute
         {
             // 使用独立 scope 保存审计数据，不干扰 HTTP context 下的 DbContext
             // HTTP context 下的 DbContext 注册了 UOW 下的 SavingChanges 事件
-            _serviceScope = Defaults.ServiceProvider.CreateScope();
+            _serviceScope = scopeFactory.CreateScope();
             _auditingStores = _serviceScope.ServiceProvider.GetServices<IAuditingStore>().ToList();
             if (_auditingStores.Any())
             {

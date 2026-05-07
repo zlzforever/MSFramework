@@ -28,6 +28,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		version.props = version.props
 		dotnet.yaml = .github/workflows/dotnet.yml
 		AGENTS.md = AGENTS.md
+		CODE_REVIEW_REPORT.md = CODE_REVIEW_REPORT.md
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{BC00DC54-17AB-455D-AE75-FDF74923FC13}"

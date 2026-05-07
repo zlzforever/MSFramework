@@ -37,6 +37,7 @@ public static class ServiceCollectionExtensions
             }
         }
 
+        store.Freeze();
         services.TryAddSingleton(store);
     }
 

@@ -17,6 +17,6 @@ public abstract record Request<TResponse>
     /// <returns></returns>
     public override string ToString()
     {
-        return $"Response: {typeof(TResponse).FullName}";
+        return $"Response: {typeof(TResponse)}";
     }
 }

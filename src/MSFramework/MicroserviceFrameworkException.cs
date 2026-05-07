@@ -15,13 +15,6 @@ public class MicroserviceFrameworkException(int code, string message, Exception 
     /// <summary>
     ///
     /// </summary>
-    public MicroserviceFrameworkException() : this(1, null)
-    {
-    }
-
-    /// <summary>
-    ///
-    /// </summary>
     /// <param name="message"></param>
     public MicroserviceFrameworkException(string message) : this(1, message)
     {

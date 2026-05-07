@@ -89,8 +89,11 @@ public abstract class Enumeration(string id, string name)
     ///
     /// </summary>
     /// <returns></returns>
-    public override int GetHashCode() => Id.GetHashCode();
-
+    public override int GetHashCode()
+    {
+        // 组合：类型 + Id，自动空安全，官方标准写法
+        return HashCode.Combine(GetType(), Id);
+    }
 
     /// <summary>
     /// 字符串转换为枚举类型

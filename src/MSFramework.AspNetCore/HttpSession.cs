@@ -16,20 +16,6 @@ namespace MicroserviceFramework.AspNetCore;
 /// </summary>
 public class HttpSession : ISession
 {
-    private static readonly HashSet<string> ChineseCultures =
-    [
-        "zh",
-        "zh-CN",
-        "zh-HK",
-        "zh-MO",
-        "zh-CHS",
-        "zh-SG",
-        "zh-TW",
-        "zh-CHT",
-        "zh-Hant",
-        "zh-Hans"
-    ];
-
     /// <summary>
     ///
     /// </summary>
@@ -46,7 +32,7 @@ public class HttpSession : ISession
         var givenName = accessor.HttpContext.User.GetValue(ClaimTypes.GivenName, JwtClaimTypes.GivenName);
         var familyName = accessor.HttpContext.User.GetValue(ClaimTypes.Surname, JwtClaimTypes.FamilyName);
         // 中文环境下，姓在前，名在后
-        var name = ChineseCultures.Contains(CultureInfo.CurrentCulture.Name)
+        var name = CultureInfo.CurrentCulture.Name.StartsWith("zh", StringComparison.OrdinalIgnoreCase)
             ? $"{familyName}{givenName}"
             : $"{givenName}{familyName}";
         name = string.IsNullOrEmpty(name)

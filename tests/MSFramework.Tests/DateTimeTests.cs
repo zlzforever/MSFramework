@@ -1,5 +1,4 @@
 ﻿using System;
-using MicroserviceFramework.Extensions;
 using Xunit;
 
 namespace MSFramework.Tests;

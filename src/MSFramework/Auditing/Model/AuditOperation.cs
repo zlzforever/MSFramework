@@ -109,7 +109,7 @@ public class AuditOperation : CreationAggregateRoot<string>, IAuditObject
     {
         foreach (var entity in entities)
         {
-            entity.Operation = this;
+            entity.SetOperation(this);
             Entities.Add(entity);
         }
     }

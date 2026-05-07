@@ -28,9 +28,9 @@ public static class IO
         public async Task<byte[]> ToArrayAsync()
         {
             stream.Seek(0, SeekOrigin.Begin);
-            var bytes = new byte[stream.Length];
-            _ = await stream.ReadAsync(bytes);
-            return bytes;
+            using var ms = new MemoryStream();
+            await stream.CopyToAsync(ms);
+            return ms.ToArray();
         }
 
         /// <summary>

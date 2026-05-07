@@ -1,7 +1,5 @@
-using System;
 using MicroserviceFramework.Ef.Extensions;
 using Microsoft.EntityFrameworkCore.Infrastructure;
-using Microsoft.EntityFrameworkCore.Migrations;
 using Pomelo.EntityFrameworkCore.MySql.Infrastructure.Internal;
 
 namespace MicroserviceFramework.Ef.MySql;

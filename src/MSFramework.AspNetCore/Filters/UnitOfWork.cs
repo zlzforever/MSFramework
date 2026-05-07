@@ -1,5 +1,4 @@
 using System.Threading.Tasks;
-using MicroserviceFramework.AspNetCore.Extensions;
 using MicroserviceFramework.Domain;
 using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.Extensions.DependencyInjection;
@@ -23,8 +22,9 @@ internal class UnitOfWork(ILogger<UnitOfWork> logger) : IAsyncActionFilter, IOrd
             return;
         }
 
-        // TODO 每次反射 Attribute 开销太大
-        if (context.HasAttribute<NoUnitOfWork>())
+        // 通过 EndpointMetadata 检查 [NoUnitOfWork]，零反射零分配
+        // EndpointMetadata 由 ASP.NET Core 在启动时构建，包含 Controller 和 Action 上的所有 Attribute 实例
+        if (HasNoUnitOfWork(context))
         {
             return;
         }
@@ -41,4 +41,18 @@ internal class UnitOfWork(ILogger<UnitOfWork> logger) : IAsyncActionFilter, IOrd
     }
 
     public int Order => Constants.UnitOfWork;
+
+    private static bool HasNoUnitOfWork(ActionExecutingContext context)
+    {
+        var metadata = context.ActionDescriptor.EndpointMetadata;
+        for (var i = 0; i < metadata.Count; i++)
+        {
+            if (metadata[i] is NoUnitOfWork)
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
 }

@@ -13,7 +13,7 @@ namespace MicroserviceFramework.Mediator;
 internal class Mediator(IServiceProvider serviceProvider) : IMediator
 {
     // TODO: 可以考虑启动时全加载
-    private static readonly Lazy<ConcurrentDictionary<Type, (Type Interface, MethodInfo Method)>> HandlerCache = new();
+    private static readonly ConcurrentDictionary<Type, (Type Interface, MethodInfo Method)> HandlerCache = new();
 
     /// <summary>
     /// 请求无响应模型
@@ -30,7 +30,7 @@ internal class Mediator(IServiceProvider serviceProvider) : IMediator
 
         var requestType = request.GetType();
         var (@interface, method) =
-            HandlerCache.Value.GetOrAdd(requestType, type => CreateHandlerMeta(typeof(IRequestHandler<>), type));
+            HandlerCache.GetOrAdd(requestType, type => CreateHandlerMeta(typeof(IRequestHandler<>), type));
 
         var handler = serviceProvider.GetService(@interface);
         if (handler == null)
@@ -55,13 +55,13 @@ internal class Mediator(IServiceProvider serviceProvider) : IMediator
     {
         if (request == null)
         {
-            return null;
+            return Task.FromResult<TResponse>(default);
         }
 
         var requestType = request.GetType();
         var responseType = typeof(TResponse);
         var (@interface, method) =
-            HandlerCache.Value.GetOrAdd(requestType,
+            HandlerCache.GetOrAdd(requestType,
                 type => CreateHandlerMeta(typeof(IRequestHandler<,>), type, responseType));
         var handler = serviceProvider.GetService(@interface);
         if (handler == null)
@@ -94,7 +94,7 @@ internal class Mediator(IServiceProvider serviceProvider) : IMediator
         }
 
         var (@interface, method) =
-            HandlerCache.Value.GetOrAdd(request.GetType(), type => CreateHandlerMeta(typeof(IRequestHandler<>), type));
+            HandlerCache.GetOrAdd(request.GetType(), type => CreateHandlerMeta(typeof(IRequestHandler<>), type));
 
         var handlers = serviceProvider.GetServices(@interface);
         foreach (var handler in handlers)
@@ -122,7 +122,7 @@ internal class Mediator(IServiceProvider serviceProvider) : IMediator
     private static (Type HandlerType, MethodInfo MethodInfo) CreateHandlerMeta(Type type, params Type[] typeArguments)
     {
         var handlerType = type.MakeGenericType(typeArguments);
-        var method = handlerType.GetMethods()[0];
+        var method = handlerType.GetMethod("HandleAsync");
         return (handlerType, method);
     }
 }

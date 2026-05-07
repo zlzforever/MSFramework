@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Frozen;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -8,13 +9,13 @@ using Microsoft.Extensions.DependencyModel;
 namespace MicroserviceFramework.Utils;
 
 /// <summary>
-///
+/// 只管理业务程序集
 /// </summary>
 public static class Runtime
 {
-    private static readonly List<Assembly> Assemblies = new();
-    private static readonly List<Type> Types = new();
-    private static readonly object Locker = new object();
+    private static FrozenSet<Assembly> _assemblies;
+    private static FrozenSet<Type> _types;
+    private static readonly object Locker = new();
 
     /// <summary>
     /// 请在 AddMicroserviceFramework 前添加前缀
@@ -28,11 +29,15 @@ public static class Runtime
 
     internal static void Load()
     {
+        if (_assemblies != null)
+        {
+            return;
+        }
+
         lock (Locker)
         {
-            Assemblies.Clear();
-            Types.Clear();
-
+            var assemblies = new List<Assembly>();
+            var types = new List<Type>();
             // 分析器不会输出程序集文件
             var analyzerAssemblyList = new[] { "MSFramework.Analyzers", "MSFramework.Ef.Analyzers" };
             if (DependencyContext.Default != null)
@@ -45,9 +50,14 @@ public static class Runtime
                     loadedAssemblies.TryAdd(name, assembly);
                 }
 
+                // var libraries = DependencyContext.Default.CompileLibraries
+                //     .Where(x => x.Type == "project"
+                //                 || StartsWith.Any(y => x.Name.StartsWith(y)));
+
+                // 只加载业务 Assembly
                 var libraries = DependencyContext.Default.CompileLibraries
-                    .Where(x => x.Type == "project"
-                                || StartsWith.Any(y => x.Name.StartsWith(y)));
+                    .Where(x => StartsWith.Any(y => x.Name.StartsWith(y)));
+
                 foreach (var lib in libraries)
                 {
                     if (lib.Type == "reference" || analyzerAssemblyList.Contains(lib.Name))
@@ -90,12 +100,12 @@ public static class Runtime
                         continue;
                     }
 
-                    if (!StartsWith.Any(y => name.StartsWith(y)))
+                    if (!StartsWith.Any(name.StartsWith))
                     {
                         continue;
                     }
 
-                    if (ExcludeWith.Any(y => name.StartsWith(y)))
+                    if (ExcludeWith.Any(name.StartsWith))
                     {
                         continue;
                     }
@@ -109,16 +119,20 @@ public static class Runtime
                     dict.TryAdd(name, assembly);
                 }
 
-                Assemblies.AddRange(dict.Values.Where(x => x != null));
+                assemblies.AddRange(dict.Values.Where(x => x != null));
             }
 
-            foreach (var assembly in Assemblies)
+            _assemblies = assemblies.ToFrozenSet();
+
+            foreach (var assembly in _assemblies)
             {
                 foreach (var definedType in assembly.DefinedTypes)
                 {
-                    Types.Add(definedType.AsType());
+                    types.Add(definedType.AsType());
                 }
             }
+
+            _types = types.ToFrozenSet();
         }
     }
 
@@ -126,23 +140,17 @@ public static class Runtime
     /// 获取项目程序集，排除所有的系统程序集(Microsoft.***、System.***等)、Nuget下载包
     /// </summary>
     /// <returns></returns>
-    public static IReadOnlyCollection<Assembly> GetAllAssemblies()
+    public static FrozenSet<Assembly> GetAllAssemblies()
     {
-        lock (Locker)
-        {
-            return Assemblies.AsReadOnly();
-        }
+        return _assemblies;
     }
 
     /// <summary>
     ///
     /// </summary>
     /// <returns></returns>
-    public static IReadOnlyCollection<Type> GetAllTypes()
+    public static FrozenSet<Type> GetAllTypes()
     {
-        lock (Locker)
-        {
-            return Types.AsReadOnly();
-        }
+        return _types;
     }
 }

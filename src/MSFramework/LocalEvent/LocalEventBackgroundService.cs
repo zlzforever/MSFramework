@@ -58,7 +58,7 @@ public class LocalEventBackgroundService(
                         var handler = services.GetService(descriptor.HandlerType);
                         if (handler == null)
                         {
-                            return;
+                            continue;
                         }
 
                         var session = services.GetService<ISession>();

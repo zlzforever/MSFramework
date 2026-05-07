@@ -36,9 +36,9 @@ public abstract class ModificationEntity<TKey>(TKey id) : CreationEntity<TKey>(i
     /// <param name="lastModifierName">最后修改时间</param>
     /// <param name="lastModificationTime">最后修改人名称</param>
     public virtual void SetModification(string lastModifierId, string lastModifierName,
-        DateTimeOffset lastModificationTime = default)
+        DateTimeOffset? lastModificationTime = null)
     {
-        LastModificationTime = lastModificationTime == default ? DateTimeOffset.UtcNow : lastModificationTime;
+        LastModificationTime = lastModificationTime ?? DateTimeOffset.UtcNow;
         LastModifierId = lastModifierId;
         LastModifierName = lastModifierName;
     }

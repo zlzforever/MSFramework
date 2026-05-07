@@ -52,25 +52,6 @@ public static class ServiceCollectionExtensions
         services.TryAddSingleton(x =>
             x.GetRequiredService<IOptions<JsonOptions>>().Value.JsonSerializerOptions);
 
-        var file = "Microsoft.AspNetCore.Mvc.NewtonsoftJson.dll";
-        if (File.Exists(file))
-        {
-            Assembly.LoadFrom(file);
-            var jsonOptionsType =
-                Type.GetType(
-                    "Microsoft.AspNetCore.Mvc.MvcNewtonsoftJsonOptions, Microsoft.AspNetCore.Mvc.NewtonsoftJson");
-            var jsonSerializerSettingsType = Type.GetType("Newtonsoft.Json.JsonSerializerSettings, Newtonsoft.Json");
-
-            if (jsonSerializerSettingsType != null && jsonOptionsType != null)
-            {
-                services.TryAddSingleton(jsonSerializerSettingsType, (x) =>
-                {
-                    var type = typeof(IOptions<>).MakeGenericType(jsonOptionsType);
-                    return ((dynamic)x.GetRequiredService(type)).Value.SerializerSettings;
-                });
-            }
-        }
-
         if (!Directory.Exists(Defaults.OSSDirectory))
         {
             Directory.CreateDirectory(Defaults.OSSDirectory);

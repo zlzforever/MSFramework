@@ -16,8 +16,9 @@ public class AuditEntity : EntityBase<string>, IAuditObject
     /// <param name="typeName"></param>
     /// <param name="entityId"></param>
     /// <param name="operationType"></param>
-    public AuditEntity(string typeName, string entityId, OperationType operationType) : this(ObjectId.GenerateNewId()
-        .ToString())
+    public AuditEntity(string typeName, string entityId, OperationType operationType) : this(
+        ObjectId.GenerateNewId()
+            .ToString())
     {
         Type = typeName;
         EntityId = entityId;
@@ -33,7 +34,7 @@ public class AuditEntity : EntityBase<string>, IAuditObject
     /// 所属的操作
     /// </summary>
     [JsonIgnore]
-    public AuditOperation Operation { get; internal set; }
+    public AuditOperation Operation { get; private set; }
 
     /// <summary>
     /// 类型名称
@@ -66,6 +67,15 @@ public class AuditEntity : EntityBase<string>, IAuditObject
             property.Entity = this;
             Properties.Add(property);
         }
+    }
+
+    /// <summary>
+    ///
+    /// </summary>
+    /// <param name="operation"></param>
+    public void SetOperation(AuditOperation operation)
+    {
+        Operation = operation;
     }
 
     /// <summary>

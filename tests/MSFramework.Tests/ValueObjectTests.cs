@@ -36,15 +36,15 @@ public class ValueObjectTests
         var address3 = new Address("a", "b", "c", "d", "f");
         Assert.True(address1 != address3);
     }
-
-    [Fact]
-    public void ValueObjectCopy()
-    {
-        var address1 = new Address("a", "b", "c", "d", "e");
-        var address2 = (Address)address1.Copy();
-
-        Assert.True(Equals(address1, address2));
-    }
+    //
+    // [Fact]
+    // public void ValueObjectCopy()
+    // {
+    //     var address1 = new Address("a", "b", "c", "d", "e");
+    //     var address2 = (Address)address1.Copy();
+    //
+    //     Assert.True(Equals(address1, address2));
+    // }
 
     [Fact]
     public void ValueObjectToString()

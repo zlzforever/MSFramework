@@ -5,6 +5,7 @@ using MicroserviceFramework.Domain;
 using MicroserviceFramework.Mediator;
 using MicroserviceFramework.Runtime;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 
 namespace MicroserviceFramework.Extensions.DependencyInjection;
 
@@ -52,7 +53,8 @@ public static class ServiceCollectionExtensions
         }
 
         // 1. 注册类型本身
-        services.TryAdd(new ServiceDescriptor(implementationType, implementationType, lifetime));
+        // 同一类型只能有一种生命周期！！！想支持多种生命周期是：反设计、反最佳实践、高风险的行为。因此，实接使用原生接口注册即可。
+        services.Add(new ServiceDescriptor(implementationType, implementationType, lifetime));
 
         var interfaceTypes = implementationType.GetInterfacesExcludeBy(
             typeof(ITransientDependency),

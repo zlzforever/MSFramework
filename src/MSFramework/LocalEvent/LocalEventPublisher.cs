@@ -12,7 +12,8 @@ internal class LocalEventPublisher(
     : IEventPublisher
 {
     internal static readonly Channel<(ISession Session, EventBase EventData)>
-        EventChannel = Channel.CreateUnbounded<(ISession, EventBase)>();
+        EventChannel = Channel.CreateBounded<(ISession, EventBase)>(
+            new BoundedChannelOptions(2000) { FullMode = BoundedChannelFullMode.Wait, SingleReader = true });
 
     public async Task PublishAsync<TEvent>(TEvent @event) where TEvent : EventBase
     {

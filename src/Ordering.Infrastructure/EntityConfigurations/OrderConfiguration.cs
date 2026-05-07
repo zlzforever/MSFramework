@@ -1,7 +1,6 @@
 using MicroserviceFramework.Common;
 using MicroserviceFramework.Ef;
 using MicroserviceFramework.Ef.Extensions;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Ordering.Domain.AggregateRoots.Order;
 

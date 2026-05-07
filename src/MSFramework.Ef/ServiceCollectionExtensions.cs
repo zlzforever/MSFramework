@@ -128,7 +128,7 @@ public static partial class ServiceCollectionExtensions
         var extension = builder.Options.FindExtension<T>() as RelationalOptionsExtension;
         if (extension == null)
         {
-            throw new MicroserviceFrameworkException("NpgsqlOptionsExtension is null");
+            throw new MicroserviceFrameworkException($"FindExtension {typeof(T).Name} failed");
         }
 
         var b = extension.WithConnectionString(connectionString);

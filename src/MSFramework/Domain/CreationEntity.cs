@@ -36,7 +36,7 @@ public abstract class CreationEntity<TKey>(TKey id) :
     /// <param name="creatorId">创建人标识</param>
     /// <param name="creatorName">创建人名称</param>
     /// <param name="creationTime">创建时间</param>
-    public virtual void SetCreation(string creatorId, string creatorName, DateTimeOffset creationTime = default)
+    public virtual void SetCreation(string creatorId, string creatorName, DateTimeOffset? creationTime = null)
     {
         // 创建只能一次操作， 因此如果已经有值， 不能再做设置
         // 若更新成功则创建时间不会为空， 不会发生再次更新的情况
@@ -45,7 +45,7 @@ public abstract class CreationEntity<TKey>(TKey id) :
             return;
         }
 
-        CreationTime = creationTime == default ? DateTimeOffset.UtcNow : creationTime;
+        CreationTime = creationTime ?? DateTimeOffset.UtcNow;
         CreatorId = creatorId;
         CreatorName = creatorName;
     }

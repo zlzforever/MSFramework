@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 using MicroserviceFramework.Application;
 using MicroserviceFramework.Auditing.Model;
 using MicroserviceFramework.Domain;
-using MicroserviceFramework.Ef.Extensions;
+using MicroserviceFramework.Ef.Auditing;
 using MicroserviceFramework.Ef.Internal;
 using MicroserviceFramework.Extensions.DependencyInjection;
 using MicroserviceFramework.Mediator;
@@ -16,7 +16,6 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
-using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace MicroserviceFramework.Ef;
 
@@ -25,6 +24,31 @@ namespace MicroserviceFramework.Ef;
 /// </summary>
 public abstract class DbContextBase : DbContext
 {
+    /// <summary>
+    /// 实体审计策略链，按数组顺序执行。
+    /// ExternalEntity 必须排第一位，确保在其他策略之前拦截外部实体。
+    /// 每个实体遍历时，第一个返回 <c>true</c> 的策略为命中，后续不再执行。
+    /// 子类可通过重写 <see cref="ApplyConcepts"/> 或替换策略来定制行为。
+    /// </summary>
+    private static readonly IEntityAuditingStrategy[] AuditingStrategies =
+    [
+        new ExternalEntityAuditingStrategy(),
+        new CreationAuditingStrategy(),
+        new ModificationAuditingStrategy(),
+        new DeletionAuditingStrategy()
+    ];
+
+    /// <summary>
+    /// 模型构建策略管道，按数组顺序执行。
+    /// 每个策略封装 OnModelCreating 中的一个独立配置关注点。
+    /// </summary>
+    private static readonly IModelBuildingStrategy[] ModelBuildingStrategies =
+    [
+        new RegisterEntityConfigurationsStrategy(),
+        new EntityTableConfigurationStrategy(),
+        new EntityPropertyConfigurationStrategy()
+    ];
+
     // private readonly ISession _session;
     //
     // // private IEntityConfigurationTypeFinder _entityConfigurationTypeFinder;
@@ -56,9 +80,12 @@ public abstract class DbContextBase : DbContext
     // }
 
     /// <summary>
-    /// 只会调用一次，创建上下文数据模型时，对各个实体类的数据库映射细节进行配置
+    /// 只会调用一次，创建上下文数据模型时，对各个实体类的数据库映射细节进行配置。
+    /// 通过 <see cref="ModelBuildingStrategies"/> 管道依次执行：
+    ///   1. 注册实体类型配置（IEntityTypeConfiguration）
+    ///   2. 实体表级配置（表名 + 软删除过滤器）
+    ///   3. 实体属性级配置（列名 + 列类型 + 乐观锁）
     /// </summary>
-    /// <param name="modelBuilder">上下文数据模型构建器</param>
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         var settings = this.GetService<DbContextSettings>();
@@ -68,65 +95,23 @@ public abstract class DbContextBase : DbContext
         }
 
         var entityConfigurationTypeFinder = this.GetService<IEntityConfigurationTypeFinder>();
-
-        //通过实体配置信息将实体注册到当前上下文
-        var contextType = GetType();
         modelBuilder.HasAnnotation("DatabaseType", settings.DatabaseType);
 
-        var entityTypeConfigurations = entityConfigurationTypeFinder.GetEntityTypeConfigurations(contextType);
-        foreach (var entityTypeConfiguration in entityTypeConfigurations)
+        var ctx = new ModelBuildingContext(modelBuilder, settings, entityConfigurationTypeFinder, GetType());
+        foreach (var modelBuildingStrategy in ModelBuildingStrategies)
         {
-            entityTypeConfiguration.EntityTypeConfiguration.Configure(modelBuilder);
+            modelBuildingStrategy.Apply(ctx);
         }
 
-        // 需要保证执行顺序，使用虚方法较为合适
+        // 子类扩展点：在所有内置策略执行完毕后，应用自定义配置
         ApplyConfiguration(modelBuilder);
-
-        foreach (var mutableEntityType in modelBuilder.Model.GetEntityTypes())
-        {
-            // owned 的类型是合并到其主表中， 所以没有 table name，schema 的说法
-            if (!mutableEntityType.IsOwned())
-            {
-                RenameTableName(mutableEntityType, settings);
-
-                // 编译模型不支持使用全局过滤器
-                if (!settings.UseCompiledModel &&
-                    typeof(IDeletion).IsAssignableFrom(mutableEntityType.ClrType))
-                {
-                    mutableEntityType.AddSoftDeleteQueryFilter();
-                }
-
-                // comment: 只要有 ID 属性，EF 为自动认为其是主键，以下代码失效
-                // // 继承了实体 & 有 ID 属性 & 未设置主键的实体， 需要自动注入主键
-                // // 如果有属性 ID， 且已经注入， 且实体已经有主键， 则不需要再管 ID 属性
-                // var identityProperty = mutableEntityType.ClrType.GetProperties()
-                //     .FirstOrDefault(x => "id".Equals(x.Name, StringComparison.OrdinalIgnoreCase));
-                // if (identityProperty != null &&
-                //     Defaults.Types.Entity.IsAssignableFrom(mutableEntityType.ClrType) &&
-                //     mutableEntityType.FindPrimaryKey() == null)
-                // {
-                //     var propertyBuilder =
-                //         mutableEntityType.AddProperty(identityProperty.Name);
-                //     propertyBuilder.IsPrimaryKey();
-                // }
-            }
-
-            var optimisticLockTable = Defaults.Types.OptimisticLock.IsAssignableFrom(mutableEntityType.ClrType);
-            var enumerationToStringConverterType = typeof(EnumerationToStringConverter<>);
-            foreach (var property in mutableEntityType.GetProperties())
-            {
-                SetOptimisticLock(optimisticLockTable, property);
-                OverwriteColumnName(settings, mutableEntityType, property);
-                AutoColumnType(property, enumerationToStringConverterType);
-            }
-        }
     }
 
     /// <summary>
-    ///
+    /// [向后兼容] 表名重命名逻辑已迁移至 <see cref="EntityTableConfigurationStrategy"/>。
+    /// 默认的 <see cref="OnModelCreating"/> 不再调用此方法。
+    /// 子类若重写了 <see cref="OnModelCreating"/> 仍可手动调用。
     /// </summary>
-    /// <param name="mutableEntityType"></param>
-    /// <param name="settings"></param>
     protected virtual void RenameTableName(IMutableEntityType mutableEntityType, DbContextSettings settings)
     {
         var defaultTableName = mutableEntityType.GetDefaultTableName();
@@ -218,7 +203,7 @@ public abstract class DbContextBase : DbContext
     }
 
     /// <summary>
-    ///
+    /// EF Core 官方在 .NET 6+ 已经明确表态：SaveChanges 同步方法是遗留产物，推荐全部使用 Async
     /// </summary>
     /// <param name="acceptAllChangesOnSuccess"></param>
     /// <returns></returns>
@@ -233,7 +218,8 @@ public abstract class DbContextBase : DbContext
             var domainEvents = GetDomainEvents();
             foreach (var @event in domainEvents)
             {
-                mediator.PublishAsync(@event).ConfigureAwait(false);
+                // 不会死锁：它等同于 await 的底层机制，不会捕获 SynchronizationContext。ASP.NET Core 内部的 HostingApplication 在处理非 async 中间件时正是这么做的。
+                mediator.PublishAsync(@event).GetAwaiter().GetResult();
             }
         }
 
@@ -243,10 +229,11 @@ public abstract class DbContextBase : DbContext
     }
 
     /// <summary>
-    ///
+    /// 将 ChangeTracker 中的实体变化应用到审计字段（创建/修改/删除人信息）。
+    /// 策略模式：遍历 <see cref="AuditingStrategies"/> 数组，
+    /// 每个实体匹配到第一个命中策略后跳出内层循环。
     /// </summary>
-    /// <returns></returns>
-    /// <exception cref="ArgumentOutOfRangeException"></exception>
+    /// <returns>是否有实体发生了状态变更</returns>
     protected virtual bool ApplyConcepts()
     {
         var scopeServiceProvider = this.GetService<IScopeServiceProvider>();
@@ -257,32 +244,13 @@ public abstract class DbContextBase : DbContext
 
         foreach (var entry in ChangeTracker.Entries())
         {
-            if (entry.Entity is IExternalEntity)
+            foreach (var auditingStrategy in AuditingStrategies)
             {
-                entry.State = EntityState.Unchanged;
-                continue;
-            }
-
-            switch (entry.State)
-            {
-                case EntityState.Added:
-                    ApplyConceptsForAddedEntity(entry, userId, name);
+                if (auditingStrategy.Apply(entry, userId, name))
+                {
                     changed = true;
                     break;
-                case EntityState.Modified:
-                    ApplyConceptsForModifiedEntity(entry, userId, name);
-                    changed = true;
-                    break;
-                case EntityState.Deleted:
-                    ApplyConceptsForDeletedEntity(entry, userId, name);
-                    changed = true;
-                    break;
-                case EntityState.Detached:
-                    break;
-                case EntityState.Unchanged:
-                    break;
-                default:
-                    throw new ArgumentOutOfRangeException();
+                }
             }
         }
 
@@ -386,52 +354,6 @@ public abstract class DbContextBase : DbContext
             : value.ToString();
     }
 
-    /// <summary>
-    ///
-    /// </summary>
-    /// <param name="entry"></param>
-    /// <param name="userId"></param>
-    /// <param name="userName"></param>
-    protected virtual void ApplyConceptsForAddedEntity(EntityEntry entry, string userId, string userName)
-    {
-        if (entry.Entity is ICreation entity)
-        {
-            entity.SetCreation(userId, userName);
-        }
-    }
-
-    /// <summary>
-    ///
-    /// </summary>
-    /// <param name="entry"></param>
-    /// <param name="userId"></param>
-    /// <param name="userName"></param>
-    protected virtual void ApplyConceptsForModifiedEntity(EntityEntry entry, string userId, string userName)
-    {
-        if (entry.Entity is IModification entity)
-        {
-            entity.SetModification(userId, userName);
-        }
-    }
-
-    /// <summary>
-    ///
-    /// </summary>
-    /// <param name="entry"></param>
-    /// <param name="userId"></param>
-    /// <param name="userName"></param>
-    protected virtual void ApplyConceptsForDeletedEntity(EntityEntry entry, string userId, string userName)
-    {
-        if (entry.Entity is not IDeletion entity)
-        {
-            return;
-        }
-
-        entry.Reload();
-        entry.State = EntityState.Modified;
-        entity.SetDeletion(userId, userName);
-    }
-
     private List<DomainEvent> GetDomainEvents()
     {
         // Dispatch Domain Events collection.
@@ -456,113 +378,5 @@ public abstract class DbContextBase : DbContext
         }
 
         return domainEvents;
-    }
-
-    private void AutoColumnType(IMutableProperty property, Type enumerationToStringConverterType)
-    {
-        if (property.ClrType == Defaults.Types.ObjectId)
-        {
-            property.SetValueConverter(new ObjectIdToStringConverter());
-            var maxLength = property.GetMaxLength();
-            switch (maxLength)
-            {
-                case null:
-                    property.SetMaxLength(36);
-                    break;
-                case < 24:
-                    throw new ArgumentException("ObjectId 长度不能小于 24");
-            }
-
-            var columnType = property.GetColumnType();
-            if (string.IsNullOrEmpty(columnType))
-            {
-                property.SetColumnType("varchar");
-            }
-
-            property.ValueGenerated = ValueGenerated.Never;
-        }
-        else if (property.ClrType == Defaults.Types.Guid)
-        {
-            var maxLength = property.GetMaxLength();
-            switch (maxLength)
-            {
-                case null:
-                    property.SetMaxLength(36);
-                    break;
-                case < 36:
-                    throw new ArgumentException("Guid 长度不能小于 36");
-            }
-
-            var columnType = property.GetColumnType();
-            if (string.IsNullOrEmpty(columnType))
-            {
-                property.SetColumnType("varchar");
-            }
-        }
-        else if (property.ClrType.IsAssignableTo(typeof(Enumeration)))
-        {
-            var columnType = property.GetColumnType();
-            if (string.IsNullOrEmpty(columnType))
-            {
-                property.SetColumnType("varchar");
-            }
-
-            var maxLength = property.GetMaxLength();
-            if (maxLength == null)
-            {
-                property.SetMaxLength(256);
-            }
-
-            var converterType = enumerationToStringConverterType.MakeGenericType(property.ClrType);
-            var converter = (ValueConverter)Activator.CreateInstance(converterType);
-            property.SetValueConverter(converter);
-        }
-    }
-
-    private void OverwriteColumnName(DbContextSettings settings, IMutableEntityType mutableEntityType,
-        IMutableProperty property)
-    {
-        if (!settings.UseUnderScoreCase)
-        {
-            return;
-        }
-
-        var tableName = mutableEntityType.GetTableName();
-        if (string.IsNullOrEmpty(tableName))
-        {
-            throw new ArgumentException("MutableEntityType.GetTableName() returns null.");
-        }
-
-        var storeObjectIdentifier = StoreObjectIdentifier.Table(tableName,
-            mutableEntityType.GetSchema());
-        var columnName = property.GetColumnName(storeObjectIdentifier);
-
-        if (string.IsNullOrEmpty(columnName))
-        {
-            throw new ArgumentException(
-                $"Entity {mutableEntityType.Name} Property {property.Name} without column name");
-        }
-
-        if (columnName.StartsWith('_'))
-        {
-            columnName = columnName.Substring(1, columnName.Length - 1);
-        }
-
-        property.SetColumnName(columnName.ToSnakeCase());
-    }
-
-    private void SetOptimisticLock(bool optimisticLockTable, IMutableProperty property)
-    {
-        if (optimisticLockTable && property.Name == nameof(IOptimisticLock.ConcurrencyStamp))
-        {
-            var maxLength = property.GetMaxLength();
-            if (maxLength == null)
-            {
-                property.SetMaxLength(36);
-            }
-
-            property.IsConcurrencyToken = true;
-            property.IsNullable = true;
-        }
     }
 }

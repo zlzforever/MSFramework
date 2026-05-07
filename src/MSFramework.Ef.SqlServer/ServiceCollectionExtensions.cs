@@ -1,6 +1,5 @@
 using MicroserviceFramework.Ef.Extensions;
 using Microsoft.EntityFrameworkCore.Infrastructure;
-using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.SqlServer.Infrastructure.Internal;
 
 namespace MicroserviceFramework.Ef.SqlServer;
