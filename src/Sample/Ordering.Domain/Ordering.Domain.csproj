@@ -10,9 +10,9 @@
 
   <ItemGroup>
     <!-- 添加对特定版本编译器的引用 -->
-    <PackageReference Include="Microsoft.Net.Compilers.Toolset" Version="5.0.0" PrivateAssets="all" />
-    <ProjectReference Include="..\MSFramework.Analyzers\MSFramework.Analyzers.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="true" />
-    <ProjectReference Include="..\MSFramework\MSFramework.csproj"/>
+    <PackageReference Include="Microsoft.Net.Compilers.Toolset" Version="5.3.0" PrivateAssets="all" />
+    <ProjectReference Include="..\..\MSFramework.Analyzers\MSFramework.Analyzers.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="true" />
+    <ProjectReference Include="..\..\MSFramework\MSFramework.csproj"/>
   </ItemGroup>
 
   <ItemGroup>

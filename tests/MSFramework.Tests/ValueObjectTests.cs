@@ -1,4 +1,7 @@
+using System;
+using System.IO;
 using MicroserviceFramework.Domain;
+using Newtonsoft.Json;
 using Xunit;
 
 namespace MSFramework.Tests;

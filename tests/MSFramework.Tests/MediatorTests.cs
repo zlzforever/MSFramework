@@ -213,12 +213,10 @@ public class MediatorTests
 
         var mediator = serviceProvider.GetRequiredService<IMediator>();
 
-        var targetInvocationException = await Assert.ThrowsAsync<TargetInvocationException>(async () =>
+        var argumentException = await Assert.ThrowsAsync<ArgumentException>(async () =>
         {
             await mediator.SendAsync(new Command3());
         });
-        var argumentException = targetInvocationException.InnerException as ArgumentException;
-        Assert.NotNull(argumentException);
         Assert.Equal("test", argumentException.Message);
     }
 }

@@ -1,5 +1,5 @@
 using System;
-using MicroserviceFramework.Ef.Design;
+using MicroserviceFramework.Ef;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Ordering.Infrastructure;

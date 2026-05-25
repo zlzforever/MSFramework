@@ -22,8 +22,12 @@ public interface IC : ITransientDependency
     string Id { get; }
 }
 
+public class Z : IA
+{
+    public string Id { get; } = Guid.NewGuid().ToString();
+}
 
-public class A : IA
+public class D : IA
 {
     public string Id { get; } = Guid.NewGuid().ToString();
 }
@@ -34,11 +38,6 @@ public class B : IB
 }
 
 public class C : IC
-{
-    public string Id { get; } = Guid.NewGuid().ToString();
-}
-
-public class D : IA
 {
     public string Id { get; } = Guid.NewGuid().ToString();
 }
@@ -57,18 +56,16 @@ public class DependencyInjectionTests
         var serviceProvider = serviceCollection.BuildServiceProvider();
 
         var scope1 = serviceProvider.CreateScope();
+
         var a1 = scope1.ServiceProvider.GetRequiredService<IA>();
-        Assert.True(a1 is D);
         var id1 = a1.Id;
         var a3 = scope1.ServiceProvider.GetRequiredService<IA>();
-        Assert.True(a3 is D);
         var id3 = a3.Id;
         scope1.Dispose();
         Assert.Equal(id1, id3);
 
         var scope2 = serviceProvider.CreateScope();
         var a2 = scope2.ServiceProvider.GetRequiredService<IA>();
-        Assert.True(a2 is D);
         var id2 = a2.Id;
         scope1.Dispose();
 

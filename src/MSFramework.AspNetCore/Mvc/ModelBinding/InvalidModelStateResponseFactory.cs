@@ -1,5 +1,6 @@
 using System;
 using System.Linq;
+using MicroserviceFramework.Common;
 using MicroserviceFramework.Runtime;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ModelBinding;

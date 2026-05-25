@@ -6,7 +6,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Dapper" Version="2.1.66" />
+    <PackageReference Include="Dapper" Version="2.1.79" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="9.0.11">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
@@ -26,19 +26,18 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\MSFramework.AspNetCore\MSFramework.AspNetCore.csproj"/>
-    <ProjectReference Include="..\MSFramework.Auditing.Loki\MSFramework.Auditing.Loki.csproj"/>
-    <ProjectReference Include="..\MSFramework.AutoMapper\MSFramework.AutoMapper.csproj"/>
-    <ProjectReference Include="..\MSFramework.Ef.Design\MSFramework.Ef.Design.csproj"/>
-    <ProjectReference Include="..\MSFramework.Ef.PostgreSql\MSFramework.Ef.PostgreSql.csproj"/>
-    <ProjectReference Include="..\MSFramework.Ef.SqlServer\MSFramework.Ef.SqlServer.csproj"/>
-    <ProjectReference Include="..\MSFramework.Ef\MSFramework.Ef.csproj"/>
-    <ProjectReference Include="..\MSFramework.Serialization.Newtonsoft\MSFramework.Serialization.Newtonsoft.csproj"/>
-    <ProjectReference Include="..\MSFramework\MSFramework.csproj"/>
+    <ProjectReference Include="..\..\MSFramework.AspNetCore\MSFramework.AspNetCore.csproj"/>
+    <ProjectReference Include="..\..\MSFramework.Auditing.Loki\MSFramework.Auditing.Loki.csproj"/>
+    <ProjectReference Include="..\..\MSFramework.AutoMapper\MSFramework.AutoMapper.csproj"/>
+    <ProjectReference Include="..\..\MSFramework.Ef.PostgreSql\MSFramework.Ef.PostgreSql.csproj"/>
+    <ProjectReference Include="..\..\MSFramework.Ef.SqlServer\MSFramework.Ef.SqlServer.csproj"/>
+    <ProjectReference Include="..\..\MSFramework.Ef\MSFramework.Ef.csproj"/>
+    <ProjectReference Include="..\..\MSFramework.Serialization.Newtonsoft\MSFramework.Serialization.Newtonsoft.csproj"/>
+    <ProjectReference Include="..\..\MSFramework\MSFramework.csproj"/>
     <ProjectReference Include="..\Ordering.Application\Ordering.Application.csproj"/>
     <ProjectReference Include="..\Ordering.Domain\Ordering.Domain.csproj"/>
     <ProjectReference Include="..\Ordering.Infrastructure\Ordering.Infrastructure.csproj"/>
-    <ProjectReference Include="..\MSFramework.Ef.MySql\MSFramework.Ef.MySql.csproj"/>
+    <ProjectReference Include="..\..\MSFramework.Ef.MySql\MSFramework.Ef.MySql.csproj"/>
   </ItemGroup>
 
   <ItemGroup>

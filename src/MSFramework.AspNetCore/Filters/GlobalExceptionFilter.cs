@@ -1,5 +1,6 @@
 using System;
 using MicroserviceFramework.AspNetCore.Mvc;
+using MicroserviceFramework.Common;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.Extensions;
 using Microsoft.AspNetCore.Mvc;

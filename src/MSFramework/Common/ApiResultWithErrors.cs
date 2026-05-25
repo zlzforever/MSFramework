@@ -1,7 +1,7 @@
 using System;
 using System.Text.Json;
 
-namespace MicroserviceFramework.AspNetCore.Mvc;
+namespace MicroserviceFramework.Common;
 
 internal class ApiResultWithErrors : ApiResult
 {
@@ -10,6 +10,7 @@ internal class ApiResultWithErrors : ApiResult
     /// <summary>
     /// 错误信息
     /// </summary>
+    // ReSharper disable once UnusedAutoPropertyAccessor.Global
     public object Errors { get; set; }
 
     public ApiResultWithErrors()
