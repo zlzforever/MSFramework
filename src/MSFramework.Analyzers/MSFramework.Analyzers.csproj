@@ -3,6 +3,13 @@
     <TargetFramework>netstandard2.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <LangVersion>latest</LangVersion>
+    <!-- 开启生成引用程序集，消除 NU5128 -->
+    <GenerateReferenceAssembly>true</GenerateReferenceAssembly>
+    <!-- 打包配置 -->
+    <IsPackable>true</IsPackable>
+    <!-- 标记为 Roslyn 分析器包类型 -->
+    <PackageType>Analyzer</PackageType>
+    <NoWarn>$(NoWarn);NU5128</NoWarn>
     <EnforceExtendedAnalyzerRules>true</EnforceExtendedAnalyzerRules>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <IncludeBuildOutput>false</IncludeBuildOutput>
@@ -15,8 +22,8 @@
     <None Include="./readme.md" Pack="true" PackagePath=""/>
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Microsoft.CodeAnalysis.Analyzers" Version="5.3.0" PrivateAssets="all" />
-    <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="5.3.0" PrivateAssets="all" />
+    <PackageReference Include="Microsoft.CodeAnalysis.Analyzers" Version="5.6.0" PrivateAssets="all" />
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="5.6.0" PrivateAssets="all" />
   </ItemGroup>
   <ItemGroup>    <!-- Package the generator in the analyzer directory of the nuget package -->
     <None Include="$(OutputPath)\$(AssemblyName).dll" Pack="true" PackagePath="analyzers/dotnet/cs" Visible="false"/>

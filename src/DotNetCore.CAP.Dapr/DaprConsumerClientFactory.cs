@@ -7,27 +7,27 @@ using Microsoft.Extensions.Options;
 namespace DotNetCore.CAP.Dapr;
 
 /// <summary>
-///
+/// Dapr 消费者客户端工厂，创建 Dapr 消息队列消费者
 /// </summary>
-/// <param name="daprOptions"></param>
-/// <param name="loggerFactory"></param>
+/// <param name="daprOptions">Dapr 选项</param>
+/// <param name="loggerFactory">日志工厂</param>
 public class DaprConsumerClientFactory(
     IOptionsMonitor<DaprOptions> daprOptions,
     ILoggerFactory loggerFactory)
     : IConsumerClientFactory
 {
     /// <summary>
-    ///
+    /// 映射 Dapr 订阅端点的静态委托
     /// </summary>
     public static Action<string, string, string, Delegate> MapEndpointRoute;
 
     /// <summary>
-    ///
+    /// 创建 Dapr 消费者客户端实例
     /// </summary>
-    /// <param name="groupId"></param>
-    /// <returns></returns>
-    /// <exception cref="ArgumentNullException"></exception>
-    /// <exception cref="BrokerConnectionException"></exception>
+    /// <param name="groupId">消费者组 ID</param>
+    /// <returns>消费者客户端实例</returns>
+    /// <exception cref="ArgumentNullException">MapEndpointRoute 未初始化</exception>
+    /// <exception cref="BrokerConnectionException">创建消费者失败</exception>
     public IConsumerClient Create(string groupId)
     {
         try
@@ -47,12 +47,12 @@ public class DaprConsumerClientFactory(
     }
 
     /// <summary>
-    ///
+    /// 异步创建 Dapr 消费者客户端（暂未实现）
     /// </summary>
-    /// <param name="groupName"></param>
-    /// <param name="groupConcurrent"></param>
-    /// <returns></returns>
-    /// <exception cref="NotImplementedException"></exception>
+    /// <param name="groupName">消费者组名称</param>
+    /// <param name="groupConcurrent">组并发数</param>
+    /// <returns>消费者客户端实例</returns>
+    /// <exception cref="NotImplementedException">该方法暂未实现</exception>
     public Task<IConsumerClient> CreateAsync(string groupName, byte groupConcurrent)
     {
         throw new NotImplementedException();

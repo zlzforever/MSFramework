@@ -1,3 +1,4 @@
+using System;
 using MicroserviceFramework.Domain;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
@@ -5,15 +6,15 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 namespace MicroserviceFramework.Ef.Extensions;
 
 /// <summary>
-///
+/// 审计字段扩展方法。已由 <c>EntityPropertyConventionStrategy</c> 自动处理，
+/// 实现 ICreation/IModification/IDeletion 的实体会自动获得默认配置。
 /// </summary>
 public static class EntityTypeBuilderExtensions
 {
     /// <summary>
-    /// 设置所有用户审计表
+    /// 设置所有审计字段，已由框架自动配置。
     /// </summary>
-    /// <param name="builder"></param>
-    /// <typeparam name="TEntity"></typeparam>
+    [Obsolete("审计字段已由 EntityPropertyConventionStrategy 自动配置，可安全移除此调用。")]
     public static void ConfigureAuditProperties<TEntity>(this EntityTypeBuilder<TEntity> builder)
         where TEntity : class, ICreation, IModification, IDeletion
     {
@@ -23,42 +24,33 @@ public static class EntityTypeBuilderExtensions
     }
 
     /// <summary>
-    ///
+    /// 设置创建审计字段，已由框架自动配置。
     /// </summary>
-    /// <param name="builder"></param>
-    /// <typeparam name="TEntity"></typeparam>
+    [Obsolete("创建审计字段已由 EntityPropertyConventionStrategy 自动配置，可安全移除此调用。")]
     public static void ConfigureCreation<TEntity>(this EntityTypeBuilder<TEntity> builder)
         where TEntity : class, ICreation
     {
         builder.Property(x => x.CreationTime).UseUnixTime();
         builder.Property(x => x.CreatorId).HasMaxLength(36);
         builder.Property(x => x.CreatorName).HasMaxLength(256);
-
-        // comments: 是否需要索引要由业务方来指定
-        // builder.HasIndex(x => x.CreationTime);
     }
 
     /// <summary>
-    ///
+    /// 设置修改审计字段，已由框架自动配置。
     /// </summary>
-    /// <param name="builder"></param>
-    /// <typeparam name="TEntity"></typeparam>
+    [Obsolete("修改审计字段已由 EntityPropertyConventionStrategy 自动配置，可安全移除此调用。")]
     public static void ConfigureModification<TEntity>(this EntityTypeBuilder<TEntity> builder)
         where TEntity : class, IModification
     {
         builder.Property(x => x.LastModificationTime).UseUnixTime();
         builder.Property(x => x.LastModifierId).HasMaxLength(36);
         builder.Property(x => x.LastModifierName).HasMaxLength(256);
-
-        // comments: 是否需要索引要由业务方来指定
-        // builder.HasIndex(x => x.LastModificationTime);
     }
 
     /// <summary>
-    ///
+    /// 设置删除审计字段，已由框架自动配置。
     /// </summary>
-    /// <param name="builder"></param>
-    /// <typeparam name="TEntity"></typeparam>
+    [Obsolete("删除审计字段已由 EntityPropertyConventionStrategy 自动配置，可安全移除此调用。")]
     public static void ConfigureDeletion<TEntity>(this EntityTypeBuilder<TEntity> builder)
         where TEntity : class, IDeletion
     {
@@ -66,8 +58,5 @@ public static class EntityTypeBuilderExtensions
         builder.Property(x => x.DeletionTime).UseUnixTime();
         builder.Property(x => x.DeleterId).HasMaxLength(36);
         builder.Property(x => x.DeleterName).HasMaxLength(256);
-
-        // comments: 是否需要索引要由业务方来指定
-        // builder.HasIndex(x => x.DeletionTime);
     }
 }

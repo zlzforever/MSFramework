@@ -7,7 +7,7 @@ using Microsoft.Extensions.Logging;
 namespace MicroserviceFramework.Ef.Initializer;
 
 /// <summary>
-///
+/// EF 数据库迁移初始化器，在应用启动时自动执行挂起的迁移
 /// </summary>
 public class EntityFrameworkInitializerBase
     : InitializerBase
@@ -16,10 +16,10 @@ public class EntityFrameworkInitializerBase
     private readonly ILogger<EntityFrameworkInitializerBase> _logger;
 
     /// <summary>
-    ///
+    /// 初始化 EntityFrameworkInitializerBase 实例
     /// </summary>
-    /// <param name="serviceProvider"></param>
-    /// <param name="logger"></param>
+    /// <param name="serviceProvider">服务提供者</param>
+    /// <param name="logger">日志记录器</param>
     public EntityFrameworkInitializerBase(IServiceProvider serviceProvider,
         ILogger<EntityFrameworkInitializerBase> logger)
     {
@@ -29,9 +29,9 @@ public class EntityFrameworkInitializerBase
     }
 
     /// <summary>
-    ///
+    /// 执行数据库迁移初始化，对开启了 AutoMigrationEnabled 的 DbContext 执行挂起迁移
     /// </summary>
-    /// <exception cref="MicroserviceFrameworkException"></exception>
+    /// <exception cref="MicroserviceFrameworkException">数据库迁移失败时抛出</exception>
     public override void Start()
     {
         if (Defaults.IsInTests)

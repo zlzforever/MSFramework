@@ -4,7 +4,7 @@ using System.Text;
 namespace MicroserviceFramework.Runtime;
 
 /// <summary>
-///
+/// 字符串扩展方法
 /// </summary>
 public static class StringExtensions
 {
@@ -23,33 +23,33 @@ public static class StringExtensions
     extension(string value)
     {
         /// <summary>
-        ///
+        /// 判断字符串是否为 null 或空字符串
         /// </summary>
-        /// <returns></returns>
+        /// <returns>如果是 null 或空返回 true</returns>
         public bool IsNullOrEmpty()
         {
             return string.IsNullOrEmpty(value);
         }
 
         /// <summary>
-        ///
+        /// 判断字符串是否为 null 或空白
         /// </summary>
-        /// <returns></returns>
+        /// <returns>如果是 null 或空白返回 true</returns>
         public bool IsNullOrWhiteSpace()
         {
             return string.IsNullOrWhiteSpace(value);
         }
 
         /// <summary>
-        ///
+        /// 将字符串转换为蛇形命名（snake_case）
         /// </summary>
-        /// <returns></returns>
+        /// <returns>蛇形命名字符串</returns>
         public string ToSnakeCase() => ToSeparatedCase(value, '_');
 
         /// <summary>
-        ///
+        /// 将字符串转换为驼峰命名（camelCase）
         /// </summary>
-        /// <returns></returns>
+        /// <returns>驼峰命名字符串</returns>
         public unsafe string ToCamelCase()
         {
             if (string.IsNullOrWhiteSpace(value))

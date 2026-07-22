@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore.Infrastructure;
 namespace MicroserviceFramework.Ef.Extensions;
 
 /// <summary>
-///
+/// 关系型数据库 DbContextOptionsBuilder 扩展方法
 /// </summary>
 public static class RelationalDbContextOptionsBuilderExtensions
 {

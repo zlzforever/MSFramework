@@ -12,7 +12,7 @@ using Serilog.Sinks.Grafana.Loki;
 namespace MicroserviceFramework.Auditing.Loki;
 
 /// <summary>
-///
+///     基于 Loki 的审计日志存储，通过 Serilog 将审计信息发送到 Grafana Loki
 /// </summary>
 public class LokiAuditingStore : IAuditingStore
 {
@@ -51,8 +51,8 @@ public class LokiAuditingStore : IAuditingStore
             .MinimumLevel.Information()
             .Enrich.FromLogContext()
             .WriteTo.GrafanaLoki(options.Uri,
-                new List<LokiLabel> { new() { Key = "application", Value = $"{application}-auditing" } },
-                options.PropertiesAsLabels, options.Credentials)
+                [new() { Key = "application", Value = $"{application}-auditing" }],
+                options.PropertiesAsLabels, credentials: options.Credentials)
             .WriteTo.Async(x => x.File($"{directory}/log.txt", rollingInterval: RollingInterval.Day))
             .CreateLogger();
         var store = new LokiAuditingStore(logger, template, operationTemplate);
@@ -61,10 +61,10 @@ public class LokiAuditingStore : IAuditingStore
     }
 
     /// <summary>
-    ///
+    ///     将审计操作记录写入 Loki，包含操作信息和所有变更实体的属性详情
     /// </summary>
-    /// <param name="auditOperation"></param>
-    /// <returns></returns>
+    /// <param name="auditOperation">审计操作数据</param>
+    /// <returns>异步任务</returns>
     public Task AddAsync(AuditOperation auditOperation)
     {
         if (_logger == null)
@@ -93,7 +93,8 @@ public class LokiAuditingStore : IAuditingStore
             new("UserName", new ScalarValue(auditOperation.CreatorName ?? string.Empty)),
             new("OperationId", new ScalarValue(auditOperation.Id))
         };
-        var auditOperationEvent = new LogEvent(DateTimeOffset.UtcNow, LogEventLevel.Information, null, _operationTemplate,
+        var auditOperationEvent = new LogEvent(DateTimeOffset.UtcNow, LogEventLevel.Information, null,
+            _operationTemplate,
             auditOperationProperties);
         _logger.Write(auditOperationEvent);
 
@@ -123,9 +124,9 @@ public class LokiAuditingStore : IAuditingStore
     }
 
     /// <summary>
-    /// 这方法，不需要做提交，Serilog 有缓存、批次管理
+    ///     提交审计日志（无需操作，Serilog 内部管理缓存和批次）
     /// </summary>
-    /// <returns></returns>
+    /// <returns>异步任务</returns>
     public Task CommitAsync()
     {
         return Task.CompletedTask;

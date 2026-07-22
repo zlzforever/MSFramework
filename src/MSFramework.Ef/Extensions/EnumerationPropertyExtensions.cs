@@ -5,18 +5,18 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 namespace MicroserviceFramework.Ef.Extensions;
 
 /// <summary>
-///
+/// Enumeration 类型映射扩展，将枚举对象映射为数据库 varchar 列
 /// </summary>
 public static class EnumerationPropertyExtensions
 {
     // private static readonly ConcurrentDictionary<Type, ConstructorInfo> ConstructorInfoCache = new();
 
     /// <summary>
-    ///
+    /// 将 Enumeration 子类映射为数据库 varchar 列（已废弃，框架会自动处理）
     /// </summary>
-    /// <param name="builder"></param>
-    /// <typeparam name="TProperty"></typeparam>
-    /// <returns></returns>
+    /// <param name="builder">属性构建器</param>
+    /// <typeparam name="TProperty">Enumeration 子类类型</typeparam>
+    /// <returns>属性构建器</returns>
     [Obsolete("枚举类型会自动设置")]
     public static PropertyBuilder<TProperty> UseEnumeration<TProperty>(this PropertyBuilder<TProperty> builder)
         where TProperty : Enumeration

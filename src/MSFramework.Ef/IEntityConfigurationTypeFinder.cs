@@ -1,72 +1,30 @@
 using System;
 using System.Collections.Generic;
-using System.Reflection;
 
 namespace MicroserviceFramework.Ef;
 
 /// <summary>
-/// 定义实体类配置类型查找器
-/// 全局单例
+/// 实体配置查找器，全局单例。按 DbContext 类型分组返回已注册的实体配置。
 /// </summary>
 public interface IEntityConfigurationTypeFinder
 {
     /// <summary>
-    /// 获取指定上下文类型的实体配置注册信息
+    /// 获取指定 DbContext 下已注册的实体配置。
     /// </summary>
-    /// <param name="dbContextType">数据上下文类型</param>
-    /// <returns></returns>
-    IEnumerable<EntityTypeConfigurationMetadata> GetEntityTypeConfigurations(Type dbContextType);
+    IEnumerable<IEntityTypeConfiguration> GetEntityTypeConfigurations(Type dbContextType);
 
     /// <summary>
-    /// 获取 实体类所属的数据上下文类
+    /// 获取指定实体所属的 DbContext 类型。
     /// </summary>
-    /// <param name="entityType">实体类型</param>
-    /// <returns>数据上下文类型</returns>
     Type GetDbContextTypeForEntity(Type entityType);
 
     /// <summary>
-    ///
+    /// 获取所有已注册的 DbContext 类型。
     /// </summary>
-    /// <returns></returns>
     IEnumerable<Type> GetAllDbContextTypes();
 
     /// <summary>
-    /// 判断实体有无配置到 DbContext
+    /// 判断指定实体类型是否有注册到 DbContext。
     /// </summary>
-    /// <returns></returns>
     bool HasDbContextForEntity<T>();
-}
-
-/// <summary>
-///
-/// </summary>
-/// <param name="entityType"></param>
-/// <param name="configureMethodInfo"></param>
-/// <param name="createEntityTypeBuilderMethod"></param>
-/// <param name="entityTypeConfiguration"></param>
-public struct EntityTypeConfigurationMetadata(
-    Type entityType,
-    MethodInfo configureMethodInfo,
-    MethodInfo createEntityTypeBuilderMethod,
-    IEntityTypeConfiguration entityTypeConfiguration)
-{
-    /// <summary>
-    ///
-    /// </summary>
-    public readonly Type EntityType = entityType;
-
-    /// <summary>
-    ///
-    /// </summary>
-    public readonly MethodInfo ConfigureMethodInfo = configureMethodInfo;
-
-    /// <summary>
-    ///
-    /// </summary>
-    public readonly MethodInfo CreateEntityTypeBuilderMethod = createEntityTypeBuilderMethod;
-
-    /// <summary>
-    ///
-    /// </summary>
-    public readonly IEntityTypeConfiguration EntityTypeConfiguration = entityTypeConfiguration;
 }

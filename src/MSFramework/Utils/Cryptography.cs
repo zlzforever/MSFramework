@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 namespace MicroserviceFramework.Utils;
 
 /// <summary>
-///
+/// 加密解密工具类，提供 MD5/SHA1/SHA256/SHA512 哈希和 AES 加解密
 /// </summary>
 public static class Cryptography
 {
@@ -25,10 +25,10 @@ public static class Cryptography
     }
 
     /// <summary>
-    ///
+    /// 计算字节数组的 MD5 哈希值，返回大写十六进制字符串
     /// </summary>
-    /// <param name="data"></param>
-    /// <returns></returns>
+    /// <param name="data">待计算的字节数组</param>
+    /// <returns>MD5 哈希值（大写十六进制）</returns>
     public static string ComputeMD5(byte[] data)
     {
         var bytes = MD5.HashData(data);
@@ -36,10 +36,10 @@ public static class Cryptography
     }
 
     /// <summary>
-    ///
+    /// 异步计算流的 MD5 哈希值，返回大写十六进制字符串
     /// </summary>
-    /// <param name="stream"></param>
-    /// <returns></returns>
+    /// <param name="stream">待计算的流</param>
+    /// <returns>MD5 哈希值（大写十六进制）</returns>
     public static async Task<string> ComputeMD5Async(Stream stream)
     {
         var bytes = await MD5.HashDataAsync(stream);
@@ -107,12 +107,12 @@ public static class Cryptography
     }
 
     /// <summary>
-    ///
+    /// 根据密钥创建 AES 加密算法实例
     /// </summary>
-    /// <param name="key"></param>
-    /// <param name="cipherMode"></param>
-    /// <param name="paddingMode"></param>
-    /// <returns></returns>
+    /// <param name="key">密钥字符串（UTF-8 编码）</param>
+    /// <param name="cipherMode">加密模式，默认 ECB</param>
+    /// <param name="paddingMode">填充模式，默认 PKCS7</param>
+    /// <returns>AES 加密器实例</returns>
     public static Aes CreateAes(string key, CipherMode cipherMode = CipherMode.ECB,
         PaddingMode paddingMode = PaddingMode.PKCS7)
     {
@@ -125,11 +125,11 @@ public static class Cryptography
     }
 
     /// <summary>
-    ///
+    /// 使用指定的 AES 实例解密密文
     /// </summary>
-    /// <param name="aes"></param>
-    /// <param name="text"></param>
-    /// <returns></returns>
+    /// <param name="aes">AES 加密器实例</param>
+    /// <param name="text">Base64 编码的密文</param>
+    /// <returns>解密后的字节数组</returns>
     public static byte[] AesDecrypt(Aes aes, string text)
     {
         var toEncryptArray = Convert.FromBase64String(text);

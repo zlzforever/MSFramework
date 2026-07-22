@@ -14,9 +14,9 @@ public abstract class BaseTest
 
     protected BaseTest()
     {
-        if (!Directory.Exists(Defaults.OSSDirectory))
+        if (!Directory.Exists(Defaults.LocalOSSDirectory))
         {
-            Directory.CreateDirectory(Defaults.OSSDirectory);
+            Directory.CreateDirectory(Defaults.LocalOSSDirectory);
         }
 
         // Arrange

@@ -6,15 +6,15 @@ using Microsoft.Extensions.Options;
 namespace MicroserviceFramework.Auditing.Loki;
 
 /// <summary>
-///
+///     Loki 审计的依赖注入扩展方法
 /// </summary>
 public static class ServiceCollectionExtensions
 {
     /// <summary>
-    ///
+    ///     添加 Loki 审计日志存储到服务集合（已弃用，推荐使用 PostgreSQL JSONB 存储）
     /// </summary>
-    /// <param name="services"></param>
-    /// <returns></returns>
+    /// <param name="services">服务集合</param>
+    /// <returns>服务集合</returns>
     [Obsolete("不方便创建索引， 因此考虑使用 PG 存 JSONB 为好")]
     public static IServiceCollection AddLokiAuditing(this IServiceCollection services)
     {

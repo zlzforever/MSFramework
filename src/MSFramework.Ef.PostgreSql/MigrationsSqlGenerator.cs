@@ -12,10 +12,10 @@
 // namespace MicroserviceFramework.Ef.PostgreSql;
 //
 // /// <summary>
-// ///
+// /// PostgreSQL 迁移 SQL 生成器，支持移除外键等自定义迁移行为
 // /// </summary>
-// /// <param name="dependencies"></param>
-// /// <param name="npgsqlSingletonOptions"></param>
+// /// <param name="dependencies">迁移 SQL 生成器依赖</param>
+// /// <param name="npgsqlSingletonOptions">Npgsql 单例选项</param>
 // public class MigrationsSqlGenerator(
 //     MigrationsSqlGeneratorDependencies dependencies,
 // #pragma warning disable EF1001
@@ -24,16 +24,16 @@
 //     : NpgsqlMigrationsSqlGenerator(dependencies, npgsqlSingletonOptions)
 // {
 //     /// <summary>
-//     ///
+//     /// 是否在生成建表脚本时跳过外键约束
 //     /// </summary>
 //     public static bool RemoveForeignKey;
 //
 //     /// <summary>
-//     ///
+//     /// 重写迁移操作生成逻辑，根据 RemoveForeignKey 配置跳过外键生成
 //     /// </summary>
-//     /// <param name="operation"></param>
-//     /// <param name="model"></param>
-//     /// <param name="builder"></param>
+//     /// <param name="operation">迁移操作</param>
+//     /// <param name="model">EF Core 模型</param>
+//     /// <param name="builder">迁移命令列表构建器</param>
 //     protected override void Generate(
 //         MigrationOperation operation,
 //         IModel model,

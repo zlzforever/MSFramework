@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Threading;
 using Microsoft.Extensions.DependencyModel;
 
 namespace MicroserviceFramework.Utils;
@@ -15,7 +16,7 @@ public static class Runtime
 {
     private static FrozenSet<Assembly> _assemblies;
     private static FrozenSet<Type> _types;
-    private static readonly object Locker = new();
+    private static readonly Lock Locker = new();
 
     /// <summary>
     /// 请在 AddMicroserviceFramework 前添加前缀
@@ -23,10 +24,13 @@ public static class Runtime
     public static readonly HashSet<string> StartsWith = ["MSFramework"];
 
     /// <summary>
-    ///
+    /// 排除的程序集前缀集合，这些程序集不会被扫描加载
     /// </summary>
     public static readonly HashSet<string> ExcludeWith = new();
 
+    /// <summary>
+    /// 加载所有符合前缀匹配的业务程序集，初始化程序集和类型缓存。
+    /// </summary>
     internal static void Load()
     {
         if (_assemblies != null)
@@ -37,7 +41,7 @@ public static class Runtime
         lock (Locker)
         {
             var assemblies = new List<Assembly>();
-            var types = new List<Type>();
+            var types = new HashSet<Type>();
             // 分析器不会输出程序集文件
             var analyzerAssemblyList = new[] { "MSFramework.Analyzers", "MSFramework.Ef.Analyzers" };
             if (DependencyContext.Default != null)
@@ -146,9 +150,9 @@ public static class Runtime
     }
 
     /// <summary>
-    ///
+    /// 获取所有已加载的程序集类型
     /// </summary>
-    /// <returns></returns>
+    /// <returns>所有已加载的程序集类型集合</returns>
     public static FrozenSet<Type> GetAllTypes()
     {
         return _types;

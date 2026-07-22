@@ -7,10 +7,10 @@ using Microsoft.EntityFrameworkCore;
 namespace MicroserviceFramework.Ef.Repositories;
 
 /// <summary>
-///
+/// EF Core 仓储基类，提供聚合根的增删改查基础实现
 /// </summary>
-/// <typeparam name="TEntity"></typeparam>
-/// <typeparam name="TKey"></typeparam>
+/// <typeparam name="TEntity">聚合根实体类型</typeparam>
+/// <typeparam name="TKey">实体主键类型</typeparam>
 public class EfRepository<TEntity, TKey> : IRepository<TEntity, TKey>, IEfRepository
     where TEntity : class, IAggregateRoot<TKey> where TKey : IEquatable<TKey>
 {
@@ -18,7 +18,7 @@ public class EfRepository<TEntity, TKey> : IRepository<TEntity, TKey>, IEfReposi
     private readonly DbContextBase _dbContext;
 
     /// <summary>
-    ///
+    /// 获取可查询的实体集合，默认包含第一级导航属性
     /// </summary>
     protected virtual IQueryable<TEntity> Store
     {
@@ -37,24 +37,24 @@ public class EfRepository<TEntity, TKey> : IRepository<TEntity, TKey>, IEfReposi
     }
 
     /// <summary>
-    ///
+    /// 获取原始 DbSet 实例
     /// </summary>
     protected DbSet<TEntity> DbSet => _dbSet;
 
     /// <summary>
-    ///
+    /// 获取当前 DbContext 实例
     /// </summary>
     public DbContext DbContext => _dbContext;
 
     /// <summary>
-    ///
+    /// 获取或设置是否启用查询拆分行为，null 时使用全局设置
     /// </summary>
     public bool? UseQuerySplittingBehavior { get; init; }
 
     /// <summary>
-    ///
+    /// 初始化 EfRepository 实例
     /// </summary>
-    /// <param name="dbContextFactory"></param>
+    /// <param name="dbContextFactory">数据库上下文工厂</param>
     public EfRepository(DbContextFactory dbContextFactory)
     {
         _dbContext = dbContextFactory.GetDbContext<TEntity>();
@@ -80,57 +80,57 @@ public class EfRepository<TEntity, TKey> : IRepository<TEntity, TKey>, IEfReposi
     }
 
     /// <summary>
-    ///
+    /// 根据主键查找实体
     /// </summary>
-    /// <param name="id"></param>
-    /// <returns></returns>
+    /// <param name="id">实体主键</param>
+    /// <returns>匹配的实体，未找到则返回 null</returns>
     public virtual TEntity Find(TKey id)
     {
         return Store.FirstOrDefault(x => x.Id.Equals(id));
     }
 
     /// <summary>
-    ///
+    /// 异步根据主键查找实体
     /// </summary>
-    /// <param name="id"></param>
-    /// <returns></returns>
+    /// <param name="id">实体主键</param>
+    /// <returns>匹配的实体，未找到则返回 null</returns>
     public virtual async Task<TEntity> FindAsync(TKey id)
     {
         return await Store.FirstOrDefaultAsync(x => x.Id.Equals(id));
     }
 
     /// <summary>
-    ///
+    /// 添加新实体到仓储
     /// </summary>
-    /// <param name="entity"></param>
+    /// <param name="entity">要添加的实体</param>
     public virtual void Add(TEntity entity)
     {
         _dbSet.Add(entity);
     }
 
     /// <summary>
-    ///
+    /// 异步添加新实体到仓储
     /// </summary>
-    /// <param name="entity"></param>
+    /// <param name="entity">要添加的实体</param>
     public virtual async Task AddAsync(TEntity entity)
     {
         await _dbSet.AddAsync(entity);
     }
 
     /// <summary>
-    ///
+    /// 从仓储中删除实体
     /// </summary>
-    /// <param name="entity"></param>
+    /// <param name="entity">要删除的实体</param>
     public virtual void Delete(TEntity entity)
     {
         _dbSet.Remove(entity);
     }
 
     /// <summary>
-    ///
+    /// 异步从仓储中删除实体
     /// </summary>
-    /// <param name="entity"></param>
-    /// <returns></returns>
+    /// <param name="entity">要删除的实体</param>
+    /// <returns>异步任务</returns>
     public virtual Task DeleteAsync(TEntity entity)
     {
         Delete(entity);
@@ -138,9 +138,9 @@ public class EfRepository<TEntity, TKey> : IRepository<TEntity, TKey>, IEfReposi
     }
 
     /// <summary>
-    ///
+    /// 根据主键删除实体
     /// </summary>
-    /// <param name="id"></param>
+    /// <param name="id">要删除的实体主键</param>
     public virtual void Delete(TKey id)
     {
         var entity = Find(id);
@@ -151,9 +151,9 @@ public class EfRepository<TEntity, TKey> : IRepository<TEntity, TKey>, IEfReposi
     }
 
     /// <summary>
-    ///
+    /// 异步根据主键删除实体
     /// </summary>
-    /// <param name="id"></param>
+    /// <param name="id">要删除的实体主键</param>
     public virtual async Task DeleteAsync(TKey id)
     {
         var entity = await FindAsync(id);
@@ -200,9 +200,9 @@ public class EfRepository<TEntity, TKey> : IRepository<TEntity, TKey>, IEfReposi
     // }
 
     /// <summary>
-    ///
+    /// 获取原始 DbSet 实例，用于高级查询操作
     /// </summary>
-    /// <returns></returns>
+    /// <returns>DbSet 实例</returns>
     public DbSet<TEntity> GetDbSet()
     {
         return _dbSet;

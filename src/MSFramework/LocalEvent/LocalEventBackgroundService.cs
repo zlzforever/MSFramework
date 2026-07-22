@@ -13,12 +13,12 @@ using MongoDB.Bson;
 namespace MicroserviceFramework.LocalEvent;
 
 /// <summary>
-///
+/// 本地事件后台服务，从管道中消费事件并分发到注册的处理器。
 /// </summary>
-/// <param name="serviceProvider"></param>
-/// <param name="logger"></param>
-/// <param name="descriptorStore"></param>
-/// <param name="options"></param>
+/// <param name="serviceProvider">服务提供程序</param>
+/// <param name="logger">日志记录器</param>
+/// <param name="descriptorStore">事件处理器描述符存储</param>
+/// <param name="options">本地事件配置</param>
 public class LocalEventBackgroundService(
     IServiceProvider serviceProvider,
     ILogger<LocalEventBackgroundService> logger,
@@ -27,10 +27,10 @@ public class LocalEventBackgroundService(
     : BackgroundService
 {
     /// <summary>
-    ///
+    /// 后台执行循环，持续消费事件管道中的事件并分发处理。
     /// </summary>
-    /// <param name="stoppingToken"></param>
-    /// <returns></returns>
+    /// <param name="stoppingToken">取消令牌</param>
+    /// <returns>表示异步操作的任务</returns>
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
         logger.LogInformation("本地事件服务启动");
@@ -111,10 +111,10 @@ public class LocalEventBackgroundService(
     }
 
     /// <summary>
-    ///
+    /// 停止后台事件服务，发送关闭信号。
     /// </summary>
-    /// <param name="cancellationToken"></param>
-    /// <returns></returns>
+    /// <param name="cancellationToken">取消令牌</param>
+    /// <returns>表示异步操作的任务</returns>
     public override async Task StopAsync(CancellationToken cancellationToken)
     {
         logger.LogDebug("开始关闭本地事件服务");

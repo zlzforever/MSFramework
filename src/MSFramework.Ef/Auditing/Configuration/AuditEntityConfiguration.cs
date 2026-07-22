@@ -3,11 +3,9 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace MicroserviceFramework.Ef.Auditing.Configuration;
 
-internal class AuditEntityConfiguration
+internal static class AuditEntityConfiguration
 {
-    internal static readonly AuditEntityConfiguration Instance = new();
-
-    public void Configure(EntityTypeBuilder<AuditEntity> builder)
+    public static void Configure(EntityTypeBuilder<AuditEntity> builder)
     {
         builder.HasMany(x => x.Properties).WithOne(x => x.Entity);
 

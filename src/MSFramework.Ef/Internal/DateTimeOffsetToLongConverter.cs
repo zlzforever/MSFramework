@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace MicroserviceFramework.Ef.Internal;
 
 /// <summary>
-///
+/// DateTimeOffset 到 long 的转换器，将日期时间存储为 Unix 时间戳（秒或毫秒）
 /// </summary>
 public class DateTimeOffsetToLongConverter(bool milliseconds = false)
     : ValueConverter<DateTimeOffset, long>(ToLong(milliseconds), ToDateTimeOffset(milliseconds))
@@ -20,7 +20,7 @@ public class DateTimeOffsetToLongConverter(bool milliseconds = false)
 }
 
 /// <summary>
-///
+/// 可空 DateTimeOffset 到可空 long 的转换器，将可空日期时间存储为 Unix 时间戳（秒或毫秒）
 /// </summary>
 public class NullableDateTimeOffsetToLongConverter(bool milliseconds = false)
     : ValueConverter<DateTimeOffset?, long?>(ToLong(milliseconds), ToDateTimeOffset(milliseconds))

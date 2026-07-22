@@ -27,13 +27,13 @@ dotnet test tests/MSFramework.Tests/MSFramework.Tests.csproj --filter "FullyQual
 dotnet test tests/MSFramework.Tests/MSFramework.Tests.csproj -v n
 
 # EF Core migrations (from project root)
-dotnet ef migrations add Init -s src/Ordering.API -c OrderingContext -p src/Ordering.Infrastructure
+dotnet ef migrations add Init -s src/Sample/Ordering.API -c OrderingContext -p src/Sample/Ordering.Infrastructure
 
 # Generate SQL migration script
-dotnet ef migrations script -s src/Ordering.API -c OrderingContext -p src/Ordering.Infrastructure
+dotnet ef migrations script -s src/Sample/Ordering.API -c OrderingContext -p src/Sample/Ordering.Infrastructure
 
 # Optimize EF Core compiled models
-dotnet ef dbcontext optimize -s src/Ordering.API -c OrderingContext -p src/Ordering.Infrastructure -o CompileModels -n Ordering.Infrastructure.CompileModels
+dotnet ef dbcontext optimize -s src/Sample/Ordering.API -c OrderingContext -p src/Sample/Ordering.Infrastructure -o CompileModels -n Ordering.Infrastructure.CompileModels
 
 # Pack NuGet packages
 dotnet pack --configuration Release
@@ -41,26 +41,38 @@ dotnet pack --configuration Release
 
 ## Project Structure
 
-The solution follows DDD (Domain-Driven Design) layered architecture:
+The solution follows DDD (Domain-Driven Design) layered architecture.
+Framework projects (NuGet packages) under `src/`, sample code under `src/Sample/`.
 
 ```
 src/
-├── MSFramework/                    # Core framework (domain primitives, utilities)
-├── MSFramework.AspNetCore/         # ASP.NET Core integration
-├── MSFramework.Ef/                 # EF Core repository implementations
+├── MSFramework/                    # Core framework (domain primitives, utilities, mediator)
+│   ├── Common/                     # ApiResult, ApiResultWithErrors (moved from AspNetCore)
+│   ├── Domain/                     # Aggregate roots, entities, value objects, events
+│   ├── Mediator/                   # CQRS mediator (Request, IMediator, IRequestHandler)
+│   ├── LocalEvent/                 # In-process event bus
+│   ├── Extensions/                 # DI markers (ITransientDependency, etc.)
+│   └── ...
+├── MSFramework.AspNetCore/         # ASP.NET Core integration (filters, response wrapping)
+├── MSFramework.Ef/                 # EF Core (DbContextBase, EfRepository, extension methods)
+│                                   #   also now contains DesignTimeDbContextFactoryBase
 ├── MSFramework.Ef.SqlServer/       # SQL Server provider
 ├── MSFramework.Ef.MySql/           # MySQL provider
 ├── MSFramework.Ef.PostgreSql/      # PostgreSQL provider
+├── MSFramework.Ef.Design/          # EF design-time utilities (mostly moved to MSFramework.Ef)
+├── MSFramework.Analyzers/          # Source Generator: auto-generate repository interfaces
+├── MSFramework.Ef.Analyzers/       # Source Generator: auto-generate repository implementations
 ├── MSFramework.AutoMapper/         # AutoMapper integration
 ├── MSFramework.Serialization.Newtonsoft/  # JSON serialization
-├── Ordering.Domain/                # Domain layer (entities, value objects, domain events)
-├── Ordering.Application/           # Application layer (commands, queries, handlers)
-├── Ordering.Infrastructure/        # Infrastructure layer (repositories, DbContext)
-└── Ordering.API/                   # API layer (controllers)
+├── MSFramework.Auditing.Loki/      # Loki audit log sink
+├── DotNetCore.CAP.Dapr/            # CAP + Dapr integration
+└── Sample/                         # Sample projects (moved from src/Ordering.*)
+    └── Ordering.{Domain,Application,Infrastructure,API}/
 
 tests/
-├── MSFramework.Tests/              # Unit tests
-└── MSFramework.AspNetCore.Test/    # Integration tests
+├── MSFramework.Tests/              # Unit tests (32 test files)
+├── MSFramework.AspNetCore.Test/    # Integration tests
+└── Benchmark/                      # Performance benchmarks
 ```
 
 ## Code Style Guidelines

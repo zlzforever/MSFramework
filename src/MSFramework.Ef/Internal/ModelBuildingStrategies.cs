@@ -49,7 +49,7 @@ internal sealed class RegisterEntityConfigurationsStrategy : IModelBuildingStrat
         var configurations = context.ConfigFinder.GetEntityTypeConfigurations(context.DbContextType);
         foreach (var config in configurations)
         {
-            config.EntityTypeConfiguration.Configure(context.ModelBuilder);
+            config.Configure(context.ModelBuilder);
         }
     }
 }
@@ -61,7 +61,7 @@ internal sealed class RegisterEntityConfigurationsStrategy : IModelBuildingStrat
 /// <summary>
 /// 遍历所有非 Owned 实体类型，应用表名规则（SnakeCase / 前缀）和软删除全局过滤器。
 /// </summary>
-internal sealed class EntityTableConfigurationStrategy : IModelBuildingStrategy
+internal sealed class EntityTableConventionStrategy : IModelBuildingStrategy
 {
     public void Apply(ModelBuildingContext context)
     {
@@ -127,7 +127,7 @@ internal sealed class EntityTableConfigurationStrategy : IModelBuildingStrategy
 ///   2. 列名转换（SnakeCase）
 ///   3. 列类型自动设置（ObjectId / Guid / Enumeration 的 ValueConverter 和 ColumnType）
 /// </summary>
-internal sealed class EntityPropertyConfigurationStrategy : IModelBuildingStrategy
+internal sealed class EntityPropertyConventionStrategy : IModelBuildingStrategy
 {
     public void Apply(ModelBuildingContext context)
     {
@@ -136,10 +136,29 @@ internal sealed class EntityPropertyConfigurationStrategy : IModelBuildingStrate
         foreach (var entityType in context.ModelBuilder.Model.GetEntityTypes())
         {
             var hasOptimisticLock = Defaults.Types.OptimisticLock.IsAssignableFrom(entityType.ClrType);
+            var hasCreation = typeof(ICreation).IsAssignableFrom(entityType.ClrType);
+            var hasModification = typeof(IModification).IsAssignableFrom(entityType.ClrType);
+            var hasDeletion = typeof(IDeletion).IsAssignableFrom(entityType.ClrType);
 
             foreach (var property in entityType.GetProperties())
             {
                 ApplyOptimisticLock(property, hasOptimisticLock);
+
+                if (hasCreation)
+                {
+                    ApplyCreationDefaults(property);
+                }
+
+                if (hasModification)
+                {
+                    ApplyModificationDefaults(property);
+                }
+
+                if (hasDeletion)
+                {
+                    ApplyDeletionDefaults(property);
+                }
+
                 ApplyColumnName(property, entityType, context.Settings);
                 ApplyColumnType(property, enumerationConverterType);
             }
@@ -268,5 +287,103 @@ internal sealed class EntityPropertyConfigurationStrategy : IModelBuildingStrate
         var converterType = enumerationConverterType.MakeGenericType(property.ClrType);
         var converter = (ValueConverter)Activator.CreateInstance(converterType);
         property.SetValueConverter(converter);
+    }
+
+    private static void ApplyCreationDefaults(IMutableProperty property)
+    {
+        switch (property.Name)
+        {
+            case nameof(ICreation.CreationTime):
+                if (property.GetValueConverter() == null)
+                {
+                    SetUnixTimeDefaults(property);
+                }
+
+                break;
+            case nameof(ICreation.CreatorId):
+                if (property.GetMaxLength() == null)
+                {
+                    property.SetMaxLength(36);
+                }
+
+                break;
+            case nameof(ICreation.CreatorName):
+                if (property.GetMaxLength() == null)
+                {
+                    property.SetMaxLength(256);
+                }
+
+                break;
+        }
+    }
+
+    private static void ApplyModificationDefaults(IMutableProperty property)
+    {
+        switch (property.Name)
+        {
+            case nameof(IModification.LastModificationTime):
+                if (property.GetValueConverter() == null)
+                {
+                    SetUnixTimeDefaults(property);
+                }
+
+                break;
+            case nameof(IModification.LastModifierId):
+                if (property.GetMaxLength() == null)
+                {
+                    property.SetMaxLength(36);
+                }
+
+                break;
+            case nameof(IModification.LastModifierName):
+                if (property.GetMaxLength() == null)
+                {
+                    property.SetMaxLength(256);
+                }
+
+                break;
+        }
+    }
+
+    private static void ApplyDeletionDefaults(IMutableProperty property)
+    {
+        switch (property.Name)
+        {
+            case nameof(IDeletion.IsDeleted):
+                if (property.GetDefaultValue() == null)
+                {
+                    property.SetDefaultValue(false);
+                }
+
+                break;
+            case nameof(IDeletion.DeletionTime):
+                if (property.GetValueConverter() == null)
+                {
+                    SetUnixTimeDefaults(property);
+                }
+
+                break;
+            case nameof(IDeletion.DeleterId):
+                if (property.GetMaxLength() == null)
+                {
+                    property.SetMaxLength(36);
+                }
+
+                break;
+            case nameof(IDeletion.DeleterName):
+                if (property.GetMaxLength() == null)
+                {
+                    property.SetMaxLength(256);
+                }
+
+                break;
+        }
+    }
+
+    private static void SetUnixTimeDefaults(IMutableProperty property)
+    {
+        property.SetValueConverter(new NullableDateTimeOffsetToLongConverter());
+        property.SetColumnType("bigint");
+        property.IsNullable = true;
     }
 }

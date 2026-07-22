@@ -6,10 +6,17 @@ using Microsoft.Extensions.Logging;
 
 namespace MicroserviceFramework.AspNetCore.Filters;
 
+/// <summary>
+/// 工作单元过滤器，Action 成功执行后自动提交 <see cref="IUnitOfWork"/>。
+/// 可通过 <see cref="NoUnitOfWork"/> Attribute 跳过提交。
+/// </summary>
 internal class UnitOfWork(ILogger<UnitOfWork> logger) : IAsyncActionFilter, IOrderedFilter
 {
     private readonly ILogger _logger = logger;
 
+    /// <summary>
+    /// Action 执行后若无异常且未标记 <see cref="NoUnitOfWork"/>，自动提交工作单元。
+    /// </summary>
     public async Task OnActionExecutionAsync(ActionExecutingContext context, ActionExecutionDelegate next)
     {
         _logger.LogDebug("开始执行工作单元过滤器");

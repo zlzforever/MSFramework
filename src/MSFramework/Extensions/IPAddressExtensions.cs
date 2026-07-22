@@ -4,15 +4,15 @@ using System.Net.Sockets;
 namespace MicroserviceFramework.Extensions;
 
 /// <summary>
-///
+/// <see cref="IPAddress"/> 扩展方法
 /// </summary>
 public static class IPAddressExtensions
 {
     /// <summary>
-    ///
+    /// 判断 IP 地址是否为内网地址（10.x, 172.16-31.x, 192.168.x 或回环地址）
     /// </summary>
-    /// <param name="address"></param>
-    /// <returns></returns>
+    /// <param name="address">待判断的 IP 地址</param>
+    /// <returns>true 表示内网地址</returns>
     public static bool IsPrivate(this IPAddress address)
     {
         if (IPAddress.IsLoopback(address))

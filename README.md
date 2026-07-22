@@ -720,10 +720,11 @@ public class MyService
 
 ```bash
 # 添加迁移
-dotnet ef migrations add Init -s src/Ordering.API -c OrderingContext -p src/Ordering.Infrastructure
+dotnet ef migrations add Init -s src/Sample/Ordering.API -c OrderingContext -p src/Sample/Ordering.Infrastructure
+dotnet ef migrations add Test -s src/Sample/Ordering.API -c OrderingContext -p src/Sample/Ordering.Infrastructure
 
 # 生成 SQL 脚本
-dotnet ef migrations script -s src/Ordering.API -c OrderingContext -p src/Ordering.Infrastructure
+dotnet ef migrations script -s src/Sample/Ordering.API -c OrderingContext -p src/Sample/Ordering.Infrastructure
 ```
 
 ### Q3: 如何使用静态模型优化启动？

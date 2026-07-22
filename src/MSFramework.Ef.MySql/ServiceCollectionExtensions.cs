@@ -1,11 +1,11 @@
 using MicroserviceFramework.Ef.Extensions;
 using Microsoft.EntityFrameworkCore.Infrastructure;
-using Pomelo.EntityFrameworkCore.MySql.Infrastructure.Internal;
+using Microting.EntityFrameworkCore.MySql.Infrastructure.Internal;
 
 namespace MicroserviceFramework.Ef.MySql;
 
 /// <summary>
-///
+/// MySQL 数据库提供程序的 ServiceCollection 扩展方法
 /// </summary>
 public static class ServiceCollectionExtensions
 {
@@ -51,10 +51,10 @@ public static class ServiceCollectionExtensions
     // }
 
     /// <summary>
-    ///
+    /// 从 DbContextSettings 加载配置并应用到 MySqlDbContextOptionsBuilder
     /// </summary>
-    /// <param name="builder"></param>
-    /// <param name="settings"></param>
+    /// <param name="builder">MySQL 数据库上下文选项构建器</param>
+    /// <param name="settings">数据库上下文配置</param>
     public static void Load(this MySqlDbContextOptionsBuilder builder,
         DbContextSettings settings)
     {
@@ -65,73 +65,4 @@ public static class ServiceCollectionExtensions
 #pragma warning restore EF1001
         // 替换 MigrationsModelDiffer 服务
     }
-
-    // public static EntityFrameworkBuilder AddMySql<TDbContext>(
-    //     this EntityFrameworkBuilder builder, IConfiguration configuration,
-    //     Action<DbContextOptionsBuilder, MySqlDbContextOptionsBuilder> mySqlOptionsAction = null)
-    //     where TDbContext : DbContextBase
-    // {
-    //     builder.Services.AddMySql<TDbContext>(configuration, mySqlOptionsAction);
-    //     return builder;
-    // }
-    //
-    // public static EntityFrameworkBuilder AddMySql<TDbContext1, TDbContext2>(
-    //     this EntityFrameworkBuilder builder, IConfiguration configuration,
-    //     Action<DbContextOptionsBuilder, MySqlDbContextOptionsBuilder> mySqlOptionsAction = null)
-    //     where TDbContext1 : DbContextBase
-    //     where TDbContext2 : DbContextBase
-    // {
-    //     builder.Services.AddMySql<TDbContext1>(configuration, mySqlOptionsAction);
-    //     builder.Services.AddMySql<TDbContext2>(configuration, mySqlOptionsAction);
-    //     return builder;
-    // }
-    //
-    // public static EntityFrameworkBuilder AddMySql<TDbContext1, TDbContext2, TDbContext3>(
-    //     this EntityFrameworkBuilder builder, IConfiguration configuration,
-    //     Action<DbContextOptionsBuilder, MySqlDbContextOptionsBuilder> mySqlOptionsAction = null)
-    //     where TDbContext1 : DbContextBase
-    //     where TDbContext2 : DbContextBase
-    //     where TDbContext3 : DbContextBase
-    // {
-    //     builder.Services.AddMySql<TDbContext1>(configuration, mySqlOptionsAction);
-    //     builder.Services.AddMySql<TDbContext2>(configuration, mySqlOptionsAction);
-    //     builder.Services.AddMySql<TDbContext3>(configuration, mySqlOptionsAction);
-    //
-    //     return builder;
-    // }
-
-    // public static IServiceCollection AddMySql<TDbContext>(
-    //     this IServiceCollection services, IConfiguration configuration,
-    //     Action<DbContextOptionsBuilder, MySqlDbContextOptionsBuilder> mySqlOptionsAction = null)
-    //     where TDbContext : DbContextBase
-    // {
-    //     var action = new Action<DbContextOptionsBuilder>(x =>
-    //     {
-    //         var dbContextType = typeof(TDbContext);
-    //         var optionDict = configuration.GetSection("DbContexts").Get<DbContextSettingsDict>();
-    //         var option = optionDict.Get(dbContextType);
-    //
-    //         var entryAssemblyName = !string.IsNullOrWhiteSpace(option.MigrationsAssembly)
-    //             ? option.MigrationsAssembly
-    //             : dbContextType.Assembly.GetName().Name;
-    //
-    //         x.UseMySql(option.ConnectionString, ServerVersion.AutoDetect(option.ConnectionString), options =>
-    //         {
-    //             var migrationsHistoryTable = string.IsNullOrWhiteSpace(option.TablePrefix)
-    //                 ? EfUtilities.MigrationsHistoryTable
-    //                 : $"{option.TablePrefix}migrations_history";
-    //
-    //             options.MigrationsHistoryTable(migrationsHistoryTable);
-    //             options.MaxBatchSize(option.MaxBatchSize);
-    //             options.MigrationsAssembly(entryAssemblyName);
-    //             options.SchemaBehavior(MySqlSchemaBehavior.Translate, (schema, table) => $"{schema}_{table}");
-    //             options.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery);
-    //
-    //             // 不管默认行为是怎么样的， 代码配置是保底的
-    //             mySqlOptionsAction?.Invoke(x, options);
-    //         });
-    //     });
-    //     services.AddDbContext<TDbContext>(action);
-    //     return services;
-    // }
 }

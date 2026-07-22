@@ -20,9 +20,9 @@ namespace MicroserviceFramework.AspNetCore;
 public class DaprSecurityMiddleware(RequestDelegate next, ILogger<DaprSecurityMiddleware> logger)
 {
     /// <summary>
-    ///
+    /// 执行中间件，验证 Dapr API 令牌
     /// </summary>
-    /// <param name="context"></param>
+    /// <param name="context">HTTP 上下文</param>
     public async Task InvokeAsync(HttpContext context)
     {
         var endpoint = context.Features.Get<IEndpointFeature>()?.Endpoint;

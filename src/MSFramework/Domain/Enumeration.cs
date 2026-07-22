@@ -21,9 +21,9 @@ public abstract class Enumeration(string id, string name)
     public string Name { get; } = name;
 
     /// <summary>
-    ///
+    /// 返回枚举标识的字符串表示
     /// </summary>
-    /// <returns></returns>
+    /// <returns>枚举标识</returns>
     public override string ToString() => Id;
 
     /// <summary>
@@ -50,10 +50,10 @@ public abstract class Enumeration(string id, string name)
     }
 
     /// <summary>
-    ///
+    /// 判断两个枚举是否相等（基于类型和标识比较）
     /// </summary>
-    /// <param name="obj"></param>
-    /// <returns></returns>
+    /// <param name="obj">待比较的枚举对象</param>
+    /// <returns>如果相等返回 true</returns>
     public override bool Equals(object obj)
     {
         var otherValue = obj as Enumeration;
@@ -68,27 +68,27 @@ public abstract class Enumeration(string id, string name)
     }
 
     /// <summary>
-    ///
+    /// 判断两个枚举是否相等
     /// </summary>
-    /// <param name="a"></param>
-    /// <param name="b"></param>
-    /// <returns></returns>
+    /// <param name="a">左侧枚举</param>
+    /// <param name="b">右侧枚举</param>
+    /// <returns>如果相等返回 true</returns>
     public static bool operator ==(Enumeration a, Enumeration b)
         => Equals(a, b);
 
     /// <summary>
-    ///
+    /// 判断两个枚举是否不相等
     /// </summary>
-    /// <param name="a"></param>
-    /// <param name="b"></param>
-    /// <returns></returns>
+    /// <param name="a">左侧枚举</param>
+    /// <param name="b">右侧枚举</param>
+    /// <returns>如果不相等返回 true</returns>
     public static bool operator !=(Enumeration a, Enumeration b)
         => !Equals(a, b);
 
     /// <summary>
-    ///
+    /// 获取枚举的哈希码（基于类型和标识组合）
     /// </summary>
-    /// <returns></returns>
+    /// <returns>哈希码</returns>
     public override int GetHashCode()
     {
         // 组合：类型 + Id，自动空安全，官方标准写法

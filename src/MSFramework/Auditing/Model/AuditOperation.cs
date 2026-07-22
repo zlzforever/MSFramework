@@ -20,6 +20,15 @@ public class AuditOperation : CreationAggregateRoot<string>, IAuditObject
     /// </summary>
     public string Method { get; private set; }
 
+    /// <summary>请求 QueryString</summary>
+    public string QueryString { get; init; }
+
+    /// <summary>设备 IMEI</summary>
+    public string IMEI { get; init; }
+
+    /// <summary>客户端平台（Android/iOS）</summary>
+    public string Platform { get; init; }
+
     /// <summary>
     /// 操作的 IP 地址
     /// </summary>
@@ -35,15 +44,63 @@ public class AuditOperation : CreationAggregateRoot<string>, IAuditObject
     /// </summary>
     public string DeviceModel { get; private set; }
 
+    /// <summary>海拔</summary>
+    public float? Altitude { get; init; }
+
+    /// <summary>
+    /// 屏幕分辨率
+    /// </summary>
+    public string Screen { get; init; }
+
+    /// <summary>
+    /// 真机持续户外作业电量缓慢下降；模拟器电量常年 100% 不动
+    /// </summary>
+    public int? Battery { get; init; }
+
+    /// <summary>
+    /// 信号强度: 户外移动信号波动，模拟器信号固定值
+    /// </summary>
+    public int? Signal { get; init; }
+
+    /// <summary>
+    /// 模拟器版本多为通用测试版，线下真机版本分散
+    /// </summary>
+    public string OSVersion { get; init; }
+
+    /// <summary>
+    /// 模拟器精度通常固定几十米，真机户外会动态变化；室内精度差、户外精度高
+    /// </summary>
+    public float? Accuracy { get; init; }
+
+    /// <summary>
+    /// 静止设备航向固定，真人行走持续变化；模拟器航向不动
+    /// </summary>
+    public float? Bearing { get; init; }
+
+    /// <summary>
+    /// 指南针 Azimuth
+    /// </summary>
+    public float? Orientation { get; init; }
+
+    /// <summary>
+    /// gps/network/fused，模拟器大多只有 network，无真实 GPS 源
+    /// </summary>
+    public string LocationSource { get; init; }
+
+    /// <summary>
+    /// APP 底层检测模拟器环境直接标记，最直观
+    /// </summary>
+    public bool? Emulator { get; init; }
+
     /// <summary>
     /// 经度
     /// </summary>
-    public double? Lat { get; private set; }
+    public decimal? Lat { get; private set; }
 
     /// <summary>
     /// 纬度
     /// </summary>
-    public double? Lng { get; private set; }
+    public decimal? Lng { get; private set; }
 
     /// <summary>
     /// 访问的 UserAgent
@@ -76,19 +133,19 @@ public class AuditOperation : CreationAggregateRoot<string>, IAuditObject
     }
 
     /// <summary>
-    ///
+    /// 创建操作审计记录
     /// </summary>
-    /// <param name="url"></param>
-    /// <param name="userAgent"></param>
-    /// <param name="ip"></param>
-    /// <param name="deviceModel"></param>
-    /// <param name="deviceId"></param>
-    /// <param name="lat"></param>
-    /// <param name="lng"></param>
-    /// <param name="traceId"></param>
-    /// <param name="method"></param>
-    public AuditOperation(string url, string userAgent, string ip, string deviceModel, string deviceId, double? lat,
-        double? lng, string traceId, string method) : this(ObjectId.GenerateNewId().ToString())
+    /// <param name="url">请求路径</param>
+    /// <param name="userAgent">用户代理</param>
+    /// <param name="ip">客户端 IP 地址</param>
+    /// <param name="deviceModel">设备型号</param>
+    /// <param name="deviceId">设备 ID</param>
+    /// <param name="lat">经度</param>
+    /// <param name="lng">纬度</param>
+    /// <param name="traceId">跟踪标识</param>
+    /// <param name="method">HTTP 方法</param>
+    public AuditOperation(string url, string userAgent, string ip, string deviceModel, string deviceId, decimal? lat,
+        decimal? lng, string traceId, string method) : this(ObjectId.GenerateNewId().ToString())
     {
         IP = ip;
         Path = url;
@@ -102,9 +159,9 @@ public class AuditOperation : CreationAggregateRoot<string>, IAuditObject
     }
 
     /// <summary>
-    ///
+    /// 添加审计实体集合到当前操作
     /// </summary>
-    /// <param name="entities"></param>
+    /// <param name="entities">审计实体集合</param>
     public void AddEntities(IEnumerable<AuditEntity> entities)
     {
         foreach (var entity in entities)
@@ -115,7 +172,7 @@ public class AuditOperation : CreationAggregateRoot<string>, IAuditObject
     }
 
     /// <summary>
-    ///
+    /// 结束操作审计，记录结束时间和耗时
     /// </summary>
     public void End()
     {
@@ -131,9 +188,9 @@ public class AuditOperation : CreationAggregateRoot<string>, IAuditObject
     }
 
     /// <summary>
-    ///
+    /// 返回操作审计的字符串表示
     /// </summary>
-    /// <returns></returns>
+    /// <returns>操作审计信息字符串</returns>
     public override string ToString()
     {
         return

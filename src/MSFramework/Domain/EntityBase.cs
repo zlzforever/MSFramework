@@ -60,20 +60,20 @@ public abstract class EntityBase<TKey> : EntityBase, IEntity<TKey> where TKey : 
     }
 
     /// <summary>
-    ///
+    /// 初始化实体基类
     /// </summary>
-    /// <param name="id"></param>
+    /// <param name="id">实体主键</param>
     protected EntityBase(TKey id)
     {
         Id = id;
     }
 
     /// <summary>
-    ///
+    /// 判断两个实体是否相等
     /// </summary>
-    /// <param name="left"></param>
-    /// <param name="right"></param>
-    /// <returns></returns>
+    /// <param name="left">左侧实体</param>
+    /// <param name="right">右侧实体</param>
+    /// <returns>如果相等返回 true</returns>
     public static bool operator ==(EntityBase<TKey> left, EntityBase<TKey> right)
     {
         if (Equals(left, null))
@@ -85,31 +85,31 @@ public abstract class EntityBase<TKey> : EntityBase, IEntity<TKey> where TKey : 
     }
 
     /// <summary>
-    ///
+    /// 判断两个实体是否不相等
     /// </summary>
-    /// <param name="left"></param>
-    /// <param name="right"></param>
-    /// <returns></returns>
+    /// <param name="left">左侧实体</param>
+    /// <param name="right">右侧实体</param>
+    /// <returns>如果不相等返回 true</returns>
     public static bool operator !=(EntityBase<TKey> left, EntityBase<TKey> right)
     {
         return !(left == right);
     }
 
     /// <summary>
-    ///
+    /// 判断主键是否等于指定值
     /// </summary>
-    /// <param name="other"></param>
-    /// <returns></returns>
+    /// <param name="other">要比较的主键值</param>
+    /// <returns>如果相等返回 true</returns>
     public bool Equals(TKey other)
     {
         return !Equals(null, other) && Equals(Id, other);
     }
 
     /// <summary>
-    ///
+    /// 判断两个实体是否相等（基于主键和类型比较）
     /// </summary>
-    /// <param name="obj"></param>
-    /// <returns></returns>
+    /// <param name="obj">待比较的实体</param>
+    /// <returns>如果相等返回 true</returns>
     public override bool Equals(object obj)
     {
         if (obj is not EntityBase<TKey> other)
@@ -148,9 +148,9 @@ public abstract class EntityBase<TKey> : EntityBase, IEntity<TKey> where TKey : 
     }
 
     /// <summary>
-    ///
+    /// 获取实体的哈希码（基于主键）
     /// </summary>
-    /// <returns></returns>
+    /// <returns>哈希码</returns>
     public override int GetHashCode()
     {
         return Id == null ? 0 : Id.GetHashCode();

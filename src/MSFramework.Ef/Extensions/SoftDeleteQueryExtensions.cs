@@ -8,17 +8,17 @@ using Microsoft.EntityFrameworkCore.Metadata;
 namespace MicroserviceFramework.Ef.Extensions;
 
 /// <summary>
-///
+/// 软删除查询过滤器扩展，自动为 IDeletion 实体添加 IsDeleted 过滤条件
 /// </summary>
 public static class SoftDeleteQueryExtensions
 {
     private static readonly ConcurrentDictionary<Type, LambdaExpression> MethodInfoCache = new();
 
     /// <summary>
-    ///
+    /// 为实体类型添加软删除查询过滤器，自动过滤 IsDeleted 为 true 的记录
     /// </summary>
-    /// <param name="entityData"></param>
-    /// <exception cref="ArgumentException"></exception>
+    /// <param name="entityData">可变实体类型元数据</param>
+    /// <exception cref="ArgumentException">无法获取过滤器表达式时抛出</exception>
     public static void AddSoftDeleteQueryFilter(
         this IMutableEntityType entityData)
     {
@@ -27,11 +27,11 @@ public static class SoftDeleteQueryExtensions
     }
 
     /// <summary>
-    ///
+    /// 获取指定实体类型的软删除筛选表达式
     /// </summary>
-    /// <param name="type"></param>
-    /// <returns></returns>
-    /// <exception cref="ArgumentException"></exception>
+    /// <param name="type">实体类型</param>
+    /// <returns>Lambda 表达式</returns>
+    /// <exception cref="ArgumentException">无法获取 GetDeleteFilter 方法时抛出</exception>
     public static LambdaExpression GetSoftDeleteQueryFilter(Type type)
     {
         return MethodInfoCache.GetOrAdd(type, t =>
@@ -51,10 +51,10 @@ public static class SoftDeleteQueryExtensions
     }
 
     /// <summary>
-    ///
+    /// 获取泛型软删除筛选表达式：x => !x.IsDeleted
     /// </summary>
-    /// <typeparam name="TEntity"></typeparam>
-    /// <returns></returns>
+    /// <typeparam name="TEntity">实现 IDeletion 接口的实体类型</typeparam>
+    /// <returns>筛选表达式</returns>
     public static LambdaExpression GetDeleteFilter<TEntity>()
         where TEntity : class, IDeletion
     {

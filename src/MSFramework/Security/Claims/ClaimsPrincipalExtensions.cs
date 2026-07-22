@@ -10,11 +10,11 @@ namespace MicroserviceFramework.Security.Claims;
 public static class ClaimsPrincipalExtensions
 {
     /// <summary>
-    ///
+    /// 从 <see cref="ClaimsPrincipal"/> 按顺序查找第一个非空 Claim 值。
     /// </summary>
-    /// <param name="principal"></param>
-    /// <param name="claims"></param>
-    /// <returns></returns>
+    /// <param name="principal">用户声明主体</param>
+    /// <param name="claims">要查找的 Claim 类型（按优先级排序）</param>
+    /// <returns>第一个非空的 Claim 值，未找到时返回 null</returns>
     public static string GetValue(this ClaimsPrincipal principal, params string[] claims)
     {
         if (principal == null)

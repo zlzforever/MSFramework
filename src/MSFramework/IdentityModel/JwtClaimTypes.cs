@@ -1,4 +1,4 @@
-namespace MicroserviceFramework.AspNetCore.IdentityModel;
+namespace MicroserviceFramework.IdentityModel;
 
 /// <summary>
 /// Commonly used claim types

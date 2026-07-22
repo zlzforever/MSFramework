@@ -3,7 +3,7 @@ using System;
 namespace MicroserviceFramework.Domain;
 
 /// <summary>
-///
+/// 外部实体标记接口，标识该实体对应外部数据库表，不由 EF 管理写操作
 /// </summary>
 public interface IExternalEntity;
 

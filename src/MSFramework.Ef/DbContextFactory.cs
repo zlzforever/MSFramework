@@ -5,21 +5,21 @@ using Microsoft.Extensions.DependencyInjection;
 namespace MicroserviceFramework.Ef;
 
 /// <summary>
-///
+/// DbContext 工厂，根据实体类型解析所属的 DbContext 实例
 /// </summary>
 public class DbContextFactory
 {
     private readonly IEntityConfigurationTypeFinder _entityConfigurationTypeFinder;
 
     /// <summary>
-    ///
+    /// 获取服务提供者
     /// </summary>
     public IServiceProvider ServiceProvider { get; }
 
     /// <summary>
-    ///
+    /// 初始化 DbContextFactory 实例
     /// </summary>
-    /// <param name="serviceProvider"></param>
+    /// <param name="serviceProvider">服务提供者</param>
     public DbContextFactory(IServiceProvider serviceProvider)
     {
         ServiceProvider = serviceProvider;
@@ -40,10 +40,10 @@ public class DbContextFactory
 
 
     /// <summary>
-    ///
+    /// 根据 DbContext 类型获取实例
     /// </summary>
-    /// <param name="dbContextType"></param>
-    /// <returns></returns>
+    /// <param name="dbContextType">DbContext 类型</param>
+    /// <returns>DbContext 实例，未找到返回 null</returns>
     public DbContextBase GetDbContext(Type dbContextType)
     {
         if (dbContextType == null)
@@ -55,9 +55,9 @@ public class DbContextFactory
     }
 
     /// <summary>
-    ///
+    /// 获取所有已注册的 DbContext 实例集合
     /// </summary>
-    /// <returns></returns>
+    /// <returns>DbContext 实例枚举</returns>
     public IEnumerable<DbContextBase> GetAllDbContexts()
     {
         foreach (var dbContextType in _entityConfigurationTypeFinder.GetAllDbContextTypes())
@@ -71,10 +71,10 @@ public class DbContextFactory
     }
 
     /// <summary>
-    ///
+    /// 获取指定实体对应的 DbContext 实例，未注册则返回 null
     /// </summary>
-    /// <typeparam name="TEntity"></typeparam>
-    /// <returns></returns>
+    /// <typeparam name="TEntity">实体类型</typeparam>
+    /// <returns>DbContext 实例，未注册则返回 null</returns>
     public DbContextBase GetDbContextOrDefault<TEntity>()
     {
         if (!_entityConfigurationTypeFinder.HasDbContextForEntity<TEntity>())

@@ -1,5 +1,4 @@
 using System;
-using MicroserviceFramework.AspNetCore.Mvc;
 using MicroserviceFramework.Common;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.Extensions;
@@ -9,8 +8,17 @@ using Microsoft.Extensions.Logging;
 
 namespace MicroserviceFramework.AspNetCore.Filters;
 
+/// <summary>
+/// 全局异常过滤器，将未处理异常统一转换为 <see cref="ApiResult"/> 格式响应。
+/// </summary>
 internal class GlobalExceptionFilter(ILogger<GlobalExceptionFilter> logger) : IExceptionFilter
 {
+    /// <summary>
+    /// 捕获异常并转换为统一响应格式：
+    /// <see cref="UnauthorizedAccessException"/> → 403，
+    /// <see cref="MicroserviceFrameworkFriendlyException"/> → 200 + 错误信息，
+    /// 其他异常 → 500。
+    /// </summary>
     public void OnException(ExceptionContext context)
     {
         if (context.ExceptionHandled)

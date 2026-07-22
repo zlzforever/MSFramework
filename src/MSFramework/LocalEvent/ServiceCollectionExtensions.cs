@@ -6,7 +6,7 @@ using Microsoft.Extensions.DependencyInjection.Extensions;
 namespace MicroserviceFramework.LocalEvent;
 
 /// <summary>
-///
+/// 本地事件总线服务注册扩展方法
 /// </summary>
 public static class ServiceCollectionExtensions
 {
@@ -42,11 +42,11 @@ public static class ServiceCollectionExtensions
     }
 
     /// <summary>
-    ///
+    /// 使用本地事件发布器
     /// </summary>
-    /// <param name="builder"></param>
-    /// <param name="configure"></param>
-    /// <returns></returns>
+    /// <param name="builder">框架构建器</param>
+    /// <param name="configure">本地事件配置委托</param>
+    /// <returns>框架构建器</returns>
     public static MicroserviceFrameworkBuilder UseLocalEventPublisher(this MicroserviceFrameworkBuilder builder,
         Action<LocalEventOptions> configure = null)
     {

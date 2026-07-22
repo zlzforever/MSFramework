@@ -1,7 +1,7 @@
 namespace MicroserviceFramework.LocalEvent;
 
 /// <summary>
-///
+/// 本地事件配置选项
 /// </summary>
 public class LocalEventOptions
 {

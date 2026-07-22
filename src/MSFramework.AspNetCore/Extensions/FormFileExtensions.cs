@@ -8,14 +8,15 @@ using Microsoft.AspNetCore.Http;
 namespace MicroserviceFramework.AspNetCore.Extensions;
 
 /// <summary>
-///
+///     上传文件的存储扩展方法
 /// </summary>
 public static class FormFileExtensions
 {
     private static readonly ConcurrentDictionary<string, bool> VirtualFolderState = new();
 
     /// <summary>
-    ///
+    /// 物理存于 /wwwroot/oss/{md5:0-1}/{md5:2-3}/{md5}.{extension}
+    /// 虚拟存于 /wwwroot/upload/20260710/EED3EFA1750D0A147098D694ADE825B5.csv
     /// </summary>
     /// <param name="formFile"></param>
     /// <param name="interval"></param>
@@ -50,7 +51,7 @@ public static class FormFileExtensions
         // upload/20251225/C4CA4238A0B923820DCC509A6F75849B.txt
         var virtualPath = Path.Combine(virtualDirectory, fileName);
         var intervalPath = Path.Combine(intervalDirectory, fileName);
-        var groupPath = Path.Combine(Defaults.OSSDirectory, level1, level2);
+        var groupPath = Path.Combine(Defaults.LocalOSSDirectory, level1, level2);
         var physicalPath = Path.Combine(groupPath, fileName);
         if (!File.Exists(virtualPath))
         {
@@ -77,23 +78,23 @@ public static class FormFileExtensions
 }
 
 /// <summary>
-///
+///     文件保存结果，包含原始名称、虚拟路径和物理路径
 /// </summary>
 [SuppressMessage("ReSharper", "UnusedAutoPropertyAccessor.Global")]
 public class SaveResult
 {
     /// <summary>
-    ///
+    ///     文件原始名称
     /// </summary>
     public string Name { get; set; }
 
     /// <summary>
-    ///
+    ///     文件虚拟路径（相对路径）
     /// </summary>
     public string Path { get; set; }
 
     /// <summary>
-    ///
+    ///     文件物理磁盘路径
     /// </summary>
     public string PhysicalPath { get; set; }
 }

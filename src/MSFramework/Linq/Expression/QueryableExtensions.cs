@@ -7,7 +7,7 @@ using MicroserviceFramework.Utils;
 namespace MicroserviceFramework.Linq.Expression;
 
 /// <summary>
-///
+/// 分页查询扩展方法
 /// </summary>
 public static class PagedQueryExtensions
 {

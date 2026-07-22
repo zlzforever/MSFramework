@@ -14,12 +14,12 @@ public class AuditProperty : EntityBase<string>, IAuditObject
     }
 
     /// <summary>
-    ///
+    /// 创建属性审计记录。
     /// </summary>
-    /// <param name="name"></param>
-    /// <param name="type"></param>
-    /// <param name="originalValue"></param>
-    /// <param name="newValue"></param>
+    /// <param name="name">属性名</param>
+    /// <param name="type">属性类型</param>
+    /// <param name="originalValue">原始值</param>
+    /// <param name="newValue">新值</param>
     public AuditProperty(string name, string type, string originalValue, string newValue)
         : this(ObjectId.GenerateNewId().ToString())
     {
@@ -56,7 +56,7 @@ public class AuditProperty : EntityBase<string>, IAuditObject
     public string NewValue { get; private set; }
 
     /// <summary>
-    ///
+    /// 返回调试友好的字符串表示。
     /// </summary>
     /// <returns></returns>
     public override string ToString()

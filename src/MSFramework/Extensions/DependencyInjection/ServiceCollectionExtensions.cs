@@ -5,12 +5,11 @@ using MicroserviceFramework.Domain;
 using MicroserviceFramework.Mediator;
 using MicroserviceFramework.Runtime;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.DependencyInjection.Extensions;
 
 namespace MicroserviceFramework.Extensions.DependencyInjection;
 
 /// <summary>
-///
+/// 依赖注入自动注册扩展方法
 /// </summary>
 public static class ServiceCollectionExtensions
 {

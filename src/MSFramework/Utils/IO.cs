@@ -5,7 +5,7 @@ namespace MicroserviceFramework.Utils;
 
 // ReSharper disable once InconsistentNaming
 /// <summary>
-///
+/// 文件与流操作工具类
 /// </summary>
 public static class IO
 {

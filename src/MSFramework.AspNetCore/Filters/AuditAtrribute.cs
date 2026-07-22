@@ -34,8 +34,6 @@ internal class Audit(ILogger<Audit> logger, IServiceScopeFactory scopeFactory) :
 
         if (Constants.CommandMethods.Contains(context.HttpContext.Request.Method))
         {
-            // 使用独立 scope 保存审计数据，不干扰 HTTP context 下的 DbContext
-            // HTTP context 下的 DbContext 注册了 UOW 下的 SavingChanges 事件
             _serviceScope = scopeFactory.CreateScope();
             _auditingStores = _serviceScope.ServiceProvider.GetServices<IAuditingStore>().ToList();
             if (_auditingStores.Any())
@@ -46,9 +44,6 @@ internal class Audit(ILogger<Audit> logger, IServiceScopeFactory scopeFactory) :
         }
 
         await base.OnActionExecutionAsync(context, next);
-
-        // comment: 必须使用 HTTP request scope 的 uow manager 才能获取到审计对象
-        // comment: 只有有变化的数据才会尝试获取变更对象
     }
 
     public override async Task OnResultExecutionAsync(ResultExecutingContext context, ResultExecutionDelegate next)
@@ -80,35 +75,55 @@ internal class Audit(ILogger<Audit> logger, IServiceScopeFactory scopeFactory) :
         var ua = context.HttpContext.Request.Headers["User-Agent"].ToString();
         var ip = context.GetRemoteIpAddress();
         var url = context.HttpContext.Request.GetDisplayUrl();
-        var deviceId = context.HttpContext.Request.Query["deviceId"].ToString();
-        deviceId = deviceId == string.Empty ? null : deviceId;
+        var queryString = context.HttpContext.Request.QueryString.ToString();
 
-        var deviceModel = context.HttpContext.Request.Query["deviceModel"].ToString();
-        deviceModel = deviceModel == string.Empty ? null : deviceModel;
+        var session = context.HttpContext.RequestServices.GetService<ISession>();
 
-        double? lat = double.TryParse(context.HttpContext.Request.Query["lat"].ToString(), out var a) ? a : null;
-        double? lng = double.TryParse(context.HttpContext.Request.Query["lng"].ToString(), out var n) ? n : null;
-
-        (string UserId, string UserDisplayName) user = default;
-        string traceId = null;
-        if (context.HttpContext.User.Identity is { IsAuthenticated: true })
+        var auditedOperation = new AuditOperation(url, ua, ip,
+            session.GetValue(SessionField.DeviceModel),
+            session.GetValue(SessionField.DeviceId),
+            ParseDecimal(session.GetValue(SessionField.Latitude)),
+            ParseDecimal(session.GetValue(SessionField.Longitude)),
+            session.TraceIdentifier ?? context.HttpContext.TraceIdentifier,
+            context.HttpContext.Request.Method)
         {
-            var session = context.HttpContext.RequestServices.GetService<ISession>();
-            if (session != null)
-            {
-                user.UserId = session.UserId;
-                user.UserDisplayName = session.UserDisplayName;
-                traceId = session.TraceIdentifier;
-            }
-        }
-        else
-        {
-            traceId = context.HttpContext.TraceIdentifier;
-        }
+            QueryString = queryString.Length > 0 ? queryString : null,
+            IMEI = session.GetValue(SessionField.IMEI),
+            Platform = session.GetValue(SessionField.Platform),
+            Altitude = ParseFloat(session.GetValue(SessionField.Altitude)),
+            Screen = session.GetValue(SessionField.Screen),
+            Battery = ParseInt(session.GetValue(SessionField.Battery)),
+            Signal = ParseInt(session.GetValue(SessionField.Signal)),
+            OSVersion = session.GetValue(SessionField.OSVersion),
+            Accuracy = ParseFloat(session.GetValue(SessionField.Accuracy)),
+            Bearing = ParseFloat(session.GetValue(SessionField.Bearing)),
+            Orientation = ParseFloat(session.GetValue(SessionField.Orientation)),
+            LocationSource = session.GetValue(SessionField.LocationSource),
+            Emulator = ParseBool(session.GetValue(SessionField.Emulator))
+        };
 
-        var auditedOperation = new AuditOperation(url, ua, ip, deviceModel, deviceId,
-            lat, lng, traceId, context.HttpContext.Request.Method);
-        auditedOperation.SetCreation(user.UserId, user.UserDisplayName, creationTime);
+        auditedOperation.SetCreation(session.UserId, session.UserDisplayName, creationTime);
+
         return auditedOperation;
+    }
+
+    private static decimal? ParseDecimal(string value)
+    {
+        return decimal.TryParse(value, out var result) ? result : null;
+    }
+
+    private static float? ParseFloat(string value)
+    {
+        return float.TryParse(value, out var result) ? result : null;
+    }
+
+    private static int? ParseInt(string value)
+    {
+        return int.TryParse(value, out var result) ? result : null;
+    }
+
+    private static bool? ParseBool(string value)
+    {
+        return bool.TryParse(value, out var result) ? result : null;
     }
 }

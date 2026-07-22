@@ -26,14 +26,14 @@ public abstract class DesignTimeDbContextFactoryBase<TDbContext> :
     }
 
     /// <summary>
-    ///
+    /// 获取服务提供程序，用于解析 DbContext 实例
     /// </summary>
-    /// <returns></returns>
+    /// <returns>配置完成的服务提供程序</returns>
     protected abstract IServiceProvider GetServiceProvider();
 
     /// <summary>
-    ///
+    /// 配置设计时服务，例如注册迁移相关的服务
     /// </summary>
-    /// <param name="serviceCollection"></param>
+    /// <param name="serviceCollection">服务集合</param>
     public abstract void ConfigureDesignTimeServices(IServiceCollection serviceCollection);
 }

@@ -4,7 +4,7 @@ using System.Runtime.InteropServices;
 namespace DotNetCore.CAP.Dapr;
 
 /// <summary>
-///
+/// Dapr 传输消息，包含消息头和消息体
 /// </summary>
 [StructLayout(LayoutKind.Auto)]
 public record DaprTransportMessage

@@ -14,11 +14,11 @@
 // namespace MicroserviceFramework.Ef.MySql;
 //
 // /// <summary>
-// ///
+// /// MySQL 迁移 SQL 生成器，支持移除外键等自定义迁移行为
 // /// </summary>
-// /// <param name="dependencies"></param>
-// /// <param name="commandBatchPreparer"></param>
-// /// <param name="options"></param>
+// /// <param name="dependencies">迁移 SQL 生成器依赖</param>
+// /// <param name="commandBatchPreparer">命令批处理准备器</param>
+// /// <param name="options">MySQL 选项配置</param>
 // public class MigrationsSqlGenerator(
 //     MigrationsSqlGeneratorDependencies dependencies,
 //     ICommandBatchPreparer commandBatchPreparer,
@@ -28,17 +28,17 @@
 //     : MySqlMigrationsSqlGenerator(dependencies, commandBatchPreparer, options)
 // {
 //     /// <summary>
-//     /// 是否删除外键
+//     /// 是否在生成建表脚本时跳过外键约束
 //     /// </summary>
 //     public static bool RemoveForeignKey;
 //
 //
 //     /// <summary>
-//     ///
+//     /// 重写迁移操作生成逻辑，根据 RemoveForeignKey 配置跳过外键生成
 //     /// </summary>
-//     /// <param name="operation"></param>
-//     /// <param name="model"></param>
-//     /// <param name="builder"></param>
+//     /// <param name="operation">迁移操作</param>
+//     /// <param name="model">EF Core 模型</param>
+//     /// <param name="builder">迁移命令列表构建器</param>
 //     protected override void Generate(
 //         MigrationOperation operation,
 //         IModel model,

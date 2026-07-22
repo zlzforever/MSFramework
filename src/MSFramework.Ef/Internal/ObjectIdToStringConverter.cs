@@ -6,7 +6,7 @@ using MongoDB.Bson;
 namespace MicroserviceFramework.Ef.Internal;
 
 /// <summary>
-///
+/// ObjectId 到 string 的 EF Core 值转换器
 /// </summary>
 public class ObjectIdToStringConverter()
     : ValueConverter<ObjectId, string>(ToStringValue(), ToObjectId())

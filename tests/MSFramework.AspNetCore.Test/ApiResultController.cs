@@ -4,7 +4,6 @@ using System.ComponentModel.DataAnnotations;
 using System.IO;
 using System.Threading.Tasks;
 using MicroserviceFramework.AspNetCore;
-using MicroserviceFramework.AspNetCore.Mvc;
 using MicroserviceFramework.Common;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;

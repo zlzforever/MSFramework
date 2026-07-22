@@ -5,17 +5,17 @@ using System.Text.Json.Serialization;
 namespace MicroserviceFramework.Text.Json.Converters;
 
 /// <summary>
-///
+/// <see cref="DateTimeOffset"/> 的 JSON 转换器，序列化为 Unix 时间戳秒数。
 /// </summary>
 public class DateTimeOffsetJsonConverter : JsonConverter<DateTimeOffset>
 {
     /// <summary>
-    ///
+    /// 从 JSON 反序列化，支持字符串和数字两种格式。
     /// </summary>
-    /// <param name="reader"></param>
-    /// <param name="typeToConvert"></param>
-    /// <param name="options"></param>
-    /// <returns></returns>
+    /// <param name="reader">JSON 读取器</param>
+    /// <param name="typeToConvert">目标类型</param>
+    /// <param name="options">序列化选项</param>
+    /// <returns>反序列化后的 DateTimeOffset</returns>
     public override DateTimeOffset Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
     {
         if (reader.TokenType == JsonTokenType.String)
@@ -33,11 +33,11 @@ public class DateTimeOffsetJsonConverter : JsonConverter<DateTimeOffset>
     }
 
     /// <summary>
-    ///
+    /// 序列化为 Unix 时间戳秒数。
     /// </summary>
-    /// <param name="writer"></param>
-    /// <param name="value"></param>
-    /// <param name="options"></param>
+    /// <param name="writer">JSON 写入器</param>
+    /// <param name="value">待序列化的值</param>
+    /// <param name="options">序列化选项</param>
     public override void Write(Utf8JsonWriter writer, DateTimeOffset value, JsonSerializerOptions options)
     {
         writer.WriteNumberValue(value.ToUnixTimeSeconds());

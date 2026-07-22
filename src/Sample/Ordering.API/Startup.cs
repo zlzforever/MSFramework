@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text.Json;
@@ -105,29 +104,26 @@ public static class Startup
             );
         });
 
-        var dbContextSettingsList = configuration.GetSection("DbContexts").Get<List<DbContextSettings>>();
-        var dbContextSettings = dbContextSettingsList[0];
-
-        services.AddDbContextPool<OrderingContext>((provider, x) =>
+        services.AddDbContextPool<OrderingContext>(configuration, (settings, provider, x) =>
         {
             var loggerFactory = provider.GetRequiredService<ILoggerFactory>();
             x.UseLoggerFactory(loggerFactory);
-            if ("mysql".Equals(dbContextSettings.DatabaseType, StringComparison.OrdinalIgnoreCase))
+            if ("mysql".Equals(settings.DatabaseType, StringComparison.OrdinalIgnoreCase))
             {
                 // if (dbContextSettings.UseCompiledModel)
                 // {
                 //     x.LoadModel("Ordering.Infrastructure.CompileModels.OrderingContextModel, Ordering.Infrastructure");
                 // }
-                x.UseMySql(ServerVersion.AutoDetect(dbContextSettings.ConnectionString), y =>
+                x.UseMySql(ServerVersion.AutoDetect(settings.ConnectionString), y =>
                 {
-                    y.Load(dbContextSettings);
+                    y.Load(settings);
                 });
             }
             else
             {
                 x.UseNpgsql(y =>
                 {
-                    y.Load(dbContextSettings);
+                    y.Load(settings);
                 });
             }
         });

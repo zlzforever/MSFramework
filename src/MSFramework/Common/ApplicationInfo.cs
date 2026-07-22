@@ -5,7 +5,7 @@ using Microsoft.Extensions.Hosting;
 namespace MicroserviceFramework.Common;
 
 /// <summary>
-///
+/// 应用程序信息，包含应用名称和版本。
 /// </summary>
 public class ApplicationInfo
 {
@@ -15,10 +15,10 @@ public class ApplicationInfo
     public string Name { get; }
 
     /// <summary>
-    ///
+    /// 从主机环境和配置中初始化应用信息。
     /// </summary>
-    /// <param name="hostEnvironment"></param>
-    /// <param name="configuration"></param>
+    /// <param name="hostEnvironment">主机环境</param>
+    /// <param name="configuration">应用配置</param>
     public ApplicationInfo(IHostEnvironment hostEnvironment, IConfiguration configuration)
     {
         var applicationName = configuration["ApiName"];

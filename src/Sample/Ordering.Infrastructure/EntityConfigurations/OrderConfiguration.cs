@@ -37,7 +37,7 @@ public class OrderConfiguration : EntityTypeConfigurationBase<Order, OrderingCon
         // //Set as field (New since EF 1.1) to access the OrderItem collection property through its field
         // navigation?.SetPropertyAccessMode(PropertyAccessMode.Field);
 
-        builder.ConfigureCreation();
+        // builder.ConfigureCreation();
         builder.HasIndex(x => x.CreationTime);
     }
 }

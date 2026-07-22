@@ -5,7 +5,6 @@ using MicroserviceFramework.Common;
 using MicroserviceFramework.Extensions.Options;
 using MicroserviceFramework.Serialization;
 using MicroserviceFramework.Text.Json;
-using MicroserviceFramework.Utils;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
@@ -20,15 +19,15 @@ using Microsoft.Extensions.Logging.Abstractions;
 namespace MicroserviceFramework;
 
 /// <summary>
-///
+/// MSFramework 框架服务注册扩展方法
 /// </summary>
 public static class ServiceCollectionExtensions
 {
     /// <summary>
-    ///
+    /// 注册 MSFramework 核心服务，初始化程序集扫描和框架构建器
     /// </summary>
-    /// <param name="services"></param>
-    /// <param name="builderAction"></param>
+    /// <param name="services">服务集合</param>
+    /// <param name="builderAction">框架构建器配置委托</param>
     /// <param name="scanAssemblyPrefixes">指定工具类 Utils.Runtime 中扫描程序集的前缀
     /// 整个框架对程序集的扫描，类型的发现都通过 RuntimeUtilities 来实现，即受此前缀影响</param>
     [MethodImpl(MethodImplOptions.Synchronized)]
@@ -61,9 +60,9 @@ public static class ServiceCollectionExtensions
     }
 
     /// <summary>
-    ///
+    /// 初始化 MSFramework，设置默认序列化器、日志和初始化器
     /// </summary>
-    /// <param name="applicationServices"></param>
+    /// <param name="applicationServices">应用程序服务提供者</param>
     public static void UseMicroserviceFramework(this IServiceProvider applicationServices)
     {
         var defaultJsonSerializer = applicationServices.GetService<IJsonSerializer>();

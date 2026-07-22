@@ -10,12 +10,12 @@ namespace MicroserviceFramework.Extensions.Options;
 public class AutoOptionsAttribute : Attribute
 {
     /// <summary>
-    ///
+    /// 选项在配置中的名称
     /// </summary>
     public string Name { get; set; }
 
     /// <summary>
-    ///
+    /// 选项在配置中的节路径
     /// </summary>
     public string Section { get; set; }
 

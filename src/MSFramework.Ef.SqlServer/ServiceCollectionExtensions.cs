@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore.SqlServer.Infrastructure.Internal;
 namespace MicroserviceFramework.Ef.SqlServer;
 
 /// <summary>
-///
+/// SQL Server 数据库提供程序的 ServiceCollection 扩展方法
 /// </summary>
 public static class ServiceCollectionExtensions
 {
@@ -38,10 +38,10 @@ public static class ServiceCollectionExtensions
     }
 
     /// <summary>
-    ///
+    /// 从 DbContextSettings 加载配置并应用到 SqlServerDbContextOptionsBuilder
     /// </summary>
-    /// <param name="builder"></param>
-    /// <param name="settings"></param>
+    /// <param name="builder">SQL Server 数据库上下文选项构建器</param>
+    /// <param name="settings">数据库上下文配置</param>
     public static void Load(this SqlServerDbContextOptionsBuilder builder,
         DbContextSettings settings)
     {

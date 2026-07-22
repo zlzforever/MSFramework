@@ -8,12 +8,12 @@ using Microsoft.AspNetCore.Mvc.ModelBinding;
 namespace MicroserviceFramework.AspNetCore.Mvc.ModelBinding;
 
 /// <summary>
-///
+/// 模型验证失败响应工厂，返回统一格式的错误响应
 /// </summary>
 public static class InvalidModelStateResponseFactory
 {
     /// <summary>
-    ///
+    /// 模型验证失败的默认响应委托
     /// </summary>
     public static readonly Func<ActionContext, IActionResult> Instance = context =>
     {

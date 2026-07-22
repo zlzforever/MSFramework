@@ -4,16 +4,16 @@ using System.Linq;
 namespace MicroserviceFramework.Runtime;
 
 /// <summary>
-///
+/// <see cref="Type"/> 扩展方法
 /// </summary>
 public static class TypeExtensions
 {
     /// <summary>
-    ///
+    /// 获取类型实现的接口，排除指定的接口并泛型类型规范化。
     /// </summary>
-    /// <param name="type"></param>
-    /// <param name="excludeInterfaces"></param>
-    /// <returns></returns>
+    /// <param name="type">目标类型</param>
+    /// <param name="excludeInterfaces">要排除的接口类型</param>
+    /// <returns>过滤后的接口类型数组</returns>
     public static Type[] GetInterfacesExcludeBy(this Type type, params Type[] excludeInterfaces)
     {
         var types = type.GetInterfaces();

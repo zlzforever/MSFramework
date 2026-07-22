@@ -1,30 +1,59 @@
+using System;
 using System.Linq;
 using System.Text.RegularExpressions;
 using MicroserviceFramework.Auditing;
 using MicroserviceFramework.Domain;
 using MicroserviceFramework.Ef.Auditing;
+using MicroserviceFramework.Ef.Extensions;
 using MicroserviceFramework.Ef.Internal;
 using MicroserviceFramework.Ef.Repositories;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 
 namespace MicroserviceFramework.Ef;
 
 /// <summary>
-///
+/// EF 服务集合扩展方法，提供 DbContext 注册与框架集成
 /// </summary>
 public static partial class ServiceCollectionExtensions
 {
-    /// <param name="builder"></param>
+    /// <summary>
+    /// 注册 <typeparamref name="TContext"/> 的 DbContext 连接池，
+    /// 自动从 <c>DbContexts</c> 配置节点解析对应的 <see cref="DbContextSettings"/>，
+    /// 并注入到回调中供 Provider 选择和配置。
+    /// </summary>
+    /// <typeparam name="TContext">DbContext 类型</typeparam>
+    /// <param name="services">服务集合</param>
+    /// <param name="configuration">应用配置</param>
+    /// <param name="optionsAction">
+    ///     接收已解析的 <see cref="DbContextSettings"/>、<see cref="IServiceProvider"/> 和
+    ///     <see cref="DbContextOptionsBuilder"/>，完成 Provider 选择和额外配置。
+    /// </param>
+    public static IServiceCollection AddDbContextPool<TContext>(
+        this IServiceCollection services,
+        IConfiguration configuration,
+        Action<DbContextSettings, IServiceProvider, DbContextOptionsBuilder> optionsAction)
+        where TContext : DbContextBase
+    {
+        var settings = configuration.GetDbContextSettings<TContext>();
+
+        return services.AddDbContextPool<TContext>((provider, builder) =>
+        {
+            optionsAction(settings, provider, builder);
+        });
+    }
+
+    /// <param name="builder">框架构建器</param>
     extension(MicroserviceFrameworkBuilder builder)
     {
         /// <summary>
-        ///
+        /// 启用 EF 审计存储，将审计日志写入指定 DbContext
         /// </summary>
-        /// <typeparam name="TDbContext"></typeparam>
-        /// <returns></returns>
+        /// <typeparam name="TDbContext">审计存储使用的 DbContext 类型</typeparam>
+        /// <returns>框架构建器</returns>
         public MicroserviceFrameworkBuilder UseEfAuditing<TDbContext>()
             where TDbContext : DbContext
         {
@@ -34,9 +63,9 @@ public static partial class ServiceCollectionExtensions
         }
 
         /// <summary>
-        ///
+        /// 启用 EntityFramework 核心扩展服务
         /// </summary>
-        /// <returns></returns>
+        /// <returns>框架构建器</returns>
         public MicroserviceFrameworkBuilder UseEntityFramework()
         {
             builder.Services.AddEntityFrameworkExtension();
@@ -45,10 +74,10 @@ public static partial class ServiceCollectionExtensions
     }
 
     /// <summary>
-    ///
+    /// 注册 EntityFramework 核心扩展服务（仓储、工作单元、配置查找器等）
     /// </summary>
-    /// <param name="services"></param>
-    /// <returns></returns>
+    /// <param name="services">服务集合</param>
+    /// <returns>服务集合</returns>
     public static IServiceCollection AddEntityFrameworkExtension(this IServiceCollection services)
     {
         services.TryAddSingleton<IEntityConfigurationTypeFinder, EntityConfigurationTypeFinder>();
@@ -114,12 +143,12 @@ public static partial class ServiceCollectionExtensions
     }
 
     /// <summary>
-    ///
+    /// 设置 DbContext 的连接字符串
     /// </summary>
-    /// <param name="builder"></param>
-    /// <param name="connectionString"></param>
-    /// <typeparam name="T"></typeparam>
-    /// <exception cref="MicroserviceFrameworkException"></exception>
+    /// <param name="builder">DbContext 选项构建器</param>
+    /// <param name="connectionString">连接字符串</param>
+    /// <typeparam name="T">选项扩展类型</typeparam>
+    /// <exception cref="MicroserviceFrameworkException">未找到指定扩展时抛出</exception>
     public static void SetConnectionString<T>(this DbContextOptionsBuilder builder, string connectionString) where T :
         class,
         IDbContextOptionsExtension

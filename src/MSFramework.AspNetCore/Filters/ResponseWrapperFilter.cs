@@ -1,6 +1,5 @@
 using System;
 using System.Threading.Tasks;
-using MicroserviceFramework.AspNetCore.Mvc;
 using MicroserviceFramework.Common;
 using MicroserviceFramework.Utils;
 using Microsoft.AspNetCore.Mvc;
@@ -9,8 +8,15 @@ using Microsoft.Extensions.Logging;
 
 namespace MicroserviceFramework.AspNetCore.Filters;
 
+/// <summary>
+/// 统一响应包装过滤器，将 Action 返回值包装为 <see cref="ApiResult"/> 格式。
+/// 已有 <see cref="ApiResult"/> 返回值不会被二次包装。
+/// </summary>
 internal sealed class ResponseWrapperFilter(ILogger<ResponseWrapperFilter> logger) : IAsyncResultFilter
 {
+    /// <summary>
+    /// 在 Action 执行完成后包装响应，仅在响应未开始时处理。
+    /// </summary>
     public async Task OnResultExecutionAsync(ResultExecutingContext context, ResultExecutionDelegate next)
     {
         logger.LogDebug("开始执行返回结果过滤器");

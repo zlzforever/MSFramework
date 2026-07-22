@@ -6,16 +6,16 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 namespace MicroserviceFramework.Ef.Extensions;
 
 /// <summary>
-///
+/// DateTimeOffset Unix 时间戳映射扩展，将日期时间属性存储为 bigint 类型
 /// </summary>
 public static class UnixTimePropertyExtensions
 {
     /// <summary>
-    ///
+    /// 将可空 DateTimeOffset 属性映射为 bigint Unix 时间戳
     /// </summary>
-    /// <param name="builder"></param>
-    /// <param name="milliseconds"></param>
-    /// <returns></returns>
+    /// <param name="builder">属性构建器</param>
+    /// <param name="milliseconds">是否使用毫秒级时间戳，默认秒级</param>
+    /// <returns>属性构建器</returns>
     public static PropertyBuilder<DateTimeOffset?> UseUnixTime(this PropertyBuilder<DateTimeOffset?> builder,
         bool milliseconds = false)
     {
@@ -36,11 +36,11 @@ public static class UnixTimePropertyExtensions
     }
 
     /// <summary>
-    ///
+    /// 将不可空 DateTimeOffset 属性映射为 bigint Unix 时间戳
     /// </summary>
-    /// <param name="builder"></param>
-    /// <param name="milliseconds"></param>
-    /// <returns></returns>
+    /// <param name="builder">属性构建器</param>
+    /// <param name="milliseconds">是否使用毫秒级时间戳，默认秒级</param>
+    /// <returns>属性构建器</returns>
     public static PropertyBuilder<DateTimeOffset> UseUnixTime(this PropertyBuilder<DateTimeOffset> builder,
         bool milliseconds = false)
     {

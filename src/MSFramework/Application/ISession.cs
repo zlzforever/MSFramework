@@ -3,7 +3,8 @@ using System.Collections.Generic;
 namespace MicroserviceFramework.Application;
 
 /// <summary>
-///
+/// 当前请求会话信息，包含用户身份和设备上下文。
+/// 通过 DI 注入，生命周期 Scoped。
 /// </summary>
 public interface ISession
 {
@@ -47,6 +48,13 @@ public interface ISession
     /// 主要用于权限系统进行检测
     /// </summary>
     IReadOnlyCollection<string> Subjects { get; }
+
+    /// <summary>
+    /// 从请求头中提取指定字段的值。返回 <c>null</c> 表示 Header 中不存在该字段。
+    /// </summary>
+    /// <param name="field">要提取的字段</param>
+    /// <returns>Header 原始值，或 null</returns>
+    string GetValue(SessionField field);
 
     /// <summary>
     /// 覆盖当前用户的信息

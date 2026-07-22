@@ -24,12 +24,12 @@ public static class EnumerableExtensions
         }
 
         /// <summary>
-        ///
+        /// 使用指定分隔符连接集合中每个元素的指定属性
         /// </summary>
-        /// <param name="separator"></param>
-        /// <param name="selector"></param>
-        /// <typeparam name="TProperty"></typeparam>
-        /// <returns></returns>
+        /// <param name="separator">分隔符</param>
+        /// <param name="selector">属性选择器</param>
+        /// <typeparam name="TProperty">属性类型</typeparam>
+        /// <returns>拼接后的字符串</returns>
         public string JoinSeparator<TProperty>(string separator, Func<T, TProperty> selector)
         {
             return string.Join(separator, enumerable.Select(selector));

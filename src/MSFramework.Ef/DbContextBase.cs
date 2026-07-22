@@ -20,7 +20,7 @@ using Microsoft.EntityFrameworkCore.Metadata;
 namespace MicroserviceFramework.Ef;
 
 /// <summary>
-///
+/// EF Core DbContext 基类，集成领域事件分发、审计追踪和工作单元支持
 /// </summary>
 public abstract class DbContextBase : DbContext
 {
@@ -45,8 +45,8 @@ public abstract class DbContextBase : DbContext
     private static readonly IModelBuildingStrategy[] ModelBuildingStrategies =
     [
         new RegisterEntityConfigurationsStrategy(),
-        new EntityTableConfigurationStrategy(),
-        new EntityPropertyConfigurationStrategy()
+        new EntityTableConventionStrategy(),
+        new EntityPropertyConventionStrategy()
     ];
 
     // private readonly ISession _session;
@@ -83,8 +83,8 @@ public abstract class DbContextBase : DbContext
     /// 只会调用一次，创建上下文数据模型时，对各个实体类的数据库映射细节进行配置。
     /// 通过 <see cref="ModelBuildingStrategies"/> 管道依次执行：
     ///   1. 注册实体类型配置（IEntityTypeConfiguration）
-    ///   2. 实体表级配置（表名 + 软删除过滤器）
-    ///   3. 实体属性级配置（列名 + 列类型 + 乐观锁）
+    /// 策略 2: 实体表级约定补全（表名 + 软删除过滤器）
+    ///   3. 实体属性级约定补全（列名 + 列类型 + 乐观锁 + 审计字段）
     /// </summary>
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -97,18 +97,19 @@ public abstract class DbContextBase : DbContext
         var entityConfigurationTypeFinder = this.GetService<IEntityConfigurationTypeFinder>();
         modelBuilder.HasAnnotation("DatabaseType", settings.DatabaseType);
 
+        // 子类扩展点：在所有内置策略执行完毕后，应用自定义配置
+        ApplyConfiguration(modelBuilder);
+
+        // 默认策略应该在最后，用于保证如表、列命名的统一性。
         var ctx = new ModelBuildingContext(modelBuilder, settings, entityConfigurationTypeFinder, GetType());
         foreach (var modelBuildingStrategy in ModelBuildingStrategies)
         {
             modelBuildingStrategy.Apply(ctx);
         }
-
-        // 子类扩展点：在所有内置策略执行完毕后，应用自定义配置
-        ApplyConfiguration(modelBuilder);
     }
 
     /// <summary>
-    /// [向后兼容] 表名重命名逻辑已迁移至 <see cref="EntityTableConfigurationStrategy"/>。
+    /// [向后兼容] 表名重命名逻辑已迁移至 <see cref="EntityTableConventionStrategy"/>。
     /// 默认的 <see cref="OnModelCreating"/> 不再调用此方法。
     /// 子类若重写了 <see cref="OnModelCreating"/> 仍可手动调用。
     /// </summary>
@@ -135,15 +136,15 @@ public abstract class DbContextBase : DbContext
     }
 
     /// <summary>
-    ///
+    /// 子类实现以配置实体映射
     /// </summary>
-    /// <param name="modelBuilder"></param>
+    /// <param name="modelBuilder">模型构建器</param>
     protected abstract void ApplyConfiguration(ModelBuilder modelBuilder);
 
     /// <summary>
-    ///
+    /// 获取变更追踪中的审计实体集合
     /// </summary>
-    /// <returns></returns>
+    /// <returns>审计实体枚举</returns>
     public virtual IEnumerable<AuditEntity> GetAuditEntities()
     {
         foreach (var entry in ChangeTracker.Entries())
@@ -170,11 +171,11 @@ public abstract class DbContextBase : DbContext
     }
 
     /// <summary>
-    ///
+    /// 保存所有更改，并在提交前分发领域事件
     /// </summary>
-    /// <param name="acceptAllChangesOnSuccess"></param>
-    /// <param name="cancellationToken"></param>
-    /// <returns></returns>
+    /// <param name="acceptAllChangesOnSuccess">成功后是否接受所有更改</param>
+    /// <param name="cancellationToken">取消令牌</param>
+    /// <returns>受影响的行数</returns>
     public override async Task<int> SaveChangesAsync(bool acceptAllChangesOnSuccess,
         CancellationToken cancellationToken = new())
     {
@@ -258,12 +259,12 @@ public abstract class DbContextBase : DbContext
     }
 
     /// <summary>
-    ///
+    /// 获取实体变更的审计信息
     /// </summary>
-    /// <param name="entry"></param>
-    /// <param name="operationType"></param>
-    /// <returns></returns>
-    /// <exception cref="ArgumentOutOfRangeException"></exception>
+    /// <param name="entry">实体跟踪条目</param>
+    /// <param name="operationType">操作类型</param>
+    /// <returns>审计实体信息</returns>
+    /// <exception cref="ArgumentOutOfRangeException">操作类型超出预期范围</exception>
     protected virtual AuditEntity GetAuditEntity(EntityEntry entry, OperationType operationType)
     {
         var type = entry.Entity.GetType();
