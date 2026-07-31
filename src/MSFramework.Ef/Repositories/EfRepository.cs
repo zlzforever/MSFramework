@@ -87,25 +87,6 @@ public class EfRepository<TAggregateRoot> : IRepository<TAggregateRoot>, IEfRepo
     }
 
     /// <summary>
-    /// 获取可查询的聚合根集合，默认包含第一级导航属性
-    /// </summary>
-    /// <returns>聚合根查询对象</returns>
-    public virtual IQueryable<TAggregateRoot> GetQueryable()
-    {
-        return Store;
-    }
-
-    /// <summary>
-    /// 异步获取可查询的聚合根集合，默认包含第一级导航属性
-    /// </summary>
-    /// <param name="cancellationToken">取消令牌</param>
-    /// <returns>聚合根查询对象</returns>
-    public virtual Task<IQueryable<TAggregateRoot>> GetQueryableAsync(CancellationToken cancellationToken = default)
-    {
-        return Task.FromResult(Store);
-    }
-
-    /// <summary>
     /// 通过表达式谓词查找聚合根。
     /// 复合主键实体无单一 TKey，须通过成员等值谓词（如 <c>x =&gt; x.OrderId == orderId &amp;&amp; x.ProductId == productId</c>）定位；
     /// 对实现 <see cref="IDeletion"/> 的实体，已软删除的记录视为不存在（返回 null），与既有全局查询过滤器行为保持一致。

@@ -1,5 +1,4 @@
 using System;
-using System.Linq;
 using System.Linq.Expressions;
 using System.Threading;
 using System.Threading.Tasks;
@@ -25,19 +24,6 @@ public interface IRepository;
 public interface IRepository<TAggregateRoot> : IRepository
     where TAggregateRoot : IAggregateRoot
 {
-    /// <summary>
-    /// 获取可查询的聚合根集合，默认包含第一级导航属性
-    /// </summary>
-    /// <returns>聚合根查询对象</returns>
-    IQueryable<TAggregateRoot> GetQueryable();
-
-    /// <summary>
-    /// 异步获取可查询的聚合根集合，默认包含第一级导航属性
-    /// </summary>
-    /// <param name="cancellationToken">取消令牌</param>
-    /// <returns>聚合根查询对象</returns>
-    Task<IQueryable<TAggregateRoot>> GetQueryableAsync(CancellationToken cancellationToken = default);
-
     /// <summary>
     /// 通过表达式谓词查找聚合根，未找到或已软删除返回 null
     /// </summary>

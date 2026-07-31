@@ -173,7 +173,7 @@ public class KeylessRepositoryTests
     }
 
     [Fact]
-    public async Task GetQueryable_FiltersByPredicate()
+    public async Task FindAsync_MultipleRows_PicksMatchingEntity()
     {
         using var host = CreateHost();
         using var context = host.Provider.GetRequiredService<KeylessTestContext>();
@@ -183,22 +183,9 @@ public class KeylessRepositoryTests
         repository.Add(new OrderLine("O1", "P2", "banana"));
         await context.SaveChangesAsync();
 
-        var result = repository.GetQueryable().Where(x => x.OrderId == "O1" && x.ProductId == "P1").Single();
+        var result = await repository.FindAsync(x => x.OrderId == "O1" && x.ProductId == "P1");
+        Assert.NotNull(result);
         Assert.Equal("apple", result.Name);
-    }
-
-    [Fact]
-    public async Task GetQueryableAsync_ReturnsQueryable()
-    {
-        using var host = CreateHost();
-        using var context = host.Provider.GetRequiredService<KeylessTestContext>();
-        var repository = CreateRepository(host.Provider);
-
-        repository.Add(new OrderLine("O1", "P1", "apple"));
-        await context.SaveChangesAsync();
-
-        var queryable = await repository.GetQueryableAsync();
-        Assert.Single(queryable);
     }
 
     [Fact]
@@ -322,6 +309,5 @@ public class KeylessRepositoryTests
         var repository = scope.ServiceProvider.GetRequiredService<IRepository<OrderLine>>();
 
         Assert.IsType<EfRepository<OrderLine>>(repository);
-        Assert.NotNull(repository.GetQueryable());
     }
 }
