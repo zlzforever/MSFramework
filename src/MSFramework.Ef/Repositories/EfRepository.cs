@@ -187,27 +187,27 @@ public class EfRepository<TEntity, TKey> : EfRepository<TEntity>, IRepository<TE
 
     /// <summary>
     /// 根据主键查找实体。
-    /// 使用 <see cref="DbSet{TEntity}.Find"/> 按主键值查找，支持单键与复合键值对象（通过值转换器映射）两种场景；
+    /// 经 <c>Store</c>（默认包含第一级导航属性）以主键等值谓词查询，支持单键与复合键值对象（通过值转换器映射）两种场景；
     /// 对实现 <see cref="IDeletion"/> 的实体，已软删除的记录视为不存在（返回 null），与既有全局查询过滤器行为保持一致。
     /// </summary>
-    /// <param name="id">实体主键（单键或复合键值对象）</param>
+    /// <param name="id">实体主键（单键或复合键值对象）；传 null 时返回 null 不抛异常</param>
     /// <returns>匹配的实体，未找到或已软删除则返回 null</returns>
     public virtual TEntity Find(TKey id)
     {
-        var entity = DbSet.Find(id);
+        var entity = Store.FirstOrDefault(x => x.Id.Equals(id));
         return entity is IDeletion { IsDeleted: true } ? null : entity;
     }
 
     /// <summary>
     /// 异步根据主键查找实体。
-    /// 使用 <see cref="DbSet{TEntity}.FindAsync(object[])"/> 按主键值查找，支持单键与复合键值对象（通过值转换器映射）两种场景；
+    /// 经 <c>Store</c>（默认包含第一级导航属性）以主键等值谓词查询，支持单键与复合键值对象（通过值转换器映射）两种场景；
     /// 对实现 <see cref="IDeletion"/> 的实体，已软删除的记录视为不存在（返回 null），与既有全局查询过滤器行为保持一致。
     /// </summary>
-    /// <param name="id">实体主键（单键或复合键值对象）</param>
+    /// <param name="id">实体主键（单键或复合键值对象）；传 null 时返回 null 不抛异常</param>
     /// <returns>匹配的实体，未找到或已软删除则返回 null</returns>
     public virtual async Task<TEntity> FindAsync(TKey id)
     {
-        var entity = await DbSet.FindAsync(id);
+        var entity = await Store.FirstOrDefaultAsync(x => x.Id.Equals(id));
         return entity is IDeletion { IsDeleted: true } ? null : entity;
     }
 

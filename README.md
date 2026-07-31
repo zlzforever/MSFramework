@@ -611,7 +611,8 @@ public class CompositeOrderItemConfiguration
         builder.ConfigureCompositeKey(
             x => x.Id,
             key => key.ToString(),
-            OrderItemKey.Parse);
+            OrderItemKey.Parse,
+            maxLength: 128); // 可选：主键列长度，默认 string 列 varchar(255)
         // 业务列配置...
     }
 }
@@ -667,7 +668,9 @@ var item = await multiColumnOrderItemRepository.FindAsync(
 | 值对象键必须不可变 | `record` / `record struct`，自动满足 `TKey : IEquatable<TKey>` |
 | 键成员必须为标量类型 | string/int/Guid/枚举等可映射列类型，成员数 ≥ 2 |
 | 键类型必须为具名类型 | 非泛型、非嵌套（源码生成器 display string 切分约束） |
+| 键成员值不得含 `\|` | 审计 `EntityId` 以 `\|` 拼接多键值（如 `O1\|P1`），键成员值若含 `\|` 将导致 `EntityId` 有歧义 |
 | 完整键值才能定位 | `Find/Delete(TKey)` 必须提供完整复合键；部分键查询走表达式谓词 |
+| `Find(null)` 行为 | 单键 `Find/FindAsync(null)` 返回 null 不抛异常；复合键必须传完整键值 |
 | EF Core 10 限制 | 复杂类型/owned 类型成员**不能**作主键（EF 11 起支持），方案 A 使用 ValueConverter 单列映射 |
 | 软删除 / 乐观锁 / 审计 | 按实体整体处理，与复合键天然兼容；审计 `EntityId` 以 `\|` 拼接多键值 |
 | 现有单键 API | 完全不变，两种方式均为纯新增 |

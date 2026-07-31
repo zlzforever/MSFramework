@@ -85,6 +85,7 @@ public static class EntityTypeBuilderExtensions
     /// <param name="toDatabaseValue">值对象到数据库字符串的转换委托（如 <c>v =&gt; v.ToString()</c>）</param>
     /// <param name="fromDatabaseValue">数据库字符串到值对象的转换委托（如 <c>s =&gt; OrderItemKey.Parse(s)</c>）</param>
     /// <param name="columnName">主键列名，为空时使用主键属性名（由 snake_case 约定转换）</param>
+    /// <param name="maxLength">主键列最大长度，为空时使用数据库默认长度（string 列默认 <c>varchar(255)</c>）</param>
     /// <returns>实体类型构建器，便于链式调用</returns>
     /// <exception cref="ArgumentNullException">keyExpression / toDatabaseValue / fromDatabaseValue 为空时抛出</exception>
     public static EntityTypeBuilder<TEntity> ConfigureCompositeKey<TEntity, TKey>(
@@ -92,7 +93,8 @@ public static class EntityTypeBuilderExtensions
         Expression<Func<TEntity, TKey>> keyExpression,
         Func<TKey, string> toDatabaseValue,
         Func<string, TKey> fromDatabaseValue,
-        string? columnName = null)
+        string columnName = null,
+        int? maxLength = null)
         where TEntity : class, IEntity<TKey>
         where TKey : IEquatable<TKey>
     {
@@ -106,6 +108,11 @@ public static class EntityTypeBuilderExtensions
         if (!string.IsNullOrWhiteSpace(columnName))
         {
             propertyBuilder.HasColumnName(columnName);
+        }
+
+        if (maxLength.HasValue)
+        {
+            propertyBuilder.HasMaxLength(maxLength.Value);
         }
 
         var keySelector = Expression.Lambda<Func<TEntity, object>>(
