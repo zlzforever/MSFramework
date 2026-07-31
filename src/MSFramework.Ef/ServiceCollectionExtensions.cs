@@ -86,6 +86,9 @@ public static partial class ServiceCollectionExtensions
         services.TryAddScoped(typeof(IExternalEntityRepository<,>), typeof(ExternalEntityRepository<,>));
         var repoInterface = typeof(IRepository<,>);
         services.TryAddScoped(repoInterface, typeof(EfRepository<,>));
+        // 无键仓储开放泛型注册：面向实现非泛型 IAggregateRoot 的复合主键聚合根
+        var keylessRepoInterface = typeof(IRepository<>);
+        services.TryAddScoped(keylessRepoInterface, typeof(EfRepository<>));
 
         // var repoMethodsCount = repoInterface.GetMethods().Length;
 
@@ -108,7 +111,7 @@ public static partial class ServiceCollectionExtensions
                 }
 
                 var repoInterfaceType = type.GetInterfaces().FirstOrDefault(x =>
-                    x.IsInterface && x.GetGenericTypeDefinition() == typeof(IRepository<,>));
+                    x.IsInterface && x.IsGenericType && x.GetGenericTypeDefinition() == typeof(IRepository<,>));
                 if (repoInterfaceType != null)
                 {
                     // TODO:
