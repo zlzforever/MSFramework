@@ -63,6 +63,13 @@ public static class Extensions
                     interfaceName.Length - AggregateRootInterface.Length - 1);
                 break;
             }
+
+            // 泛型接口未命中时，检查是否实现非泛型 IAggregateRoot（复合主键多属性实体，无键）
+            if (!isAggregateRoot && interfaces.Any(x =>
+                    x.ToDisplayString() == "MicroserviceFramework.Domain.IAggregateRoot"))
+            {
+                isAggregateRoot = true;
+            }
         }
 
         return (typeSymbol, isAggregateRoot, key);

@@ -567,6 +567,80 @@ builder.Services.AddDbContext<OrderingContext>(options =>
 });
 ```
 
+### 4.6 复合主键 (Composite Primary Key)
+
+当业务标识由多个成员组成（如「订单 + 产品」唯一确定一个订单项）时，需要复合主键。MSFramework 仅支持一种复合主键建模方式（多列实体，方案 B）。
+
+#### 多列实体（方案 B，无键仓储）
+
+实体自身多个标量属性直接作主键（**无 Id 包装**），实现**非泛型** `IAggregateRoot`。
+EF Core 10 原生支持顶层标量多列 `HasKey`；配合框架的**无键仓储** `IRepository<TAggregateRoot>`
+（ABP 风格）以表达式谓词查询。
+
+```csharp
+// 1. 聚合根实现非泛型 IAggregateRoot，多个标量属性作主键
+public class MultiColumnOrderItem : EntityBase, IAggregateRoot
+{
+    protected MultiColumnOrderItem() { }
+
+    public static MultiColumnOrderItem Create(string orderId, string productId, string name, int quantity)
+        => new() { OrderId = orderId, ProductId = productId, Name = name, Quantity = quantity };
+
+    public string OrderId { get; private set; }    // 复合主键成员 1
+    public string ProductId { get; private set; }  // 复合主键成员 2
+    public string Name { get; private set; }
+    public int Quantity { get; private set; }
+}
+
+// 2. EF 映射：顶层标量多列主键
+public class MultiColumnOrderItemConfiguration
+    : EntityTypeConfigurationBase<MultiColumnOrderItem, OrderingContext>
+{
+    public override void Configure(EntityTypeBuilder<MultiColumnOrderItem> builder)
+    {
+        builder.HasKey(x => new { x.OrderId, x.ProductId });
+        // 业务列配置...
+    }
+}
+
+// 3. 仓储：源码生成器自动识别非泛型 IAggregateRoot，
+//    生成无键接口 IMultiColumnOrderItemRepository : IRepository<MultiColumnOrderItem>
+//    与实现 MultiColumnOrderItemRepository : EfRepository<MultiColumnOrderItem>
+//    查询使用成员等值谓词：
+var item = await multiColumnOrderItemRepository.FindAsync(
+    x => x.OrderId == orderId && x.ProductId == productId);
+```
+
+#### TKey 标量约束
+
+`EntityBase<TKey>` / `IRepository<TAggregateRoot, TKey>` / `EfRepository<TEntity, TKey>` 的 `TKey`
+**仅允许以下标量白名单**：
+
+- `string`
+- `int`
+- `long`
+- `ObjectId`
+- `Guid`
+
+复合主键一律走方案 B（非泛型 `EntityBase` + 无键仓储多列模式），**不**允许以值对象/record 作为
+`TKey`。该约束通过 `TKey : IEquatable<TKey>` 泛型约束 + 文档/XML 注释约定落地，
+属于**软约束（文档约定）而非编译器强制**——`IEquatable<TKey>` 只能排除不具备相等语义的类型，
+无法排除同样实现 `IEquatable<T>` 的 record 值对象，因此依赖代码评审保证白名单不被突破。
+
+#### 约束与注意事项
+
+| 约束 | 说明 |
+|------|------|
+| 主键成员必须为标量类型 | string/int/Guid/枚举等可映射列类型，成员数 ≥ 2 |
+| 多列主键用 `HasKey` 声明 | EF Core 10 原生支持顶层标量多列主键 |
+| 完整键值才能定位 | 无键仓储按成员等值谓词查询，必须提供完整主键成员 |
+| 键成员值不得含 `\|` | 审计 `EntityId` 以 `\|` 拼接多键值（如 `O1\|P1`），键成员值若含 `\|` 将导致 `EntityId` 有歧义 |
+| 软删除 / 乐观锁 / 审计 | 按实体整体处理，与复合键天然兼容；审计 `EntityId` 以 `\|` 拼接多键值 |
+| 现有单键 API | 完全不变，方案 B 为纯新增 |
+
+完整示例见 `src/Sample/Ordering.Domain/AggregateRoots/CompositeKey/` 与
+`src/Sample/Ordering.Infrastructure/EntityConfigurations/`（含 EF 迁移 `MultiColumnOrderItemSample`）。
+
 ---
 
 ## 五、API 增强

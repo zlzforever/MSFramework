@@ -6,8 +6,7 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 namespace MicroserviceFramework.Ef.Extensions;
 
 /// <summary>
-/// 审计字段扩展方法。已由 <c>EntityPropertyConventionStrategy</c> 自动处理，
-/// 实现 ICreation/IModification/IDeletion 的实体会自动获得默认配置。
+/// 实体类型构建器扩展方法：审计字段配置（已由 <c>EntityPropertyConventionStrategy</c> 自动处理，标记为过时）。
 /// </summary>
 public static class EntityTypeBuilderExtensions
 {

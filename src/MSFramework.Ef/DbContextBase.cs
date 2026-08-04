@@ -259,7 +259,9 @@ public abstract class DbContextBase : DbContext
     }
 
     /// <summary>
-    /// 获取实体变更的审计信息
+    /// 获取实体变更的审计信息。
+    /// 实体标识（<see cref="AuditEntity.EntityId"/>）取实体全部主键属性值，
+    /// 多主键（复合主键）场景按主键属性顺序以 <c>|</c> 分隔拼接，单主键场景行为与历史版本一致。
     /// </summary>
     /// <param name="entry">实体跟踪条目</param>
     /// <param name="operationType">操作类型</param>
@@ -270,7 +272,7 @@ public abstract class DbContextBase : DbContext
         var type = entry.Entity.GetType();
         var typeName = type.FullName;
 
-        string entityId = null;
+        var entityId = BuildEntityId(entry);
         var properties = new List<AuditProperty>();
         foreach (var property in entry.CurrentValues.Properties)
         {
@@ -281,12 +283,6 @@ public abstract class DbContextBase : DbContext
 
             var propertyName = property.Name;
             var propertyEntry = entry.Property(property.Name);
-            if (property.IsPrimaryKey())
-            {
-                entityId = entry.State == EntityState.Deleted
-                    ? propertyEntry.OriginalValue?.ToString()
-                    : propertyEntry.CurrentValue?.ToString();
-            }
 
             var propertyType = property.ClrType.ToString();
             string originalValue = null;
@@ -341,6 +337,31 @@ public abstract class DbContextBase : DbContext
         var auditedEntity = new AuditEntity(typeName, entityId, operationType);
         auditedEntity.AddProperties(properties);
         return auditedEntity;
+    }
+
+    /// <summary>
+    /// 按主键元数据顺序收集实体全部主键属性值，拼接为审计实体标识。
+    /// 单主键返回单个值；复合主键以 <c>|</c> 分隔拼接。
+    /// 删除（<see cref="EntityState.Deleted"/>）状态下取原始值，其余状态取当前值。
+    /// </summary>
+    /// <param name="entry">实体跟踪条目</param>
+    /// <returns>拼接后的实体标识；实体无主键时返回 null</returns>
+    private static string BuildEntityId(EntityEntry entry)
+    {
+        var primaryKey = entry.Metadata.FindPrimaryKey();
+        if (primaryKey == null)
+        {
+            return null;
+        }
+
+        var values = primaryKey.Properties.Select(p =>
+        {
+            var propertyEntry = entry.Property(p.Name);
+            return entry.State == EntityState.Deleted
+                ? propertyEntry.OriginalValue?.ToString()
+                : propertyEntry.CurrentValue?.ToString();
+        });
+        return string.Join("|", values);
     }
 
     private string GetValue(string columnType, object value)

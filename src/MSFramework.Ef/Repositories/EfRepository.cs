@@ -1,5 +1,7 @@
 using System;
 using System.Linq;
+using System.Linq.Expressions;
+using System.Threading;
 using System.Threading.Tasks;
 using MicroserviceFramework.Domain;
 using Microsoft.EntityFrameworkCore;
@@ -7,20 +9,25 @@ using Microsoft.EntityFrameworkCore;
 namespace MicroserviceFramework.Ef.Repositories;
 
 /// <summary>
-/// EF Core 仓储基类，提供聚合根的增删改查基础实现
+/// 无键 EF Core 仓储基类，面向复合主键（多属性作主键、无 Id 包装）的聚合根。
+/// <para>
+/// 为兑现非泛型 <see cref="IAggregateRoot"/> 接口「主键可能不是 Id 或为复合主键」的设计初衷而提供：
+/// 聚合根以多个标量属性直接作为主键（无 Id 包装）时，无法使用 <see cref="EfRepository{TEntity,TKey}"/>，
+/// 应继承本基类并通过表达式谓词（<see cref="FindAsync(System.Linq.Expressions.Expression{Func{TAggregateRoot,bool}},System.Threading.CancellationToken)"/>）
+/// 完成查询。<see cref="EfRepository{TEntity,TKey}"/> 继承自本类，复用 Store/查询/审计逻辑。
+/// </para>
 /// </summary>
-/// <typeparam name="TEntity">聚合根实体类型</typeparam>
-/// <typeparam name="TKey">实体主键类型</typeparam>
-public class EfRepository<TEntity, TKey> : IRepository<TEntity, TKey>, IEfRepository
-    where TEntity : class, IAggregateRoot<TKey> where TKey : IEquatable<TKey>
+/// <typeparam name="TAggregateRoot">聚合根类型，需实现非泛型 <see cref="IAggregateRoot"/></typeparam>
+public class EfRepository<TAggregateRoot> : IRepository<TAggregateRoot>, IEfRepository
+    where TAggregateRoot : class, IAggregateRoot
 {
-    private readonly DbSet<TEntity> _dbSet;
+    private readonly DbSet<TAggregateRoot> _dbSet;
     private readonly DbContextBase _dbContext;
 
     /// <summary>
     /// 获取可查询的实体集合，默认包含第一级导航属性
     /// </summary>
-    protected virtual IQueryable<TEntity> Store
+    protected virtual IQueryable<TAggregateRoot> Store
     {
         get
         {
@@ -35,11 +42,6 @@ public class EfRepository<TEntity, TKey> : IRepository<TEntity, TKey>, IEfReposi
             return field;
         }
     }
-
-    /// <summary>
-    /// 获取原始 DbSet 实例
-    /// </summary>
-    protected DbSet<TEntity> DbSet => _dbSet;
 
     /// <summary>
     /// 获取当前 DbContext 实例
@@ -57,8 +59,8 @@ public class EfRepository<TEntity, TKey> : IRepository<TEntity, TKey>, IEfReposi
     /// <param name="dbContextFactory">数据库上下文工厂</param>
     public EfRepository(DbContextFactory dbContextFactory)
     {
-        _dbContext = dbContextFactory.GetDbContext<TEntity>();
-        _dbSet = _dbContext.Set<TEntity>();
+        _dbContext = dbContextFactory.GetDbContext<TAggregateRoot>();
+        _dbSet = _dbContext.Set<TAggregateRoot>();
     }
 
     /// <summary>
@@ -69,7 +71,7 @@ public class EfRepository<TEntity, TKey> : IRepository<TEntity, TKey>, IEfReposi
     /// </summary>
     /// <param name="dbSet"></param>
     /// <returns></returns>
-    protected virtual IQueryable<TEntity> BuildQueryable(DbSet<TEntity> dbSet)
+    protected virtual IQueryable<TAggregateRoot> BuildQueryable(DbSet<TAggregateRoot> dbSet)
     {
         var queryable = dbSet.AsQueryable();
         var navigations = dbSet.EntityType.GetNavigations();
@@ -80,30 +82,43 @@ public class EfRepository<TEntity, TKey> : IRepository<TEntity, TKey>, IEfReposi
     }
 
     /// <summary>
-    /// 根据主键查找实体
+    /// 通过表达式谓词查找聚合根。
+    /// 复合主键实体无单一 TKey，须通过成员等值谓词（如 <c>x =&gt; x.OrderId == orderId &amp;&amp; x.ProductId == productId</c>）定位；
+    /// 对实现 <see cref="IDeletion"/> 的实体，已软删除的记录视为不存在（返回 null），与既有全局查询过滤器行为保持一致。
     /// </summary>
-    /// <param name="id">实体主键</param>
-    /// <returns>匹配的实体，未找到则返回 null</returns>
-    public virtual TEntity Find(TKey id)
+    /// <param name="predicate">查询谓词，用于定位聚合根</param>
+    /// <param name="cancellationToken">取消令牌</param>
+    /// <returns>匹配的聚合根，未找到或已软删除则返回 null</returns>
+    public virtual async Task<TAggregateRoot> FindAsync(
+        Expression<Func<TAggregateRoot, bool>> predicate,
+        CancellationToken cancellationToken = default)
     {
-        return Store.FirstOrDefault(x => x.Id.Equals(id));
+        ArgumentNullException.ThrowIfNull(predicate);
+        return await Store.FirstOrDefaultAsync(predicate, cancellationToken);
     }
 
     /// <summary>
-    /// 异步根据主键查找实体
+    /// 通过表达式谓词同步查找聚合根。
+    /// 复合主键实体无单一 TKey，须通过成员等值谓词（如 <c>x =&gt; x.OrderId == orderId &amp;&amp; x.ProductId == productId</c>）定位；
+    /// 对实现 <see cref="IDeletion"/> 的实体，已软删除的记录视为不存在（返回 null），与既有全局查询过滤器行为保持一致。
     /// </summary>
-    /// <param name="id">实体主键</param>
-    /// <returns>匹配的实体，未找到则返回 null</returns>
-    public virtual async Task<TEntity> FindAsync(TKey id)
+    /// <param name="predicate">查询谓词，用于定位聚合根</param>
+    /// <param name="cancellationToken">取消令牌</param>
+    /// <returns>匹配的聚合根，未找到或已软删除则返回 null</returns>
+    /// <exception cref="ArgumentNullException">predicate 为 null 时抛出</exception>
+    public virtual TAggregateRoot Find(
+        Expression<Func<TAggregateRoot, bool>> predicate,
+        CancellationToken cancellationToken = default)
     {
-        return await Store.FirstOrDefaultAsync(x => x.Id.Equals(id));
+        ArgumentNullException.ThrowIfNull(predicate);
+        return Store.FirstOrDefault(predicate);
     }
 
     /// <summary>
     /// 添加新实体到仓储
     /// </summary>
     /// <param name="entity">要添加的实体</param>
-    public virtual void Add(TEntity entity)
+    public virtual void Add(TAggregateRoot entity)
     {
         _dbSet.Add(entity);
     }
@@ -112,7 +127,7 @@ public class EfRepository<TEntity, TKey> : IRepository<TEntity, TKey>, IEfReposi
     /// 异步添加新实体到仓储
     /// </summary>
     /// <param name="entity">要添加的实体</param>
-    public virtual async Task AddAsync(TEntity entity)
+    public virtual async Task AddAsync(TAggregateRoot entity)
     {
         await _dbSet.AddAsync(entity);
     }
@@ -121,7 +136,7 @@ public class EfRepository<TEntity, TKey> : IRepository<TEntity, TKey>, IEfReposi
     /// 从仓储中删除实体
     /// </summary>
     /// <param name="entity">要删除的实体</param>
-    public virtual void Delete(TEntity entity)
+    public virtual void Delete(TAggregateRoot entity)
     {
         _dbSet.Remove(entity);
     }
@@ -131,10 +146,51 @@ public class EfRepository<TEntity, TKey> : IRepository<TEntity, TKey>, IEfReposi
     /// </summary>
     /// <param name="entity">要删除的实体</param>
     /// <returns>异步任务</returns>
-    public virtual Task DeleteAsync(TEntity entity)
+    public virtual Task DeleteAsync(TAggregateRoot entity)
     {
         Delete(entity);
         return Task.CompletedTask;
+    }
+}
+
+/// <summary>
+/// EF Core 仓储基类，提供聚合根的增删改查基础实现
+/// </summary>
+/// <typeparam name="TEntity">聚合根实体类型</typeparam>
+/// <typeparam name="TKey">实体主键类型</typeparam>
+public class EfRepository<TEntity, TKey> : EfRepository<TEntity>, IRepository<TEntity, TKey>
+    where TEntity : class, IAggregateRoot<TKey> where TKey : IEquatable<TKey>
+{
+    /// <summary>
+    /// 初始化 EfRepository 实例
+    /// </summary>
+    /// <param name="dbContextFactory">数据库上下文工厂</param>
+    public EfRepository(DbContextFactory dbContextFactory) : base(dbContextFactory)
+    {
+    }
+
+    /// <summary>
+    /// 根据主键查找实体。
+    /// 经 <c>Store</c>（默认包含第一级导航属性）以主键等值谓词查询，仅支持单键语义；
+    /// 对实现 <see cref="IDeletion"/> 的实体，已软删除的记录视为不存在（返回 null），与既有全局查询过滤器行为保持一致。
+    /// </summary>
+    /// <param name="id">实体主键（标量键，如 string/int/long/ObjectId/Guid）；传 null 时返回 null 不抛异常</param>
+    /// <returns>匹配的实体，未找到或已软删除则返回 null</returns>
+    public virtual TEntity Find(TKey id)
+    {
+        return Find(x => x.Id.Equals(id));
+    }
+
+    /// <summary>
+    /// 异步根据主键查找实体。
+    /// 经 <c>Store</c>（默认包含第一级导航属性）以主键等值谓词查询，仅支持单键语义；
+    /// 对实现 <see cref="IDeletion"/> 的实体，已软删除的记录视为不存在（返回 null），与既有全局查询过滤器行为保持一致。
+    /// </summary>
+    /// <param name="id">实体主键（标量键，如 string/int/long/ObjectId/Guid）；传 null 时返回 null 不抛异常</param>
+    /// <returns>匹配的实体，未找到或已软删除则返回 null</returns>
+    public virtual async Task<TEntity> FindAsync(TKey id)
+    {
+        return await FindAsync(x => x.Id.Equals(id));
     }
 
     /// <summary>
@@ -161,50 +217,5 @@ public class EfRepository<TEntity, TKey> : IRepository<TEntity, TKey>, IEfReposi
         {
             await DeleteAsync(entity);
         }
-    }
-
-    // protected async Task<TEntity> LoadAllNavigationsAsync(TEntity entity)
-    // {
-    // 	if (entity == null)
-    // 	{
-    // 		return null;
-    // 	}
-    //
-    // 	foreach (var navigation in DbContext.Entry(entity).Navigations)
-    // 	{
-    // 		if (!navigation.IsLoaded)
-    // 		{
-    // 			await navigation.LoadAsync();
-    // 		}
-    // 	}
-    //
-    // 	return entity;
-    // }
-
-    // protected TEntity LoadAllNavigations(TEntity entity)
-    // {
-    // 	if (entity == null)
-    // 	{
-    // 		return null;
-    // 	}
-    //
-    // 	foreach (var navigation in DbContext.Entry(entity).Navigations)
-    // 	{
-    // 		if (!navigation.IsLoaded)
-    // 		{
-    // 			navigation.Load();
-    // 		}
-    // 	}
-    //
-    // 	return entity;
-    // }
-
-    /// <summary>
-    /// 获取原始 DbSet 实例，用于高级查询操作
-    /// </summary>
-    /// <returns>DbSet 实例</returns>
-    public DbSet<TEntity> GetDbSet()
-    {
-        return _dbSet;
     }
 }
