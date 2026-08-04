@@ -44,11 +44,6 @@ public class EfRepository<TAggregateRoot> : IRepository<TAggregateRoot>, IEfRepo
     }
 
     /// <summary>
-    /// 获取原始 DbSet 实例
-    /// </summary>
-    protected DbSet<TAggregateRoot> DbSet => _dbSet;
-
-    /// <summary>
     /// 获取当前 DbContext 实例
     /// </summary>
     public DbContext DbContext => _dbContext;
@@ -103,6 +98,23 @@ public class EfRepository<TAggregateRoot> : IRepository<TAggregateRoot>, IEfRepo
     }
 
     /// <summary>
+    /// 通过表达式谓词同步查找聚合根。
+    /// 复合主键实体无单一 TKey，须通过成员等值谓词（如 <c>x =&gt; x.OrderId == orderId &amp;&amp; x.ProductId == productId</c>）定位；
+    /// 对实现 <see cref="IDeletion"/> 的实体，已软删除的记录视为不存在（返回 null），与既有全局查询过滤器行为保持一致。
+    /// </summary>
+    /// <param name="predicate">查询谓词，用于定位聚合根</param>
+    /// <param name="cancellationToken">取消令牌</param>
+    /// <returns>匹配的聚合根，未找到或已软删除则返回 null</returns>
+    /// <exception cref="ArgumentNullException">predicate 为 null 时抛出</exception>
+    public virtual TAggregateRoot Find(
+        Expression<Func<TAggregateRoot, bool>> predicate,
+        CancellationToken cancellationToken = default)
+    {
+        ArgumentNullException.ThrowIfNull(predicate);
+        return Store.FirstOrDefault(predicate);
+    }
+
+    /// <summary>
     /// 添加新实体到仓储
     /// </summary>
     /// <param name="entity">要添加的实体</param>
@@ -139,15 +151,6 @@ public class EfRepository<TAggregateRoot> : IRepository<TAggregateRoot>, IEfRepo
         Delete(entity);
         return Task.CompletedTask;
     }
-
-    /// <summary>
-    /// 获取原始 DbSet 实例，用于高级查询操作
-    /// </summary>
-    /// <returns>DbSet 实例</returns>
-    public DbSet<TAggregateRoot> GetDbSet()
-    {
-        return _dbSet;
-    }
 }
 
 /// <summary>
@@ -175,8 +178,7 @@ public class EfRepository<TEntity, TKey> : EfRepository<TEntity>, IRepository<TE
     /// <returns>匹配的实体，未找到或已软删除则返回 null</returns>
     public virtual TEntity Find(TKey id)
     {
-        var entity = Store.FirstOrDefault(x => x.Id.Equals(id));
-        return entity is IDeletion { IsDeleted: true } ? null : entity;
+        return Find(x => x.Id.Equals(id));
     }
 
     /// <summary>
@@ -188,8 +190,7 @@ public class EfRepository<TEntity, TKey> : EfRepository<TEntity>, IRepository<TE
     /// <returns>匹配的实体，未找到或已软删除则返回 null</returns>
     public virtual async Task<TEntity> FindAsync(TKey id)
     {
-        var entity = await Store.FirstOrDefaultAsync(x => x.Id.Equals(id));
-        return entity is IDeletion { IsDeleted: true } ? null : entity;
+        return await FindAsync(x => x.Id.Equals(id));
     }
 
     /// <summary>

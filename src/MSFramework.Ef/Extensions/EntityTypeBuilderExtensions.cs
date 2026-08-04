@@ -104,7 +104,9 @@ public static class EntityTypeBuilderExtensions
         ArgumentNullException.ThrowIfNull(fromDatabaseValue);
 
         var propertyBuilder = builder.Property(keyExpression);
-        propertyBuilder.HasConversion(new ValueConverter<TKey, string>(v => toDatabaseValue(v), s => fromDatabaseValue(s)));
+        propertyBuilder.HasConversion(new ValueConverter<TKey, string>(v => toDatabaseValue(v),
+            s => fromDatabaseValue(s)));
+
         if (!string.IsNullOrWhiteSpace(columnName))
         {
             propertyBuilder.HasColumnName(columnName);
