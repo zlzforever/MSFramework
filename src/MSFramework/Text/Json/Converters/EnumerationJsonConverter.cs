@@ -13,14 +13,18 @@ public class EnumerationJsonConverter<T> : JsonConverter<T> where T : Enumeratio
 {
     /// <summary>
     /// 从 JSON 字符串反序列化，通过 <see cref="Enumeration.Parse"/> 匹配 Id。
+    /// 使用 <see cref="Utf8JsonReader.GetString"/> 读取值，内部按
+    /// <see cref="Utf8JsonReader.HasValueSequence"/> 自动选择 ValueSpan/ValueSequence，
+    /// 可正确处理值跨缓冲区段边界（如 PipeReader 分块读取）的场景。
     /// </summary>
     /// <param name="reader">JSON 读取器</param>
     /// <param name="typeToConvert">目标类型</param>
     /// <param name="options">序列化选项</param>
     /// <returns>反序列化后的 Enumeration 实例</returns>
+    /// <exception cref="InvalidOperationException">值不是 <paramref name="typeToConvert"/> 的合法 Id 时抛出</exception>
     public override T Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
     {
-        var value = System.Text.Encoding.UTF8.GetString(reader.ValueSpan);
+        var value = reader.GetString();
         return Enumeration.Parse(typeToConvert, value) as T;
     }
 
