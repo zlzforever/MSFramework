@@ -20,7 +20,7 @@ public class ObjectIdJsonConverter : JsonConverter<ObjectId>
     /// <param name="typeToConvert">目标类型</param>
     /// <param name="options">序列化选项</param>
     /// <returns>反序列化后的 ObjectId，null/空字符串返回 <see cref="ObjectId.Empty"/></returns>
-    /// <exception cref="ArgumentException">值不是合法的 24 位十六进制 ObjectId 字符串时抛出</exception>
+    /// <exception cref="FormatException">值不是合法的 24 位十六进制 ObjectId 字符串时抛出</exception>
     public override ObjectId Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
     {
         System.Diagnostics.Debug.Assert(typeToConvert == typeof(ObjectId));
