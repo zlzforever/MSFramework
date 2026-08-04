@@ -45,6 +45,9 @@ public abstract class EntityBase : IEntity
 /// <summary>
 /// 实体基类
 /// </summary>
+/// <typeparam name="TKey">实体主键类型，仅限标量白名单：string / int / long / ObjectId / Guid。
+/// 该约束通过 <c>TKey : IEquatable&lt;TKey&gt;</c> 结合文档/XML 注释约定落地（非编译器强制）；
+/// 复合主键请改用非泛型 <see cref="EntityBase"/> 多列模式（方案 B）</typeparam>
 [Serializable]
 public abstract class EntityBase<TKey> : EntityBase, IEntity<TKey> where TKey : IEquatable<TKey>
 {

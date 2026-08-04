@@ -61,6 +61,10 @@ public interface IRepository<TAggregateRoot> : IRepository
 /// <summary>
 /// 仓储接口
 /// </summary>
+/// <typeparam name="TAggregateRoot">聚合根类型，需实现 <see cref="IAggregateRoot{TKey}"/></typeparam>
+/// <typeparam name="TKey">聚合根主键类型，仅限标量白名单：string / int / long / ObjectId / Guid。
+/// 该约束通过 <c>TKey : IEquatable&lt;TKey&gt;</c> 结合文档/XML 注释约定落地（非编译器强制）；
+/// 复合主键请改用无键仓储 <see cref="IRepository{TAggregateRoot}"/> 多列模式（方案 B）</typeparam>
 public interface IRepository<TAggregateRoot, in TKey> : IRepository
     where TAggregateRoot : IAggregateRoot<TKey> where TKey : IEquatable<TKey>
 {
