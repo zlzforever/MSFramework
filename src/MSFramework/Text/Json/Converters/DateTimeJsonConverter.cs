@@ -32,7 +32,15 @@ public class DateTimeJsonConverter : JsonConverter<DateTime>
                 throw new JsonException("Unix 时间戳数值超出 Int64 范围，无法转换为 DateTime");
             }
 
-            return DateTimeOffset.FromUnixTimeSeconds(v).LocalDateTime;
+            try
+            {
+                return DateTimeOffset.FromUnixTimeSeconds(v).LocalDateTime;
+            }
+            catch (ArgumentOutOfRangeException ex)
+            {
+                // 数值超出 DateTime 可表示范围，按解析失败约定统一抛 JsonException
+                throw new JsonException("Unix 时间戳数值超出 DateTime 可表示范围，无法转换为 DateTime", ex);
+            }
         }
 
         throw new NotSupportedException("不支持的数据类型");

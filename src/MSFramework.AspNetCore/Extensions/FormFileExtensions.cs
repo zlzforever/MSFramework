@@ -54,17 +54,23 @@ public static class FormFileExtensions
         var physicalPath = Path.Combine(groupPath, fileName);
         if (!File.Exists(virtualPath))
         {
-            // MD5 计算已消费流内容，回到起始位置以便重新写入
-            if (stream.CanSeek)
-            {
-                stream.Seek(0, SeekOrigin.Begin);
-            }
-
             // 并发请求可能同时进入该分支，FileMode.Create 截断写入保证幂等
             EnsureDirectory(groupPath);
             await using (var outStream = new FileStream(physicalPath, FileMode.Create, FileAccess.Write, FileShare.Read))
             {
-                await stream.CopyToAsync(outStream);
+                if (stream.CanSeek)
+                {
+                    // MD5 计算已消费流内容，回到起始位置以便重新写入
+                    stream.Seek(0, SeekOrigin.Begin);
+                    await stream.CopyToAsync(outStream);
+                }
+                else
+                {
+                    // 非可寻址流无法回退位置，重新打开读取流（IFormFile 每次调用可重新打开）
+                    // 以保证写出完整内容，而非 0 字节空文件
+                    await using var reopenedStream = formFile.OpenReadStream();
+                    await reopenedStream.CopyToAsync(outStream);
+                }
             }
 
             await CreateLinkOrCopyAsync(virtualPath, physicalPath);

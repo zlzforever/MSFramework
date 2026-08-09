@@ -48,6 +48,10 @@ internal class Audit(ILogger<Audit> logger, IServiceScopeFactory scopeFactory) :
         var scope = scopeFactory.CreateScope();
         try
         {
+            // scope 创建后无条件登记，保证未注册 IAuditingStore 或 ISession 跳过审计时，
+            // 正常完成路径与异常路径仍能统一由 finally/catch 释放，避免 scope 泄漏
+            httpContext.Items[AuditScopeKey] = scope;
+
             var auditingStores = scope.ServiceProvider.GetServices<IAuditingStore>().ToList();
             if (auditingStores.Count > 0)
             {
@@ -57,7 +61,6 @@ internal class Audit(ILogger<Audit> logger, IServiceScopeFactory scopeFactory) :
                     unitOfWork.RegisterAuditOperation(auditOperation);
 
                     // 过滤器实例被多个请求共享，可变状态统一放入 HttpContext.Items 防止跨请求串扰
-                    httpContext.Items[AuditScopeKey] = scope;
                     httpContext.Items[AuditingStoresKey] = auditingStores;
                     httpContext.Items[AuditOperationKey] = auditOperation;
                 }
