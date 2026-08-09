@@ -70,14 +70,26 @@ internal class Audit(ILogger<Audit> logger, IServiceScopeFactory scopeFactory) :
         }
         catch
         {
-            // 业务执行异常时 OnResultExecutionAsync 不会执行，此处释放 scope 防止泄漏
-            if (httpContext.Items.TryGetValue(AuditScopeKey, out var scopeItem) && scopeItem is IServiceScope leakedScope)
-            {
-                leakedScope.Dispose();
-                httpContext.Items.Remove(AuditScopeKey);
-            }
+            // 兜底：异常未走 OnActionExecuted 回调而直接传播时，此处释放 scope 防止泄漏
+            ReleaseAuditScope(httpContext);
 
             throw;
+        }
+    }
+
+    /// <summary>
+    /// Action 执行结束回调。ASP.NET Core 10 中 action 异常由异常过滤器处理后不传播进
+    /// <see cref="OnActionExecutionAsync"/> 的 catch，而是携带在 <paramref name="context"/>.Exception 上，
+    /// 且异常短路路径下结果过滤器（OnResultExecutionAsync）不再执行，因此必须在此释放审计 scope。
+    /// </summary>
+    /// <param name="context">Action 执行结果上下文，异常发生时 Exception 非空</param>
+    public override void OnActionExecuted(ActionExecutedContext context)
+    {
+        base.OnActionExecuted(context);
+
+        if (context.Exception != null)
+        {
+            ReleaseAuditScope(context.HttpContext);
         }
     }
 
@@ -113,16 +125,26 @@ internal class Audit(ILogger<Audit> logger, IServiceScopeFactory scopeFactory) :
             }
             finally
             {
-                if (httpContext.Items.TryGetValue(AuditScopeKey, out var scopeItem) && scopeItem is IServiceScope scope)
-                {
-                    scope.Dispose();
-                }
-
-                httpContext.Items.Remove(AuditScopeKey);
+                ReleaseAuditScope(httpContext);
                 httpContext.Items.Remove(AuditingStoresKey);
                 httpContext.Items.Remove(AuditOperationKey);
                 logger.LogDebug("结束执行审计过滤器");
             }
+        }
+    }
+
+    /// <summary>
+    /// 幂等释放审计 scope：scope 已释放或未登记时不做任何操作。
+    /// 供正常完成（OnResultExecutionAsync finally）、Action 异常（OnActionExecuted）、
+    /// 异常直接传播（OnActionExecutionAsync catch）三条路径共用，保证任意路径不泄漏且不重复释放。
+    /// </summary>
+    /// <param name="httpContext">当前请求上下文，scope 登记在 HttpContext.Items 中</param>
+    private static void ReleaseAuditScope(HttpContext httpContext)
+    {
+        if (httpContext.Items.TryGetValue(AuditScopeKey, out var scopeItem) && scopeItem is IServiceScope scope)
+        {
+            scope.Dispose();
+            httpContext.Items.Remove(AuditScopeKey);
         }
     }
 
