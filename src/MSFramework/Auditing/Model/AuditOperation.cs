@@ -93,12 +93,12 @@ public class AuditOperation : CreationAggregateRoot<string>, IAuditObject
     public bool? Emulator { get; init; }
 
     /// <summary>
-    /// 经度
+    /// 纬度（Latitude）
     /// </summary>
     public decimal? Lat { get; private set; }
 
     /// <summary>
-    /// 纬度
+    /// 经度（Longitude）
     /// </summary>
     public decimal? Lng { get; private set; }
 
@@ -140,20 +140,20 @@ public class AuditOperation : CreationAggregateRoot<string>, IAuditObject
     /// <param name="ip">客户端 IP 地址</param>
     /// <param name="deviceModel">设备型号</param>
     /// <param name="deviceId">设备 ID</param>
-    /// <param name="lat">经度</param>
-    /// <param name="lng">纬度</param>
+    /// <param name="latitude">纬度</param>
+    /// <param name="longitude">经度</param>
     /// <param name="traceId">跟踪标识</param>
     /// <param name="method">HTTP 方法</param>
-    public AuditOperation(string url, string userAgent, string ip, string deviceModel, string deviceId, decimal? lat,
-        decimal? lng, string traceId, string method) : this(ObjectId.GenerateNewId().ToString())
+    public AuditOperation(string url, string userAgent, string ip, string deviceModel, string deviceId, decimal? latitude,
+        decimal? longitude, string traceId, string method) : this(ObjectId.GenerateNewId().ToString())
     {
         IP = ip;
         Path = url;
         UserAgent = userAgent;
         DeviceModel = deviceModel;
         DeviceId = deviceId;
-        Lat = lat;
-        Lng = lng;
+        Lat = latitude;
+        Lng = longitude;
         TraceId = traceId;
         Method = method;
     }

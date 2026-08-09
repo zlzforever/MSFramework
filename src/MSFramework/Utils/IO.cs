@@ -13,36 +13,35 @@ public static class IO
     extension(Stream stream)
     {
         /// <summary>
-        /// 流保存到文件
+        /// 流保存到文件，目标文件已存在时截断重写
         /// </summary>
-        /// <param name="path"></param>
+        /// <param name="path">目标文件路径</param>
         public void SaveToFile(string path)
         {
-            using var fileStream = File.Open(path, FileMode.OpenOrCreate);
+            using var fileStream = File.Open(path, FileMode.Create);
             stream.CopyTo(fileStream);
         }
 
         /// <summary>
-        /// 流转换成 byte[]
+        /// 将流当前位置到末尾的内容异步读取为 byte[]，不依赖 Seek 支持
         /// </summary>
+        /// <returns>流内容字节数组</returns>
         public async Task<byte[]> ToArrayAsync()
         {
-            stream.Seek(0, SeekOrigin.Begin);
             using var ms = new MemoryStream();
             await stream.CopyToAsync(ms);
             return ms.ToArray();
         }
 
         /// <summary>
-        /// 流转换成 byte[]
+        /// 将流当前位置到末尾的内容读取为 byte[]，不依赖 Seek 支持
         /// </summary>
-        /// <returns></returns>
+        /// <returns>流内容字节数组</returns>
         public byte[] ToArray()
         {
-            stream.Seek(0, SeekOrigin.Begin);
-            var bytes = new byte[stream.Length];
-            _ = stream.Read(bytes);
-            return bytes;
+            using var ms = new MemoryStream();
+            stream.CopyTo(ms);
+            return ms.ToArray();
         }
     }
 

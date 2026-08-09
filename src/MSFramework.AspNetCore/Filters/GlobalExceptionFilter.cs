@@ -46,15 +46,15 @@ internal class GlobalExceptionFilter(ILogger<GlobalExceptionFilter> logger) : IE
             logger.LogWarning(context.Exception, "请求 {Method} {Url} 异常", context.HttpContext.Request.Method,
                 context.HttpContext.Request.GetDisplayUrl());
         }
-        else if (context.Exception.InnerException is MicroserviceFrameworkFriendlyException innerException)
+        else if (FindFriendlyException(context.Exception) is { } friendlyException)
         {
             context.HttpContext.Response.StatusCode = 200;
             context.Result = new ObjectResult(new ApiResult
             {
-                Success = false, Msg = innerException.Message, Code = innerException.Code, Data = null
+                Success = false, Msg = friendlyException.Message, Code = friendlyException.Code, Data = null
             });
 
-            logger.LogWarning(innerException, "请求 {Method} {Url} 异常", context.HttpContext.Request.Method,
+            logger.LogWarning(friendlyException, "请求 {Method} {Url} 异常", context.HttpContext.Request.Method,
                 context.HttpContext.Request.GetDisplayUrl());
         }
         else
@@ -70,5 +70,24 @@ internal class GlobalExceptionFilter(ILogger<GlobalExceptionFilter> logger) : IE
         }
 
         context.ExceptionHandled = true;
+    }
+
+    /// <summary>
+    /// 遍历异常链查找 <see cref="MicroserviceFrameworkFriendlyException"/>，
+    /// 支持任意嵌套深度的 InnerException 包装，找不到返回 null
+    /// </summary>
+    /// <param name="exception">根异常</param>
+    /// <returns>异常链中的友好异常，不存在时返回 null</returns>
+    private static MicroserviceFrameworkFriendlyException FindFriendlyException(Exception exception)
+    {
+        for (var current = exception; current != null; current = current.InnerException)
+        {
+            if (current is MicroserviceFrameworkFriendlyException friendlyException)
+            {
+                return friendlyException;
+            }
+        }
+
+        return null;
     }
 }

@@ -27,9 +27,12 @@ public class DateTimeJsonConverter : JsonConverter<DateTime>
 
         if (reader.TokenType == JsonTokenType.Number)
         {
-            return reader.TryGetInt32(out var v)
-                ? DateTimeOffset.FromUnixTimeSeconds(v).LocalDateTime
-                : DateTime.UnixEpoch;
+            if (!reader.TryGetInt64(out var v))
+            {
+                throw new JsonException("Unix 时间戳数值超出 Int64 范围，无法转换为 DateTime");
+            }
+
+            return DateTimeOffset.FromUnixTimeSeconds(v).LocalDateTime;
         }
 
         throw new NotSupportedException("不支持的数据类型");

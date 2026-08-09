@@ -1,29 +1,38 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
 using Newtonsoft.Json.Serialization;
 
 namespace MicroserviceFramework.Serialization.Newtonsoft;
 
 /// <summary>
-///     组合多个 IContractResolver 的合成解析器，按添加顺序依次尝试解析合约
+///     组合多个 IContractResolver 的合成解析器，按添加顺序返回第一个「非 null」合约。
+///     解析器对不匹配的类型应返回 null（如 <see cref="EnumerationContractResolver"/>），
+///     以便后续解析器（如 camelCase）生效；所有解析器均未命中时回退默认合约。
 /// </summary>
 public class CompositeContractResolver : IContractResolver, IEnumerable<IContractResolver>
 {
+    private static readonly DefaultContractResolver FallbackResolver = new();
     private readonly IList<IContractResolver> _contractResolvers = new List<IContractResolver>();
 
     /// <summary>
-    ///     按顺序尝试每个合约解析器，返回第一个成功的合约
+    ///     按顺序尝试每个合约解析器，返回第一个非 null 的合约；
+    ///     全部未命中时回退到 <see cref="DefaultContractResolver"/>，避免返回 null
     /// </summary>
     /// <param name="type">对象类型</param>
     /// <returns>JSON 合约</returns>
     public JsonContract ResolveContract(Type type)
     {
-        return
-            _contractResolvers
-                .Select(x => x.ResolveContract(type))
-                .FirstOrDefault();
+        foreach (var contractResolver in _contractResolvers)
+        {
+            var contract = contractResolver.ResolveContract(type);
+            if (contract != null)
+            {
+                return contract;
+            }
+        }
+
+        return FallbackResolver.ResolveContract(type);
     }
 
     /// <summary>

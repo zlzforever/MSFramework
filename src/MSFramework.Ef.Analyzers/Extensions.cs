@@ -26,11 +26,38 @@ public static class Extensions
     {
         // Ordering.Domain.AggregateRoots.Product -> Ordering.Domain.Interface
         // Ordering.Domain.AggregateRoots.Product -> Ordering.Infrastructure.Interface
-        var tmp = fullName.Replace("AggregateRoots", "Repositories")
-            .Replace("Aggregates", "Repositories");
+        var tmp = ReplaceNamespaceSegment(fullName, "AggregateRoots", "Repositories");
+        tmp = ReplaceNamespaceSegment(tmp, "Aggregates", "Repositories");
+        // 全局命名空间（无 '.' 分隔符）时直接返回，避免 LastIndexOf 为 -1 时 Substring 崩溃
         var index = tmp.LastIndexOf('.');
+        if (index <= 0)
+        {
+            return tmp;
+        }
+
         var final = tmp.Substring(0, index);
         return final;
+    }
+
+    /// <summary>
+    /// 按命名空间段精确替换，避免 Replace 全量替换误伤其他包含该子串的段
+    /// </summary>
+    /// <param name="fullName">完整命名空间</param>
+    /// <param name="segment">待替换的命名空间段</param>
+    /// <param name="replacement">替换后的命名空间段</param>
+    /// <returns>替换后的命名空间</returns>
+    public static string ReplaceNamespaceSegment(string fullName, string segment, string replacement)
+    {
+        var parts = fullName.Split('.');
+        for (var i = 0; i < parts.Length; i++)
+        {
+            if (parts[i] == segment)
+            {
+                parts[i] = replacement;
+            }
+        }
+
+        return string.Join(".", parts);
     }
 
     public static (ITypeSymbol Type, bool IsAggregateRoot, string Key) GetAggregateRootInfo(

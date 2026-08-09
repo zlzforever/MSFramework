@@ -26,7 +26,12 @@ public class DateTimeOffsetJsonConverter : JsonConverter<DateTimeOffset>
 
         if (reader.TokenType == JsonTokenType.Number)
         {
-            return reader.TryGetInt32(out var v) ? DateTimeOffset.FromUnixTimeSeconds(v) : DateTimeOffset.UnixEpoch;
+            if (!reader.TryGetInt64(out var v))
+            {
+                throw new JsonException("Unix 时间戳数值超出 Int64 范围，无法转换为 DateTimeOffset");
+            }
+
+            return DateTimeOffset.FromUnixTimeSeconds(v);
         }
 
         throw new NotSupportedException("不支持的数据类型");

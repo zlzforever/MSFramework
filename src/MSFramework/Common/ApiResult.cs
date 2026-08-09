@@ -77,14 +77,16 @@ public class ApiResult : ApiResult<object>
     public static readonly Type GenericType = typeof(ApiResult<>);
 
     /// <summary>
-    /// 成功的响应结果实例
+    /// 返回一个新的成功响应结果实例。
+    /// 每次访问都创建新实例，避免共享可变静态实例被调用方篡改后影响其他请求
     /// </summary>
-    public static readonly ApiResult Ok = new() { Code = 0, Success = true, Msg = string.Empty, Data = null };
+    public static ApiResult Ok => new() { Code = 0, Success = true, Msg = string.Empty, Data = null };
 
     /// <summary>
-    /// 失败的响应结果实例
+    /// 返回一个新的失败响应结果实例。
+    /// 每次访问都创建新实例，避免共享可变静态实例被调用方篡改后影响其他请求
     /// </summary>
-    public static readonly ApiResult Error = new() { Code = 1, Success = false, Msg = "服务器内部错误", Data = null };
+    public static ApiResult Error => new() { Code = 1, Success = false, Msg = "服务器内部错误", Data = null };
 
     /// <summary>
     /// 判断指定类型是否为 API 响应结果类型（含泛型和非泛型）
