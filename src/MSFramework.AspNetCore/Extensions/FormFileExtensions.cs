@@ -48,8 +48,11 @@ public static class FormFileExtensions
         var level2 = md5.Substring(2, 2);
         var fileName = $"{md5}{extension}";
         // upload/20251225/C4CA4238A0B923820DCC509A6F75849B.txt
-        var virtualPath = Path.Combine(virtualDirectory, fileName);
         var intervalPath = Path.Combine(intervalDirectory, fileName);
+        // Path.Combine 存在可空参数重载（返回 string?），此处入参均为非空字符串，
+        // 结果不可能为 null；显式判空兜底以消除静态分析空值告警，并保证后续使用恒非空
+        var virtualPath = Path.Combine(virtualDirectory, fileName)
+            ?? throw new InvalidOperationException($"无法生成虚拟文件路径: {intervalPath}");
         var groupPath = Path.Combine(Defaults.LocalOSSDirectory, level1, level2);
         var physicalPath = Path.Combine(groupPath, fileName);
         if (!File.Exists(virtualPath))
@@ -73,7 +76,7 @@ public static class FormFileExtensions
                 }
             }
 
-            await CreateLinkOrCopyAsync(virtualPath, physicalPath);
+            CreateLinkOrCopy(virtualPath, physicalPath);
         }
 
         return new SaveResult { Name = formFile.FileName, Path = intervalPath, PhysicalPath = physicalPath };
@@ -100,9 +103,9 @@ public static class FormFileExtensions
     /// 为虚拟路径创建指向物理文件的符号链接；
     /// 符号链接创建失败（文件系统不支持或无权限）时降级为文件复制并记录告警日志
     /// </summary>
-    /// <param name="virtualPath">虚拟文件路径</param>
-    /// <param name="physicalPath">物理文件路径</param>
-    private static async Task CreateLinkOrCopyAsync(string virtualPath, string physicalPath)
+    /// <param name="virtualPath">虚拟文件路径（必须非空，调用方保证）</param>
+    /// <param name="physicalPath">物理文件路径（必须非空，调用方保证）</param>
+    private static void CreateLinkOrCopy(string virtualPath, string physicalPath)
     {
         if (File.Exists(virtualPath))
         {
