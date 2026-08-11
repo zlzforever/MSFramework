@@ -3,7 +3,7 @@ using System.Collections.Generic;
 namespace MicroserviceFramework.AspNetCore.Filters;
 
 /// <summary>
-/// Filter 的顺序，越大则先运行
+/// Filter 的执行顺序：Order 越小越先执行（进入阶段按 Order 升序，退出阶段按降序反向执行）
 /// </summary>
 public static class Constants
 {
@@ -26,6 +26,12 @@ public static class Constants
     ///     审计过滤器执行顺序
     /// </summary>
     public const int Audit = 1002;
+
+    /// <summary>
+    ///     审计异常兜底过滤器执行顺序：取最小值，保证在所有异常过滤器之后执行，
+    ///     从而确定 action 异常是否已被其他异常过滤器处理
+    /// </summary>
+    public const int AuditExceptionRelease = int.MinValue;
 
     /// <summary>
     /// HTTP 写操作方法集合（POST、DELETE、PATCH、PUT）
