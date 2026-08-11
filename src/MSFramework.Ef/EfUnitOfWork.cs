@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
+using MicroserviceFramework.Auditing;
 using MicroserviceFramework.Auditing.Model;
 using MicroserviceFramework.Domain;
 
@@ -14,7 +15,6 @@ internal class EfUnitOfWork : IUnitOfWork
 {
     private readonly DbContextFactory _dbContextFactory;
     private readonly HashSet<DbContextBase> _subscribedContexts = [];
-    private AuditOperation _auditOperation;
 
     /// <summary>
     /// 初始化工作单元管理器
@@ -36,10 +36,9 @@ internal class EfUnitOfWork : IUnitOfWork
             return;
         }
 
-        // 仅记录当前请求的最新审计操作，SavingChanges 处理器按当前请求解析
-        _auditOperation = auditOperation;
-
-        // 每个 DbContext 只订阅一次，避免重复调用 RegisterAuditOperation 时处理器无限累积
+        // 每个 DbContext 只订阅一次，避免重复调用 RegisterAuditOperation 时处理器无限累积；
+        // 审计操作本身不再存储，由请求执行流（AuditOperationContext.AsyncLocal）承载，
+        // SavingChanges 处理器在自身执行流中读取，从根源消除池化 DbContext 下残留订阅读错对象的跨请求污染
         foreach (var dbContextBase in _dbContextFactory.GetAllDbContexts())
         {
             if (_subscribedContexts.Add(dbContextBase))
@@ -50,7 +49,7 @@ internal class EfUnitOfWork : IUnitOfWork
     }
 
     /// <summary>
-    /// DbContext 保存前的审计实体收集处理器，按当前请求的 AuditOperation 收集实体
+    /// DbContext 保存前的审计实体收集处理器，从当前执行流的 <see cref="AuditOperationContext"/> 读取审计操作并收集实体
     /// </summary>
     /// <param name="sender">触发保存的 DbContext</param>
     /// <param name="args">事件参数</param>
@@ -61,7 +60,8 @@ internal class EfUnitOfWork : IUnitOfWork
             return;
         }
 
-        var auditOperation = _auditOperation;
+        // 仅当当前执行流承载审计操作时才收集，避免无审计请求或跨请求残留值被误收集
+        var auditOperation = AuditOperationContext.Value;
         if (auditOperation == null)
         {
             return;
@@ -90,7 +90,6 @@ internal class EfUnitOfWork : IUnitOfWork
         }
 
         _subscribedContexts.Clear();
-        _auditOperation = null;
         SavedChanges = null;
     }
 }

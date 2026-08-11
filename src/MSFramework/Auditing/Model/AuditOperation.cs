@@ -130,6 +130,7 @@ public class AuditOperation : CreationAggregateRoot<string>, IAuditObject
     private AuditOperation(string id) : base(id)
     {
         Entities = new List<AuditEntity>();
+        _collectedEntityKeys = [];
     }
 
     /// <summary>
@@ -159,13 +160,38 @@ public class AuditOperation : CreationAggregateRoot<string>, IAuditObject
     }
 
     /// <summary>
-    /// 添加审计实体集合到当前操作
+    /// 已收集审计实体的去重键集合（类型 + 实体标识 + 操作类型）。
+    /// <see cref="AuditEntity"/> 未重写相等性（引用相等），而每次 <c>GetAuditEntities()</c>
+    /// 都会新建实例，残留处理器重复触发收集时无法用引用去重，
+    /// 故以值语义三元组作为唯一键，保证同一实体的同一变更状态只收集一次。
+    /// </summary>
+    private readonly HashSet<(string Type, string EntityId, OperationType OperationType)> _collectedEntityKeys;
+
+    /// <summary>
+    /// 添加审计实体集合到当前操作，按实体值身份（类型 + 实体标识 + 操作类型）去重，保证同一实体只收集一次
     /// </summary>
     /// <param name="entities">审计实体集合</param>
     public void AddEntities(IEnumerable<AuditEntity> entities)
     {
+        if (entities == null)
+        {
+            return;
+        }
+
         foreach (var entity in entities)
         {
+            if (entity == null)
+            {
+                continue;
+            }
+
+            // 残留处理器可能对同一请求重复触发收集（每次收集都会新建 AuditEntity 实例），
+            // 按值语义键去重，保证同一实体的同一变更状态只进入集合一次
+            if (!_collectedEntityKeys.Add((entity.Type, entity.EntityId, entity.OperationType)))
+            {
+                continue;
+            }
+
             entity.SetOperation(this);
             Entities.Add(entity);
         }

@@ -58,7 +58,13 @@ internal class Audit(ILogger<Audit> logger, IServiceScopeFactory scopeFactory) :
                 var auditOperation = CreateAuditOperation(context, DateTimeOffset.UtcNow, scope.ServiceProvider);
                 if (auditOperation != null)
                 {
+                    // RegisterAuditOperation 仅作订阅信号（触发 UnitOfWork 订阅各 DbContext 的保存事件）
                     unitOfWork.RegisterAuditOperation(auditOperation);
+
+                    // 审计操作承载到当前请求执行流（AsyncLocal），随 ExecutionContext 流转，
+                    // 使 UnitOfWork 过滤器中的 SaveChanges 回调能在同一执行流读取到本请求的审计操作，
+                    // 避免池化 DbContext 下实例字段残留导致的跨请求污染
+                    AuditOperationContext.Value = auditOperation;
 
                     // 过滤器实例被多个请求共享，可变状态统一放入 HttpContext.Items 防止跨请求串扰
                     httpContext.Items[AuditingStoresKey] = auditingStores;
@@ -70,8 +76,10 @@ internal class Audit(ILogger<Audit> logger, IServiceScopeFactory scopeFactory) :
         }
         catch
         {
-            // 兜底：异常未走 OnActionExecuted 回调而直接传播时，此处释放 scope 防止泄漏
+            // 兜底：异常未走 OnActionExecuted 回调而直接传播时，此处释放 scope 防止泄漏；
+            // 同时清理执行流中的审计操作，防止 AsyncLocal 值随 ExecutionContext 复用到其他请求
             ReleaseAuditScope(httpContext);
+            AuditOperationContext.Value = null;
 
             throw;
         }
@@ -90,6 +98,8 @@ internal class Audit(ILogger<Audit> logger, IServiceScopeFactory scopeFactory) :
         if (context.Exception != null)
         {
             ReleaseAuditScope(context.HttpContext);
+            // 异常短路路径下结果过滤器不再执行，此处必须同步清理执行流中的审计操作
+            AuditOperationContext.Value = null;
         }
     }
 
@@ -128,6 +138,8 @@ internal class Audit(ILogger<Audit> logger, IServiceScopeFactory scopeFactory) :
                 ReleaseAuditScope(httpContext);
                 httpContext.Items.Remove(AuditingStoresKey);
                 httpContext.Items.Remove(AuditOperationKey);
+                // 审计信息保存完成后清理执行流中的审计操作，防止随 ExecutionContext 复用到其他请求
+                AuditOperationContext.Value = null;
                 logger.LogDebug("结束执行审计过滤器");
             }
         }
