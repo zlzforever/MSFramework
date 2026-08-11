@@ -191,11 +191,6 @@ public sealed class FakeUnitOfWork : IUnitOfWork
     /// <summary>保存完成事件，测试场景不使用</summary>
     public event Action SavedChanges;
 
-    /// <summary>空实现：仅作订阅信号，不执行持久化</summary>
-    public void RegisterAuditOperation()
-    {
-    }
-
     /// <summary>空实现：测试场景无需真实保存</summary>
     /// <param name="cancellationToken">取消令牌</param>
     /// <returns>已完成的任务</returns>

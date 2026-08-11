@@ -72,12 +72,7 @@ public class LocalEventBackgroundService(
                         if (options.Value.EnableAuditing)
                         {
                             var auditOperation = CreateAuditedOperation(session, handlerName);
-                            var unitOfWork = services.GetService<IUnitOfWork>();
-                            // RegisterAuditOperation 仅作订阅信号，审计操作本体由下方
-                            // AuditOperationContext.Value 承载到当前后台执行流
-                            unitOfWork?.RegisterAuditOperation();
-
-                            // 审计操作承载到当前后台执行流（AsyncLocal），使保存回调（OnSavingChanges）
+                            // 审计操作承载到当前后台执行流（AsyncLocal），使 DbContextBase 默认保存流程
                             // 能在同一执行流读取到本事件处理器的审计操作并收集变更实体；
                             // 每个事件处理器是独立审计单元，处理完成后（含异常路径）必须在 finally 清理
                             AuditOperationContext.Value = auditOperation;

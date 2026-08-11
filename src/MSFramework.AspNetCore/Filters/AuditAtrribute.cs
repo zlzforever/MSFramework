@@ -58,13 +58,9 @@ internal class Audit(ILogger<Audit> logger, IServiceScopeFactory scopeFactory) :
                 var auditOperation = CreateAuditOperation(context, DateTimeOffset.UtcNow, scope.ServiceProvider);
                 if (auditOperation != null)
                 {
-                    // RegisterAuditOperation 仅作订阅信号（触发 UnitOfWork 订阅各 DbContext 的保存事件），
-                    // 审计操作本体不再传参，由下方 AuditOperationContext.Value 承载到当前执行流
-                    unitOfWork.RegisterAuditOperation();
-
                     // 审计操作承载到当前请求执行流（AsyncLocal），随 ExecutionContext 流转，
-                    // 使 UnitOfWork 过滤器中的 SaveChanges 回调能在同一执行流读取到本请求的审计操作，
-                    // 避免池化 DbContext 下实例字段残留导致的跨请求污染
+                    // 使 DbContextBase 默认保存流程（ApplyConcepts 之后、提交之前）能在同一执行流
+                    // 读取到本请求的审计操作并收集变更实体；请求结束后（结果阶段）统一清理
                     AuditOperationContext.Value = auditOperation;
 
                     // 过滤器实例被多个请求共享，可变状态统一放入 HttpContext.Items 防止跨请求串扰

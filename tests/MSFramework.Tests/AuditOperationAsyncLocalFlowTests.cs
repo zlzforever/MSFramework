@@ -17,8 +17,9 @@ using Xunit;
 namespace MSFramework.Tests;
 
 /// <summary>
-/// <see cref="EfUnitOfWork"/> 从 <see cref="AuditOperationContext"/>（AsyncLocal）读取审计操作的集成测试：
-/// 验证保存回调只收集当前执行流承载的审计操作（OnSavingChanges 从 AsyncLocal 读取），
+/// 审计收集下沉 <see cref="DbContextBase"/> 默认保存流程的集成测试：
+/// 验证保存路径（<see cref="DbContextBase.SaveChangesAsync(bool, System.Threading.CancellationToken)"/>）
+/// 在实体状态定型后从 <see cref="AuditOperationContext"/>（AsyncLocal）读取审计操作并收集变更实体，
 /// 未设置审计操作时跳过收集；实体经 <see cref="AuditOperation.AddEntities"/> 防重后进入操作。
 /// </summary>
 public class AuditOperationAsyncLocalFlowTests
@@ -148,7 +149,7 @@ public class AuditOperationAsyncLocalFlowTests
     }
 
     /// <summary>
-    /// 完整链路：注册审计操作并设置 AsyncLocal 后，SaveChanges 回调必须从执行流读取到审计操作并收集变更实体
+    /// 完整链路：设置 AsyncLocal 审计操作后，工作单元保存路径必须从执行流读取到审计操作并收集变更实体
     /// </summary>
     [Fact]
     public async Task SaveChanges_WithAsyncLocalOperation_CollectsEntities()
@@ -159,7 +160,6 @@ public class AuditOperationAsyncLocalFlowTests
         var context = scope.ServiceProvider.GetRequiredService<AuditFlowContext>();
 
         var operation = CreateOperation();
-        unitOfWork.RegisterAuditOperation();
         AuditOperationContext.Value = operation;
         try
         {
@@ -179,7 +179,7 @@ public class AuditOperationAsyncLocalFlowTests
     }
 
     /// <summary>
-    /// 未设置 AsyncLocal 审计操作时，即使已注册订阅，保存回调也必须跳过收集（不误收集）
+    /// 未设置 AsyncLocal 审计操作时，保存路径必须跳过收集（不误收集）
     /// </summary>
     [Fact]
     public async Task SaveChanges_WithoutAsyncLocalOperation_SkipsCollection()
@@ -190,7 +190,6 @@ public class AuditOperationAsyncLocalFlowTests
         var context = scope.ServiceProvider.GetRequiredService<AuditFlowContext>();
 
         var operation = CreateOperation();
-        unitOfWork.RegisterAuditOperation();
         try
         {
             context.Orders.Add(new AuditFlowOrder("ORD-2", "order-2"));
@@ -205,7 +204,37 @@ public class AuditOperationAsyncLocalFlowTests
     }
 
     /// <summary>
-    /// 同一请求执行流内重复保存（残留处理器重复触发收集场景）时，同一实体的同一变更状态只收集一次
+    /// 请求执行流内绕过工作单元直接调用 DbContext 保存时，审计激活状态下同样必须收集变更实体：
+    /// 收集逻辑已下沉 DbContextBase 默认保存流程，不再依赖工作单元的订阅信号
+    /// </summary>
+    [Fact]
+    public async Task DirectSaveChanges_WithAsyncLocalOperation_CollectsEntities()
+    {
+        using var host = CreateHost();
+        using var scope = host.Provider.CreateScope();
+        var context = scope.ServiceProvider.GetRequiredService<AuditFlowContext>();
+
+        var operation = CreateOperation();
+        AuditOperationContext.Value = operation;
+        try
+        {
+            context.Orders.Add(new AuditFlowOrder("ORD-4", "order-4"));
+            await context.SaveChangesAsync();
+
+            var entity = Assert.Single(operation.Entities);
+            Assert.Equal("ORD-4", entity.EntityId);
+            Assert.Equal(OperationType.Add, entity.OperationType);
+            Assert.Contains(nameof(AuditFlowOrder), entity.Type);
+            Assert.Same(operation, entity.Operation);
+        }
+        finally
+        {
+            AuditOperationContext.Value = null;
+        }
+    }
+
+    /// <summary>
+    /// 同一请求执行流内重复保存时，同一实体的同一变更状态只收集一次（AddEntities 值身份去重兜底）
     /// </summary>
     [Fact]
     public async Task SaveChanges_RepeatedSave_CollectsEachEntityStateOnce()
@@ -216,7 +245,6 @@ public class AuditOperationAsyncLocalFlowTests
         var context = scope.ServiceProvider.GetRequiredService<AuditFlowContext>();
 
         var operation = CreateOperation();
-        unitOfWork.RegisterAuditOperation();
         AuditOperationContext.Value = operation;
         try
         {
