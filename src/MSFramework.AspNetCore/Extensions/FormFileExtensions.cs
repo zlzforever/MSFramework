@@ -13,7 +13,7 @@ namespace MicroserviceFramework.AspNetCore.Extensions;
 /// </summary>
 public static class FormFileExtensions
 {
-    private static readonly ConcurrentDictionary<string, bool> VirtualFolderState = new();
+    private static readonly ConcurrentDictionary<string, bool> DirectoryState = new();
 
     /// <summary>
     /// 符号链接创建委托（内部可测试性扩展点，默认使用 <see cref="File.CreateSymbolicLink(string, string)"/>；
@@ -28,7 +28,7 @@ public static class FormFileExtensions
     /// 判重键为 oss 链接（内容指纹恒定、与日期无关），跨日期重复上传零数据写（仅新增 upload 链接）
     /// </summary>
     /// <param name="formFile">上传的文件</param>
-    /// <param name="interval">虚拟目录间隔名（默认 upload）</param>
+    /// <param name="interval">业务目录间隔名（默认 upload）</param>
     /// <returns>保存结果：Path 为 upload 相对真实文件路径，PhysicalPath 为 oss 判重链接路径</returns>
     /// <exception cref="ArgumentNullException">formFile 为 null 时抛出</exception>
     /// <exception cref="ArgumentException">interval 包含非法路径字符时抛出</exception>
@@ -54,25 +54,25 @@ public static class FormFileExtensions
         var fileName = $"{md5}{extension}";
         // 真实文件目标（md5 二级分层防单日目录爆炸）：upload/{date}/{l1}/{l2}/{md5}{ext}
         var intervalDirectory = Path.Combine(interval, date, level1, level2);
-        var virtualDirectory = Path.Combine(AppContext.BaseDirectory, "wwwroot", intervalDirectory);
+        var businessDirectory = Path.Combine(AppContext.BaseDirectory, "wwwroot", intervalDirectory);
         // upload/20251225/AB/CD/C4CA4238A0B923820DCC509A6F75849B.txt
         var intervalPath = Path.Combine(intervalDirectory, fileName);
         // Path.Combine 存在可空参数重载（返回 string?），此处入参均为非空字符串，
         // 结果不可能为 null；显式判空兜底以消除静态分析空值告警，并保证后续使用恒非空
-        var virtualPath = Path.Combine(virtualDirectory, fileName)
-            ?? throw new InvalidOperationException($"无法生成虚拟文件路径: {intervalPath}");
-        // 判重链接目标（仅作判重用，指向 upload 真实文件）：oss/{l1}/{l2}/{md5}{ext}
-        var groupPath = Path.Combine(Defaults.LocalOSSDirectory, level1, level2);
-        var physicalPath = Path.Combine(groupPath, fileName);
+        var businessPath = Path.Combine(businessDirectory, fileName)
+            ?? throw new InvalidOperationException($"无法生成业务文件路径: {intervalPath}");
+        // 判重链接目标（仅作判重用，指向 upload 业务文件）：oss/{l1}/{l2}/{md5}{ext}
+        var dedupeLinkDirectory = Path.Combine(Defaults.LocalOSSDirectory, level1, level2);
+        var dedupeLinkPath = Path.Combine(dedupeLinkDirectory, fileName);
 
-        EnsureDirectory(virtualDirectory);
+        EnsureDirectory(businessDirectory);
 
-        if (!File.Exists(physicalPath))
+        if (!File.Exists(dedupeLinkPath))
         {
             // 首次上传（或并发竞态下链接尚未建立）：写入真实文件，FileMode.Create 截断写保证幂等，
             // FileShare.ReadWrite 允许并发写者同时打开，同内容并发写最终内容一致
-            EnsureDirectory(groupPath);
-            await using (var outStream = new FileStream(virtualPath, FileMode.Create, FileAccess.Write,
+            EnsureDirectory(dedupeLinkDirectory);
+            await using (var outStream = new FileStream(businessPath, FileMode.Create, FileAccess.Write,
                              FileShare.ReadWrite))
             {
                 if (stream.CanSeek)
@@ -91,18 +91,18 @@ public static class FormFileExtensions
             }
 
             // 创建 oss 判重链接；并发场景下链接已被另一进程创建时，catch 中复用既有链接
-            CreateLinkOrCopy(physicalPath, virtualPath);
+            CreateLinkOrCopy(dedupeLinkPath, businessPath);
         }
         else
         {
             // 判重命中：同内容已上传过（真实文件可能位于更早日期的 upload 目录），
             // 仅创建新的 upload 符号链接指向既有真实文件，零数据写
-            var existingPath = File.ResolveLinkTarget(physicalPath, returnFinalTarget: true)?.FullName
-                               ?? physicalPath;
-            CreateLinkOrCopy(virtualPath, existingPath);
+            var existingPath = File.ResolveLinkTarget(dedupeLinkPath, returnFinalTarget: true)?.FullName
+                               ?? dedupeLinkPath;
+            CreateLinkOrCopy(businessPath, existingPath);
         }
 
-        return new SaveResult { Name = formFile.FileName, Path = intervalPath, PhysicalPath = physicalPath };
+        return new SaveResult { Name = formFile.FileName, Path = intervalPath, PhysicalPath = dedupeLinkPath };
     }
 
     /// <summary>
@@ -111,7 +111,7 @@ public static class FormFileExtensions
     /// <param name="path">目录路径</param>
     private static void EnsureDirectory(string path)
     {
-        VirtualFolderState.GetOrAdd(path, p =>
+        DirectoryState.GetOrAdd(path, p =>
         {
             if (!Directory.Exists(p))
             {
@@ -152,7 +152,7 @@ public static class FormFileExtensions
 }
 
 /// <summary>
-///     文件保存结果，包含原始名称、upload 虚拟路径和 oss 判重链接路径
+///     文件保存结果，包含原始名称、upload 业务路径和 oss 判重链接路径
 /// </summary>
 [SuppressMessage("ReSharper", "UnusedAutoPropertyAccessor.Global")]
 public class SaveResult
@@ -163,7 +163,7 @@ public class SaveResult
     public string Name { get; set; }
 
     /// <summary>
-    ///     文件虚拟路径（相对路径）：真实文件所在路径 upload/{date}/{l1}/{l2}/{md5}{ext}；
+    ///     文件业务路径（相对路径）：真实文件所在路径 upload/{date}/{l1}/{l2}/{md5}{ext}；
     ///     重复上传时为指向既有真实文件的符号链接路径，语义上均为可访问文件内容的路径
     /// </summary>
     public string Path { get; set; }
