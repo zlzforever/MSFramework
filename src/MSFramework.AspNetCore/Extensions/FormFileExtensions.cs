@@ -13,13 +13,29 @@ namespace MicroserviceFramework.AspNetCore.Extensions;
 /// </summary>
 public static class FormFileExtensions
 {
-    private static readonly ConcurrentDictionary<string, bool> DirectoryState = new();
+    /// <summary>
+    ///     已确认存在的目录缓存：键为经 <see cref="Path.GetFullPath(string)"/> 规范化后的完整路径，值为占位标记；
+    ///     使用线程安全容器承载，缓存命中时跳过重复的目录探测与创建（同一目录不同写法只占一个缓存键）
+    /// </summary>
+    private static readonly ConcurrentDictionary<string, byte> _existingDirCache = new();
 
     /// <summary>
-    /// 符号链接创建委托（内部可测试性扩展点，默认使用 <see cref="File.CreateSymbolicLink(string, string)"/>；
-    /// 测试可替换为抛异常委托以验证符号链接失败时的降级复制路径）
+    ///     符号链接创建委托（内部可测试性扩展点，默认使用 <see cref="File.CreateSymbolicLink(string, string)"/>；
+    ///     测试可替换为抛异常委托以验证符号链接失败时的降级复制路径）
     /// </summary>
     internal static Func<string, string, FileSystemInfo> LinkCreator { get; set; } = File.CreateSymbolicLink;
+
+    /// <summary>
+    ///     目录创建委托（内部可测试性扩展点，默认使用 <see cref="Directory.CreateDirectory(string)"/>；
+    ///     测试可替换为抛出指定 HResult 的 IOException 委托，以验证 Windows 错误码 183 与磁盘校验降级路径）
+    /// </summary>
+    internal static Func<string, DirectoryInfo> DirectoryCreator { get; set; } = Directory.CreateDirectory;
+
+    /// <summary>
+    ///     Windows 平台判定委托（内部可测试性扩展点，默认使用 <see cref="OperatingSystem.IsWindows"/>；
+    ///     测试可替换为恒返回 true 的委托，以在非 Windows 环境验证错误码 183（ERROR_ALREADY_EXISTS）处理路径）
+    /// </summary>
+    internal static Func<bool> IsWindowsPlatform { get; set; } = OperatingSystem.IsWindows;
 
     /// <summary>
     /// 存储结构（用户确认的新方案）：
@@ -65,13 +81,13 @@ public static class FormFileExtensions
         var dedupeLinkDirectory = Path.Combine(Defaults.LocalOSSDirectory, level1, level2);
         var dedupeLinkPath = Path.Combine(dedupeLinkDirectory, fileName);
 
-        EnsureDirectory(businessDirectory);
+        EnsureDirectoryExistsCached(businessDirectory);
 
         if (!File.Exists(dedupeLinkPath))
         {
             // 首次上传（或并发竞态下链接尚未建立）：写入真实文件，FileMode.Create 截断写保证幂等，
             // FileShare.ReadWrite 允许并发写者同时打开，同内容并发写最终内容一致
-            EnsureDirectory(dedupeLinkDirectory);
+            EnsureDirectoryExistsCached(dedupeLinkDirectory);
             await using (var outStream = new FileStream(businessPath, FileMode.Create, FileAccess.Write,
                              FileShare.ReadWrite))
             {
@@ -106,20 +122,55 @@ public static class FormFileExtensions
     }
 
     /// <summary>
-    /// 幂等创建目录（并发安全，重复调用无副作用）
+    ///     幂等确保目录存在（并发安全）：路径先经 <see cref="Path.GetFullPath(string)"/> 规范化后作为缓存键，
+    ///     缓存命中直接返回；创建目录时若因并发竞态抛出 IOException——
+    ///     Windows 下优先按错误码 183（ERROR_ALREADY_EXISTS）判定目录已被他人创建，
+    ///     非 Windows 下按磁盘实际状态（<see cref="Directory.Exists(string)"/>）校验——
+    ///     均视为目录已存在并写入缓存后静默成功；仅当磁盘校验确认目录不存在时重新抛出
     /// </summary>
-    /// <param name="path">目录路径</param>
-    private static void EnsureDirectory(string path)
+    /// <param name="path">待确保存在的目录路径；为 null 或纯空白时抛出 <see cref="ArgumentNullException"/></param>
+    /// <exception cref="ArgumentNullException">path 为 null 或纯空白时抛出</exception>
+    /// <exception cref="IOException">目录创建失败且磁盘校验确认目录不存在时抛出，异常消息包含完整路径</exception>
+    internal static void EnsureDirectoryExistsCached(string path)
     {
-        DirectoryState.GetOrAdd(path, p =>
+        if (string.IsNullOrWhiteSpace(path))
         {
-            if (!Directory.Exists(p))
+            throw new ArgumentNullException(nameof(path));
+        }
+
+        // 规范化完整路径，同一目录的不同写法（如冗余分隔符/./..）收敛为单一缓存键
+        var fullPath = Path.GetFullPath(path);
+        if (_existingDirCache.ContainsKey(fullPath))
+        {
+            return;
+        }
+
+        try
+        {
+            DirectoryCreator(fullPath);
+            _existingDirCache.TryAdd(fullPath, 0);
+        }
+        catch (IOException ex)
+        {
+            // Windows 优先判断错误码 183（ERROR_ALREADY_EXISTS）：
+            // 并发下另一进程已创建目录时 CreateDirectory 抛 IOException，错误码 183 即"目录已存在"
+            var isAlreadyExistsError = IsWindowsPlatform() && (ex.HResult & 0xFFFF) == 183;
+            if (isAlreadyExistsError)
             {
-                Directory.CreateDirectory(p!);
+                _existingDirCache.TryAdd(fullPath, 0);
+                return;
             }
 
-            return true;
-        });
+            // Linux / macOS / 其他 IO 错误：必须磁盘校验真实状态，
+            // 目录已存在（并发竞态被他人创建）则复用，否则抛出
+            if (Directory.Exists(fullPath))
+            {
+                _existingDirCache.TryAdd(fullPath, 0);
+                return;
+            }
+
+            throw new IOException($"创建目录失败 {fullPath}", ex);
+        }
     }
 
     /// <summary>

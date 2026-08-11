@@ -1,6 +1,9 @@
 using System;
+using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
@@ -15,7 +18,7 @@ namespace MSFramework.AspNetCore.Test;
 ///     上传存储扩展测试：验证新存储结构「真实文件存于 upload/{date}/{l1}/{l2}，oss/{l1}/{l2} 仅作判重链接」，
 ///     以及跨日期重复上传零数据写、判重命中、并发链接复用、符号链接失败降级复制等关键行为
 /// </summary>
-public class FormFileTests : BaseTest
+public class FormFileTests : BaseTest, IDisposable
 {
     /// <summary>
     ///     计算内容字节的 MD5 大写十六进制值（与框架存储命名规则一致）
@@ -210,5 +213,210 @@ public class FormFileTests : BaseTest
         {
             FormFileExtensions.LinkCreator = original;
         }
+    }
+
+    /// <summary>
+    ///     生成唯一临时目录路径（并登记回收），避免测试间缓存与文件系统状态互相干扰
+    /// </summary>
+    /// <returns>唯一临时目录完整路径</returns>
+    private static string NewTempDirPath()
+    {
+        var path = Path.Combine(Path.GetTempPath(), "msf-ensure-dir", Guid.NewGuid().ToString("N"));
+        _tempDirPaths.Add(path);
+        return path;
+    }
+
+    /// <summary>
+    ///     本测试类产生的临时目录集合（测试结束后统一清理）
+    /// </summary>
+    private static readonly List<string> _tempDirPaths = new();
+
+    /// <summary>
+    ///     反射读取 FormFileExtensions 内部目录缓存，用于断言规范化后缓存键的唯一性
+    /// </summary>
+    /// <returns>目录缓存字典</returns>
+    private static ConcurrentDictionary<string, byte> ExistingDirCache()
+    {
+        var field = typeof(FormFileExtensions).GetField("_existingDirCache",
+            BindingFlags.Static | BindingFlags.NonPublic);
+        Assert.NotNull(field);
+        return (ConcurrentDictionary<string, byte>)field.GetValue(null)!;
+    }
+
+    /// <summary>
+    ///     清理全部临时目录（xUnit 每用例结束调用），保证测试退出后不留文件系统残留
+    /// </summary>
+    public void Dispose()
+    {
+        foreach (var dir in _tempDirPaths)
+        {
+            try
+            {
+                if (Directory.Exists(dir))
+                {
+                    Directory.Delete(dir, recursive: true);
+                }
+            }
+            catch (IOException)
+            {
+                // 并发测试遗留句柄未释放时忽略清理失败，避免影响测试结果
+            }
+        }
+    }
+
+    /// <summary>
+    ///     空值校验：null 或纯空白路径必须抛出 ArgumentNullException
+    /// </summary>
+    [Fact]
+    public void EnsureDirectoryExistsCached_ThrowsOnNullOrWhitespace()
+    {
+        Assert.Throws<ArgumentNullException>(() => FormFileExtensions.EnsureDirectoryExistsCached(null!));
+        Assert.Throws<ArgumentNullException>(() => FormFileExtensions.EnsureDirectoryExistsCached(string.Empty));
+        Assert.Throws<ArgumentNullException>(() => FormFileExtensions.EnsureDirectoryExistsCached("   "));
+    }
+
+    /// <summary>
+    ///     路径规范化：同一目录的不同写法（含冗余分隔符与 . 段）收敛为单一缓存键，目录只创建一次
+    /// </summary>
+    [Fact]
+    public void EnsureDirectoryExistsCached_NormalizesPathAndCachesOnce()
+    {
+        var dir = NewTempDirPath();
+        // 两种写法规范化后指向同一完整路径：{dir}/sub 与 {dir}/./sub
+        var variantA = Path.Combine(dir, "sub");
+        var variantB = Path.Combine(dir, ".", "sub");
+        var normalized = Path.GetFullPath(Path.Combine(dir, "sub"));
+
+        FormFileExtensions.EnsureDirectoryExistsCached(variantA);
+        FormFileExtensions.EnsureDirectoryExistsCached(variantB);
+
+        Assert.True(Directory.Exists(normalized));
+        // 缓存键唯一：该规范化路径在缓存中只出现一次（同一目录不同写法不再重复缓存）
+        Assert.Single(ExistingDirCache().Keys, key => key == normalized);
+    }
+
+    /// <summary>
+    ///     已存在目录：重复调用无异常、无副作用，并写入缓存
+    /// </summary>
+    [Fact]
+    public void EnsureDirectoryExistsCached_ExistingDirectoryIsIdempotentAndCached()
+    {
+        var dir = NewTempDirPath();
+        Directory.CreateDirectory(dir);
+
+        FormFileExtensions.EnsureDirectoryExistsCached(dir);
+        FormFileExtensions.EnsureDirectoryExistsCached(dir);
+
+        Assert.True(Directory.Exists(dir));
+        Assert.Contains(Path.GetFullPath(dir), ExistingDirCache().Keys);
+    }
+
+    /// <summary>
+    ///     Windows 错误码路径：CreateDirectory 抛 HResult 低 16 位为 183（ERROR_ALREADY_EXISTS）的 IOException 时，
+    ///     视为目录已被他人创建而静默成功并缓存（模拟 Windows 跨进程并发竞态，且不依赖磁盘校验）
+    /// </summary>
+    [Fact]
+    public void EnsureDirectoryExistsCached_WindowsError183IsSwallowedAndCached()
+    {
+        var dir = NewTempDirPath();
+        var originalDirectoryCreator = FormFileExtensions.DirectoryCreator;
+        var originalIsWindows = FormFileExtensions.IsWindowsPlatform;
+        // 0x800700B7：HRESULT 化后的 Windows 错误码 183（ERROR_ALREADY_EXISTS）；
+        // 强制按 Windows 平台判定，使错误码 183 分支在非 Windows 环境亦可覆盖
+        FormFileExtensions.DirectoryCreator = _ => throw new IOException("simulated: already exists")
+        {
+            HResult = unchecked((int)0x800700B7)
+        };
+        FormFileExtensions.IsWindowsPlatform = () => true;
+        try
+        {
+            FormFileExtensions.EnsureDirectoryExistsCached(dir);
+
+            // 错误码路径直接判定已存在：不抛异常且写入缓存（目录实际未创建，证明未走磁盘校验降级）
+            Assert.Contains(Path.GetFullPath(dir), ExistingDirCache().Keys);
+            Assert.False(Directory.Exists(dir));
+        }
+        finally
+        {
+            FormFileExtensions.DirectoryCreator = originalDirectoryCreator;
+            FormFileExtensions.IsWindowsPlatform = originalIsWindows;
+        }
+    }
+
+    /// <summary>
+    ///     磁盘校验路径：CreateDirectory 抛非 183 IOException 但目录实际已存在时（并发下被他人创建），
+    ///     通过磁盘校验复用并缓存，不抛异常
+    /// </summary>
+    [Fact]
+    public void EnsureDirectoryExistsCached_NonAlreadyExistsErrorWithExistingDirFallsBackToDiskCheck()
+    {
+        var dir = NewTempDirPath();
+        Directory.CreateDirectory(dir);
+        var originalDirectoryCreator = FormFileExtensions.DirectoryCreator;
+        var originalIsWindows = FormFileExtensions.IsWindowsPlatform;
+        // 非 183 错误码（此处为访问拒绝语义），模拟 Windows 下其他 IO 错误；强制按非 Windows 平台判定走磁盘校验
+        FormFileExtensions.DirectoryCreator = _ => throw new IOException("simulated: access denied")
+        {
+            HResult = unchecked((int)0x80070005)
+        };
+        FormFileExtensions.IsWindowsPlatform = () => false;
+        try
+        {
+            FormFileExtensions.EnsureDirectoryExistsCached(dir);
+
+            Assert.True(Directory.Exists(dir));
+            Assert.Contains(Path.GetFullPath(dir), ExistingDirCache().Keys);
+        }
+        finally
+        {
+            FormFileExtensions.DirectoryCreator = originalDirectoryCreator;
+            FormFileExtensions.IsWindowsPlatform = originalIsWindows;
+        }
+    }
+
+    /// <summary>
+    ///     真实创建失败：CreateDirectory 抛非 183 IOException 且磁盘校验确认目录不存在时，
+    ///     重新抛出包含完整路径的 IOException，且不污染缓存
+    /// </summary>
+    [Fact]
+    public void EnsureDirectoryExistsCached_CreationFailureRethrowsWrappedWithPath()
+    {
+        var dir = NewTempDirPath();
+        var originalDirectoryCreator = FormFileExtensions.DirectoryCreator;
+        var originalIsWindows = FormFileExtensions.IsWindowsPlatform;
+        var inner = new IOException("simulated: disk full") { HResult = unchecked((int)0x80070070) };
+        FormFileExtensions.DirectoryCreator = _ => throw inner;
+        FormFileExtensions.IsWindowsPlatform = () => false;
+        try
+        {
+            var ex = Assert.Throws<IOException>(() => FormFileExtensions.EnsureDirectoryExistsCached(dir));
+
+            Assert.Contains(Path.GetFullPath(dir), ex.Message);
+            Assert.Same(inner, ex.InnerException);
+            Assert.DoesNotContain(Path.GetFullPath(dir), ExistingDirCache().Keys);
+        }
+        finally
+        {
+            FormFileExtensions.DirectoryCreator = originalDirectoryCreator;
+            FormFileExtensions.IsWindowsPlatform = originalIsWindows;
+        }
+    }
+
+    /// <summary>
+    ///     并发创建：多个线程同时确保同一目录存在，全部成功且目录最终存在（缓存与 CreateDirectory 竞态均安全）
+    /// </summary>
+    [Fact]
+    public async Task EnsureDirectoryExistsCached_ConcurrentCallsAllSucceed()
+    {
+        var dir = NewTempDirPath();
+        const int count = 16;
+
+        var tasks = Enumerable.Range(0, count)
+            .Select(_ => Task.Run(() => FormFileExtensions.EnsureDirectoryExistsCached(dir)))
+            .ToArray();
+
+        await Task.WhenAll(tasks);
+
+        Assert.True(Directory.Exists(dir));
     }
 }
