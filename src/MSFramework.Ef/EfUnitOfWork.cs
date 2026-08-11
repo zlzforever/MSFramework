@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using MicroserviceFramework.Auditing;
-using MicroserviceFramework.Auditing.Model;
 using MicroserviceFramework.Domain;
 
 namespace MicroserviceFramework.Ef;
@@ -29,13 +28,13 @@ internal class EfUnitOfWork : IUnitOfWork
     /// </summary>
     public event Action SavedChanges;
 
-    public void RegisterAuditOperation(AuditOperation auditOperation)
+    /// <summary>
+    /// 订阅所有 DbContext 的保存事件，用于在保存前收集审计实体。
+    /// 审计操作本体从当前执行流的 <see cref="AuditOperationContext"/> 读取，本方法不接收任何参数，
+    /// 仅保证「每个 DbContext 只订阅一次」，防止重复调用导致保存事件处理器无限累积。
+    /// </summary>
+    public void RegisterAuditOperation()
     {
-        if (auditOperation == null)
-        {
-            return;
-        }
-
         // 每个 DbContext 只订阅一次，避免重复调用 RegisterAuditOperation 时处理器无限累积；
         // 审计操作本身不再存储，由请求执行流（AuditOperationContext.AsyncLocal）承载，
         // SavingChanges 处理器在自身执行流中读取，从根源消除池化 DbContext 下残留订阅读错对象的跨请求污染

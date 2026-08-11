@@ -159,7 +159,7 @@ public class AuditOperationAsyncLocalFlowTests
         var context = scope.ServiceProvider.GetRequiredService<AuditFlowContext>();
 
         var operation = CreateOperation();
-        unitOfWork.RegisterAuditOperation(operation);
+        unitOfWork.RegisterAuditOperation();
         AuditOperationContext.Value = operation;
         try
         {
@@ -190,7 +190,7 @@ public class AuditOperationAsyncLocalFlowTests
         var context = scope.ServiceProvider.GetRequiredService<AuditFlowContext>();
 
         var operation = CreateOperation();
-        unitOfWork.RegisterAuditOperation(operation);
+        unitOfWork.RegisterAuditOperation();
         try
         {
             context.Orders.Add(new AuditFlowOrder("ORD-2", "order-2"));
@@ -216,7 +216,7 @@ public class AuditOperationAsyncLocalFlowTests
         var context = scope.ServiceProvider.GetRequiredService<AuditFlowContext>();
 
         var operation = CreateOperation();
-        unitOfWork.RegisterAuditOperation(operation);
+        unitOfWork.RegisterAuditOperation();
         AuditOperationContext.Value = operation;
         try
         {

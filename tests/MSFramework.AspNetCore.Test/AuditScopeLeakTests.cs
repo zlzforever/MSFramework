@@ -191,9 +191,8 @@ public sealed class FakeUnitOfWork : IUnitOfWork
     /// <summary>保存完成事件，测试场景不使用</summary>
     public event Action SavedChanges;
 
-    /// <summary>空实现：不执行持久化</summary>
-    /// <param name="auditOperation">审计操作，测试场景不校验</param>
-    public void RegisterAuditOperation(AuditOperation auditOperation)
+    /// <summary>空实现：仅作订阅信号，不执行持久化</summary>
+    public void RegisterAuditOperation()
     {
     }
 
