@@ -51,7 +51,7 @@ public class GlobalExceptionFilterTests
         Assert.False(apiResult.Success);
         Assert.Equal("业务异常", apiResult.Msg);
         Assert.Equal(40001, apiResult.Code);
-        Assert.Equal(200, context.HttpContext.Response.StatusCode);
+        Assert.Equal(StatusCodes.Status200OK, result.StatusCode);
     }
 
     [Fact]
