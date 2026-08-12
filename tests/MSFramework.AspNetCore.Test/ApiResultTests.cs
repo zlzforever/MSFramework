@@ -233,4 +233,49 @@ public class ApiResultTests(ITestOutputHelper output) : BaseTest
                      {"success":true,"code":0,"msg":"","data":1}
                      """, result1);
     }
+
+    /// <summary>
+    /// 接口内抛出 <see cref="MicroserviceFrameworkFriendlyException"/> 时，
+    /// 全局异常过滤器应返回 HTTP 200 + ApiResult 错误结构（success=false、code=异常错误码、msg=异常消息、data=null）
+    /// </summary>
+    [Fact]
+    public async Task ThrowFriendlyException()
+    {
+        var result = await Client.GetAsync("/apiResult/friendlyException");
+        var text = await result.Content.ReadAsStringAsync();
+        Assert.Equal(200, (int)result.StatusCode);
+        Assert.Equal("""
+                     {"success":false,"code":2,"msg":"业务处理失败","data":null}
+                     """, text);
+    }
+
+    /// <summary>
+    /// 接口内抛出普通异常（<see cref="InvalidOperationException"/>）时，
+    /// 全局异常过滤器应返回 HTTP 500 + ApiResult 错误结构（success=false、code=500、msg=系统内部错误、data=null）
+    /// </summary>
+    [Fact]
+    public async Task ThrowInvalidOperationException()
+    {
+        var result = await Client.GetAsync("/apiResult/invalidOperationException");
+        var text = await result.Content.ReadAsStringAsync();
+        Assert.Equal(500, (int)result.StatusCode);
+        Assert.Equal("""
+                     {"success":false,"code":500,"msg":"系统内部错误","data":null}
+                     """, text);
+    }
+
+    /// <summary>
+    /// 接口内抛出参数类普通异常（<see cref="ArgumentException"/>）时，
+    /// 全局异常过滤器同样应返回 HTTP 500 + ApiResult 错误结构（success=false、code=500、msg=系统内部错误、data=null）
+    /// </summary>
+    [Fact]
+    public async Task ThrowArgumentException()
+    {
+        var result = await Client.GetAsync("/apiResult/argumentException");
+        var text = await result.Content.ReadAsStringAsync();
+        Assert.Equal(500, (int)result.StatusCode);
+        Assert.Equal("""
+                     {"success":false,"code":500,"msg":"系统内部错误","data":null}
+                     """, text);
+    }
 }
