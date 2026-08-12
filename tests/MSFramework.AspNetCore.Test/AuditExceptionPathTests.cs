@@ -1,6 +1,7 @@
 using System;
 using System.Net.Http;
 using System.Threading.Tasks;
+using MicroserviceFramework;
 using MicroserviceFramework.Application;
 using MicroserviceFramework.AspNetCore.Filters;
 using MicroserviceFramework.Auditing;
@@ -17,13 +18,15 @@ using Xunit;
 namespace MSFramework.AspNetCore.Test;
 
 /// <summary>
-/// 审计过滤器异常路径回归测试（N6/N7）：
+/// 审计过滤器异常路径回归测试（审计契约反转）：
 /// 用模拟 scoped 生命周期探针存储（scope 释放后 AddAsync 抛异常，等价于默认
 /// EfAuditingStore 持 DbContext 被 Dispose 后的行为）观测：
 /// <list type="bullet">
-/// <item><description>N5/N6：异常被异常过滤器处理（全局/用户自定义）时，保存发生在 scope 释放之前且真实落库、仅保存一次；</description></item>
-/// <item><description>N7：异常直接传播（无异常过滤器处理）时不保存审计；</description></item>
-/// <item><description>两条路径均无 scope 泄漏、无重复释放。</description></item>
+/// <item><description>异常被异常过滤器处理（全局/用户自定义/FriendlyException）时一律不保存审计（契约反转，原 N5 取消）；</description></item>
+/// <item><description>异常直接传播（无异常过滤器处理）时不保存审计（N7 保持）；</description></item>
+/// <item><description>正常完成路径保存审计，保存发生在 scope 释放之前且仅保存一次；</description></item>
+/// <item><description>内层过滤器短路（设置 Result 未调用 next）按成功保存（「成功审计」边界情况）；</description></item>
+/// <item><description>全部路径均无 scope 泄漏、无重复释放。</description></item>
 /// </list>
 /// </summary>
 public class AuditExceptionPathTests : IDisposable
@@ -50,33 +53,29 @@ public class AuditExceptionPathTests : IDisposable
     }
 
     /// <summary>
-    /// N5/N6 回归：Action 抛异常且被全局异常过滤器处理后，
-    /// 审计必须在 scope 释放之前保存（真实落库，探针在 Dispose 后 AddAsync 会抛异常），
-    /// 且仅保存一次、scope 仅释放一次
+    /// 契约反转回归：Action 抛异常且被全局异常过滤器处理（500）时，
+    /// 审计一律不保存，scope 仍被释放且仅释放一次（无泄漏）
     /// </summary>
     [Fact]
-    public async Task HandledException_GlobalExceptionFilter_SavesAuditBeforeScopeDispose()
+    public async Task HandledException_GlobalExceptionFilter_DoesNotSaveAuditAndDisposesScope()
     {
         var response = await _client.PostAsync("/audit-exc/throw", new StringContent(""));
 
         Assert.Equal(500, (int)response.StatusCode);
 
-        // 保存发生在 scope 释放之前：若保存时序错误（先释放后保存），
-        // 探针 AddAsync 会命中已释放状态而抛异常，AddCallsBeforeDispose 为 0
-        Assert.Equal(1, LifecycleProbeAuditingStore.AddCallsBeforeDispose);
-        // 无重复保存
-        Assert.Equal(1, LifecycleProbeAuditingStore.AddCallCount);
+        // 异常被处理也不保存审计（契约反转：原 N5「异常被处理仍保存」取消）
+        Assert.Equal(0, LifecycleProbeAuditingStore.AddCallCount);
+        Assert.Equal(0, LifecycleProbeAuditingStore.AddCallsBeforeDispose);
         // scope 无泄漏、无重复释放
         Assert.Equal(1, LifecycleProbeAuditingStore.DisposeCount);
     }
 
     /// <summary>
-    /// N5/N6 扩展：Action 抛异常且被用户自定义异常过滤器处理时，
-    /// 审计同样必须保存且先于 scope 释放（异常兜底过滤器 Order 取最小值，
-    /// 在用户异常过滤器之后执行，ExceptionHandled 为 true 时不再干预，交给结果阶段保存）
+    /// 契约反转扩展：Action 抛异常且被用户自定义异常过滤器处理（200）时，
+    /// 审计同样不保存，scope 仍被释放且仅释放一次
     /// </summary>
     [Fact]
-    public async Task HandledException_UserExceptionFilter_SavesAuditBeforeScopeDispose()
+    public async Task HandledException_UserExceptionFilter_DoesNotSaveAuditAndDisposesScope()
     {
         AuditExceptionPathSettings.RegisterGlobalExceptionFilter = false;
         AuditExceptionPathSettings.RegisterUserExceptionFilter = true;
@@ -88,8 +87,8 @@ public class AuditExceptionPathTests : IDisposable
             var response = await client.PostAsync("/audit-exc/throw", new StringContent(""));
 
             Assert.Equal(200, (int)response.StatusCode);
-            Assert.Equal(1, LifecycleProbeAuditingStore.AddCallsBeforeDispose);
-            Assert.Equal(1, LifecycleProbeAuditingStore.AddCallCount);
+            Assert.Equal(0, LifecycleProbeAuditingStore.AddCallCount);
+            Assert.Equal(0, LifecycleProbeAuditingStore.AddCallsBeforeDispose);
             Assert.Equal(1, LifecycleProbeAuditingStore.DisposeCount);
         }
         finally
@@ -100,8 +99,23 @@ public class AuditExceptionPathTests : IDisposable
     }
 
     /// <summary>
+    /// 契约语义回归：FriendlyException（业务异常）被全局异常过滤器处理时返回 HTTP 200，
+    /// 但审计一律不保存（用户确认：500/403/FriendlyException 等一律不保存，审计表只剩成功请求）
+    /// </summary>
+    [Fact]
+    public async Task FriendlyException_HandledByGlobalExceptionFilter_DoesNotSaveAudit()
+    {
+        var response = await _client.PostAsync("/audit-exc/friendly", new StringContent(""));
+
+        Assert.Equal(200, (int)response.StatusCode);
+
+        Assert.Equal(0, LifecycleProbeAuditingStore.AddCallCount);
+        Assert.Equal(1, LifecycleProbeAuditingStore.DisposeCount);
+    }
+
+    /// <summary>
     /// N7 回归：未注册任何异常过滤器时 Action 异常直接传播（MVC 在过滤器链之外重抛，
-    /// 结果阶段被跳过），审计必须不保存，且 scope 仍被释放、仅释放一次（无泄漏）
+    /// 动作阶段被跳过），审计必须不保存，且 scope 仍被释放、仅释放一次（无泄漏）
     /// </summary>
     [Fact]
     public async Task UnhandledException_DoesNotSaveAuditAndDisposesScope()
@@ -126,7 +140,7 @@ public class AuditExceptionPathTests : IDisposable
 
             // 异常直接传播路径不保存审计（N7 契约）
             Assert.Equal(0, LifecycleProbeAuditingStore.AddCallCount);
-            // scope 无泄漏：异常阶段兜底释放，且仅释放一次
+            // scope 无泄漏：动作阶段 catch/finally 兜底释放，且仅释放一次
             Assert.Equal(1, LifecycleProbeAuditingStore.DisposeCount);
         }
         finally
@@ -147,6 +161,22 @@ public class AuditExceptionPathTests : IDisposable
         Assert.Equal(1, LifecycleProbeAuditingStore.AddCallCount);
         Assert.Equal(1, LifecycleProbeAuditingStore.DisposeCount);
     }
+
+    /// <summary>
+    /// 短路路径回归：内层过滤器在 OnActionExecuting 设置 Result 且不调用 next 时
+    /// （动作未执行、无异常），审计按成功保存（「成功审计」边界情况，不新增处理），
+    /// scope 仍被释放且仅释放一次
+    /// </summary>
+    [Fact]
+    public async Task ShortCircuitPath_SavesAuditAsSuccess()
+    {
+        var response = await _client.PostAsync("/audit-exc/short-circuit", new StringContent(""));
+
+        Assert.Equal(200, (int)response.StatusCode);
+        Assert.Equal(1, LifecycleProbeAuditingStore.AddCallsBeforeDispose);
+        Assert.Equal(1, LifecycleProbeAuditingStore.AddCallCount);
+        Assert.Equal(1, LifecycleProbeAuditingStore.DisposeCount);
+    }
 }
 
 /// <summary>异常路径审计测试专用 Startup 的依赖注册开关（同测试 class 内用例串行执行，互不串扰）</summary>
@@ -159,7 +189,28 @@ internal static class AuditExceptionPathSettings
     public static bool RegisterUserExceptionFilter;
 }
 
-/// <summary>异常路径审计测试专用控制器：提供正常完成与抛异常两条写请求路径</summary>
+/// <summary>短路测试用动作过滤器：在 OnActionExecuting 设置 Result 且不调用 next，模拟内层过滤器短路</summary>
+public class ShortCircuitActionFilter : ActionFilterAttribute
+{
+    /// <summary>
+    /// 取最大值保证本过滤器在全局审计过滤器（Order 1002）之后执行：
+    /// 只有「内层」过滤器短路（发生在审计过滤器的 next 内部）才是契约定义的
+    /// 「成功审计」边界情况；若在审计过滤器之前短路，审计过滤器根本不会执行。
+    /// </summary>
+    public ShortCircuitActionFilter()
+    {
+        Order = int.MaxValue;
+    }
+
+    /// <summary>设置短路结果，跳过后续过滤器与 Action 本体</summary>
+    /// <param name="context">Action 执行上下文</param>
+    public override void OnActionExecuting(ActionExecutingContext context)
+    {
+        context.Result = new ObjectResult("short-circuited");
+    }
+}
+
+/// <summary>异常路径审计测试专用控制器：提供正常完成、抛异常与短路三条写请求路径</summary>
 [ApiController]
 [Route("audit-exc")]
 public class AuditExceptionController : ControllerBase
@@ -178,6 +229,23 @@ public class AuditExceptionController : ControllerBase
     public IActionResult Throw()
     {
         throw new InvalidOperationException("boom");
+    }
+
+    /// <summary>抛出业务异常的写请求，由全局异常过滤器转换为 200 + 错误响应</summary>
+    /// <returns>恒抛业务异常，无返回值</returns>
+    [HttpPost("friendly")]
+    public IActionResult Friendly()
+    {
+        throw new MicroserviceFrameworkFriendlyException(40001, "业务异常");
+    }
+
+    /// <summary>被短路过滤器拦截的写请求：Action 本体不会执行</summary>
+    /// <returns>恒抛异常，短路后不会执行到</returns>
+    [HttpPost("short-circuit")]
+    [ShortCircuitActionFilter]
+    public IActionResult ShortCircuit()
+    {
+        throw new InvalidOperationException("不应执行到此");
     }
 }
 
@@ -219,7 +287,7 @@ public class AuditExceptionPathStartup
 
 /// <summary>
 /// 用户自定义异常过滤器（模拟第三方异常过滤器）：处理 <see cref="InvalidOperationException"/>
-/// 并设置统一响应，用于验证「用户自定义异常过滤器处理异常时审计仍保存」的场景
+/// 并设置统一响应，用于验证「用户自定义异常过滤器处理异常时审计不保存」的场景
 /// </summary>
 public class HandlingExceptionFilter : IExceptionFilter
 {

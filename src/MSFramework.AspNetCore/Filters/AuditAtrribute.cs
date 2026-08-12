@@ -22,28 +22,30 @@ namespace MicroserviceFramework.AspNetCore.Filters;
 /// UnitOfWork 提交完成后，则 DbContext ChangeObject 状态变清除，此时保存审计信息不会干扰业务，即便保存失败也没有关系。
 /// 审计操作由 <see cref="AuditOperationContext"/>（AsyncLocal）随执行流承载，
 /// 供 DbContextBase 默认保存流程（ApplyConcepts 之后、提交之前）收集变更实体。
-/// 审计保存（End + 写入存储）统一延迟到结果阶段完成（异常被异常过滤器处理时经
-/// <see cref="IAsyncAlwaysRunResultFilter"/> 路径同样执行），保证：
+/// 审计仅覆盖成功请求：保存与 scope 释放统一收敛在动作阶段（<see cref="OnActionExecutionAsync"/>），
+/// 只要动作阶段产生异常（无论是否被异常过滤器处理）一律不保存审计，异常记录由
+/// <see cref="GlobalExceptionFilter"/> 的日志（LogWarning/LogError）承担。
 /// <list type="bullet">
-/// <item><description>保存时审计 scope 仍存活（scoped 审计存储不会被提前 Dispose，异常路径审计真实落库，N6）；</description></item>
-/// <item><description>异常直接传播（未被任何异常过滤器处理）时结果阶段被跳过、不保存审计（N7）；</description></item>
-/// <item><description>异常被异常过滤器处理后（含用户自定义异常过滤器）仍保存审计（N5）。</description></item>
+/// <item><description>正常完成：next 返回且 <see cref="ActionExecutedContext.Exception"/> 为空 →
+/// 结束审计操作并写入全部审计存储（单点保存）；</description></item>
+/// <item><description>异常被异常过滤器处理（500/403/FriendlyException 等，含用户自定义异常过滤器）：
+/// next 正常返回但携带异常 → 跳过保存（契约反转，原 N5 取消）；</description></item>
+/// <item><description>异常直接传播（未被任何异常过滤器处理）：next 抛出 → 跳过保存（N7 保持），
+/// scope 由 catch/finally 兜底释放；</description></item>
+/// <item><description>结果阶段（响应写出）异常：保存已在动作阶段完成，不受结果阶段影响，审计仍落库（不回归）；</description></item>
+/// <item><description>内层过滤器短路（OnActionExecuting 设置 Result 未调用 next）：
+/// <see cref="ActionExecutedContext.Exception"/> 为空 → 按成功保存，属「成功审计」边界情况，不新增处理。</description></item>
 /// </list>
 /// </summary>
 [AttributeUsage(AttributeTargets.Class | AttributeTargets.Method)]
-internal class Audit(ILogger<Audit> logger, IServiceScopeFactory scopeFactory)
-    : ActionFilterAttribute, IAsyncAlwaysRunResultFilter
+internal class Audit(ILogger<Audit> logger, IServiceScopeFactory scopeFactory) : ActionFilterAttribute
 {
     /// <summary>HttpContext.Items 中审计 scope 的键</summary>
     private const string AuditScopeKey = "MSFramework.Audit.Scope";
 
-    /// <summary>HttpContext.Items 中审计保存状态（审计操作 + 已解析的审计存储）的键</summary>
-    private const string AuditSaveStateKey = "MSFramework.Audit.SaveState";
-
     /// <summary>
     /// 审计过滤器动作阶段主流程：创建审计 scope 与审计操作，承载到 <see cref="AuditOperationContext"/>，
-    /// 执行 Action（含 UnitOfWork 提交与变更实体收集）。保存与 scope 释放不在本阶段进行——
-    /// 统一延迟到结果阶段（<see cref="OnResultExecutionAsync"/>）与异常阶段（<see cref="AuditExceptionReleaseFilter"/>），
+    /// 执行 Action（含 UnitOfWork 提交与变更实体收集），返回后单点保存审计并释放 scope。
     /// 未注册 IUnitOfWork 或非写操作时直接跳过审计。
     /// </summary>
     /// <param name="context">Action 执行上下文</param>
@@ -80,65 +82,45 @@ internal class Audit(ILogger<Audit> logger, IServiceScopeFactory scopeFactory)
                     // 使 DbContextBase 默认保存流程（ApplyConcepts 之后、提交之前）能在同一执行流
                     // 读取到本请求的审计操作并收集变更实体
                     AuditOperationContext.Value = auditOperation;
-
-                    // 审计保存状态跨阶段传递（动作阶段 → 结果阶段/异常阶段）：
-                    // 过滤器实例生命周期不保证跨阶段安全，统一放入 HttpContext.Items
-                    httpContext.Items[AuditSaveStateKey] = new AuditSaveState(auditOperation, auditingStores);
                 }
             }
 
-            await base.OnActionExecutionAsync(context, next);
+            // 单点保存：动作阶段结束（UnitOfWork 已提交、变更实体已收集）后统一处理。
+            // next 正常返回且 Exception 为空 → 按成功保存；next 正常返回但携带异常 ⇔
+            // 异常已被异常过滤器处理（全局/用户自定义），此时不保存审计（有异常一律不保存）；
+            // next 抛出 ⇔ 异常直接传播，由下方 catch 兜底释放 scope，同样不保存。
+            // 注意：ActionExecutingContext 本身无 Exception 属性，异常状态需从
+            // next 返回的 ActionExecutedContext 读取，故直接调用 next 而非 base
+            // （base 仅额外触发未使用的 OnActionExecuted 回调，行为等价）。
+            var executedContext = await next();
+            if (executedContext.Exception != null)
+            {
+                logger.LogDebug("请求存在异常（含被异常过滤器处理），跳过审计保存");
+            }
+            else if (auditOperation != null)
+            {
+                await SaveAuditOperation(auditOperation, auditingStores);
+            }
         }
         catch
         {
-            // 兜底：过滤器自身前置异常（scope 创建/服务解析等失败）直接传播时释放 scope 防止泄漏
+            // 兜底：过滤器自身前置异常（scope 创建/服务解析等失败）或异常直接传播时释放 scope 防止泄漏；
+            // 同时是未来框架行为变化的保险（若 .NET 后续版本逃逸路径穿透 next 抛出，此处仍兜底释放）
             ReleaseAuditScope(httpContext);
 
             throw;
         }
         finally
         {
+            // 无论是否有异常均释放 scope：幂等释放（catch 已释放时此处不再重复释放），
+            // 保存先于释放（scoped 审计存储持 DbContext 期间真实落库）
+            ReleaseAuditScope(httpContext);
+
             // 动作阶段结束即清理执行流中的审计操作：变更实体收集发生在该阶段内的
             // UnitOfWork 提交（DbContextBase.SaveChangesAsync 在 ApplyConcepts 之后收集），
-            // 此后结果阶段/异常阶段在 ResourceInvoker 捕获的 ExecutionContext 上执行，
-            // 不再需要 AsyncLocal 值；此处不释放审计 scope——保存延迟到结果阶段
-            // （OnResultExecutionAsync），scope 必须存活到保存完成
+            // 此后不再需要 AsyncLocal 值
             AuditOperationContext.Value = null;
             logger.LogDebug("动作阶段结束");
-        }
-    }
-
-    /// <summary>
-    /// 审计过滤器结果阶段：保存审计并释放审计 scope。
-    /// 到达结果阶段 ⇔ 请求不存在未处理异常——异常直接传播时 MVC 在过滤器链之外重抛、
-    /// 结果阶段被跳过（故此处保存天然满足「异常直接传播不保存」契约，N7）；
-    /// 异常被异常过滤器处理后 MVC 走 <see cref="IAlwaysRunResultFilter"/> 路径，
-    /// 本过滤器实现 <see cref="IAsyncAlwaysRunResultFilter"/> 保证该路径仍执行到此处（N5 保存路径）。
-    /// 保存发生在 finally 中：无论结果写出成功、取消或抛出异常，scope 均被释放且仅释放一次。
-    /// 异常直接传播时 scope 由 <see cref="AuditExceptionReleaseFilter"/> 释放（不保存审计）。
-    /// </summary>
-    /// <param name="context">结果执行上下文</param>
-    /// <param name="next">结果执行委托，调用后写出响应</param>
-    public override async Task OnResultExecutionAsync(ResultExecutingContext context, ResultExecutionDelegate next)
-    {
-        try
-        {
-            await base.OnResultExecutionAsync(context, next);
-        }
-        finally
-        {
-            // 保存先于 scope 释放（N6 时序）：scoped 审计存储（默认 EfAuditingStore 持 DbContext）
-            // 在 scope 存活期间调用 AddAsync，异常路径审计真实落库
-            var httpContext = context.HttpContext;
-            if (httpContext.Items.TryGetValue(AuditSaveStateKey, out var saveStateItem) &&
-                saveStateItem is AuditSaveState saveState)
-            {
-                await SaveAuditOperation(saveState.AuditOperation, saveState.AuditingStores);
-                httpContext.Items.Remove(AuditSaveStateKey);
-            }
-
-            ReleaseAuditScope(httpContext);
-            logger.LogDebug("结束执行审计过滤器");
         }
     }
 
@@ -166,9 +148,7 @@ internal class Audit(ILogger<Audit> logger, IServiceScopeFactory scopeFactory)
 
     /// <summary>
     /// 幂等释放审计 scope：scope 已释放或未登记时不做任何操作。
-    /// 供结果阶段（<see cref="OnResultExecutionAsync"/> finally）、异常直接传播
-    /// （<see cref="AuditExceptionReleaseFilter"/>）、过滤器前置异常
-    /// （<see cref="OnActionExecutionAsync"/> catch）三条路径共用，
+    /// 供动作阶段正常完成路径（finally）与异常路径（catch）共用，
     /// 保证任意路径不泄漏且不重复释放。
     /// </summary>
     /// <param name="httpContext">当前请求上下文，scope 登记在 HttpContext.Items 中</param>
@@ -269,12 +249,4 @@ internal class Audit(ILogger<Audit> logger, IServiceScopeFactory scopeFactory)
     {
         return bool.TryParse(value, out var result) ? result : null;
     }
-
-    /// <summary>
-    /// 审计保存跨阶段（动作阶段 → 结果阶段/异常阶段）传递的状态：
-    /// 承载待保存的审计操作与已从审计 scope 解析的审计存储。
-    /// </summary>
-    /// <param name="AuditOperation">待保存的审计操作</param>
-    /// <param name="AuditingStores">已解析的审计存储集合</param>
-    private sealed record AuditSaveState(AuditOperation AuditOperation, List<IAuditingStore> AuditingStores);
 }

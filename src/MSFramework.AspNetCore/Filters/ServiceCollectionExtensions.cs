@@ -28,8 +28,6 @@ public static class ServiceCollectionExtensions
         public FilterCollection AddAudit()
         {
             filters.Add<Audit>(Constants.Audit);
-            // 异常直接传播路径的 scope 兜底释放：Order 取最小值，保证在所有异常过滤器之后执行
-            filters.Add<AuditExceptionReleaseFilter>(Constants.AuditExceptionRelease);
             return filters;
         }
 

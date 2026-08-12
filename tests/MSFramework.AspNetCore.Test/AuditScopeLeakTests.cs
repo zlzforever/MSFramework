@@ -98,10 +98,10 @@ public class AuditScopeLeakTests : IDisposable
     }
 
     /// <summary>
-    /// Action 抛异常路径（N5）：全局异常过滤器处理后，审计 scope 必须仍被释放且仅释放一次。
-    /// ASP.NET Core 10 中 action 异常不传播进 OnActionExecutionAsync 的 catch，
-    /// 仅 OnActionExecuted 回调携带 context.Exception，故该用例曾标记 Skip，
-    /// 修复 OnActionExecuted 释放 scope 后启用。
+    /// Action 抛异常路径（契约反转）：全局异常过滤器处理后审计不保存，
+    /// 但审计 scope 必须仍被释放且仅释放一次。
+    /// 保存与释放统一收敛在动作阶段（finally 幂等释放），异常被处理时
+    /// 动作阶段正常返回、异常未处理时由 catch 兜底，两条路径均无泄漏。
     /// </summary>
     [Fact]
     public async Task ExceptionPath_ShouldDisposeAuditScope()
