@@ -28,12 +28,6 @@ public static class Constants
     public const int Audit = 1002;
 
     /// <summary>
-    ///     审计异常兜底过滤器执行顺序：取最小值，保证在所有异常过滤器之后执行，
-    ///     从而确定 action 异常是否已被其他异常过滤器处理
-    /// </summary>
-    public const int AuditExceptionRelease = int.MinValue;
-
-    /// <summary>
     /// HTTP 写操作方法集合（POST、DELETE、PATCH、PUT）
     /// </summary>
     public static readonly HashSet<string> CommandMethods;

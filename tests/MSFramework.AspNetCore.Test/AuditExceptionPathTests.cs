@@ -22,9 +22,10 @@ namespace MSFramework.AspNetCore.Test;
 /// 用模拟 scoped 生命周期探针存储（scope 释放后 AddAsync 抛异常，等价于默认
 /// EfAuditingStore 持 DbContext 被 Dispose 后的行为）观测：
 /// <list type="bullet">
-/// <item><description>异常被异常过滤器处理（全局/用户自定义/FriendlyException）时一律不保存审计（契约反转，原 N5 取消）；</description></item>
+/// <item><description>异常被异常过滤器处理（全局/用户自定义/FriendlyException/403 权限异常）时一律不保存审计（契约反转，原 N5 取消）；</description></item>
 /// <item><description>异常直接传播（无异常过滤器处理）时不保存审计（N7 保持）；</description></item>
 /// <item><description>正常完成路径保存审计，保存发生在 scope 释放之前且仅保存一次；</description></item>
+/// <item><description>结果阶段（响应写出）过滤器抛异常时审计已保存不受影响（保存先于结果阶段的结构性保证）；</description></item>
 /// <item><description>内层过滤器短路（设置 Result 未调用 next）按成功保存（「成功审计」边界情况）；</description></item>
 /// <item><description>全部路径均无 scope 泄漏、无重复释放。</description></item>
 /// </list>
@@ -150,6 +151,51 @@ public class AuditExceptionPathTests : IDisposable
         }
     }
 
+    /// <summary>
+    /// 契约逐项对齐：403（<see cref="UnauthorizedAccessException"/> 被全局异常过滤器处理）路径
+    /// 审计同样不保存（契约：500/403/FriendlyException 一律不保存），scope 仍被释放且仅释放一次
+    /// </summary>
+    [Fact]
+    public async Task UnauthorizedAccessException_HandledByGlobalExceptionFilter_DoesNotSaveAudit()
+    {
+        var response = await _client.PostAsync("/audit-exc/unauthorized", new StringContent(""));
+
+        Assert.Equal(403, (int)response.StatusCode);
+
+        // 403 异常被处理也不保存审计（与 500/FriendlyException 路径契约一致）
+        Assert.Equal(0, LifecycleProbeAuditingStore.AddCallCount);
+        Assert.Equal(0, LifecycleProbeAuditingStore.AddCallsBeforeDispose);
+        // scope 无泄漏、无重复释放
+        Assert.Equal(1, LifecycleProbeAuditingStore.DisposeCount);
+    }
+
+    /// <summary>
+    /// 结果阶段异常回归：审计保存在动作阶段（早于结果阶段）完成，结果阶段（响应写出）
+    /// 过滤器抛异常时审计仍已保存且仅保存一次（保存先于释放的结构性保证，
+    /// 结果阶段异常不影响审计落库）。MVC 不将结果阶段异常路由给异常过滤器，
+    /// 异常直接传播，客户端表现为异常或 500，不影响本用例断言。
+    /// </summary>
+    [Fact]
+    public async Task ResultStageException_AuditAlreadySaved()
+    {
+        // 结果阶段异常直接传播：TestServer 侧请求处理失败（客户端表现为异常或 500），
+        // 是否抛出不影响本用例断言——关键断言是审计已在动作阶段保存且 scope 已释放
+        try
+        {
+            await _client.PostAsync("/audit-exc/result-fail", new StringContent(""));
+        }
+        catch (Exception)
+        {
+            // 结果阶段异常直接传播的预期表现
+        }
+
+        // 审计保存不受结果阶段异常影响：动作阶段已保存且仅保存一次
+        Assert.Equal(1, LifecycleProbeAuditingStore.AddCallsBeforeDispose);
+        Assert.Equal(1, LifecycleProbeAuditingStore.AddCallCount);
+        // scope 无泄漏、无重复释放
+        Assert.Equal(1, LifecycleProbeAuditingStore.DisposeCount);
+    }
+
     /// <summary>正常完成路径回归：审计保存先于 scope 释放、仅保存一次、scope 仅释放一次</summary>
     [Fact]
     public async Task NormalPath_SavesAuditBeforeScopeDispose()
@@ -187,6 +233,28 @@ internal static class AuditExceptionPathSettings
 
     /// <summary>是否注册用户自定义异常过滤器；true 时模拟第三方异常过滤器处理异常的场景</summary>
     public static bool RegisterUserExceptionFilter;
+}
+
+/// <summary>
+/// 结果阶段抛异常过滤器（特性形式，挂在 Action 上）：在 OnResultExecuting 抛出异常，
+/// 模拟「审计已保存后响应写出阶段失败」。MVC 不将结果阶段异常路由给异常过滤器，
+/// 异常直接传播，审计保存与 scope 释放不受影响（均已在动作阶段完成）。
+/// </summary>
+[AttributeUsage(AttributeTargets.Method)]
+public class ResultStageThrowingFilter : Attribute, IResultFilter
+{
+    /// <summary>结果阶段入口：抛出异常，模拟响应写出阶段失败</summary>
+    /// <param name="context">结果执行上下文</param>
+    public void OnResultExecuting(ResultExecutingContext context)
+    {
+        throw new InvalidOperationException("result stage boom");
+    }
+
+    /// <summary>结果阶段出口：空实现</summary>
+    /// <param name="context">结果已执行上下文</param>
+    public void OnResultExecuted(ResultExecutedContext context)
+    {
+    }
 }
 
 /// <summary>短路测试用动作过滤器：在 OnActionExecuting 设置 Result 且不调用 next，模拟内层过滤器短路</summary>
@@ -237,6 +305,23 @@ public class AuditExceptionController : ControllerBase
     public IActionResult Friendly()
     {
         throw new MicroserviceFrameworkFriendlyException(40001, "业务异常");
+    }
+
+    /// <summary>抛出权限异常的写请求，由全局异常过滤器转换为 403 响应</summary>
+    /// <returns>恒抛权限异常，无返回值</returns>
+    [HttpPost("unauthorized")]
+    public IActionResult ThrowUnauthorized()
+    {
+        throw new UnauthorizedAccessException("无权访问");
+    }
+
+    /// <summary>Action 正常执行并保存审计，结果阶段过滤器抛异常的写请求</summary>
+    /// <returns>正常结果，异常由结果阶段过滤器抛出</returns>
+    [HttpPost("result-fail")]
+    [ResultStageThrowingFilter]
+    public IActionResult ResultFail()
+    {
+        return Ok();
     }
 
     /// <summary>被短路过滤器拦截的写请求：Action 本体不会执行</summary>
