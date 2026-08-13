@@ -22,7 +22,8 @@ namespace MSFramework.Tests;
 /// 验证 <see cref="DeletionAuditingStrategy"/> 去掉 Reload 后的行为——
 /// 批量删除不再产生逐行 SELECT、软删除 UPDATE 仅包含删除审计列、
 /// 非审计列数据不被清空、乐观锁语义保留（WHERE 按原令牌判断且不重写令牌）、
-/// stub 删除（仅构造主键、未加载）不会把空值写入数据库。
+/// stub 删除（仅构造主键、未加载）不会把空值写入数据库、
+/// stub + 乐观锁组合删除抛 <see cref="DbUpdateConcurrencyException"/> 且行未被删除。
 /// </summary>
 public class SoftDeleteAuditingTests
 {
@@ -590,6 +591,37 @@ public class SoftDeleteAuditingTests
         using var verifyScope = CreateContext(host);
         var persisted = verifyScope.Context.Categories.IgnoreQueryFilters().Single(x => x.Id == "C-1");
         Assert.True(persisted.IsDeleted);
+        Assert.Equal("apple", persisted.Name);
+    }
+
+    /// <summary>
+    /// stub + 乐观锁删除：仅构造主键（未加载数据库）的 stub 实体实现 <see cref="IOptimisticLock"/>，
+    /// 提交应抛 <see cref="DbUpdateConcurrencyException"/> 且行未被删除。
+    /// stub 的乐观锁令牌由构造器生成、与库中令牌不一致，WHERE 按该令牌匹配不到行；
+    /// 该行为固化后防止未来实现漂移（如重新引入 Reload 导致 stub 删除静默成功）。
+    /// </summary>
+    [Fact]
+    public async Task StubSoftDelete_WithOptimisticLock_ThrowsDbUpdateConcurrencyException()
+    {
+        using var host = CreateHost();
+
+        using (var seedScope = CreateContext(host))
+        {
+            seedScope.Context.VersionedCategories.Add(new VersionedCategory("V-1", "apple"));
+            await seedScope.Context.SaveChangesAsync();
+        }
+
+        using var scope = CreateContext(host);
+        // stub 删除：仅设置主键即 Remove，不经过数据库加载；构造器生成的新令牌与库中令牌不一致
+        scope.Context.VersionedCategories.Remove(new VersionedCategory("V-1", null));
+
+        // WHERE 按 stub 的乐观锁令牌匹配不到行 → 并发异常
+        await Assert.ThrowsAsync<DbUpdateConcurrencyException>(() => scope.Context.SaveChangesAsync());
+
+        // 异常后行必须仍然存在且未被软删除，业务数据保持完整
+        using var verifyScope = CreateContext(host);
+        var persisted = verifyScope.Context.VersionedCategories.IgnoreQueryFilters().Single(x => x.Id == "V-1");
+        Assert.False(persisted.IsDeleted);
         Assert.Equal("apple", persisted.Name);
     }
 

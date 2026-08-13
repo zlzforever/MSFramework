@@ -78,6 +78,13 @@ internal sealed class ModificationAuditingStrategy : IEntityAuditingStrategy
 /// 使最终 UPDATE 仅包含删除审计列，避免全列写放大；乐观锁列保持原值仅参与 WHERE 判断，
 /// 并发语义不受影响。
 /// </summary>
+/// <remarks>
+/// 固定集合约束：软删除 UPDATE 仅落库 <c>DeletionAuditPropertyNames</c> 中固定的 4 个删除审计属性
+/// （IsDeleted、DeleterId、DeleterName、DeletionTime）。若实体在自定义
+/// <see cref="IDeletion.SetDeletion"/> 重写中额外写入属性，这些属性会被重置为未修改而不落库；
+/// 如需扩展删除审计列，必须同步扩展 <c>DeletionAuditPropertyNames</c> 集合或另行处理
+/// （如改为物理删除、扩展本策略），不可仅重写 <see cref="IDeletion.SetDeletion"/> 后依赖其落库。
+/// </remarks>
 internal sealed class DeletionAuditingStrategy : IEntityAuditingStrategy
 {
     /// <summary>
