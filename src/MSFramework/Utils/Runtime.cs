@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Frozen;
 using System.Collections.Generic;
 using System.IO;
@@ -6,6 +7,7 @@ using System.Linq;
 using System.Reflection;
 using System.Threading;
 using Microsoft.Extensions.DependencyModel;
+using Microsoft.Extensions.Logging;
 
 namespace MicroserviceFramework.Utils;
 
@@ -19,14 +21,16 @@ public static class Runtime
     private static readonly Lock Locker = new();
 
     /// <summary>
-    /// 请在 AddMicroserviceFramework 前添加前缀
+    /// 请在 AddMicroserviceFramework 前添加前缀。
+    /// 使用线程安全容器，避免加载期间并发读写集合造成的不一致
     /// </summary>
-    public static readonly HashSet<string> StartsWith = ["MSFramework"];
+    public static readonly ConcurrentBag<string> StartsWith = new(["MSFramework"]);
 
     /// <summary>
-    /// 排除的程序集前缀集合，这些程序集不会被扫描加载
+    /// 排除的程序集前缀集合，这些程序集不会被扫描加载。
+    /// 使用线程安全容器，避免加载期间并发读写集合造成的不一致
     /// </summary>
-    public static readonly HashSet<string> ExcludeWith = new();
+    public static readonly ConcurrentBag<string> ExcludeWith = new();
 
     /// <summary>
     /// 加载所有符合前缀匹配的业务程序集，初始化程序集和类型缓存。
@@ -79,8 +83,16 @@ public static class Runtime
                         var path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, $"{lib.Name}.dll");
                         if (File.Exists(path))
                         {
-                            assembly = AppDomain.CurrentDomain.Load(new AssemblyName(lib.Name));
-                            loadedAssemblies.TryAdd(lib.Name, assembly);
+                            try
+                            {
+                                assembly = AppDomain.CurrentDomain.Load(new AssemblyName(lib.Name));
+                                loadedAssemblies.TryAdd(lib.Name, assembly);
+                            }
+                            catch (Exception ex)
+                            {
+                                // 单个程序集加载失败不影响应用启动，记录日志后跳过
+                                Defaults.Logger?.LogWarning(ex, "程序集加载失败，已跳过: {AssemblyName}", lib.Name);
+                            }
                         }
                     }
 
@@ -119,8 +131,16 @@ public static class Runtime
                         continue;
                     }
 
-                    var assembly = AppDomain.CurrentDomain.Load(AssemblyName.GetAssemblyName(file));
-                    dict.TryAdd(name, assembly);
+                    try
+                    {
+                        var assembly = AppDomain.CurrentDomain.Load(AssemblyName.GetAssemblyName(file));
+                        dict.TryAdd(name, assembly);
+                    }
+                    catch (Exception ex)
+                    {
+                        // 损坏或依赖缺失的 dll 仅跳过并记录日志，保证应用正常启动
+                        Defaults.Logger?.LogWarning(ex, "程序集加载失败，已跳过: {File}", file);
+                    }
                 }
 
                 assemblies.AddRange(dict.Values.Where(x => x != null));

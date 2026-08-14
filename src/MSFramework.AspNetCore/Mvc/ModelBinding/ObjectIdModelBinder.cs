@@ -10,14 +10,16 @@ namespace MicroserviceFramework.AspNetCore.Mvc.ModelBinding;
 public class ObjectIdModelBinder : IModelBinder
 {
     /// <summary>
-    ///     从请求值中解析 ObjectId 并绑定到模型
+    ///     从请求值中解析 ObjectId 并绑定到模型，非法格式返回绑定失败（400）
     /// </summary>
     /// <param name="bindingContext">模型绑定上下文</param>
     /// <returns>异步任务</returns>
     public Task BindModelAsync(ModelBindingContext bindingContext)
     {
         var value = bindingContext.ValueProvider.GetValue(bindingContext.FieldName).FirstValue;
-        bindingContext.Result = !ObjectId.TryParse(value, out var id) && id != ObjectId.Empty
+
+        // 解析失败或解析结果为 Empty（非法输入）时绑定失败，返回 400 而非静默绑定 Empty
+        bindingContext.Result = !ObjectId.TryParse(value, out var id) || id == ObjectId.Empty
             ? ModelBindingResult.Failed()
             : ModelBindingResult.Success(id);
 

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 namespace MicroserviceFramework.AspNetCore.Filters;
 
 /// <summary>
-/// Filter 的顺序，越大则先运行
+/// Filter 的执行顺序：Order 越小越先执行（进入阶段按 Order 升序，退出阶段按降序反向执行）
 /// </summary>
 public static class Constants
 {

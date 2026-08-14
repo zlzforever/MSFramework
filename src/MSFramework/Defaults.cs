@@ -4,7 +4,9 @@ using System.IO;
 using System.Reflection;
 using MicroserviceFramework.Domain;
 using MicroserviceFramework.Serialization;
+using MicroserviceFramework.Text.Json;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
 using MongoDB.Bson;
 
 namespace MicroserviceFramework;
@@ -14,15 +16,27 @@ namespace MicroserviceFramework;
 /// </summary>
 public static class Defaults
 {
-    /// <summary>
-    /// 全局 JSON 序列化器实例
-    /// </summary>
-    public static IJsonSerializer JsonSerializer;
+    private static readonly Lazy<IJsonSerializer> DefaultJsonSerializer = new(TextJsonSerializer.Create);
 
     /// <summary>
-    /// 全局日志记录器实例
+    /// 全局 JSON 序列化器实例。
+    /// 未显式初始化时惰性使用默认 <see cref="TextJsonSerializer"/>，仅框架内部可覆写
     /// </summary>
-    public static ILogger Logger;
+    public static IJsonSerializer JsonSerializer
+    {
+        get => field ?? DefaultJsonSerializer.Value;
+        internal set;
+    }
+
+    /// <summary>
+    /// 全局日志记录器实例。
+    /// 未显式初始化时惰性使用 <see cref="Microsoft.Extensions.Logging.Abstractions.NullLogger"/>，仅框架内部可覆写
+    /// </summary>
+    public static ILogger Logger
+    {
+        get => field ?? NullLogger.Instance;
+        internal set;
+    }
 
     /// <summary>
     /// 当前是否运行在测试环境中
@@ -35,9 +49,9 @@ public static class Defaults
     public static readonly string LocalOSSDirectory = Path.Combine(AppContext.BaseDirectory, "wwwroot", "oss");
 
     /// <summary>
-    /// 全局服务提供程序
+    /// 全局服务提供程序，仅框架内部可覆写
     /// </summary>
-    public static IServiceProvider ServiceProvider;
+    public static IServiceProvider ServiceProvider { get; internal set; }
 
     static Defaults()
     {

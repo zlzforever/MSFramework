@@ -1,7 +1,6 @@
 using System;
 using System.Threading;
 using System.Threading.Tasks;
-using MicroserviceFramework.Auditing.Model;
 
 namespace MicroserviceFramework.Domain;
 
@@ -14,12 +13,6 @@ public interface IUnitOfWork : IDisposable
     /// 注册保存事件
     /// </summary>
     event Action SavedChanges;
-
-    /// <summary>
-    /// 设置审计信息
-    /// </summary>
-    /// <param name="auditOperation"></param>
-    void RegisterAuditOperation(AuditOperation auditOperation);
 
     /// <summary>
     /// 保存工作单元

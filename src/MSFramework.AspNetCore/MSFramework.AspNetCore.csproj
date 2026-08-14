@@ -12,4 +12,9 @@
   <ItemGroup>
     <FrameworkReference Include="Microsoft.AspNetCore.App" />
   </ItemGroup>
+  <ItemGroup>
+    <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleToAttribute">
+      <_Parameter1>MSFramework.AspNetCore.Test</_Parameter1>
+    </AssemblyAttribute>
+  </ItemGroup>
 </Project>

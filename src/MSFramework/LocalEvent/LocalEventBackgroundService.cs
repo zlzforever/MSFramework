@@ -2,6 +2,7 @@ using System;
 using System.Threading;
 using System.Threading.Tasks;
 using MicroserviceFramework.Application;
+using MicroserviceFramework.Auditing;
 using MicroserviceFramework.Auditing.Model;
 using MicroserviceFramework.Domain;
 using Microsoft.Extensions.DependencyInjection;
@@ -61,29 +62,24 @@ public class LocalEventBackgroundService(
                             continue;
                         }
 
-                        var session = services.GetService<ISession>();
-                        // 覆盖 session 对象
-                        if (entry.Session != null)
-                        {
-                            session?.Load(entry.Session);
-                        }
-
                         if (options.Value.EnableAuditing)
                         {
-                            var auditOperation = CreateAuditedOperation(session, handlerName);
-                            var unitOfWork = services.GetService<IUnitOfWork>();
-                            unitOfWork?.RegisterAuditOperation(auditOperation);
-                        }
-
-                        if (descriptor.HandleMethod.Invoke(handler, [entry.EventData, stoppingToken]) is
-                            not Task
-                            task)
-                        {
-                            continue;
+                            var auditOperation = CreateAuditedOperation(entry.Session, handlerName);
+                            // 审计操作承载到当前后台执行流（AsyncLocal），使 DbContextBase 默认保存流程
+                            // 能在同一执行流读取到本事件处理器的审计操作并收集变更实体；
+                            // 每个事件处理器是独立审计单元，处理完成后（含异常路径）必须在 finally 清理
+                            AuditOperationContext.Value = auditOperation;
                         }
 
                         try
                         {
+                            if (descriptor.HandleMethod.Invoke(handler, [entry.EventData, stoppingToken]) is
+                                not Task
+                                task)
+                            {
+                                continue;
+                            }
+
                             await task;
                             var unitOfWork = services.GetService<IUnitOfWork>();
                             if (unitOfWork != null)
@@ -98,6 +94,12 @@ public class LocalEventBackgroundService(
                         {
                             logger.LogError(e, "{TraceId}, 事件处理器 {HandlerType} 执行失败",
                                 traceId, handlerName);
+                        }
+                        finally
+                        {
+                            // 事件处理完成或异常后清理执行流中的审计操作，防止 AsyncLocal 值
+                            // 随 ExecutionContext 复用到后续事件处理器或其他请求
+                            AuditOperationContext.Value = null;
                         }
                     }
                 }

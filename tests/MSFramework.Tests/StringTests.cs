@@ -114,4 +114,35 @@ public class StringTests
         var result = value.ToCamelCase();
         Assert.Equal("a", result);
     }
+
+    [Fact]
+    public void ToCamelCase_DoesNotMutateOriginalString()
+    {
+        // 修复前使用 unsafe 指针原地改写字符串，会破坏字符串驻留；修复后必须返回新实例
+        var value = "PascalCaseString";
+        var result = value.ToCamelCase();
+        Assert.Equal("pascalCaseString", result);
+        Assert.Equal("PascalCaseString", value);
+        Assert.NotSame(value, result);
+    }
+
+    [Fact]
+    public void ToCamelCase_HandlesNullAndWhitespace()
+    {
+        string nullValue = null;
+        Assert.Null(nullValue.ToCamelCase());
+
+        var whitespace = "  ";
+        Assert.Equal(whitespace, whitespace.ToCamelCase());
+    }
+
+    [Fact]
+    public void ToCamelCase_KeepsInterning_ForSharedString()
+    {
+        // "Hello" 被多个字符串字面量共享（驻留），转换后原驻留字符串必须保持 "Hello"
+        var shared = "Hello";
+        var result = shared.ToCamelCase();
+        Assert.Equal("hello", result);
+        Assert.Equal("Hello", shared);
+    }
 }

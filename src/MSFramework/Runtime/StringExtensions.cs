@@ -1,3 +1,4 @@
+using System;
 using System.Globalization;
 using System.Text;
 
@@ -47,23 +48,23 @@ public static class StringExtensions
         public string ToSnakeCase() => ToSeparatedCase(value, '_');
 
         /// <summary>
-        /// 将字符串转换为驼峰命名（camelCase）
+        /// 将字符串转换为驼峰命名（camelCase），首字符转换为小写。
+        /// 该方法在栈上复制字符串副本后改写，不会原地修改字符串对象，
+        /// 避免破坏 .NET 字符串驻留机制；空串或 null 直接原样返回。
         /// </summary>
-        /// <returns>驼峰命名字符串</returns>
-        public unsafe string ToCamelCase()
+        /// <returns>驼峰命名字符串（新实例），null 或空白字符串原样返回</returns>
+        public string ToCamelCase()
         {
             if (string.IsNullOrWhiteSpace(value))
             {
                 return value;
             }
 
-            fixed (char* chr = value)
-            {
-                var valueChar = *chr;
-                *chr = char.ToLowerInvariant(valueChar);
-            }
-
-            return value;
+            var span = value.AsSpan();
+            Span<char> buffer = stackalloc char[span.Length];
+            span.CopyTo(buffer);
+            buffer[0] = char.ToLowerInvariant(buffer[0]);
+            return new string(buffer);
         }
     }
 

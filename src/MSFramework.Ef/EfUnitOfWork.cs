@@ -1,7 +1,6 @@
 using System;
 using System.Threading;
 using System.Threading.Tasks;
-using MicroserviceFramework.Auditing.Model;
 using MicroserviceFramework.Domain;
 
 namespace MicroserviceFramework.Ef;
@@ -25,33 +24,6 @@ internal class EfUnitOfWork : IUnitOfWork
     /// 所有 DbContext 保存完成后调用
     /// </summary>
     public event Action SavedChanges;
-
-    // public AuditOperation GetAuditOperation()
-    // {
-    //     return _auditOperation;
-    // }
-
-    public void RegisterAuditOperation(AuditOperation auditOperation)
-    {
-        if (auditOperation == null)
-        {
-            return;
-        }
-
-        foreach (var dbContextBase in _dbContextFactory.GetAllDbContexts())
-        {
-            dbContextBase.SavingChanges += (sender, _) =>
-            {
-                if (sender is not DbContextBase db)
-                {
-                    return;
-                }
-
-                var entities = db.GetAuditEntities();
-                auditOperation.AddEntities(entities);
-            };
-        }
-    }
 
     public async Task SaveChangesAsync(CancellationToken cancellationToken = default)
     {

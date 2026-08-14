@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using MicroserviceFramework.Auditing.Model;
 using MicroserviceFramework.Domain;
 using MicroserviceFramework.Ef;
 using MicroserviceFramework.Extensions.DependencyInjection;
@@ -208,5 +209,16 @@ public class AuditRegressionTests
 
         var auditEntity = context.GetAuditEntities().Single(x => x.Type.Contains(nameof(GuidIdCategory)));
         Assert.Equal(id.ToString(), auditEntity.EntityId);
+    }
+
+    [Fact]
+    public void AuditOperation_LatLng_HasCorrectSemantics()
+    {
+        // 回归测试：Lat=纬度、Lng=经度，防止经纬度语义再次颠倒
+        var operation = new AuditOperation("/orders", "ua", "1.2.3.4", "iPhone", "device-1",
+            31.2304m, 121.4737m, "trace-1", "POST");
+
+        Assert.Equal(31.2304m, operation.Lat);
+        Assert.Equal(121.4737m, operation.Lng);
     }
 }

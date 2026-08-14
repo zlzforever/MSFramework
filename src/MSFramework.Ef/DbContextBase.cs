@@ -5,6 +5,7 @@ using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using MicroserviceFramework.Application;
+using MicroserviceFramework.Auditing;
 using MicroserviceFramework.Auditing.Model;
 using MicroserviceFramework.Domain;
 using MicroserviceFramework.Ef.Auditing;
@@ -199,6 +200,8 @@ public abstract class DbContextBase : DbContext
             return effectedCount;
         }
 
+        CollectAuditEntities();
+
         var r = await base.SaveChangesAsync(acceptAllChangesOnSuccess, cancellationToken);
         return r;
     }
@@ -226,7 +229,37 @@ public abstract class DbContextBase : DbContext
 
         var effectedCount = 0;
         var changed = ApplyConcepts();
-        return !changed ? effectedCount : base.SaveChanges(acceptAllChangesOnSuccess);
+        if (!changed)
+        {
+            return effectedCount;
+        }
+
+        CollectAuditEntities();
+
+        return base.SaveChanges(acceptAllChangesOnSuccess);
+    }
+
+    /// <summary>
+    /// 审计收集挂钩：在实体状态定型（<see cref="ApplyConcepts"/>）之后、提交数据库之前，
+    /// 若当前执行流承载审计操作（<see cref="AuditOperationContext.Value"/> 非空），
+    /// 则收集变更实体到该操作中。
+    /// 审计请求由 <see cref="AuditOperationContext"/>（AsyncLocal）随执行流承载，
+    /// 与工作单元实现解耦：只要在执行流内调用保存（含绕过工作单元直接调用
+    /// <see cref="SaveChangesAsync(bool, CancellationToken)"/> 的路径），且未越过
+    /// 审计链路终点，即可被收集。
+    /// Value 为 null（无审计请求）时本方法立即返回，仅一次 AsyncLocal 读取开销；
+    /// 实体收集结果经 <see cref="AuditOperation.AddEntities"/> 按值身份去重，
+    /// 多次保存/多上下文场景不会重复收集同一实体的同一变更状态。
+    /// </summary>
+    private void CollectAuditEntities()
+    {
+        var auditOperation = AuditOperationContext.Value;
+        if (auditOperation == null)
+        {
+            return;
+        }
+
+        auditOperation.AddEntities(GetAuditEntities());
     }
 
     /// <summary>
