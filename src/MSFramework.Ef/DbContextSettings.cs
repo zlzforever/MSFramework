@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
@@ -125,6 +126,7 @@ public class DbContextSettings : IDbContextOptionsExtension
     /// <summary>
     /// 使用编译模型
     /// </summary>
+    [Obsolete("编译模型与软删除、多租户等功能不兼容，建议不要使用编译模型")]
     public bool UseCompiledModel { get; set; }
 
     /// <summary>

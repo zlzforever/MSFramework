@@ -16,10 +16,6 @@ namespace MicroserviceFramework;
 /// </summary>
 public static class Defaults
 {
-    private static IJsonSerializer _jsonSerializer;
-    private static ILogger _logger;
-    private static IServiceProvider _serviceProvider;
-
     private static readonly Lazy<IJsonSerializer> DefaultJsonSerializer = new(TextJsonSerializer.Create);
 
     /// <summary>
@@ -28,8 +24,8 @@ public static class Defaults
     /// </summary>
     public static IJsonSerializer JsonSerializer
     {
-        get => _jsonSerializer ?? DefaultJsonSerializer.Value;
-        internal set => _jsonSerializer = value;
+        get => field ?? DefaultJsonSerializer.Value;
+        internal set;
     }
 
     /// <summary>
@@ -38,8 +34,8 @@ public static class Defaults
     /// </summary>
     public static ILogger Logger
     {
-        get => _logger ?? NullLogger.Instance;
-        internal set => _logger = value;
+        get => field ?? NullLogger.Instance;
+        internal set;
     }
 
     /// <summary>
@@ -55,11 +51,7 @@ public static class Defaults
     /// <summary>
     /// 全局服务提供程序，仅框架内部可覆写
     /// </summary>
-    public static IServiceProvider ServiceProvider
-    {
-        get => _serviceProvider;
-        internal set => _serviceProvider = value;
-    }
+    public static IServiceProvider ServiceProvider { get; internal set; }
 
     static Defaults()
     {
