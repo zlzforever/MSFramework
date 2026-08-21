@@ -674,7 +674,44 @@ builder.Services.AddControllers(options =>
 });
 ```
 
-### 5.3 Swagger 增强
+全局异常过滤器返回 RFC 7807 `ProblemDetails`，错误响应保持真实 HTTP 状态码，
+不会再被响应包装器转换为 HTTP 200 或 `ApiResult`。客户端应按 HTTP 状态码和
+`ProblemDetails` 字段处理错误，不要在错误响应中读取 `success`/`data`。
+
+| 异常 | HTTP 状态码 |
+|------|-------------|
+| `MicroserviceFrameworkFriendlyException` | 400 |
+| `ArgumentException` | 400 |
+| `AuthenticationException` | 401 |
+| `UnauthorizedAccessException` | 403 |
+| `KeyNotFoundException` / `FileNotFoundException` | 404 |
+| `MicroserviceFrameworkConflictException` | 409 |
+| 其他异常（包括普通 `InvalidOperationException`、EF/DI 异常） | 500 |
+
+只有明确抛出 `MicroserviceFrameworkConflictException` 才表示资源状态冲突：
+
+```csharp
+throw new MicroserviceFrameworkConflictException("资源状态冲突");
+```
+
+生产环境的 500 响应只返回通用错误详情；所有错误都会保留 `correlationId`，
+并通过 `X-Correlation-ID` 响应头返回，客户端应记录该标识供排查。
+
+### 5.3 分页扩展包迁移
+
+`PagedQueryAsync` 的公共命名空间仍为 `MicroserviceFramework.Linq.Expression`，
+但实现已迁移到 `MSFramework.Ef` 包，以保证 `MSFramework` Core 不直接依赖 EF Core。
+使用 EF 分页扩展的项目需要显式安装并引用：
+
+```bash
+dotnet add package MSFramework.Ef
+```
+
+代码中的 `using MicroserviceFramework.Linq.Expression;` 无需修改。仅引用
+`MSFramework` Core 的项目不再自动获得 EF 分页扩展；这不是运行时降级，需按项目边界
+显式添加 `MSFramework.Ef`，或在不使用 EF 的场景采用项目自己的 `IQueryable` 分页实现。
+
+### 5.4 Swagger 增强
 
 ```csharp
 builder.Services.AddSwaggerGen(x =>

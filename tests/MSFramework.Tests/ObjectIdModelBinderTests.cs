@@ -21,6 +21,8 @@ public class ObjectIdModelBinderTests
         await new ObjectIdModelBinder().BindModelAsync(context);
 
         Assert.Equal(ModelBindingResult.Failed(), context.Result);
+        Assert.True(context.ModelState.ContainsKey("id"));
+        Assert.NotEmpty(context.ModelState["id"].Errors);
     }
 
     [Fact]
@@ -32,6 +34,8 @@ public class ObjectIdModelBinderTests
         await new ObjectIdModelBinder().BindModelAsync(context);
 
         Assert.Equal(ModelBindingResult.Failed(), context.Result);
+        Assert.True(context.ModelState.ContainsKey("id"));
+        Assert.NotEmpty(context.ModelState["id"].Errors);
     }
 
     [Fact]

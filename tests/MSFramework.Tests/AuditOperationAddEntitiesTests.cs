@@ -1,4 +1,5 @@
 using System.Linq;
+using System.Threading.Tasks;
 using MicroserviceFramework.Auditing.Model;
 using Xunit;
 
@@ -40,16 +41,19 @@ public class AuditOperationAddEntitiesTests
     }
 
     /// <summary>
-    /// 残留处理器重复触发收集场景：每次收集都会新建实例（引用不同），按值身份去重后仍只收集一次
+    /// 同一收集批次内重复触发收集场景：每次收集都会新建实例（引用不同），按值身份去重后仍只收集一次
     /// </summary>
     [Fact]
     public void AddEntities_RepeatedCollectionSameState_CollectedOnce()
     {
         var operation = CreateOperation();
 
-        operation.AddEntities([new AuditEntity("Order", "O1", OperationType.Modify)]);
-        operation.AddEntities([new AuditEntity("Order", "O1", OperationType.Modify)]);
-        operation.AddEntities([new AuditEntity("Order", "O1", OperationType.Modify)]);
+        operation.AddEntities(
+        [
+            new AuditEntity("Order", "O1", OperationType.Modify),
+            new AuditEntity("Order", "O1", OperationType.Modify),
+            new AuditEntity("Order", "O1", OperationType.Modify)
+        ]);
 
         var entity = Assert.Single(operation.Entities);
         Assert.Equal("Order", entity.Type);
@@ -75,6 +79,37 @@ public class AuditOperationAddEntitiesTests
         Assert.Equal(2, operation.Entities.Count);
         Assert.Contains(operation.Entities, x => x.OperationType == OperationType.Add);
         Assert.Contains(operation.Entities, x => x.OperationType == OperationType.Modify);
+    }
+
+    [Fact]
+    public void AddEntities_SameOperationTypeWithDifferentPropertySnapshots_BothCollected()
+    {
+        var operation = CreateOperation();
+        var first = CreateModifiedEntity("before-1", "after-1");
+        var second = CreateModifiedEntity("before-2", "after-2");
+
+        operation.AddEntities([first, second]);
+
+        Assert.Equal(2, operation.Entities.Count);
+        Assert.Contains(operation.Entities, entity =>
+            entity.Properties.Single().NewValue == "after-1");
+        Assert.Contains(operation.Entities, entity =>
+            entity.Properties.Single().NewValue == "after-2");
+    }
+
+    [Fact]
+    public void AddEntities_SameSnapshotAcrossCollectionBatches_PreservesEachBatch()
+    {
+        var operation = CreateOperation();
+        var firstBatch = CreateModifiedEntity("before-1", "after-1");
+        var secondBatch = CreateModifiedEntity("before-1", "after-1");
+
+        operation.AddEntities([firstBatch]);
+        operation.AddEntities([secondBatch]);
+
+        Assert.Equal(2, operation.Entities.Count);
+        Assert.Contains(operation.Entities, entity => ReferenceEquals(entity, firstBatch));
+        Assert.Contains(operation.Entities, entity => ReferenceEquals(entity, secondBatch));
     }
 
     /// <summary>
@@ -107,5 +142,32 @@ public class AuditOperationAddEntitiesTests
 
         operation.AddEntities([null, new AuditEntity("Order", "O1", OperationType.Add)]);
         Assert.Single(operation.Entities);
+    }
+
+    [Fact]
+    public async Task AddEntities_ConcurrentWriters_PreserveEveryEntity()
+    {
+        var operation = CreateOperation();
+
+        await Task.WhenAll(Enumerable.Range(0, 32).Select(worker => Task.Run(() =>
+        {
+            for (var index = 0; index < 100; index++)
+            {
+                var entity = new AuditEntity("Order", $"O-{worker}-{index}", OperationType.Modify);
+                operation.AddEntities([entity]);
+            }
+        })));
+
+        Assert.Equal(3200, operation.Entities.Count);
+        var entityIds = operation.Entities.Select(entity => entity.EntityId).ToArray();
+        Assert.Equal(3200, entityIds.Distinct().Count());
+        Assert.All(entityIds, entityId => Assert.StartsWith("O-", entityId));
+    }
+
+    private static AuditEntity CreateModifiedEntity(string originalValue, string newValue)
+    {
+        var entity = new AuditEntity("Order", "O1", OperationType.Modify);
+        entity.AddProperties([new AuditProperty("Name", "System.String", originalValue, newValue)]);
+        return entity;
     }
 }

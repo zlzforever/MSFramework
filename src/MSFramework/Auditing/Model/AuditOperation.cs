@@ -1,5 +1,7 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using MicroserviceFramework.Domain;
 using MongoDB.Bson;
 
@@ -129,8 +131,7 @@ public class AuditOperation : CreationAggregateRoot<string>, IAuditObject
 
     private AuditOperation(string id) : base(id)
     {
-        Entities = new List<AuditEntity>();
-        _collectedEntityKeys = [];
+        Entities = new ThreadSafeCollection<AuditEntity>();
     }
 
     /// <summary>
@@ -160,17 +161,170 @@ public class AuditOperation : CreationAggregateRoot<string>, IAuditObject
     }
 
     /// <summary>
-    /// 已收集审计实体的去重键集合（类型 + 实体标识 + 操作类型）。
-    /// <see cref="AuditEntity"/> 未重写相等性（引用相等），而每次 <c>GetAuditEntities()</c>
-    /// 都会新建实例，残留处理器重复触发收集时无法用引用去重，
-    /// 故以值语义三元组作为唯一键，保证同一实体的同一变更状态只收集一次。
+    /// 审计实体及其属性快照的值键。属性快照不同表示实体在不同保存批次中的不同变更，
+    /// 即使操作类型相同也必须分别保留。
     /// </summary>
-    private readonly HashSet<(string Type, string EntityId, OperationType OperationType)> _collectedEntityKeys;
+    private sealed class AuditEntityKey : IEquatable<AuditEntityKey>
+    {
+        private AuditEntityKey(string type, string entityId, OperationType operationType,
+            IReadOnlyList<AuditPropertyKey> properties)
+        {
+            Type = type;
+            EntityId = entityId;
+            OperationType = operationType;
+            Properties = properties;
+        }
+
+        private string Type { get; }
+
+        private string EntityId { get; }
+
+        private OperationType OperationType { get; }
+
+        private IReadOnlyList<AuditPropertyKey> Properties { get; }
+
+        public static AuditEntityKey From(AuditEntity entity)
+        {
+            var properties = (entity.Properties ?? []).Select(property =>
+                    new AuditPropertyKey(property.Name, property.Type, property.OriginalValue, property.NewValue))
+                .OrderBy(property => property.Name, StringComparer.Ordinal)
+                .ThenBy(property => property.Type, StringComparer.Ordinal)
+                .ThenBy(property => property.OriginalValue, StringComparer.Ordinal)
+                .ThenBy(property => property.NewValue, StringComparer.Ordinal)
+                .ToArray();
+
+            return new AuditEntityKey(entity.Type, entity.EntityId, entity.OperationType, properties);
+        }
+
+        public bool Equals(AuditEntityKey other)
+        {
+            if (other == null || !string.Equals(Type, other.Type, StringComparison.Ordinal) ||
+                !string.Equals(EntityId, other.EntityId, StringComparison.Ordinal) ||
+                OperationType != other.OperationType || Properties.Count != other.Properties.Count)
+            {
+                return false;
+            }
+
+            for (var index = 0; index < Properties.Count; index++)
+            {
+                if (Properties[index] != other.Properties[index])
+                {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        public override bool Equals(object obj)
+        {
+            return Equals(obj as AuditEntityKey);
+        }
+
+        public override int GetHashCode()
+        {
+            var hash = new HashCode();
+            hash.Add(Type, StringComparer.Ordinal);
+            hash.Add(EntityId, StringComparer.Ordinal);
+            hash.Add(OperationType);
+            foreach (var property in Properties)
+            {
+                hash.Add(property);
+            }
+
+            return hash.ToHashCode();
+        }
+    }
+
+    private readonly record struct AuditPropertyKey(string Name, string Type, string OriginalValue, string NewValue);
 
     /// <summary>
-    /// 添加审计实体集合到当前操作，按实体值身份（类型 + 实体标识 + 操作类型）去重，保证同一实体只收集一次
+    /// 同步去重键集合与实体集合的修改，避免多个 DbContext 并发收集时出现部分提交。
+    /// Entities 本身使用快照枚举的并发集合，外部枚举也不会与写入冲突。
     /// </summary>
-    /// <param name="entities">审计实体集合</param>
+    private readonly object _entitiesSync = new();
+
+    /// <summary>
+    /// 保持 ICollection 公共契约，同时为 Count、写入和枚举提供线程安全。
+    /// 枚举返回固定快照，避免持有内部锁跨越调用方代码。
+    /// </summary>
+    private sealed class ThreadSafeCollection<T> : ICollection<T>
+    {
+        private readonly List<T> _items = [];
+        private readonly object _sync = new();
+
+        public int Count
+        {
+            get
+            {
+                lock (_sync)
+                {
+                    return _items.Count;
+                }
+            }
+        }
+
+        public bool IsReadOnly => false;
+
+        public void Add(T item)
+        {
+            lock (_sync)
+            {
+                _items.Add(item);
+            }
+        }
+
+        public void Clear()
+        {
+            lock (_sync)
+            {
+                _items.Clear();
+            }
+        }
+
+        public bool Contains(T item)
+        {
+            lock (_sync)
+            {
+                return _items.Contains(item);
+            }
+        }
+
+        public void CopyTo(T[] array, int arrayIndex)
+        {
+            lock (_sync)
+            {
+                _items.CopyTo(array, arrayIndex);
+            }
+        }
+
+        public bool Remove(T item)
+        {
+            lock (_sync)
+            {
+                return _items.Remove(item);
+            }
+        }
+
+        public IEnumerator<T> GetEnumerator()
+        {
+            lock (_sync)
+            {
+                return _items.ToArray().AsEnumerable().GetEnumerator();
+            }
+        }
+
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return GetEnumerator();
+        }
+    }
+
+    /// <summary>
+    /// 添加一个收集批次的审计实体，按实体值身份（类型 + 实体标识 + 操作类型 + 属性快照）在批次内去重。
+    /// 不跨批次去重：同一实体恢复到旧值后再次变更，仍需保留每次 SaveChanges 的审计记录。
+    /// </summary>
+    /// <param name="entities">一个 SaveChanges/收集批次的审计实体集合</param>
     public void AddEntities(IEnumerable<AuditEntity> entities)
     {
         if (entities == null)
@@ -178,6 +332,7 @@ public class AuditOperation : CreationAggregateRoot<string>, IAuditObject
             return;
         }
 
+        var batchKeys = new HashSet<AuditEntityKey>();
         foreach (var entity in entities)
         {
             if (entity == null)
@@ -185,15 +340,19 @@ public class AuditOperation : CreationAggregateRoot<string>, IAuditObject
                 continue;
             }
 
-            // 残留处理器可能对同一请求重复触发收集（每次收集都会新建 AuditEntity 实例），
-            // 按值语义键去重，保证同一实体的同一变更状态只进入集合一次
-            if (!_collectedEntityKeys.Add((entity.Type, entity.EntityId, entity.OperationType)))
+            var key = AuditEntityKey.From(entity);
+            // 每次调用代表一个明确的收集批次。批次外不复用去重键，避免 A→B→A→B
+            // 这类合法变更因历史快照相同而被吞掉。
+            if (!batchKeys.Add(key))
             {
                 continue;
             }
 
-            entity.SetOperation(this);
-            Entities.Add(entity);
+            lock (_entitiesSync)
+            {
+                entity.SetOperation(this);
+                Entities.Add(entity);
+            }
         }
     }
 

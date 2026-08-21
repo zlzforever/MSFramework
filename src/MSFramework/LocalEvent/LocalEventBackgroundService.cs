@@ -1,10 +1,13 @@
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using MicroserviceFramework.Application;
 using MicroserviceFramework.Auditing;
 using MicroserviceFramework.Auditing.Model;
 using MicroserviceFramework.Domain;
+using MicroserviceFramework.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
@@ -27,6 +30,9 @@ public class LocalEventBackgroundService(
     IOptions<LocalEventOptions> options)
     : BackgroundService
 {
+    private readonly LocalEventChannel _eventChannel =
+        serviceProvider.GetRequiredService<LocalEventChannel>();
+
     /// <summary>
     /// 后台执行循环，持续消费事件管道中的事件并分发处理。
     /// </summary>
@@ -36,9 +42,9 @@ public class LocalEventBackgroundService(
     {
         logger.LogInformation("本地事件服务启动");
 
-        while (await LocalEventPublisher.EventChannel.Reader.WaitToReadAsync(stoppingToken))
+        while (await _eventChannel.EventChannel.Reader.WaitToReadAsync(stoppingToken))
         {
-            while (LocalEventPublisher.EventChannel.Reader.TryRead(out var entry))
+            while (_eventChannel.EventChannel.Reader.TryRead(out var entry))
             {
                 try
                 {
@@ -56,25 +62,31 @@ public class LocalEventBackgroundService(
 
                         using var scope = serviceProvider.CreateScope();
                         var services = scope.ServiceProvider;
+                        using var scopeContext = ScopeServiceProviderContext.Push(
+                            new LocalScopeServiceProvider(services));
                         try
                         {
-                            var handler = services.GetService(descriptor.HandlerType);
-                            if (handler == null)
-                            {
-                                continue;
-                            }
+                            // 每个 handler 都从干净的执行流开始，避免上一个事件的审计操作泄漏。
+                            AuditOperationContext.Value = null;
 
-                            // 后台执行流无 HttpContext，ISession 可能未注册（如仅引用核心包的控制台宿主）；
-                            // 已注册时用事件发布时的会话快照回填用户上下文，未注册或快照为空时不阻断事件处理
+                            // 先恢复发布时的会话快照，再解析 handler，保证 handler 构造函数及其 DbContext
+                            // 看到的是发布者身份而不是后台根容器的默认会话。
                             var session = services.GetService<ISession>();
                             if (session != null && entry.Session != null)
                             {
                                 session.Load(entry.Session);
                             }
 
+                            var handler = services.GetService(descriptor.HandlerType);
+                            if (handler == null)
+                            {
+                                continue;
+                            }
+
+                            AuditOperation auditOperation = null;
                             if (options.Value.EnableAuditing)
                             {
-                                var auditOperation = CreateAuditedOperation(session, handlerName);
+                                auditOperation = CreateAuditedOperation(session, handlerName);
                                 // 审计操作承载到当前后台执行流（AsyncLocal），使 DbContextBase 默认保存流程
                                 // 能在同一执行流读取到本事件处理器的审计操作并收集变更实体；
                                 // 每个事件处理器是独立审计单元，处理完成后（含异常路径）必须在 finally 清理
@@ -93,6 +105,22 @@ public class LocalEventBackgroundService(
                             if (unitOfWork != null)
                             {
                                 await unitOfWork.SaveChangesAsync(stoppingToken);
+                            }
+
+                            if (auditOperation != null)
+                            {
+                                IReadOnlyCollection<IAuditingStore> auditingStores = [];
+                                try
+                                {
+                                    // 在业务处理完成后才解析审计存储，存储构造或落库失败不会丢弃业务事件。
+                                    auditingStores = services.GetServices<IAuditingStore>().ToArray();
+                                }
+                                catch (Exception e)
+                                {
+                                    logger.LogError(e, "{TraceId}, 解析审计存储失败", traceId);
+                                }
+
+                                await SaveAuditOperation(auditOperation, auditingStores, traceId, handlerName);
                             }
 
                             logger.LogDebug(
@@ -128,6 +156,7 @@ public class LocalEventBackgroundService(
     public override async Task StopAsync(CancellationToken cancellationToken)
     {
         logger.LogDebug("开始关闭本地事件服务");
+        _eventChannel.EventChannel.Writer.TryComplete();
         await base.StopAsync(cancellationToken);
         logger.LogInformation("关闭本地事件服务完成");
     }
@@ -139,5 +168,34 @@ public class LocalEventBackgroundService(
             null, null, session?.TraceIdentifier, "Local");
         auditedOperation.SetCreation(session?.UserId, session?.UserDisplayName, DateTimeOffset.UtcNow);
         return auditedOperation;
+    }
+
+    /// <summary>
+    /// 结束并保存后台事件审计。单个存储失败只记录日志，不影响已完成的业务事件。
+    /// </summary>
+    private async Task SaveAuditOperation(AuditOperation auditOperation,
+        IReadOnlyCollection<IAuditingStore> auditingStores, string traceId, string handlerName)
+    {
+        auditOperation.End();
+        foreach (var auditingStore in auditingStores)
+        {
+            try
+            {
+                await auditingStore.AddAsync(auditOperation);
+            }
+            catch (Exception e)
+            {
+                logger.LogError(e, "{TraceId}, 事件处理器 {HandlerType} 保存审计信息失败",
+                    traceId, handlerName);
+            }
+        }
+    }
+
+    private sealed class LocalScopeServiceProvider(IServiceProvider provider) : IScopeServiceProvider
+    {
+        public T GetService<T>()
+        {
+            return provider.GetService<T>();
+        }
     }
 }

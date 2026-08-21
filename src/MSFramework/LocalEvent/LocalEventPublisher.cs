@@ -1,6 +1,5 @@
 using System;
 using System.Threading;
-using System.Threading.Channels;
 using System.Threading.Tasks;
 using MicroserviceFramework.Application;
 using MicroserviceFramework.Utils;
@@ -9,13 +8,10 @@ using Microsoft.Extensions.DependencyInjection;
 namespace MicroserviceFramework.LocalEvent;
 
 internal class LocalEventPublisher(
-    IServiceProvider serviceProvider)
+    IServiceProvider serviceProvider,
+    LocalEventChannel eventChannel)
     : IEventPublisher
 {
-    internal static readonly Channel<(SessionSnapshot Session, EventBase EventData)>
-        EventChannel = Channel.CreateBounded<(SessionSnapshot, EventBase)>(
-            new BoundedChannelOptions(2000) { FullMode = BoundedChannelFullMode.Wait, SingleReader = true });
-
     /// <summary>
     /// 发布事件到本地事件管道，仅拷贝会话标量字段快照，避免跨作用域捕获 Scoped 会话实例
     /// </summary>
@@ -29,6 +25,6 @@ internal class LocalEventPublisher(
         Check.NotNull(@event, nameof(@event));
         var session = serviceProvider.GetService<ISession>();
         var snapshot = session == null ? null : new SessionSnapshot(session);
-        await EventChannel.Writer.WriteAsync((snapshot, @event), cancellationToken);
+        await eventChannel.EventChannel.Writer.WriteAsync((snapshot, @event), cancellationToken);
     }
 }

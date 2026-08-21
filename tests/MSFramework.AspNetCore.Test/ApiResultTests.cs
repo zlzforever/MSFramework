@@ -40,10 +40,21 @@ public class ApiResultTests(ITestOutputHelper output) : BaseTest
     {
         var result = await Client.PostAsync("/apiResult/validation", new StringContent(""));
         var text = await result.Content.ReadAsStringAsync();
-        Assert.Equal(200, (int)result.StatusCode);
+        Assert.Equal(400, (int)result.StatusCode);
         Assert.Equal("""
                      {"errors":[{"name":"id","messages":["The id field is required."]}],"success":false,"code":1,"msg":"数据校验不通过","data":null}
                      """, text);
+    }
+
+    [Fact]
+    public async Task InvalidObjectId_ReturnsHttp400AndModelStateError()
+    {
+        var result = await Client.GetAsync("/apiResult/objectId?id=not-an-object-id");
+        var text = await result.Content.ReadAsStringAsync();
+
+        Assert.Equal(400, (int)result.StatusCode);
+        Assert.Contains("\"errors\"", text);
+        Assert.Contains("\"id\"", text);
     }
 
 
@@ -52,10 +63,12 @@ public class ApiResultTests(ITestOutputHelper output) : BaseTest
     {
         var result = await Client.GetAsync("/apiResult/452");
         var text = await result.Content.ReadAsStringAsync();
+        using var problemDetails = System.Text.Json.JsonDocument.Parse(text);
+
         Assert.Equal(452, (int)result.StatusCode);
-        Assert.Equal("""
-                     {"success":false,"code":-1,"msg":"","data":null}
-                     """, text);
+        Assert.Equal("application/problem+json", result.Content.Headers.ContentType?.MediaType);
+        Assert.Equal(452, problemDetails.RootElement.GetProperty("status").GetInt32());
+        Assert.NotEmpty(problemDetails.RootElement.GetProperty("traceId").GetString());
     }
 
     [Fact]
@@ -236,46 +249,88 @@ public class ApiResultTests(ITestOutputHelper output) : BaseTest
 
     /// <summary>
     /// 接口内抛出 <see cref="MicroserviceFrameworkFriendlyException"/> 时，
-    /// 全局异常过滤器应返回 HTTP 200 + ApiResult 错误结构（success=false、code=异常错误码、msg=异常消息、data=null）
+    /// 全局异常过滤器应返回 HTTP 400 + RFC 7807 ProblemDetails。
     /// </summary>
     [Fact]
     public async Task ThrowFriendlyException()
     {
         var result = await Client.GetAsync("/apiResult/friendlyException");
         var text = await result.Content.ReadAsStringAsync();
-        Assert.Equal(200, (int)result.StatusCode);
-        Assert.Equal("""
-                     {"success":false,"code":2,"msg":"业务处理失败","data":null}
-                     """, text);
+        using var problemDetails = System.Text.Json.JsonDocument.Parse(text);
+
+        Assert.Equal(400, (int)result.StatusCode);
+        Assert.Equal("application/problem+json", result.Content.Headers.ContentType?.MediaType);
+        Assert.Equal(400, problemDetails.RootElement.GetProperty("status").GetInt32());
+        Assert.Equal("业务处理失败", problemDetails.RootElement.GetProperty("detail").GetString());
+        Assert.Equal(2, problemDetails.RootElement.GetProperty("code").GetInt32());
+        Assert.False(problemDetails.RootElement.TryGetProperty("success", out _));
+        var correlationId = problemDetails.RootElement.GetProperty("correlationId").GetString();
+        var headerCorrelationId = Assert.Single(result.Headers.GetValues("X-Correlation-ID"));
+        Assert.Equal(correlationId, headerCorrelationId);
     }
 
     /// <summary>
     /// 接口内抛出普通异常（<see cref="InvalidOperationException"/>）时，
-    /// 全局异常过滤器应返回 HTTP 500 + ApiResult 错误结构（success=false、code=500、msg=系统内部错误、data=null）
+    /// 全局异常过滤器应返回 HTTP 500 + RFC 7807 ProblemDetails。
     /// </summary>
     [Fact]
-    public async Task ThrowInvalidOperationException()
+    public async Task ThrowInvalidOperationExceptionReturnsInternalServerProblemDetails()
     {
         var result = await Client.GetAsync("/apiResult/invalidOperationException");
         var text = await result.Content.ReadAsStringAsync();
+        using var problemDetails = System.Text.Json.JsonDocument.Parse(text);
+
         Assert.Equal(500, (int)result.StatusCode);
-        Assert.Equal("""
-                     {"success":false,"code":500,"msg":"系统内部错误","data":null}
-                     """, text);
+        Assert.Equal(500, problemDetails.RootElement.GetProperty("status").GetInt32());
+        Assert.Equal("服务器内部错误", problemDetails.RootElement.GetProperty("title").GetString());
     }
 
     /// <summary>
-    /// 接口内抛出参数类普通异常（<see cref="ArgumentException"/>）时，
-    /// 全局异常过滤器同样应返回 HTTP 500 + ApiResult 错误结构（success=false、code=500、msg=系统内部错误、data=null）
+    /// 接口内抛出参数类异常（<see cref="ArgumentException"/>）时，
+    /// 全局异常过滤器应返回 HTTP 400 + RFC 7807 ProblemDetails。
     /// </summary>
     [Fact]
-    public async Task ThrowArgumentException()
+    public async Task ThrowArgumentExceptionReturnsBadRequestProblemDetails()
     {
         var result = await Client.GetAsync("/apiResult/argumentException");
         var text = await result.Content.ReadAsStringAsync();
+        using var problemDetails = System.Text.Json.JsonDocument.Parse(text);
+
+        Assert.Equal(400, (int)result.StatusCode);
+        Assert.Equal(400, problemDetails.RootElement.GetProperty("status").GetInt32());
+        Assert.Equal("错误请求", problemDetails.RootElement.GetProperty("title").GetString());
+    }
+
+    [Theory]
+    [InlineData("authenticationException", 401)]
+    [InlineData("unauthorizedException", 403)]
+    [InlineData("notFoundException", 404)]
+    [InlineData("conflictException", 409)]
+    public async Task ThrowKnownExceptionReturnsStandardProblemDetails(string endpoint, int statusCode)
+    {
+        var result = await Client.GetAsync($"/apiResult/{endpoint}");
+        var text = await result.Content.ReadAsStringAsync();
+        using var problemDetails = System.Text.Json.JsonDocument.Parse(text);
+
+        Assert.Equal(statusCode, (int)result.StatusCode);
+        Assert.Equal(statusCode, problemDetails.RootElement.GetProperty("status").GetInt32());
+        var headerCorrelationId = Assert.Single(result.Headers.GetValues("X-Correlation-ID"));
+        Assert.Equal(headerCorrelationId,
+            problemDetails.RootElement.GetProperty("correlationId").GetString());
+        Assert.False(problemDetails.RootElement.TryGetProperty("success", out _));
+    }
+
+    [Fact]
+    public async Task ThrowUnexpectedExceptionHidesInternalDetails()
+    {
+        var result = await Client.GetAsync("/apiResult/unexpectedException");
+        var text = await result.Content.ReadAsStringAsync();
+        using var problemDetails = System.Text.Json.JsonDocument.Parse(text);
+
         Assert.Equal(500, (int)result.StatusCode);
-        Assert.Equal("""
-                     {"success":false,"code":500,"msg":"系统内部错误","data":null}
-                     """, text);
+        Assert.Equal("系统内部错误", problemDetails.RootElement.GetProperty("detail").GetString());
+        Assert.DoesNotContain("数据库连接字符串", text);
+        Assert.DoesNotContain("InvalidOperationException", text);
+        Assert.False(problemDetails.RootElement.TryGetProperty("success", out _));
     }
 }

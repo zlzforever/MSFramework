@@ -111,6 +111,33 @@ public class PagedQueryTests
     }
 
     [Fact]
+    async Task PagedQueryAsync_NormalizesNonPositivePageAndLimitToDefaults()
+    {
+        var data = Enumerable.Range(1, 20).Select(i => new TestEntity { Id = i }).AsQueryable();
+
+        var result = await data.PagedQueryAsync(0, 0);
+
+        Assert.Equal(1, result.Page);
+        Assert.Equal(10, result.Limit);
+        Assert.Equal(20, result.Total);
+        Assert.Equal(Enumerable.Range(1, 10), result.Data.Select(entity => entity.Id));
+    }
+
+    [Fact]
+    async Task PagedQueryAsync_Mapper_NormalizesNonPositivePageAndLimitToDefaults()
+    {
+        var data = Enumerable.Range(1, 20).Select(i => new TestEntity { Id = i }).AsQueryable();
+
+        var result = await data.PagedQueryAsync(0, 0,
+            entity => new TestDto { Id = entity.Id });
+
+        Assert.Equal(1, result.Page);
+        Assert.Equal(10, result.Limit);
+        Assert.Equal(20, result.Total);
+        Assert.Equal(Enumerable.Range(1, 10), result.Data.Select(dto => dto.Id));
+    }
+
+    [Fact]
     async Task PagedQueryAsync_Mapper_ThrowsArgumentNullException_WhenMapperIsNull()
     {
         // Arrange
@@ -156,5 +183,59 @@ public class PagedQueryTests
         Assert.Equal(50, result.Total);
         Assert.Equal(10, result.Data.Count());
         Assert.Equal(11, result.Data.First().Id);
+    }
+
+    [Fact]
+    async Task PagedQueryAsync_ReturnsEmptyResult_WhenOffsetExceedsIntRange()
+    {
+        var data = Enumerable.Range(1, 50).Select(i => new TestEntity { Id = i }).AsQueryable();
+
+        var result = await data.PagedQueryAsync(int.MaxValue, 2);
+
+        Assert.Equal(int.MaxValue, result.Page);
+        Assert.Equal(2, result.Limit);
+        Assert.Equal(50, result.Total);
+        Assert.Empty(result.Data);
+    }
+
+    [Fact]
+    async Task PagedQueryAsync_Mapper_ReturnsEmptyResult_WhenOffsetExceedsIntRange()
+    {
+        var data = Enumerable.Range(1, 50).Select(i => new TestEntity { Id = i }).AsQueryable();
+
+        var result = await data.PagedQueryAsync(int.MaxValue, 2,
+            entity => new TestDto { Id = entity.Id });
+
+        Assert.Equal(int.MaxValue, result.Page);
+        Assert.Equal(2, result.Limit);
+        Assert.Equal(50, result.Total);
+        Assert.Empty(result.Data);
+    }
+
+    [Fact]
+    async Task PagedQueryAsync_ReturnsEmptyResult_WhenOffsetEqualsIntMaxValue()
+    {
+        var data = Enumerable.Range(1, 50).Select(i => new TestEntity { Id = i }).AsQueryable();
+
+        var result = await data.PagedQueryAsync(2, int.MaxValue);
+
+        Assert.Equal(2, result.Page);
+        Assert.Equal(int.MaxValue, result.Limit);
+        Assert.Equal(50, result.Total);
+        Assert.Empty(result.Data);
+    }
+
+    [Fact]
+    async Task PagedQueryAsync_Mapper_ReturnsEmptyResult_WhenOffsetEqualsIntMaxValue()
+    {
+        var data = Enumerable.Range(1, 50).Select(i => new TestEntity { Id = i }).AsQueryable();
+
+        var result = await data.PagedQueryAsync(2, int.MaxValue,
+            entity => new TestDto { Id = entity.Id });
+
+        Assert.Equal(2, result.Page);
+        Assert.Equal(int.MaxValue, result.Limit);
+        Assert.Equal(50, result.Total);
+        Assert.Empty(result.Data);
     }
 }
