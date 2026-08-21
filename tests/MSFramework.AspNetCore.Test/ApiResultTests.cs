@@ -264,8 +264,9 @@ public class ApiResultTests(ITestOutputHelper output) : BaseTest
         Assert.Equal("业务处理失败", problemDetails.RootElement.GetProperty("detail").GetString());
         Assert.Equal(2, problemDetails.RootElement.GetProperty("code").GetInt32());
         Assert.False(problemDetails.RootElement.TryGetProperty("success", out _));
-        Assert.NotEmpty(problemDetails.RootElement.GetProperty("correlationId").GetString());
-        Assert.NotEmpty(result.Headers.GetValues("X-Correlation-ID"));
+        var correlationId = problemDetails.RootElement.GetProperty("correlationId").GetString();
+        var headerCorrelationId = Assert.Single(result.Headers.GetValues("X-Correlation-ID"));
+        Assert.Equal(correlationId, headerCorrelationId);
     }
 
     /// <summary>
@@ -313,7 +314,9 @@ public class ApiResultTests(ITestOutputHelper output) : BaseTest
 
         Assert.Equal(statusCode, (int)result.StatusCode);
         Assert.Equal(statusCode, problemDetails.RootElement.GetProperty("status").GetInt32());
-        Assert.NotEmpty(problemDetails.RootElement.GetProperty("correlationId").GetString());
+        var headerCorrelationId = Assert.Single(result.Headers.GetValues("X-Correlation-ID"));
+        Assert.Equal(headerCorrelationId,
+            problemDetails.RootElement.GetProperty("correlationId").GetString());
         Assert.False(problemDetails.RootElement.TryGetProperty("success", out _));
     }
 

@@ -110,6 +110,44 @@ public class GlobalExceptionFilterTests
         Assert.Equal(StatusCodes.Status409Conflict, problemDetails.Status);
     }
 
+    [Fact]
+    public void OnException_HidesNestedConflictDetailsInProduction()
+    {
+        var filter = CreateFilter(Environments.Production);
+        var context = CreateExceptionContext(new InvalidOperationException("基础设施包装",
+            new MicroserviceFrameworkConflictException("内部资源标识和连接信息")));
+
+        filter.Invoke(context);
+
+        var result = Assert.IsType<ObjectResult>(context.Result);
+        var problemDetails = Assert.IsType<ProblemDetails>(result.Value);
+        Assert.Equal(StatusCodes.Status409Conflict, result.StatusCode);
+        Assert.Equal(StatusCodes.Status409Conflict, problemDetails.Status);
+        Assert.Equal("请求与资源当前状态冲突", problemDetails.Detail);
+        Assert.DoesNotContain("内部资源标识和连接信息", problemDetails.Detail);
+        var correlationId = Assert.IsType<string>(problemDetails.Extensions["correlationId"]);
+        Assert.Equal(correlationId,
+            context.HttpContext.Response.Headers["X-Correlation-ID"].ToString());
+    }
+
+    [Fact]
+    public void OnException_GeneratesCorrelationIdWhenTraceIdentifierIsEmpty()
+    {
+        var filter = CreateFilter();
+        var context = CreateExceptionContext(new InvalidOperationException("请求失败"), string.Empty);
+
+        filter.Invoke(context);
+
+        var result = Assert.IsType<ObjectResult>(context.Result);
+        var problemDetails = Assert.IsType<ProblemDetails>(result.Value);
+        var correlationId = Assert.IsType<string>(problemDetails.Extensions["correlationId"]);
+
+        Assert.False(string.IsNullOrWhiteSpace(correlationId));
+        Assert.Equal(correlationId, context.HttpContext.TraceIdentifier);
+        Assert.Equal(correlationId,
+            context.HttpContext.Response.Headers["X-Correlation-ID"].ToString());
+    }
+
     [Theory]
     [InlineData("argument", StatusCodes.Status400BadRequest)]
     [InlineData("authentication", StatusCodes.Status401Unauthorized)]
@@ -143,9 +181,10 @@ public class GlobalExceptionFilterTests
     /// </summary>
     /// <param name="exception">异常</param>
     /// <returns>异常上下文</returns>
-    private static ExceptionContext CreateExceptionContext(Exception exception)
+    private static ExceptionContext CreateExceptionContext(Exception exception,
+        string traceIdentifier = "trace-123")
     {
-        var httpContext = new DefaultHttpContext { TraceIdentifier = "trace-123" };
+        var httpContext = new DefaultHttpContext { TraceIdentifier = traceIdentifier };
         httpContext.Request.Path = "/test";
         return new ExceptionContext(
             new ActionContext(httpContext, new RouteData(), new ActionDescriptor()),

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Security.Claims;
 using System.Text;
 using System.Threading;
+using System.Threading.Channels;
 using System.Threading.Tasks;
 using MicroserviceFramework;
 using MicroserviceFramework.AspNetCore;
@@ -29,11 +30,24 @@ public class EventBusImplTests
 
         public LocalEventBackgroundService BackgroundService => _backgroundService;
 
+        public async Task StopAsync()
+        {
+            if (_stopped)
+            {
+                return;
+            }
+
+            _stopped = true;
+            await _backgroundService.StopAsync(CancellationToken.None);
+        }
+
         public async ValueTask DisposeAsync()
         {
-            await _backgroundService.StopAsync(CancellationToken.None);
+            await StopAsync();
             await Provider.DisposeAsync();
         }
+
+        private bool _stopped;
     }
 
     public sealed record HostMarker(string Name);
@@ -46,15 +60,29 @@ public class EventBusImplTests
 
         public TaskCompletionSource<string> Processed { get; } =
             new(TaskCreationOptions.RunContinuationsAsynchronously);
+
+        public bool BlockUntilReleased { get; init; }
+
+        public TaskCompletionSource<bool> HandlerStarted { get; } =
+            new(TaskCreationOptions.RunContinuationsAsynchronously);
+
+        public TaskCompletionSource<bool> Release { get; } =
+            new(TaskCreationOptions.RunContinuationsAsynchronously);
     }
 
     public sealed class HostIsolationEventHandler(HostMarker marker) : IEventHandler<HostIsolationEvent>
     {
-        public Task HandleAsync(HostIsolationEvent @event, CancellationToken cancellationToken)
+        public async Task HandleAsync(HostIsolationEvent @event, CancellationToken cancellationToken)
         {
             @event.HandledBy = marker.Name;
+
+            if (@event.BlockUntilReleased)
+            {
+                @event.HandlerStarted.TrySetResult(true);
+                await @event.Release.Task;
+            }
+
             @event.Processed.TrySetResult(marker.Name);
-            return Task.CompletedTask;
         }
     }
 
@@ -62,6 +90,9 @@ public class EventBusImplTests
     {
         public static readonly StringBuilder Output = new();
         public int Order { get; set; }
+
+        public TaskCompletionSource<bool> Processed { get; } =
+            new(TaskCreationOptions.RunContinuationsAsynchronously);
     }
 
     public class SingleHandlerEventHandler : IEventHandler<Event1>
@@ -69,6 +100,7 @@ public class EventBusImplTests
         public Task HandleAsync(Event1 @event, CancellationToken cancellationToken)
         {
             Event1.Output.Append(@event.Order).Append(", ");
+            @event.Processed.TrySetResult(true);
             return Task.CompletedTask;
         }
 
@@ -92,10 +124,14 @@ public class EventBusImplTests
 
             var eventBus = provider.GetRequiredService<IEventPublisher>();
 
-            await eventBus.PublishAsync(new Event1 { Order = 1 });
-            Thread.Sleep(100);
-            await eventBus.PublishAsync(new Event1 { Order = 2 });
-            Thread.Sleep(100);
+            var firstEvent = new Event1 { Order = 1 };
+            await eventBus.PublishAsync(firstEvent);
+            await firstEvent.Processed.Task.WaitAsync(TimeSpan.FromSeconds(5));
+
+            var secondEvent = new Event1 { Order = 2 };
+            await eventBus.PublishAsync(secondEvent);
+            await secondEvent.Processed.Task.WaitAsync(TimeSpan.FromSeconds(5));
+
             Assert.Equal("1, 2, ", Event1.Output.ToString());
         }
     }
@@ -117,6 +153,19 @@ public class EventBusImplTests
     {
         public static readonly StringBuilder Output = new();
         public int Order { get; set; }
+
+        public TaskCompletionSource<bool> Processed { get; } =
+            new(TaskCreationOptions.RunContinuationsAsynchronously);
+
+        private int _handlerCount;
+
+        public void MarkHandlerCompleted()
+        {
+            if (Interlocked.Increment(ref _handlerCount) == 2)
+            {
+                Processed.TrySetResult(true);
+            }
+        }
     }
 
     public class EventHandler31 : IEventHandler<Event3>
@@ -128,6 +177,7 @@ public class EventBusImplTests
                 Event3.Output.Append(@event.Order).Append(", ");
             }
 
+            @event.MarkHandlerCompleted();
             return Task.CompletedTask;
         }
 
@@ -145,6 +195,7 @@ public class EventBusImplTests
                 Event3.Output.Append(@event.Order).Append(", ");
             }
 
+            @event.MarkHandlerCompleted();
             return Task.CompletedTask;
         }
 
@@ -163,10 +214,14 @@ public class EventBusImplTests
             var provider = host.Provider;
 
             var eventBus = provider.GetRequiredService<IEventPublisher>();
-            await eventBus.PublishAsync(new Event3 { Order = 1 });
-            Thread.Sleep(100);
-            await eventBus.PublishAsync(new Event3 { Order = 2 });
-            Thread.Sleep(100);
+            var firstEvent = new Event3 { Order = 1 };
+            await eventBus.PublishAsync(firstEvent);
+            await firstEvent.Processed.Task.WaitAsync(TimeSpan.FromSeconds(5));
+
+            var secondEvent = new Event3 { Order = 2 };
+            await eventBus.PublishAsync(secondEvent);
+            await secondEvent.Processed.Task.WaitAsync(TimeSpan.FromSeconds(5));
+
             Assert.Equal("1, 1, 2, 2, ", Event3.Output.ToString());
 
             // var handler = provider.GetRequiredService<IEventHandler<Event3>>();
@@ -194,18 +249,42 @@ public class EventBusImplTests
     }
 
     [Fact]
-    public async Task EventPublishedToStoppedHostIsNotConsumedByAnotherHost()
+    public async Task StoppedHostRejectsNewEventsWithoutAffectingAnotherHost()
     {
         await using var firstHost = await CreateHostAsync(hostName: "first");
-        await using var secondHost = await CreateHostAsync(hostName: "second", startService: false);
+        await using var secondHost = await CreateHostAsync(hostName: "second");
+
+        var firstPublisher = firstHost.Provider.GetRequiredService<IEventPublisher>();
+        var secondPublisher = secondHost.Provider.GetRequiredService<IEventPublisher>();
+
+        var firstEvent = new HostIsolationEvent { ExpectedHost = "first" };
+        await firstPublisher.PublishAsync(firstEvent);
+        Assert.Equal("first", await firstEvent.Processed.Task.WaitAsync(TimeSpan.FromSeconds(5)));
+
+        var blockingEvent = new HostIsolationEvent
+        {
+            ExpectedHost = "first",
+            BlockUntilReleased = true
+        };
+        await firstPublisher.PublishAsync(blockingEvent);
+        await blockingEvent.HandlerStarted.Task.WaitAsync(TimeSpan.FromSeconds(5));
+
+        var queuedBeforeStop = new HostIsolationEvent { ExpectedHost = "first" };
+        await firstPublisher.PublishAsync(queuedBeforeStop);
+
+        var stopTask = firstHost.StopAsync();
+        blockingEvent.Release.TrySetResult(true);
+        await stopTask;
+
+        // 既有语义：停止时已入队事件仍由内层读取循环排空，停止完成后才拒绝新发布。
+        Assert.Equal("first", await queuedBeforeStop.Processed.Task.WaitAsync(TimeSpan.FromSeconds(5)));
+
+        var stoppedHostEvent = new HostIsolationEvent { ExpectedHost = "first" };
+        await Assert.ThrowsAsync<ChannelClosedException>(() => firstPublisher.PublishAsync(stoppedHostEvent));
+        Assert.False(stoppedHostEvent.Processed.Task.IsCompleted);
 
         var secondEvent = new HostIsolationEvent { ExpectedHost = "second" };
-        await secondHost.Provider.GetRequiredService<IEventPublisher>().PublishAsync(secondEvent);
-        await Task.Delay(200);
-
-        Assert.False(secondEvent.Processed.Task.IsCompleted);
-
-        await secondHost.BackgroundService.StartAsync(CancellationToken.None);
+        await secondPublisher.PublishAsync(secondEvent);
         var handledBy = await secondEvent.Processed.Task.WaitAsync(TimeSpan.FromSeconds(5));
         Assert.Equal(secondEvent.ExpectedHost, handledBy);
     }
@@ -244,7 +323,6 @@ public class EventBusImplTests
         if (startService)
         {
             await backgroundService.StartAsync(CancellationToken.None);
-            await Task.Delay(100);
         }
 
         return new TestHost(provider, backgroundService);
