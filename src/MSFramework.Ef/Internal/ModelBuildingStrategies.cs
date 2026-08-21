@@ -59,7 +59,8 @@ internal sealed class RegisterEntityConfigurationsStrategy : IModelBuildingStrat
 // ============================================================================
 
 /// <summary>
-/// 遍历所有非 Owned 实体类型，应用表名规则（SnakeCase / 前缀）和软删除全局过滤器。
+/// 遍历所有非 Owned、非 Keyless 实体类型，应用表名规则（SnakeCase / 前缀）和软删除全局过滤器。
+/// Keyless 实体（<c>HasNoKey</c>/<c>ToQuery</c> 只读查询模型）无表名映射，跳过表级约定。
 /// </summary>
 internal sealed class EntityTableConventionStrategy : IModelBuildingStrategy
 {
@@ -67,7 +68,7 @@ internal sealed class EntityTableConventionStrategy : IModelBuildingStrategy
     {
         foreach (var entityType in context.ModelBuilder.Model.GetEntityTypes())
         {
-            if (entityType.IsOwned())
+            if (entityType.IsOwned() || entityType.IsKeyless)
             {
                 continue;
             }
@@ -84,6 +85,12 @@ internal sealed class EntityTableConventionStrategy : IModelBuildingStrategy
 
         // 仅在用户未设置自定义表名时自动调整
         if (defaultTableName != tableName)
+        {
+            return;
+        }
+
+        // 无表名映射（Keyless / ToView 实体）时跳过，避免对 null 调用 ToSnakeCase 抛 NRE
+        if (string.IsNullOrEmpty(tableName))
         {
             return;
         }
@@ -122,10 +129,12 @@ internal sealed class EntityTableConventionStrategy : IModelBuildingStrategy
 // ============================================================================
 
 /// <summary>
-/// 遍历所有实体类型的所有属性，应用：
+/// 遍历所有非 Owned、非 Keyless 实体类型的所有属性，应用：
 ///   1. 乐观锁（ConcurrencyStamp 配置为 ConcurrencyToken）
 ///   2. 列名转换（SnakeCase）
 ///   3. 列类型自动设置（ObjectId / Guid / Enumeration 的 ValueConverter 和 ColumnType）
+/// Keyless 实体（<c>HasNoKey</c>/<c>ToQuery</c> 只读查询模型）无表名映射，
+/// 其列名/列类型由查询定义自身决定，跳过属性级约定。
 /// </summary>
 internal sealed class EntityPropertyConventionStrategy : IModelBuildingStrategy
 {
@@ -135,6 +144,11 @@ internal sealed class EntityPropertyConventionStrategy : IModelBuildingStrategy
 
         foreach (var entityType in context.ModelBuilder.Model.GetEntityTypes())
         {
+            if (entityType.IsOwned() || entityType.IsKeyless)
+            {
+                continue;
+            }
+
             var hasOptimisticLock = Defaults.Types.OptimisticLock.IsAssignableFrom(entityType.ClrType);
             var hasCreation = typeof(ICreation).IsAssignableFrom(entityType.ClrType);
             var hasModification = typeof(IModification).IsAssignableFrom(entityType.ClrType);
@@ -192,7 +206,8 @@ internal sealed class EntityPropertyConventionStrategy : IModelBuildingStrategy
         var tableName = entityType.GetTableName();
         if (string.IsNullOrEmpty(tableName))
         {
-            throw new ArgumentException("MutableEntityType.GetTableName() returns null.");
+            // Keyless / ToView 实体无表名映射，跳过列名约定（由查询/视图定义自身决定列名）
+            return;
         }
 
         var storeObjectIdentifier =

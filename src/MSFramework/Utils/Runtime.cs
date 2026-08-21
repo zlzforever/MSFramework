@@ -16,8 +16,11 @@ namespace MicroserviceFramework.Utils;
 /// </summary>
 public static class Runtime
 {
-    private static FrozenSet<Assembly> _assemblies;
-    private static FrozenSet<Type> _types;
+    // volatile：双检锁中保证跨线程可见性，防止外层空检查读到过期值
+    // _assemblies 作为加载完成的发布标志，加载完成前 _types 先写入，
+    // 因此观察非 null 的 _assemblies 即保证 _types 也已初始化
+    private static volatile FrozenSet<Assembly> _assemblies;
+    private static volatile FrozenSet<Type> _types;
     private static readonly Lock Locker = new();
 
     /// <summary>
@@ -34,6 +37,7 @@ public static class Runtime
 
     /// <summary>
     /// 加载所有符合前缀匹配的业务程序集，初始化程序集和类型缓存。
+    /// 幂等且线程安全：并发调用只会执行一次完整加载
     /// </summary>
     internal static void Load()
     {
@@ -44,6 +48,12 @@ public static class Runtime
 
         lock (Locker)
         {
+            // 双检锁：进入锁后再次检查，防止等待锁的线程重复加载
+            if (_assemblies != null)
+            {
+                return;
+            }
+
             var assemblies = new List<Assembly>();
             var types = new HashSet<Type>();
             // 分析器不会输出程序集文件
@@ -146,9 +156,9 @@ public static class Runtime
                 assemblies.AddRange(dict.Values.Where(x => x != null));
             }
 
-            _assemblies = assemblies.ToFrozenSet();
-
-            foreach (var assembly in _assemblies)
+            // 先写 _types 再写 _assemblies：_assemblies 是发布标志，
+            // 观察者读到非 null 的 _assemblies 时 _types 必定已可见
+            foreach (var assembly in assemblies)
             {
                 foreach (var definedType in assembly.DefinedTypes)
                 {
@@ -156,25 +166,32 @@ public static class Runtime
                 }
             }
 
-            _types = types.ToFrozenSet();
+            var frozenTypes = types.ToFrozenSet();
+            var frozenAssemblies = assemblies.ToFrozenSet();
+            _types = frozenTypes;
+            _assemblies = frozenAssemblies;
         }
     }
 
     /// <summary>
-    /// 获取项目程序集，排除所有的系统程序集(Microsoft.***、System.***等)、Nuget下载包
+    /// 获取项目程序集，排除所有的系统程序集(Microsoft.***、System.***等)、Nuget下载包。
+    /// 未加载时先触发一次加载，返回结果永不为 null
     /// </summary>
-    /// <returns></returns>
+    /// <returns>业务程序集集合；加载失败时可能为空集合</returns>
     public static FrozenSet<Assembly> GetAllAssemblies()
     {
+        Load();
         return _assemblies;
     }
 
     /// <summary>
-    /// 获取所有已加载的程序集类型
+    /// 获取所有已加载的程序集类型。
+    /// 未加载时先触发一次加载，返回结果永不为 null
     /// </summary>
-    /// <returns>所有已加载的程序集类型集合</returns>
+    /// <returns>所有已加载的程序集类型集合；加载失败时可能为空集合</returns>
     public static FrozenSet<Type> GetAllTypes()
     {
+        Load();
         return _types;
     }
 }

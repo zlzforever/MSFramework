@@ -67,7 +67,14 @@ public class RepositoryGenerator : IIncrementalGenerator
                                {
                                    public {{typeInfo.TypeName}}Repository(DbContextFactory context) : base(context)
                                    {
-                                       UseQuerySplittingBehavior = true;
+                                       // 查询拆分策略由基类按一级导航数量启发式自动决定（>3 个导航时 SplitQuery），
+                                       // 特殊场景可在派生类构造函数中显式重载 UseQuerySplittingBehavior
+                                       var queryable = dbSet.AsQueryable();
+                                        var navigations = dbSet.EntityType.GetNavigations();
+                                        queryable = navigations.Aggregate(queryable, (current, navigation) => current.Include(navigation.Name));
+
+                                        return !UseQuerySplittingBehavior.HasValue ? queryable :
+                                        UseQuerySplittingBehavior.Value ? queryable.AsSplitQuery() : queryable.AsSingleQuery();
                                    }
                                }
                                """;
