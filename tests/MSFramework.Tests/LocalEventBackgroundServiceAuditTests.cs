@@ -261,7 +261,7 @@ public class LocalEventBackgroundServiceAuditTests
     /// <returns>测试宿主（后台服务已启动）</returns>
     private static async Task<TestHost> CreateHostAsync(
         bool enableAuditing, bool registerSession = true, bool startService = true,
-        bool registerAuditingStore = false)
+        bool registerAuditingStore = false, bool sessionFactoryReturnsNull = false)
     {
         var connection = new SqliteConnection("DataSource=:memory:");
         connection.Open();
@@ -277,7 +277,7 @@ public class LocalEventBackgroundServiceAuditTests
         services.AddSingleton<IEntityConfigurationTypeFinder>(new TestEntityConfigurationTypeFinder());
         if (registerSession)
         {
-            services.AddScoped<ISession, TestSession>();
+            services.AddScoped<ISession>(_ => sessionFactoryReturnsNull ? null : new TestSession());
         }
         if (registerAuditingStore)
         {
@@ -419,6 +419,10 @@ public class LocalEventBackgroundServiceAuditTests
             await WaitUntilAsync(() => CapturingLocalEventAuditingStore.Captured.Count == 1,
                 TimeSpan.FromSeconds(5));
             Assert.Single(CapturingLocalEventAuditingStore.Captured);
+
+            using var queryScope = host.Provider.CreateScope();
+            var context = queryScope.ServiceProvider.GetRequiredService<LocalEventAuditContext>();
+            Assert.True(await context.Orders.AnyAsync(order => order.Id == "ORDER-" + evt.Order));
         }
         finally
         {
@@ -454,6 +458,20 @@ public class LocalEventBackgroundServiceAuditTests
     public async Task EnableAuditing_WithoutSession_EventHandlerStillRuns()
     {
         await using var host = await CreateHostAsync(enableAuditing: true, registerSession: false);
+        var publisher = host.Provider.GetRequiredService<IEventPublisher>();
+
+        var evt = await PublishUntilProcessedAsync(publisher,
+            order => new LocalEventAuditEvent { Order = order }, TimeSpan.FromSeconds(15));
+
+        Assert.NotNull(evt.ObservedOperation);
+        Assert.Null(evt.ObservedOperation.TraceId);
+    }
+
+    [Fact]
+    public async Task EnableAuditing_RegisteredSessionWithoutSnapshot_EventHandlerStillRuns()
+    {
+        await using var host = await CreateHostAsync(
+            enableAuditing: true, registerSession: true, sessionFactoryReturnsNull: true);
         var publisher = host.Provider.GetRequiredService<IEventPublisher>();
 
         var evt = await PublishUntilProcessedAsync(publisher,

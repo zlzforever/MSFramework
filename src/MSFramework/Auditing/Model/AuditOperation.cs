@@ -132,7 +132,6 @@ public class AuditOperation : CreationAggregateRoot<string>, IAuditObject
     private AuditOperation(string id) : base(id)
     {
         Entities = new ThreadSafeCollection<AuditEntity>();
-        _collectedEntityKeys = [];
     }
 
     /// <summary>
@@ -160,14 +159,6 @@ public class AuditOperation : CreationAggregateRoot<string>, IAuditObject
         TraceId = traceId;
         Method = method;
     }
-
-    /// <summary>
-    /// 已收集审计实体的去重键集合（类型 + 实体标识 + 操作类型 + 属性变更快照）。
-    /// <see cref="AuditEntity"/> 未重写相等性（引用相等），而每次 <c>GetAuditEntities()</c>
-    /// 都会新建实例，残留处理器重复触发收集时无法用引用去重，
-    /// 故以值语义三元组作为唯一键，保证同一实体的同一变更状态只收集一次。
-    /// </summary>
-    private readonly HashSet<AuditEntityKey> _collectedEntityKeys;
 
     /// <summary>
     /// 审计实体及其属性快照的值键。属性快照不同表示实体在不同保存批次中的不同变更，
@@ -330,9 +321,10 @@ public class AuditOperation : CreationAggregateRoot<string>, IAuditObject
     }
 
     /// <summary>
-    /// 添加审计实体集合到当前操作，按实体值身份（类型 + 实体标识 + 操作类型）去重，保证同一实体只收集一次
+    /// 添加一个收集批次的审计实体，按实体值身份（类型 + 实体标识 + 操作类型 + 属性快照）在批次内去重。
+    /// 不跨批次去重：同一实体恢复到旧值后再次变更，仍需保留每次 SaveChanges 的审计记录。
     /// </summary>
-    /// <param name="entities">审计实体集合</param>
+    /// <param name="entities">一个 SaveChanges/收集批次的审计实体集合</param>
     public void AddEntities(IEnumerable<AuditEntity> entities)
     {
         if (entities == null)
@@ -340,6 +332,7 @@ public class AuditOperation : CreationAggregateRoot<string>, IAuditObject
             return;
         }
 
+        var batchKeys = new HashSet<AuditEntityKey>();
         foreach (var entity in entities)
         {
             if (entity == null)
@@ -348,15 +341,15 @@ public class AuditOperation : CreationAggregateRoot<string>, IAuditObject
             }
 
             var key = AuditEntityKey.From(entity);
+            // 每次调用代表一个明确的收集批次。批次外不复用去重键，避免 A→B→A→B
+            // 这类合法变更因历史快照相同而被吞掉。
+            if (!batchKeys.Add(key))
+            {
+                continue;
+            }
+
             lock (_entitiesSync)
             {
-                // 残留处理器可能对同一请求重复触发收集（每次收集都会新建 AuditEntity 实例），
-                // 按完整值快照去重，保证同一变更状态只进入集合一次。
-                if (!_collectedEntityKeys.Add(key))
-                {
-                    continue;
-                }
-
                 entity.SetOperation(this);
                 Entities.Add(entity);
             }

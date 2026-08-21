@@ -18,7 +18,10 @@ public static class ServiceCollectionExtensions
     private static void AddLocalEventPublisher(this IServiceCollection services)
     {
         services.TryAddScoped<IEventPublisher, LocalEventPublisher>();
-        services.AddHostedService<LocalEventBackgroundService>();
+        services.TryAddSingleton<LocalEventChannel>();
+        services.TryAddSingleton<LocalEventBackgroundService>();
+        services.AddHostedService(serviceProvider =>
+            serviceProvider.GetRequiredService<LocalEventBackgroundService>());
 
         var handlerInterface = typeof(IEventHandler<>);
 

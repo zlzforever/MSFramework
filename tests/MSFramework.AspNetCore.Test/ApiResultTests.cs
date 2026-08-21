@@ -270,18 +270,18 @@ public class ApiResultTests(ITestOutputHelper output) : BaseTest
 
     /// <summary>
     /// 接口内抛出普通异常（<see cref="InvalidOperationException"/>）时，
-    /// 全局异常过滤器应返回 HTTP 409 + RFC 7807 ProblemDetails。
+    /// 全局异常过滤器应返回 HTTP 500 + RFC 7807 ProblemDetails。
     /// </summary>
     [Fact]
-    public async Task ThrowInvalidOperationExceptionReturnsConflictProblemDetails()
+    public async Task ThrowInvalidOperationExceptionReturnsInternalServerProblemDetails()
     {
         var result = await Client.GetAsync("/apiResult/invalidOperationException");
         var text = await result.Content.ReadAsStringAsync();
         using var problemDetails = System.Text.Json.JsonDocument.Parse(text);
 
-        Assert.Equal(409, (int)result.StatusCode);
-        Assert.Equal(409, problemDetails.RootElement.GetProperty("status").GetInt32());
-        Assert.Equal("冲突", problemDetails.RootElement.GetProperty("title").GetString());
+        Assert.Equal(500, (int)result.StatusCode);
+        Assert.Equal(500, problemDetails.RootElement.GetProperty("status").GetInt32());
+        Assert.Equal("服务器内部错误", problemDetails.RootElement.GetProperty("title").GetString());
     }
 
     /// <summary>

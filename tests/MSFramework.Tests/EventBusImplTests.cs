@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Security.Claims;
 using System.Text;
@@ -14,6 +15,49 @@ namespace MSFramework.Tests;
 
 public class EventBusImplTests
 {
+    private sealed class TestHost : IAsyncDisposable
+    {
+        private readonly LocalEventBackgroundService _backgroundService;
+
+        public TestHost(ServiceProvider provider, LocalEventBackgroundService backgroundService)
+        {
+            Provider = provider;
+            _backgroundService = backgroundService;
+        }
+
+        public ServiceProvider Provider { get; }
+
+        public LocalEventBackgroundService BackgroundService => _backgroundService;
+
+        public async ValueTask DisposeAsync()
+        {
+            await _backgroundService.StopAsync(CancellationToken.None);
+            await Provider.DisposeAsync();
+        }
+    }
+
+    public sealed record HostMarker(string Name);
+
+    public record HostIsolationEvent : EventBase
+    {
+        public string ExpectedHost { get; init; }
+
+        public string HandledBy { get; set; }
+
+        public TaskCompletionSource<string> Processed { get; } =
+            new(TaskCreationOptions.RunContinuationsAsynchronously);
+    }
+
+    public sealed class HostIsolationEventHandler(HostMarker marker) : IEventHandler<HostIsolationEvent>
+    {
+        public Task HandleAsync(HostIsolationEvent @event, CancellationToken cancellationToken)
+        {
+            @event.HandledBy = marker.Name;
+            @event.Processed.TrySetResult(marker.Name);
+            return Task.CompletedTask;
+        }
+    }
+
     public record Event1 : EventBase
     {
         public static readonly StringBuilder Output = new();
@@ -43,20 +87,8 @@ public class EventBusImplTests
             Thread.CurrentPrincipal =
                 new ClaimsPrincipal(new[] { new ClaimsIdentity(new List<Claim> { new("sub", "123") }) });
 
-            var serviceCollection = new ServiceCollection();
-            serviceCollection.AddLogging();
-            serviceCollection.AddMicroserviceFramework(x =>
-            {
-                x.UseDependencyInjectionLoader();
-                x.UseLocalEventPublisher();
-            });
-            serviceCollection.AddSingleton<LocalEventBackgroundService>();
-            var provider = serviceCollection.BuildServiceProvider();
-            provider.UseMicroserviceFramework();
-
-            var backgroundService = provider.GetRequiredService<LocalEventBackgroundService>();
-            backgroundService.StartAsync(default).ConfigureAwait(true).GetAwaiter();
-            await Task.Delay(100);
+            await using var host = await CreateHostAsync();
+            var provider = host.Provider;
 
             var eventBus = provider.GetRequiredService<IEventPublisher>();
 
@@ -127,22 +159,8 @@ public class EventBusImplTests
         for (var i = 0; i < 40; ++i)
         {
             Event3.Output.Clear();
-            var serviceCollection = new ServiceCollection();
-            serviceCollection.AddLogging();
-            serviceCollection.AddMicroserviceFramework(x =>
-            {
-                x.UseDependencyInjectionLoader();
-                x.UseLocalEventPublisher();
-                x.UseAspNetCoreExtension();
-            });
-            serviceCollection.AddHttpContextAccessor();
-            serviceCollection.AddSingleton<LocalEventBackgroundService>();
-            var provider = serviceCollection.BuildServiceProvider();
-            provider.UseMicroserviceFramework();
-
-            var backgroundService = provider.GetRequiredService<LocalEventBackgroundService>();
-            backgroundService.StartAsync(default).ConfigureAwait(true).GetAwaiter();
-            await Task.Delay(100);
+            await using var host = await CreateHostAsync(useAspNetCore: true);
+            var provider = host.Provider;
 
             var eventBus = provider.GetRequiredService<IEventPublisher>();
             await eventBus.PublishAsync(new Event3 { Order = 1 });
@@ -154,5 +172,81 @@ public class EventBusImplTests
             // var handler = provider.GetRequiredService<IEventHandler<Event3>>();
             // await handler.HandleAsync(new Event3 { Order = 3 });
         }
+    }
+
+    [Fact]
+    public async Task HostsUseIsolatedEventChannels()
+    {
+        await using var firstHost = await CreateHostAsync(hostName: "first");
+        await using var secondHost = await CreateHostAsync(hostName: "second");
+
+        var firstEvent = new HostIsolationEvent { ExpectedHost = "first" };
+        var secondEvent = new HostIsolationEvent { ExpectedHost = "second" };
+        await firstHost.Provider.GetRequiredService<IEventPublisher>().PublishAsync(firstEvent);
+        await secondHost.Provider.GetRequiredService<IEventPublisher>().PublishAsync(secondEvent);
+
+        await Task.WhenAll(
+            firstEvent.Processed.Task.WaitAsync(TimeSpan.FromSeconds(5)),
+            secondEvent.Processed.Task.WaitAsync(TimeSpan.FromSeconds(5)));
+
+        Assert.Equal(firstEvent.ExpectedHost, firstEvent.HandledBy);
+        Assert.Equal(secondEvent.ExpectedHost, secondEvent.HandledBy);
+    }
+
+    [Fact]
+    public async Task EventPublishedToStoppedHostIsNotConsumedByAnotherHost()
+    {
+        await using var firstHost = await CreateHostAsync(hostName: "first");
+        await using var secondHost = await CreateHostAsync(hostName: "second", startService: false);
+
+        var secondEvent = new HostIsolationEvent { ExpectedHost = "second" };
+        await secondHost.Provider.GetRequiredService<IEventPublisher>().PublishAsync(secondEvent);
+        await Task.Delay(200);
+
+        Assert.False(secondEvent.Processed.Task.IsCompleted);
+
+        await secondHost.BackgroundService.StartAsync(CancellationToken.None);
+        var handledBy = await secondEvent.Processed.Task.WaitAsync(TimeSpan.FromSeconds(5));
+        Assert.Equal(secondEvent.ExpectedHost, handledBy);
+    }
+
+    private static async Task<TestHost> CreateHostAsync(
+        bool useAspNetCore = false,
+        string hostName = null,
+        bool startService = true)
+    {
+        var serviceCollection = new ServiceCollection();
+        serviceCollection.AddLogging();
+        serviceCollection.AddMicroserviceFramework(x =>
+        {
+            x.UseDependencyInjectionLoader();
+            x.UseLocalEventPublisher();
+            if (useAspNetCore)
+            {
+                x.UseAspNetCoreExtension();
+            }
+        });
+        if (useAspNetCore)
+        {
+            serviceCollection.AddHttpContextAccessor();
+        }
+
+        if (hostName != null)
+        {
+            serviceCollection.AddSingleton(new HostMarker(hostName));
+        }
+
+        serviceCollection.AddSingleton<LocalEventBackgroundService>();
+        var provider = serviceCollection.BuildServiceProvider();
+        provider.UseMicroserviceFramework();
+
+        var backgroundService = provider.GetRequiredService<LocalEventBackgroundService>();
+        if (startService)
+        {
+            await backgroundService.StartAsync(CancellationToken.None);
+            await Task.Delay(100);
+        }
+
+        return new TestHost(provider, backgroundService);
     }
 }

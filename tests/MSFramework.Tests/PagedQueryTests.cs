@@ -163,10 +163,10 @@ public class PagedQueryTests
     {
         var data = Enumerable.Range(1, 50).Select(i => new TestEntity { Id = i }).AsQueryable();
 
-        var result = await data.PagedQueryAsync(int.MaxValue, int.MaxValue);
+        var result = await data.PagedQueryAsync(int.MaxValue, 2);
 
         Assert.Equal(int.MaxValue, result.Page);
-        Assert.Equal(int.MaxValue, result.Limit);
+        Assert.Equal(2, result.Limit);
         Assert.Equal(50, result.Total);
         Assert.Empty(result.Data);
     }
@@ -176,9 +176,11 @@ public class PagedQueryTests
     {
         var data = Enumerable.Range(1, 50).Select(i => new TestEntity { Id = i }).AsQueryable();
 
-        var result = await data.PagedQueryAsync(int.MaxValue, int.MaxValue,
+        var result = await data.PagedQueryAsync(int.MaxValue, 2,
             entity => new TestDto { Id = entity.Id });
 
+        Assert.Equal(int.MaxValue, result.Page);
+        Assert.Equal(2, result.Limit);
         Assert.Equal(50, result.Total);
         Assert.Empty(result.Data);
     }

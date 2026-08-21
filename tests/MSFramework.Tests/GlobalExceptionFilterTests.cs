@@ -79,6 +79,37 @@ public class GlobalExceptionFilterTests
         Assert.Equal("trace-123", problemDetails.Extensions["correlationId"]);
     }
 
+    [Fact]
+    public void OnException_MapsUnexpectedInvalidOperationToInternalServerError()
+    {
+        var filter = CreateFilter();
+        var context = CreateExceptionContext(new InvalidOperationException("DI 容器状态错误"));
+
+        filter.Invoke(context);
+
+        var result = Assert.IsType<ObjectResult>(context.Result);
+        var problemDetails = Assert.IsType<ProblemDetails>(result.Value);
+        Assert.Equal(StatusCodes.Status500InternalServerError, result.StatusCode);
+        Assert.Equal(StatusCodes.Status500InternalServerError, problemDetails.Status);
+        Assert.Equal("服务器内部错误", problemDetails.Title);
+        Assert.Equal("DI 容器状态错误", problemDetails.Detail);
+    }
+
+    [Fact]
+    public void OnException_MapsNestedConflictToConflict()
+    {
+        var filter = CreateFilter();
+        var context = CreateExceptionContext(new InvalidOperationException("外层包装",
+            new MicroserviceFrameworkConflictException("资源状态冲突")));
+
+        filter.Invoke(context);
+
+        var result = Assert.IsType<ObjectResult>(context.Result);
+        var problemDetails = Assert.IsType<ProblemDetails>(result.Value);
+        Assert.Equal(StatusCodes.Status409Conflict, result.StatusCode);
+        Assert.Equal(StatusCodes.Status409Conflict, problemDetails.Status);
+    }
+
     [Theory]
     [InlineData("argument", StatusCodes.Status400BadRequest)]
     [InlineData("authentication", StatusCodes.Status401Unauthorized)]
@@ -94,7 +125,7 @@ public class GlobalExceptionFilterTests
             "authentication" => new AuthenticationException("认证失败"),
             "unauthorized" => new UnauthorizedAccessException("无权访问"),
             "not-found" => new KeyNotFoundException("资源不存在"),
-            "conflict" => new InvalidOperationException("资源状态冲突"),
+            "conflict" => new MicroserviceFrameworkConflictException("资源状态冲突"),
             _ => throw new ArgumentOutOfRangeException(nameof(exceptionType))
         });
 

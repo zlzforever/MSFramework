@@ -54,7 +54,7 @@ public class AuditExceptionPathTests : IDisposable
     }
 
     /// <summary>
-    /// 契约反转回归：Action 抛异常且被全局异常过滤器处理（409）时，
+    /// 契约反转回归：Action 抛异常且被全局异常过滤器处理（500）时，
     /// 审计一律不保存，scope 仍被释放且仅释放一次（无泄漏）
     /// </summary>
     [Fact]
@@ -62,7 +62,7 @@ public class AuditExceptionPathTests : IDisposable
     {
         var response = await _client.PostAsync("/audit-exc/throw", new StringContent(""));
 
-        Assert.Equal(409, (int)response.StatusCode);
+        Assert.Equal(500, (int)response.StatusCode);
 
         // 异常被处理也不保存审计（契约反转：原 N5「异常被处理仍保存」取消）
         Assert.Equal(0, LifecycleProbeAuditingStore.AddCallCount);

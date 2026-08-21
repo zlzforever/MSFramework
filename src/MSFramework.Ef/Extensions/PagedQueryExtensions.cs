@@ -13,6 +13,11 @@ namespace MicroserviceFramework.Linq.Expression;
 /// <summary>
 /// EF Core 分页查询扩展方法。
 /// </summary>
+/// <remarks>
+/// 此 API 随 EF Core 依赖位于 <c>MSFramework.Ef</c> 包中，公共命名空间仍为
+/// <c>MicroserviceFramework.Linq.Expression</c>。Core-only 消费者需要显式引用
+/// <c>MSFramework.Ef</c> 后才能继续使用该扩展；核心包本身不再携带 EF Core 依赖。
+/// </remarks>
 public static class PagedQueryExtensions
 {
     /// <param name="queryable">EF Core 或内存查询对象</param>
@@ -85,7 +90,13 @@ public static class PagedQueryExtensions
     private static bool TryGetOffset(int page, int limit, int total, out int offset)
     {
         var longOffset = ((long)page - 1) * limit;
-        if (longOffset >= total || longOffset > int.MaxValue)
+        if (longOffset > int.MaxValue)
+        {
+            offset = 0;
+            return false;
+        }
+
+        if (longOffset >= total)
         {
             offset = 0;
             return false;

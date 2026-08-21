@@ -194,7 +194,7 @@ public class ApiResultController(IOptions<JsonSerializerSettings> options) : Api
     }
 
     /// <summary>
-    /// 抛出普通运行时异常（InvalidOperationException），验证全局异常过滤器返回 HTTP 409 + ProblemDetails
+    /// 抛出普通运行时异常（InvalidOperationException），验证全局异常过滤器返回 HTTP 500 + ProblemDetails
     /// </summary>
     /// <returns>正常返回不会被执行，始终抛出异常</returns>
     /// <exception cref="InvalidOperationException">模拟接口内抛出非友好普通异常</exception>
@@ -236,7 +236,7 @@ public class ApiResultController(IOptions<JsonSerializerSettings> options) : Api
     [HttpGet("conflictException")]
     public int GetConflictException()
     {
-        throw new InvalidOperationException("资源状态冲突");
+        throw new MicroserviceFrameworkConflictException("资源状态冲突");
     }
 
     [HttpGet("unexpectedException")]

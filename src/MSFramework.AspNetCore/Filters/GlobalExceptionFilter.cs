@@ -36,14 +36,15 @@ internal class GlobalExceptionFilter(
 
         var exception = context.Exception;
         var friendlyException = FindFriendlyException(exception);
-        var (statusCode, title) = GetStatusCode(exception, friendlyException);
+        var conflictException = friendlyException == null ? FindConflictException(exception) : null;
+        var (statusCode, title) = GetStatusCode(exception, friendlyException, conflictException);
         var correlationId = GetCorrelationId(context.HttpContext);
         var problemDetails = new ProblemDetails
         {
             Type = "about:blank",
             Title = title,
             Status = statusCode,
-            Detail = GetDetail(exception, statusCode, friendlyException),
+            Detail = GetDetail(exception, statusCode, friendlyException, conflictException),
             Instance = context.HttpContext.Request.Path
         };
 
@@ -84,11 +85,17 @@ internal class GlobalExceptionFilter(
     private string GetDetail(
         Exception exception,
         int statusCode,
-        MicroserviceFrameworkFriendlyException friendlyException)
+        MicroserviceFrameworkFriendlyException friendlyException,
+        MicroserviceFrameworkConflictException conflictException)
     {
         if (friendlyException != null)
         {
             return friendlyException.Message;
+        }
+
+        if (conflictException != null && environment.IsDevelopment())
+        {
+            return conflictException.Message;
         }
 
         if (environment.IsDevelopment())
@@ -116,11 +123,17 @@ internal class GlobalExceptionFilter(
 
     private static (int StatusCode, string Title) GetStatusCode(
         Exception exception,
-        MicroserviceFrameworkFriendlyException friendlyException)
+        MicroserviceFrameworkFriendlyException friendlyException,
+        MicroserviceFrameworkConflictException conflictException)
     {
         if (friendlyException != null)
         {
             return (StatusCodes.Status400BadRequest, "错误请求");
+        }
+
+        if (conflictException != null)
+        {
+            return (StatusCodes.Status409Conflict, "冲突");
         }
 
         return exception switch
@@ -130,7 +143,7 @@ internal class GlobalExceptionFilter(
             UnauthorizedAccessException => (StatusCodes.Status403Forbidden, "禁止访问"),
             KeyNotFoundException or FileNotFoundException =>
                 (StatusCodes.Status404NotFound, "资源不存在"),
-            InvalidOperationException => (StatusCodes.Status409Conflict, "冲突"),
+            MicroserviceFrameworkConflictException => (StatusCodes.Status409Conflict, "冲突"),
             _ => (StatusCodes.Status500InternalServerError, "服务器内部错误")
         };
     }
@@ -158,6 +171,22 @@ internal class GlobalExceptionFilter(
             if (current is MicroserviceFrameworkFriendlyException friendlyException)
             {
                 return friendlyException;
+            }
+        }
+
+        return null;
+    }
+
+    /// <summary>
+    /// 遍历异常链查找明确的资源冲突异常，支持被基础设施异常包装的业务冲突。
+    /// </summary>
+    private static MicroserviceFrameworkConflictException FindConflictException(Exception exception)
+    {
+        for (var current = exception; current != null; current = current.InnerException)
+        {
+            if (current is MicroserviceFrameworkConflictException conflictException)
+            {
+                return conflictException;
             }
         }
 

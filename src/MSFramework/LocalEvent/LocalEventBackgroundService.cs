@@ -30,6 +30,9 @@ public class LocalEventBackgroundService(
     IOptions<LocalEventOptions> options)
     : BackgroundService
 {
+    private readonly LocalEventChannel _eventChannel =
+        serviceProvider.GetRequiredService<LocalEventChannel>();
+
     /// <summary>
     /// 后台执行循环，持续消费事件管道中的事件并分发处理。
     /// </summary>
@@ -39,9 +42,9 @@ public class LocalEventBackgroundService(
     {
         logger.LogInformation("本地事件服务启动");
 
-        while (await LocalEventPublisher.EventChannel.Reader.WaitToReadAsync(stoppingToken))
+        while (await _eventChannel.EventChannel.Reader.WaitToReadAsync(stoppingToken))
         {
-            while (LocalEventPublisher.EventChannel.Reader.TryRead(out var entry))
+            while (_eventChannel.EventChannel.Reader.TryRead(out var entry))
             {
                 try
                 {
@@ -153,6 +156,7 @@ public class LocalEventBackgroundService(
     public override async Task StopAsync(CancellationToken cancellationToken)
     {
         logger.LogDebug("开始关闭本地事件服务");
+        _eventChannel.EventChannel.Writer.TryComplete();
         await base.StopAsync(cancellationToken);
         logger.LogInformation("关闭本地事件服务完成");
     }

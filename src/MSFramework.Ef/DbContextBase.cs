@@ -248,8 +248,8 @@ public abstract class DbContextBase : DbContext
     /// <see cref="SaveChangesAsync(bool, CancellationToken)"/> 的路径），且未越过
     /// 审计链路终点，即可被收集。
     /// Value 为 null（无审计请求）时本方法立即返回，仅一次 AsyncLocal 读取开销；
-    /// 实体收集结果经 <see cref="AuditOperation.AddEntities"/> 按值身份去重，
-    /// 多次保存/多上下文场景不会重复收集同一实体的同一变更状态。
+    /// 每次保存先物化一个收集批次，再由 <see cref="AuditOperation.AddEntities"/> 在该批次内按值身份去重；
+    /// 批次之间不共享去重键，保证同一实体恢复旧值后再次变更仍完整保留。
     /// </summary>
     private void CollectAuditEntities()
     {
@@ -259,7 +259,7 @@ public abstract class DbContextBase : DbContext
             return;
         }
 
-        auditOperation.AddEntities(GetAuditEntities());
+        auditOperation.AddEntities(GetAuditEntities().ToArray());
     }
 
     /// <summary>
