@@ -50,8 +50,12 @@ public class RepositoryInterfaceGenerator : IIncrementalGenerator
                 return;
             }
 
-            // 按命名空间段精确替换，避免 Replace 子串全量替换误伤其他段
+            // 按命名空间段精确替换，避免 Replace 子串全量替换误伤其他段。
+            // 与 MSFramework.Ef.Analyzers 的实现生成器保持同一约定：
+            // 同时支持 "AggregateRoots" 与 "Aggregates" 两种领域段命名，
+            // 否则聚合根放在 "Aggregates" 段时接口与实现会落到不同命名空间导致编译失败
             var repoNamespace = ReplaceNamespaceSegment(model.Namespace, "AggregateRoots", "Repositories");
+            repoNamespace = ReplaceNamespaceSegment(repoNamespace, "Aggregates", "Repositories");
             // Key 为空表示实现非泛型 IAggregateRoot 的聚合根（复合主键多属性实体），生成无键仓储接口
             var baseInterfaces = string.IsNullOrEmpty(model.Key)
                 ? $"IRepository<E>"

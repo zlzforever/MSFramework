@@ -22,7 +22,11 @@ public class EfRepository<TAggregateRoot> : IRepository<TAggregateRoot>, IEfRepo
     where TAggregateRoot : class, IAggregateRoot
 {
     private readonly DbSet<TAggregateRoot> _dbSet;
-    private readonly DbContextBase _dbContext;
+
+    /// <summary>
+    /// 当前 DbContext 实例，供派生仓储按主键点查等内部操作使用
+    /// </summary>
+    protected readonly DbContextBase DBContext;
 
     /// <summary>
     /// 获取可查询的实体集合，默认包含第一级导航属性
@@ -46,10 +50,17 @@ public class EfRepository<TAggregateRoot> : IRepository<TAggregateRoot>, IEfRepo
     /// <summary>
     /// 获取当前 DbContext 实例
     /// </summary>
-    public DbContext DbContext => _dbContext;
+    public DbContext DbContext => DBContext;
 
     /// <summary>
-    /// 获取或设置是否启用查询拆分行为，null 时使用全局设置
+    /// 一级导航数量超过该阈值时自动启用 SplitQuery，
+    /// 避免多集合导航 JOIN 产生的笛卡尔积爆炸
+    /// </summary>
+    private const int SplitQueryNavigationThreshold = 3;
+
+    /// <summary>
+    /// 获取或设置是否启用查询拆分行为，null 时按一级导航数量自动选择：
+    /// 不超过 <see cref="SplitQueryNavigationThreshold"/> 个一级导航使用 SingleQuery，否则强制 SplitQuery
     /// </summary>
     public bool? UseQuerySplittingBehavior { get; init; }
 
@@ -59,26 +70,27 @@ public class EfRepository<TAggregateRoot> : IRepository<TAggregateRoot>, IEfRepo
     /// <param name="dbContextFactory">数据库上下文工厂</param>
     public EfRepository(DbContextFactory dbContextFactory)
     {
-        _dbContext = dbContextFactory.GetDbContext<TAggregateRoot>();
-        _dbSet = _dbContext.Set<TAggregateRoot>();
+        DBContext = dbContextFactory.GetDbContext<TAggregateRoot>();
+        _dbSet = DBContext.Set<TAggregateRoot>();
     }
 
     /// <summary>
-    /// 若 UseQuerySplittingBehavior 为空，则使用全局设置，默认是 SingleQuery
-    /// 建议 2 个或以上的 1:N 关系则使用 SplitQuery 来避免笛卡尔积爆炸，其它情况使用 SingleQuery
-    /// 即其他情况使用默认配置，仅在聚合根有较多 1:N 的关系时重载 UseQuerySplittingBehavior = true 来优化查询
-    /// 默认会 include 第一级导航属性
+    /// 构建包含全部一级导航属性的查询。
+    /// 查询拆分策略优先级：显式配置 <see cref="UseQuerySplittingBehavior"/> &gt; 一级导航数量启发式（见
+    /// <see cref="SplitQueryNavigationThreshold"/>）。默认会 include 第一级导航属性
     /// </summary>
-    /// <param name="dbSet"></param>
-    /// <returns></returns>
+    /// <param name="dbSet">实体集合</param>
+    /// <returns>包含一级导航与查询拆分策略的查询</returns>
     protected virtual IQueryable<TAggregateRoot> BuildQueryable(DbSet<TAggregateRoot> dbSet)
     {
         var queryable = dbSet.AsQueryable();
-        var navigations = dbSet.EntityType.GetNavigations();
+        var navigations = dbSet.EntityType.GetNavigations().ToList();
         queryable = navigations.Aggregate(queryable, (current, navigation) => current.Include(navigation.Name));
 
-        return !UseQuerySplittingBehavior.HasValue ? queryable :
-            UseQuerySplittingBehavior.Value ? queryable.AsSplitQuery() : queryable.AsSingleQuery();
+        // 超过 3 个一级导航（含多个集合导航）时强制 SplitQuery 避免笛卡尔积爆炸；
+        // 未显式配置时以此启发式决定，不再依赖全局默认
+        var useSplitQuery = UseQuerySplittingBehavior ?? navigations.Count > SplitQueryNavigationThreshold;
+        return useSplitQuery ? queryable.AsSplitQuery() : queryable.AsSingleQuery();
     }
 
     /// <summary>
@@ -194,26 +206,48 @@ public class EfRepository<TEntity, TKey> : EfRepository<TEntity>, IRepository<TE
     }
 
     /// <summary>
-    /// 根据主键删除实体
+    /// 根据主键删除实体。
+    /// 仅按主键点查定位实体（不 Include 任何导航属性），避免为删除全量加载聚合；
+    /// 对实现 <see cref="IDeletion"/> 的实体，已软删除的记录视为不存在（不重复软删），
+    /// 与既有全局查询过滤器行为保持一致。
+    /// 注意：依赖数据库外键级联删除子集合；若配置为客户端级联（<c>DeleteBehavior.ClientCascade</c>）
+    /// 且子集合未加载，删除父实体将触发外键冲突，此种场景应先加载子集合再删除。
     /// </summary>
-    /// <param name="id">要删除的实体主键</param>
+    /// <param name="id">要删除的实体主键；传 null 时静默返回</param>
     public virtual void Delete(TKey id)
     {
+        if (id == null)
+        {
+            return;
+        }
+
+
         var entity = Find(id);
-        if (entity != null)
+        if (entity != null && entity is not IDeletion { IsDeleted: true })
         {
             Delete(entity);
         }
     }
 
     /// <summary>
-    /// 异步根据主键删除实体
+    /// 异步根据主键删除实体。
+    /// 仅按主键点查定位实体（不 Include 任何导航属性），避免为删除全量加载聚合；
+    /// 对实现 <see cref="IDeletion"/> 的实体，已软删除的记录视为不存在（不重复软删），
+    /// 与既有全局查询过滤器行为保持一致。
+    /// 注意：依赖数据库外键级联删除子集合；若配置为客户端级联（<c>DeleteBehavior.ClientCascade</c>）
+    /// 且子集合未加载，删除父实体将触发外键冲突，此种场景应先加载子集合再删除。
     /// </summary>
-    /// <param name="id">要删除的实体主键</param>
+    /// <param name="id">要删除的实体主键；传 null 时静默返回</param>
+    /// <returns>表示异步操作的任务</returns>
     public virtual async Task DeleteAsync(TKey id)
     {
+        if (id == null)
+        {
+            return;
+        }
+
         var entity = await FindAsync(id);
-        if (entity != null)
+        if (entity != null && entity is not IDeletion { IsDeleted: true })
         {
             await DeleteAsync(entity);
         }

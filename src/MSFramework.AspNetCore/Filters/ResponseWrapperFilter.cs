@@ -2,6 +2,7 @@ using System;
 using System.Threading.Tasks;
 using MicroserviceFramework.Common;
 using MicroserviceFramework.Utils;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.Extensions.Logging;
@@ -70,7 +71,18 @@ internal sealed class ResponseWrapperFilter(ILogger<ResponseWrapperFilter> logge
             }
             else
             {
-                objectResult.Value = new ApiResult { Data = objectResult.Value, Msg = string.Empty };
+                // 根据 ObjectResult 状态码判定 success：
+                // 非 2xx（如 BadRequestObjectResult/NotFoundObjectResult/ConflictObjectResult）包装时
+                // 必须标记 Success=false，避免 HTTP 状态与 success 字段自相矛盾
+                var code = objectResult.StatusCode ?? StatusCodes.Status200OK;
+                var success = HttpUtils.IsSuccessStatusCode(code);
+                objectResult.Value = new ApiResult
+                {
+                    Success = success,
+                    Code = 0,
+                    Msg = string.Empty,
+                    Data = objectResult.Value
+                };
                 objectResult.DeclaredType = ApiResult.Type;
             }
         }

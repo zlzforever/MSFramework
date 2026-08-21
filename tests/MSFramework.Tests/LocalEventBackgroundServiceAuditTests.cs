@@ -14,6 +14,7 @@ using MicroserviceFramework.LocalEvent;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using Xunit;
 
 namespace MSFramework.Tests;
@@ -190,6 +191,20 @@ public class LocalEventBackgroundServiceAuditTests
     }
 
     /// <summary>
+    /// 仅用于验证已注册描述符但未解析到 handler 时的上下文清理。
+    /// </summary>
+    public record LocalEventMissingHandlerEvent : EventBase;
+
+    /// <summary>
+    /// 会被事件描述符扫描到，但测试宿主会移除其 DI 注册。
+    /// </summary>
+    public class LocalEventMissingHandler : IEventHandler<LocalEventMissingHandlerEvent>
+    {
+        public Task HandleAsync(LocalEventMissingHandlerEvent @event, CancellationToken cancellationToken) =>
+            Task.CompletedTask;
+    }
+
+    /// <summary>
     /// 测试事件处理器：记录处理器实例化时（早于审计操作设置）与入口处执行流中的审计操作，
     /// 可选写入审计实体或抛异常
     /// </summary>
@@ -233,7 +248,8 @@ public class LocalEventBackgroundServiceAuditTests
     /// </summary>
     /// <param name="enableAuditing">是否启用本地事件审计</param>
     /// <returns>测试宿主（后台服务已启动）</returns>
-    private static async Task<TestHost> CreateHostAsync(bool enableAuditing)
+    private static async Task<TestHost> CreateHostAsync(
+        bool enableAuditing, bool registerSession = true, bool startService = true)
     {
         var connection = new SqliteConnection("DataSource=:memory:");
         connection.Open();
@@ -247,8 +263,12 @@ public class LocalEventBackgroundServiceAuditTests
         // 初始化框架（程序集扫描），AddEntityFrameworkExtension 依赖 Utils.Runtime 类型缓存
         services.AddSingleton(new DbContextSettings { UseUnderScoreCase = true, DatabaseType = "Sqlite" });
         services.AddSingleton<IEntityConfigurationTypeFinder>(new TestEntityConfigurationTypeFinder());
-        services.AddScoped<ISession, TestSession>();
+        if (registerSession)
+        {
+            services.AddScoped<ISession, TestSession>();
+        }
         services.AddDbContext<LocalEventAuditContext>(options => options.UseSqlite(connection));
+        services.RemoveAll<LocalEventMissingHandler>();
 
         var rootProvider = services.BuildServiceProvider();
         services.AddSingleton<IScopeServiceProvider>(new TestScopeServiceProvider(rootProvider));
@@ -262,7 +282,10 @@ public class LocalEventBackgroundServiceAuditTests
         provider.GetRequiredService<LocalEventAuditContext>().Database.EnsureCreated();
 
         var backgroundService = provider.GetRequiredService<LocalEventBackgroundService>();
-        await backgroundService.StartAsync(CancellationToken.None);
+        if (startService)
+        {
+            await backgroundService.StartAsync(CancellationToken.None);
+        }
 
         return new TestHost(provider, connection, backgroundService);
     }
@@ -340,6 +363,50 @@ public class LocalEventBackgroundServiceAuditTests
         Assert.Equal(OperationType.Add, entity.OperationType);
         Assert.Contains(nameof(LocalEventAuditOrder), entity.Type);
         Assert.Same(operation, entity.Operation);
+    }
+
+    /// <summary>
+    /// 审计开启但宿主未注册 ISession 时，事件处理仍必须执行。
+    /// </summary>
+    [Fact]
+    public async Task EnableAuditing_WithoutSession_EventHandlerStillRuns()
+    {
+        await using var host = await CreateHostAsync(enableAuditing: true, registerSession: false);
+        var publisher = host.Provider.GetRequiredService<IEventPublisher>();
+
+        var evt = await PublishUntilProcessedAsync(publisher,
+            order => new LocalEventAuditEvent { Order = order }, TimeSpan.FromSeconds(15));
+
+        Assert.NotNull(evt.ObservedOperation);
+        Assert.Null(evt.ObservedOperation.TraceId);
+    }
+
+    /// <summary>
+    /// 未解析 handler 的事件不得把审计上下文泄漏给后续事件。
+    /// </summary>
+    [Fact]
+    public async Task EnableAuditing_MissingHandler_ContextValueClearedBeforeNextEvent()
+    {
+        LocalEventAuditEventHandler.ObservedValueAtConstruction = null;
+        AuditOperationContext.Value = new AuditOperation(
+            "seed", null, null, null, null, null, null, "seed-trace", "Local");
+        await using var host = await CreateHostAsync(enableAuditing: true, startService: false);
+        var publisher = host.Provider.GetRequiredService<IEventPublisher>();
+
+        var missingRegistration = host.Provider.GetRequiredService<EventDescriptorStore>();
+        Assert.Contains(missingRegistration.GetList(typeof(LocalEventMissingHandlerEvent)),
+            descriptor => descriptor.HandlerType == typeof(LocalEventMissingHandler));
+
+        var next = new LocalEventAuditEvent { Order = 100 };
+        await Task.WhenAll(
+            publisher.PublishAsync(new LocalEventMissingHandlerEvent()),
+            publisher.PublishAsync(next));
+        await host.BackgroundService.StartAsync(CancellationToken.None);
+        await next.Processed.Task.WaitAsync(TimeSpan.FromSeconds(15));
+
+        Assert.Null(LocalEventAuditEventHandler.ObservedValueAtConstruction);
+        Assert.NotNull(next.ObservedOperation);
+        AuditOperationContext.Value = null;
     }
 
     /// <summary>

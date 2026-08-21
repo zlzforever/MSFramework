@@ -56,23 +56,31 @@ public class LocalEventBackgroundService(
 
                         using var scope = serviceProvider.CreateScope();
                         var services = scope.ServiceProvider;
-                        var handler = services.GetService(descriptor.HandlerType);
-                        if (handler == null)
-                        {
-                            continue;
-                        }
-
-                        if (options.Value.EnableAuditing)
-                        {
-                            var auditOperation = CreateAuditedOperation(entry.Session, handlerName);
-                            // 审计操作承载到当前后台执行流（AsyncLocal），使 DbContextBase 默认保存流程
-                            // 能在同一执行流读取到本事件处理器的审计操作并收集变更实体；
-                            // 每个事件处理器是独立审计单元，处理完成后（含异常路径）必须在 finally 清理
-                            AuditOperationContext.Value = auditOperation;
-                        }
-
                         try
                         {
+                            var handler = services.GetService(descriptor.HandlerType);
+                            if (handler == null)
+                            {
+                                continue;
+                            }
+
+                            // 后台执行流无 HttpContext，ISession 可能未注册（如仅引用核心包的控制台宿主）；
+                            // 已注册时用事件发布时的会话快照回填用户上下文，未注册或快照为空时不阻断事件处理
+                            var session = services.GetService<ISession>();
+                            if (session != null && entry.Session != null)
+                            {
+                                session.Load(entry.Session);
+                            }
+
+                            if (options.Value.EnableAuditing)
+                            {
+                                var auditOperation = CreateAuditedOperation(session, handlerName);
+                                // 审计操作承载到当前后台执行流（AsyncLocal），使 DbContextBase 默认保存流程
+                                // 能在同一执行流读取到本事件处理器的审计操作并收集变更实体；
+                                // 每个事件处理器是独立审计单元，处理完成后（含异常路径）必须在 finally 清理
+                                AuditOperationContext.Value = auditOperation;
+                            }
+
                             if (descriptor.HandleMethod.Invoke(handler, [entry.EventData, stoppingToken]) is
                                 not Task
                                 task)
@@ -97,8 +105,8 @@ public class LocalEventBackgroundService(
                         }
                         finally
                         {
-                            // 事件处理完成或异常后清理执行流中的审计操作，防止 AsyncLocal 值
-                            // 随 ExecutionContext 复用到后续事件处理器或其他请求
+                            // 包括 handler 未解析、处理器异常和正常完成在内，统一清理执行流中的审计操作，
+                            // 防止 AsyncLocal 值污染后续事件处理器或其他请求
                             AuditOperationContext.Value = null;
                         }
                     }
@@ -126,9 +134,10 @@ public class LocalEventBackgroundService(
 
     private AuditOperation CreateAuditedOperation(ISession session, string handlerType)
     {
+        // session 可能为 null（ISession 未注册的宿主），审计操作仅缺省用户信息，不影响事件处理
         var auditedOperation = new AuditOperation(handlerType, null, null, null, null,
-            null, null, session.TraceIdentifier, "Local");
-        auditedOperation.SetCreation(session.UserId, session.UserDisplayName, DateTimeOffset.UtcNow);
+            null, null, session?.TraceIdentifier, "Local");
+        auditedOperation.SetCreation(session?.UserId, session?.UserDisplayName, DateTimeOffset.UtcNow);
         return auditedOperation;
     }
 }
