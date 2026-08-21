@@ -108,7 +108,7 @@ public class AuditScopeLeakTests : IDisposable
     {
         var response = await _client.PostAsync("/audit-leak/throw", new StringContent(""));
 
-        Assert.Equal(500, (int)response.StatusCode);
+        Assert.Equal(409, (int)response.StatusCode);
         Assert.Equal(1, FakeAuditingStore.DisposeCount);
     }
 }

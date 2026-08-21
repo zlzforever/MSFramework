@@ -18,10 +18,21 @@ public class ObjectIdModelBinder : IModelBinder
     {
         var value = bindingContext.ValueProvider.GetValue(bindingContext.FieldName).FirstValue;
 
-        // 解析失败或解析结果为 Empty（非法输入）时绑定失败，返回 400 而非静默绑定 Empty
-        bindingContext.Result = !ObjectId.TryParse(value, out var id) || id == ObjectId.Empty
-            ? ModelBindingResult.Failed()
-            : ModelBindingResult.Success(id);
+        // 解析失败或解析结果为 Empty（非法输入）时写入 ModelState，
+        // 让 ApiController 的模型验证流程能够返回真实的 HTTP 400。
+        if (!ObjectId.TryParse(value, out var id) || id == ObjectId.Empty)
+        {
+            var key = string.IsNullOrEmpty(bindingContext.ModelName)
+                ? bindingContext.FieldName
+                : bindingContext.ModelName;
+            bindingContext.ModelState.TryAddModelError(key,
+                $"The value '{value}' is not valid.");
+            bindingContext.Result = ModelBindingResult.Failed();
+        }
+        else
+        {
+            bindingContext.Result = ModelBindingResult.Success(id);
+        }
 
         return Task.CompletedTask;
     }

@@ -54,7 +54,7 @@ public class AuditExceptionPathTests : IDisposable
     }
 
     /// <summary>
-    /// 契约反转回归：Action 抛异常且被全局异常过滤器处理（500）时，
+    /// 契约反转回归：Action 抛异常且被全局异常过滤器处理（409）时，
     /// 审计一律不保存，scope 仍被释放且仅释放一次（无泄漏）
     /// </summary>
     [Fact]
@@ -62,7 +62,7 @@ public class AuditExceptionPathTests : IDisposable
     {
         var response = await _client.PostAsync("/audit-exc/throw", new StringContent(""));
 
-        Assert.Equal(500, (int)response.StatusCode);
+        Assert.Equal(409, (int)response.StatusCode);
 
         // 异常被处理也不保存审计（契约反转：原 N5「异常被处理仍保存」取消）
         Assert.Equal(0, LifecycleProbeAuditingStore.AddCallCount);
@@ -100,15 +100,15 @@ public class AuditExceptionPathTests : IDisposable
     }
 
     /// <summary>
-    /// 契约语义回归：FriendlyException（业务异常）被全局异常过滤器处理时返回 HTTP 200，
-    /// 但审计一律不保存（用户确认：500/403/FriendlyException 等一律不保存，审计表只剩成功请求）
+    /// 契约语义回归：FriendlyException（业务异常）被全局异常过滤器处理时返回 HTTP 400，
+    /// 但审计一律不保存（用户确认：400/403/FriendlyException 等一律不保存，审计表只剩成功请求）
     /// </summary>
     [Fact]
     public async Task FriendlyException_HandledByGlobalExceptionFilter_DoesNotSaveAudit()
     {
         var response = await _client.PostAsync("/audit-exc/friendly", new StringContent(""));
 
-        Assert.Equal(200, (int)response.StatusCode);
+        Assert.Equal(400, (int)response.StatusCode);
 
         Assert.Equal(0, LifecycleProbeAuditingStore.AddCallCount);
         Assert.Equal(1, LifecycleProbeAuditingStore.DisposeCount);
@@ -299,7 +299,7 @@ public class AuditExceptionController : ControllerBase
         throw new InvalidOperationException("boom");
     }
 
-    /// <summary>抛出业务异常的写请求，由全局异常过滤器转换为 200 + 错误响应</summary>
+    /// <summary>抛出业务异常的写请求，由全局异常过滤器转换为 400 + ProblemDetails 响应</summary>
     /// <returns>恒抛业务异常，无返回值</returns>
     [HttpPost("friendly")]
     public IActionResult Friendly()

@@ -157,4 +157,29 @@ public class PagedQueryTests
         Assert.Equal(10, result.Data.Count());
         Assert.Equal(11, result.Data.First().Id);
     }
+
+    [Fact]
+    async Task PagedQueryAsync_ReturnsEmptyResult_WhenOffsetExceedsIntRange()
+    {
+        var data = Enumerable.Range(1, 50).Select(i => new TestEntity { Id = i }).AsQueryable();
+
+        var result = await data.PagedQueryAsync(int.MaxValue, int.MaxValue);
+
+        Assert.Equal(int.MaxValue, result.Page);
+        Assert.Equal(int.MaxValue, result.Limit);
+        Assert.Equal(50, result.Total);
+        Assert.Empty(result.Data);
+    }
+
+    [Fact]
+    async Task PagedQueryAsync_Mapper_ReturnsEmptyResult_WhenOffsetExceedsIntRange()
+    {
+        var data = Enumerable.Range(1, 50).Select(i => new TestEntity { Id = i }).AsQueryable();
+
+        var result = await data.PagedQueryAsync(int.MaxValue, int.MaxValue,
+            entity => new TestDto { Id = entity.Id });
+
+        Assert.Equal(50, result.Total);
+        Assert.Empty(result.Data);
+    }
 }

@@ -180,8 +180,8 @@ public abstract class DbContextBase : DbContext
     public override async Task<int> SaveChangesAsync(bool acceptAllChangesOnSuccess,
         CancellationToken cancellationToken = new())
     {
-        var scopeServiceProvider = this.GetService<IScopeServiceProvider>();
-        var mediator = scopeServiceProvider.GetService<IMediator>();
+        var scopeServiceProvider = GetScopeServiceProvider();
+        var mediator = scopeServiceProvider?.GetService<IMediator>();
         if (mediator != null)
         {
             // 若是有领域事件则分发出去
@@ -213,8 +213,8 @@ public abstract class DbContextBase : DbContext
     /// <returns></returns>
     public override int SaveChanges(bool acceptAllChangesOnSuccess)
     {
-        var scopeServiceProvider = this.GetService<IScopeServiceProvider>();
-        var mediator = scopeServiceProvider.GetService<IMediator>();
+        var scopeServiceProvider = GetScopeServiceProvider();
+        var mediator = scopeServiceProvider?.GetService<IMediator>();
         if (mediator != null)
         {
             // 若是有领域事件则分发出去
@@ -270,8 +270,8 @@ public abstract class DbContextBase : DbContext
     /// <returns>是否有实体发生了状态变更</returns>
     protected virtual bool ApplyConcepts()
     {
-        var scopeServiceProvider = this.GetService<IScopeServiceProvider>();
-        var session = scopeServiceProvider.GetService<ISession>();
+        var scopeServiceProvider = GetScopeServiceProvider();
+        var session = scopeServiceProvider?.GetService<ISession>();
         var userId = session?.UserId;
         var name = session?.UserDisplayName;
         var changed = false;
@@ -289,6 +289,14 @@ public abstract class DbContextBase : DbContext
         }
 
         return changed;
+    }
+
+    /// <summary>
+    /// 优先读取后台事件建立的当前异步作用域，HTTP 请求则回退到 EF 注册的作用域服务提供器。
+    /// </summary>
+    private IScopeServiceProvider GetScopeServiceProvider()
+    {
+        return ScopeServiceProviderContext.Current ?? this.GetService<IScopeServiceProvider>();
     }
 
     /// <summary>

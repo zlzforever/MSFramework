@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -95,6 +96,16 @@ public class LocalEventBackgroundServiceAuditTests
     /// </summary>
     private sealed class TestSession : ISession
     {
+        public TestSession()
+        {
+        }
+
+        public TestSession(string userId, string userDisplayName)
+        {
+            UserId = userId;
+            UserDisplayName = userDisplayName;
+        }
+
         public string TraceIdentifier { get; private set; } = "trace-1";
 
         public string UserId { get; private set; } = "user-1";
@@ -249,7 +260,8 @@ public class LocalEventBackgroundServiceAuditTests
     /// <param name="enableAuditing">是否启用本地事件审计</param>
     /// <returns>测试宿主（后台服务已启动）</returns>
     private static async Task<TestHost> CreateHostAsync(
-        bool enableAuditing, bool registerSession = true, bool startService = true)
+        bool enableAuditing, bool registerSession = true, bool startService = true,
+        bool registerAuditingStore = false)
     {
         var connection = new SqliteConnection("DataSource=:memory:");
         connection.Open();
@@ -266,6 +278,10 @@ public class LocalEventBackgroundServiceAuditTests
         if (registerSession)
         {
             services.AddScoped<ISession, TestSession>();
+        }
+        if (registerAuditingStore)
+        {
+            services.AddScoped<IAuditingStore, CapturingLocalEventAuditingStore>();
         }
         services.AddDbContext<LocalEventAuditContext>(options => options.UseSqlite(connection));
         services.RemoveAll<LocalEventMissingHandler>();
@@ -363,6 +379,72 @@ public class LocalEventBackgroundServiceAuditTests
         Assert.Equal(OperationType.Add, entity.OperationType);
         Assert.Contains(nameof(LocalEventAuditOrder), entity.Type);
         Assert.Same(operation, entity.Operation);
+    }
+
+    [Fact]
+    public async Task EnableAuditing_AfterBusinessCompletion_EndsAndPersistsAuditOperation()
+    {
+        CapturingLocalEventAuditingStore.Reset();
+        await using var host = await CreateHostAsync(
+            enableAuditing: true, registerAuditingStore: true);
+        var publisher = host.Provider.GetRequiredService<IEventPublisher>();
+
+        var evt = await PublishUntilProcessedAsync(publisher,
+            order => new LocalEventAuditEvent { Order = order }, TimeSpan.FromSeconds(15));
+
+        await WaitUntilAsync(() => CapturingLocalEventAuditingStore.Captured.Count == 1,
+            TimeSpan.FromSeconds(5));
+
+        var operation = Assert.Single(CapturingLocalEventAuditingStore.Captured);
+        Assert.Same(evt.ObservedOperation, operation);
+        Assert.NotEqual(default, operation.EndTime);
+        Assert.Single(operation.Entities);
+    }
+
+    [Fact]
+    public async Task EnableAuditing_AuditingStoreFailure_DoesNotLoseBusinessEvent()
+    {
+        CapturingLocalEventAuditingStore.Reset();
+        CapturingLocalEventAuditingStore.ThrowOnAdd = true;
+        try
+        {
+            await using var host = await CreateHostAsync(
+                enableAuditing: true, registerAuditingStore: true);
+            var publisher = host.Provider.GetRequiredService<IEventPublisher>();
+
+            var evt = await PublishUntilProcessedAsync(publisher,
+                order => new LocalEventAuditEvent { Order = order }, TimeSpan.FromSeconds(15));
+
+            Assert.NotNull(evt.ObservedOperation);
+            await WaitUntilAsync(() => CapturingLocalEventAuditingStore.Captured.Count == 1,
+                TimeSpan.FromSeconds(5));
+            Assert.Single(CapturingLocalEventAuditingStore.Captured);
+        }
+        finally
+        {
+            CapturingLocalEventAuditingStore.ThrowOnAdd = false;
+        }
+    }
+
+    [Fact]
+    public async Task EnableAuditing_RestoresPublishedSessionForEntityAuditFields()
+    {
+        await using var host = await CreateHostAsync(enableAuditing: true);
+        using var publishingScope = host.Provider.CreateScope();
+        var publisher = publishingScope.ServiceProvider.GetRequiredService<IEventPublisher>();
+        publishingScope.ServiceProvider.GetRequiredService<ISession>().Load(
+            new TestSession("published-user", "发布用户"));
+
+        var evt = await PublishUntilProcessedAsync(publisher,
+            order => new LocalEventAuditEvent { Order = order }, TimeSpan.FromSeconds(15));
+
+        using var queryScope = host.Provider.CreateScope();
+        var context = queryScope.ServiceProvider.GetRequiredService<LocalEventAuditContext>();
+        var orderEntity = await context.Orders.AsNoTracking()
+            .SingleAsync(order => order.Id == "ORDER-" + evt.Order);
+
+        Assert.Equal("published-user", orderEntity.CreatorId);
+        Assert.Equal("发布用户", orderEntity.CreatorName);
     }
 
     /// <summary>
@@ -472,5 +554,30 @@ public class LocalEventBackgroundServiceAuditTests
             order => new LocalEventAuditEvent { Order = order }, TimeSpan.FromSeconds(15));
 
         Assert.Null(evt.ObservedOperation);
+    }
+}
+
+public sealed class CapturingLocalEventAuditingStore : IAuditingStore
+{
+    public static ConcurrentQueue<AuditOperation> Captured { get; } = new();
+
+    public static bool ThrowOnAdd { get; set; }
+
+    public static void Reset()
+    {
+        while (Captured.TryDequeue(out _))
+        {
+        }
+    }
+
+    public Task AddAsync(AuditOperation auditOperation)
+    {
+        Captured.Enqueue(auditOperation);
+        if (ThrowOnAdd)
+        {
+            throw new InvalidOperationException("模拟审计存储失败");
+        }
+
+        return Task.CompletedTask;
     }
 }

@@ -265,4 +265,41 @@ public class AuditOperationAsyncLocalFlowTests
             AuditOperationContext.Value = null;
         }
     }
+
+    [Fact]
+    public async Task SaveChanges_RepeatedModification_PreservesEachChangeSnapshot()
+    {
+        using var host = CreateHost();
+        using var scope = host.Provider.CreateScope();
+        var unitOfWork = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
+        var context = scope.ServiceProvider.GetRequiredService<AuditFlowContext>();
+
+        var operation = CreateOperation();
+        AuditOperationContext.Value = operation;
+        try
+        {
+            var order = new AuditFlowOrder("ORD-5", "order-1");
+            context.Orders.Add(order);
+            await unitOfWork.SaveChangesAsync();
+
+            order.Name = "order-2";
+            await unitOfWork.SaveChangesAsync();
+
+            order.Name = "order-3";
+            await unitOfWork.SaveChangesAsync();
+
+            var modifications = operation.Entities
+                .Where(entity => entity.OperationType == OperationType.Modify)
+                .ToList();
+            Assert.Equal(2, modifications.Count);
+            Assert.Contains(modifications, entity =>
+                entity.Properties.Any(property => property.NewValue == "order-2"));
+            Assert.Contains(modifications, entity =>
+                entity.Properties.Any(property => property.NewValue == "order-3"));
+        }
+        finally
+        {
+            AuditOperationContext.Value = null;
+        }
+    }
 }

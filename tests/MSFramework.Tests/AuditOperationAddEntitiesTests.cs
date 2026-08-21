@@ -1,4 +1,5 @@
 using System.Linq;
+using System.Threading.Tasks;
 using MicroserviceFramework.Auditing.Model;
 using Xunit;
 
@@ -77,6 +78,22 @@ public class AuditOperationAddEntitiesTests
         Assert.Contains(operation.Entities, x => x.OperationType == OperationType.Modify);
     }
 
+    [Fact]
+    public void AddEntities_SameOperationTypeWithDifferentPropertySnapshots_BothCollected()
+    {
+        var operation = CreateOperation();
+        var first = CreateModifiedEntity("before-1", "after-1");
+        var second = CreateModifiedEntity("before-2", "after-2");
+
+        operation.AddEntities([first, second]);
+
+        Assert.Equal(2, operation.Entities.Count);
+        Assert.Contains(operation.Entities, entity =>
+            entity.Properties.Single().NewValue == "after-1");
+        Assert.Contains(operation.Entities, entity =>
+            entity.Properties.Single().NewValue == "after-2");
+    }
+
     /// <summary>
     /// 同一操作类型不同实体标识属于不同实体，必须都收集
     /// </summary>
@@ -107,5 +124,29 @@ public class AuditOperationAddEntitiesTests
 
         operation.AddEntities([null, new AuditEntity("Order", "O1", OperationType.Add)]);
         Assert.Single(operation.Entities);
+    }
+
+    [Fact]
+    public async Task AddEntities_ConcurrentWriters_PreserveEveryEntity()
+    {
+        var operation = CreateOperation();
+
+        await Task.WhenAll(Enumerable.Range(0, 32).Select(worker => Task.Run(() =>
+        {
+            for (var index = 0; index < 100; index++)
+            {
+                var entity = new AuditEntity("Order", $"O-{worker}-{index}", OperationType.Modify);
+                operation.AddEntities([entity]);
+            }
+        })));
+
+        Assert.Equal(3200, operation.Entities.Count);
+    }
+
+    private static AuditEntity CreateModifiedEntity(string originalValue, string newValue)
+    {
+        var entity = new AuditEntity("Order", "O1", OperationType.Modify);
+        entity.AddProperties([new AuditProperty("Name", "System.String", originalValue, newValue)]);
+        return entity;
     }
 }

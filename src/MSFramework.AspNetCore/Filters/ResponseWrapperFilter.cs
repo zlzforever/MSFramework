@@ -44,32 +44,9 @@ internal sealed class ResponseWrapperFilter(ILogger<ResponseWrapperFilter> logge
         if (context.Result is ObjectResult objectResult)
         {
             var declaredType = objectResult.DeclaredType ?? objectResult.Value?.GetType();
-            if (declaredType == null)
-            {
-            }
-            else if (objectResult.Value is ProblemDetails problemDetails)
-            {
-                var code = problemDetails.Status ?? 200;
-                var success = HttpUtils.IsSuccessStatusCode(code);
-                if (success)
-                {
-                    objectResult.Value = new ApiResult { Data = objectResult.Value, Msg = string.Empty };
-                    objectResult.DeclaredType = ApiResult.Type;
-                }
-                else
-                {
-                    objectResult.Value = new ApiResult
-                    {
-                        Success = false, Code = -1, Msg = problemDetails.Title ?? string.Empty
-                    };
-                    objectResult.StatusCode = code;
-                    objectResult.DeclaredType = ApiResult.Type;
-                }
-            }
-            else if (ApiResult.IsApiResult(declaredType))
-            {
-            }
-            else
+            // ProblemDetails 是 RFC 7807 错误契约，必须保持原样，不能再转换为 ApiResult。
+            if (declaredType != null && objectResult.Value is not ProblemDetails &&
+                !ApiResult.IsApiResult(declaredType))
             {
                 // 根据 ObjectResult 状态码判定 success：
                 // 非 2xx（如 BadRequestObjectResult/NotFoundObjectResult/ConflictObjectResult）包装时
