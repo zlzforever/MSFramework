@@ -1,3 +1,4 @@
+using System;
 using System.Linq;
 using MicroserviceFramework.Auditing.Model;
 using Xunit;
@@ -51,8 +52,12 @@ public class AuditOperationAddEntitiesTests
 
         operation.AddEntities(entities);
 
-        Assert.Equal(entities, operation.Entities);
-        Assert.All(operation.Entities, entity => Assert.Same(operation, entity.Operation));
+        var collected = operation.Entities.ToArray();
+        Assert.Equal(3, collected.Length);
+        Assert.Same(entities[0], collected[0]);
+        Assert.Same(entities[1], collected[1]);
+        Assert.Same(entities[2], collected[2]);
+        Assert.All(collected, entity => Assert.Same(operation, entity.Operation));
     }
 
     /// <summary>
@@ -62,16 +67,18 @@ public class AuditOperationAddEntitiesTests
     public void AddEntities_DifferentOperationTypes_BothCollected()
     {
         var operation = CreateOperation();
+        var first = new AuditEntity("Order", "O1", OperationType.Add);
+        var second = new AuditEntity("Order", "O1", OperationType.Modify);
 
-        operation.AddEntities(
-        [
-            new AuditEntity("Order", "O1", OperationType.Add),
-            new AuditEntity("Order", "O1", OperationType.Modify)
-        ]);
+        operation.AddEntities([first, second]);
 
-        Assert.Equal(2, operation.Entities.Count);
-        Assert.Contains(operation.Entities, x => x.OperationType == OperationType.Add);
-        Assert.Contains(operation.Entities, x => x.OperationType == OperationType.Modify);
+        var collected = operation.Entities.ToArray();
+        Assert.Equal(2, collected.Length);
+        Assert.Same(first, collected[0]);
+        Assert.Same(second, collected[1]);
+        Assert.Equal(OperationType.Add, collected[0].OperationType);
+        Assert.Equal(OperationType.Modify, collected[1].OperationType);
+        Assert.All(collected, entity => Assert.Same(operation, entity.Operation));
     }
 
     [Fact]
@@ -83,11 +90,13 @@ public class AuditOperationAddEntitiesTests
 
         operation.AddEntities([first, second]);
 
-        Assert.Equal(2, operation.Entities.Count);
-        Assert.Contains(operation.Entities, entity =>
-            entity.Properties.Single().NewValue == "after-1");
-        Assert.Contains(operation.Entities, entity =>
-            entity.Properties.Single().NewValue == "after-2");
+        var collected = operation.Entities.ToArray();
+        Assert.Equal(2, collected.Length);
+        Assert.Same(first, collected[0]);
+        Assert.Same(second, collected[1]);
+        Assert.Equal("after-1", collected[0].Properties.Single().NewValue);
+        Assert.Equal("after-2", collected[1].Properties.Single().NewValue);
+        Assert.All(collected, entity => Assert.Same(operation, entity.Operation));
     }
 
     [Fact]
@@ -104,6 +113,7 @@ public class AuditOperationAddEntitiesTests
         Assert.Equal(2, entities.Length);
         Assert.Same(firstBatch, entities[0]);
         Assert.Same(secondBatch, entities[1]);
+        Assert.All(entities, entity => Assert.Same(operation, entity.Operation));
     }
 
     /// <summary>
@@ -113,29 +123,60 @@ public class AuditOperationAddEntitiesTests
     public void AddEntities_DifferentEntityIds_BothCollected()
     {
         var operation = CreateOperation();
+        var first = new AuditEntity("Order", "O1", OperationType.Modify);
+        var second = new AuditEntity("Order", "O2", OperationType.Modify);
 
-        operation.AddEntities(
-        [
-            new AuditEntity("Order", "O1", OperationType.Modify),
-            new AuditEntity("Order", "O2", OperationType.Modify)
-        ]);
+        operation.AddEntities([first, second]);
 
-        Assert.Equal(2, operation.Entities.Count);
+        var collected = operation.Entities.ToArray();
+        Assert.Equal(2, collected.Length);
+        Assert.Same(first, collected[0]);
+        Assert.Same(second, collected[1]);
+        Assert.All(collected, entity => Assert.Same(operation, entity.Operation));
     }
 
     /// <summary>
-    /// 空集合与 null 元素必须被安全跳过，不影响其他实体收集
+    /// 独立空集合必须被安全跳过
     /// </summary>
     [Fact]
-    public void AddEntities_NullEntities_SkippedSafely()
+    public void AddEntities_EmptyCollection_DoesNotAddEntities()
+    {
+        var operation = CreateOperation();
+
+        operation.AddEntities(Array.Empty<AuditEntity>());
+        Assert.Empty(operation.Entities);
+    }
+
+    /// <summary>
+    /// null 集合必须被安全跳过
+    /// </summary>
+    [Fact]
+    public void AddEntities_NullCollection_DoesNotAddEntities()
     {
         var operation = CreateOperation();
 
         operation.AddEntities(null);
-        Assert.Empty(operation.Entities);
 
-        operation.AddEntities([null, new AuditEntity("Order", "O1", OperationType.Add)]);
-        Assert.Single(operation.Entities);
+        Assert.Empty(operation.Entities);
+    }
+
+    /// <summary>
+    /// 两个有效实体之间的 null 元素必须被跳过，并保持有效实体顺序与操作关联
+    /// </summary>
+    [Fact]
+    public void AddEntities_NullElementBetweenEntities_PreservesOrderAndOperation()
+    {
+        var operation = CreateOperation();
+        var first = new AuditEntity("Order", "O1", OperationType.Add);
+        var second = new AuditEntity("Order", "O2", OperationType.Modify);
+
+        operation.AddEntities([first, null, second]);
+
+        var collected = operation.Entities.ToArray();
+        Assert.Equal(2, collected.Length);
+        Assert.Same(first, collected[0]);
+        Assert.Same(second, collected[1]);
+        Assert.All(collected, entity => Assert.Same(operation, entity.Operation));
     }
 
     private static AuditEntity CreateModifiedEntity(string originalValue, string newValue)

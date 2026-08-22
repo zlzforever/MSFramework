@@ -237,7 +237,7 @@ public class AuditOperationAsyncLocalFlowTests
     /// 同一请求执行流内重复保存且没有新变更时，不应向审计操作追加实体
     /// </summary>
     [Fact]
-    public async Task SaveChanges_RepeatedSaveWithoutChanges_DoesNotAddEntities()
+    public async Task SaveChanges_RepeatedSaveWithoutChanges_DoesNotAddEntitiesAsync()
     {
         using var host = CreateHost();
         using var scope = host.Provider.CreateScope();

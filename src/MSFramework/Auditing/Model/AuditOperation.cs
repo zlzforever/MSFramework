@@ -6,7 +6,8 @@ using MongoDB.Bson;
 namespace MicroserviceFramework.Auditing.Model;
 
 /// <summary>
-/// 操作审计信息
+/// 当前审计 scope 的操作信息。实体按 <see cref="AddEntities"/> 的调用顺序和输入顺序保存；
+/// 本类型不承诺并发安全。
 /// </summary>
 public class AuditOperation : CreationAggregateRoot<string>, IAuditObject
 {
@@ -159,7 +160,8 @@ public class AuditOperation : CreationAggregateRoot<string>, IAuditObject
     }
 
     /// <summary>
-    /// 按输入顺序添加审计实体。
+    /// 在当前审计 scope 内按输入顺序追加非空审计实体，并关联到当前操作。
+    /// 本方法不承诺并发安全。
     /// </summary>
     /// <param name="entities">待添加的审计实体集合</param>
     public void AddEntities(IEnumerable<AuditEntity> entities)
