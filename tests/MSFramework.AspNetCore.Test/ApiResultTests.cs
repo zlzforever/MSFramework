@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Net.Http;
+using System.Text.Json;
 using System.Threading.Tasks;
 using MicroserviceFramework.Extensions;
 using Xunit;
@@ -64,9 +65,12 @@ public class ApiResultTests(ITestOutputHelper output) : BaseTest
         var result = await Client.GetAsync("/apiResult/452");
         var text = await result.Content.ReadAsStringAsync();
         Assert.Equal(452, (int)result.StatusCode);
-        Assert.Equal("""
-                     {"success":false,"code":-1,"msg":"","data":null}
-                     """, text);
+        using var document = JsonDocument.Parse(text);
+        var root = document.RootElement;
+        Assert.False(root.GetProperty("success").GetBoolean());
+        Assert.Equal(-1, root.GetProperty("code").GetInt32());
+        Assert.Equal(string.Empty, root.GetProperty("msg").GetString());
+        Assert.Equal(452, root.GetProperty("data").GetProperty("status").GetInt32());
     }
 
     [Fact]
@@ -226,9 +230,14 @@ public class ApiResultTests(ITestOutputHelper output) : BaseTest
 
         Assert.Equal(400, (int)result.StatusCode);
         Assert.Equal("application/json", result.Content.Headers.ContentType?.MediaType);
-        Assert.Equal("""
-                     {"success":false,"code":-1,"msg":"请求无效","data":null}
-                     """, text);
+        using var document = JsonDocument.Parse(text);
+        var root = document.RootElement;
+        Assert.False(root.GetProperty("success").GetBoolean());
+        Assert.Equal(-1, root.GetProperty("code").GetInt32());
+        Assert.Equal("请求无效", root.GetProperty("msg").GetString());
+        var data = root.GetProperty("data");
+        Assert.Equal("请求无效", data.GetProperty("title").GetString());
+        Assert.Equal(400, data.GetProperty("status").GetInt32());
     }
 
     [Fact]
