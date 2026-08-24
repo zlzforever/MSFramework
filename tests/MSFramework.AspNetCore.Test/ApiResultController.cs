@@ -183,7 +183,7 @@ public class ApiResultController(IOptions<JsonSerializerSettings> options) : Api
     }
 
     /// <summary>
-    /// 抛出自定义友好异常（业务错误码 2），验证全局异常过滤器返回 HTTP 400 + ProblemDetails
+    /// 抛出自定义友好异常（业务错误码 2），验证全局异常过滤器返回 HTTP 200 + ApiResult
     /// </summary>
     /// <returns>正常返回不会被执行，始终抛出异常</returns>
     /// <exception cref="MicroserviceFrameworkFriendlyException">模拟接口内抛出友好异常</exception>
@@ -194,7 +194,7 @@ public class ApiResultController(IOptions<JsonSerializerSettings> options) : Api
     }
 
     /// <summary>
-    /// 抛出普通运行时异常（InvalidOperationException），验证全局异常过滤器返回 HTTP 500 + ProblemDetails
+    /// 抛出普通运行时异常（InvalidOperationException），验证全局异常过滤器返回 HTTP 500 + ApiResult
     /// </summary>
     /// <returns>正常返回不会被执行，始终抛出异常</returns>
     /// <exception cref="InvalidOperationException">模拟接口内抛出非友好普通异常</exception>
@@ -205,7 +205,7 @@ public class ApiResultController(IOptions<JsonSerializerSettings> options) : Api
     }
 
     /// <summary>
-    /// 抛出参数校验异常（ArgumentException），验证全局异常过滤器返回 HTTP 400 + ProblemDetails
+    /// 抛出参数校验异常（ArgumentException），验证全局异常过滤器返回 HTTP 500 + ApiResult
     /// </summary>
     /// <returns>正常返回不会被执行，始终抛出异常</returns>
     /// <exception cref="ArgumentException">模拟接口内抛出参数类普通异常</exception>

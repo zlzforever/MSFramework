@@ -1,30 +1,25 @@
 using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Security.Authentication;
-using MicroserviceFramework;
+using MicroserviceFramework.Common;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.Extensions;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
-using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 
 namespace MicroserviceFramework.AspNetCore.Filters;
 
 /// <summary>
-/// 全局异常过滤器，将未处理异常统一转换为 RFC 7807 ProblemDetails 响应。
+/// 全局异常过滤器，将未处理异常统一转换为 <see cref="ApiResult"/> 格式响应。
 /// </summary>
-internal class GlobalExceptionFilter(
-    ILogger<GlobalExceptionFilter> logger,
-    IHostEnvironment environment) : IExceptionFilter
+internal class GlobalExceptionFilter(ILogger<GlobalExceptionFilter> logger) : IExceptionFilter
 {
     private const string CorrelationIdHeader = "X-Correlation-ID";
-    private const string ProblemDetailsContentType = "application/problem+json";
-    private const string GenericErrorDetail = "系统内部错误";
 
     /// <summary>
-    /// 捕获异常并转换为标准 HTTP 错误响应。服务端始终记录完整异常，响应只暴露允许返回的详情。
+    /// 捕获异常并转换为统一响应格式：
+    /// <see cref="UnauthorizedAccessException"/> → 403，
+    /// <see cref="MicroserviceFrameworkFriendlyException"/> → 200 + 错误信息，
+    /// 其他异常 → 500。
     /// </summary>
     /// <param name="context">异常过滤器上下文</param>
     public void OnException(ExceptionContext context)
@@ -35,117 +30,70 @@ internal class GlobalExceptionFilter(
         }
 
         var exception = context.Exception;
-        var friendlyException = FindFriendlyException(exception);
-        var conflictException = friendlyException == null ? FindConflictException(exception) : null;
-        var (statusCode, title) = GetStatusCode(exception, friendlyException, conflictException);
         var correlationId = GetCorrelationId(context.HttpContext);
-        var problemDetails = new ProblemDetails
-        {
-            Type = "about:blank",
-            Title = title,
-            Status = statusCode,
-            Detail = GetDetail(exception, statusCode, friendlyException, conflictException),
-            Instance = context.HttpContext.Request.Path
-        };
 
-        problemDetails.Extensions["correlationId"] = correlationId;
-        if (friendlyException != null)
+        if (exception is UnauthorizedAccessException unauthorizedException)
         {
-            problemDetails.Extensions["code"] = friendlyException.Code;
-        }
+            context.Result = new ObjectResult(new ApiResult
+            {
+                Success = false,
+                Msg = unauthorizedException.Message,
+                Code = StatusCodes.Status403Forbidden,
+                Data = null
+            })
+            {
+                StatusCode = StatusCodes.Status403Forbidden
+            };
 
-        var result = new ObjectResult(problemDetails)
-        {
-            StatusCode = statusCode
-        };
-        result.ContentTypes.Add(ProblemDetailsContentType);
-        context.Result = result;
-        context.ExceptionHandled = true;
-
-        if (statusCode >= StatusCodes.Status500InternalServerError)
-        {
             logger.LogError(exception,
                 "请求 {Method} {Url} 返回 {StatusCode}，CorrelationId={CorrelationId}",
                 context.HttpContext.Request.Method,
                 context.HttpContext.Request.GetDisplayUrl(),
-                statusCode,
+                StatusCodes.Status403Forbidden,
+                correlationId);
+        }
+        else if (FindFriendlyException(exception) is { } friendlyException)
+        {
+            context.Result = new ObjectResult(new ApiResult
+            {
+                Success = false,
+                Msg = friendlyException.Message,
+                Code = friendlyException.Code,
+                Data = null
+            })
+            {
+                StatusCode = StatusCodes.Status200OK
+            };
+
+            logger.LogWarning(friendlyException,
+                "请求 {Method} {Url} 返回 {StatusCode}，CorrelationId={CorrelationId}",
+                context.HttpContext.Request.Method,
+                context.HttpContext.Request.GetDisplayUrl(),
+                StatusCodes.Status200OK,
                 correlationId);
         }
         else
         {
-            logger.LogWarning(exception,
+            context.Result = new ObjectResult(new ApiResult
+            {
+                Success = false,
+                Msg = "系统内部错误",
+                Code = StatusCodes.Status500InternalServerError,
+                Data = null
+            })
+            {
+                StatusCode = StatusCodes.Status500InternalServerError
+            };
+
+            logger.LogError(exception,
                 "请求 {Method} {Url} 返回 {StatusCode}，CorrelationId={CorrelationId}",
                 context.HttpContext.Request.Method,
                 context.HttpContext.Request.GetDisplayUrl(),
-                statusCode,
+                StatusCodes.Status500InternalServerError,
                 correlationId);
         }
-    }
 
-    private string GetDetail(
-        Exception exception,
-        int statusCode,
-        MicroserviceFrameworkFriendlyException friendlyException,
-        MicroserviceFrameworkConflictException conflictException)
-    {
-        if (friendlyException != null)
-        {
-            return friendlyException.Message;
-        }
-
-        if (conflictException != null && environment.IsDevelopment())
-        {
-            return conflictException.Message;
-        }
-
-        if (environment.IsDevelopment())
-        {
-            return exception.Message;
-        }
-
-        return statusCode == StatusCodes.Status500InternalServerError
-            ? GenericErrorDetail
-            : GetPublicDetail(statusCode);
-    }
-
-    private static string GetPublicDetail(int statusCode)
-    {
-        return statusCode switch
-        {
-            StatusCodes.Status400BadRequest => "请求参数无效",
-            StatusCodes.Status401Unauthorized => "需要身份认证",
-            StatusCodes.Status403Forbidden => "无权访问该资源",
-            StatusCodes.Status404NotFound => "请求的资源不存在",
-            StatusCodes.Status409Conflict => "请求与资源当前状态冲突",
-            _ => GenericErrorDetail
-        };
-    }
-
-    private static (int StatusCode, string Title) GetStatusCode(
-        Exception exception,
-        MicroserviceFrameworkFriendlyException friendlyException,
-        MicroserviceFrameworkConflictException conflictException)
-    {
-        if (friendlyException != null)
-        {
-            return (StatusCodes.Status400BadRequest, "错误请求");
-        }
-
-        if (conflictException != null)
-        {
-            return (StatusCodes.Status409Conflict, "冲突");
-        }
-
-        return exception switch
-        {
-            ArgumentException => (StatusCodes.Status400BadRequest, "错误请求"),
-            AuthenticationException => (StatusCodes.Status401Unauthorized, "未认证"),
-            UnauthorizedAccessException => (StatusCodes.Status403Forbidden, "禁止访问"),
-            KeyNotFoundException or FileNotFoundException =>
-                (StatusCodes.Status404NotFound, "资源不存在"),
-            MicroserviceFrameworkConflictException => (StatusCodes.Status409Conflict, "冲突"),
-            _ => (StatusCodes.Status500InternalServerError, "服务器内部错误")
-        };
+        context.ExceptionHandled = true;
     }
 
     private static string GetCorrelationId(HttpContext httpContext)
@@ -162,8 +110,11 @@ internal class GlobalExceptionFilter(
     }
 
     /// <summary>
-    /// 遍历异常链查找 <see cref="MicroserviceFrameworkFriendlyException"/>，支持任意嵌套深度。
+    /// 遍历异常链查找 <see cref="MicroserviceFrameworkFriendlyException"/>，
+    /// 支持任意嵌套深度的 InnerException 包装，找不到返回 null
     /// </summary>
+    /// <param name="exception">根异常</param>
+    /// <returns>异常链中的友好异常，不存在时返回 null</returns>
     private static MicroserviceFrameworkFriendlyException FindFriendlyException(Exception exception)
     {
         for (var current = exception; current != null; current = current.InnerException)
@@ -171,22 +122,6 @@ internal class GlobalExceptionFilter(
             if (current is MicroserviceFrameworkFriendlyException friendlyException)
             {
                 return friendlyException;
-            }
-        }
-
-        return null;
-    }
-
-    /// <summary>
-    /// 遍历异常链查找明确的资源冲突异常，支持被基础设施异常包装的业务冲突。
-    /// </summary>
-    private static MicroserviceFrameworkConflictException FindConflictException(Exception exception)
-    {
-        for (var current = exception; current != null; current = current.InnerException)
-        {
-            if (current is MicroserviceFrameworkConflictException conflictException)
-            {
-                return conflictException;
             }
         }
 

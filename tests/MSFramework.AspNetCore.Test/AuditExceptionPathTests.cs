@@ -100,15 +100,15 @@ public class AuditExceptionPathTests : IDisposable
     }
 
     /// <summary>
-    /// 契约语义回归：FriendlyException（业务异常）被全局异常过滤器处理时返回 HTTP 400，
-    /// 但审计一律不保存（用户确认：400/403/FriendlyException 等一律不保存，审计表只剩成功请求）
+    /// 契约语义回归：FriendlyException（业务异常）被全局异常过滤器处理时返回 HTTP 200 + ApiResult，
+    /// 但审计一律不保存（用户确认：业务异常/403 等一律不保存，审计表只剩成功请求）
     /// </summary>
     [Fact]
     public async Task FriendlyException_HandledByGlobalExceptionFilter_DoesNotSaveAudit()
     {
         var response = await _client.PostAsync("/audit-exc/friendly", new StringContent(""));
 
-        Assert.Equal(400, (int)response.StatusCode);
+        Assert.Equal(200, (int)response.StatusCode);
 
         Assert.Equal(0, LifecycleProbeAuditingStore.AddCallCount);
         Assert.Equal(1, LifecycleProbeAuditingStore.DisposeCount);
@@ -299,7 +299,7 @@ public class AuditExceptionController : ControllerBase
         throw new InvalidOperationException("boom");
     }
 
-    /// <summary>抛出业务异常的写请求，由全局异常过滤器转换为 400 + ProblemDetails 响应</summary>
+    /// <summary>抛出业务异常的写请求，由全局异常过滤器转换为 200 + ApiResult 响应</summary>
     /// <returns>恒抛业务异常，无返回值</returns>
     [HttpPost("friendly")]
     public IActionResult Friendly()

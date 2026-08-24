@@ -660,8 +660,9 @@ builder.Services.AddControllers(options =>
 ```json
 {
     "success": true,
-    "data": { ... },
-    "error": null
+    "code": 0,
+    "msg": "",
+    "data": { ... }
 }
 ```
 
@@ -674,28 +675,21 @@ builder.Services.AddControllers(options =>
 });
 ```
 
-全局异常过滤器返回 RFC 7807 `ProblemDetails`，错误响应保持真实 HTTP 状态码，
-不会再被响应包装器转换为 HTTP 200 或 `ApiResult`。客户端应按 HTTP 状态码和
-`ProblemDetails` 字段处理错误，不要在错误响应中读取 `success`/`data`。
+全局异常过滤器返回项目既有 `ApiResult`，并保留异常类型对应的 HTTP 状态码。
+响应包装器不会对已有 `ApiResult` 二次包装；客户端可按 `success`、`code`、`msg` 和
+`data` 字段处理错误。服务端同时通过 `X-Correlation-ID` 响应头提供排查关联标识。
 
 | 异常 | HTTP 状态码 |
 |------|-------------|
-| `MicroserviceFrameworkFriendlyException` | 400 |
-| `ArgumentException` | 400 |
-| `AuthenticationException` | 401 |
+| `MicroserviceFrameworkFriendlyException` | 200 |
 | `UnauthorizedAccessException` | 403 |
-| `KeyNotFoundException` / `FileNotFoundException` | 404 |
-| `MicroserviceFrameworkConflictException` | 409 |
-| 其他异常（包括普通 `InvalidOperationException`、EF/DI 异常） | 500 |
+| 其他异常（包括 `ArgumentException`、认证/资源异常、普通 `InvalidOperationException`、EF/DI 异常） | 500 |
 
-只有明确抛出 `MicroserviceFrameworkConflictException` 才表示资源状态冲突：
+友好异常的响应使用异常自身的业务 `code` 和 `msg`；其他异常使用 `code=500`、
+`msg="系统内部错误"`，不会向客户端泄露异常细节。未授权异常使用 `code=403`。
 
-```csharp
-throw new MicroserviceFrameworkConflictException("资源状态冲突");
-```
-
-生产环境的 500 响应只返回通用错误详情；所有错误都会保留 `correlationId`，
-并通过 `X-Correlation-ID` 响应头返回，客户端应记录该标识供排查。
+生产环境的 500 响应只返回通用错误详情；服务端日志会保留完整异常和 correlation id，
+并通过 `X-Correlation-ID` 响应头返回该标识，客户端应记录它供排查。
 
 ### 5.3 分页扩展包迁移
 

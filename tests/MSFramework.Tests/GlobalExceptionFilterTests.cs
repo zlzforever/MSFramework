@@ -1,17 +1,15 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Reflection;
 using System.Security.Authentication;
 using MicroserviceFramework;
 using MicroserviceFramework.AspNetCore.Mvc.ModelBinding;
+using MicroserviceFramework.Common;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Abstractions;
 using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.AspNetCore.Routing;
-using Microsoft.Extensions.FileProviders;
-using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 using Xunit;
@@ -23,16 +21,14 @@ public class GlobalExceptionFilterTests
     /// <summary>
     /// 通过反射实例化 internal 的 GlobalExceptionFilter
     /// </summary>
-    private static GlobalExceptionFilterReflection CreateFilter(string environmentName = null)
+    private static GlobalExceptionFilterReflection CreateFilter()
     {
-        environmentName ??= Environments.Development;
         var assembly = typeof(ObjectIdModelBinder).Assembly;
         var filterType = assembly.GetType("MicroserviceFramework.AspNetCore.Filters.GlobalExceptionFilter");
         Assert.NotNull(filterType);
 
         var logger = Activator.CreateInstance(typeof(NullLogger<>).MakeGenericType(filterType));
-        var environment = new TestHostEnvironment(environmentName);
-        var filter = Activator.CreateInstance(filterType, logger, environment);
+        var filter = Activator.CreateInstance(filterType, logger);
         var method = filterType.GetMethod("OnException", BindingFlags.Public | BindingFlags.Instance);
         Assert.NotNull(method);
 
@@ -40,7 +36,7 @@ public class GlobalExceptionFilterTests
     }
 
     [Fact]
-    public void OnException_ReturnsProblemDetailsForFriendlyException()
+    public void OnException_ReturnsApiResultForFriendlyException()
     {
         var filter = CreateFilter();
         var context = CreateExceptionContext(new InvalidOperationException("最外层包装",
@@ -51,36 +47,38 @@ public class GlobalExceptionFilterTests
 
         Assert.True(context.ExceptionHandled);
         var result = Assert.IsType<ObjectResult>(context.Result);
-        var problemDetails = Assert.IsType<ProblemDetails>(result.Value);
-        Assert.Equal(StatusCodes.Status400BadRequest, result.StatusCode);
-        Assert.Equal(StatusCodes.Status400BadRequest, problemDetails.Status);
-        Assert.Equal("业务异常", problemDetails.Detail);
-        Assert.Equal(40001, problemDetails.Extensions["code"]);
-        Assert.Equal("trace-123", problemDetails.Extensions["correlationId"]);
+        var apiResult = Assert.IsType<ApiResult>(result.Value);
+        Assert.Equal(StatusCodes.Status200OK, result.StatusCode);
+        Assert.False(apiResult.Success);
+        Assert.Equal(40001, apiResult.Code);
+        Assert.Equal("业务异常", apiResult.Msg);
+        Assert.Null(apiResult.Data);
+        Assert.Empty(result.ContentTypes);
         Assert.Equal("trace-123", context.HttpContext.Response.Headers["X-Correlation-ID"]);
-        Assert.Equal("application/problem+json", result.ContentTypes.Single());
     }
 
     [Fact]
     public void OnException_HidesInternalDetailsInProduction()
     {
-        var filter = CreateFilter(Environments.Production);
+        var filter = CreateFilter();
         var context = CreateExceptionContext(new Exception("数据库连接字符串和堆栈不应返回给客户端"));
 
         filter.Invoke(context);
 
         Assert.True(context.ExceptionHandled);
         var result = Assert.IsType<ObjectResult>(context.Result);
-        var problemDetails = Assert.IsType<ProblemDetails>(result.Value);
+        var apiResult = Assert.IsType<ApiResult>(result.Value);
         Assert.Equal(StatusCodes.Status500InternalServerError, result.StatusCode);
-        Assert.Equal("系统内部错误", problemDetails.Detail);
-        Assert.DoesNotContain("数据库连接字符串", problemDetails.Detail);
-        Assert.DoesNotContain("InvalidOperationException", problemDetails.Detail);
-        Assert.Equal("trace-123", problemDetails.Extensions["correlationId"]);
+        Assert.False(apiResult.Success);
+        Assert.Equal(StatusCodes.Status500InternalServerError, apiResult.Code);
+        Assert.Equal("系统内部错误", apiResult.Msg);
+        Assert.Null(apiResult.Data);
+        Assert.DoesNotContain("数据库连接字符串", apiResult.Msg);
+        Assert.Equal("trace-123", context.HttpContext.Response.Headers["X-Correlation-ID"]);
     }
 
     [Fact]
-    public void OnException_MapsUnexpectedInvalidOperationToInternalServerError()
+    public void OnException_ReturnsGenericApiResultForUnhandledException()
     {
         var filter = CreateFilter();
         var context = CreateExceptionContext(new InvalidOperationException("DI 容器状态错误"));
@@ -88,35 +86,35 @@ public class GlobalExceptionFilterTests
         filter.Invoke(context);
 
         var result = Assert.IsType<ObjectResult>(context.Result);
-        var problemDetails = Assert.IsType<ProblemDetails>(result.Value);
+        var apiResult = Assert.IsType<ApiResult>(result.Value);
         Assert.Equal(StatusCodes.Status500InternalServerError, result.StatusCode);
-        Assert.Equal(StatusCodes.Status500InternalServerError, problemDetails.Status);
-        Assert.Equal("服务器内部错误", problemDetails.Title);
-        Assert.Equal("DI 容器状态错误", problemDetails.Detail);
+        Assert.False(apiResult.Success);
+        Assert.Equal(StatusCodes.Status500InternalServerError, apiResult.Code);
+        Assert.Equal("系统内部错误", apiResult.Msg);
+        Assert.Null(apiResult.Data);
     }
 
     [Fact]
-    public void OnException_MapsNestedConflictToConflict()
+    public void OnException_UsesGenericApiResultForUnhandledConflictException()
     {
         var filter = CreateFilter();
-        var context = CreateExceptionContext(new InvalidOperationException("外层包装",
-            new MicroserviceFrameworkConflictException("资源状态冲突")));
+        var context = CreateExceptionContext(new MicroserviceFrameworkConflictException("资源状态冲突"));
 
         filter.Invoke(context);
 
         var result = Assert.IsType<ObjectResult>(context.Result);
-        var problemDetails = Assert.IsType<ProblemDetails>(result.Value);
-        Assert.Equal(StatusCodes.Status409Conflict, result.StatusCode);
-        Assert.Equal(StatusCodes.Status409Conflict, problemDetails.Status);
+        var apiResult = Assert.IsType<ApiResult>(result.Value);
+        Assert.Equal(StatusCodes.Status500InternalServerError, result.StatusCode);
+        Assert.Equal(StatusCodes.Status500InternalServerError, apiResult.Code);
+        Assert.Equal("系统内部错误", apiResult.Msg);
     }
 
     [Theory]
-    [InlineData("argument", StatusCodes.Status400BadRequest)]
-    [InlineData("authentication", StatusCodes.Status401Unauthorized)]
+    [InlineData("argument", StatusCodes.Status500InternalServerError)]
+    [InlineData("authentication", StatusCodes.Status500InternalServerError)]
     [InlineData("unauthorized", StatusCodes.Status403Forbidden)]
-    [InlineData("not-found", StatusCodes.Status404NotFound)]
-    [InlineData("conflict", StatusCodes.Status409Conflict)]
-    public void OnException_MapsKnownExceptionsToStandardStatusCodes(string exceptionType, int statusCode)
+    [InlineData("not-found", StatusCodes.Status500InternalServerError)]
+    public void OnException_MapsLegacyExceptionStatuses(string exceptionType, int statusCode)
     {
         var filter = CreateFilter();
         var context = CreateExceptionContext(exceptionType switch
@@ -125,17 +123,20 @@ public class GlobalExceptionFilterTests
             "authentication" => new AuthenticationException("认证失败"),
             "unauthorized" => new UnauthorizedAccessException("无权访问"),
             "not-found" => new KeyNotFoundException("资源不存在"),
-            "conflict" => new MicroserviceFrameworkConflictException("资源状态冲突"),
             _ => throw new ArgumentOutOfRangeException(nameof(exceptionType))
         });
 
         filter.Invoke(context);
 
         var result = Assert.IsType<ObjectResult>(context.Result);
-        var problemDetails = Assert.IsType<ProblemDetails>(result.Value);
+        var apiResult = Assert.IsType<ApiResult>(result.Value);
         Assert.Equal(statusCode, result.StatusCode);
-        Assert.Equal(statusCode, problemDetails.Status);
-        Assert.Equal("trace-123", problemDetails.Extensions["correlationId"]);
+        Assert.Equal(statusCode == StatusCodes.Status403Forbidden
+                ? StatusCodes.Status403Forbidden
+                : StatusCodes.Status500InternalServerError,
+            apiResult.Code);
+        Assert.Equal(statusCode == StatusCodes.Status403Forbidden ? "无权访问" : "系统内部错误", apiResult.Msg);
+        Assert.Null(apiResult.Data);
     }
 
     /// <summary>
@@ -153,17 +154,6 @@ public class GlobalExceptionFilterTests
         {
             Exception = exception
         };
-    }
-
-    private sealed class TestHostEnvironment(string environmentName) : IHostEnvironment
-    {
-        public string EnvironmentName { get; set; } = environmentName;
-
-        public string ApplicationName { get; set; } = typeof(GlobalExceptionFilterTests).Assembly.GetName().Name;
-
-        public string ContentRootPath { get; set; } = AppContext.BaseDirectory;
-
-        public IFileProvider ContentRootFileProvider { get; set; } = new NullFileProvider();
     }
 
     /// <summary>

@@ -63,12 +63,10 @@ public class ApiResultTests(ITestOutputHelper output) : BaseTest
     {
         var result = await Client.GetAsync("/apiResult/452");
         var text = await result.Content.ReadAsStringAsync();
-        using var problemDetails = System.Text.Json.JsonDocument.Parse(text);
-
         Assert.Equal(452, (int)result.StatusCode);
-        Assert.Equal("application/problem+json", result.Content.Headers.ContentType?.MediaType);
-        Assert.Equal(452, problemDetails.RootElement.GetProperty("status").GetInt32());
-        Assert.NotEmpty(problemDetails.RootElement.GetProperty("traceId").GetString());
+        Assert.Equal("""
+                     {"success":false,"code":-1,"msg":"","data":null}
+                     """, text);
     }
 
     [Fact]
@@ -249,72 +247,59 @@ public class ApiResultTests(ITestOutputHelper output) : BaseTest
 
     /// <summary>
     /// 接口内抛出 <see cref="MicroserviceFrameworkFriendlyException"/> 时，
-    /// 全局异常过滤器应返回 HTTP 400 + RFC 7807 ProblemDetails。
+    /// 全局异常过滤器应返回 HTTP 200 + ApiResult 错误结构。
     /// </summary>
     [Fact]
     public async Task ThrowFriendlyException()
     {
         var result = await Client.GetAsync("/apiResult/friendlyException");
         var text = await result.Content.ReadAsStringAsync();
-        using var problemDetails = System.Text.Json.JsonDocument.Parse(text);
-
-        Assert.Equal(400, (int)result.StatusCode);
-        Assert.Equal("application/problem+json", result.Content.Headers.ContentType?.MediaType);
-        Assert.Equal(400, problemDetails.RootElement.GetProperty("status").GetInt32());
-        Assert.Equal("业务处理失败", problemDetails.RootElement.GetProperty("detail").GetString());
-        Assert.Equal(2, problemDetails.RootElement.GetProperty("code").GetInt32());
-        Assert.False(problemDetails.RootElement.TryGetProperty("success", out _));
-        Assert.NotEmpty(problemDetails.RootElement.GetProperty("correlationId").GetString());
+        Assert.Equal(200, (int)result.StatusCode);
+        Assert.Equal("""
+                     {"success":false,"code":2,"msg":"业务处理失败","data":null}
+                     """, text);
         Assert.NotEmpty(result.Headers.GetValues("X-Correlation-ID"));
     }
 
     /// <summary>
     /// 接口内抛出普通异常（<see cref="InvalidOperationException"/>）时，
-    /// 全局异常过滤器应返回 HTTP 500 + RFC 7807 ProblemDetails。
+    /// 全局异常过滤器应返回 HTTP 500 + ApiResult 错误结构。
     /// </summary>
     [Fact]
-    public async Task ThrowInvalidOperationExceptionReturnsInternalServerProblemDetails()
+    public async Task ThrowInvalidOperationException()
     {
         var result = await Client.GetAsync("/apiResult/invalidOperationException");
         var text = await result.Content.ReadAsStringAsync();
-        using var problemDetails = System.Text.Json.JsonDocument.Parse(text);
-
         Assert.Equal(500, (int)result.StatusCode);
-        Assert.Equal(500, problemDetails.RootElement.GetProperty("status").GetInt32());
-        Assert.Equal("服务器内部错误", problemDetails.RootElement.GetProperty("title").GetString());
+        Assert.Equal("""
+                     {"success":false,"code":500,"msg":"系统内部错误","data":null}
+                     """, text);
     }
 
     /// <summary>
     /// 接口内抛出参数类异常（<see cref="ArgumentException"/>）时，
-    /// 全局异常过滤器应返回 HTTP 400 + RFC 7807 ProblemDetails。
+    /// 全局异常过滤器应返回 HTTP 500 + ApiResult 错误结构。
     /// </summary>
     [Fact]
-    public async Task ThrowArgumentExceptionReturnsBadRequestProblemDetails()
+    public async Task ThrowArgumentException()
     {
         var result = await Client.GetAsync("/apiResult/argumentException");
         var text = await result.Content.ReadAsStringAsync();
-        using var problemDetails = System.Text.Json.JsonDocument.Parse(text);
-
-        Assert.Equal(400, (int)result.StatusCode);
-        Assert.Equal(400, problemDetails.RootElement.GetProperty("status").GetInt32());
-        Assert.Equal("错误请求", problemDetails.RootElement.GetProperty("title").GetString());
+        Assert.Equal(500, (int)result.StatusCode);
+        Assert.Equal("""
+                     {"success":false,"code":500,"msg":"系统内部错误","data":null}
+                     """, text);
     }
 
-    [Theory]
-    [InlineData("authenticationException", 401)]
-    [InlineData("unauthorizedException", 403)]
-    [InlineData("notFoundException", 404)]
-    [InlineData("conflictException", 409)]
-    public async Task ThrowKnownExceptionReturnsStandardProblemDetails(string endpoint, int statusCode)
+    [Fact]
+    public async Task ThrowUnauthorizedExceptionReturnsForbiddenApiResult()
     {
-        var result = await Client.GetAsync($"/apiResult/{endpoint}");
+        var result = await Client.GetAsync("/apiResult/unauthorizedException");
         var text = await result.Content.ReadAsStringAsync();
-        using var problemDetails = System.Text.Json.JsonDocument.Parse(text);
-
-        Assert.Equal(statusCode, (int)result.StatusCode);
-        Assert.Equal(statusCode, problemDetails.RootElement.GetProperty("status").GetInt32());
-        Assert.NotEmpty(problemDetails.RootElement.GetProperty("correlationId").GetString());
-        Assert.False(problemDetails.RootElement.TryGetProperty("success", out _));
+        Assert.Equal(403, (int)result.StatusCode);
+        Assert.Equal("""
+                     {"success":false,"code":403,"msg":"无权访问","data":null}
+                     """, text);
     }
 
     [Fact]
@@ -322,12 +307,11 @@ public class ApiResultTests(ITestOutputHelper output) : BaseTest
     {
         var result = await Client.GetAsync("/apiResult/unexpectedException");
         var text = await result.Content.ReadAsStringAsync();
-        using var problemDetails = System.Text.Json.JsonDocument.Parse(text);
-
         Assert.Equal(500, (int)result.StatusCode);
-        Assert.Equal("系统内部错误", problemDetails.RootElement.GetProperty("detail").GetString());
+        Assert.Equal("""
+                     {"success":false,"code":500,"msg":"系统内部错误","data":null}
+                     """, text);
         Assert.DoesNotContain("数据库连接字符串", text);
         Assert.DoesNotContain("InvalidOperationException", text);
-        Assert.False(problemDetails.RootElement.TryGetProperty("success", out _));
     }
 }
