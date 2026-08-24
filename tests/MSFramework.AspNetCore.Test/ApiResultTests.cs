@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Net.Http;
+using System.Text.Json;
 using System.Threading.Tasks;
 using MicroserviceFramework.Extensions;
 using Xunit;
@@ -40,10 +41,21 @@ public class ApiResultTests(ITestOutputHelper output) : BaseTest
     {
         var result = await Client.PostAsync("/apiResult/validation", new StringContent(""));
         var text = await result.Content.ReadAsStringAsync();
-        Assert.Equal(200, (int)result.StatusCode);
+        Assert.Equal(400, (int)result.StatusCode);
         Assert.Equal("""
                      {"errors":[{"name":"id","messages":["The id field is required."]}],"success":false,"code":1,"msg":"数据校验不通过","data":null}
                      """, text);
+    }
+
+    [Fact]
+    public async Task InvalidObjectId_ReturnsHttp400AndModelStateError()
+    {
+        var result = await Client.GetAsync("/apiResult/objectId?id=not-an-object-id");
+        var text = await result.Content.ReadAsStringAsync();
+
+        Assert.Equal(400, (int)result.StatusCode);
+        Assert.Contains("\"errors\"", text);
+        Assert.Contains("\"id\"", text);
     }
 
 
@@ -53,9 +65,12 @@ public class ApiResultTests(ITestOutputHelper output) : BaseTest
         var result = await Client.GetAsync("/apiResult/452");
         var text = await result.Content.ReadAsStringAsync();
         Assert.Equal(452, (int)result.StatusCode);
-        Assert.Equal("""
-                     {"success":false,"code":-1,"msg":"","data":null}
-                     """, text);
+        using var document = JsonDocument.Parse(text);
+        var root = document.RootElement;
+        Assert.False(root.GetProperty("success").GetBoolean());
+        Assert.Equal(-1, root.GetProperty("code").GetInt32());
+        Assert.Equal(string.Empty, root.GetProperty("msg").GetString());
+        Assert.Equal(452, root.GetProperty("data").GetProperty("status").GetInt32());
     }
 
     [Fact]
@@ -208,9 +223,30 @@ public class ApiResultTests(ITestOutputHelper output) : BaseTest
     }
 
     [Fact]
-    public async Task GetApiResult()
+    public async Task ReturnProblemDetailsAsApiResultWithJsonContentTypeAsync()
     {
-        var result1 = await Client.GetStringAsync("/apiResult/apiResult");
+        var result = await Client.GetAsync("/apiResult/problemDetails");
+        var text = await result.Content.ReadAsStringAsync();
+
+        Assert.Equal(400, (int)result.StatusCode);
+        Assert.Equal("application/json", result.Content.Headers.ContentType?.MediaType);
+        using var document = JsonDocument.Parse(text);
+        var root = document.RootElement;
+        Assert.False(root.GetProperty("success").GetBoolean());
+        Assert.Equal(-1, root.GetProperty("code").GetInt32());
+        Assert.Equal("请求无效", root.GetProperty("msg").GetString());
+        var data = root.GetProperty("data");
+        Assert.Equal("请求无效", data.GetProperty("title").GetString());
+        Assert.Equal(400, data.GetProperty("status").GetInt32());
+    }
+
+    [Fact]
+    public async Task GetApiResultPreservesHttpContractAsync()
+    {
+        var result = await Client.GetAsync("/apiResult/apiResult");
+        var result1 = await result.Content.ReadAsStringAsync();
+        Assert.Equal(200, (int)result.StatusCode);
+        Assert.Equal("application/json", result.Content.Headers.ContentType?.MediaType);
         Assert.Equal("""
                      {"success":true,"code":0,"msg":"","data":1}
                      """, result1);
@@ -226,17 +262,58 @@ public class ApiResultTests(ITestOutputHelper output) : BaseTest
     }
 
     [Fact]
-    public async Task GetApiResultGeneric()
+    public async Task GetApiResultGenericPreservesHttpContractAsync()
     {
-        var result1 = await Client.GetStringAsync("/apiResult/apiResultGeneric");
+        var result = await Client.GetAsync("/apiResult/apiResultGeneric");
+        var result1 = await result.Content.ReadAsStringAsync();
+        Assert.Equal(200, (int)result.StatusCode);
+        Assert.Equal("application/json", result.Content.Headers.ContentType?.MediaType);
         Assert.Equal("""
                      {"success":true,"code":0,"msg":"","data":1}
                      """, result1);
     }
 
+    [Theory]
+    [InlineData("ordinaryBadRequest", 400, "普通请求错误")]
+    [InlineData("ordinaryServerError", 500, "普通服务器错误")]
+    public async Task ReturnOrdinaryErrorAsApiResultWithHttpContractAsync(
+        string route, int expectedStatusCode, string expectedData)
+    {
+        var result = await Client.GetAsync($"/apiResult/{route}");
+        var text = await result.Content.ReadAsStringAsync();
+
+        Assert.Equal(expectedStatusCode, (int)result.StatusCode);
+        Assert.Equal("application/json", result.Content.Headers.ContentType?.MediaType);
+
+        using var document = JsonDocument.Parse(text);
+        var root = document.RootElement;
+        Assert.False(root.GetProperty("success").GetBoolean());
+        Assert.Equal(0, root.GetProperty("code").GetInt32());
+        Assert.Equal(string.Empty, root.GetProperty("msg").GetString());
+        Assert.Equal(expectedData, root.GetProperty("data").GetString());
+    }
+
+    [Fact]
+    public async Task GetApiResultGenericSubclassWithoutNestedWrappingAsync()
+    {
+        var result = await Client.GetAsync("/apiResult/apiResultGenericSubclass");
+        var text = await result.Content.ReadAsStringAsync();
+
+        Assert.Equal(200, (int)result.StatusCode);
+        Assert.Equal("application/json", result.Content.Headers.ContentType?.MediaType);
+
+        using var document = JsonDocument.Parse(text);
+        var root = document.RootElement;
+        Assert.True(root.GetProperty("success").GetBoolean());
+        Assert.Equal(0, root.GetProperty("code").GetInt32());
+        Assert.Equal("自定义结果", root.GetProperty("msg").GetString());
+        Assert.Equal(7, root.GetProperty("data").GetInt32());
+        Assert.Equal("custom", root.GetProperty("marker").GetString());
+    }
+
     /// <summary>
     /// 接口内抛出 <see cref="MicroserviceFrameworkFriendlyException"/> 时，
-    /// 全局异常过滤器应返回 HTTP 200 + ApiResult 错误结构（success=false、code=异常错误码、msg=异常消息、data=null）
+    /// 全局异常过滤器应返回 HTTP 200 + ApiResult 错误结构。
     /// </summary>
     [Fact]
     public async Task ThrowFriendlyException()
@@ -247,11 +324,12 @@ public class ApiResultTests(ITestOutputHelper output) : BaseTest
         Assert.Equal("""
                      {"success":false,"code":2,"msg":"业务处理失败","data":null}
                      """, text);
+        Assert.False(result.Headers.Contains("X-Correlation-ID"));
     }
 
     /// <summary>
     /// 接口内抛出普通异常（<see cref="InvalidOperationException"/>）时，
-    /// 全局异常过滤器应返回 HTTP 500 + ApiResult 错误结构（success=false、code=500、msg=系统内部错误、data=null）
+    /// 全局异常过滤器应返回 HTTP 500 + ApiResult 错误结构。
     /// </summary>
     [Fact]
     public async Task ThrowInvalidOperationException()
@@ -265,8 +343,8 @@ public class ApiResultTests(ITestOutputHelper output) : BaseTest
     }
 
     /// <summary>
-    /// 接口内抛出参数类普通异常（<see cref="ArgumentException"/>）时，
-    /// 全局异常过滤器同样应返回 HTTP 500 + ApiResult 错误结构（success=false、code=500、msg=系统内部错误、data=null）
+    /// 接口内抛出参数类异常（<see cref="ArgumentException"/>）时，
+    /// 全局异常过滤器应返回 HTTP 500 + ApiResult 错误结构。
     /// </summary>
     [Fact]
     public async Task ThrowArgumentException()
@@ -277,5 +355,29 @@ public class ApiResultTests(ITestOutputHelper output) : BaseTest
         Assert.Equal("""
                      {"success":false,"code":500,"msg":"系统内部错误","data":null}
                      """, text);
+    }
+
+    [Fact]
+    public async Task ThrowUnauthorizedExceptionReturnsForbiddenApiResult()
+    {
+        var result = await Client.GetAsync("/apiResult/unauthorizedException");
+        var text = await result.Content.ReadAsStringAsync();
+        Assert.Equal(403, (int)result.StatusCode);
+        Assert.Equal("""
+                     {"success":false,"code":403,"msg":"无权访问","data":null}
+                     """, text);
+    }
+
+    [Fact]
+    public async Task ThrowUnexpectedExceptionHidesInternalDetails()
+    {
+        var result = await Client.GetAsync("/apiResult/unexpectedException");
+        var text = await result.Content.ReadAsStringAsync();
+        Assert.Equal(500, (int)result.StatusCode);
+        Assert.Equal("""
+                     {"success":false,"code":500,"msg":"系统内部错误","data":null}
+                     """, text);
+        Assert.DoesNotContain("数据库连接字符串", text);
+        Assert.DoesNotContain("InvalidOperationException", text);
     }
 }

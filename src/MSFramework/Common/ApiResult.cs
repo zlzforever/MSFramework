@@ -100,19 +100,13 @@ public class ApiResult : ApiResult<object>
             return false;
         }
 
-        if (type == Type)
+        for (var currentType = type; currentType != null; currentType = currentType.BaseType)
         {
-            return true;
-        }
-
-        if (type == ApiResultWithErrors.ApiResultWithErrorsType)
-        {
-            return true;
-        }
-
-        if (type.IsGenericType && type.GetGenericTypeDefinition() == GenericType)
-        {
-            return true;
+            if (currentType == Type || currentType == ApiResultWithErrors.ApiResultWithErrorsType ||
+                currentType.IsGenericType && currentType.GetGenericTypeDefinition() == GenericType)
+            {
+                return true;
+            }
         }
 
         return false;
