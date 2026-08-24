@@ -20,7 +20,7 @@ namespace MSFramework.Tests;
 /// 审计收集下沉 <see cref="DbContextBase"/> 默认保存流程的集成测试：
 /// 验证保存路径（<see cref="DbContextBase.SaveChangesAsync(bool, System.Threading.CancellationToken)"/>）
 /// 在实体状态定型后从 <see cref="AuditOperationContext"/>（AsyncLocal）读取审计操作并收集变更实体，
-/// 未设置审计操作时跳过收集；实体经 <see cref="AuditOperation.AddEntities"/> 防重后进入操作。
+/// 未设置审计操作时跳过收集；实体经 <see cref="AuditOperation.AddEntities"/> 按收集顺序进入操作。
 /// </summary>
 public class AuditOperationAsyncLocalFlowTests
 {
@@ -234,10 +234,10 @@ public class AuditOperationAsyncLocalFlowTests
     }
 
     /// <summary>
-    /// 同一请求执行流内重复保存时，同一实体的同一变更状态只收集一次（AddEntities 值身份去重兜底）
+    /// 同一请求执行流内重复保存且没有新变更时，不应向审计操作追加实体
     /// </summary>
     [Fact]
-    public async Task SaveChanges_RepeatedSave_CollectsEachEntityStateOnce()
+    public async Task SaveChanges_RepeatedSaveWithoutChanges_DoesNotAddEntitiesAsync()
     {
         using var host = CreateHost();
         using var scope = host.Provider.CreateScope();
@@ -259,6 +259,46 @@ public class AuditOperationAsyncLocalFlowTests
 
             Assert.Equal(1, addEntities);
             Assert.Equal(1, totalAfterSecondSave);
+        }
+        finally
+        {
+            AuditOperationContext.Value = null;
+        }
+    }
+
+    [Fact]
+    public async Task SaveChanges_RepeatedModification_PreservesEachChangeSnapshotAcrossBatches()
+    {
+        using var host = CreateHost();
+        using var scope = host.Provider.CreateScope();
+        var unitOfWork = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
+        var context = scope.ServiceProvider.GetRequiredService<AuditFlowContext>();
+
+        var operation = CreateOperation();
+        AuditOperationContext.Value = operation;
+        try
+        {
+            var order = new AuditFlowOrder("ORD-5", "order-1");
+            context.Orders.Add(order);
+            await unitOfWork.SaveChangesAsync();
+
+            order.Name = "order-2";
+            await unitOfWork.SaveChangesAsync();
+
+            order.Name = "order-1";
+            await unitOfWork.SaveChangesAsync();
+
+            order.Name = "order-2";
+            await unitOfWork.SaveChangesAsync();
+
+            var modifications = operation.Entities
+                .Where(entity => entity.OperationType == OperationType.Modify)
+                .ToList();
+            Assert.Equal(3, modifications.Count);
+            Assert.Equal(
+                ["order-2", "order-1", "order-2"],
+                modifications.Select(entity => entity.Properties
+                    .Single(property => property.Name == nameof(AuditFlowOrder.Name)).NewValue).ToArray());
         }
         finally
         {

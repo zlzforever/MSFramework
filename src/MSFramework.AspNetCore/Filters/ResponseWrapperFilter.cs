@@ -39,51 +39,40 @@ internal sealed class ResponseWrapperFilter(ILogger<ResponseWrapperFilter> logge
             }
         }
 
-        // comments by lewis at 20240103
-        // 只能使用 type 比较， 不能使用 is， 不然如 BadRequestObjectResult 也会被二次包装
+        // 仅处理 ObjectResult；ProblemDetails 以运行时值为准，避免声明类型掩盖错误响应。
         if (context.Result is ObjectResult objectResult)
         {
-            var declaredType = objectResult.DeclaredType ?? objectResult.Value?.GetType();
-            if (declaredType == null)
+            var valueType = objectResult.Value?.GetType() ?? objectResult.DeclaredType;
+            // 只要结果是 ApiResult 直接跳过
+            if (objectResult.Value is ApiResult ||
+                ApiResult.IsApiResult(valueType))
             {
             }
+            // 只要结果是 ProblemDetails problemDetails 重新包装一下
             else if (objectResult.Value is ProblemDetails problemDetails)
             {
-                var code = problemDetails.Status ?? 200;
-                var success = HttpUtils.IsSuccessStatusCode(code);
-                if (success)
+                objectResult.ContentTypes.Clear();
+                var code = objectResult.StatusCode ?? problemDetails.Status ?? StatusCodes.Status200OK;
+                objectResult.Value = new ApiResult
                 {
-                    objectResult.Value = new ApiResult { Data = objectResult.Value, Msg = string.Empty };
-                    objectResult.DeclaredType = ApiResult.Type;
-                }
-                else
-                {
-                    objectResult.Value = new ApiResult
-                    {
-                        Success = false, Code = -1, Msg = problemDetails.Title ?? string.Empty
-                    };
-                    objectResult.StatusCode = code;
-                    objectResult.DeclaredType = ApiResult.Type;
-                }
-            }
-            else if (ApiResult.IsApiResult(declaredType))
-            {
+                    Success = false, Code = -1, Msg = problemDetails.Title ?? string.Empty, Data = problemDetails
+                };
+                objectResult.StatusCode = code;
+                objectResult.DeclaredType = ApiResult.Type;
             }
             else
             {
-                // 根据 ObjectResult 状态码判定 success：
-                // 非 2xx（如 BadRequestObjectResult/NotFoundObjectResult/ConflictObjectResult）包装时
-                // 必须标记 Success=false，避免 HTTP 状态与 success 字段自相矛盾
-                var code = objectResult.StatusCode ?? StatusCodes.Status200OK;
-                var success = HttpUtils.IsSuccessStatusCode(code);
-                objectResult.Value = new ApiResult
+                if (valueType is not null && !ApiResult.IsApiResult(valueType))
                 {
-                    Success = success,
-                    Code = 0,
-                    Msg = string.Empty,
-                    Data = objectResult.Value
-                };
-                objectResult.DeclaredType = ApiResult.Type;
+                    // 以运行时值为准包装普通 ObjectResult；声明类型可能是 ApiResult，不能掩盖实际响应值。
+                    var code = objectResult.StatusCode ?? StatusCodes.Status200OK;
+                    var success = HttpUtils.IsSuccessStatusCode(code);
+                    objectResult.Value = new ApiResult
+                    {
+                        Success = success, Code = code, Msg = string.Empty, Data = objectResult.Value
+                    };
+                    objectResult.DeclaredType = ApiResult.Type;
+                }
             }
         }
         else if (context.Result is EmptyResult)

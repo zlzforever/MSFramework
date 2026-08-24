@@ -180,8 +180,8 @@ public abstract class DbContextBase : DbContext
     public override async Task<int> SaveChangesAsync(bool acceptAllChangesOnSuccess,
         CancellationToken cancellationToken = new())
     {
-        var scopeServiceProvider = this.GetService<IScopeServiceProvider>();
-        var mediator = scopeServiceProvider.GetService<IMediator>();
+        var scopeServiceProvider = GetScopeServiceProvider();
+        var mediator = scopeServiceProvider?.GetService<IMediator>();
         if (mediator != null)
         {
             // 若是有领域事件则分发出去
@@ -213,8 +213,8 @@ public abstract class DbContextBase : DbContext
     /// <returns></returns>
     public override int SaveChanges(bool acceptAllChangesOnSuccess)
     {
-        var scopeServiceProvider = this.GetService<IScopeServiceProvider>();
-        var mediator = scopeServiceProvider.GetService<IMediator>();
+        var scopeServiceProvider = GetScopeServiceProvider();
+        var mediator = scopeServiceProvider?.GetService<IMediator>();
         if (mediator != null)
         {
             // 若是有领域事件则分发出去
@@ -248,8 +248,8 @@ public abstract class DbContextBase : DbContext
     /// <see cref="SaveChangesAsync(bool, CancellationToken)"/> 的路径），且未越过
     /// 审计链路终点，即可被收集。
     /// Value 为 null（无审计请求）时本方法立即返回，仅一次 AsyncLocal 读取开销；
-    /// 实体收集结果经 <see cref="AuditOperation.AddEntities"/> 按值身份去重，
-    /// 多次保存/多上下文场景不会重复收集同一实体的同一变更状态。
+    /// 每次保存先物化一个收集批次，再由 <see cref="AuditOperation.AddEntities"/> 按输入顺序直接追加非空实体；
+    /// 批次之间不共享收集状态，保证同一实体恢复旧值后再次变更仍完整保留。
     /// </summary>
     private void CollectAuditEntities()
     {
@@ -259,7 +259,7 @@ public abstract class DbContextBase : DbContext
             return;
         }
 
-        auditOperation.AddEntities(GetAuditEntities());
+        auditOperation.AddEntities(GetAuditEntities().ToArray());
     }
 
     /// <summary>
@@ -270,8 +270,8 @@ public abstract class DbContextBase : DbContext
     /// <returns>是否有实体发生了状态变更</returns>
     protected virtual bool ApplyConcepts()
     {
-        var scopeServiceProvider = this.GetService<IScopeServiceProvider>();
-        var session = scopeServiceProvider.GetService<ISession>();
+        var scopeServiceProvider = GetScopeServiceProvider();
+        var session = scopeServiceProvider?.GetService<ISession>();
         var userId = session?.UserId;
         var name = session?.UserDisplayName;
         var changed = false;
@@ -289,6 +289,14 @@ public abstract class DbContextBase : DbContext
         }
 
         return changed;
+    }
+
+    /// <summary>
+    /// 优先读取后台事件建立的当前异步作用域，HTTP 请求则回退到 EF 注册的作用域服务提供器。
+    /// </summary>
+    private IScopeServiceProvider GetScopeServiceProvider()
+    {
+        return ScopeServiceProviderContext.Current ?? this.GetService<IScopeServiceProvider>();
     }
 
     /// <summary>
