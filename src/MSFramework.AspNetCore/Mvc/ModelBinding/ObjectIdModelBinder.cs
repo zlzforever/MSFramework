@@ -18,9 +18,8 @@ public class ObjectIdModelBinder : IModelBinder
     {
         var value = bindingContext.ValueProvider.GetValue(bindingContext.FieldName).FirstValue;
 
-        // 解析失败或解析结果为 Empty（非法输入）时写入 ModelState，
-        // 让 ApiController 的模型验证流程能够返回真实的 HTTP 400。
-        if (!ObjectId.TryParse(value, out var id) || id == ObjectId.Empty)
+        // 仅解析失败时写入 ModelState，让 ApiController 的模型验证流程能够返回真实的 HTTP 400。
+        if (!ObjectId.TryParse(value, out var id))
         {
             var key = string.IsNullOrEmpty(bindingContext.ModelName)
                 ? bindingContext.FieldName

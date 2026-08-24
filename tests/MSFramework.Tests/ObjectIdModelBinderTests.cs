@@ -26,16 +26,14 @@ public class ObjectIdModelBinderTests
     }
 
     [Fact]
-    public async Task BindModelAsync_ReturnsFailed_ForEmptyObjectId()
+    public async Task BindModelAsync_ReturnsSuccess_ForEmptyObjectId()
     {
-        // 旧实现中 !TryParse && id == Empty 恒为 false，非法输入被静默绑定为 Empty；新实现必须绑定失败
         var context = CreateContext(ObjectId.Empty.ToString());
 
         await new ObjectIdModelBinder().BindModelAsync(context);
 
-        Assert.Equal(ModelBindingResult.Failed(), context.Result);
-        Assert.True(context.ModelState.ContainsKey("id"));
-        Assert.NotEmpty(context.ModelState["id"].Errors);
+        Assert.True(context.Result.IsModelSet);
+        Assert.Equal(ObjectId.Empty, (ObjectId)context.Result.Model);
     }
 
     [Fact]
