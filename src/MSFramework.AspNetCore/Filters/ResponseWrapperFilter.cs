@@ -42,43 +42,34 @@ internal sealed class ResponseWrapperFilter(ILogger<ResponseWrapperFilter> logge
         // 仅处理 ObjectResult；ProblemDetails 以运行时值为准，避免声明类型掩盖错误响应。
         if (context.Result is ObjectResult objectResult)
         {
-            var declaredType = objectResult.DeclaredType;
-            var valueType = objectResult.Value?.GetType();
-            if (objectResult.Value is ProblemDetails problemDetails)
+            var valueType = objectResult.Value?.GetType() ?? objectResult.DeclaredType;
+            // 只要结果是 ApiResult 直接跳过
+            if (objectResult.Value is ApiResult ||
+                ApiResult.IsApiResult(valueType))
+            {
+            }
+            // 只要结果是 ProblemDetails problemDetails 重新包装一下
+            else if (objectResult.Value is ProblemDetails problemDetails)
             {
                 objectResult.ContentTypes.Clear();
                 var code = objectResult.StatusCode ?? problemDetails.Status ?? StatusCodes.Status200OK;
                 objectResult.Value = new ApiResult
                 {
-                    Success = false,
-                    Code = -1,
-                    Msg = problemDetails.Title ?? string.Empty,
-                    Data = problemDetails
+                    Success = false, Code = -1, Msg = problemDetails.Title ?? string.Empty, Data = problemDetails
                 };
                 objectResult.StatusCode = code;
                 objectResult.DeclaredType = ApiResult.Type;
             }
-            else if (objectResult.Value is ApiResult ||
-                     ApiResult.IsApiResult(valueType))
-            {
-                await next();
-                return;
-            }
             else
             {
-                declaredType ??= valueType;
-                if (declaredType is not null &&
-                    (valueType is not null || !ApiResult.IsApiResult(declaredType)))
+                if (valueType is not null && !ApiResult.IsApiResult(valueType))
                 {
                     // 以运行时值为准包装普通 ObjectResult；声明类型可能是 ApiResult，不能掩盖实际响应值。
                     var code = objectResult.StatusCode ?? StatusCodes.Status200OK;
                     var success = HttpUtils.IsSuccessStatusCode(code);
                     objectResult.Value = new ApiResult
                     {
-                        Success = success,
-                        Code = 0,
-                        Msg = string.Empty,
-                        Data = objectResult.Value
+                        Success = success, Code = code, Msg = string.Empty, Data = objectResult.Value
                     };
                     objectResult.DeclaredType = ApiResult.Type;
                 }
