@@ -109,6 +109,59 @@ public class GlobalExceptionFilterTests
         Assert.Equal("系统内部错误", apiResult.Msg);
     }
 
+    [Fact]
+    public void OnException_LeavesAlreadyHandledExceptionUntouched()
+    {
+        var exception = new InvalidOperationException("异常已由其他过滤器处理");
+        var context = CreateExceptionContext(exception);
+        context.ExceptionHandled = true;
+
+        Assert.Same(exception, context.Exception);
+
+        CreateFilter().Invoke(context);
+
+        Assert.True(context.ExceptionHandled);
+        Assert.Null(context.Result);
+        Assert.False(context.HttpContext.Response.Headers.ContainsKey("X-Correlation-ID"));
+    }
+
+    [Fact]
+    public void OnException_UsesFixedMessageForUnauthorizedException()
+    {
+        const string sensitiveMessage =
+            "无法访问 Server=prod-db;Password=secret; /srv/app/appsettings.Production.json";
+        var exception = new UnauthorizedAccessException(sensitiveMessage);
+        var context = CreateExceptionContext(exception);
+
+        Assert.Same(exception, context.Exception);
+
+        CreateFilter().Invoke(context);
+
+        var result = Assert.IsType<ObjectResult>(context.Result);
+        var apiResult = Assert.IsType<ApiResult>(result.Value);
+        Assert.Equal(StatusCodes.Status403Forbidden, result.StatusCode);
+        Assert.Equal("无权访问", apiResult.Msg);
+        Assert.DoesNotContain(sensitiveMessage, apiResult.Msg);
+        Assert.DoesNotContain("Server=prod-db", apiResult.Msg);
+        Assert.DoesNotContain("/srv/app/appsettings.Production.json", apiResult.Msg);
+    }
+
+    [Fact]
+    public void OnException_GeneratesCorrelationIdWhenTraceIdentifierIsEmpty()
+    {
+        var exception = new InvalidOperationException("请求处理失败");
+        var context = CreateExceptionContext(exception, string.Empty);
+
+        Assert.IsType<InvalidOperationException>(context.Exception);
+
+        CreateFilter().Invoke(context);
+
+        var correlationId = context.HttpContext.Response.Headers["X-Correlation-ID"].ToString();
+        Assert.False(string.IsNullOrWhiteSpace(correlationId));
+        Assert.Equal(correlationId, context.HttpContext.TraceIdentifier);
+        Assert.True(context.ExceptionHandled);
+    }
+
     [Theory]
     [InlineData("argument", StatusCodes.Status500InternalServerError)]
     [InlineData("authentication", StatusCodes.Status500InternalServerError)]
@@ -144,9 +197,9 @@ public class GlobalExceptionFilterTests
     /// </summary>
     /// <param name="exception">异常</param>
     /// <returns>异常上下文</returns>
-    private static ExceptionContext CreateExceptionContext(Exception exception)
+    private static ExceptionContext CreateExceptionContext(Exception exception, string traceIdentifier = "trace-123")
     {
-        var httpContext = new DefaultHttpContext { TraceIdentifier = "trace-123" };
+        var httpContext = new DefaultHttpContext { TraceIdentifier = traceIdentifier };
         httpContext.Request.Path = "/test";
         return new ExceptionContext(
             new ActionContext(httpContext, new RouteData(), new ActionDescriptor()),

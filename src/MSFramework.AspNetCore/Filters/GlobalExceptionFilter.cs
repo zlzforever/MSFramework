@@ -14,6 +14,7 @@ namespace MicroserviceFramework.AspNetCore.Filters;
 internal class GlobalExceptionFilter(ILogger<GlobalExceptionFilter> logger) : IExceptionFilter
 {
     private const string CorrelationIdHeader = "X-Correlation-ID";
+    private const string UnauthorizedErrorMessage = "无权访问";
 
     /// <summary>
     /// 捕获异常并转换为统一响应格式：
@@ -32,12 +33,12 @@ internal class GlobalExceptionFilter(ILogger<GlobalExceptionFilter> logger) : IE
         var exception = context.Exception;
         var correlationId = GetCorrelationId(context.HttpContext);
 
-        if (exception is UnauthorizedAccessException unauthorizedException)
+        if (exception is UnauthorizedAccessException)
         {
             context.Result = new ObjectResult(new ApiResult
             {
                 Success = false,
-                Msg = unauthorizedException.Message,
+                Msg = UnauthorizedErrorMessage,
                 Code = StatusCodes.Status403Forbidden,
                 Data = null
             })

@@ -49,6 +49,7 @@ internal sealed class ResponseWrapperFilter(ILogger<ResponseWrapperFilter> logge
             }
             else if (objectResult.Value is ProblemDetails problemDetails)
             {
+                objectResult.ContentTypes.Clear();
                 var code = objectResult.StatusCode ?? problemDetails.Status ?? StatusCodes.Status200OK;
                 var success = HttpUtils.IsSuccessStatusCode(code);
                 if (success)
