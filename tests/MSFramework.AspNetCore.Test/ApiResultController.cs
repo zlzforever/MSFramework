@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using MicroserviceFramework;
 using MicroserviceFramework.AspNetCore;
 using MicroserviceFramework.Common;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using MongoDB.Bson;
@@ -168,6 +169,21 @@ public class ApiResultController(IOptions<JsonSerializerSettings> options) : Api
     public IActionResult GetEmptyResult()
     {
         return new EmptyResult();
+    }
+
+    [HttpGet("problemDetails")]
+    public IActionResult GetProblemDetails()
+    {
+        var result = new ObjectResult(new ProblemDetails
+        {
+            Status = StatusCodes.Status400BadRequest,
+            Title = "请求无效"
+        })
+        {
+            StatusCode = StatusCodes.Status400BadRequest
+        };
+        result.ContentTypes.Add("application/problem+json");
+        return result;
     }
 
     [HttpGet("apiResult")]

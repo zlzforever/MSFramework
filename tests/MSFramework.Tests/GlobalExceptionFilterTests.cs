@@ -146,11 +146,13 @@ public class GlobalExceptionFilterTests
         Assert.DoesNotContain("/srv/app/appsettings.Production.json", apiResult.Msg);
     }
 
-    [Fact]
-    public void OnException_GeneratesCorrelationIdWhenTraceIdentifierIsEmpty()
+    [Theory]
+    [InlineData("")]
+    [InlineData("   ")]
+    public void OnException_GeneratesCorrelationIdWhenTraceIdentifierIsBlank(string traceIdentifier)
     {
         var exception = new InvalidOperationException("请求处理失败");
-        var context = CreateExceptionContext(exception, string.Empty);
+        var context = CreateExceptionContext(exception, traceIdentifier);
 
         Assert.IsType<InvalidOperationException>(context.Exception);
 

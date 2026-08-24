@@ -77,7 +77,47 @@ public class ResponseWrapperFilterTests
         Assert.Same(problemDetails, apiResult.Data);
         Assert.Equal(ApiResult.Type, result.DeclaredType);
         Assert.Empty(result.ContentTypes);
-        Assert.DoesNotContain("application/problem+json", result.ContentTypes);
+    }
+
+    [Fact]
+    public async Task WrapsProblemDetailsWithApiResultDefaultsWhenStatusAndTitleAreMissingAsync()
+    {
+        var problemDetails = new ProblemDetails();
+        var context = CreateContext(problemDetails, null);
+
+        var nextCalls = await InvokeFilterAsync(context);
+
+        var result = Assert.IsType<ObjectResult>(context.Result);
+        var apiResult = Assert.IsType<ApiResult>(result.Value);
+        Assert.Equal(1, nextCalls);
+        Assert.True(apiResult.Success);
+        Assert.Equal(0, apiResult.Code);
+        Assert.Equal(string.Empty, apiResult.Msg);
+        Assert.Same(problemDetails, apiResult.Data);
+        Assert.Equal(ApiResult.Type, result.DeclaredType);
+        Assert.Empty(result.ContentTypes);
+    }
+
+    [Fact]
+    public async Task UsesProblemDetailsStatusWhenObjectResultStatusCodeIsMissingAsync()
+    {
+        var context = CreateContext(new ProblemDetails
+        {
+            Status = StatusCodes.Status422UnprocessableEntity,
+            Title = "实体校验失败"
+        }, null);
+
+        var nextCalls = await InvokeFilterAsync(context);
+
+        var result = Assert.IsType<ObjectResult>(context.Result);
+        var apiResult = Assert.IsType<ApiResult>(result.Value);
+        Assert.Equal(1, nextCalls);
+        Assert.Equal(StatusCodes.Status422UnprocessableEntity, result.StatusCode);
+        Assert.False(apiResult.Success);
+        Assert.Equal(-1, apiResult.Code);
+        Assert.Equal("实体校验失败", apiResult.Msg);
+        Assert.Equal(ApiResult.Type, result.DeclaredType);
+        Assert.Empty(result.ContentTypes);
     }
 
     [Fact]
@@ -121,6 +161,25 @@ public class ResponseWrapperFilterTests
         Assert.Equal(1, nextCalls);
         var result = Assert.IsType<ObjectResult>(context.Result);
         Assert.Same(originalValue, result.Value);
+    }
+
+    [Fact]
+    public async Task WrapsWhenInternalCallHeaderIsNotTrueAsync()
+    {
+        var originalValue = new object();
+        var context = CreateContext(originalValue, StatusCodes.Status200OK);
+        context.HttpContext.Request.Headers[Defaults.Headers.InternalCall] = "false";
+
+        var nextCalls = await InvokeFilterAsync(context);
+
+        var result = Assert.IsType<ObjectResult>(context.Result);
+        var apiResult = Assert.IsType<ApiResult>(result.Value);
+        Assert.Equal(1, nextCalls);
+        Assert.True(apiResult.Success);
+        Assert.Equal(0, apiResult.Code);
+        Assert.Equal(string.Empty, apiResult.Msg);
+        Assert.Same(originalValue, apiResult.Data);
+        Assert.Equal(ApiResult.Type, result.DeclaredType);
     }
 
     private static ResultExecutingContext CreateContext(object value, int? statusCode)

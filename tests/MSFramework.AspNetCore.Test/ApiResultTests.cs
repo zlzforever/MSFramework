@@ -219,6 +219,19 @@ public class ApiResultTests(ITestOutputHelper output) : BaseTest
     }
 
     [Fact]
+    public async Task ReturnProblemDetailsAsApiResultWithJsonContentType()
+    {
+        var result = await Client.GetAsync("/apiResult/problemDetails");
+        var text = await result.Content.ReadAsStringAsync();
+
+        Assert.Equal(400, (int)result.StatusCode);
+        Assert.Equal("application/json", result.Content.Headers.ContentType?.MediaType);
+        Assert.Equal("""
+                     {"success":false,"code":-1,"msg":"请求无效","data":null}
+                     """, text);
+    }
+
+    [Fact]
     public async Task GetApiResult()
     {
         var result1 = await Client.GetStringAsync("/apiResult/apiResult");
