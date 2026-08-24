@@ -677,7 +677,7 @@ builder.Services.AddControllers(options =>
 
 全局异常过滤器返回项目既有 `ApiResult`，并保留异常类型对应的 HTTP 状态码。
 响应包装器不会对已有 `ApiResult` 二次包装；客户端可按 `success`、`code`、`msg` 和
-`data` 字段处理错误。服务端同时通过 `X-Correlation-ID` 响应头提供排查关联标识。
+`data` 字段处理错误。请求跟踪标识由全局 Serilog 日志上下文记录，不在响应中重复生成或返回。
 
 | 异常 | HTTP 状态码 |
 |------|-------------|
@@ -688,8 +688,8 @@ builder.Services.AddControllers(options =>
 友好异常的响应使用异常自身的业务 `code` 和 `msg`；其他异常使用 `code=500`、
 `msg="系统内部错误"`，不会向客户端泄露异常细节。未授权异常使用 `code=403`。
 
-生产环境的 500 响应只返回通用错误详情；服务端日志会保留完整异常和 correlation id，
-并通过 `X-Correlation-ID` 响应头返回该标识，客户端应记录它供排查。
+生产环境的 500 响应只返回通用错误详情；服务端日志会保留完整异常和全局跟踪上下文，
+客户端无需依赖异常过滤器生成的 correlation id 响应头。
 
 ### 5.3 分页扩展包迁移
 

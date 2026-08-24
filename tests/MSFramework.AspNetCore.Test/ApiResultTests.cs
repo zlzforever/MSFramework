@@ -219,7 +219,7 @@ public class ApiResultTests(ITestOutputHelper output) : BaseTest
     }
 
     [Fact]
-    public async Task ReturnProblemDetailsAsApiResultWithJsonContentType()
+    public async Task ReturnProblemDetailsAsApiResultWithJsonContentTypeAsync()
     {
         var result = await Client.GetAsync("/apiResult/problemDetails");
         var text = await result.Content.ReadAsStringAsync();
@@ -271,7 +271,7 @@ public class ApiResultTests(ITestOutputHelper output) : BaseTest
         Assert.Equal("""
                      {"success":false,"code":2,"msg":"业务处理失败","data":null}
                      """, text);
-        Assert.NotEmpty(result.Headers.GetValues("X-Correlation-ID"));
+        Assert.False(result.Headers.Contains("X-Correlation-ID"));
     }
 
     /// <summary>

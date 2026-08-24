@@ -13,7 +13,6 @@ namespace MicroserviceFramework.AspNetCore.Filters;
 /// </summary>
 internal class GlobalExceptionFilter(ILogger<GlobalExceptionFilter> logger) : IExceptionFilter
 {
-    private const string CorrelationIdHeader = "X-Correlation-ID";
     private const string UnauthorizedErrorMessage = "无权访问";
 
     /// <summary>
@@ -31,7 +30,6 @@ internal class GlobalExceptionFilter(ILogger<GlobalExceptionFilter> logger) : IE
         }
 
         var exception = context.Exception;
-        var correlationId = GetCorrelationId(context.HttpContext);
 
         if (exception is UnauthorizedAccessException)
         {
@@ -47,11 +45,10 @@ internal class GlobalExceptionFilter(ILogger<GlobalExceptionFilter> logger) : IE
             };
 
             logger.LogError(exception,
-                "请求 {Method} {Url} 返回 {StatusCode}，CorrelationId={CorrelationId}",
+                "请求 {Method} {Url} 返回 {StatusCode}",
                 context.HttpContext.Request.Method,
                 context.HttpContext.Request.GetDisplayUrl(),
-                StatusCodes.Status403Forbidden,
-                correlationId);
+                StatusCodes.Status403Forbidden);
         }
         else if (FindFriendlyException(exception) is { } friendlyException)
         {
@@ -67,11 +64,10 @@ internal class GlobalExceptionFilter(ILogger<GlobalExceptionFilter> logger) : IE
             };
 
             logger.LogWarning(friendlyException,
-                "请求 {Method} {Url} 返回 {StatusCode}，CorrelationId={CorrelationId}",
+                "请求 {Method} {Url} 返回 {StatusCode}",
                 context.HttpContext.Request.Method,
                 context.HttpContext.Request.GetDisplayUrl(),
-                StatusCodes.Status200OK,
-                correlationId);
+                StatusCodes.Status200OK);
         }
         else
         {
@@ -87,27 +83,13 @@ internal class GlobalExceptionFilter(ILogger<GlobalExceptionFilter> logger) : IE
             };
 
             logger.LogError(exception,
-                "请求 {Method} {Url} 返回 {StatusCode}，CorrelationId={CorrelationId}",
+                "请求 {Method} {Url} 返回 {StatusCode}",
                 context.HttpContext.Request.Method,
                 context.HttpContext.Request.GetDisplayUrl(),
-                StatusCodes.Status500InternalServerError,
-                correlationId);
+                StatusCodes.Status500InternalServerError);
         }
 
         context.ExceptionHandled = true;
-    }
-
-    private static string GetCorrelationId(HttpContext httpContext)
-    {
-        var correlationId = httpContext.TraceIdentifier;
-        if (string.IsNullOrWhiteSpace(correlationId))
-        {
-            correlationId = Guid.NewGuid().ToString("N");
-            httpContext.TraceIdentifier = correlationId;
-        }
-
-        httpContext.Response.Headers[CorrelationIdHeader] = correlationId;
-        return correlationId;
     }
 
     /// <summary>

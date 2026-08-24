@@ -54,7 +54,7 @@ public class GlobalExceptionFilterTests
         Assert.Equal("业务异常", apiResult.Msg);
         Assert.Null(apiResult.Data);
         Assert.Empty(result.ContentTypes);
-        Assert.Equal("trace-123", context.HttpContext.Response.Headers["X-Correlation-ID"]);
+        Assert.False(context.HttpContext.Response.Headers.ContainsKey("X-Correlation-ID"));
     }
 
     [Fact]
@@ -74,7 +74,7 @@ public class GlobalExceptionFilterTests
         Assert.Equal("系统内部错误", apiResult.Msg);
         Assert.Null(apiResult.Data);
         Assert.DoesNotContain("数据库连接字符串", apiResult.Msg);
-        Assert.Equal("trace-123", context.HttpContext.Response.Headers["X-Correlation-ID"]);
+        Assert.False(context.HttpContext.Response.Headers.ContainsKey("X-Correlation-ID"));
     }
 
     [Fact]
@@ -149,7 +149,7 @@ public class GlobalExceptionFilterTests
     [Theory]
     [InlineData("")]
     [InlineData("   ")]
-    public void OnException_GeneratesCorrelationIdWhenTraceIdentifierIsBlank(string traceIdentifier)
+    public void OnException_DoesNotGenerateCorrelationIdWhenTraceIdentifierIsBlank(string traceIdentifier)
     {
         var exception = new InvalidOperationException("请求处理失败");
         var context = CreateExceptionContext(exception, traceIdentifier);
@@ -158,9 +158,8 @@ public class GlobalExceptionFilterTests
 
         CreateFilter().Invoke(context);
 
-        var correlationId = context.HttpContext.Response.Headers["X-Correlation-ID"].ToString();
-        Assert.False(string.IsNullOrWhiteSpace(correlationId));
-        Assert.Equal(correlationId, context.HttpContext.TraceIdentifier);
+        Assert.False(context.HttpContext.Response.Headers.ContainsKey("X-Correlation-ID"));
+        Assert.Equal(traceIdentifier, context.HttpContext.TraceIdentifier);
         Assert.True(context.ExceptionHandled);
     }
 
