@@ -191,6 +191,18 @@ public class ApiResultController(IOptions<JsonSerializerSettings> options) : Api
         return result;
     }
 
+    [HttpGet("ordinaryBadRequest")]
+    public IActionResult GetOrdinaryBadRequest()
+    {
+        return BadRequest("普通请求错误");
+    }
+
+    [HttpGet("ordinaryServerError")]
+    public IActionResult GetOrdinaryServerError()
+    {
+        return new ObjectResult("普通服务器错误") { StatusCode = StatusCodes.Status500InternalServerError };
+    }
+
     [HttpGet("apiResult")]
     public ApiResult GetApiResult()
     {

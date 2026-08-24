@@ -241,9 +241,12 @@ public class ApiResultTests(ITestOutputHelper output) : BaseTest
     }
 
     [Fact]
-    public async Task GetApiResult()
+    public async Task GetApiResultPreservesHttpContractAsync()
     {
-        var result1 = await Client.GetStringAsync("/apiResult/apiResult");
+        var result = await Client.GetAsync("/apiResult/apiResult");
+        var result1 = await result.Content.ReadAsStringAsync();
+        Assert.Equal(200, (int)result.StatusCode);
+        Assert.Equal("application/json", result.Content.Headers.ContentType?.MediaType);
         Assert.Equal("""
                      {"success":true,"code":0,"msg":"","data":1}
                      """, result1);
@@ -259,12 +262,35 @@ public class ApiResultTests(ITestOutputHelper output) : BaseTest
     }
 
     [Fact]
-    public async Task GetApiResultGeneric()
+    public async Task GetApiResultGenericPreservesHttpContractAsync()
     {
-        var result1 = await Client.GetStringAsync("/apiResult/apiResultGeneric");
+        var result = await Client.GetAsync("/apiResult/apiResultGeneric");
+        var result1 = await result.Content.ReadAsStringAsync();
+        Assert.Equal(200, (int)result.StatusCode);
+        Assert.Equal("application/json", result.Content.Headers.ContentType?.MediaType);
         Assert.Equal("""
                      {"success":true,"code":0,"msg":"","data":1}
                      """, result1);
+    }
+
+    [Theory]
+    [InlineData("ordinaryBadRequest", 400, "普通请求错误")]
+    [InlineData("ordinaryServerError", 500, "普通服务器错误")]
+    public async Task ReturnOrdinaryErrorAsApiResultWithHttpContractAsync(
+        string route, int expectedStatusCode, string expectedData)
+    {
+        var result = await Client.GetAsync($"/apiResult/{route}");
+        var text = await result.Content.ReadAsStringAsync();
+
+        Assert.Equal(expectedStatusCode, (int)result.StatusCode);
+        Assert.Equal("application/json", result.Content.Headers.ContentType?.MediaType);
+
+        using var document = JsonDocument.Parse(text);
+        var root = document.RootElement;
+        Assert.False(root.GetProperty("success").GetBoolean());
+        Assert.Equal(0, root.GetProperty("code").GetInt32());
+        Assert.Equal(string.Empty, root.GetProperty("msg").GetString());
+        Assert.Equal(expectedData, root.GetProperty("data").GetString());
     }
 
     [Fact]

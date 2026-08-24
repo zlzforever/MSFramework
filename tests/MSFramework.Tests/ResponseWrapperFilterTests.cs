@@ -263,17 +263,27 @@ public class ResponseWrapperFilterTests
     }
 
     [Fact]
-    public async Task LeavesDeclaredApiResultTypeUnwrappedWhenValueIsOrdinaryObjectAsync()
+    public async Task WrapsOrdinaryObjectWhenDeclaredTypeIsApiResultAsync()
     {
-        var originalValue = new object();
+        var originalValue = "payload";
         var context = CreateContext(originalValue, StatusCodes.Status200OK, ApiResult.Type);
+        Assert.IsType<ObjectResult>(context.Result).ContentTypes.Add("application/vnd.api+json");
 
         var nextCalls = await InvokeFilterAsync(context);
 
         var result = Assert.IsType<ObjectResult>(context.Result);
+        var apiResult = Assert.IsType<ApiResult>(result.Value);
         Assert.Equal(1, nextCalls);
-        Assert.Same(originalValue, result.Value);
+        Assert.Equal(StatusCodes.Status200OK, result.StatusCode);
         Assert.Equal(ApiResult.Type, result.DeclaredType);
+        Assert.Equal(["application/vnd.api+json"], result.ContentTypes);
+        Assert.True(apiResult.Success);
+        Assert.Equal(0, apiResult.Code);
+        Assert.Equal(string.Empty, apiResult.Msg);
+        Assert.Same(originalValue, apiResult.Data);
+        Assert.Equal(
+            "{\"success\":true,\"code\":0,\"msg\":\"\",\"data\":\"payload\"}",
+            JsonSerializer.Serialize(result.Value));
     }
 
     [Fact]
@@ -407,8 +417,6 @@ public class ResponseWrapperFilterTests
         var context = CreateContext(originalValue, StatusCodes.Status201Created);
         var originalResult = Assert.IsType<ObjectResult>(context.Result);
         originalResult.ContentTypes.Add("application/custom+json");
-        var expectedBody = JsonSerializer.Serialize(originalValue);
-
         var nextCalls = await InvokeFilterAsync(context);
 
         var result = Assert.IsType<ObjectResult>(context.Result);
@@ -418,7 +426,9 @@ public class ResponseWrapperFilterTests
         Assert.Null(result.DeclaredType);
         Assert.Single(result.ContentTypes);
         Assert.Equal("application/custom+json", result.ContentTypes[0]);
-        Assert.Equal(expectedBody, JsonSerializer.Serialize(result.Value));
+        Assert.Equal(
+            """{"success":true,"code":0,"msg":"\u81EA\u5B9A\u4E49\u7ED3\u679C","data":7}""",
+            JsonSerializer.Serialize((CustomApiResult<int>)result.Value));
     }
 
     private static ResultExecutingContext CreateContext(object value, int? statusCode, Type declaredType = null)

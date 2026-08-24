@@ -59,7 +59,6 @@ internal sealed class ResponseWrapperFilter(ILogger<ResponseWrapperFilter> logge
                 objectResult.DeclaredType = ApiResult.Type;
             }
             else if (objectResult.Value is ApiResult ||
-                     ApiResult.IsApiResult(declaredType) ||
                      ApiResult.IsApiResult(valueType))
             {
                 await next();
@@ -68,11 +67,10 @@ internal sealed class ResponseWrapperFilter(ILogger<ResponseWrapperFilter> logge
             else
             {
                 declaredType ??= valueType;
-                if (declaredType is not null && !ApiResult.IsApiResult(declaredType))
+                if (declaredType is not null &&
+                    (valueType is not null || !ApiResult.IsApiResult(declaredType)))
                 {
-                    // 根据 ObjectResult 状态码判定 success：
-                    // 非 2xx（如 BadRequestObjectResult/NotFoundObjectResult/ConflictObjectResult）包装时
-                    // 必须标记 Success=false，避免 HTTP 状态与 success 字段自相矛盾
+                    // 以运行时值为准包装普通 ObjectResult；声明类型可能是 ApiResult，不能掩盖实际响应值。
                     var code = objectResult.StatusCode ?? StatusCodes.Status200OK;
                     var success = HttpUtils.IsSuccessStatusCode(code);
                     objectResult.Value = new ApiResult

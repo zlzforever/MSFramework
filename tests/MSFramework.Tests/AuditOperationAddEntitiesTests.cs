@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using MicroserviceFramework.Auditing.Model;
 using Xunit;
@@ -11,6 +12,15 @@ namespace MSFramework.Tests;
 /// </summary>
 public class AuditOperationAddEntitiesTests
 {
+    [Fact]
+    public void Entities_ExposesICollectionPublicContract()
+    {
+        var property = typeof(AuditOperation).GetProperty(nameof(AuditOperation.Entities));
+
+        Assert.NotNull(property);
+        Assert.Equal(typeof(ICollection<AuditEntity>), property.PropertyType);
+    }
+
     /// <summary>
     /// 构建测试用审计操作
     /// </summary>

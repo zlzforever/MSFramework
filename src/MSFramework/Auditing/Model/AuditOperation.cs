@@ -111,7 +111,7 @@ public class AuditOperation : CreationAggregateRoot<string>, IAuditObject
     /// <summary>
     /// 获取或设置审计数据信息集合
     /// </summary>
-    public List<AuditEntity> Entities { get; private set; }
+    public ICollection<AuditEntity> Entities { get; private set; }
 
     /// <summary>
     /// 请求结束时间
