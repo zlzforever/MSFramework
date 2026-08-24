@@ -19,6 +19,11 @@ namespace MSFramework.AspNetCore.Test;
 [ApiController]
 public class ApiResultController(IOptions<JsonSerializerSettings> options) : ApiControllerBase
 {
+    public class CustomApiResult<T>(T data) : ApiResult<T>(data)
+    {
+        public string Marker { get; set; } = "custom";
+    }
+
     public class EnumInput
     {
         /// <summary>
@@ -196,6 +201,12 @@ public class ApiResultController(IOptions<JsonSerializerSettings> options) : Api
     public ApiResult<int> GetApiResultGeneric()
     {
         return new ApiResult<int>(1);
+    }
+
+    [HttpGet("apiResultGenericSubclass")]
+    public CustomApiResult<int> GetApiResultGenericSubclass()
+    {
+        return new CustomApiResult<int>(7) { Msg = "自定义结果" };
     }
 
     /// <summary>

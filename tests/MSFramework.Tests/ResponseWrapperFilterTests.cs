@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
+using System.Text.Json;
 using System.Threading.Tasks;
 using MicroserviceFramework;
 using MicroserviceFramework.AspNetCore.Mvc.ModelBinding;
@@ -261,6 +262,165 @@ public class ResponseWrapperFilterTests
         Assert.Equal(ApiResult.Type, result.DeclaredType);
     }
 
+    [Fact]
+    public async Task LeavesDeclaredApiResultTypeUnwrappedWhenValueIsOrdinaryObjectAsync()
+    {
+        var originalValue = new object();
+        var context = CreateContext(originalValue, StatusCodes.Status200OK, ApiResult.Type);
+
+        var nextCalls = await InvokeFilterAsync(context);
+
+        var result = Assert.IsType<ObjectResult>(context.Result);
+        Assert.Equal(1, nextCalls);
+        Assert.Same(originalValue, result.Value);
+        Assert.Equal(ApiResult.Type, result.DeclaredType);
+    }
+
+    [Fact]
+    public async Task PassesThroughNonGenericApiResultAsync()
+    {
+        var originalValue = new ApiResult { Data = 7, Msg = "原始结果" };
+        var context = CreateContext(originalValue, StatusCodes.Status200OK);
+
+        var nextCalls = await InvokeFilterAsync(context);
+
+        var result = Assert.IsType<ObjectResult>(context.Result);
+        Assert.Equal(1, nextCalls);
+        Assert.Same(originalValue, result.Value);
+        Assert.Null(result.DeclaredType);
+    }
+
+    [Fact]
+    public async Task PassesThroughGenericApiResultAsync()
+    {
+        var originalValue = new ApiResult<int>(7) { Msg = "原始结果" };
+        var context = CreateContext(originalValue, StatusCodes.Status200OK);
+
+        var nextCalls = await InvokeFilterAsync(context);
+
+        var result = Assert.IsType<ObjectResult>(context.Result);
+        Assert.Equal(1, nextCalls);
+        Assert.Same(originalValue, result.Value);
+        Assert.Null(result.DeclaredType);
+    }
+
+    [Theory]
+    [InlineData(StatusCodes.Status400BadRequest)]
+    [InlineData(StatusCodes.Status404NotFound)]
+    [InlineData(StatusCodes.Status500InternalServerError)]
+    public async Task WrapsOrdinaryObjectAsFailureForNonSuccessStatusCodesAsync(int statusCode)
+    {
+        var originalValue = new object();
+        var context = CreateContext(originalValue, statusCode);
+
+        var nextCalls = await InvokeFilterAsync(context);
+
+        var result = Assert.IsType<ObjectResult>(context.Result);
+        var apiResult = Assert.IsType<ApiResult>(result.Value);
+        Assert.Equal(1, nextCalls);
+        Assert.Equal(statusCode, result.StatusCode);
+        Assert.False(apiResult.Success);
+        Assert.Equal(0, apiResult.Code);
+        Assert.Equal(string.Empty, apiResult.Msg);
+        Assert.Same(originalValue, apiResult.Data);
+        Assert.Equal(ApiResult.Type, result.DeclaredType);
+    }
+
+    [Theory]
+    [InlineData("true")]
+    [InlineData("TRUE")]
+    [InlineData("TrUe")]
+    public async Task PassesThroughInternalCallHeaderCaseInsensitivelyAsync(string headerValue)
+    {
+        var originalValue = new object();
+        var context = CreateContext(originalValue, StatusCodes.Status200OK);
+        context.HttpContext.Request.Headers[Defaults.Headers.InternalCall] = headerValue;
+
+        var nextCalls = await InvokeFilterAsync(context);
+
+        var result = Assert.IsType<ObjectResult>(context.Result);
+        Assert.Equal(1, nextCalls);
+        Assert.Same(originalValue, result.Value);
+    }
+
+    [Theory]
+    [InlineData("false")]
+    [InlineData("1")]
+    [InlineData(" true ")]
+    public async Task WrapsInternalCallHeaderWhenValueIsNotTrueAsync(string headerValue)
+    {
+        var originalValue = new object();
+        var context = CreateContext(originalValue, StatusCodes.Status200OK);
+        context.HttpContext.Request.Headers[Defaults.Headers.InternalCall] = headerValue;
+
+        var nextCalls = await InvokeFilterAsync(context);
+
+        var result = Assert.IsType<ObjectResult>(context.Result);
+        var apiResult = Assert.IsType<ApiResult>(result.Value);
+        Assert.Equal(1, nextCalls);
+        Assert.True(apiResult.Success);
+        Assert.Same(originalValue, apiResult.Data);
+    }
+
+    [Fact]
+    public async Task WrapsEmptyResultAsSuccessfulApiResultAsync()
+    {
+        var context = CreateContext(new object(), StatusCodes.Status200OK);
+        context.Result = new EmptyResult();
+
+        var nextCalls = await InvokeFilterAsync(context);
+
+        var result = Assert.IsType<ObjectResult>(context.Result);
+        var apiResult = Assert.IsType<ApiResult>(result.Value);
+        Assert.Equal(1, nextCalls);
+        Assert.True(apiResult.Success);
+        Assert.Equal(0, apiResult.Code);
+        Assert.Equal(string.Empty, apiResult.Msg);
+        Assert.Null(apiResult.Data);
+    }
+
+    [Fact]
+    public async Task PropagatesExceptionThrownByNextAsync()
+    {
+        var context = CreateContext(new object(), StatusCodes.Status200OK);
+        var expected = new InvalidOperationException("next failed");
+        var nextCalls = 0;
+        var next = new ResultExecutionDelegate(() =>
+        {
+            nextCalls++;
+            return Task.FromException<ResultExecutedContext>(expected);
+        });
+
+        var actual = await Assert.ThrowsAsync<InvalidOperationException>(() => InvokeFilterAsync(context, next));
+
+        Assert.Same(expected, actual);
+        Assert.Equal(1, nextCalls);
+    }
+
+    [Fact]
+    public async Task PassesThroughCustomGenericApiResultSubclassAsync()
+    {
+        var originalValue = new CustomApiResult<int>(7)
+        {
+            Msg = "自定义结果"
+        };
+        var context = CreateContext(originalValue, StatusCodes.Status201Created);
+        var originalResult = Assert.IsType<ObjectResult>(context.Result);
+        originalResult.ContentTypes.Add("application/custom+json");
+        var expectedBody = JsonSerializer.Serialize(originalValue);
+
+        var nextCalls = await InvokeFilterAsync(context);
+
+        var result = Assert.IsType<ObjectResult>(context.Result);
+        Assert.Equal(1, nextCalls);
+        Assert.Same(originalValue, result.Value);
+        Assert.Equal(StatusCodes.Status201Created, result.StatusCode);
+        Assert.Null(result.DeclaredType);
+        Assert.Single(result.ContentTypes);
+        Assert.Equal("application/custom+json", result.ContentTypes[0]);
+        Assert.Equal(expectedBody, JsonSerializer.Serialize(result.Value));
+    }
+
     private static ResultExecutingContext CreateContext(object value, int? statusCode, Type declaredType = null)
     {
         var httpContext = new DefaultHttpContext();
@@ -274,7 +434,8 @@ public class ResponseWrapperFilterTests
         return new ResultExecutingContext(actionContext, new List<IFilterMetadata>(), result, null);
     }
 
-    private static async Task<int> InvokeFilterAsync(ResultExecutingContext context)
+    private static async Task<int> InvokeFilterAsync(ResultExecutingContext context,
+        ResultExecutionDelegate next = null)
     {
         var assembly = typeof(ObjectIdModelBinder).Assembly;
         var filterType = assembly.GetType("MicroserviceFramework.AspNetCore.Filters.ResponseWrapperFilter");
@@ -286,7 +447,7 @@ public class ResponseWrapperFilterTests
         Assert.NotNull(method);
 
         var nextCalls = 0;
-        var next = new ResultExecutionDelegate(() =>
+        next ??= new ResultExecutionDelegate(() =>
         {
             nextCalls++;
             return Task.FromResult(new ResultExecutedContext(context, new List<IFilterMetadata>(), context.Result,
@@ -317,4 +478,6 @@ public class ResponseWrapperFilterTests
         {
         }
     }
+
+    private sealed class CustomApiResult<T>(T data) : ApiResult<T>(data);
 }

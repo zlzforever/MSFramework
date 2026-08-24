@@ -267,6 +267,24 @@ public class ApiResultTests(ITestOutputHelper output) : BaseTest
                      """, result1);
     }
 
+    [Fact]
+    public async Task GetApiResultGenericSubclassWithoutNestedWrappingAsync()
+    {
+        var result = await Client.GetAsync("/apiResult/apiResultGenericSubclass");
+        var text = await result.Content.ReadAsStringAsync();
+
+        Assert.Equal(200, (int)result.StatusCode);
+        Assert.Equal("application/json", result.Content.Headers.ContentType?.MediaType);
+
+        using var document = JsonDocument.Parse(text);
+        var root = document.RootElement;
+        Assert.True(root.GetProperty("success").GetBoolean());
+        Assert.Equal(0, root.GetProperty("code").GetInt32());
+        Assert.Equal("自定义结果", root.GetProperty("msg").GetString());
+        Assert.Equal(7, root.GetProperty("data").GetInt32());
+        Assert.Equal("custom", root.GetProperty("marker").GetString());
+    }
+
     /// <summary>
     /// 接口内抛出 <see cref="MicroserviceFrameworkFriendlyException"/> 时，
     /// 全局异常过滤器应返回 HTTP 200 + ApiResult 错误结构。
