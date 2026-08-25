@@ -237,7 +237,7 @@ public class FormFileTests : BaseTest, IDisposable
     /// <returns>目录缓存字典</returns>
     private static ConcurrentDictionary<string, byte> ExistingDirCache()
     {
-        var field = typeof(FormFileExtensions).GetField("_existingDirCache",
+        var field = typeof(FormFileExtensions).GetField("ExistingDirCache",
             BindingFlags.Static | BindingFlags.NonPublic);
         Assert.NotNull(field);
         return (ConcurrentDictionary<string, byte>)field.GetValue(null)!;

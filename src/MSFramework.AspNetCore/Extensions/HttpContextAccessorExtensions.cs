@@ -1,3 +1,5 @@
+using System.IO;
+using System.Text;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 
@@ -29,11 +31,22 @@ public static class HttpContextAccessorExtensions
             request.EnableBuffering();
         }
 
-        // reader 不能释放， 会导致 body 关闭
-        var reader = new System.IO.StreamReader(request.Body);
-        // comments by lewis: 一定要使用异步， 同步会阻塞操作
-        var text = await reader.ReadToEndAsync();
+        var originalPosition = request.Body.Position;
         request.Body.Position = 0;
-        return text;
+
+        try
+        {
+            // reader 不能释放， 会导致 body 关闭
+            using var reader = new StreamReader(
+                request.Body, Encoding.UTF8, true, 1024, leaveOpen: true);
+            // comments by lewis: 一定要使用异步， 同步会阻塞操作
+            var text = await reader.ReadToEndAsync();
+            return text;
+        }
+        finally
+        {
+            // 归位
+            request.Body.Position = originalPosition;
+        }
     }
 }

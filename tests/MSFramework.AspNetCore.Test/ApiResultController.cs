@@ -2,12 +2,15 @@
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.IO;
+using System.Security.Authentication;
 using System.Threading.Tasks;
 using MicroserviceFramework;
 using MicroserviceFramework.AspNetCore;
 using MicroserviceFramework.Common;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
+using MongoDB.Bson;
 using Newtonsoft.Json;
 
 namespace MSFramework.AspNetCore.Test;
@@ -16,6 +19,11 @@ namespace MSFramework.AspNetCore.Test;
 [ApiController]
 public class ApiResultController(IOptions<JsonSerializerSettings> options) : ApiControllerBase
 {
+    public class CustomApiResult<T>(T data) : ApiResult<T>(data)
+    {
+        public string Marker { get; set; } = "custom";
+    }
+
     public class EnumInput
     {
         /// <summary>
@@ -41,6 +49,12 @@ public class ApiResultController(IOptions<JsonSerializerSettings> options) : Api
     public int Validation([FromQuery, Required] int id)
     {
         return 1;
+    }
+
+    [HttpGet("objectId")]
+    public string GetObjectId(ObjectId id)
+    {
+        return id.ToString();
     }
 
     [HttpGet("452")]
@@ -162,6 +176,33 @@ public class ApiResultController(IOptions<JsonSerializerSettings> options) : Api
         return new EmptyResult();
     }
 
+    [HttpGet("problemDetails")]
+    public IActionResult GetProblemDetails()
+    {
+        var result = new ObjectResult(new ProblemDetails
+        {
+            Status = StatusCodes.Status400BadRequest,
+            Title = "请求无效"
+        })
+        {
+            StatusCode = StatusCodes.Status400BadRequest
+        };
+        result.ContentTypes.Add("application/problem+json");
+        return result;
+    }
+
+    [HttpGet("ordinaryBadRequest")]
+    public IActionResult GetOrdinaryBadRequest()
+    {
+        return BadRequest("普通请求错误");
+    }
+
+    [HttpGet("ordinaryServerError")]
+    public IActionResult GetOrdinaryServerError()
+    {
+        return new ObjectResult("普通服务器错误") { StatusCode = StatusCodes.Status500InternalServerError };
+    }
+
     [HttpGet("apiResult")]
     public ApiResult GetApiResult()
     {
@@ -174,8 +215,14 @@ public class ApiResultController(IOptions<JsonSerializerSettings> options) : Api
         return new ApiResult<int>(1);
     }
 
+    [HttpGet("apiResultGenericSubclass")]
+    public CustomApiResult<int> GetApiResultGenericSubclass()
+    {
+        return new CustomApiResult<int>(7) { Msg = "自定义结果" };
+    }
+
     /// <summary>
-    /// 抛出自定义友好异常（业务错误码 2），验证全局异常过滤器返回 HTTP 200 + ApiResult 错误结构
+    /// 抛出自定义友好异常（业务错误码 2），验证全局异常过滤器返回 HTTP 200 + ApiResult
     /// </summary>
     /// <returns>正常返回不会被执行，始终抛出异常</returns>
     /// <exception cref="MicroserviceFrameworkFriendlyException">模拟接口内抛出友好异常</exception>
@@ -186,7 +233,7 @@ public class ApiResultController(IOptions<JsonSerializerSettings> options) : Api
     }
 
     /// <summary>
-    /// 抛出普通运行时异常（InvalidOperationException），验证全局异常过滤器返回 HTTP 500 + 系统内部错误结构
+    /// 抛出普通运行时异常（InvalidOperationException），验证全局异常过滤器返回 HTTP 500 + ApiResult
     /// </summary>
     /// <returns>正常返回不会被执行，始终抛出异常</returns>
     /// <exception cref="InvalidOperationException">模拟接口内抛出非友好普通异常</exception>
@@ -197,7 +244,7 @@ public class ApiResultController(IOptions<JsonSerializerSettings> options) : Api
     }
 
     /// <summary>
-    /// 抛出参数校验异常（ArgumentException），验证全局异常过滤器返回 HTTP 500 + 系统内部错误结构
+    /// 抛出参数校验异常（ArgumentException），验证全局异常过滤器返回 HTTP 500 + ApiResult
     /// </summary>
     /// <returns>正常返回不会被执行，始终抛出异常</returns>
     /// <exception cref="ArgumentException">模拟接口内抛出参数类普通异常</exception>
@@ -205,5 +252,35 @@ public class ApiResultController(IOptions<JsonSerializerSettings> options) : Api
     public int GetArgumentException()
     {
         throw new ArgumentException("参数不合法");
+    }
+
+    [HttpGet("authenticationException")]
+    public int GetAuthenticationException()
+    {
+        throw new AuthenticationException("认证失败");
+    }
+
+    [HttpGet("unauthorizedException")]
+    public int GetUnauthorizedException()
+    {
+        throw new UnauthorizedAccessException("无权访问");
+    }
+
+    [HttpGet("notFoundException")]
+    public int GetNotFoundException()
+    {
+        throw new KeyNotFoundException("资源不存在");
+    }
+
+    [HttpGet("conflictException")]
+    public int GetConflictException()
+    {
+        throw new MicroserviceFrameworkConflictException("资源状态冲突");
+    }
+
+    [HttpGet("unexpectedException")]
+    public int GetUnexpectedException()
+    {
+        throw new Exception("数据库连接字符串和堆栈不应返回给客户端");
     }
 }

@@ -1,35 +1,58 @@
 using System;
-using System.Linq.Expressions;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace MicroserviceFramework.Ef.Internal;
 
 /// <summary>
-/// DateTimeOffset 到 long 的转换器，将日期时间存储为 Unix 时间戳（秒或毫秒）
+/// DateTimeOffset UTC 转 long Unix秒
 /// </summary>
-public class DateTimeOffsetToLongConverter(bool milliseconds = false)
-    : ValueConverter<DateTimeOffset, long>(ToLong(milliseconds), ToDateTimeOffset(milliseconds))
+public class DateTimeOffsetToUnixSecondsConverter : ValueConverter<DateTimeOffset, long>
 {
-    private static Expression<Func<DateTimeOffset, long>> ToLong(bool milliseconds = false)
-        => v => milliseconds ? v.ToUnixTimeMilliseconds() : v.ToUnixTimeSeconds();
+    /// <summary>
+    ///
+    /// </summary>
+    public DateTimeOffsetToUnixSecondsConverter()
+        : base(v => v.ToUnixTimeSeconds(), l => DateTimeOffset.FromUnixTimeSeconds(l))
+    {
+    }
+}
 
-    private static Expression<Func<long, DateTimeOffset>> ToDateTimeOffset(bool milliseconds = false)
-        => v => milliseconds
-            ? DateTimeOffset.FromUnixTimeMilliseconds(v).ToLocalTime()
-            : DateTimeOffset.FromUnixTimeSeconds(v).ToLocalTime();
+/// <summary>DateTimeOffset UTC 转 long Unix毫秒</summary>
+public class DateTimeOffsetToUnixMsConverter : ValueConverter<DateTimeOffset, long>
+{
+    /// <summary>
+    ///
+    /// </summary>
+    public DateTimeOffsetToUnixMsConverter()
+        : base(v => v.ToUnixTimeMilliseconds(), l => DateTimeOffset.FromUnixTimeMilliseconds(l))
+    {
+    }
 }
 
 /// <summary>
-/// 可空 DateTimeOffset 到可空 long 的转换器，将可空日期时间存储为 Unix 时间戳（秒或毫秒）
+/// 可空 DateTimeOffset 到可空 long 的转换器，将可空日期时间存储为 Unix 时间戳（秒）
 /// </summary>
-public class NullableDateTimeOffsetToLongConverter(bool milliseconds = false)
-    : ValueConverter<DateTimeOffset?, long?>(ToLong(milliseconds), ToDateTimeOffset(milliseconds))
+public class NullableDateTimeOffsetToUnixSecondsConverter : ValueConverter<DateTimeOffset?, long?>
 {
-    private static Expression<Func<DateTimeOffset?, long?>> ToLong(bool milliseconds = false)
-        => v => v.HasValue ? (milliseconds ? v.Value.ToUnixTimeMilliseconds() : v.Value.ToUnixTimeSeconds()) : null;
+    /// <summary>
+    ///
+    /// </summary>
+    public NullableDateTimeOffsetToUnixSecondsConverter()
+        : base(v => v.HasValue ? v.Value.ToUnixTimeSeconds() : null,
+            l => l.HasValue ? DateTimeOffset.FromUnixTimeSeconds(l.Value) : null)
+    {
+    }
+}
 
-    private static Expression<Func<long?, DateTimeOffset?>> ToDateTimeOffset(bool milliseconds = false)
-        => v => !v.HasValue ? null
-            : milliseconds ? DateTimeOffset.FromUnixTimeMilliseconds(v.Value).ToLocalTime()
-            : DateTimeOffset.FromUnixTimeSeconds(v.Value).ToLocalTime();
+/// <summary>可空 DateTimeOffset 到可空 long 的转换器，将可空日期时间存储为 Unix 时间戳（毫秒）</summary>
+public class NullableDateTimeOffsetToUnixMsConverter : ValueConverter<DateTimeOffset?, long?>
+{
+    /// <summary>
+    ///
+    /// </summary>
+    public NullableDateTimeOffsetToUnixMsConverter()
+        : base(v => v.HasValue ? v.Value.ToUnixTimeMilliseconds() : null,
+            l => l.HasValue ? DateTimeOffset.FromUnixTimeMilliseconds(l.Value) : null)
+    {
+    }
 }

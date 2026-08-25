@@ -2,6 +2,7 @@ using System;
 using System.Linq;
 using MicroserviceFramework.Common;
 using MicroserviceFramework.Runtime;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 
@@ -29,6 +30,9 @@ public static class InvalidModelStateResponseFactory
         return new ObjectResult(new ApiResultWithErrors
         {
             Msg = "数据校验不通过", Errors = errors
-        });
+        })
+        {
+            StatusCode = StatusCodes.Status400BadRequest
+        };
     };
 }

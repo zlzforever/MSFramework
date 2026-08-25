@@ -18,7 +18,7 @@ public class ApiResult<T>(T data)
     public bool Success { get; set; } = true;
 
     /// <summary>
-    /// 业务代码
+    /// 业务码，0 代表成功；非 0 代表业务错误；
     /// </summary>
     [JsonPropertyName("code")]
     public int Code { get; set; }
@@ -71,6 +71,7 @@ public class ApiResult : ApiResult<object>
     /// <see cref="ApiResult"/> 的运行时类型
     /// </summary>
     public static readonly Type Type = typeof(ApiResult);
+
     /// <summary>
     /// <see cref="ApiResult{T}"/> 的泛型类型定义
     /// </summary>
@@ -95,24 +96,22 @@ public class ApiResult : ApiResult<object>
     /// <returns>如果是 API 响应类型则返回 true</returns>
     public static bool IsApiResult(Type type)
     {
-        if (type == null)
+        if (type is null)
         {
             return false;
         }
 
-        if (type == Type)
+        var current = type;
+        while (current != null)
         {
-            return true;
-        }
+            if (current == Type
+                || current == ApiResultWithErrors.ApiResultWithErrorsType
+                || (current.IsGenericType && current.GetGenericTypeDefinition() == GenericType))
+            {
+                return true;
+            }
 
-        if (type == ApiResultWithErrors.ApiResultWithErrorsType)
-        {
-            return true;
-        }
-
-        if (type.IsGenericType && type.GetGenericTypeDefinition() == GenericType)
-        {
-            return true;
+            current = current.BaseType;
         }
 
         return false;

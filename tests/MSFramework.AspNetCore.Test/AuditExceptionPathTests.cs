@@ -100,8 +100,8 @@ public class AuditExceptionPathTests : IDisposable
     }
 
     /// <summary>
-    /// 契约语义回归：FriendlyException（业务异常）被全局异常过滤器处理时返回 HTTP 200，
-    /// 但审计一律不保存（用户确认：500/403/FriendlyException 等一律不保存，审计表只剩成功请求）
+    /// 契约语义回归：FriendlyException（业务异常）被全局异常过滤器处理时返回 HTTP 200 + ApiResult，
+    /// 但审计一律不保存（用户确认：业务异常/403 等一律不保存，审计表只剩成功请求）
     /// </summary>
     [Fact]
     public async Task FriendlyException_HandledByGlobalExceptionFilter_DoesNotSaveAudit()
@@ -128,16 +128,9 @@ public class AuditExceptionPathTests : IDisposable
 
         try
         {
-            // 异常直接传播：TestServer 侧请求处理失败（客户端表现为异常或 500），
-            // 是否抛出不影响本用例断言——关键断言是审计未保存且 scope 已释放
-            try
-            {
-                await client.PostAsync("/audit-exc/throw", new StringContent(""));
-            }
-            catch (Exception)
-            {
-                // 异常直接传播的预期表现
-            }
+            // 异常直接传播：TestServer 侧应保留 Action 抛出的异常类型。
+            await Assert.ThrowsAsync<InvalidOperationException>(() =>
+                client.PostAsync("/audit-exc/throw", new StringContent("")));
 
             // 异常直接传播路径不保存审计（N7 契约）
             Assert.Equal(0, LifecycleProbeAuditingStore.AddCallCount);
@@ -178,16 +171,9 @@ public class AuditExceptionPathTests : IDisposable
     [Fact]
     public async Task ResultStageException_AuditAlreadySaved()
     {
-        // 结果阶段异常直接传播：TestServer 侧请求处理失败（客户端表现为异常或 500），
-        // 是否抛出不影响本用例断言——关键断言是审计已在动作阶段保存且 scope 已释放
-        try
-        {
-            await _client.PostAsync("/audit-exc/result-fail", new StringContent(""));
-        }
-        catch (Exception)
-        {
-            // 结果阶段异常直接传播的预期表现
-        }
+        // 结果阶段异常直接传播：TestServer 侧应观测到结果过滤器抛出的异常。
+        await Assert.ThrowsAsync<InvalidOperationException>(() =>
+            _client.PostAsync("/audit-exc/result-fail", new StringContent("")));
 
         // 审计保存不受结果阶段异常影响：动作阶段已保存且仅保存一次
         Assert.Equal(1, LifecycleProbeAuditingStore.AddCallsBeforeDispose);
@@ -299,7 +285,7 @@ public class AuditExceptionController : ControllerBase
         throw new InvalidOperationException("boom");
     }
 
-    /// <summary>抛出业务异常的写请求，由全局异常过滤器转换为 200 + 错误响应</summary>
+    /// <summary>抛出业务异常的写请求，由全局异常过滤器转换为 200 + ApiResult 响应</summary>
     /// <returns>恒抛业务异常，无返回值</returns>
     [HttpPost("friendly")]
     public IActionResult Friendly()

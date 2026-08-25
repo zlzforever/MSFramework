@@ -1,5 +1,6 @@
 using System;
 using System.Net.Http;
+using System.Threading;
 using System.Threading.Tasks;
 using MicroserviceFramework.Application;
 using MicroserviceFramework.Auditing;
@@ -189,7 +190,7 @@ public class AuditLeakStartup
 public sealed class FakeUnitOfWork : IUnitOfWork
 {
     /// <summary>保存完成事件，测试场景不使用</summary>
-    public event Action SavedChanges;
+    public event Func<CancellationToken, ValueTask> SavedChanges;
 
     /// <summary>空实现：测试场景无需真实保存</summary>
     /// <param name="cancellationToken">取消令牌</param>

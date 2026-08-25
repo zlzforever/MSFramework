@@ -53,7 +53,7 @@ public class DateTimeJsonConverter : JsonConverter<DateTime>
 
             try
             {
-                return DateTimeOffset.FromUnixTimeSeconds(v).LocalDateTime;
+                return DateTimeOffset.FromUnixTimeSeconds(v).UtcDateTime;
             }
             catch (ArgumentOutOfRangeException ex)
             {

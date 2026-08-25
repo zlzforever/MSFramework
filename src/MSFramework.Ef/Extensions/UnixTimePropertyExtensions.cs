@@ -19,17 +19,9 @@ public static class UnixTimePropertyExtensions
     public static PropertyBuilder<DateTimeOffset?> UseUnixTime(this PropertyBuilder<DateTimeOffset?> builder,
         bool milliseconds = false)
     {
-        // var converter = new ValueConverter<DateTimeOffset?, long?>(
-        //     v => v.HasValue
-        //         ? milliseconds ? v.Value.ToUnixTimeMilliseconds() : v.Value.ToUnixTimeSeconds()
-        //         : default,
-        //     v => v.HasValue
-        //         ? milliseconds
-        //             ? DateTimeOffset.FromUnixTimeMilliseconds(v.Value).ToLocalTime()
-        //             : DateTimeOffset.FromUnixTimeSeconds(v.Value).ToLocalTime()
-        //         : default);
-        // builder.Metadata.SetValueConverter(converter);
-        builder.Metadata.SetValueConverter(new NullableDateTimeOffsetToLongConverter(milliseconds));
+        builder.Metadata.SetValueConverter(milliseconds
+            ? new NullableDateTimeOffsetToUnixMsConverter()
+            : new NullableDateTimeOffsetToUnixSecondsConverter());
         builder.HasColumnType("bigint");
         builder.IsRequired(false);
         return builder;
@@ -47,7 +39,9 @@ public static class UnixTimePropertyExtensions
         builder.IsRequired();
         builder.HasColumnType("bigint");
         builder.HasDefaultValue(DateTimeOffset.UnixEpoch);
-        builder.Metadata.SetValueConverter(new DateTimeOffsetToLongConverter(milliseconds));
+        builder.Metadata.SetValueConverter(milliseconds
+            ? new DateTimeOffsetToUnixMsConverter()
+            : new DateTimeOffsetToUnixSecondsConverter());
         return builder;
     }
 }

@@ -31,6 +31,7 @@ public class EfRepository<TAggregateRoot> : IRepository<TAggregateRoot>, IEfRepo
     /// <summary>
     /// 获取可查询的实体集合，默认包含第一级导航属性
     /// </summary>
+    // ReSharper disable once VirtualMemberNeverOverridden.Global
     protected virtual IQueryable<TAggregateRoot> Store
     {
         get
@@ -48,11 +49,6 @@ public class EfRepository<TAggregateRoot> : IRepository<TAggregateRoot>, IEfRepo
     }
 
     /// <summary>
-    /// 获取当前 DbContext 实例
-    /// </summary>
-    public DbContext DbContext => DBContext;
-
-    /// <summary>
     /// 一级导航数量超过该阈值时自动启用 SplitQuery，
     /// 避免多集合导航 JOIN 产生的笛卡尔积爆炸
     /// </summary>
@@ -62,7 +58,7 @@ public class EfRepository<TAggregateRoot> : IRepository<TAggregateRoot>, IEfRepo
     /// 获取或设置是否启用查询拆分行为，null 时按一级导航数量自动选择：
     /// 不超过 <see cref="SplitQueryNavigationThreshold"/> 个一级导航使用 SingleQuery，否则强制 SplitQuery
     /// </summary>
-    public bool? UseQuerySplittingBehavior { get; init; }
+    public bool? UseQuerySplittingBehavior { get; set; }
 
     /// <summary>
     /// 初始化 EfRepository 实例

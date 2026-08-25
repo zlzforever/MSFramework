@@ -1,4 +1,5 @@
 using System;
+using System.Reflection;
 using System.Threading.Tasks;
 using MicroserviceFramework.Common;
 using MicroserviceFramework.Utils;
@@ -11,6 +12,7 @@ namespace MicroserviceFramework.AspNetCore.Filters;
 
 /// <summary>
 /// 统一响应包装过滤器，将 Action 返回值包装为 <see cref="ApiResult"/> 格式。
+/// 业务码，0 代表成功；非 0 代表业务错误；
 /// 已有 <see cref="ApiResult"/> 返回值不会被二次包装。
 /// </summary>
 internal sealed class ResponseWrapperFilter(ILogger<ResponseWrapperFilter> logger) : IAsyncResultFilter
@@ -35,55 +37,51 @@ internal sealed class ResponseWrapperFilter(ILogger<ResponseWrapperFilter> logge
             if ("true".Equals(value, StringComparison.OrdinalIgnoreCase))
             {
                 await next();
+                logger.LogDebug("结束执行返回结果过滤器");
                 return;
             }
         }
 
-        // comments by lewis at 20240103
-        // 只能使用 type 比较， 不能使用 is， 不然如 BadRequestObjectResult 也会被二次包装
         if (context.Result is ObjectResult objectResult)
         {
-            var declaredType = objectResult.DeclaredType ?? objectResult.Value?.GetType();
-            if (declaredType == null)
-            {
-            }
-            else if (objectResult.Value is ProblemDetails problemDetails)
-            {
-                var code = problemDetails.Status ?? 200;
-                var success = HttpUtils.IsSuccessStatusCode(code);
-                if (success)
-                {
-                    objectResult.Value = new ApiResult { Data = objectResult.Value, Msg = string.Empty };
-                    objectResult.DeclaredType = ApiResult.Type;
-                }
-                else
-                {
-                    objectResult.Value = new ApiResult
-                    {
-                        Success = false, Code = -1, Msg = problemDetails.Title ?? string.Empty
-                    };
-                    objectResult.StatusCode = code;
-                    objectResult.DeclaredType = ApiResult.Type;
-                }
-            }
-            else if (ApiResult.IsApiResult(declaredType))
+            // BadRequestObject CreatedObjectResult 之类原样返回
+            if (context.Result.GetType() != typeof(ObjectResult))
             {
             }
             else
             {
-                // 根据 ObjectResult 状态码判定 success：
-                // 非 2xx（如 BadRequestObjectResult/NotFoundObjectResult/ConflictObjectResult）包装时
-                // 必须标记 Success=false，避免 HTTP 状态与 success 字段自相矛盾
-                var code = objectResult.StatusCode ?? StatusCodes.Status200OK;
-                var success = HttpUtils.IsSuccessStatusCode(code);
-                objectResult.Value = new ApiResult
+                var valueType = objectResult.Value?.GetType();
+                // ObjectResult 且 Value是ApiResult，直接跳过
+                if (valueType != null && (objectResult.Value is ApiResult ||
+                                          ApiResult.IsApiResult(valueType)))
                 {
-                    Success = success,
-                    Code = 0,
-                    Msg = string.Empty,
-                    Data = objectResult.Value
-                };
-                objectResult.DeclaredType = ApiResult.Type;
+                }
+                // 只要结果是 ProblemDetails problemDetails 重新包装一下
+                else if (objectResult.Value is ProblemDetails problemDetails)
+                {
+                    objectResult.ContentTypes.Clear();
+                    var code = objectResult.StatusCode ?? problemDetails.Status ?? StatusCodes.Status200OK;
+                    objectResult.Value = new ApiResult
+                    {
+                        Success = false,
+                        Code = 500,
+                        Msg = problemDetails.Title ?? string.Empty,
+                        Data = problemDetails
+                    };
+                    objectResult.StatusCode = code;
+                    objectResult.DeclaredType = ApiResult.Type;
+                }
+                // ObjectResult 且 Value 不是 ApiResult，如是一个 string(Task<string>)
+                else
+                {
+                    var code = objectResult.StatusCode ?? StatusCodes.Status200OK;
+                    var success = HttpUtils.IsSuccessStatusCode(code);
+                    objectResult.Value = new ApiResult
+                    {
+                        Success = success, Code = success ? 0 : 1, Msg = string.Empty, Data = objectResult.Value
+                    };
+                    objectResult.DeclaredType = ApiResult.Type;
+                }
             }
         }
         else if (context.Result is EmptyResult)

@@ -74,7 +74,7 @@ internal sealed class EntityTableConventionStrategy : IModelBuildingStrategy
             }
 
             ApplyTableName(entityType, context.Settings);
-            ApplySoftDeleteFilter(entityType, context.Settings);
+            ApplySoftDeleteFilter(entityType);
         }
     }
 
@@ -108,12 +108,12 @@ internal sealed class EntityTableConventionStrategy : IModelBuildingStrategy
         entityType.SetTableName(tableName);
     }
 
-    private static void ApplySoftDeleteFilter(IMutableEntityType entityType, DbContextSettings settings)
+    private static void ApplySoftDeleteFilter(IMutableEntityType entityType)
     {
-        if (settings.UseCompiledModel)
-        {
-            return;
-        }
+        // if (settings.UseCompiledModel)
+        // {
+        //     return;
+        // }
 
         if (!typeof(IDeletion).IsAssignableFrom(entityType.ClrType))
         {
@@ -397,7 +397,7 @@ internal sealed class EntityPropertyConventionStrategy : IModelBuildingStrategy
 
     private static void SetUnixTimeDefaults(IMutableProperty property)
     {
-        property.SetValueConverter(new NullableDateTimeOffsetToLongConverter());
+        property.SetValueConverter(new NullableDateTimeOffsetToUnixSecondsConverter());
         property.SetColumnType("bigint");
         property.IsNullable = true;
     }

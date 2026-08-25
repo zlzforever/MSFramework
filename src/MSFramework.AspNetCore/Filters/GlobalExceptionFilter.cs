@@ -13,12 +13,15 @@ namespace MicroserviceFramework.AspNetCore.Filters;
 /// </summary>
 internal class GlobalExceptionFilter(ILogger<GlobalExceptionFilter> logger) : IExceptionFilter
 {
+    private const string UnauthorizedErrorMessage = "无权访问";
+
     /// <summary>
     /// 捕获异常并转换为统一响应格式：
     /// <see cref="UnauthorizedAccessException"/> → 403，
     /// <see cref="MicroserviceFrameworkFriendlyException"/> → 200 + 错误信息，
     /// 其他异常 → 500。
     /// </summary>
+    /// <param name="context">异常过滤器上下文</param>
     public void OnException(ExceptionContext context)
     {
         if (context.ExceptionHandled)
@@ -26,54 +29,64 @@ internal class GlobalExceptionFilter(ILogger<GlobalExceptionFilter> logger) : IE
             return;
         }
 
-        if (context.Exception is UnauthorizedAccessException uae)
-        {
-            context.Result =
-                new ObjectResult(new ApiResult { Success = false, Msg = uae.Message, Code = 403, Data = null })
-                {
-                    StatusCode = StatusCodes.Status403Forbidden
-                };
+        var exception = context.Exception;
 
-            logger.LogError(context.Exception, "请求 {Method} {Url} 权限异常", context.HttpContext.Request.Method,
-                context.HttpContext.Request.GetDisplayUrl());
-        }
-        else if (context.Exception is MicroserviceFrameworkFriendlyException e)
+        if (exception is UnauthorizedAccessException)
         {
             context.Result = new ObjectResult(new ApiResult
             {
-                Success = false, Msg = e.Message, Code = e.Code, Data = null
+                Success = false,
+                Msg = UnauthorizedErrorMessage,
+                Code = StatusCodes.Status403Forbidden,
+                Data = null
+            })
+            {
+                StatusCode = StatusCodes.Status403Forbidden
+            };
+
+            logger.LogError(exception,
+                "请求 {Method} {Url} 返回 {StatusCode}",
+                context.HttpContext.Request.Method,
+                context.HttpContext.Request.GetDisplayUrl(),
+                StatusCodes.Status403Forbidden);
+        }
+        else if (FindFriendlyException(exception) is { } friendlyException)
+        {
+            context.Result = new ObjectResult(new ApiResult
+            {
+                Success = false,
+                Msg = friendlyException.Message,
+                Code = friendlyException.Code,
+                Data = null
             })
             {
                 StatusCode = StatusCodes.Status200OK
             };
 
-            logger.LogWarning(context.Exception, "请求 {Method} {Url} 异常", context.HttpContext.Request.Method,
-                context.HttpContext.Request.GetDisplayUrl());
-        }
-        else if (FindFriendlyException(context.Exception) is { } friendlyException)
-        {
-            context.Result = new ObjectResult(new ApiResult
-            {
-                Success = false, Msg = friendlyException.Message, Code = friendlyException.Code, Data = null
-            })
-            {
-                StatusCode = StatusCodes.Status200OK
-            };
-
-            logger.LogWarning(friendlyException, "请求 {Method} {Url} 异常", context.HttpContext.Request.Method,
-                context.HttpContext.Request.GetDisplayUrl());
+            logger.LogWarning(friendlyException,
+                "请求 {Method} {Url} 返回 {StatusCode}",
+                context.HttpContext.Request.Method,
+                context.HttpContext.Request.GetDisplayUrl(),
+                StatusCodes.Status200OK);
         }
         else
         {
             context.Result = new ObjectResult(new ApiResult
             {
-                Success = false, Msg = "系统内部错误", Code = StatusCodes.Status500InternalServerError, Data = null
+                Success = false,
+                Msg = "系统内部错误",
+                Code = StatusCodes.Status500InternalServerError,
+                Data = null
             })
             {
                 StatusCode = StatusCodes.Status500InternalServerError
             };
-            logger.LogError(context.Exception, "请求 {Method} {Url} 异常", context.HttpContext.Request.Method,
-                context.HttpContext.Request.GetDisplayUrl());
+
+            logger.LogError(exception,
+                "请求 {Method} {Url} 返回 {StatusCode}",
+                context.HttpContext.Request.Method,
+                context.HttpContext.Request.GetDisplayUrl(),
+                StatusCodes.Status500InternalServerError);
         }
 
         context.ExceptionHandled = true;

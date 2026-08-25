@@ -109,6 +109,18 @@ public class RepositoryInterfaceGenerator : IIncrementalGenerator
     /// <returns>键类型名；空字符串表示无键聚合根；null 表示非聚合根</returns>
     private static string ExtractKey(ITypeSymbol typeSymbol)
     {
+        if (typeSymbol is not INamedTypeSymbol
+            {
+                TypeKind: TypeKind.Class,
+                IsAbstract: false,
+                IsGenericType: false,
+                ContainingType: null,
+                DeclaredAccessibility: Accessibility.Public
+            })
+        {
+            return null;
+        }
+
         var hasGenericAggregateRoot = false;
         string key = null;
         foreach (var @interface in typeSymbol.AllInterfaces)

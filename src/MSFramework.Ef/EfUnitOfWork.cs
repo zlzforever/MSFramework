@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using MicroserviceFramework.Domain;
@@ -23,7 +24,7 @@ internal class EfUnitOfWork : IUnitOfWork
     /// <summary>
     /// 所有 DbContext 保存完成后调用
     /// </summary>
-    public event Action SavedChanges;
+    public event Func<CancellationToken, ValueTask> SavedChanges;
 
     public async Task SaveChangesAsync(CancellationToken cancellationToken = default)
     {
@@ -32,7 +33,17 @@ internal class EfUnitOfWork : IUnitOfWork
             await dbContext.SaveChangesAsync(cancellationToken);
         }
 
-        SavedChanges?.Invoke();
+        if (SavedChanges != null)
+        {
+            var callbacks = SavedChanges?.GetInvocationList()
+                .Cast<Func<CancellationToken, ValueTask>>()
+                .ToArray() ?? [];
+
+            foreach (var callback in callbacks)
+            {
+                await callback(cancellationToken);
+            }
+        }
     }
 
     public void Dispose()

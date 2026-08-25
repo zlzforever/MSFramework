@@ -7,8 +7,4 @@ namespace MicroserviceFramework.Ef.Repositories;
 /// </summary>
 public interface IEfRepository
 {
-    /// <summary>
-    /// 获取关联的 DbContext 实例
-    /// </summary>
-    DbContext DbContext { get; }
 }

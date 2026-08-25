@@ -180,8 +180,8 @@ public abstract class DbContextBase : DbContext
     public override async Task<int> SaveChangesAsync(bool acceptAllChangesOnSuccess,
         CancellationToken cancellationToken = new())
     {
-        var scopeServiceProvider = this.GetService<IScopeServiceProvider>();
-        var mediator = scopeServiceProvider.GetService<IMediator>();
+        var scopeServiceProvider = GetScopeServiceProvider();
+        var mediator = scopeServiceProvider?.GetService<IMediator>();
         if (mediator != null)
         {
             // 若是有领域事件则分发出去
@@ -193,17 +193,16 @@ public abstract class DbContextBase : DbContext
             }
         }
 
-        var effectedCount = 0;
+        var effected = 0;
         var changed = ApplyConcepts();
         if (!changed)
         {
-            return effectedCount;
+            return effected;
         }
 
         CollectAuditEntities();
-
-        var r = await base.SaveChangesAsync(acceptAllChangesOnSuccess, cancellationToken);
-        return r;
+        effected = await base.SaveChangesAsync(acceptAllChangesOnSuccess, cancellationToken);
+        return effected;
     }
 
     /// <summary>
@@ -213,8 +212,8 @@ public abstract class DbContextBase : DbContext
     /// <returns></returns>
     public override int SaveChanges(bool acceptAllChangesOnSuccess)
     {
-        var scopeServiceProvider = this.GetService<IScopeServiceProvider>();
-        var mediator = scopeServiceProvider.GetService<IMediator>();
+        var scopeServiceProvider = GetScopeServiceProvider();
+        var mediator = scopeServiceProvider?.GetService<IMediator>();
         if (mediator != null)
         {
             // 若是有领域事件则分发出去
@@ -227,16 +226,16 @@ public abstract class DbContextBase : DbContext
             }
         }
 
-        var effectedCount = 0;
+        var effected = 0;
         var changed = ApplyConcepts();
         if (!changed)
         {
-            return effectedCount;
+            return effected;
         }
 
         CollectAuditEntities();
-
-        return base.SaveChanges(acceptAllChangesOnSuccess);
+        effected = base.SaveChanges(acceptAllChangesOnSuccess);
+        return effected;
     }
 
     /// <summary>
@@ -248,8 +247,8 @@ public abstract class DbContextBase : DbContext
     /// <see cref="SaveChangesAsync(bool, CancellationToken)"/> 的路径），且未越过
     /// 审计链路终点，即可被收集。
     /// Value 为 null（无审计请求）时本方法立即返回，仅一次 AsyncLocal 读取开销；
-    /// 实体收集结果经 <see cref="AuditOperation.AddEntities"/> 按值身份去重，
-    /// 多次保存/多上下文场景不会重复收集同一实体的同一变更状态。
+    /// 每次保存先物化一个收集批次，再由 <see cref="AuditOperation.AddEntities"/> 按输入顺序直接追加非空实体；
+    /// 批次之间不共享收集状态，保证同一实体恢复旧值后再次变更仍完整保留。
     /// </summary>
     private void CollectAuditEntities()
     {
@@ -259,7 +258,7 @@ public abstract class DbContextBase : DbContext
             return;
         }
 
-        auditOperation.AddEntities(GetAuditEntities());
+        auditOperation.AddEntities(GetAuditEntities().ToArray());
     }
 
     /// <summary>
@@ -270,8 +269,8 @@ public abstract class DbContextBase : DbContext
     /// <returns>是否有实体发生了状态变更</returns>
     protected virtual bool ApplyConcepts()
     {
-        var scopeServiceProvider = this.GetService<IScopeServiceProvider>();
-        var session = scopeServiceProvider.GetService<ISession>();
+        var scopeServiceProvider = GetScopeServiceProvider();
+        var session = scopeServiceProvider?.GetService<ISession>();
         var userId = session?.UserId;
         var name = session?.UserDisplayName;
         var changed = false;
@@ -289,6 +288,14 @@ public abstract class DbContextBase : DbContext
         }
 
         return changed;
+    }
+
+    /// <summary>
+    /// 优先读取后台事件建立的当前异步作用域，HTTP 请求则回退到 EF 注册的作用域服务提供器。
+    /// </summary>
+    private IScopeServiceProvider GetScopeServiceProvider()
+    {
+        return ScopeServiceProviderContext.Current ?? this.GetService<IScopeServiceProvider>();
     }
 
     /// <summary>
@@ -350,21 +357,12 @@ public abstract class DbContextBase : DbContext
                     throw new ArgumentOutOfRangeException();
             }
 
-            if (string.IsNullOrWhiteSpace(originalValue))
+            if (Equals(propertyEntry.OriginalValue, propertyEntry.CurrentValue))
             {
-                // 原值为空，新值不为空则记录
-                if (!string.IsNullOrWhiteSpace(newValue))
-                {
-                    properties.Add(new AuditProperty(propertyName, propertyType, originalValue, newValue));
-                }
+                continue;
             }
-            else
-            {
-                if (!originalValue.Equals(newValue))
-                {
-                    properties.Add(new AuditProperty(propertyName, propertyType, originalValue, newValue));
-                }
-            }
+
+            properties.Add(new AuditProperty(propertyName, propertyType, originalValue, newValue));
         }
 
         var auditedEntity = new AuditEntity(typeName, entityId, operationType);
@@ -404,12 +402,13 @@ public abstract class DbContextBase : DbContext
             return null;
         }
 
-        return Regex.IsMatch(columnType, "JSON", RegexOptions.IgnoreCase)
-            ? Defaults.JsonSerializer.Serialize(value)
-            : value.ToString();
+        var isJson = columnType?.Contains(
+            "JSON",
+            StringComparison.OrdinalIgnoreCase) == true;
+        return isJson ? Defaults.JsonSerializer.Serialize(value) : value.ToString();
     }
 
-    private List<DomainEvent> GetDomainEvents()
+    private HashSet<DomainEvent> GetDomainEvents()
     {
         // Dispatch Domain Events collection.
         // Choices:
@@ -419,7 +418,7 @@ public abstract class DbContextBase : DbContext
         // You will need to handle eventual consistency and compensatory actions in case of failures in any of the Handlers.
 
         // 此处不能改为迭代器， 事件在迭代过程中会触发 ChangeTracker.Entries 的变化
-        var domainEvents = new List<DomainEvent>();
+        var domainEvents = new HashSet<DomainEvent>();
 
         foreach (var aggregateRoot in ChangeTracker
                      .Entries<EntityBase>())
@@ -427,11 +426,20 @@ public abstract class DbContextBase : DbContext
             var events = aggregateRoot.Entity.GetDomainEvents();
             if (events != null && events.Any())
             {
-                domainEvents.AddRange(events);
+                domainEvents.UnionWith(events);
                 aggregateRoot.Entity.ClearDomainEvents();
             }
         }
 
         return domainEvents;
+    }
+
+    private void ClearDomainEvents()
+    {
+        foreach (var aggregateRoot in ChangeTracker
+                     .Entries<EntityBase>())
+        {
+            aggregateRoot.Entity.ClearDomainEvents();
+        }
     }
 }

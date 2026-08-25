@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Threading.Tasks;
@@ -17,7 +18,28 @@ public static class FormFileExtensions
     ///     已确认存在的目录缓存：键为经 <see cref="Path.GetFullPath(string)"/> 规范化后的完整路径，值为占位标记；
     ///     使用线程安全容器承载，缓存命中时跳过重复的目录探测与创建（同一目录不同写法只占一个缓存键）
     /// </summary>
-    private static readonly ConcurrentDictionary<string, byte> _existingDirCache = new();
+    private static readonly ConcurrentDictionary<string, byte> ExistingDirCache = new ConcurrentDictionary<string, byte>();
+
+    // 禁止的危险后缀（补充拦截，双重保险）
+    private static readonly HashSet<string> DangerousExtensions = new(StringComparer.OrdinalIgnoreCase)
+    {
+        ".html",
+        ".htm",
+        ".js",
+        ".php",
+        ".php3",
+        ".phtml",
+        ".aspx",
+        ".ashx",
+        ".cshtml",
+        ".asp",
+        ".jsp",
+        ".svg",
+        ".exe",
+        ".bat",
+        ".cmd",
+        ".sh"
+    };
 
     /// <summary>
     ///     符号链接创建委托（内部可测试性扩展点，默认使用 <see cref="File.CreateSymbolicLink(string, string)"/>；
@@ -59,6 +81,11 @@ public static class FormFileExtensions
         }
 
         var extension = Path.GetExtension(formFile.FileName);
+        if (DangerousExtensions.Contains(extension))
+        {
+            throw new ArgumentException($"File extension '{extension}' is not allowed for security reasons.");
+        }
+
         // 日期格式 yyyyMMdd，修正原 yyyMMdd 笔误
         var date = DateTimeOffset.UtcNow.ToString("yyyyMMdd");
 
@@ -75,8 +102,7 @@ public static class FormFileExtensions
         var intervalPath = Path.Combine(intervalDirectory, fileName);
         // Path.Combine 存在可空参数重载（返回 string?），此处入参均为非空字符串，
         // 结果不可能为 null；显式判空兜底以消除静态分析空值告警，并保证后续使用恒非空
-        var businessPath = Path.Combine(businessDirectory, fileName)
-            ?? throw new InvalidOperationException($"无法生成业务文件路径: {intervalPath}");
+        var businessPath = Path.Combine(businessDirectory, fileName);
         // 判重链接目标（仅作判重用，指向 upload 业务文件）：oss/{l1}/{l2}/{md5}{ext}
         var dedupeLinkDirectory = Path.Combine(Defaults.LocalOSSDirectory, level1, level2);
         var dedupeLinkPath = Path.Combine(dedupeLinkDirectory, fileName);
@@ -140,7 +166,7 @@ public static class FormFileExtensions
 
         // 规范化完整路径，同一目录的不同写法（如冗余分隔符/./..）收敛为单一缓存键
         var fullPath = Path.GetFullPath(path);
-        if (_existingDirCache.ContainsKey(fullPath))
+        if (ExistingDirCache.ContainsKey(fullPath))
         {
             return;
         }
@@ -148,7 +174,7 @@ public static class FormFileExtensions
         try
         {
             DirectoryCreator(fullPath);
-            _existingDirCache.TryAdd(fullPath, 0);
+            ExistingDirCache.TryAdd(fullPath, 0);
         }
         catch (IOException ex)
         {
@@ -157,7 +183,7 @@ public static class FormFileExtensions
             var isAlreadyExistsError = IsWindowsPlatform() && (ex.HResult & 0xFFFF) == 183;
             if (isAlreadyExistsError)
             {
-                _existingDirCache.TryAdd(fullPath, 0);
+                ExistingDirCache.TryAdd(fullPath, 0);
                 return;
             }
 
@@ -165,7 +191,7 @@ public static class FormFileExtensions
             // 目录已存在（并发竞态被他人创建）则复用，否则抛出
             if (Directory.Exists(fullPath))
             {
-                _existingDirCache.TryAdd(fullPath, 0);
+                ExistingDirCache.TryAdd(fullPath, 0);
                 return;
             }
 
