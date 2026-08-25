@@ -30,7 +30,7 @@ public class DateTimeTests
 
         var result = converter.Read(ref reader, typeof(DateTime), null);
 
-        Assert.Equal(DateTimeOffset.FromUnixTimeSeconds(99999999999).LocalDateTime, result);
+        Assert.Equal(DateTimeOffset.FromUnixTimeSeconds(99999999999), result);
     }
 
     [Fact]

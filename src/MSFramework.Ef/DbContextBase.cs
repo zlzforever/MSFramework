@@ -193,17 +193,16 @@ public abstract class DbContextBase : DbContext
             }
         }
 
-        var effectedCount = 0;
+        var effected = 0;
         var changed = ApplyConcepts();
         if (!changed)
         {
-            return effectedCount;
+            return effected;
         }
 
         CollectAuditEntities();
-
-        var r = await base.SaveChangesAsync(acceptAllChangesOnSuccess, cancellationToken);
-        return r;
+        effected = await base.SaveChangesAsync(acceptAllChangesOnSuccess, cancellationToken);
+        return effected;
     }
 
     /// <summary>
@@ -227,16 +226,16 @@ public abstract class DbContextBase : DbContext
             }
         }
 
-        var effectedCount = 0;
+        var effected = 0;
         var changed = ApplyConcepts();
         if (!changed)
         {
-            return effectedCount;
+            return effected;
         }
 
         CollectAuditEntities();
-
-        return base.SaveChanges(acceptAllChangesOnSuccess);
+        effected = base.SaveChanges(acceptAllChangesOnSuccess);
+        return effected;
     }
 
     /// <summary>
@@ -358,21 +357,12 @@ public abstract class DbContextBase : DbContext
                     throw new ArgumentOutOfRangeException();
             }
 
-            if (string.IsNullOrWhiteSpace(originalValue))
+            if (Equals(propertyEntry.OriginalValue, propertyEntry.CurrentValue))
             {
-                // 原值为空，新值不为空则记录
-                if (!string.IsNullOrWhiteSpace(newValue))
-                {
-                    properties.Add(new AuditProperty(propertyName, propertyType, originalValue, newValue));
-                }
+                continue;
             }
-            else
-            {
-                if (!originalValue.Equals(newValue))
-                {
-                    properties.Add(new AuditProperty(propertyName, propertyType, originalValue, newValue));
-                }
-            }
+
+            properties.Add(new AuditProperty(propertyName, propertyType, originalValue, newValue));
         }
 
         var auditedEntity = new AuditEntity(typeName, entityId, operationType);
@@ -412,12 +402,13 @@ public abstract class DbContextBase : DbContext
             return null;
         }
 
-        return Regex.IsMatch(columnType, "JSON", RegexOptions.IgnoreCase)
-            ? Defaults.JsonSerializer.Serialize(value)
-            : value.ToString();
+        var isJson = columnType?.Contains(
+            "JSON",
+            StringComparison.OrdinalIgnoreCase) == true;
+        return isJson ? Defaults.JsonSerializer.Serialize(value) : value.ToString();
     }
 
-    private List<DomainEvent> GetDomainEvents()
+    private HashSet<DomainEvent> GetDomainEvents()
     {
         // Dispatch Domain Events collection.
         // Choices:
@@ -427,7 +418,7 @@ public abstract class DbContextBase : DbContext
         // You will need to handle eventual consistency and compensatory actions in case of failures in any of the Handlers.
 
         // 此处不能改为迭代器， 事件在迭代过程中会触发 ChangeTracker.Entries 的变化
-        var domainEvents = new List<DomainEvent>();
+        var domainEvents = new HashSet<DomainEvent>();
 
         foreach (var aggregateRoot in ChangeTracker
                      .Entries<EntityBase>())
@@ -435,11 +426,20 @@ public abstract class DbContextBase : DbContext
             var events = aggregateRoot.Entity.GetDomainEvents();
             if (events != null && events.Any())
             {
-                domainEvents.AddRange(events);
+                domainEvents.UnionWith(events);
                 aggregateRoot.Entity.ClearDomainEvents();
             }
         }
 
         return domainEvents;
+    }
+
+    private void ClearDomainEvents()
+    {
+        foreach (var aggregateRoot in ChangeTracker
+                     .Entries<EntityBase>())
+        {
+            aggregateRoot.Entity.ClearDomainEvents();
+        }
     }
 }

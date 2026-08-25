@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
 using System.Security.Claims;
+using System.Threading;
 using MicroserviceFramework.Application;
 using MicroserviceFramework.IdentityModel;
 using Microsoft.AspNetCore.Http;
@@ -17,6 +18,7 @@ public class HttpSession : ISession
 {
     private readonly IHttpContextAccessor _accessor;
     private Dictionary<SessionField, string> _fields;
+    private readonly Lock _fieldsLock = new();
 
     /// <summary>
     ///     从 HttpContext 中解析 Claims 创建用户会话
@@ -112,19 +114,22 @@ public class HttpSession : ISession
     /// </summary>
     public string GetValue(SessionField field)
     {
-        _fields ??= new Dictionary<SessionField, string>();
-
-        if (!_fields.TryGetValue(field, out var value))
+        lock (_fieldsLock)
         {
-            value = ReadHeaderValue(field);
-            _fields[field] = value;
-        }
+            _fields ??= new Dictionary<SessionField, string>();
 
-        return value;
+            if (!_fields.TryGetValue(field, out var value))
+            {
+                value = ReadHeaderValue(field);
+                _fields[field] = value;
+            }
+
+            return value;
+        }
     }
 
     /// <summary>
-    /// 从 <see cref="HttpContext.Request.Headers"/> 读取单个字段的原始值。
+    /// 从 HttpContext Request Headers 读取单个字段的原始值。
     /// 可被子类重写以从其他来源取值（如 Cookie、Claims）。
     /// </summary>
     /// <param name="field">要读取的字段</param>
@@ -187,6 +192,8 @@ public class HttpSession : ISession
     /// <param name="session"></param>
     public void Load(ISession session)
     {
+        ArgumentNullException.ThrowIfNull(session);
+
         TraceIdentifier = session.TraceIdentifier;
         UserId = session.UserId;
         UserName = session.UserName;
@@ -195,5 +202,9 @@ public class HttpSession : ISession
         UserDisplayName = session.UserDisplayName;
         Roles = session.Roles;
         Subjects = session.Subjects;
+        lock (_fieldsLock)
+        {
+            _fields = new Dictionary<SessionField, string>();
+        }
     }
 }

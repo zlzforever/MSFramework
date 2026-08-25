@@ -36,8 +36,7 @@ public class RepositoryGenerator : IIncrementalGenerator
                 return;
             }
 
-            var list = new HashSet<string>();
-            list = LoadAllTypes(domainAssemblySymbol.GlobalNamespace);
+            var list = LoadAllTypes(domainAssemblySymbol.GlobalNamespace);
 
             foreach (var entity in list)
             {
@@ -97,6 +96,18 @@ public class RepositoryGenerator : IIncrementalGenerator
 
         foreach (var member in namespaceSymbol.GetMembers())
         {
+            if (member is not INamedTypeSymbol
+                {
+                    TypeKind: TypeKind.Class,
+                    IsAbstract: false,
+                    IsGenericType: false,
+                    ContainingType: null,
+                    DeclaredAccessibility: Accessibility.Public
+                })
+            {
+                continue;
+            }
+
             list.Add(member.ToDisplayString());
         }
 

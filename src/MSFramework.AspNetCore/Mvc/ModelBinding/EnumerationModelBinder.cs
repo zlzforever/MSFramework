@@ -22,7 +22,16 @@ public class EnumerationModelBinder : IModelBinder
         var value = bindingContext.ValueProvider.GetValue(bindingContext.FieldName).FirstValue;
         if (string.IsNullOrWhiteSpace(value))
         {
-            bindingContext.Result = ModelBindingResult.Failed();
+            if (bindingContext.ModelMetadata.IsRequired)
+            {
+                bindingContext.ModelState.AddModelError(
+                    bindingContext.ModelName, "枚举值不能为空");
+                bindingContext.Result = ModelBindingResult.Failed();
+            }
+            else
+            {
+                bindingContext.Result = ModelBindingResult.Success(null);
+            }
         }
         else
         {

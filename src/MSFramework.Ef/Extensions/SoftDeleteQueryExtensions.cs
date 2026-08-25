@@ -22,8 +22,8 @@ public static class SoftDeleteQueryExtensions
     public static void AddSoftDeleteQueryFilter(
         this IMutableEntityType entityData)
     {
-        var filter = GetSoftDeleteQueryFilter(entityData.ClrType);
-        entityData.SetQueryFilter(filter);
+        var softDelete = GetSoftDeleteQueryFilter(entityData.ClrType);
+        entityData.SetQueryFilter("SoftDelete", softDelete);
     }
 
     /// <summary>

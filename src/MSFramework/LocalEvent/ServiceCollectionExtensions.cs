@@ -28,6 +28,12 @@ public static class ServiceCollectionExtensions
         var store = new EventDescriptorStore();
         foreach (var type in Utils.Runtime.GetAllTypes())
         {
+            // 抽象类、开放泛型不能注册：abstract class BaseHandler : IEventHandler<E>
+            if (!type.IsClass || type.IsAbstract || type.IsGenericTypeDefinition)
+            {
+                continue;
+            }
+
             var serviceTypes = type
                 .GetInterfaces()
                 .Where(i => i.IsGenericType && i.GetGenericTypeDefinition() == handlerInterface);

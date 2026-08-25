@@ -20,10 +20,10 @@ public class ProjectCreatedEventHandler(
         // 集成事件 <-> 异步不管的
         // 领域事件的处理器，发送集成事件
         unitOfWork.SavedChanges +=
-            async () =>
+            async c =>
             {
                 await daprClient.PublishEventAsync("rabbitmq-pubsub", Names.ProjectCreatedEvent,
-                    new { @event.Id, @event.Name, @event.CreationTime }, cancellationToken: cancellationToken);
+                    new { @event.Id, @event.Name, @event.CreationTime }, cancellationToken: c);
                 logger.LogInformation("Publish ProjectCreatedEvent");
             };
         return Task.CompletedTask;
