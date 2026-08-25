@@ -1,5 +1,4 @@
-﻿using System;
-using Microsoft.EntityFrameworkCore.Migrations;
+﻿using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
@@ -20,9 +19,15 @@ namespace Ordering.Infrastructure.Migrations
                 {
                     id = table.Column<string>(type: "varchar(36)", maxLength: 36, nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
-                    path = table.Column<string>(type: "varchar(1024)", maxLength: 1024, nullable: true)
+                    path = table.Column<string>(type: "longtext", nullable: true)
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     method = table.Column<string>(type: "varchar(12)", maxLength: 12, nullable: true)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    query_string = table.Column<string>(type: "longtext", nullable: true)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    imei = table.Column<string>(type: "varchar(64)", maxLength: 64, nullable: true)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    platform = table.Column<string>(type: "varchar(32)", maxLength: 32, nullable: true)
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     ip = table.Column<string>(type: "varchar(256)", maxLength: 256, nullable: true)
                         .Annotation("MySql:CharSet", "utf8mb4"),
@@ -30,8 +35,21 @@ namespace Ordering.Infrastructure.Migrations
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     device_model = table.Column<string>(type: "varchar(256)", maxLength: 256, nullable: true)
                         .Annotation("MySql:CharSet", "utf8mb4"),
-                    lat = table.Column<double>(type: "double", nullable: true),
-                    lng = table.Column<double>(type: "double", nullable: true),
+                    altitude = table.Column<float>(type: "float", nullable: true),
+                    screen = table.Column<string>(type: "varchar(32)", maxLength: 32, nullable: true)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    battery = table.Column<int>(type: "int", nullable: true),
+                    signal = table.Column<int>(type: "int", nullable: true),
+                    os_version = table.Column<string>(type: "varchar(32)", maxLength: 32, nullable: true)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    accuracy = table.Column<float>(type: "float", nullable: true),
+                    bearing = table.Column<float>(type: "float", nullable: true),
+                    orientation = table.Column<float>(type: "float", nullable: true),
+                    location_source = table.Column<string>(type: "varchar(32)", maxLength: 32, nullable: true)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    emulator = table.Column<bool>(type: "tinyint(1)", nullable: true),
+                    lat = table.Column<decimal>(type: "decimal(11,8)", precision: 11, scale: 8, nullable: true),
+                    lng = table.Column<decimal>(type: "decimal(11,8)", precision: 11, scale: 8, nullable: true),
                     user_agent = table.Column<string>(type: "varchar(1024)", maxLength: 1024, nullable: true)
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     end_time = table.Column<long>(type: "bigint", nullable: false, defaultValue: 0L),
@@ -51,20 +69,38 @@ namespace Ordering.Infrastructure.Migrations
                 .Annotation("MySql:CharSet", "utf8mb4");
 
             migrationBuilder.CreateTable(
+                name: "ordering_multi_column_order_item",
+                columns: table => new
+                {
+                    order_id = table.Column<string>(type: "varchar(36)", maxLength: 36, nullable: false)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    product_id = table.Column<string>(type: "varchar(36)", maxLength: 36, nullable: false)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    name = table.Column<string>(type: "varchar(200)", maxLength: 200, nullable: false)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    quantity = table.Column<int>(type: "int", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_ordering_multi_column_order_item", x => new { x.order_id, x.product_id });
+                })
+                .Annotation("MySql:CharSet", "utf8mb4");
+
+            migrationBuilder.CreateTable(
                 name: "ordering_order",
                 columns: table => new
                 {
                     id = table.Column<string>(type: "varchar(255)", nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
-                    address_street = table.Column<string>(type: "varchar(200)", maxLength: 200, nullable: true)
+                    Address_Street = table.Column<string>(type: "varchar(200)", maxLength: 200, nullable: true)
                         .Annotation("MySql:CharSet", "utf8mb4"),
-                    address_city = table.Column<string>(type: "varchar(200)", maxLength: 200, nullable: true)
+                    Address_City = table.Column<string>(type: "varchar(200)", maxLength: 200, nullable: true)
                         .Annotation("MySql:CharSet", "utf8mb4"),
-                    address_state = table.Column<string>(type: "varchar(200)", maxLength: 200, nullable: true)
+                    Address_State = table.Column<string>(type: "varchar(200)", maxLength: 200, nullable: true)
                         .Annotation("MySql:CharSet", "utf8mb4"),
-                    address_country = table.Column<string>(type: "varchar(50)", maxLength: 50, nullable: true)
+                    Address_Country = table.Column<string>(type: "varchar(50)", maxLength: 50, nullable: true)
                         .Annotation("MySql:CharSet", "utf8mb4"),
-                    address_zip_code = table.Column<string>(type: "varchar(20)", maxLength: 20, nullable: true)
+                    Address_ZipCode = table.Column<string>(type: "varchar(20)", maxLength: 20, nullable: true)
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     status = table.Column<string>(type: "varchar(20)", maxLength: 20, nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
@@ -87,17 +123,17 @@ namespace Ordering.Infrastructure.Migrations
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     creator_name = table.Column<string>(type: "varchar(256)", maxLength: 256, nullable: true)
                         .Annotation("MySql:CharSet", "utf8mb4"),
-                    last_modifier_id = table.Column<string>(type: "longtext", nullable: true)
+                    last_modifier_id = table.Column<string>(type: "varchar(36)", maxLength: 36, nullable: true)
                         .Annotation("MySql:CharSet", "utf8mb4"),
-                    last_modifier_name = table.Column<string>(type: "longtext", nullable: true)
+                    last_modifier_name = table.Column<string>(type: "varchar(256)", maxLength: 256, nullable: true)
                         .Annotation("MySql:CharSet", "utf8mb4"),
-                    last_modification_time = table.Column<DateTimeOffset>(type: "datetime(6)", nullable: true),
+                    last_modification_time = table.Column<long>(type: "bigint", nullable: true),
                     is_deleted = table.Column<bool>(type: "tinyint(1)", nullable: false),
-                    deleter_id = table.Column<string>(type: "longtext", nullable: true)
+                    deleter_id = table.Column<string>(type: "varchar(36)", maxLength: 36, nullable: true)
                         .Annotation("MySql:CharSet", "utf8mb4"),
-                    deleter_name = table.Column<string>(type: "longtext", nullable: true)
+                    deleter_name = table.Column<string>(type: "varchar(256)", maxLength: 256, nullable: true)
                         .Annotation("MySql:CharSet", "utf8mb4"),
-                    deletion_time = table.Column<DateTimeOffset>(type: "datetime(6)", nullable: true)
+                    deletion_time = table.Column<long>(type: "bigint", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -143,7 +179,7 @@ namespace Ordering.Infrastructure.Migrations
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     type = table.Column<string>(type: "varchar(256)", maxLength: 256, nullable: true)
                         .Annotation("MySql:CharSet", "utf8mb4"),
-                    entity_id = table.Column<string>(type: "varchar(36)", maxLength: 36, nullable: true)
+                    entity_id = table.Column<string>(type: "varchar(256)", maxLength: 256, nullable: true)
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     operation_type = table.Column<string>(type: "varchar(256)", maxLength: 256, nullable: true)
                         .Annotation("MySql:CharSet", "utf8mb4")
@@ -167,11 +203,11 @@ namespace Ordering.Infrastructure.Migrations
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     order_id = table.Column<string>(type: "varchar(255)", nullable: true)
                         .Annotation("MySql:CharSet", "utf8mb4"),
-                    product_id = table.Column<string>(type: "varchar(36)", maxLength: 36, nullable: true)
+                    ProductId = table.Column<string>(type: "varchar(36)", maxLength: 36, nullable: true)
                         .Annotation("MySql:CharSet", "utf8mb4"),
-                    product_name = table.Column<string>(type: "varchar(255)", maxLength: 255, nullable: true)
+                    Product_Name = table.Column<string>(type: "varchar(255)", maxLength: 255, nullable: true)
                         .Annotation("MySql:CharSet", "utf8mb4"),
-                    product_picture_url = table.Column<string>(type: "varchar(300)", maxLength: 300, nullable: true)
+                    Product_PictureUrl = table.Column<string>(type: "varchar(300)", maxLength: 300, nullable: true)
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     price = table.Column<decimal>(type: "decimal(65,30)", nullable: false),
                     units = table.Column<int>(type: "int", nullable: false),
@@ -257,9 +293,9 @@ namespace Ordering.Infrastructure.Migrations
                 column: "order_id");
 
             migrationBuilder.CreateIndex(
-                name: "IX_ordering_order_item_product_id",
+                name: "IX_ordering_order_item_ProductId",
                 table: "ordering_order_item",
-                column: "product_id");
+                column: "ProductId");
         }
 
         /// <inheritdoc />
@@ -267,6 +303,9 @@ namespace Ordering.Infrastructure.Migrations
         {
             migrationBuilder.DropTable(
                 name: "ordering_audit_property");
+
+            migrationBuilder.DropTable(
+                name: "ordering_multi_column_order_item");
 
             migrationBuilder.DropTable(
                 name: "ordering_order_item");

@@ -357,7 +357,7 @@ public abstract class DbContextBase : DbContext
                     throw new ArgumentOutOfRangeException();
             }
 
-            if (Equals(propertyEntry.OriginalValue, propertyEntry.CurrentValue))
+            if (Equals(originalValue, newValue))
             {
                 continue;
             }
@@ -432,14 +432,5 @@ public abstract class DbContextBase : DbContext
         }
 
         return domainEvents;
-    }
-
-    private void ClearDomainEvents()
-    {
-        foreach (var aggregateRoot in ChangeTracker
-                     .Entries<EntityBase>())
-        {
-            aggregateRoot.Entity.ClearDomainEvents();
-        }
     }
 }

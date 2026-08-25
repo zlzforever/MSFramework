@@ -1,5 +1,6 @@
 using MicroserviceFramework.Ef.Extensions;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Infrastructure;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Infrastructure.Internal;
 
@@ -13,17 +14,17 @@ public static class ServiceCollectionExtensions
     /// <param name="options"></param>
     extension(NpgsqlDbContextOptionsBuilder options)
     {
-        // /// <summary>
-        // ///
-        // /// </summary>
-        // /// <returns></returns>
-        // public NpgsqlDbContextOptionsBuilder UseRemoveForeignKeyService()
-        // {
-        //     // MigrationsSqlGenerator.RemoveForeignKey = true;
-        //     var ops = (IRelationalDbContextOptionsBuilderInfrastructure)options;
-        //     ops.OptionsBuilder.ReplaceService<IMigrationsSqlGenerator, MigrationsSqlGenerator>();
-        //     return options;
-        // }
+        /// <summary>
+        ///
+        /// </summary>
+        /// <returns></returns>
+        public NpgsqlDbContextOptionsBuilder UseRemoveForeignKeyService()
+        {
+            // MigrationsSqlGenerator.RemoveForeignKey = true;
+            var ops = (IRelationalDbContextOptionsBuilderInfrastructure)options;
+            ops.OptionsBuilder.ReplaceService<IMigrationsSqlGenerator, MigrationsSqlGenerator>();
+            return options;
+        }
 
         // /// <summary>
         // ///
@@ -51,6 +52,7 @@ public static class ServiceCollectionExtensions
         var dbContextOptionsBuilder = ((IRelationalDbContextOptionsBuilderInfrastructure)builder).OptionsBuilder;
         dbContextOptionsBuilder.SetConnectionString<NpgsqlOptionsExtension>(settings.ConnectionString);
 #pragma warning restore EF1001
+        builder.UseRemoveForeignKeyService();
     }
 
     // public static IServiceCollection AddNpgsql<TDbContext>(

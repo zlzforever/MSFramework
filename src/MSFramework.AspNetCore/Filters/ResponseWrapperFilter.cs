@@ -44,9 +44,9 @@ internal sealed class ResponseWrapperFilter(ILogger<ResponseWrapperFilter> logge
 
         if (context.Result is ObjectResult objectResult)
         {
-            // BadRequestObject CreatedObjectResult 之类原样返回
-            if (context.Result.GetType() != typeof(ObjectResult))
+            if (objectResult.GetType() != typeof(ObjectResult))
             {
+                // BadRequestObjectResult、CreatedObjectResult 子类直接跳过，不包装
             }
             else
             {
@@ -55,6 +55,7 @@ internal sealed class ResponseWrapperFilter(ILogger<ResponseWrapperFilter> logge
                 if (valueType != null && (objectResult.Value is ApiResult ||
                                           ApiResult.IsApiResult(valueType)))
                 {
+                    // 已经是ApiResult，不处理
                 }
                 // 只要结果是 ProblemDetails problemDetails 重新包装一下
                 else if (objectResult.Value is ProblemDetails problemDetails)
@@ -69,7 +70,8 @@ internal sealed class ResponseWrapperFilter(ILogger<ResponseWrapperFilter> logge
                         Data = problemDetails
                     };
                     objectResult.StatusCode = code;
-                    objectResult.DeclaredType = ApiResult.Type;
+                    // 关键：清空声明类型，不要手动赋值ApiResult.Type
+                    objectResult.DeclaredType = null;
                 }
                 // ObjectResult 且 Value 不是 ApiResult，如是一个 string(Task<string>)
                 else
@@ -80,7 +82,8 @@ internal sealed class ResponseWrapperFilter(ILogger<ResponseWrapperFilter> logge
                     {
                         Success = success, Code = success ? 0 : 1, Msg = string.Empty, Data = objectResult.Value
                     };
-                    objectResult.DeclaredType = ApiResult.Type;
+                    // 关键：清空声明类型，不要手动赋值ApiResult.Type
+                    objectResult.DeclaredType = null;
                 }
             }
         }

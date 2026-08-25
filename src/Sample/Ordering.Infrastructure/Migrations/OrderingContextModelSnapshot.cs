@@ -30,8 +30,8 @@ namespace Ordering.Infrastructure.Migrations
                         .HasColumnName("id");
 
                     b.Property<string>("EntityId")
-                        .HasMaxLength(36)
-                        .HasColumnType("varchar(36)")
+                        .HasMaxLength(256)
+                        .HasColumnType("varchar(256)")
                         .HasColumnName("entity_id");
 
                     b.Property<string>("OperationId")
@@ -479,38 +479,32 @@ namespace Ordering.Infrastructure.Migrations
                     b.OwnsOne("Ordering.Domain.AggregateRoots.Order.Address", "Address", b1 =>
                         {
                             b1.Property<string>("OrderId")
-                                .HasColumnType("varchar(255)")
-                                .HasColumnName("id");
+                                .HasColumnType("varchar(255)");
 
                             b1.Property<string>("City")
                                 .IsRequired()
                                 .HasMaxLength(200)
-                                .HasColumnType("varchar(200)")
-                                .HasColumnName("address_city");
+                                .HasColumnType("varchar(200)");
 
                             b1.Property<string>("Country")
                                 .IsRequired()
                                 .HasMaxLength(50)
-                                .HasColumnType("varchar(50)")
-                                .HasColumnName("address_country");
+                                .HasColumnType("varchar(50)");
 
                             b1.Property<string>("State")
                                 .IsRequired()
                                 .HasMaxLength(200)
-                                .HasColumnType("varchar(200)")
-                                .HasColumnName("address_state");
+                                .HasColumnType("varchar(200)");
 
                             b1.Property<string>("Street")
                                 .IsRequired()
                                 .HasMaxLength(200)
-                                .HasColumnType("varchar(200)")
-                                .HasColumnName("address_street");
+                                .HasColumnType("varchar(200)");
 
                             b1.Property<string>("ZipCode")
                                 .IsRequired()
                                 .HasMaxLength(20)
-                                .HasColumnType("varchar(20)")
-                                .HasColumnName("address_zip_code");
+                                .HasColumnType("varchar(20)");
 
                             b1.HasKey("OrderId");
 
@@ -534,25 +528,22 @@ namespace Ordering.Infrastructure.Migrations
                     b.OwnsOne("Ordering.Domain.AggregateRoots.Order.Product", "Product", b1 =>
                         {
                             b1.Property<string>("OrderItemId")
-                                .HasColumnType("varchar(36)")
-                                .HasColumnName("id");
+                                .HasColumnType("varchar(36)");
 
                             b1.Property<string>("Name")
                                 .IsRequired()
                                 .HasMaxLength(255)
-                                .HasColumnType("varchar(255)")
-                                .HasColumnName("product_name");
+                                .HasColumnType("varchar(255)");
 
                             b1.Property<string>("PictureUrl")
                                 .HasMaxLength(300)
-                                .HasColumnType("varchar(300)")
-                                .HasColumnName("product_picture_url");
+                                .HasColumnType("varchar(300)");
 
                             b1.Property<string>("ProductId")
                                 .IsRequired()
                                 .HasMaxLength(36)
                                 .HasColumnType("varchar(36)")
-                                .HasColumnName("product_id");
+                                .HasColumnName("ProductId");
 
                             b1.HasKey("OrderItemId");
 

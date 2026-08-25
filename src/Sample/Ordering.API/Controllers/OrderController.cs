@@ -36,6 +36,19 @@ public class OrderController(
     IJsonSerializer jsonSerializer)
     : ApiControllerBase
 {
+    /// <summary>
+    /// curl -v -X POST 'http://localhost:5001/api/v1.0/orders/createTest' -H 'Content-Type: application/json'
+    /// curl -v 'http://localhost:5001/value/apiResult'
+    /// curl -v 'http://localhost:5001/value/actionResult'
+    /// curl -v 'http://localhost:5001/value/emptyResult'
+    /// curl -v 'http://localhost:5001/value/pagedResult'
+    /// curl -v 'http://localhost:5001/value/noData'
+    /// curl -v 'http://localhost:5001/value/OrderDto'
+    /// curl -v 'http://localhost:5001/value/OrderDto2'
+    /// curl -v 'http://localhost:5001/value/OrderDto3'
+    /// </summary>
+    /// <param name="single"></param>
+    /// <returns></returns>
     [HttpPost("createTest")]
     public async Task<(OrderDto Order1, OrderDto Order2, OrderDto Order3)> CreateTest(bool single = false)
     {
