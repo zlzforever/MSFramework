@@ -1,4 +1,5 @@
 using System;
+using System.Reflection;
 using System.Threading.Tasks;
 using MicroserviceFramework.Common;
 using MicroserviceFramework.Utils;
@@ -11,6 +12,7 @@ namespace MicroserviceFramework.AspNetCore.Filters;
 
 /// <summary>
 /// 统一响应包装过滤器，将 Action 返回值包装为 <see cref="ApiResult"/> 格式。
+/// 业务码，0 代表成功；非 0 代表业务错误；
 /// 已有 <see cref="ApiResult"/> 返回值不会被二次包装。
 /// </summary>
 internal sealed class ResponseWrapperFilter(ILogger<ResponseWrapperFilter> logger) : IAsyncResultFilter
@@ -35,41 +37,48 @@ internal sealed class ResponseWrapperFilter(ILogger<ResponseWrapperFilter> logge
             if ("true".Equals(value, StringComparison.OrdinalIgnoreCase))
             {
                 await next();
+                logger.LogDebug("结束执行返回结果过滤器");
                 return;
             }
         }
 
-        // 仅处理 ObjectResult；ProblemDetails 以运行时值为准，避免声明类型掩盖错误响应。
         if (context.Result is ObjectResult objectResult)
         {
-            var valueType = objectResult.Value?.GetType() ?? objectResult.DeclaredType;
-            // 只要结果是 ApiResult 直接跳过
-            if (objectResult.Value is ApiResult ||
-                ApiResult.IsApiResult(valueType))
+            // BadRequestObject CreatedObjectResult 之类原样返回
+            if (context.Result.GetType() != typeof(ObjectResult))
             {
-            }
-            // 只要结果是 ProblemDetails problemDetails 重新包装一下
-            else if (objectResult.Value is ProblemDetails problemDetails)
-            {
-                objectResult.ContentTypes.Clear();
-                var code = objectResult.StatusCode ?? problemDetails.Status ?? StatusCodes.Status200OK;
-                objectResult.Value = new ApiResult
-                {
-                    Success = false, Code = -1, Msg = problemDetails.Title ?? string.Empty, Data = problemDetails
-                };
-                objectResult.StatusCode = code;
-                objectResult.DeclaredType = ApiResult.Type;
             }
             else
             {
-                if (valueType is not null && !ApiResult.IsApiResult(valueType))
+                var valueType = objectResult.Value?.GetType();
+                // ObjectResult 且 Value是ApiResult，直接跳过
+                if (valueType != null && (objectResult.Value is ApiResult ||
+                                          ApiResult.IsApiResult(valueType)))
                 {
-                    // 以运行时值为准包装普通 ObjectResult；声明类型可能是 ApiResult，不能掩盖实际响应值。
+                }
+                // 只要结果是 ProblemDetails problemDetails 重新包装一下
+                else if (objectResult.Value is ProblemDetails problemDetails)
+                {
+                    objectResult.ContentTypes.Clear();
+                    var code = objectResult.StatusCode ?? problemDetails.Status ?? StatusCodes.Status200OK;
+                    objectResult.Value = new ApiResult
+                    {
+                        Success = false,
+                        Code = 500,
+                        Msg = problemDetails.Title ?? string.Empty,
+                        Data = problemDetails
+                    };
+                    objectResult.StatusCode = code;
+                    objectResult.DeclaredType = ApiResult.Type;
+                }
+                // ObjectResult 且 Value 不是 ApiResult，如是一个 string(Task<string>)
+                else
+                {
                     var code = objectResult.StatusCode ?? StatusCodes.Status200OK;
                     var success = HttpUtils.IsSuccessStatusCode(code);
                     objectResult.Value = new ApiResult
                     {
-                        Success = success, Code = code, Msg = string.Empty, Data = objectResult.Value
+                        Success = success, Code = success ? 0 : 1, Msg = string.Empty, Data = objectResult.Value
                     };
                     objectResult.DeclaredType = ApiResult.Type;
                 }

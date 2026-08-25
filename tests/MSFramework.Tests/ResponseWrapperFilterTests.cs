@@ -23,13 +23,7 @@ public class ResponseWrapperFilterTests
     [Fact]
     public async Task LeavesNonGenericApiResultUnwrappedWhenDeclaredTypeIsObjectAsync()
     {
-        var apiResult = new ApiResult
-        {
-            Success = false,
-            Code = 42,
-            Msg = "原始响应",
-            Data = "payload"
-        };
+        var apiResult = new ApiResult { Success = false, Code = 42, Msg = "原始响应", Data = "payload" };
         var context = CreateContext(apiResult, StatusCodes.Status418ImATeapot, typeof(object));
         Assert.IsType<ObjectResult>(context.Result).ContentTypes.Add("application/vnd.api+json");
 
@@ -71,11 +65,7 @@ public class ResponseWrapperFilterTests
     [Fact]
     public async Task WrapsProblemDetailsEvenWhenDeclaredTypeIsApiResultAsync()
     {
-        var problemDetails = new ProblemDetails
-        {
-            Status = StatusCodes.Status200OK,
-            Title = "问题响应"
-        };
+        var problemDetails = new ProblemDetails { Status = StatusCodes.Status200OK, Title = "问题响应" };
         var context = CreateContext(problemDetails, StatusCodes.Status200OK, ApiResult.Type);
 
         var nextCalls = await InvokeFilterAsync(context);
@@ -84,7 +74,7 @@ public class ResponseWrapperFilterTests
         var apiResult = Assert.IsType<ApiResult>(result.Value);
         Assert.Equal(1, nextCalls);
         Assert.False(apiResult.Success);
-        Assert.Equal(-1, apiResult.Code);
+        Assert.Equal(500, apiResult.Code);
         Assert.Equal("问题响应", apiResult.Msg);
         Assert.Same(problemDetails, apiResult.Data);
         Assert.Empty(result.ContentTypes);
@@ -93,11 +83,7 @@ public class ResponseWrapperFilterTests
     [Fact]
     public async Task WrapsProblemDetailsUsingObjectResultStatusCodeAsync()
     {
-        var problemDetails = new ProblemDetails
-        {
-            Status = StatusCodes.Status500InternalServerError,
-            Title = "错误"
-        };
+        var problemDetails = new ProblemDetails { Status = StatusCodes.Status500InternalServerError, Title = "错误" };
         var context = CreateContext(problemDetails, StatusCodes.Status400BadRequest);
 
         var nextCalls = await InvokeFilterAsync(context);
@@ -107,7 +93,7 @@ public class ResponseWrapperFilterTests
         Assert.Equal(1, nextCalls);
         Assert.Equal(StatusCodes.Status400BadRequest, result.StatusCode);
         Assert.False(apiResult.Success);
-        Assert.Equal(-1, apiResult.Code);
+        Assert.Equal(500, apiResult.Code);
         Assert.Equal("错误", apiResult.Msg);
         Assert.Same(problemDetails, apiResult.Data);
         Assert.Empty(result.ContentTypes);
@@ -126,7 +112,7 @@ public class ResponseWrapperFilterTests
         Assert.Equal(1, nextCalls);
         Assert.Equal(StatusCodes.Status400BadRequest, result.StatusCode);
         Assert.False(apiResult.Success);
-        Assert.Equal(-1, apiResult.Code);
+        Assert.Equal(500, apiResult.Code);
         Assert.Equal("请求无效", apiResult.Msg);
         Assert.Same(problemDetails, apiResult.Data);
         Assert.Empty(result.ContentTypes);
@@ -135,11 +121,7 @@ public class ResponseWrapperFilterTests
     [Fact]
     public async Task WrapsProblemDetailsAsFailureRegardlessOfSuccessfulStatusCodeAsync()
     {
-        var problemDetails = new ProblemDetails
-        {
-            Status = StatusCodes.Status200OK,
-            Title = "成功"
-        };
+        var problemDetails = new ProblemDetails { Status = StatusCodes.Status200OK, Title = "成功" };
         var context = CreateContext(problemDetails, StatusCodes.Status200OK);
 
         var nextCalls = await InvokeFilterAsync(context);
@@ -149,7 +131,7 @@ public class ResponseWrapperFilterTests
         Assert.Equal(1, nextCalls);
         Assert.Equal(StatusCodes.Status200OK, result.StatusCode);
         Assert.False(apiResult.Success);
-        Assert.Equal(-1, apiResult.Code);
+        Assert.Equal(500, apiResult.Code);
         Assert.Equal("成功", apiResult.Msg);
         Assert.Same(problemDetails, apiResult.Data);
         Assert.Equal(ApiResult.Type, result.DeclaredType);
@@ -169,7 +151,7 @@ public class ResponseWrapperFilterTests
         Assert.Equal(1, nextCalls);
         Assert.Equal(StatusCodes.Status200OK, result.StatusCode);
         Assert.False(apiResult.Success);
-        Assert.Equal(-1, apiResult.Code);
+        Assert.Equal(500, apiResult.Code);
         Assert.Equal(string.Empty, apiResult.Msg);
         Assert.Same(problemDetails, apiResult.Data);
         Assert.Equal(ApiResult.Type, result.DeclaredType);
@@ -179,11 +161,7 @@ public class ResponseWrapperFilterTests
     [Fact]
     public async Task UsesProblemDetailsStatusWhenObjectResultStatusCodeIsMissingAsync()
     {
-        var problemDetails = new ProblemDetails
-        {
-            Status = StatusCodes.Status422UnprocessableEntity,
-            Title = "实体校验失败"
-        };
+        var problemDetails = new ProblemDetails { Status = StatusCodes.Status422UnprocessableEntity, Title = "实体校验失败" };
         var context = CreateContext(problemDetails, null);
 
         var nextCalls = await InvokeFilterAsync(context);
@@ -193,7 +171,7 @@ public class ResponseWrapperFilterTests
         Assert.Equal(1, nextCalls);
         Assert.Equal(StatusCodes.Status422UnprocessableEntity, result.StatusCode);
         Assert.False(apiResult.Success);
-        Assert.Equal(-1, apiResult.Code);
+        Assert.Equal(500, apiResult.Code);
         Assert.Equal("实体校验失败", apiResult.Msg);
         Assert.Same(problemDetails, apiResult.Data);
         Assert.Equal(ApiResult.Type, result.DeclaredType);
@@ -209,8 +187,9 @@ public class ResponseWrapperFilterTests
 
         var result = Assert.IsType<ObjectResult>(context.Result);
         Assert.Equal(1, nextCalls);
-        Assert.Null(result.Value);
-        Assert.Null(result.DeclaredType);
+        Assert.NotNull(result.Value);
+        var r = (ApiResult)result.Value;
+        Assert.True(r.Success);
     }
 
     [Fact]
@@ -330,7 +309,7 @@ public class ResponseWrapperFilterTests
         Assert.Equal(1, nextCalls);
         Assert.Equal(statusCode, result.StatusCode);
         Assert.False(apiResult.Success);
-        Assert.Equal(0, apiResult.Code);
+        Assert.Equal(1, apiResult.Code);
         Assert.Equal(string.Empty, apiResult.Msg);
         Assert.Same(originalValue, apiResult.Data);
         Assert.Equal(ApiResult.Type, result.DeclaredType);
@@ -410,10 +389,7 @@ public class ResponseWrapperFilterTests
     [Fact]
     public async Task PassesThroughCustomGenericApiResultSubclassAsync()
     {
-        var originalValue = new CustomApiResult<int>(7)
-        {
-            Msg = "自定义结果"
-        };
+        var originalValue = new CustomApiResult<int>(7) { Msg = "自定义结果" };
         var context = CreateContext(originalValue, StatusCodes.Status201Created);
         var originalResult = Assert.IsType<ObjectResult>(context.Result);
         originalResult.ContentTypes.Add("application/custom+json");
