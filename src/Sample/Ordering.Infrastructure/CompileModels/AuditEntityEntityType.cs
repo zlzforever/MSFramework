@@ -106,7 +106,7 @@ namespace Ordering.Infrastructure.CompileModels
                 propertyInfo: typeof(AuditEntity).GetProperty("OperationType", BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly),
                 fieldInfo: typeof(AuditEntity).GetField("<OperationType>k__BackingField", BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.DeclaredOnly),
                 nullable: true,
-                maxLength: 256);
+                maxLength: 255);
             operationType.TypeMapping = MySqlStringTypeMapping.Default.Clone(
                 comparer: new ValueComparer<OperationType>(
                     (OperationType v1, OperationType v2) => object.Equals(v1, v2),
@@ -121,8 +121,8 @@ namespace Ordering.Infrastructure.CompileModels
                     (string v) => v.GetHashCode(),
                     (string v) => v),
                 mappingInfo: new RelationalTypeMappingInfo(
-                    storeTypeName: "varchar(256)",
-                    size: 256),
+                    storeTypeName: "varchar(255)",
+                    size: 255),
                 converter: new ValueConverter<OperationType, string>(
                     (OperationType v) => v.ToString(),
                     (string v) => string.IsNullOrEmpty(v) ? null : Enumeration.FromValue<OperationType>(v)),
@@ -140,7 +140,7 @@ namespace Ordering.Infrastructure.CompileModels
                 propertyInfo: typeof(AuditEntity).GetProperty("Type", BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly),
                 fieldInfo: typeof(AuditEntity).GetField("<Type>k__BackingField", BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.DeclaredOnly),
                 nullable: true,
-                maxLength: 256);
+                maxLength: 255);
             type.TypeMapping = MySqlStringTypeMapping.Default.Clone(
                 comparer: new ValueComparer<string>(
                     (string v1, string v2) => v1 == v2,
@@ -155,8 +155,8 @@ namespace Ordering.Infrastructure.CompileModels
                     (string v) => v.GetHashCode(),
                     (string v) => v),
                 mappingInfo: new RelationalTypeMappingInfo(
-                    storeTypeName: "varchar(256)",
-                    size: 256));
+                    storeTypeName: "varchar(255)",
+                    size: 255));
             type.AddAnnotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.None);
             type.AddAnnotation("Relational:ColumnName", "type");
 

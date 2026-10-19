@@ -12,6 +12,6 @@
 //         ConfigureDefaultIdentifier(builder);
 //
 //         builder.Property(x => x.Id).ValueGeneratedOnAdd();
-//         builder.Property(x => x.Name).HasMaxLength(256);
+//         builder.Property(x => x.Name).HasMaxLength(255);
 //     }
 // }

@@ -27,6 +27,9 @@
       <ProjectReference Include="..\..\src\MSFramework.Ef\MSFramework.Ef.csproj" />
       <ProjectReference Include="..\..\src\MSFramework.Serialization.Newtonsoft\MSFramework.Serialization.Newtonsoft.csproj" />
       <ProjectReference Include="..\..\src\MSFramework\MSFramework.csproj" />
+      <ProjectReference Include="..\..\src\Sample\Ordering.Application\Ordering.Application.csproj" />
+      <ProjectReference Include="..\..\src\Sample\Ordering.Domain\Ordering.Domain.csproj" />
+      <ProjectReference Include="..\..\src\Sample\Ordering.Infrastructure\Ordering.Infrastructure.csproj" />
     </ItemGroup>
 
     <ItemGroup>

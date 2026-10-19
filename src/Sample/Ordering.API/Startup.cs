@@ -154,6 +154,7 @@ public static class Startup
             app.UseDeveloperExceptionPage();
         }
 
+        SeedData.Initialize(app.Services);
         app.UseRouting();
         app.UseHealthChecks("/healthcheck");
         app.UseAuthentication();

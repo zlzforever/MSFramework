@@ -3,7 +3,7 @@ using MongoDB.Bson;
 
 namespace Ordering.Domain.AggregateRoots.Order;
 
-public class OrderItem : EntityBase<string>
+public class OrderItem : DeletionEntity<string>
 {
     public Order Order { get; private set; }
 

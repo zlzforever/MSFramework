@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using MicroserviceFramework.Application;
@@ -27,7 +26,10 @@ public abstract class DbContextBase : DbContext
 {
     /// <summary>
     /// 实体审计策略链，按数组顺序执行。
-    /// ExternalEntity 必须排第一位，确保在其他策略之前拦截外部实体。
+    /// ExternalEntity 必须排第一位，确保在其他策略之前拦截外部实体；
+    /// DeletionAuditingStrategy 必须排在 ModificationAuditingStrategy 之前：
+    /// 软删除转换（Deleted 转 Modified）后不能再叠加修改审计，
+    /// 且未命中的条目（如普通修改、物理删除）会被它放行给后续策略。
     /// 每个实体遍历时，第一个返回 <c>true</c> 的策略为命中，后续不再执行。
     /// 子类可通过重写 <see cref="ApplyConcepts"/> 或替换策略来定制行为。
     /// </summary>
@@ -35,8 +37,8 @@ public abstract class DbContextBase : DbContext
     [
         new ExternalEntityAuditingStrategy(),
         new CreationAuditingStrategy(),
-        new ModificationAuditingStrategy(),
-        new DeletionAuditingStrategy()
+        new DeletionAuditingStrategy(),
+        new ModificationAuditingStrategy()
     ];
 
     /// <summary>

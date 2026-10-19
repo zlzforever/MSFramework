@@ -1,8 +1,10 @@
 using MicroserviceFramework.Common;
 using MicroserviceFramework.Ef;
 using MicroserviceFramework.Ef.Extensions;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Ordering.Domain.AggregateRoots.Order;
+using MicroserviceFramework.Ef.Extensions;
 
 namespace Ordering.Infrastructure.EntityConfigurations;
 
@@ -29,7 +31,14 @@ public class OrderConfiguration : EntityTypeConfigurationBase<Order, OrderingCon
         builder.Property(x => x.List).UseJson(typeof(HashSet<string>), JsonDataType.JSON);
         builder.Property(x => x.Dict).UseJson(JsonDataType.JSON);
         builder.Property(x => x.Extra).UseJson(JsonDataType.JSON);
-        builder.HasMany(x => x.Items).WithOne(x => x.Order);
+        builder.HasMany(x => x.Items).WithOne(x => x.Order).OnSoftDelete();
+
+        // builder.HasMany(x => x.Items)
+        //     .WithOne(x => x.Order)
+        //     .HasForeignKey("OrderId")
+        //     .IsRequired()
+        //     // 由聚合移除子项时交给 EF 标记 Deleted，再由框架转换为软删除；数据库 FK 不做级联。
+        //     .OnDelete(DeleteBehavior.ClientCascade);
 
         // var navigation = builder.Metadata.FindNavigation(nameof(Order.Items));
         //

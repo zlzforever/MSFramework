@@ -113,7 +113,7 @@ namespace Ordering.Infrastructure.CompileModels
                 propertyInfo: typeof(CreationEntity<string>).GetProperty("CreatorName", BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly),
                 fieldInfo: typeof(CreationEntity<string>).GetField("<CreatorName>k__BackingField", BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.DeclaredOnly),
                 nullable: true,
-                maxLength: 256);
+                maxLength: 255);
             creatorName.TypeMapping = MySqlStringTypeMapping.Default.Clone(
                 comparer: new ValueComparer<string>(
                     (string v1, string v2) => v1 == v2,
@@ -128,8 +128,8 @@ namespace Ordering.Infrastructure.CompileModels
                     (string v) => v.GetHashCode(),
                     (string v) => v),
                 mappingInfo: new RelationalTypeMappingInfo(
-                    storeTypeName: "varchar(256)",
-                    size: 256));
+                    storeTypeName: "varchar(255)",
+                    size: 255));
             creatorName.AddAnnotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.None);
             creatorName.AddAnnotation("Relational:ColumnName", "creator_name");
 
@@ -165,7 +165,7 @@ namespace Ordering.Infrastructure.CompileModels
                 propertyInfo: typeof(AuditOperation).GetProperty("DeviceModel", BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly),
                 fieldInfo: typeof(AuditOperation).GetField("<DeviceModel>k__BackingField", BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.DeclaredOnly),
                 nullable: true,
-                maxLength: 256);
+                maxLength: 255);
             deviceModel.TypeMapping = MySqlStringTypeMapping.Default.Clone(
                 comparer: new ValueComparer<string>(
                     (string v1, string v2) => v1 == v2,
@@ -180,8 +180,8 @@ namespace Ordering.Infrastructure.CompileModels
                     (string v) => v.GetHashCode(),
                     (string v) => v),
                 mappingInfo: new RelationalTypeMappingInfo(
-                    storeTypeName: "varchar(256)",
-                    size: 256));
+                    storeTypeName: "varchar(255)",
+                    size: 255));
             deviceModel.AddAnnotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.None);
             deviceModel.AddAnnotation("Relational:ColumnName", "device_model");
 
@@ -244,7 +244,7 @@ namespace Ordering.Infrastructure.CompileModels
                 propertyInfo: typeof(AuditOperation).GetProperty("IP", BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly),
                 fieldInfo: typeof(AuditOperation).GetField("<IP>k__BackingField", BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.DeclaredOnly),
                 nullable: true,
-                maxLength: 256);
+                maxLength: 255);
             iP.TypeMapping = MySqlStringTypeMapping.Default.Clone(
                 comparer: new ValueComparer<string>(
                     (string v1, string v2) => v1 == v2,
@@ -259,8 +259,8 @@ namespace Ordering.Infrastructure.CompileModels
                     (string v) => v.GetHashCode(),
                     (string v) => v),
                 mappingInfo: new RelationalTypeMappingInfo(
-                    storeTypeName: "varchar(256)",
-                    size: 256));
+                    storeTypeName: "varchar(255)",
+                    size: 255));
             iP.AddAnnotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.None);
             iP.AddAnnotation("Relational:ColumnName", "ip");
 

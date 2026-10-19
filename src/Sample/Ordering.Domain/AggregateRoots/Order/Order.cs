@@ -135,6 +135,17 @@ public class Order : DeletionAggregateRoot<string>, IOptimisticLock
         }
     }
 
+    /// <summary>
+    /// 删除当前订单中的订单项。
+    /// </summary>
+    /// <param name="orderItemId">订单项标识</param>
+    /// <returns>是否找到并移除订单项</returns>
+    public bool DeleteItem(string orderItemId)
+    {
+        var orderItem = _items.SingleOrDefault(x => x.Id == orderItemId);
+        return _items.Remove(orderItem);
+    }
+
     public void SetAddress(Address newAddress)
     {
         Address = newAddress ?? throw new ArgumentException(nameof(newAddress));

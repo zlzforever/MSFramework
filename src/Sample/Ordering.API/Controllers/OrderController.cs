@@ -104,6 +104,12 @@ public class OrderController(
         await mediator.SendAsync(command);
     }
 
+    [HttpDelete("{orderId}/items/{orderItemId}")]
+    public async Task DeleteItem([FromRoute] DeleteOrderItemCommand command)
+    {
+        await mediator.SendAsync(command);
+    }
+
     [HttpPut("{orderId}/address")]
     public async Task SetAddress([FromRoute, StringLength(36), Required] string orderId,
         [FromBody] SetOrderAddressCommand command)

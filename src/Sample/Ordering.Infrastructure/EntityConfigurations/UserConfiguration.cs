@@ -12,6 +12,6 @@ public class UserConfiguration
     {
         builder.Property(x => x.Id).HasMaxLength(36);
         builder.ToTable("user", t => t.ExcludeFromMigrations());
-        builder.Property(x => x.Name).HasMaxLength(256);
+        builder.Property(x => x.Name).HasMaxLength(255);
     }
 }

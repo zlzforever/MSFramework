@@ -42,6 +42,11 @@ internal sealed class CreationAuditingStrategy : IEntityAuditingStrategy
             entity.SetCreation(userId, userName);
         }
 
+        if (entry.Entity is IModification modification)
+        {
+            modification.SetModification(userId, userName);
+        }
+
         return true;
     }
 }
@@ -49,6 +54,8 @@ internal sealed class CreationAuditingStrategy : IEntityAuditingStrategy
 /// <summary>
 /// 修改审计策略：处理 <see cref="EntityState.Modified"/> 状态的实体，
 /// 对实现了 <see cref="IModification"/> 的实体设置最后修改人、最后修改时间。
+/// 软删除实体（<see cref="IDeletion"/>）由排在前面的 <see cref="DeletionAuditingStrategy"/> 优先处理，
+/// 本策略只负责未被其命中的普通修改。
 /// </summary>
 internal sealed class ModificationAuditingStrategy : IEntityAuditingStrategy
 {
@@ -69,27 +76,24 @@ internal sealed class ModificationAuditingStrategy : IEntityAuditingStrategy
 }
 
 /// <summary>
-/// 删除审计策略（软删除）：处理 <see cref="EntityState.Deleted"/> 状态的实体。
-/// 对实现了 <see cref="IDeletion"/> 的实体直接转 <see cref="EntityState.Modified"/> 并调用
-/// <see cref="IDeletion.SetDeletion"/> 写入删除审计字段，
-/// 实现软删除而非物理删除。
-/// 实体被标记 Deleted 后 EF Core 不会清空属性值，因此无需逐实体 Reload 回填数据；
-/// 转 Modified 后 EF Core 会把全部属性标记为已修改，策略将非审计属性重置为未修改，
-/// 使最终 UPDATE 仅包含删除审计列，避免全列写放大；乐观锁列保持原值仅参与 WHERE 判断，
-/// 并发语义不受影响。
+/// 删除审计策略（软删除）：处理 <see cref="EntityState.Deleted"/> 状态的实体，
+/// 对实现了 <see cref="IDeletion"/> 的实体转 <see cref="EntityState.Modified"/> 并调用
+/// <see cref="IDeletion.SetDeletion"/> 写入删除审计字段，实现软删除而非物理删除；
+/// 同时处理 Modified 状态下 IsDeleted 由 false 变为 true 的领域显式标记删除场景。
+/// 命中处理后返回 true 阻止后续策略；未命中一律返回 false，交由后续策略（如修改审计）处理。
 /// </summary>
 /// <remarks>
-/// 固定集合约束：软删除 UPDATE 仅落库 <c>DeletionAuditPropertyNames</c> 中固定的 4 个删除审计属性
-/// （IsDeleted、DeleterId、DeleterName、DeletionTime）。若实体在自定义
-/// <see cref="IDeletion.SetDeletion"/> 重写中额外写入属性，这些属性会被重置为未修改而不落库；
-/// 如需扩展删除审计列，必须同步扩展 <c>DeletionAuditPropertyNames</c> 集合或另行处理
-/// （如改为物理删除、扩展本策略），不可仅重写 <see cref="IDeletion.SetDeletion"/> 后依赖其落库。
+/// 聚合根集合移除子项的场景要求关系为必需且 DeleteBehavior 为 ClientCascade
+/// （见 <c>ReferenceCollectionBuilderExtensions.OnSoftDelete</c>）：
+/// EF Core 会把被移除的子项标记为 <see cref="EntityState.Deleted"/> 且外键值保留，
+/// 本策略在其落库前转回 Modified 实现软删除，外键列不会被置空；
+/// 数据库外键禁止配置级联删除（<see cref="DeleteBehavior.Cascade"/>），防止真实 DELETE 扩散。
 /// </remarks>
 internal sealed class DeletionAuditingStrategy : IEntityAuditingStrategy
 {
     /// <summary>
     /// 删除审计属性名集合：由 <see cref="IDeletion"/> 契约强制定义，
-    /// 软删除 UPDATE 仅允许包含这些列（含 <see cref="IDeletion.IsDeleted"/>）。
+    /// 软删除 UPDATE 必须包含这些列（含 <see cref="IDeletion.IsDeleted"/>）。
     /// </summary>
     private static readonly HashSet<string> DeletionAuditPropertyNames =
     [
@@ -101,32 +105,53 @@ internal sealed class DeletionAuditingStrategy : IEntityAuditingStrategy
 
     public bool Apply(EntityEntry entry, string userId, string userName)
     {
-        if (entry.State != EntityState.Deleted)
-        {
-            return false;
-        }
-
-        if (entry.Entity is not IDeletion entity)
-        {
-            return true; // 非软删除实体，不处理但标记已处理（阻止继续匹配）
-        }
-
+        // 聚合根集合移除子项：必需关系 + ClientCascade 时，EF 把被移除的子项标记为 Deleted（外键值保留）。
         // 转 Modified 实现软删除：实体被标记 Deleted 后属性值仍保留在内存中，
         // 直接转 Modified 并设置删除审计字段即可，省去 Reload 带来的逐行 SELECT。
-        entry.State = EntityState.Modified;
-        entity.SetDeletion(userId, userName);
-
-        // 收敛 UPDATE 列：转 Modified 时 EF Core 会标记全部属性为已修改，
-        // 将删除审计列之外的属性重置为未修改，最终 UPDATE 仅含审计列；
-        // 乐观锁列即使 IsModified=false 也仍以原值参与 WHERE 判断，不影响并发语义。
-        foreach (var property in entry.Properties)
+        if (entry.State == EntityState.Deleted)
         {
-            if (!DeletionAuditPropertyNames.Contains(property.Metadata.Name))
+            if (entry.Entity is not IDeletion entity)
             {
-                property.IsModified = false;
+                return false; // 物理删除实体，交由后续策略处理
+            }
+
+            entry.State = EntityState.Modified;
+            entity.SetDeletion(userId, userName);
+
+            // 选择性收敛 UPDATE 列：转 Modified 时 EF Core 会把全部属性标记为已修改，
+            // 将"当前值 == 原始值"（未被业务修改）且非删除审计列的属性重置为未修改，
+            // 最终 UPDATE 仅含删除审计列与业务真改过的列，避免全列写放大，
+            // 同时保留"先修改值再删除"的业务变更不丢失；
+            // 乐观锁列即使 IsModified=false 也仍以原值参与 WHERE 判断，不影响并发语义。
+            foreach (var property in entry.Properties)
+            {
+                if (DeletionAuditPropertyNames.Contains(property.Metadata.Name))
+                {
+                    continue;
+                }
+
+                if (Equals(property.CurrentValue, property.OriginalValue))
+                {
+                    property.IsModified = false;
+                }
+            }
+
+            return true;
+        }
+
+        // 领域显式标记删除：实体保留在集合中、仅 IsDeleted 置 true 的软删除
+        if (entry.State == EntityState.Modified && entry.Entity is IDeletion deletion)
+        {
+            var origin = entry.OriginalValues.GetValue<bool>(nameof(IDeletion.IsDeleted));
+            var current = entry.CurrentValues.GetValue<bool>(nameof(IDeletion.IsDeleted));
+            if (!origin && current)
+            {
+                deletion.SetDeletion(userId, userName);
+                return true;
             }
         }
 
-        return true;
+        // 未命中：交由后续策略（如修改审计）处理
+        return false;
     }
 }

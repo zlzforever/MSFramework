@@ -30,8 +30,8 @@ namespace Ordering.Infrastructure.Migrations
                         .HasColumnName("id");
 
                     b.Property<string>("EntityId")
-                        .HasMaxLength(256)
-                        .HasColumnType("varchar(256)")
+                        .HasMaxLength(255)
+                        .HasColumnType("varchar(255)")
                         .HasColumnName("entity_id");
 
                     b.Property<string>("OperationId")
@@ -39,13 +39,13 @@ namespace Ordering.Infrastructure.Migrations
                         .HasColumnName("operation_id");
 
                     b.Property<string>("OperationType")
-                        .HasMaxLength(256)
+                        .HasMaxLength(255)
                         .HasColumnType("varchar")
                         .HasColumnName("operation_type");
 
                     b.Property<string>("Type")
-                        .HasMaxLength(256)
-                        .HasColumnType("varchar(256)")
+                        .HasMaxLength(255)
+                        .HasColumnType("varchar(255)")
                         .HasColumnName("type");
 
                     b.HasKey("Id");
@@ -90,8 +90,8 @@ namespace Ordering.Infrastructure.Migrations
                         .HasColumnName("creator_id");
 
                     b.Property<string>("CreatorName")
-                        .HasMaxLength(256)
-                        .HasColumnType("varchar(256)")
+                        .HasMaxLength(255)
+                        .HasColumnType("varchar(255)")
                         .HasColumnName("creator_name");
 
                     b.Property<string>("DeviceId")
@@ -100,8 +100,8 @@ namespace Ordering.Infrastructure.Migrations
                         .HasColumnName("device_id");
 
                     b.Property<string>("DeviceModel")
-                        .HasMaxLength(256)
-                        .HasColumnType("varchar(256)")
+                        .HasMaxLength(255)
+                        .HasColumnType("varchar(255)")
                         .HasColumnName("device_model");
 
                     b.Property<int>("Elapsed")
@@ -124,8 +124,8 @@ namespace Ordering.Infrastructure.Migrations
                         .HasColumnName("imei");
 
                     b.Property<string>("IP")
-                        .HasMaxLength(256)
-                        .HasColumnType("varchar(256)")
+                        .HasMaxLength(255)
+                        .HasColumnType("varchar(255)")
                         .HasColumnName("ip");
 
                     b.Property<decimal?>("Lat")
@@ -185,8 +185,7 @@ namespace Ordering.Infrastructure.Migrations
                         .HasColumnName("trace_id");
 
                     b.Property<string>("UserAgent")
-                        .HasMaxLength(1024)
-                        .HasColumnType("varchar(1024)")
+                        .HasColumnType("longtext")
                         .HasColumnName("user_agent");
 
                     b.HasKey("Id");
@@ -210,8 +209,8 @@ namespace Ordering.Infrastructure.Migrations
                         .HasColumnName("entity_id");
 
                     b.Property<string>("Name")
-                        .HasMaxLength(256)
-                        .HasColumnType("varchar(256)")
+                        .HasMaxLength(255)
+                        .HasColumnType("varchar(255)")
                         .HasColumnName("name");
 
                     b.Property<string>("NewValue")
@@ -223,8 +222,8 @@ namespace Ordering.Infrastructure.Migrations
                         .HasColumnName("original_value");
 
                     b.Property<string>("Type")
-                        .HasMaxLength(256)
-                        .HasColumnType("varchar(256)")
+                        .HasMaxLength(255)
+                        .HasColumnType("varchar(255)")
                         .HasColumnName("type");
 
                     b.HasKey("Id");
@@ -287,8 +286,8 @@ namespace Ordering.Infrastructure.Migrations
                         .HasColumnName("creator_id");
 
                     b.Property<string>("CreatorName")
-                        .HasMaxLength(256)
-                        .HasColumnType("varchar(256)")
+                        .HasMaxLength(255)
+                        .HasColumnType("varchar(255)")
                         .HasColumnName("creator_name");
 
                     b.Property<string>("DeleterId")
@@ -297,8 +296,8 @@ namespace Ordering.Infrastructure.Migrations
                         .HasColumnName("deleter_id");
 
                     b.Property<string>("DeleterName")
-                        .HasMaxLength(256)
-                        .HasColumnType("varchar(256)")
+                        .HasMaxLength(255)
+                        .HasColumnType("varchar(255)")
                         .HasColumnName("deleter_name");
 
                     b.Property<long?>("DeletionTime")
@@ -332,8 +331,8 @@ namespace Ordering.Infrastructure.Migrations
                         .HasColumnName("last_modifier_id");
 
                     b.Property<string>("LastModifierName")
-                        .HasMaxLength(256)
-                        .HasColumnType("varchar(256)")
+                        .HasMaxLength(255)
+                        .HasColumnType("varchar(255)")
                         .HasColumnName("last_modifier_name");
 
                     b.Property<string>("List")
@@ -368,11 +367,58 @@ namespace Ordering.Infrastructure.Migrations
                         .HasColumnType("varchar(36)")
                         .HasColumnName("id");
 
+                    b.Property<long?>("CreationTime")
+                        .HasColumnType("bigint")
+                        .HasColumnName("creation_time");
+
+                    b.Property<string>("CreatorId")
+                        .HasMaxLength(36)
+                        .HasColumnType("varchar(36)")
+                        .HasColumnName("creator_id");
+
+                    b.Property<string>("CreatorName")
+                        .HasMaxLength(255)
+                        .HasColumnType("varchar(255)")
+                        .HasColumnName("creator_name");
+
+                    b.Property<string>("DeleterId")
+                        .HasMaxLength(36)
+                        .HasColumnType("varchar(36)")
+                        .HasColumnName("deleter_id");
+
+                    b.Property<string>("DeleterName")
+                        .HasMaxLength(255)
+                        .HasColumnType("varchar(255)")
+                        .HasColumnName("deleter_name");
+
+                    b.Property<long?>("DeletionTime")
+                        .HasColumnType("bigint")
+                        .HasColumnName("deletion_time");
+
                     b.Property<decimal>("Discount")
                         .HasColumnType("decimal(65,30)")
                         .HasColumnName("discount");
 
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("tinyint(1)")
+                        .HasColumnName("is_deleted");
+
+                    b.Property<long?>("LastModificationTime")
+                        .HasColumnType("bigint")
+                        .HasColumnName("last_modification_time");
+
+                    b.Property<string>("LastModifierId")
+                        .HasMaxLength(36)
+                        .HasColumnType("varchar(36)")
+                        .HasColumnName("last_modifier_id");
+
+                    b.Property<string>("LastModifierName")
+                        .HasMaxLength(255)
+                        .HasColumnType("varchar(255)")
+                        .HasColumnName("last_modifier_name");
+
                     b.Property<string>("OrderId")
+                        .IsRequired()
                         .HasColumnType("varchar(255)")
                         .HasColumnName("order_id");
 
@@ -414,13 +460,13 @@ namespace Ordering.Infrastructure.Migrations
                         .HasColumnName("creator_id");
 
                     b.Property<string>("CreatorName")
-                        .HasMaxLength(256)
-                        .HasColumnType("varchar(256)")
+                        .HasMaxLength(255)
+                        .HasColumnType("varchar(255)")
                         .HasColumnName("creator_name");
 
                     b.Property<string>("Name")
-                        .HasMaxLength(256)
-                        .HasColumnType("varchar(256)")
+                        .HasMaxLength(255)
+                        .HasColumnType("varchar(255)")
                         .HasColumnName("name");
 
                     b.Property<int>("Price")
@@ -440,8 +486,8 @@ namespace Ordering.Infrastructure.Migrations
                         .HasColumnName("id");
 
                     b.Property<string>("Name")
-                        .HasMaxLength(256)
-                        .HasColumnType("varchar(256)")
+                        .HasMaxLength(255)
+                        .HasColumnType("varchar(255)")
                         .HasColumnName("name");
 
                     b.HasKey("Id");
@@ -479,32 +525,38 @@ namespace Ordering.Infrastructure.Migrations
                     b.OwnsOne("Ordering.Domain.AggregateRoots.Order.Address", "Address", b1 =>
                         {
                             b1.Property<string>("OrderId")
-                                .HasColumnType("varchar(255)");
+                                .HasColumnType("varchar(255)")
+                                .HasColumnName("id");
 
                             b1.Property<string>("City")
                                 .IsRequired()
                                 .HasMaxLength(200)
-                                .HasColumnType("varchar(200)");
+                                .HasColumnType("varchar(200)")
+                                .HasColumnName("address_city");
 
                             b1.Property<string>("Country")
                                 .IsRequired()
                                 .HasMaxLength(50)
-                                .HasColumnType("varchar(50)");
+                                .HasColumnType("varchar(50)")
+                                .HasColumnName("address_country");
 
                             b1.Property<string>("State")
                                 .IsRequired()
                                 .HasMaxLength(200)
-                                .HasColumnType("varchar(200)");
+                                .HasColumnType("varchar(200)")
+                                .HasColumnName("address_state");
 
                             b1.Property<string>("Street")
                                 .IsRequired()
                                 .HasMaxLength(200)
-                                .HasColumnType("varchar(200)");
+                                .HasColumnType("varchar(200)")
+                                .HasColumnName("address_street");
 
                             b1.Property<string>("ZipCode")
                                 .IsRequired()
                                 .HasMaxLength(20)
-                                .HasColumnType("varchar(20)");
+                                .HasColumnType("varchar(20)")
+                                .HasColumnName("address_zip_code");
 
                             b1.HasKey("OrderId");
 
@@ -523,27 +575,33 @@ namespace Ordering.Infrastructure.Migrations
                 {
                     b.HasOne("Ordering.Domain.AggregateRoots.Order.Order", "Order")
                         .WithMany("Items")
-                        .HasForeignKey("OrderId");
+                        .HasForeignKey("OrderId")
+                        .OnDelete(DeleteBehavior.ClientCascade)
+                        .IsRequired()
+                        .HasAnnotation("OnSoftDelete", true);
 
                     b.OwnsOne("Ordering.Domain.AggregateRoots.Order.Product", "Product", b1 =>
                         {
                             b1.Property<string>("OrderItemId")
-                                .HasColumnType("varchar(36)");
+                                .HasColumnType("varchar(36)")
+                                .HasColumnName("id");
 
                             b1.Property<string>("Name")
                                 .IsRequired()
                                 .HasMaxLength(255)
-                                .HasColumnType("varchar(255)");
+                                .HasColumnType("varchar(255)")
+                                .HasColumnName("product_name");
 
                             b1.Property<string>("PictureUrl")
                                 .HasMaxLength(300)
-                                .HasColumnType("varchar(300)");
+                                .HasColumnType("varchar(300)")
+                                .HasColumnName("product_picture_url");
 
                             b1.Property<string>("ProductId")
                                 .IsRequired()
                                 .HasMaxLength(36)
                                 .HasColumnType("varchar(36)")
-                                .HasColumnName("ProductId");
+                                .HasColumnName("product_id");
 
                             b1.HasKey("OrderItemId");
 

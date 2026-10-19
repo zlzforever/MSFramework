@@ -71,12 +71,12 @@ namespace Ordering.Infrastructure.CompileModels
                 IsNullable = true
             };
             microserviceFrameworkAuditingModelAuditEntityTableBase.Columns.Add("operation_id", operation_idColumnBase);
-            var operation_typeColumnBase = new ColumnBase<ColumnMappingBase>("operation_type", "varchar(256)", microserviceFrameworkAuditingModelAuditEntityTableBase)
+            var operation_typeColumnBase = new ColumnBase<ColumnMappingBase>("operation_type", "varchar(255)", microserviceFrameworkAuditingModelAuditEntityTableBase)
             {
                 IsNullable = true
             };
             microserviceFrameworkAuditingModelAuditEntityTableBase.Columns.Add("operation_type", operation_typeColumnBase);
-            var typeColumnBase = new ColumnBase<ColumnMappingBase>("type", "varchar(256)", microserviceFrameworkAuditingModelAuditEntityTableBase)
+            var typeColumnBase = new ColumnBase<ColumnMappingBase>("type", "varchar(255)", microserviceFrameworkAuditingModelAuditEntityTableBase)
             {
                 IsNullable = true
             };
@@ -106,12 +106,12 @@ namespace Ordering.Infrastructure.CompileModels
                 IsNullable = true
             };
             ordering_audit_entityTable.Columns.Add("operation_id", operation_idColumn);
-            var operation_typeColumn = new Column("operation_type", "varchar(256)", ordering_audit_entityTable)
+            var operation_typeColumn = new Column("operation_type", "varchar(255)", ordering_audit_entityTable)
             {
                 IsNullable = true
             };
             ordering_audit_entityTable.Columns.Add("operation_type", operation_typeColumn);
-            var typeColumn = new Column("type", "varchar(256)", ordering_audit_entityTable)
+            var typeColumn = new Column("type", "varchar(255)", ordering_audit_entityTable)
             {
                 IsNullable = true
             };
@@ -165,7 +165,7 @@ namespace Ordering.Infrastructure.CompileModels
                 IsNullable = true
             };
             microserviceFrameworkAuditingModelAuditOperationTableBase.Columns.Add("creator_id", creator_idColumnBase);
-            var creator_nameColumnBase = new ColumnBase<ColumnMappingBase>("creator_name", "varchar(256)", microserviceFrameworkAuditingModelAuditOperationTableBase)
+            var creator_nameColumnBase = new ColumnBase<ColumnMappingBase>("creator_name", "varchar(255)", microserviceFrameworkAuditingModelAuditOperationTableBase)
             {
                 IsNullable = true
             };
@@ -175,7 +175,7 @@ namespace Ordering.Infrastructure.CompileModels
                 IsNullable = true
             };
             microserviceFrameworkAuditingModelAuditOperationTableBase.Columns.Add("device_id", device_idColumnBase);
-            var device_modelColumnBase = new ColumnBase<ColumnMappingBase>("device_model", "varchar(256)", microserviceFrameworkAuditingModelAuditOperationTableBase)
+            var device_modelColumnBase = new ColumnBase<ColumnMappingBase>("device_model", "varchar(255)", microserviceFrameworkAuditingModelAuditOperationTableBase)
             {
                 IsNullable = true
             };
@@ -186,7 +186,7 @@ namespace Ordering.Infrastructure.CompileModels
             microserviceFrameworkAuditingModelAuditOperationTableBase.Columns.Add("end_time", end_timeColumnBase);
             var idColumnBase0 = new ColumnBase<ColumnMappingBase>("id", "varchar(36)", microserviceFrameworkAuditingModelAuditOperationTableBase);
             microserviceFrameworkAuditingModelAuditOperationTableBase.Columns.Add("id", idColumnBase0);
-            var ipColumnBase = new ColumnBase<ColumnMappingBase>("ip", "varchar(256)", microserviceFrameworkAuditingModelAuditOperationTableBase)
+            var ipColumnBase = new ColumnBase<ColumnMappingBase>("ip", "varchar(255)", microserviceFrameworkAuditingModelAuditOperationTableBase)
             {
                 IsNullable = true
             };
@@ -250,7 +250,7 @@ namespace Ordering.Infrastructure.CompileModels
                 IsNullable = true
             };
             ordering_audit_operationTable.Columns.Add("creator_id", creator_idColumn);
-            var creator_nameColumn = new Column("creator_name", "varchar(256)", ordering_audit_operationTable)
+            var creator_nameColumn = new Column("creator_name", "varchar(255)", ordering_audit_operationTable)
             {
                 IsNullable = true
             };
@@ -260,7 +260,7 @@ namespace Ordering.Infrastructure.CompileModels
                 IsNullable = true
             };
             ordering_audit_operationTable.Columns.Add("device_id", device_idColumn);
-            var device_modelColumn = new Column("device_model", "varchar(256)", ordering_audit_operationTable)
+            var device_modelColumn = new Column("device_model", "varchar(255)", ordering_audit_operationTable)
             {
                 IsNullable = true
             };
@@ -269,7 +269,7 @@ namespace Ordering.Infrastructure.CompileModels
             ordering_audit_operationTable.Columns.Add("elapsed", elapsedColumn);
             var end_timeColumn = new Column("end_time", "bigint", ordering_audit_operationTable);
             ordering_audit_operationTable.Columns.Add("end_time", end_timeColumn);
-            var ipColumn = new Column("ip", "varchar(256)", ordering_audit_operationTable)
+            var ipColumn = new Column("ip", "varchar(255)", ordering_audit_operationTable)
             {
                 IsNullable = true
             };
@@ -354,7 +354,7 @@ namespace Ordering.Infrastructure.CompileModels
             microserviceFrameworkAuditingModelAuditPropertyTableBase.Columns.Add("entity_id", entity_idColumnBase0);
             var idColumnBase1 = new ColumnBase<ColumnMappingBase>("id", "varchar(36)", microserviceFrameworkAuditingModelAuditPropertyTableBase);
             microserviceFrameworkAuditingModelAuditPropertyTableBase.Columns.Add("id", idColumnBase1);
-            var nameColumnBase = new ColumnBase<ColumnMappingBase>("name", "varchar(256)", microserviceFrameworkAuditingModelAuditPropertyTableBase)
+            var nameColumnBase = new ColumnBase<ColumnMappingBase>("name", "varchar(255)", microserviceFrameworkAuditingModelAuditPropertyTableBase)
             {
                 IsNullable = true
             };
@@ -369,7 +369,7 @@ namespace Ordering.Infrastructure.CompileModels
                 IsNullable = true
             };
             microserviceFrameworkAuditingModelAuditPropertyTableBase.Columns.Add("original_value", original_valueColumnBase);
-            var typeColumnBase0 = new ColumnBase<ColumnMappingBase>("type", "varchar(256)", microserviceFrameworkAuditingModelAuditPropertyTableBase)
+            var typeColumnBase0 = new ColumnBase<ColumnMappingBase>("type", "varchar(255)", microserviceFrameworkAuditingModelAuditPropertyTableBase)
             {
                 IsNullable = true
             };
@@ -395,7 +395,7 @@ namespace Ordering.Infrastructure.CompileModels
                 IsNullable = true
             };
             ordering_audit_propertyTable.Columns.Add("entity_id", entity_idColumn0);
-            var nameColumn = new Column("name", "varchar(256)", ordering_audit_propertyTable)
+            var nameColumn = new Column("name", "varchar(255)", ordering_audit_propertyTable)
             {
                 IsNullable = true
             };
@@ -410,7 +410,7 @@ namespace Ordering.Infrastructure.CompileModels
                 IsNullable = true
             };
             ordering_audit_propertyTable.Columns.Add("original_value", original_valueColumn);
-            var typeColumn0 = new Column("type", "varchar(256)", ordering_audit_propertyTable)
+            var typeColumn0 = new Column("type", "varchar(255)", ordering_audit_propertyTable)
             {
                 IsNullable = true
             };
@@ -517,7 +517,7 @@ namespace Ordering.Infrastructure.CompileModels
                 IsNullable = true
             };
             ordering_orderTable.Columns.Add("creator_id", creator_idColumn0);
-            var creator_nameColumn0 = new Column("creator_name", "varchar(256)", ordering_orderTable)
+            var creator_nameColumn0 = new Column("creator_name", "varchar(255)", ordering_orderTable)
             {
                 IsNullable = true
             };
@@ -651,7 +651,7 @@ namespace Ordering.Infrastructure.CompileModels
                 IsNullable = true
             };
             orderingDomainAggregateRootsOrderTableBase.Columns.Add("creator_id", creator_idColumnBase0);
-            var creator_nameColumnBase0 = new ColumnBase<ColumnMappingBase>("creator_name", "varchar(256)", orderingDomainAggregateRootsOrderTableBase)
+            var creator_nameColumnBase0 = new ColumnBase<ColumnMappingBase>("creator_name", "varchar(255)", orderingDomainAggregateRootsOrderTableBase)
             {
                 IsNullable = true
             };
@@ -933,14 +933,14 @@ namespace Ordering.Infrastructure.CompileModels
                 IsNullable = true
             };
             orderingDomainAggregateRootsProductTableBase.Columns.Add("creator_id", creator_idColumnBase1);
-            var creator_nameColumnBase1 = new ColumnBase<ColumnMappingBase>("creator_name", "varchar(256)", orderingDomainAggregateRootsProductTableBase)
+            var creator_nameColumnBase1 = new ColumnBase<ColumnMappingBase>("creator_name", "varchar(255)", orderingDomainAggregateRootsProductTableBase)
             {
                 IsNullable = true
             };
             orderingDomainAggregateRootsProductTableBase.Columns.Add("creator_name", creator_nameColumnBase1);
             var idColumnBase6 = new ColumnBase<ColumnMappingBase>("id", "varchar(255)", orderingDomainAggregateRootsProductTableBase);
             orderingDomainAggregateRootsProductTableBase.Columns.Add("id", idColumnBase6);
-            var nameColumnBase0 = new ColumnBase<ColumnMappingBase>("name", "varchar(256)", orderingDomainAggregateRootsProductTableBase)
+            var nameColumnBase0 = new ColumnBase<ColumnMappingBase>("name", "varchar(255)", orderingDomainAggregateRootsProductTableBase)
             {
                 IsNullable = true
             };
@@ -979,12 +979,12 @@ namespace Ordering.Infrastructure.CompileModels
                 IsNullable = true
             };
             ordering_productTable.Columns.Add("creator_id", creator_idColumn1);
-            var creator_nameColumn1 = new Column("creator_name", "varchar(256)", ordering_productTable)
+            var creator_nameColumn1 = new Column("creator_name", "varchar(255)", ordering_productTable)
             {
                 IsNullable = true
             };
             ordering_productTable.Columns.Add("creator_name", creator_nameColumn1);
-            var nameColumn0 = new Column("name", "varchar(256)", ordering_productTable)
+            var nameColumn0 = new Column("name", "varchar(255)", ordering_productTable)
             {
                 IsNullable = true
             };
@@ -1018,7 +1018,7 @@ namespace Ordering.Infrastructure.CompileModels
             var orderingDomainAggregateRootsUserTableBase = new TableBase("Ordering.Domain.AggregateRoots.User", null, relationalModel);
             var idColumnBase7 = new ColumnBase<ColumnMappingBase>("id", "int", orderingDomainAggregateRootsUserTableBase);
             orderingDomainAggregateRootsUserTableBase.Columns.Add("id", idColumnBase7);
-            var nameColumnBase1 = new ColumnBase<ColumnMappingBase>("name", "varchar(256)", orderingDomainAggregateRootsUserTableBase)
+            var nameColumnBase1 = new ColumnBase<ColumnMappingBase>("name", "varchar(255)", orderingDomainAggregateRootsUserTableBase)
             {
                 IsNullable = true
             };
@@ -1035,7 +1035,7 @@ namespace Ordering.Infrastructure.CompileModels
             var userTable = new Table("user", null, relationalModel);
             var idColumn5 = new Column("id", "int", userTable);
             userTable.Columns.Add("id", idColumn5);
-            var nameColumn1 = new Column("name", "varchar(256)", userTable)
+            var nameColumn1 = new Column("name", "varchar(255)", userTable)
             {
                 IsNullable = true
             };
