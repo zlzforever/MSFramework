@@ -9,6 +9,7 @@ using MicroserviceFramework.Serialization.Newtonsoft.Converters;
 using MicroserviceFramework.Text.Json;
 using MongoDB.Bson;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Serialization;
 using Xunit;
 using JsonSerializer = System.Text.Json.JsonSerializer;
 
@@ -117,6 +118,20 @@ public class SerializationTests
     }
 
     [Fact]
+    public void Dict2()
+    {
+        var jsonSerializerSettings = new JsonSerializerSettings();
+        jsonSerializerSettings.Converters.Add(new ObjectIdConverter());
+        jsonSerializerSettings.Converters.Add(new EnumerationConverter());
+        jsonSerializerSettings.ContractResolver = new CamelCasePropertyNamesContractResolver();
+        var json = JsonConvert.SerializeObject(
+            new Dictionary<string, string> { { "Name", "name1" }, { "age", "age1" }, }, jsonSerializerSettings);
+
+        // 固化 CamelCasePropertyNamesContractResolver 对字典键的行为：键同样被 camelCase（"Name" -> "name"）
+        Assert.Equal("""{"name":"name1","age":"age1"}""", json);
+    }
+
+    [Fact]
     public void DicTest()
     {
         var dict = new Dictionary<string, string> { { "a", "v1" }, { "A", "v2" } };
@@ -178,8 +193,8 @@ public class SerializationTests
     [Fact]
     public void DatetimeOffsetTest()
     {
-        var a = System.Text.Json.JsonSerializer.Serialize(DateTimeOffset.UtcNow);
-        var b = JsonConvert.SerializeObject(DateTimeOffset.UtcNow);
+        var a = System.Text.Json.JsonSerializer.Serialize(DateTimeOffset.Now);
+        var b = JsonConvert.SerializeObject(DateTimeOffset.Now);
         Assert.Contains("T", a);
         Assert.Contains("T", b);
     }
@@ -256,15 +271,15 @@ public class SerializationTests
             new PaginationResult<A>(1, 10, 2,
                 [new A { Id = "1", Name = "A1" }, new A { Id = "2", Name = "A2" }]), options);
         Assert.Equal("""
-{"data":[{"id":"1","name":"A1"},{"id":"2","name":"A2"}],"total":2,"page":1,"limit":10}
-"""
+                     {"data":[{"id":"1","name":"A1"},{"id":"2","name":"A2"}],"total":2,"page":1,"limit":10}
+                     """
             , json);
         var json2 = System.Text.Json.JsonSerializer.Serialize(
             new PaginationResult<A>(1, 10, 2,
                 null), options);
         Assert.Equal("""
-{"data":[],"total":2,"page":1,"limit":10}
-"""
+                     {"data":[],"total":2,"page":1,"limit":10}
+                     """
             , json2);
     }
 }

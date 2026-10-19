@@ -70,7 +70,7 @@ public class KeylessRepositoryTests
             IsDeleted = true;
             DeleterId = deleterId;
             DeleterName = deleterName;
-            DeletionTime = deletionTime ?? DateTimeOffset.UtcNow;
+            DeletionTime = deletionTime ?? DateTimeOffset.Now;
         }
     }
 

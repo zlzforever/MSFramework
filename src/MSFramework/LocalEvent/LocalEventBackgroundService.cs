@@ -166,7 +166,7 @@ public class LocalEventBackgroundService(
         // session 可能为 null（ISession 未注册的宿主），审计操作仅缺省用户信息，不影响事件处理
         var auditedOperation = new AuditOperation(handlerType, null, null, null, null,
             null, null, session?.TraceIdentifier, "Local");
-        auditedOperation.SetCreation(session?.UserId, session?.UserDisplayName, DateTimeOffset.UtcNow);
+        auditedOperation.SetCreation(session?.UserId, session?.UserDisplayName, DateTimeOffset.Now);
         return auditedOperation;
     }
 

@@ -50,7 +50,7 @@ public class FormFileTests : BaseTest, IDisposable
         var md5 = ComputeMd5(content);
         var fileName = $"{md5}{Path.GetExtension(name)}";
         return Path.Combine(AppContext.BaseDirectory, "wwwroot", "upload",
-            DateTimeOffset.UtcNow.ToString("yyyyMMdd"), md5.Substring(0, 2), md5.Substring(2, 2), fileName);
+            DateTimeOffset.Now.ToString("yyyyMMdd"), md5.Substring(0, 2), md5.Substring(2, 2), fileName);
     }
 
     /// <summary>
@@ -87,7 +87,7 @@ public class FormFileTests : BaseTest, IDisposable
         var realPath = RealFilePath(content);
         var ossPath = OssLinkPath(content);
         var md5 = ComputeMd5(content);
-        var today = DateTimeOffset.UtcNow.ToString("yyyyMMdd");
+        var today = DateTimeOffset.Now.ToString("yyyyMMdd");
         // 真实文件：upload/{date}/{l1}/{l2}/{md5}{ext}，为普通文件且内容正确
         Assert.True(File.Exists(realPath));
         Assert.False(File.GetAttributes(realPath).HasFlag(FileAttributes.ReparsePoint));
@@ -154,7 +154,7 @@ public class FormFileTests : BaseTest, IDisposable
         var result = await CreateFormFile(content).SaveAsync();
 
         // 今日 upload 路径仅创建符号链接指向旧真实文件，不写入任何数据
-        var today = DateTimeOffset.UtcNow.ToString("yyyyMMdd");
+        var today = DateTimeOffset.Now.ToString("yyyyMMdd");
         var newLinkPath = Path.Combine(AppContext.BaseDirectory, "wwwroot", "upload", today, level1, level2, fileName);
         Assert.True(File.Exists(newLinkPath));
         Assert.True(File.GetAttributes(newLinkPath).HasFlag(FileAttributes.ReparsePoint));

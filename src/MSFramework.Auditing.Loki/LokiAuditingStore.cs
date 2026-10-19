@@ -93,7 +93,7 @@ public class LokiAuditingStore : IAuditingStore
             new("UserName", new ScalarValue(auditOperation.CreatorName ?? string.Empty)),
             new("OperationId", new ScalarValue(auditOperation.Id))
         };
-        var auditOperationEvent = new LogEvent(DateTimeOffset.UtcNow, LogEventLevel.Information, null,
+        var auditOperationEvent = new LogEvent(DateTimeOffset.Now, LogEventLevel.Information, null,
             _operationTemplate,
             auditOperationProperties);
         _logger.Write(auditOperationEvent);
@@ -116,7 +116,7 @@ public class LokiAuditingStore : IAuditingStore
                 properties.Add(new LogEventProperty($"{property.Name}_NewValue", new ScalarValue(property.NewValue)));
             }
 
-            var logEvent = new LogEvent(DateTimeOffset.UtcNow, LogEventLevel.Information, null, _template, properties);
+            var logEvent = new LogEvent(DateTimeOffset.Now, LogEventLevel.Information, null, _template, properties);
             _logger.Write(logEvent);
         }
 

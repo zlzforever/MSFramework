@@ -75,7 +75,7 @@ internal class Audit(ILogger<Audit> logger, IServiceScopeFactory scopeFactory) :
             AuditOperation auditOperation = null;
             if (auditingStores.Count > 0)
             {
-                auditOperation = CreateAuditOperation(context, DateTimeOffset.UtcNow, scope.ServiceProvider);
+                auditOperation = CreateAuditOperation(context, DateTimeOffset.Now, scope.ServiceProvider);
                 if (auditOperation != null)
                 {
                     // 审计操作承载到当前请求执行流（AsyncLocal），随 ExecutionContext 流转，

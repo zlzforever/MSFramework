@@ -194,7 +194,7 @@ public class ProductController(
     //     await dbContext.AddAsync(prod);
     //
     //     await _capBus.PublishAsync(Names.ProjectCreateFailedEvent,
-    //         new { prod.Id, prod.Name, CreationTime = DateTimeOffset.UtcNow });
+    //         new { prod.Id, prod.Name, CreationTime = DateTimeOffset.Now });
     //
     //     await dbContext.SaveChangesAsync();
     //     return Ok();

@@ -2,12 +2,38 @@
 using System.Text;
 using System.Text.Json;
 using MicroserviceFramework.Text.Json.Converters;
+using Newtonsoft.Json;
 using Xunit;
+using JsonException = System.Text.Json.JsonException;
 
 namespace MSFramework.Tests;
 
 public class DateTimeTests
 {
+    [Fact]
+    public void LocalSerialization()
+    {
+        // 2023-01-18 10:17:00(+8)
+        var unixTime = 1674008220;
+        var dt = DateTimeOffset.FromUnixTimeSeconds(unixTime);
+        var local = dt.ToLocalTime();
+        var json1 = JsonConvert.SerializeObject(local);
+        var json2 = JsonConvert.SerializeObject(dt);
+
+        // 同一时刻的两种偏移表示：序列化往返后绝对时刻不变，且各自保留原偏移量
+        var roundTripLocal = JsonConvert.DeserializeObject<DateTimeOffset>(json1);
+        var roundTripUtc = JsonConvert.DeserializeObject<DateTimeOffset>(json2);
+        Assert.Equal(local.Offset, roundTripLocal.Offset);
+        Assert.Equal(dt.Offset, roundTripUtc.Offset);
+        Assert.Equal(unixTime, roundTripLocal.ToUnixTimeSeconds());
+        Assert.Equal(unixTime, roundTripUtc.ToUnixTimeSeconds());
+        // 同一时刻在本地时区序列化结果与 UTC 表示不同（偏移非零时区）
+        if (local.Offset != TimeSpan.Zero)
+        {
+            Assert.NotEqual(json1, json2);
+        }
+    }
+
     [Fact]
     public void ToLocal()
     {
@@ -64,7 +90,7 @@ public class DateTimeTests
     public void DateTimeOffsetJsonConverter_ThrowsJsonException_WhenTimestampExceedsInt64()
     {
         var converter = new DateTimeOffsetJsonConverter();
-        var bytes = Encoding.UTF8.GetBytes("9223372036854775808");
+        var bytes = "9223372036854775808"u8.ToArray();
 
         Assert.Throws<JsonException>(() =>
         {

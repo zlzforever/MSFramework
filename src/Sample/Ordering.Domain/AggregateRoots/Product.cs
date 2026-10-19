@@ -17,7 +17,7 @@ public class Product : CreationAggregateRoot<string>, IOptimisticLock
         {
             Id = product.Id,
             Name = name,
-            CreationTime = DateTimeOffset.UtcNow
+            CreationTime = DateTimeOffset.Now
         });
 
         return product;

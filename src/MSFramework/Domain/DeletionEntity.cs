@@ -50,11 +50,11 @@ public abstract class DeletionEntity<TKey>(TKey id) : ModificationEntity<TKey>(i
         }
 
         IsDeleted = true;
-        DeletionTime = deletionTime ?? DateTimeOffset.UtcNow;
+        DeletionTime = deletionTime ?? DateTimeOffset.Now;
         DeleterId = deleterId;
         DeleterName = deleterName;
 
-        // DeletionTime ??= deletionTime == default ? DateTimeOffset.UtcNow : deletionTime;
+        // DeletionTime ??= deletionTime == default ? DateTimeOffset.Now : deletionTime;
         // if (!string.IsNullOrWhiteSpace(userId) && string.IsNullOrWhiteSpace(DeleterId))
         // {
         //     DeleterId = userId;

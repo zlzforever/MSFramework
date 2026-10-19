@@ -45,7 +45,7 @@ public abstract class CreationEntity<TKey>(TKey id) :
             return;
         }
 
-        CreationTime = creationTime ?? DateTimeOffset.UtcNow;
+        CreationTime = creationTime ?? DateTimeOffset.Now;
         CreatorId = creatorId;
         CreatorName = creatorName;
     }

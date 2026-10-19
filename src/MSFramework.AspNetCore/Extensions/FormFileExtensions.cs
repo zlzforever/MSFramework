@@ -87,7 +87,7 @@ public static class FormFileExtensions
         }
 
         // 日期格式 yyyyMMdd，修正原 yyyMMdd 笔误
-        var date = DateTimeOffset.UtcNow.ToString("yyyyMMdd");
+        var date = DateTimeOffset.Now.ToString("yyyyMMdd");
 
         await using var stream = formFile.OpenReadStream();
         // 使用流式接口，增强性能
