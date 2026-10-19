@@ -134,7 +134,7 @@ public class ResponseWrapperFilterTests
         Assert.Equal(500, apiResult.Code);
         Assert.Equal("成功", apiResult.Msg);
         Assert.Same(problemDetails, apiResult.Data);
-        Assert.Equal(ApiResult.Type, result.DeclaredType);
+        Assert.Null(result.DeclaredType);
         Assert.Empty(result.ContentTypes);
     }
 
@@ -154,7 +154,7 @@ public class ResponseWrapperFilterTests
         Assert.Equal(500, apiResult.Code);
         Assert.Equal(string.Empty, apiResult.Msg);
         Assert.Same(problemDetails, apiResult.Data);
-        Assert.Equal(ApiResult.Type, result.DeclaredType);
+        Assert.Null(result.DeclaredType);
         Assert.Empty(result.ContentTypes);
     }
 
@@ -174,7 +174,7 @@ public class ResponseWrapperFilterTests
         Assert.Equal(500, apiResult.Code);
         Assert.Equal("实体校验失败", apiResult.Msg);
         Assert.Same(problemDetails, apiResult.Data);
-        Assert.Equal(ApiResult.Type, result.DeclaredType);
+        Assert.Null(result.DeclaredType);
         Assert.Empty(result.ContentTypes);
     }
 
@@ -238,7 +238,7 @@ public class ResponseWrapperFilterTests
         Assert.Equal(0, apiResult.Code);
         Assert.Equal(string.Empty, apiResult.Msg);
         Assert.Same(originalValue, apiResult.Data);
-        Assert.Equal(ApiResult.Type, result.DeclaredType);
+        Assert.Null(result.DeclaredType);
     }
 
     [Fact]
@@ -254,7 +254,9 @@ public class ResponseWrapperFilterTests
         var apiResult = Assert.IsType<ApiResult>(result.Value);
         Assert.Equal(1, nextCalls);
         Assert.Equal(StatusCodes.Status200OK, result.StatusCode);
-        Assert.Equal(ApiResult.Type, result.DeclaredType);
+        // 包装后声明类型被清空（以运行时值为准）：SystemTextJsonOutputFormatter 优先按声明类型序列化，
+        // 声明类型与被替换后的 ApiResult 运行时值不匹配会抛 InvalidCastException
+        Assert.Null(result.DeclaredType);
         Assert.Equal(["application/vnd.api+json"], result.ContentTypes);
         Assert.True(apiResult.Success);
         Assert.Equal(0, apiResult.Code);
@@ -263,6 +265,28 @@ public class ResponseWrapperFilterTests
         Assert.Equal(
             "{\"success\":true,\"code\":0,\"msg\":\"\",\"data\":\"payload\"}",
             JsonSerializer.Serialize(result.Value));
+    }
+
+    /// <summary>
+    /// 回归：包装时必须清空陈旧的声明类型。
+    /// Action 返回 Task&lt;string&gt;/Task&lt;OrderDto&gt; 等时 ObjectResult.DeclaredType 是声明类型，
+    /// 过滤器把 Value 换成 ApiResult 后若保留声明类型，SystemTextJsonOutputFormatter 会按声明类型的
+    /// 契约序列化，抛 InvalidCastException（Value 为 ApiResult、声明类型为 string 时实测复现）。
+    /// </summary>
+    [Fact]
+    public async Task ClearsStaleDeclaredTypeWhenWrappingAsync()
+    {
+        var originalValue = new object();
+        var context = CreateContext(originalValue, StatusCodes.Status200OK, typeof(string));
+
+        var nextCalls = await InvokeFilterAsync(context);
+
+        var result = Assert.IsType<ObjectResult>(context.Result);
+        var apiResult = Assert.IsType<ApiResult>(result.Value);
+        Assert.Equal(1, nextCalls);
+        Assert.Same(originalValue, apiResult.Data);
+        // 清空后由输出格式化器按运行时类型序列化，避免声明类型与运行时值不匹配
+        Assert.Null(result.DeclaredType);
     }
 
     [Fact]
@@ -312,7 +336,8 @@ public class ResponseWrapperFilterTests
         Assert.Equal(1, apiResult.Code);
         Assert.Equal(string.Empty, apiResult.Msg);
         Assert.Same(originalValue, apiResult.Data);
-        Assert.Equal(ApiResult.Type, result.DeclaredType);
+        // 包装后声明类型被清空（以运行时值为准），原因同 WrapsOrdinaryObjectWhenDeclaredTypeIsApiResultAsync
+        Assert.Null(result.DeclaredType);
     }
 
     [Theory]

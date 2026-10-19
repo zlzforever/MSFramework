@@ -70,7 +70,14 @@ internal sealed class ResponseWrapperFilter(ILogger<ResponseWrapperFilter> logge
                         Data = problemDetails
                     };
                     objectResult.StatusCode = code;
-                    // 关键：清空声明类型，不要手动赋值ApiResult.Type
+                    // 包装后 Value 的运行时类型已变为 ApiResult，但 DeclaredType 仍是 Action 的返回类型
+                    // （如 Task<string>/Task<OrderDto> 对应的 string/OrderDto）。
+                    // SystemTextJsonOutputFormatter 优先按声明类型的契约序列化，
+                    // 声明类型与运行时值不匹配时会抛 InvalidCastException（Value 为 ApiResult、声明类型为 string 时实测复现）。
+                    // 置 null 表示"以运行时值为准"，与实际序列化对象永远一致；
+                    // 不要赋值 ApiResult.Type：它只在包装值恰好是非泛型 ApiResult 时正确，
+                    // 若包装值变为 ApiResult<T> 或子类（如带 Errors 属性的 ApiResultWithErrors），
+                    // 在按声明类型序列化的行为下会丢失子类属性。
                     objectResult.DeclaredType = null;
                 }
                 // ObjectResult 且 Value 不是 ApiResult，如是一个 string(Task<string>)
@@ -82,7 +89,14 @@ internal sealed class ResponseWrapperFilter(ILogger<ResponseWrapperFilter> logge
                     {
                         Success = success, Code = success ? 0 : 1, Msg = string.Empty, Data = objectResult.Value
                     };
-                    // 关键：清空声明类型，不要手动赋值ApiResult.Type
+                    // 包装后 Value 的运行时类型已变为 ApiResult，但 DeclaredType 仍是 Action 的返回类型
+                    // （如 Task<string>/Task<OrderDto> 对应的 string/OrderDto）。
+                    // SystemTextJsonOutputFormatter 优先按声明类型的契约序列化，
+                    // 声明类型与运行时值不匹配时会抛 InvalidCastException（Value 为 ApiResult、声明类型为 string 时实测复现）。
+                    // 置 null 表示"以运行时值为准"，与实际序列化对象永远一致；
+                    // 不要赋值 ApiResult.Type：它只在包装值恰好是非泛型 ApiResult 时正确，
+                    // 若包装值变为 ApiResult<T> 或子类（如带 Errors 属性的 ApiResultWithErrors），
+                    // 在按声明类型序列化的行为下会丢失子类属性。
                     objectResult.DeclaredType = null;
                 }
             }
