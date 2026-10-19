@@ -1,4 +1,6 @@
+using System;
 using System.Reflection;
+using AutoMapper;
 using MicroserviceFramework.Domain;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
@@ -14,10 +16,12 @@ public static class ServiceCollectionExtensions
     ///     通过 builder 方式注册 AutoMapper 对象映射器（扫描所有程序集）
     /// </summary>
     /// <param name="builder">框架构建器</param>
+    /// <param name="configAction"></param>
     /// <returns>框架构建器</returns>
-    public static MicroserviceFrameworkBuilder UseAutoMapperObjectAssembler(this MicroserviceFrameworkBuilder builder)
+    public static MicroserviceFrameworkBuilder UseAutoMapperObjectAssembler(this MicroserviceFrameworkBuilder builder,
+        Action<IMapperConfigurationExpression> configAction = null)
     {
-        builder.Services.AddAutoMapperObjectAssembler();
+        builder.Services.AddAutoMapperObjectAssembler(configAction);
         return builder;
     }
 
@@ -25,13 +29,13 @@ public static class ServiceCollectionExtensions
     ///     注册 AutoMapper 对象映射器到服务集合（扫描所有程序集）
     /// </summary>
     /// <param name="services">服务集合</param>
+    /// <param name="configAction"></param>
     /// <returns>服务集合</returns>
-    public static IServiceCollection AddAutoMapperObjectAssembler(this IServiceCollection services)
+    public static IServiceCollection AddAutoMapperObjectAssembler(this IServiceCollection services,
+        Action<IMapperConfigurationExpression> configAction = null)
     {
         services.TryAddScoped<IObjectAssembler, AutoMapperObjectAssembler>();
-        services.AddAutoMapper(_ =>
-        {
-        }, Utils.Runtime.GetAllAssemblies());
+        services.AddAutoMapper(configAction, Utils.Runtime.GetAllAssemblies());
         return services;
     }
 
@@ -39,15 +43,15 @@ public static class ServiceCollectionExtensions
     ///     通过 builder 方式注册 AutoMapper 对象映射器（指定程序集列表）
     /// </summary>
     /// <param name="builder">框架构建器</param>
+    /// <param name="configAction"></param>
     /// <param name="assemblies">要扫描的程序集列表</param>
     /// <returns>框架构建器</returns>
     public static MicroserviceFrameworkBuilder UseAutoMapperObjectAssembler(this MicroserviceFrameworkBuilder builder,
+        Action<IMapperConfigurationExpression> configAction,
         params Assembly[] assemblies)
     {
         builder.Services.TryAddScoped<IObjectAssembler, AutoMapperObjectAssembler>();
-        builder.Services.AddAutoMapper(_ =>
-        {
-        }, assemblies);
+        builder.Services.AddAutoMapper(configAction, assemblies);
         return builder;
     }
 }

@@ -25,7 +25,7 @@ public static class Defaults
     public static IJsonSerializer JsonSerializer
     {
         get => field ?? DefaultJsonSerializer.Value;
-        internal set;
+        set;
     }
 
     /// <summary>
@@ -35,7 +35,7 @@ public static class Defaults
     public static ILogger Logger
     {
         get => field ?? NullLogger.Instance;
-        internal set;
+        set;
     }
 
     /// <summary>
