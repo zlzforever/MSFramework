@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using MicroserviceFramework.Domain;
 using MicroserviceFramework.Ef.Extensions;
 using MicroserviceFramework.Runtime;
@@ -144,11 +145,6 @@ internal sealed class EntityPropertyConventionStrategy : IModelBuildingStrategy
 
         foreach (var entityType in context.ModelBuilder.Model.GetEntityTypes())
         {
-            if (entityType.IsOwned() || entityType.IsKeyless)
-            {
-                continue;
-            }
-
             var hasOptimisticLock = Defaults.Types.OptimisticLock.IsAssignableFrom(entityType.ClrType);
             var hasCreation = typeof(ICreation).IsAssignableFrom(entityType.ClrType);
             var hasModification = typeof(IModification).IsAssignableFrom(entityType.ClrType);
@@ -296,7 +292,7 @@ internal sealed class EntityPropertyConventionStrategy : IModelBuildingStrategy
 
         if (property.GetMaxLength() == null)
         {
-            property.SetMaxLength(256);
+            property.SetMaxLength(255);
         }
 
         var converterType = enumerationConverterType.MakeGenericType(property.ClrType);
@@ -325,7 +321,7 @@ internal sealed class EntityPropertyConventionStrategy : IModelBuildingStrategy
             case nameof(ICreation.CreatorName):
                 if (property.GetMaxLength() == null)
                 {
-                    property.SetMaxLength(256);
+                    property.SetMaxLength(255);
                 }
 
                 break;
@@ -353,7 +349,7 @@ internal sealed class EntityPropertyConventionStrategy : IModelBuildingStrategy
             case nameof(IModification.LastModifierName):
                 if (property.GetMaxLength() == null)
                 {
-                    property.SetMaxLength(256);
+                    property.SetMaxLength(255);
                 }
 
                 break;
@@ -388,7 +384,7 @@ internal sealed class EntityPropertyConventionStrategy : IModelBuildingStrategy
             case nameof(IDeletion.DeleterName):
                 if (property.GetMaxLength() == null)
                 {
-                    property.SetMaxLength(256);
+                    property.SetMaxLength(255);
                 }
 
                 break;

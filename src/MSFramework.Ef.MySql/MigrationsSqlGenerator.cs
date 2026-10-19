@@ -69,12 +69,11 @@ public class MigrationsSqlGenerator(
         //         }
         //     }
         // }
-        Console.WriteLine("Generate: {0}", operation.GetType().FullName);
+        // Console.WriteLine("Generate: {0}", operation.GetType().FullName);
         if (RemoveForeignKey && operation is CreateTableOperation createTableOperation)
         {
-            Dependencies.Logger.Logger.LogInformation("Skip create foreign key for table: {Table}",
+            Dependencies.Logger.Logger.LogDebug("Skip create foreign key for table: {Table}",
                 createTableOperation.Name);
-            Console.WriteLine("Skip create foreign key for table: {0}", createTableOperation.Name);
             createTableOperation.ForeignKeys.Clear();
         }
 

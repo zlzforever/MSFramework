@@ -72,7 +72,7 @@
 //
 //         if (RemoveForeignKey && operation is CreateTableOperation createTableOperation)
 //         {
-//             Dependencies.Logger.Logger.LogInformation("Skip create foreign key for table: {Table}",
+//             Dependencies.Logger.Logger.LogDebug("Skip create foreign key for table: {Table}",
 //                 createTableOperation.Name);
 //             createTableOperation.ForeignKeys.Clear();
 //         }

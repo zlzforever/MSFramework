@@ -16,11 +16,11 @@ internal static class AuditEntityConfiguration
         var entityIdProperty = builder.Property(x => x.EntityId);
         if (entityIdProperty.Metadata.GetMaxLength() == null)
         {
-            entityIdProperty.HasMaxLength(256);
+            entityIdProperty.HasMaxLength(255);
         }
 
-        builder.Property(x => x.Type).HasMaxLength(256);
-        builder.Property(e => e.OperationType).HasMaxLength(256);
+        builder.Property(x => x.Type).HasMaxLength(255);
+        builder.Property(e => e.OperationType).HasMaxLength(255);
 
         builder.HasIndex(m => m.EntityId);
     }

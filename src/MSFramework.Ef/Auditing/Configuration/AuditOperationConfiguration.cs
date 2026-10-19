@@ -11,9 +11,9 @@ internal static class AuditOperationConfiguration
         builder.HasMany(x => x.Entities).WithOne(x => x.Operation);
 
         builder.Property(x => x.Id).ValueGeneratedNever().HasMaxLength(36);
-        builder.Property(x => x.IP).HasMaxLength(256);
+        builder.Property(x => x.IP).HasMaxLength(255);
         builder.Property(x => x.Method).HasMaxLength(12);
-        builder.Property(x => x.UserAgent).HasMaxLength(1024);
+        builder.Property(x => x.UserAgent);
         builder.Property(x => x.Path);
         builder.Property(x => x.Elapsed);
         builder.Property(x => x.EndTime).UseUnixTime();
@@ -21,7 +21,7 @@ internal static class AuditOperationConfiguration
         builder.Property(x => x.QueryString);
 
         builder.Property(x => x.DeviceId).HasMaxLength(36);
-        builder.Property(x => x.DeviceModel).HasMaxLength(256);
+        builder.Property(x => x.DeviceModel).HasMaxLength(255);
         builder.Property(x => x.Lat).HasPrecision(11, 8);
         builder.Property(x => x.Lng).HasPrecision(11, 8);
         builder.Property(x => x.IMEI).HasMaxLength(64);

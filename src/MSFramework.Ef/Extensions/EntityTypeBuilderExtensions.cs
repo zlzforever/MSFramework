@@ -31,7 +31,7 @@ public static class EntityTypeBuilderExtensions
     {
         builder.Property(x => x.CreationTime).UseUnixTime();
         builder.Property(x => x.CreatorId).HasMaxLength(36);
-        builder.Property(x => x.CreatorName).HasMaxLength(256);
+        builder.Property(x => x.CreatorName).HasMaxLength(255);
     }
 
     /// <summary>
@@ -43,7 +43,7 @@ public static class EntityTypeBuilderExtensions
     {
         builder.Property(x => x.LastModificationTime).UseUnixTime();
         builder.Property(x => x.LastModifierId).HasMaxLength(36);
-        builder.Property(x => x.LastModifierName).HasMaxLength(256);
+        builder.Property(x => x.LastModifierName).HasMaxLength(255);
     }
 
     /// <summary>
@@ -56,6 +56,6 @@ public static class EntityTypeBuilderExtensions
         builder.Property(x => x.IsDeleted).HasDefaultValue(false);
         builder.Property(x => x.DeletionTime).UseUnixTime();
         builder.Property(x => x.DeleterId).HasMaxLength(36);
-        builder.Property(x => x.DeleterName).HasMaxLength(256);
+        builder.Property(x => x.DeleterName).HasMaxLength(255);
     }
 }
