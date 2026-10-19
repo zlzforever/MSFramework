@@ -12,16 +12,16 @@ MSFramework 是一个轻量级的微服务框架，专为 .NET 8/10 设计，采
 
 ### 核心特性
 
-| 特性             | 描述                                   |
-| ---------------- | -------------------------------------- |
-| **DDD 架构**     | 提供聚合根、值对象、领域事件等基础类型 |
-| **多数据库支持** | 支持 SQL Server、MySQL、PostgreSQL     |
-| **依赖注入**     | 基于标记接口的自动服务注册             |
-| **审计日志**     | 支持 EF 内存审计和 Loki 审计           |
-| **事件总线**     | 支持 RabbitMQ 事件总线和 Dapr 集成     |
-| **API 增强**     | Swagger 集成、统一响应包装、异常过滤   |
-| **Source Generator** | 自动生成仓储接口和实现，减少样板代码 |
-| **EF 增强**      | JSON 映射、Unix 时间戳、软删除过滤器   |
+| 特性                 | 描述                                   |
+| -------------------- | -------------------------------------- |
+| **DDD 架构**         | 提供聚合根、值对象、领域事件等基础类型 |
+| **多数据库支持**     | 支持 SQL Server、MySQL、PostgreSQL     |
+| **依赖注入**         | 基于标记接口的自动服务注册             |
+| **审计日志**         | 支持 EF 内存审计和 Loki 审计           |
+| **事件总线**         | 支持 RabbitMQ 事件总线和 Dapr 集成     |
+| **API 增强**         | Swagger 集成、统一响应包装、异常过滤   |
+| **Source Generator** | 自动生成仓储接口和实现，减少样板代码   |
+| **EF 增强**          | JSON 映射、Unix 时间戳、软删除过滤器   |
 
 ### 架构图
 
@@ -442,20 +442,20 @@ public class Order : DeletionAggregateRoot<string>, IOptimisticLock
 }
 ```
 
-| 配置项 | 说明 | 默认值 |
-|--------|------|--------|
-| `ConnectionString` | 数据库连接字符串 | - |
-| `DatabaseType` | 数据库类型 (SqlServer/MySql/PostgreSql) | - |
-| `TablePrefix` | 表名前缀 | - |
-| `UseUnderScoreCase` | 使用下划线命名 (snake_case) | `true` |
-| `AutoMigrationEnabled` | 启用自动迁移 | `false` |
-| `MaxBatchSize` | 批量提交大小 | `100` |
-| `CommandTimeout` | 命令超时(秒) | `30` |
-| `EnableSensitiveDataLogging` | 记录敏感数据 | `false` |
-| `EnableDetailedErrors` | 详细错误信息 | `false` |
-| `MigrationsAssembly` | 迁移程序集 | 当前程序集 |
-| `QuerySplittingBehavior` | 查询拆分策略 | `SingleQuery` |
-| `UseCompiledModel` | 使用编译模型优化启动 | `false` |
+| 配置项                       | 说明                                    | 默认值        |
+| ---------------------------- | --------------------------------------- | ------------- |
+| `ConnectionString`           | 数据库连接字符串                        | -             |
+| `DatabaseType`               | 数据库类型 (SqlServer/MySql/PostgreSql) | -             |
+| `TablePrefix`                | 表名前缀                                | -             |
+| `UseUnderScoreCase`          | 使用下划线命名 (snake_case)             | `true`        |
+| `AutoMigrationEnabled`       | 启用自动迁移                            | `false`       |
+| `MaxBatchSize`               | 批量提交大小                            | `100`         |
+| `CommandTimeout`             | 命令超时(秒)                            | `30`          |
+| `EnableSensitiveDataLogging` | 记录敏感数据                            | `false`       |
+| `EnableDetailedErrors`       | 详细错误信息                            | `false`       |
+| `MigrationsAssembly`         | 迁移程序集                              | 当前程序集    |
+| `QuerySplittingBehavior`     | 查询拆分策略                            | `SingleQuery` |
+| `UseCompiledModel`           | 使用编译模型优化启动                    | `false`       |
 
 ### 4.4 实体类型配置扩展
 
@@ -520,10 +520,10 @@ public class OrderConfiguration : EntityTypeConfigurationBase<Order, OrderingCon
 }
 ```
 
-| JsonDataType | 说明 | 推荐数据库 |
-|--------------|------|------------|
-| `JSONB` | 二进制 JSON，支持索引和查询 | PostgreSQL |
-| `JSON` | 标准 JSON 格式 | MySQL, PostgreSQL |
+| JsonDataType | 说明                        | 推荐数据库        |
+| ------------ | --------------------------- | ----------------- |
+| `JSONB`      | 二进制 JSON，支持索引和查询 | PostgreSQL        |
+| `JSON`       | 标准 JSON 格式              | MySQL, PostgreSQL |
 
 #### 软删除过滤器
 
@@ -629,14 +629,14 @@ var item = await multiColumnOrderItemRepository.FindAsync(
 
 #### 约束与注意事项
 
-| 约束 | 说明 |
-|------|------|
-| 主键成员必须为标量类型 | string/int/Guid/枚举等可映射列类型，成员数 ≥ 2 |
-| 多列主键用 `HasKey` 声明 | EF Core 10 原生支持顶层标量多列主键 |
-| 完整键值才能定位 | 无键仓储按成员等值谓词查询，必须提供完整主键成员 |
-| 键成员值不得含 `\|` | 审计 `EntityId` 以 `\|` 拼接多键值（如 `O1\|P1`），键成员值若含 `\|` 将导致 `EntityId` 有歧义 |
-| 软删除 / 乐观锁 / 审计 | 按实体整体处理，与复合键天然兼容；审计 `EntityId` 以 `\|` 拼接多键值 |
-| 现有单键 API | 完全不变，方案 B 为纯新增 |
+| 约束                     | 说明                                                                                          |
+| ------------------------ | --------------------------------------------------------------------------------------------- |
+| 主键成员必须为标量类型   | string/int/Guid/枚举等可映射列类型，成员数 ≥ 2                                                |
+| 多列主键用 `HasKey` 声明 | EF Core 10 原生支持顶层标量多列主键                                                           |
+| 完整键值才能定位         | 无键仓储按成员等值谓词查询，必须提供完整主键成员                                              |
+| 键成员值不得含 `\|`      | 审计 `EntityId` 以 `\|` 拼接多键值（如 `O1\|P1`），键成员值若含 `\|` 将导致 `EntityId` 有歧义 |
+| 软删除 / 乐观锁 / 审计   | 按实体整体处理，与复合键天然兼容；审计 `EntityId` 以 `\|` 拼接多键值                          |
+| 现有单键 API             | 完全不变，方案 B 为纯新增                                                                     |
 
 完整示例见 `src/Sample/Ordering.Domain/AggregateRoots/CompositeKey/` 与
 `src/Sample/Ordering.Infrastructure/EntityConfigurations/`（含 EF 迁移 `MultiColumnOrderItemSample`）。
@@ -679,11 +679,11 @@ builder.Services.AddControllers(options =>
 响应包装器不会对已有 `ApiResult` 二次包装；客户端可按 `success`、`code`、`msg` 和
 `data` 字段处理错误。请求跟踪标识由全局 Serilog 日志上下文记录，不在响应中重复生成或返回。
 
-| 异常 | HTTP 状态码 |
-|------|-------------|
-| `MicroserviceFrameworkFriendlyException` | 200 |
-| `UnauthorizedAccessException` | 403 |
-| 其他异常（包括 `ArgumentException`、认证/资源异常、普通 `InvalidOperationException`、EF/DI 异常） | 500 |
+| 异常                                                                                              | HTTP 状态码 |
+| ------------------------------------------------------------------------------------------------- | ----------- |
+| `MicroserviceFrameworkFriendlyException`                                                          | 200         |
+| `UnauthorizedAccessException`                                                                     | 403         |
+| 其他异常（包括 `ArgumentException`、认证/资源异常、普通 `InvalidOperationException`、EF/DI 异常） | 500         |
 
 友好异常的响应使用异常自身的业务 `code` 和 `msg`；其他异常使用 `code=500`、
 `msg="系统内部错误"`，不会向客户端泄露异常细节。未授权异常使用 `code=403`。

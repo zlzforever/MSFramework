@@ -25,7 +25,7 @@ dotnet nuget push src/MSFramework.Ef/bin/Release/*.nupkg  -s $NUGET_SERVER -k $N
 dotnet nuget push src/MSFramework.Ef.MySql/bin/Release/*.nupkg  -s $NUGET_SERVER -k $NUGET_KEY --skip-duplicate
 dotnet nuget push src/MSFramework.Ef.PostgreSql/bin/Release/*.nupkg  -s  $NUGET_SERVER -k $NUGET_KEY --skip-duplicate
 dotnet nuget push src/MSFramework.Ef.SqlServer/bin/Release/*.nupkg  -s $NUGET_SERVER -k $NUGET_KEY --skip-duplicate
-#dotnet nuget push src/MSFramework.Ef.Design/bin/Release/*.nupkg  -s $NUGET_SERVER -k $NUGET_KEY --skip-duplicate
+dotnet nuget push src/MSFramework.Ef.Design/bin/Release/*.nupkg  -s $NUGET_SERVER -k $NUGET_KEY --skip-duplicate
 #dotnet nuget push src/MSFramework.AspNetCore.Swagger/bin/Release/*.nupkg  -s $NUGET_SERVER -k $NUGET_KEY --skip-duplicate
 dotnet nuget push src/MSFramework.Serialization.Newtonsoft/bin/Release/*.nupkg  -s $NUGET_SERVER -k $NUGET_KEY --skip-duplicate
 dotnet nuget push src/DotNetCore.CAP.Dapr/bin/Release/*.nupkg  -s $NUGET_SERVER -k $NUGET_KEY --skip-duplicate
