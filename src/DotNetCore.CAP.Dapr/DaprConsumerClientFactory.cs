@@ -47,14 +47,13 @@ public class DaprConsumerClientFactory(
     }
 
     /// <summary>
-    /// 异步创建 Dapr 消费者客户端（暂未实现）
+    /// 异步创建 Dapr 消费者客户端
     /// </summary>
     /// <param name="groupName">消费者组名称</param>
     /// <param name="groupConcurrent">组并发数</param>
     /// <returns>消费者客户端实例</returns>
-    /// <exception cref="NotImplementedException">该方法暂未实现</exception>
     public Task<IConsumerClient> CreateAsync(string groupName, byte groupConcurrent)
     {
-        throw new NotImplementedException();
+        return Task.FromResult(Create(groupName));
     }
 }

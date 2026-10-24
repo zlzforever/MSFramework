@@ -55,15 +55,17 @@ public class NewtonsoftJsonSerializer : IJsonSerializer
     }
 
     /// <summary>
-    ///     将值序列化到流中（暂未实现）
+    ///     将值序列化到 UTF-8 流中
     /// </summary>
     /// <param name="utf8Json">输出流</param>
     /// <param name="value">要序列化的值</param>
     /// <typeparam name="TValue">值类型</typeparam>
-    /// <exception cref="NotImplementedException">该方法尚未实现</exception>
     public void Serialize<TValue>(Stream utf8Json, TValue value)
     {
-        throw new NotImplementedException();
+        using var streamWriter = new StreamWriter(utf8Json, new UTF8Encoding(false), 1024, true);
+        using var jsonWriter = new JsonTextWriter(streamWriter);
+        JsonSerializer.Create(_settings).Serialize(jsonWriter, value);
+        jsonWriter.Flush();
     }
 
     /// <summary>
@@ -85,8 +87,9 @@ public class NewtonsoftJsonSerializer : IJsonSerializer
     /// <returns>反序列化后的对象</returns>
     public T Deserialize<T>(Stream json)
     {
-        using var reader = new StreamReader(json);
-        return JsonConvert.DeserializeObject<T>(reader.ReadToEnd(), _settings);
+        using var streamReader = new StreamReader(json, Encoding.UTF8, true, 1024, true);
+        using var jsonReader = new JsonTextReader(streamReader);
+        return JsonSerializer.Create(_settings).Deserialize<T>(jsonReader);
     }
 
     /// <summary>

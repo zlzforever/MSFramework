@@ -1,5 +1,7 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
+using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using MicroserviceFramework.Common;
@@ -253,6 +255,31 @@ public class SerializationTests
         json = "{\"enum\":\"Graph\"}";
         obj = serializer.Deserialize<Obj>(json);
         Assert.Equal(ObjectId.Empty, obj.Id);
+    }
+
+    [Fact]
+    public void NewtonsoftSerializeToStream_WritesUtf8JsonAndLeavesStreamOpen()
+    {
+        var serializer = new NewtonsoftJsonSerializer();
+        using var stream = new MemoryStream();
+
+        serializer.Serialize(stream, new A { Id = "1", Name = "sample" });
+
+        Assert.True(stream.CanWrite);
+        Assert.Equal("{\"id\":\"1\",\"name\":\"sample\"}", Encoding.UTF8.GetString(stream.ToArray()));
+    }
+
+    [Fact]
+    public void NewtonsoftDeserializeFromStream_ReadsUtf8JsonAndLeavesStreamOpen()
+    {
+        var serializer = new NewtonsoftJsonSerializer();
+        using var stream = new MemoryStream(Encoding.UTF8.GetBytes("{\"id\":\"1\",\"name\":\"sample\"}"));
+
+        var result = serializer.Deserialize<A>(stream);
+
+        Assert.Equal("1", result.Id);
+        Assert.Equal("sample", result.Name);
+        Assert.True(stream.CanRead);
     }
 
     public class A

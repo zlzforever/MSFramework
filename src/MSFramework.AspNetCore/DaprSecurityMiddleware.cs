@@ -1,7 +1,6 @@
 using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
-using MicroserviceFramework.AspNetCore.Extensions;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.Extensions;
 using Microsoft.AspNetCore.Http.Features;
@@ -10,8 +9,7 @@ using Microsoft.Extensions.Logging;
 namespace MicroserviceFramework.AspNetCore;
 
 /// <summary>
-/// 使用 DAPR_API_TOKEN 环境变量来控制访问 dapr 的权限
-/// 然后限制 topic 的  action 只能是内部访问（sidecar)
+/// 限制 Dapr topic action 只能由本机 sidecar 访问。
 /// dapr
 /// 20X： 消费成功
 /// 404： 错误被记录下来，信息被删除
@@ -20,7 +18,7 @@ namespace MicroserviceFramework.AspNetCore;
 public class DaprSecurityMiddleware(RequestDelegate next, ILogger<DaprSecurityMiddleware> logger)
 {
     /// <summary>
-    /// 执行中间件，验证 Dapr API 令牌
+    /// 执行中间件，验证 Dapr topic 请求的连接来源
     /// </summary>
     /// <param name="context">HTTP 上下文</param>
     public async Task InvokeAsync(HttpContext context)
@@ -45,9 +43,10 @@ public class DaprSecurityMiddleware(RequestDelegate next, ILogger<DaprSecurityMi
             return;
         }
 
-        var ip = context.GetRemoteIpAddress();
-        // 仅限内部请求可以访问
-        if (IPAddress.IsLoopback(ip))
+        // 安全决策只信任服务器建立连接时记录的地址；未经 Forwarded Headers
+        // 中间件校验的 X-Forwarded-For 可由客户端伪造。
+        var remoteIpAddress = context.Connection.RemoteIpAddress;
+        if (remoteIpAddress != null && IPAddress.IsLoopback(remoteIpAddress))
         {
             await next(context);
             return;

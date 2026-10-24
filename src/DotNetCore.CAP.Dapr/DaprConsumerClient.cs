@@ -29,48 +29,48 @@ public class DaprConsumerClient(
     private readonly DaprOptions _daprOptions = daprOptions.CurrentValue;
 
     /// <summary>
-    ///     异步订阅主题（暂未实现）
+    ///     异步订阅主题
     /// </summary>
     /// <param name="topics">主题列表</param>
     /// <returns>异步任务</returns>
-    /// <exception cref="NotImplementedException">该方法尚未实现</exception>
     public Task SubscribeAsync(IEnumerable<string> topics)
     {
-        throw new NotImplementedException();
+        Subscribe(topics);
+        return Task.CompletedTask;
     }
 
     /// <summary>
-    ///     异步监听消息（暂未实现）
+    ///     异步监听消息
     /// </summary>
     /// <param name="timeout">超时时间</param>
     /// <param name="cancellationToken">取消令牌</param>
     /// <returns>异步任务</returns>
-    /// <exception cref="NotImplementedException">该方法尚未实现</exception>
     public Task ListeningAsync(TimeSpan timeout, CancellationToken cancellationToken)
     {
-        throw new NotImplementedException();
+        Listening(timeout, cancellationToken);
+        return Task.CompletedTask;
     }
 
     /// <summary>
-    ///     异步提交消息（暂未实现）
+    ///     异步提交消息
     /// </summary>
     /// <param name="sender">发送方对象</param>
     /// <returns>异步任务</returns>
-    /// <exception cref="NotImplementedException">该方法尚未实现</exception>
     public Task CommitAsync(object sender)
     {
-        throw new NotImplementedException();
+        Commit(sender);
+        return Task.CompletedTask;
     }
 
     /// <summary>
-    ///     异步拒绝消息（暂未实现）
+    ///     异步拒绝消息
     /// </summary>
     /// <param name="sender">发送方对象</param>
     /// <returns>异步任务</returns>
-    /// <exception cref="NotImplementedException">该方法尚未实现</exception>
     public Task RejectAsync(object sender)
     {
-        throw new NotImplementedException();
+        Reject(sender);
+        return Task.CompletedTask;
     }
 
     /// <summary>
@@ -155,12 +155,12 @@ public class DaprConsumerClient(
     public Action<LogMessageEventArgs> OnLogCallback { get; set; }
 
     /// <summary>
-    ///     异步释放资源（暂未实现）
+    ///     异步释放资源
     /// </summary>
     /// <returns>异步值任务</returns>
-    /// <exception cref="NotImplementedException">该方法尚未实现</exception>
     public ValueTask DisposeAsync()
     {
-        throw new NotImplementedException();
+        Dispose();
+        return ValueTask.CompletedTask;
     }
 }
