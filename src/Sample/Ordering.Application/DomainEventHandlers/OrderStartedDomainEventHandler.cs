@@ -1,4 +1,4 @@
-﻿using System.Threading;
+using System.Threading;
 using System.Threading.Tasks;
 using MicroserviceFramework.Domain;
 using Microsoft.Extensions.Logging;
@@ -13,7 +13,7 @@ public class OrderStartedDomainEventHandler(
 {
     public Task HandleAsync(OrderStartedDomainEvent @event, CancellationToken cancellationToken = default)
     {
-        unitOfWork.SavedChanges +=
+        unitOfWork.SavedChangesAsync +=
             async _ =>
             {
                 // await daprClient.PublishEventAsync("rabbitmq-pubsub", Names.OrderCreatedEvent,

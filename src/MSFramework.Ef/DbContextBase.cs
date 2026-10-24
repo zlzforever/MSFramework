@@ -24,6 +24,8 @@ namespace MicroserviceFramework.Ef;
 /// </summary>
 public abstract class DbContextBase : DbContext
 {
+    private static readonly AsyncLocal<int> DeferredDomainEventDepth = new();
+
     /// <summary>
     /// 实体审计策略链，按数组顺序执行。
     /// ExternalEntity 必须排第一位，确保在其他策略之前拦截外部实体；
@@ -174,7 +176,7 @@ public abstract class DbContextBase : DbContext
     }
 
     /// <summary>
-    /// 保存所有更改，并在提交前分发领域事件
+    /// 保存所有更改，并在数据库提交成功后分发领域事件
     /// </summary>
     /// <param name="acceptAllChangesOnSuccess">成功后是否接受所有更改</param>
     /// <param name="cancellationToken">取消令牌</param>
@@ -182,28 +184,19 @@ public abstract class DbContextBase : DbContext
     public override async Task<int> SaveChangesAsync(bool acceptAllChangesOnSuccess,
         CancellationToken cancellationToken = new())
     {
-        var scopeServiceProvider = GetScopeServiceProvider();
-        var mediator = scopeServiceProvider?.GetService<IMediator>();
-        if (mediator != null)
-        {
-            // 若是有领域事件则分发出去
-            // 领域事件可能导致别聚合调用当前 DbContext 并改变状态，或者添加新的事件
-            var domainEvents = GetDomainEvents();
-            foreach (var @event in domainEvents)
-            {
-                await mediator.PublishAsync(@event, cancellationToken);
-            }
-        }
-
         var effected = 0;
         var changed = ApplyConcepts();
-        if (!changed)
+        if (changed)
         {
-            return effected;
+            CollectAuditEntities();
+            effected = await base.SaveChangesAsync(acceptAllChangesOnSuccess, cancellationToken);
         }
 
-        CollectAuditEntities();
-        effected = await base.SaveChangesAsync(acceptAllChangesOnSuccess, cancellationToken);
+        if (DeferredDomainEventDepth.Value == 0)
+        {
+            await DispatchDomainEventsAsync(cancellationToken);
+        }
+
         return effected;
     }
 
@@ -214,30 +207,57 @@ public abstract class DbContextBase : DbContext
     /// <returns></returns>
     public override int SaveChanges(bool acceptAllChangesOnSuccess)
     {
-        var scopeServiceProvider = GetScopeServiceProvider();
-        var mediator = scopeServiceProvider?.GetService<IMediator>();
-        if (mediator != null)
-        {
-            // 若是有领域事件则分发出去
-            // 领域事件可能导致别聚合调用当前 DbContext 并改变状态，或者添加新的事件
-            var domainEvents = GetDomainEvents();
-            foreach (var @event in domainEvents)
-            {
-                // 不会死锁：它等同于 await 的底层机制，不会捕获 SynchronizationContext。ASP.NET Core 内部的 HostingApplication 在处理非 async 中间件时正是这么做的。
-                mediator.PublishAsync(@event).GetAwaiter().GetResult();
-            }
-        }
-
         var effected = 0;
         var changed = ApplyConcepts();
-        if (!changed)
+        if (changed)
         {
-            return effected;
+            CollectAuditEntities();
+            effected = base.SaveChanges(acceptAllChangesOnSuccess);
         }
 
-        CollectAuditEntities();
-        effected = base.SaveChanges(acceptAllChangesOnSuccess);
+        if (DeferredDomainEventDepth.Value == 0)
+        {
+            DispatchDomainEventsAsync().GetAwaiter().GetResult();
+        }
+
         return effected;
+    }
+
+    internal static IDisposable DeferDomainEvents()
+    {
+        DeferredDomainEventDepth.Value++;
+        return new DomainEventDeferral();
+    }
+
+    internal async Task DispatchDomainEventsAsync(CancellationToken cancellationToken = default)
+    {
+        var mediator = GetScopeServiceProvider()?.GetService<IMediator>();
+        if (mediator == null)
+        {
+            return;
+        }
+
+        foreach (var (entity, @event) in GetDomainEvents())
+        {
+            await mediator.PublishAsync(@event, cancellationToken);
+            entity.RemoveDomainEvent(@event);
+        }
+    }
+
+    private sealed class DomainEventDeferral : IDisposable
+    {
+        private bool _disposed;
+
+        public void Dispose()
+        {
+            if (_disposed)
+            {
+                return;
+            }
+
+            DeferredDomainEventDepth.Value--;
+            _disposed = true;
+        }
     }
 
     /// <summary>
@@ -340,17 +360,17 @@ public abstract class DbContextBase : DbContext
                     originalValue = GetValue(columnType, propertyEntry.OriginalValue);
                     break;
                 case EntityState.Modified:
-                {
-                    var currentValue = GetValue(columnType, propertyEntry.CurrentValue);
-                    originalValue = GetValue(columnType, propertyEntry.OriginalValue);
-                    if (currentValue == originalValue)
                     {
-                        continue;
-                    }
+                        var currentValue = GetValue(columnType, propertyEntry.CurrentValue);
+                        originalValue = GetValue(columnType, propertyEntry.OriginalValue);
+                        if (currentValue == originalValue)
+                        {
+                            continue;
+                        }
 
-                    newValue = currentValue;
-                    break;
-                }
+                        newValue = currentValue;
+                        break;
+                    }
                 case EntityState.Detached:
                     break;
                 case EntityState.Unchanged:
@@ -410,26 +430,18 @@ public abstract class DbContextBase : DbContext
         return isJson ? Defaults.JsonSerializer.Serialize(value) : value.ToString();
     }
 
-    private HashSet<DomainEvent> GetDomainEvents()
+    private List<(EntityBase Entity, DomainEvent Event)> GetDomainEvents()
     {
-        // Dispatch Domain Events collection.
-        // Choices:
-        // A) Right BEFORE committing data (EF SaveChanges) into the DB will make a single transaction including
-        // side effects from the domain event handlers which are using the same DbContext with "InstancePerLifetimeScope" or "scoped" lifetime
-        // B) Right AFTER committing data (EF SaveChanges) into the DB will make multiple transactions.
-        // You will need to handle eventual consistency and compensatory actions in case of failures in any of the Handlers.
-
-        // 此处不能改为迭代器， 事件在迭代过程中会触发 ChangeTracker.Entries 的变化
-        var domainEvents = new HashSet<DomainEvent>();
+        // 先物化，避免事件处理器改变 ChangeTracker；List 保留添加顺序与值相等的重复事件。
+        var domainEvents = new List<(EntityBase, DomainEvent)>();
 
         foreach (var aggregateRoot in ChangeTracker
                      .Entries<EntityBase>())
         {
             var events = aggregateRoot.Entity.GetDomainEvents();
-            if (events != null && events.Any())
+            foreach (var @event in events)
             {
-                domainEvents.UnionWith(events);
-                aggregateRoot.Entity.ClearDomainEvents();
+                domainEvents.Add((aggregateRoot.Entity, @event));
             }
         }
 

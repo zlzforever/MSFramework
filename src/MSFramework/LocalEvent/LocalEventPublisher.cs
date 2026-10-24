@@ -23,6 +23,13 @@ internal class LocalEventPublisher(
         where TEvent : EventBase
     {
         Check.NotNull(@event, nameof(@event));
+        if (@event is ICriticalLocalEvent)
+        {
+            throw new InvalidOperationException(
+                "Critical events cannot use the non-durable local publisher. " +
+                "Publish through a transactional outbox or durable distributed event bus.");
+        }
+
         var session = serviceProvider.GetService<ISession>();
         var snapshot = session == null ? null : new SessionSnapshot(session);
         await eventChannel.EventChannel.Writer.WriteAsync((snapshot, @event), cancellationToken);

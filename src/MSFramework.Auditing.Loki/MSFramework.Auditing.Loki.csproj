@@ -4,7 +4,11 @@
     <PackageId>MSFramework.Auditing.Loki</PackageId>
     <AssemblyName>MSFramework.Auditing.Loki</AssemblyName>
     <RootNamespace>MicroserviceFramework.Auditing.Loki</RootNamespace>
-  </PropertyGroup>
+</PropertyGroup>
+
+<ItemGroup>
+  <InternalsVisibleTo Include="MSFramework.Tests" />
+</ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\MSFramework\MSFramework.csproj"/>
   </ItemGroup>

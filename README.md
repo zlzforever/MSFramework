@@ -968,6 +968,9 @@ builder.Property(x => x.Address).UseJson();
 
 2. **避免硬编码**
    - 连接字符串、API 密钥等应使用配置或环境变量
+   - 示例和模板中的敏感值保持为空；通过 `DbContexts__0__ConnectionString`、`DbContexts__1__ConnectionString`、`LokiAuditing__Uri`、`RabbitMQ__Password`、`RemoteConfiguration__AccessKeyId` 和 `RemoteConfiguration__AccessKeySecret` 等 .NET 环境变量注入
+   - Dapr 本地组件通过 `REDIS_HOST`、`REDIS_PASSWORD`、`RABBITMQ_HOST`、`RABBITMQ_USERNAME`、`RABBITMQ_PASSWORD` 和 `ZIPKIN_ENDPOINT_ADDRESS` 环境变量配置
+   - 已经提交过的数据库、消息队列、远程配置和日志服务凭据必须在对应系统中轮换；从当前版本删除并不能清除 Git 历史
 
 3. **正确处理异常**
    - 不要使用空的 catch 块

@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Threading;
 using System.Threading.Tasks;
 using MicroserviceFramework.Common;
@@ -20,6 +21,11 @@ namespace MicroserviceFramework.Linq.Expression;
 /// </remarks>
 public static class PagedQueryExtensions
 {
+    /// <summary>
+    /// 单次分页查询允许的最大记录数。
+    /// </summary>
+    public const int MaxPageSize = 1000;
+
     /// <param name="queryable">EF Core 或内存查询对象</param>
     /// <typeparam name="TEntity">实体类型</typeparam>
     extension<TEntity>(IQueryable<TEntity> queryable) where TEntity : class
@@ -35,8 +41,7 @@ public static class PagedQueryExtensions
         public async Task<PaginationResult<TEntity>> PagedQueryAsync(int page, int limit,
             CancellationToken cancellationToken = default)
         {
-            page = page < 1 ? 1 : page;
-            limit = limit < 1 ? 10 : limit;
+            NormalizeAndValidate(queryable, ref page, ref limit);
 
             var total = await CountAsync(queryable, cancellationToken);
             var data = TryGetOffset(page, limit, total, out var offset)
@@ -62,8 +67,7 @@ public static class PagedQueryExtensions
         {
             Check.NotNull(mapper, nameof(mapper));
 
-            page = page < 1 ? 1 : page;
-            limit = limit < 1 ? 10 : limit;
+            NormalizeAndValidate(queryable, ref page, ref limit);
 
             var total = await CountAsync(queryable, cancellationToken);
             List<TDto> data;
@@ -81,6 +85,41 @@ public static class PagedQueryExtensions
 
             return new PaginationResult<TDto>(page, limit, total, data);
         }
+    }
+
+    private static void NormalizeAndValidate<T>(IQueryable<T> queryable, ref int page, ref int limit)
+    {
+        page = page < 1 ? 1 : page;
+        limit = limit < 1 ? 10 : limit;
+
+        if (limit > MaxPageSize)
+        {
+            throw new ArgumentOutOfRangeException(nameof(limit), limit,
+                $"Page size cannot exceed {MaxPageSize}.");
+        }
+
+        if (!ContainsOrdering(queryable.Expression))
+        {
+            throw new InvalidOperationException(
+                "Paged queries require an explicit OrderBy or OrderByDescending clause.");
+        }
+    }
+
+    private static bool ContainsOrdering(System.Linq.Expressions.Expression expression)
+    {
+        while (expression is MethodCallExpression methodCall)
+        {
+            if (methodCall.Method.DeclaringType == typeof(Queryable) &&
+                methodCall.Method.Name is nameof(Queryable.OrderBy) or nameof(Queryable.OrderByDescending)
+                    or nameof(Queryable.ThenBy) or nameof(Queryable.ThenByDescending))
+            {
+                return true;
+            }
+
+            expression = methodCall.Arguments[0];
+        }
+
+        return false;
     }
 
     /// <summary>

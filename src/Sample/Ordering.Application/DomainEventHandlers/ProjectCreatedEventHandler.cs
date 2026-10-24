@@ -19,7 +19,7 @@ public class ProjectCreatedEventHandler(
         // 领域事件 <-> 和当前上下文/SCOPE 同时成功、失败，同步
         // 集成事件 <-> 异步不管的
         // 领域事件的处理器，发送集成事件
-        unitOfWork.SavedChanges +=
+        unitOfWork.SavedChangesAsync +=
             async c =>
             {
                 await daprClient.PublishEventAsync("rabbitmq-pubsub", Names.ProjectCreatedEvent,

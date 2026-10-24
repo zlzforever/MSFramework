@@ -100,7 +100,7 @@ public static class StartupExtensions
             var dbContextSettingsList = configuration.GetSection("DbContexts").Get<List<DbContextSettings>>();
             var dbContextSettings = dbContextSettingsList[0];
 
-            services.AddDbContext<TemplateDbContext>((provider, x) =>
+            services.AddDbContextFactory<TemplateDbContext>((provider, x) =>
             {
                 var loggerFactory = provider.GetRequiredService<ILoggerFactory>();
                 x.UseLoggerFactory(loggerFactory);

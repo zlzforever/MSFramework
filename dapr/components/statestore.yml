@@ -7,8 +7,8 @@ spec:
   version: v1
   metadata:
     - name: redisHost
-      value: 192.168.100.254:6379
+      value: "{env:REDIS_HOST}"
     - name: redisPassword
-      value: "1qazZAQ!"
+      value: "{env:REDIS_PASSWORD}"
     - name: actorStateStore
       value: "true"

@@ -17,7 +17,7 @@ namespace MSFramework.Tests;
 /// Stage 5 复测回归用例（ZZO-87）：
 /// 验证 ZZO-86 修复后，单键 <see cref="EfRepository{TEntity,TKey}.Find(TKey)"/> /
 /// <see cref="EfRepository{TEntity,TKey}.FindAsync(TKey)"/> 对带 HasMany 导航的单键聚合根
-/// 恢复首级导航加载（单键行为等价），且 <c>Find(null)</c>/<c>FindAsync(null)</c> 返回 null 不抛异常；
+/// 不再隐式加载导航，且 <c>Find(null)</c>/<c>FindAsync(null)</c> 返回 null 不抛异常；
 /// 同时复测软删除守卫（已跟踪已持久化软删除实体 Find 返回 null）。
 /// </summary>
 public class FindNavigationRegressionTests
@@ -193,7 +193,7 @@ public class FindNavigationRegressionTests
     }
 
     [Fact]
-    public void Find_UntrackedSingleKeyAggregate_LoadsFirstLevelNavigation()
+    public void Find_UntrackedSingleKeyAggregate_DoesNotLoadNavigation()
     {
         using var host = CreateHost();
 
@@ -206,17 +206,19 @@ public class FindNavigationRegressionTests
             context.SaveChanges();
         }
 
-        // 新建作用域上下文（未跟踪任何实体）→ Find 应恢复首级导航加载
+        // 新建作用域上下文（未跟踪任何实体）→ Find 只加载聚合根
         using var scope = host.Provider.CreateScope();
         var repository = CreateOrderRepository(scope.ServiceProvider);
         var found = repository.Find("O-1");
 
         Assert.NotNull(found);
-        Assert.Single(found.Items);
+        Assert.Empty(found.Items);
+        Assert.False(scope.ServiceProvider.GetRequiredService<FindRegressionContext>()
+            .Entry(found).Collection(x => x.Items).IsLoaded);
     }
 
     [Fact]
-    public async Task FindAsync_UntrackedSingleKeyAggregate_LoadsFirstLevelNavigation()
+    public async Task FindAsync_UntrackedSingleKeyAggregate_DoesNotLoadNavigation()
     {
         using var host = CreateHost();
 
@@ -229,13 +231,15 @@ public class FindNavigationRegressionTests
             await context.SaveChangesAsync();
         }
 
-        // 新建作用域上下文（未跟踪任何实体）→ FindAsync 应恢复首级导航加载
+        // 新建作用域上下文（未跟踪任何实体）→ FindAsync 只加载聚合根
         using var scope = host.Provider.CreateScope();
         var repository = CreateOrderRepository(scope.ServiceProvider);
         var found = await repository.FindAsync("O-1");
 
         Assert.NotNull(found);
-        Assert.Single(found.Items);
+        Assert.Empty(found.Items);
+        Assert.False(scope.ServiceProvider.GetRequiredService<FindRegressionContext>()
+            .Entry(found).Collection(x => x.Items).IsLoaded);
     }
 
     [Fact]

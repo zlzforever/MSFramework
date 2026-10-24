@@ -3,6 +3,8 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
+using System.Security.Cryptography;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
@@ -19,27 +21,6 @@ public static class FormFileExtensions
     ///     使用线程安全容器承载，缓存命中时跳过重复的目录探测与创建（同一目录不同写法只占一个缓存键）
     /// </summary>
     private static readonly ConcurrentDictionary<string, byte> ExistingDirCache = new ConcurrentDictionary<string, byte>();
-
-    // 禁止的危险后缀（补充拦截，双重保险）
-    private static readonly HashSet<string> DangerousExtensions = new(StringComparer.OrdinalIgnoreCase)
-    {
-        ".html",
-        ".htm",
-        ".js",
-        ".php",
-        ".php3",
-        ".phtml",
-        ".aspx",
-        ".ashx",
-        ".cshtml",
-        ".asp",
-        ".jsp",
-        ".svg",
-        ".exe",
-        ".bat",
-        ".cmd",
-        ".sh"
-    };
 
     /// <summary>
     ///     符号链接创建委托（内部可测试性扩展点，默认使用 <see cref="File.CreateSymbolicLink(string, string)"/>；
@@ -60,9 +41,9 @@ public static class FormFileExtensions
     internal static Func<bool> IsWindowsPlatform { get; set; } = OperatingSystem.IsWindows;
 
     /// <summary>
-    /// 存储结构（用户确认的新方案）：
-    /// 真实文件存于 /wwwroot/upload/{date}/{md5前2位}/{md5次2位}/{md5}.{extension}（数据只写这里）
-    /// 判重链接存于 /wwwroot/oss/{md5前2位}/{md5次2位}/{md5}.{extension}（符号链接指向真实文件，仅用于判重）
+    /// 存储结构：
+    /// 真实文件存于 Web 根目录之外的 {StorageRoot}/{interval}/{date}/{sha256前2位}/{sha256次2位}/{sha256}.{extension}。
+    /// 判重链接存于 {DedupeRoot}/{sha256前2位}/{sha256次2位}/{sha256}.{extension}。
     /// 判重键为 oss 链接（内容指纹恒定、与日期无关），跨日期重复上传零数据写（仅新增 upload 链接）
     /// </summary>
     /// <param name="formFile">上传的文件</param>
@@ -70,81 +51,131 @@ public static class FormFileExtensions
     /// <returns>保存结果：Path 为 upload 相对真实文件路径，PhysicalPath 为 oss 判重链接路径</returns>
     /// <exception cref="ArgumentNullException">formFile 为 null 时抛出</exception>
     /// <exception cref="ArgumentException">interval 包含非法路径字符时抛出</exception>
-    public static async Task<SaveResult> SaveAsync(this IFormFile formFile,
-        string interval = "upload")
+    public static Task<SaveResult> SaveAsync(this IFormFile formFile, string interval = "upload")
+    {
+        return SaveAsync(formFile, new FileUploadOptions(), interval);
+    }
+
+    /// <summary>
+    /// 使用显式安全策略保存上传文件。
+    /// </summary>
+    public static async Task<SaveResult> SaveAsync(this IFormFile formFile, FileUploadOptions options,
+        string interval = "upload", CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(formFile);
+        ArgumentNullException.ThrowIfNull(options);
+        cancellationToken.ThrowIfCancellationRequested();
 
-        if (interval.Contains("..") || interval.Contains('/') || interval.Contains('\\'))
+        if (string.IsNullOrWhiteSpace(interval) || interval.Contains("..") || interval.Contains('/') ||
+            interval.Contains('\\'))
         {
             throw new ArgumentException("Invalid interval path");
         }
 
-        var extension = Path.GetExtension(formFile.FileName);
-        if (DangerousExtensions.Contains(extension))
+        var extension = Path.GetExtension(formFile.FileName).ToLowerInvariant();
+        if (!options.AllowedExtensions.Contains(extension))
         {
-            throw new ArgumentException($"File extension '{extension}' is not allowed for security reasons.");
+            throw new ArgumentException($"File extension '{extension}' is not allowed.", nameof(formFile));
         }
 
-        // 日期格式 yyyyMMdd，修正原 yyyMMdd 笔误
-        var date = DateTimeOffset.Now.ToString("yyyyMMdd");
-
-        await using var stream = formFile.OpenReadStream();
-        // 使用流式接口，增强性能
-        var md5 = await Utils.Cryptography.ComputeMD5Async(stream);
-        var level1 = md5.Substring(0, 2);
-        var level2 = md5.Substring(2, 2);
-        var fileName = $"{md5}{extension}";
-        // 真实文件目标（md5 二级分层防单日目录爆炸）：upload/{date}/{l1}/{l2}/{md5}{ext}
-        var intervalDirectory = Path.Combine(interval, date, level1, level2);
-        var businessDirectory = Path.Combine(AppContext.BaseDirectory, "wwwroot", intervalDirectory);
-        // upload/20251225/AB/CD/C4CA4238A0B923820DCC509A6F75849B.txt
-        var intervalPath = Path.Combine(intervalDirectory, fileName);
-        // Path.Combine 存在可空参数重载（返回 string?），此处入参均为非空字符串，
-        // 结果不可能为 null；显式判空兜底以消除静态分析空值告警，并保证后续使用恒非空
-        var businessPath = Path.Combine(businessDirectory, fileName);
-        // 判重链接目标（仅作判重用，指向 upload 业务文件）：oss/{l1}/{l2}/{md5}{ext}
-        var dedupeLinkDirectory = Path.Combine(Defaults.LocalOSSDirectory, level1, level2);
-        var dedupeLinkPath = Path.Combine(dedupeLinkDirectory, fileName);
-
-        EnsureDirectoryExistsCached(businessDirectory);
-
-        if (!File.Exists(dedupeLinkPath))
+        if (formFile.Length <= 0)
         {
-            // 首次上传（或并发竞态下链接尚未建立）：写入真实文件，FileMode.Create 截断写保证幂等，
-            // FileShare.ReadWrite 允许并发写者同时打开，同内容并发写最终内容一致
-            EnsureDirectoryExistsCached(dedupeLinkDirectory);
-            await using (var outStream = new FileStream(businessPath, FileMode.Create, FileAccess.Write,
-                             FileShare.ReadWrite))
+            throw new ArgumentException("Empty files are not allowed.", nameof(formFile));
+        }
+
+        if (formFile.Length > options.MaxFileSize)
+        {
+            throw new ArgumentException($"File exceeds the {options.MaxFileSize} byte limit.", nameof(formFile));
+        }
+
+        var declaredContentType = formFile.Headers?.ContentType.ToString();
+        if (!string.IsNullOrWhiteSpace(declaredContentType) &&
+            (!options.AllowedContentTypes.TryGetValue(extension, out var contentTypes) ||
+             !contentTypes.Contains(declaredContentType)))
+        {
+            throw new ArgumentException("The declared content type does not match the file extension.", nameof(formFile));
+        }
+
+        var date = DateTimeOffset.Now.ToString("yyyyMMdd");
+        var stagingDirectory = Path.Combine(options.StorageRoot, ".staging");
+        EnsureDirectoryExistsCached(stagingDirectory);
+        var stagingPath = Path.Combine(stagingDirectory, $"{Guid.NewGuid():N}.upload");
+
+        try
+        {
+            string digest;
+            long bytesWritten = 0;
+            using var hasher = IncrementalHash.CreateHash(HashAlgorithmName.SHA256);
+            await using var input = formFile.OpenReadStream();
+            await using (var output = new FileStream(stagingPath, FileMode.CreateNew, FileAccess.Write,
+                             FileShare.None, 81920, FileOptions.Asynchronous | FileOptions.SequentialScan))
             {
-                if (stream.CanSeek)
+                var buffer = new byte[81920];
+                int read;
+                while ((read = await input.ReadAsync(buffer, cancellationToken)) > 0)
                 {
-                    // MD5 计算已消费流内容，回到起始位置以便重新写入
-                    stream.Seek(0, SeekOrigin.Begin);
-                    await stream.CopyToAsync(outStream);
+                    bytesWritten += read;
+                    if (bytesWritten > options.MaxFileSize)
+                    {
+                        throw new ArgumentException($"File exceeds the {options.MaxFileSize} byte limit.", nameof(formFile));
+                    }
+
+                    hasher.AppendData(buffer, 0, read);
+                    await output.WriteAsync(buffer.AsMemory(0, read), cancellationToken);
                 }
-                else
-                {
-                    // 非可寻址流无法回退位置，重新打开读取流（IFormFile 每次调用可重新打开）
-                    // 以保证写出完整内容，而非 0 字节空文件
-                    await using var reopenedStream = formFile.OpenReadStream();
-                    await reopenedStream.CopyToAsync(outStream);
-                }
+
+                await output.FlushAsync(cancellationToken);
             }
 
-            // 创建 oss 判重链接；并发场景下链接已被另一进程创建时，catch 中复用既有链接
-            CreateLinkOrCopy(dedupeLinkPath, businessPath);
-        }
-        else
-        {
-            // 判重命中：同内容已上传过（真实文件可能位于更早日期的 upload 目录），
-            // 仅创建新的 upload 符号链接指向既有真实文件，零数据写
-            var existingPath = File.ResolveLinkTarget(dedupeLinkPath, returnFinalTarget: true)?.FullName
-                               ?? dedupeLinkPath;
-            CreateLinkOrCopy(businessPath, existingPath);
-        }
+            if (bytesWritten == 0)
+            {
+                throw new ArgumentException("Empty files are not allowed.", nameof(formFile));
+            }
 
-        return new SaveResult { Name = formFile.FileName, Path = intervalPath, PhysicalPath = dedupeLinkPath };
+            digest = Convert.ToHexString(hasher.GetHashAndReset());
+            var level1 = digest[..2];
+            var level2 = digest.Substring(2, 2);
+            var fileName = $"{digest}{extension}";
+            var intervalDirectory = Path.Combine(interval, date, level1, level2);
+            var businessDirectory = Path.Combine(options.StorageRoot, intervalDirectory);
+            var businessPath = Path.Combine(businessDirectory, fileName);
+            var intervalPath = Path.Combine(intervalDirectory, fileName);
+            var dedupeLinkDirectory = Path.Combine(options.DedupeRoot, level1, level2);
+            var dedupeLinkPath = Path.Combine(dedupeLinkDirectory, fileName);
+
+            EnsureDirectoryExistsCached(businessDirectory);
+            EnsureDirectoryExistsCached(dedupeLinkDirectory);
+
+            if (!File.Exists(dedupeLinkPath))
+            {
+                try
+                {
+                    File.Move(stagingPath, businessPath, overwrite: false);
+                }
+                catch (IOException) when (File.Exists(businessPath))
+                {
+                    File.Delete(stagingPath);
+                }
+
+                CreateLinkOrCopy(dedupeLinkPath, businessPath);
+            }
+            else
+            {
+                File.Delete(stagingPath);
+                var existingPath = File.ResolveLinkTarget(dedupeLinkPath, returnFinalTarget: true)?.FullName
+                                   ?? dedupeLinkPath;
+                CreateLinkOrCopy(businessPath, existingPath);
+            }
+
+            return new SaveResult { Name = formFile.FileName, Path = intervalPath, PhysicalPath = dedupeLinkPath };
+        }
+        finally
+        {
+            if (File.Exists(stagingPath))
+            {
+                File.Delete(stagingPath);
+            }
+        }
     }
 
     /// <summary>
@@ -222,14 +253,77 @@ public static class FormFileExtensions
 
             Defaults.Logger?.LogWarning(ex,
                 "创建符号链接失败，降级为文件复制: {LinkPath} -> {TargetPath}", linkPath, targetPath);
-            // 覆盖写保证幂等
-            File.Copy(targetPath, linkPath, overwrite: true);
+            CopyAtomically(targetPath, linkPath);
+        }
+    }
+
+    private static void CopyAtomically(string sourcePath, string destinationPath)
+    {
+        var directory = Path.GetDirectoryName(destinationPath)
+                        ?? throw new ArgumentException("Destination must include a directory.", nameof(destinationPath));
+        var temporaryPath = Path.Combine(directory, $".{Path.GetFileName(destinationPath)}.{Guid.NewGuid():N}.tmp");
+        try
+        {
+            File.Copy(sourcePath, temporaryPath, overwrite: false);
+            try
+            {
+                File.Move(temporaryPath, destinationPath, overwrite: false);
+            }
+            catch (IOException) when (File.Exists(destinationPath))
+            {
+                // Another writer atomically published the same content first.
+            }
+        }
+        finally
+        {
+            if (File.Exists(temporaryPath))
+            {
+                File.Delete(temporaryPath);
+            }
         }
     }
 }
 
 /// <summary>
-///     文件保存结果，包含原始名称、upload 业务路径和 oss 判重链接路径
+/// 上传文件的大小、类型与存储位置策略。
+/// </summary>
+public sealed class FileUploadOptions
+{
+    /// <summary>单个文件允许的最大字节数。</summary>
+    public long MaxFileSize { get; init; } = 10 * 1024 * 1024;
+
+    /// <summary>位于 Web 根目录之外的物理存储根目录。</summary>
+    public string StorageRoot { get; init; } = Defaults.LocalStorageDirectory;
+
+    /// <summary>内容寻址去重目录。</summary>
+    public string DedupeRoot { get; init; } = Defaults.LocalOSSDirectory;
+
+    /// <summary>允许的文件扩展名。</summary>
+    public ISet<string> AllowedExtensions { get; init; } = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
+    {
+        ".csv", ".txt", ".json", ".xml", ".pdf", ".png", ".jpg", ".jpeg", ".gif", ".webp", ".zip"
+    };
+
+    /// <summary>扩展名对应的允许 MIME 类型。空 Content-Type 仍按扩展名策略处理。</summary>
+    public IDictionary<string, ISet<string>> AllowedContentTypes { get; init; } =
+        new Dictionary<string, ISet<string>>(StringComparer.OrdinalIgnoreCase)
+        {
+            [".csv"] = new HashSet<string>(["text/csv", "application/csv", "text/plain"], StringComparer.OrdinalIgnoreCase),
+            [".txt"] = new HashSet<string>(["text/plain"], StringComparer.OrdinalIgnoreCase),
+            [".json"] = new HashSet<string>(["application/json", "text/json"], StringComparer.OrdinalIgnoreCase),
+            [".xml"] = new HashSet<string>(["application/xml", "text/xml"], StringComparer.OrdinalIgnoreCase),
+            [".pdf"] = new HashSet<string>(["application/pdf"], StringComparer.OrdinalIgnoreCase),
+            [".png"] = new HashSet<string>(["image/png"], StringComparer.OrdinalIgnoreCase),
+            [".jpg"] = new HashSet<string>(["image/jpeg"], StringComparer.OrdinalIgnoreCase),
+            [".jpeg"] = new HashSet<string>(["image/jpeg"], StringComparer.OrdinalIgnoreCase),
+            [".gif"] = new HashSet<string>(["image/gif"], StringComparer.OrdinalIgnoreCase),
+            [".webp"] = new HashSet<string>(["image/webp"], StringComparer.OrdinalIgnoreCase),
+            [".zip"] = new HashSet<string>(["application/zip", "application/x-zip-compressed"], StringComparer.OrdinalIgnoreCase)
+        };
+}
+
+/// <summary>
+///     文件保存结果，包含原始名称、业务相对路径和判重链接路径
 /// </summary>
 [SuppressMessage("ReSharper", "UnusedAutoPropertyAccessor.Global")]
 public class SaveResult
@@ -240,13 +334,13 @@ public class SaveResult
     public string Name { get; set; }
 
     /// <summary>
-    ///     文件业务路径（相对路径）：真实文件所在路径 upload/{date}/{l1}/{l2}/{md5}{ext}；
+    ///     文件业务路径（相对路径）：真实文件所在路径 {interval}/{date}/{l1}/{l2}/{sha256}{ext}；
     ///     重复上传时为指向既有真实文件的符号链接路径，语义上均为可访问文件内容的路径
     /// </summary>
     public string Path { get; set; }
 
     /// <summary>
-    ///     判重链接路径：oss/{l1}/{l2}/{md5}{ext}，为指向 upload 真实文件的符号链接（判重键，与日期无关）；
+    ///     判重链接路径：{DedupeRoot}/{l1}/{l2}/{sha256}{ext}，为指向真实文件的符号链接（判重键，与日期无关）；
     ///     文件系统不支持符号链接时降级为真实文件的内容副本
     /// </summary>
     public string PhysicalPath { get; set; }

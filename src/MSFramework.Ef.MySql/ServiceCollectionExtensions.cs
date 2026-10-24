@@ -1,6 +1,6 @@
+using System;
 using MicroserviceFramework.Ef.Extensions;
 using Microsoft.EntityFrameworkCore.Infrastructure;
-using Microsoft.EntityFrameworkCore.Migrations;
 using Microting.EntityFrameworkCore.MySql.Infrastructure.Internal;
 
 namespace MicroserviceFramework.Ef.MySql;
@@ -31,11 +31,9 @@ public static class ServiceCollectionExtensions
         ///
         /// </summary>
         /// <returns></returns>
+        [Obsolete("External entities are excluded through model metadata; foreign keys are no longer removed globally.")]
         public MySqlDbContextOptionsBuilder UseRemoveExternalEntityService()
         {
-            MigrationsSqlGenerator.RemoveForeignKey = true;
-            var ops = (IRelationalDbContextOptionsBuilderInfrastructure)options;
-            ops.OptionsBuilder.ReplaceService<IMigrationsSqlGenerator, MigrationsSqlGenerator>();
             return options;
         }
     }
@@ -64,7 +62,5 @@ public static class ServiceCollectionExtensions
         builder.LoadDbContextSettings<MySqlDbContextOptionsBuilder, MySqlOptionsExtension>(settings);
         dbContextOptionsBuilder.SetConnectionString<MySqlOptionsExtension>(settings.ConnectionString);
 #pragma warning restore EF1001
-        builder.UseRemoveExternalEntityService();
-        // 替换 MigrationsModelDiffer 服务
     }
 }

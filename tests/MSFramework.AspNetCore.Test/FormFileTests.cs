@@ -6,6 +6,7 @@ using System.Linq;
 using System.Reflection;
 using System.Security.Cryptography;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using MicroserviceFramework;
 using MicroserviceFramework.AspNetCore.Extensions;
@@ -25,7 +26,7 @@ public class FormFileTests : BaseTest, IDisposable
     /// </summary>
     /// <param name="content">内容字节</param>
     /// <returns>大写十六进制 MD5 字符串</returns>
-    private static string ComputeMd5(byte[] content) => Convert.ToHexString(MD5.HashData(content));
+    private static string ComputeMd5(byte[] content) => Convert.ToHexString(SHA256.HashData(content));
 
     /// <summary>
     ///     构造指定内容的 FormFile 测试对象
@@ -49,7 +50,7 @@ public class FormFileTests : BaseTest, IDisposable
     {
         var md5 = ComputeMd5(content);
         var fileName = $"{md5}{Path.GetExtension(name)}";
-        return Path.Combine(AppContext.BaseDirectory, "wwwroot", "upload",
+        return Path.Combine(Defaults.LocalStorageDirectory, "upload",
             DateTimeOffset.Now.ToString("yyyyMMdd"), md5.Substring(0, 2), md5.Substring(2, 2), fileName);
     }
 
@@ -72,6 +73,51 @@ public class FormFileTests : BaseTest, IDisposable
         await using var stream = new MemoryStream(Encoding.UTF8.GetBytes(Guid.NewGuid().ToString()));
         var formFile = new FormFile(stream, 0, stream.Length, "1", "1.csv");
         await formFile.SaveAsync();
+    }
+
+    [Fact]
+    public async Task SaveAsyncRejectsEmptyAndOversizedFiles()
+    {
+        await Assert.ThrowsAsync<ArgumentException>(() => CreateFormFile([]).SaveAsync());
+
+        var options = new FileUploadOptions { MaxFileSize = 4 };
+        await Assert.ThrowsAsync<ArgumentException>(() =>
+            CreateFormFile([1, 2, 3, 4, 5]).SaveAsync(options));
+    }
+
+    [Fact]
+    public async Task SaveAsyncRejectsDisallowedExtensionAndMismatchedContentType()
+    {
+        await Assert.ThrowsAsync<ArgumentException>(() =>
+            CreateFormFile(Encoding.UTF8.GetBytes("payload"), "payload.exe").SaveAsync());
+
+        var file = (FormFile)CreateFormFile(Encoding.UTF8.GetBytes("a,b"));
+        file.Headers = new HeaderDictionary();
+        file.ContentType = "text/html";
+        await Assert.ThrowsAsync<ArgumentException>(() => file.SaveAsync());
+    }
+
+    [Fact]
+    public async Task SaveAsyncHonorsCancellationWithoutPublishingPartialFile()
+    {
+        var root = NewTempDirPath();
+        var options = new FileUploadOptions { StorageRoot = root, DedupeRoot = Path.Combine(root, ".dedupe") };
+        using var cancellation = new CancellationTokenSource();
+        cancellation.Cancel();
+
+        await Assert.ThrowsAnyAsync<OperationCanceledException>(() =>
+            CreateFormFile(Encoding.UTF8.GetBytes("cancelled")).SaveAsync(options, cancellationToken: cancellation.Token));
+
+        Assert.False(Directory.Exists(root) && Directory.EnumerateFiles(root, "*", SearchOption.AllDirectories).Any());
+    }
+
+    [Fact]
+    public async Task SavedPhysicalFilesStayOutsidePublicWebRoot()
+    {
+        var result = await CreateFormFile(Encoding.UTF8.GetBytes($"private-{Guid.NewGuid()}")).SaveAsync();
+        var webRoot = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "wwwroot")) + Path.DirectorySeparatorChar;
+
+        Assert.False(Path.GetFullPath(result.PhysicalPath).StartsWith(webRoot, StringComparison.Ordinal));
     }
 
     /// <summary>
@@ -142,7 +188,7 @@ public class FormFileTests : BaseTest, IDisposable
         var level2 = md5.Substring(2, 2);
         // 预置更早日期的真实文件与 oss 判重链接（模拟历史上传，今日路径尚不存在）
         const string oldDate = "20200101";
-        var oldRealDir = Path.Combine(AppContext.BaseDirectory, "wwwroot", "upload", oldDate, level1, level2);
+        var oldRealDir = Path.Combine(Defaults.LocalStorageDirectory, "upload", oldDate, level1, level2);
         var oldRealPath = Path.Combine(oldRealDir, fileName);
         Directory.CreateDirectory(oldRealDir);
         await File.WriteAllBytesAsync(oldRealPath, content);
@@ -155,7 +201,7 @@ public class FormFileTests : BaseTest, IDisposable
 
         // 今日 upload 路径仅创建符号链接指向旧真实文件，不写入任何数据
         var today = DateTimeOffset.Now.ToString("yyyyMMdd");
-        var newLinkPath = Path.Combine(AppContext.BaseDirectory, "wwwroot", "upload", today, level1, level2, fileName);
+        var newLinkPath = Path.Combine(Defaults.LocalStorageDirectory, "upload", today, level1, level2, fileName);
         Assert.True(File.Exists(newLinkPath));
         Assert.True(File.GetAttributes(newLinkPath).HasFlag(FileAttributes.ReparsePoint));
         Assert.Equal(oldRealPath, File.ResolveLinkTarget(newLinkPath, returnFinalTarget: true)?.FullName);
@@ -208,6 +254,29 @@ public class FormFileTests : BaseTest, IDisposable
             Assert.False(File.GetAttributes(ossPath).HasFlag(FileAttributes.ReparsePoint));
             Assert.Equal(content, await File.ReadAllBytesAsync(ossPath));
             Assert.Equal(content, await File.ReadAllBytesAsync(RealFilePath(content)));
+        }
+        finally
+        {
+            FormFileExtensions.LinkCreator = original;
+        }
+    }
+
+    [Fact]
+    public async Task ConcurrentFallbackCopiesPublishOneCompleteFileWithoutTemporaryArtifacts()
+    {
+        var root = NewTempDirPath();
+        var options = new FileUploadOptions { StorageRoot = root, DedupeRoot = Path.Combine(root, ".dedupe") };
+        var content = Encoding.UTF8.GetBytes($"fallback-concurrent-{Guid.NewGuid()}");
+        var original = FormFileExtensions.LinkCreator;
+        FormFileExtensions.LinkCreator = (_, _) => throw new IOException("simulated: symlink unsupported");
+        try
+        {
+            var results = await Task.WhenAll(Enumerable.Range(0, 8)
+                .Select(_ => CreateFormFile(content).SaveAsync(options)));
+
+            var publishedPath = Assert.Single(results.Select(result => result.PhysicalPath).Distinct());
+            Assert.Equal(content, await File.ReadAllBytesAsync(publishedPath));
+            Assert.Empty(Directory.EnumerateFiles(root, "*.tmp", SearchOption.AllDirectories));
         }
         finally
         {

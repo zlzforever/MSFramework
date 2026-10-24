@@ -1,5 +1,6 @@
 using System;
 using MicroserviceFramework.Common;
+using MicroserviceFramework.Ef.Internal;
 using MicroserviceFramework.Utils;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
@@ -38,6 +39,12 @@ public static class JsonPropertyBuilderExtensions
             JsonDataType databaseType = JsonDataType.JSONB)
         {
             Check.NotNull(fieldType, nameof(fieldType));
+            if (!typeof(TProperty).IsAssignableFrom(fieldType))
+            {
+                throw new ArgumentException(
+                    $"The JSON field type {fieldType.FullName} is not assignable to {typeof(TProperty).FullName}.",
+                    nameof(fieldType));
+            }
 
             builder
                 .UsePropertyAccessMode(PropertyAccessMode.PreferField)
@@ -59,7 +66,18 @@ public static class JsonPropertyBuilderExtensions
     private static TProperty Deserialize<TProperty>(string json, Type fieldType)
     {
         var result = Defaults.JsonSerializer.Deserialize(json, fieldType);
-        return result == null ? default : (TProperty)result;
+        if (result == null)
+        {
+            return default;
+        }
+
+        if (result is TProperty property)
+        {
+            return property;
+        }
+
+        throw new InvalidOperationException(
+            $"Deserialized JSON value of type {result.GetType().FullName} cannot be assigned to {typeof(TProperty).FullName}.");
     }
 
     /// <summary>
@@ -84,17 +102,28 @@ public static class JsonPropertyBuilderExtensions
 
     private static bool ContentEquals<TProperty>(TProperty left, TProperty right)
     {
-        return Defaults.JsonSerializer.Serialize(left) == Defaults.JsonSerializer.Serialize(right);
+        return CanonicalJson.Equals(left, right);
     }
 
     private static int ComputeHashCode<TProperty>(TProperty instance)
     {
-        return instance == null ? 0 : Defaults.JsonSerializer.Serialize(instance).GetHashCode();
+        return CanonicalJson.GetHashCode(instance);
     }
 
     private static TProperty CreateSnapshot<TProperty>(TProperty instance, Type fieldType)
     {
         var result = Defaults.JsonSerializer.Deserialize(Defaults.JsonSerializer.Serialize(instance), fieldType);
-        return result == null ? default : (TProperty)result;
+        if (result == null)
+        {
+            return default;
+        }
+
+        if (result is TProperty snapshot)
+        {
+            return snapshot;
+        }
+
+        throw new InvalidOperationException(
+            $"JSON snapshot type {result.GetType().FullName} cannot be assigned to {typeof(TProperty).FullName}.");
     }
 }

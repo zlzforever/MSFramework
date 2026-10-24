@@ -13,6 +13,13 @@ namespace MicroserviceFramework.Utils;
 /// </summary>
 public static class Cryptography
 {
+    private const string AuthenticatedAesPrefix = "msf:aesgcm:v1:";
+    private const int SaltSize = 16;
+    private const int NonceSize = 12;
+    private const int TagSize = 16;
+    private const int DerivedKeySize = 32;
+    private const int Pbkdf2Iterations = 100_000;
+
     /// <summary>
     /// 获取字符串的MD5哈希值，默认编码为<see cref="Encoding.UTF8"/>
     /// </summary>
@@ -84,7 +91,7 @@ public static class Cryptography
     }
 
     /// <summary>
-    /// AES 算法解密(ECB模式) 将密文base64解码进行解密，返回明文
+    /// 解密认证 AES 格式；无版本前缀的值按旧 ECB 格式读取，以支持数据迁移
     /// </summary>
     /// <param name="text">密文</param>
     /// <param name="key">密钥</param>
@@ -102,8 +109,78 @@ public static class Cryptography
     /// <returns>明文</returns>
     public static byte[] AesDecrypt(string text, string key)
     {
-        using var aes = CreateAes(key);
-        return AesDecrypt(aes, text);
+        ArgumentNullException.ThrowIfNull(text);
+        ValidatePassword(key);
+
+        if (!text.StartsWith(AuthenticatedAesPrefix, StringComparison.Ordinal))
+        {
+            using var legacyAes = CreateAes(key);
+            return AesDecrypt(legacyAes, text);
+        }
+
+        var payload = Convert.FromBase64String(text[AuthenticatedAesPrefix.Length..]);
+        var minimumLength = SaltSize + NonceSize + TagSize;
+        if (payload.Length < minimumLength)
+        {
+            throw new CryptographicException("The authenticated ciphertext is invalid.");
+        }
+
+        var salt = payload.AsSpan(0, SaltSize);
+        var nonce = payload.AsSpan(SaltSize, NonceSize);
+        var tag = payload.AsSpan(SaltSize + NonceSize, TagSize);
+        var ciphertext = payload.AsSpan(minimumLength);
+        var plaintext = new byte[ciphertext.Length];
+        var derivedKey = DeriveKey(key, salt);
+        try
+        {
+            using var aes = new AesGcm(derivedKey, TagSize);
+            aes.Decrypt(nonce, ciphertext, tag, plaintext);
+            return plaintext;
+        }
+        finally
+        {
+            CryptographicOperations.ZeroMemory(derivedKey);
+        }
+    }
+
+    /// <summary>
+    /// 使用 AES-256-GCM、随机 salt/nonce 和 PBKDF2-SHA256 加密文本。
+    /// </summary>
+    public static string AesEncryptToString(string text, string password)
+    {
+        ArgumentNullException.ThrowIfNull(text);
+        return AesEncrypt(Encoding.UTF8.GetBytes(text), password);
+    }
+
+    /// <summary>
+    /// 使用带版本标识的认证格式加密字节数组。
+    /// </summary>
+    public static string AesEncrypt(byte[] plaintext, string password)
+    {
+        ArgumentNullException.ThrowIfNull(plaintext);
+        ValidatePassword(password);
+
+        var salt = RandomNumberGenerator.GetBytes(SaltSize);
+        var nonce = RandomNumberGenerator.GetBytes(NonceSize);
+        var ciphertext = new byte[plaintext.Length];
+        var tag = new byte[TagSize];
+        var derivedKey = DeriveKey(password, salt);
+        try
+        {
+            using var aes = new AesGcm(derivedKey, TagSize);
+            aes.Encrypt(nonce, plaintext, ciphertext, tag);
+        }
+        finally
+        {
+            CryptographicOperations.ZeroMemory(derivedKey);
+        }
+
+        var payload = new byte[SaltSize + NonceSize + TagSize + ciphertext.Length];
+        salt.CopyTo(payload, 0);
+        nonce.CopyTo(payload, SaltSize);
+        tag.CopyTo(payload, SaltSize + NonceSize);
+        ciphertext.CopyTo(payload, SaltSize + NonceSize + TagSize);
+        return AuthenticatedAesPrefix + Convert.ToBase64String(payload);
     }
 
     /// <summary>
@@ -135,5 +212,23 @@ public static class Cryptography
         var toEncryptArray = Convert.FromBase64String(text);
         using var decrypt = aes.CreateDecryptor();
         return decrypt.TransformFinalBlock(toEncryptArray, 0, toEncryptArray.Length);
+    }
+
+    private static byte[] DeriveKey(string password, ReadOnlySpan<byte> salt)
+    {
+        return Rfc2898DeriveBytes.Pbkdf2(
+            password,
+            salt,
+            Pbkdf2Iterations,
+            HashAlgorithmName.SHA256,
+            DerivedKeySize);
+    }
+
+    private static void ValidatePassword(string password)
+    {
+        if (string.IsNullOrEmpty(password))
+        {
+            throw new ArgumentException("Encryption password cannot be empty.", nameof(password));
+        }
     }
 }

@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using System.Reflection;
 using AutoMapper;
 using MicroserviceFramework.Domain;
@@ -16,12 +17,30 @@ public static class ServiceCollectionExtensions
     ///     通过 builder 方式注册 AutoMapper 对象映射器（扫描所有程序集）
     /// </summary>
     /// <param name="builder">框架构建器</param>
-    /// <param name="configAction"></param>
     /// <returns>框架构建器</returns>
+    public static MicroserviceFrameworkBuilder UseAutoMapperObjectAssembler(this MicroserviceFrameworkBuilder builder)
+    {
+        builder.Services.AddAutoMapperObjectAssembler();
+        return builder;
+    }
+
+    /// <summary>
+    ///     通过 builder 方式注册 AutoMapper 对象映射器（扫描所有程序集）
+    /// </summary>
     public static MicroserviceFrameworkBuilder UseAutoMapperObjectAssembler(this MicroserviceFrameworkBuilder builder,
-        Action<IMapperConfigurationExpression> configAction = null)
+        Action<IMapperConfigurationExpression> configAction)
     {
         builder.Services.AddAutoMapperObjectAssembler(configAction);
+        return builder;
+    }
+
+    /// <summary>
+    ///     通过 builder 方式注册 AutoMapper 对象映射器（指定程序集列表）
+    /// </summary>
+    public static MicroserviceFrameworkBuilder UseAutoMapperObjectAssembler(this MicroserviceFrameworkBuilder builder,
+        params Assembly[] assemblies)
+    {
+        builder.Services.AddAutoMapperObjectAssembler((Action<IMapperConfigurationExpression>)null, assemblies);
         return builder;
     }
 
@@ -29,13 +48,39 @@ public static class ServiceCollectionExtensions
     ///     注册 AutoMapper 对象映射器到服务集合（扫描所有程序集）
     /// </summary>
     /// <param name="services">服务集合</param>
-    /// <param name="configAction"></param>
     /// <returns>服务集合</returns>
+    public static IServiceCollection AddAutoMapperObjectAssembler(this IServiceCollection services)
+    {
+        return services.AddAutoMapperObjectAssembler((Action<IMapperConfigurationExpression>)null,
+            Utils.Runtime.GetAllAssemblies().ToArray());
+    }
+
+    /// <summary>
+    ///     注册 AutoMapper 对象映射器到服务集合（扫描所有程序集）
+    /// </summary>
     public static IServiceCollection AddAutoMapperObjectAssembler(this IServiceCollection services,
-        Action<IMapperConfigurationExpression> configAction = null)
+        Action<IMapperConfigurationExpression> configAction)
+    {
+        return services.AddAutoMapperObjectAssembler(configAction, Utils.Runtime.GetAllAssemblies().ToArray());
+    }
+
+    /// <summary>
+    ///     注册 AutoMapper 对象映射器到服务集合（指定程序集列表）
+    /// </summary>
+    public static IServiceCollection AddAutoMapperObjectAssembler(this IServiceCollection services,
+        params Assembly[] assemblies)
+    {
+        return services.AddAutoMapperObjectAssembler((Action<IMapperConfigurationExpression>)null, assemblies);
+    }
+
+    /// <summary>
+    ///     注册 AutoMapper 对象映射器到服务集合（指定程序集列表）
+    /// </summary>
+    public static IServiceCollection AddAutoMapperObjectAssembler(this IServiceCollection services,
+        Action<IMapperConfigurationExpression> configAction, params Assembly[] assemblies)
     {
         services.TryAddScoped<IObjectAssembler, AutoMapperObjectAssembler>();
-        services.AddAutoMapper(configAction, Utils.Runtime.GetAllAssemblies());
+        services.AddAutoMapper(configAction, assemblies);
         return services;
     }
 
@@ -50,8 +95,7 @@ public static class ServiceCollectionExtensions
         Action<IMapperConfigurationExpression> configAction,
         params Assembly[] assemblies)
     {
-        builder.Services.TryAddScoped<IObjectAssembler, AutoMapperObjectAssembler>();
-        builder.Services.AddAutoMapper(configAction, assemblies);
+        builder.Services.AddAutoMapperObjectAssembler(configAction, assemblies);
         return builder;
     }
 }

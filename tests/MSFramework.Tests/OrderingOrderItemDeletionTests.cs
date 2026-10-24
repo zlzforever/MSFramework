@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -8,11 +7,9 @@ using MicroserviceFramework.Application;
 using MicroserviceFramework.Domain;
 using MicroserviceFramework.Ef;
 using MicroserviceFramework.Ef.Extensions;
-using MicroserviceFramework.Ef.MySql;
-using MicroserviceFramework.Ef.PostgreSql;
 using MicroserviceFramework.Extensions.DependencyInjection;
+using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Ordering.Application.Commands;
 using Ordering.Domain.AggregateRoots;
@@ -107,21 +104,35 @@ public class OrderingOrderItemDeletionTests
 
     private static TestHost CreateHost()
     {
-        var settings = LoadApiDatabaseSettings();
+        var connection = new SqliteConnection("DataSource=:memory:");
+        connection.Open();
+        var settings = new DbContextSettings
+        {
+            DatabaseType = "Sqlite",
+            UseUnderScoreCase = true
+        };
 
         var services = new ServiceCollection();
         services.AddSingleton(settings);
         services.AddSingleton<IEntityConfigurationTypeFinder>(new OrderingEntityConfigurationTypeFinder());
         services.AddScoped<ISession, TestSession>();
-        services.AddDbContext<OrderingContext>(options => ConfigureDatabase(options, settings));
+        services.AddDbContext<OrderingContext>(options => options.UseSqlite(connection));
         services.AddEntityFrameworkExtension();
         services.AddScoped<IOrderRepository, OrderRepository>();
         services.AddScoped<DeleteOrderItemCommandHandler>();
         services.AddScoped<IScopeServiceProvider>(provider => new TestScopeServiceProvider(provider));
 
         var provider = services.BuildServiceProvider();
+        using (var scope = provider.CreateScope())
+        {
+            var context = scope.ServiceProvider.GetRequiredService<OrderingContext>();
+            context.Database.EnsureCreated();
+            context.Database.ExecuteSqlRaw(
+                "CREATE TABLE IF NOT EXISTS \"user\" " +
+                "(\"id\" TEXT NOT NULL CONSTRAINT \"PK_user\" PRIMARY KEY, \"name\" TEXT NULL);");
+        }
 
-        return new TestHost(provider, settings);
+        return new TestHost(provider, settings, connection);
     }
 
     private static async Task<(string OrderId, string OrderItemId)> SeedOrderAsync(
@@ -132,6 +143,8 @@ public class OrderingOrderItemDeletionTests
 
         using var scope = host.Provider.CreateScope();
         var context = scope.ServiceProvider.GetRequiredService<OrderingContext>();
+        await context.Database.ExecuteSqlInterpolatedAsync(
+            $"INSERT INTO \"user\" (\"id\", \"name\") VALUES ({userId}, {"Test User"})");
 
         var order = Order.Create(
             UserInfo.Create(userId, "Test User"),
@@ -170,77 +183,6 @@ public class OrderingOrderItemDeletionTests
         return (row.OrderId, row.IsDeleted);
     }
 
-    private static DbContextSettings LoadApiDatabaseSettings()
-    {
-        var apiDirectory = FindApiProjectDirectory();
-        var configuration = new ConfigurationBuilder()
-            .SetBasePath(apiDirectory)
-            .AddJsonFile("appsettings.json", optional: true, reloadOnChange: false)
-            .AddJsonFile("appsettings.Development.json", optional: true, reloadOnChange: false)
-            .AddEnvironmentVariables()
-            .Build();
-
-        var settings = configuration.GetDbContextSettings<OrderingContext>();
-        if (string.IsNullOrWhiteSpace(settings.ConnectionString))
-        {
-            throw new InvalidOperationException(
-                $"Ordering.API 数据库配置缺少 {nameof(DbContextSettings.ConnectionString)}。");
-        }
-
-        return settings;
-    }
-
-    private static string FindApiProjectDirectory()
-    {
-        var startDirectories = new[]
-        {
-            new DirectoryInfo(Directory.GetCurrentDirectory()),
-            new DirectoryInfo(AppContext.BaseDirectory)
-        };
-
-        foreach (var startDirectory in startDirectories)
-        {
-            for (var directory = startDirectory; directory != null; directory = directory.Parent)
-            {
-                var apiDirectory = Path.Combine(
-                    directory.FullName,
-                    "src",
-                    "Sample",
-                    "Ordering.API");
-                if (File.Exists(Path.Combine(apiDirectory, "appsettings.Development.json")))
-                {
-                    return apiDirectory;
-                }
-            }
-        }
-
-        throw new DirectoryNotFoundException(
-            "未找到 src/Sample/Ordering.API/appsettings.Development.json。请从 MSFramework 仓库运行测试。");
-    }
-
-    private static void ConfigureDatabase(
-        DbContextOptionsBuilder options,
-        DbContextSettings settings)
-    {
-        if ("mysql".Equals(settings.DatabaseType, StringComparison.OrdinalIgnoreCase))
-        {
-            options.UseMySql(
-                ServerVersion.AutoDetect(settings.ConnectionString),
-                mysql => mysql.Load(settings));
-            return;
-        }
-
-        if ("postgresql".Equals(settings.DatabaseType, StringComparison.OrdinalIgnoreCase) ||
-            "postgres".Equals(settings.DatabaseType, StringComparison.OrdinalIgnoreCase))
-        {
-            options.UseNpgsql(postgres => postgres.Load(settings));
-            return;
-        }
-
-        throw new NotSupportedException(
-            $"Ordering.API 测试暂不支持数据库类型: {settings.DatabaseType}");
-    }
-
     private void WriteDatabaseInspectionHint(
         DbContextSettings settings,
         string orderId,
@@ -253,7 +195,10 @@ public class OrderingOrderItemDeletionTests
             $"SQL: SELECT id, order_id, is_deleted, deletion_time FROM {settings.TablePrefix}order_item WHERE id = '{orderItemId}';");
     }
 
-    private sealed class TestHost(ServiceProvider provider, DbContextSettings settings) : IDisposable
+    private sealed class TestHost(
+        ServiceProvider provider,
+        DbContextSettings settings,
+        SqliteConnection connection) : IDisposable
     {
         public ServiceProvider Provider { get; } = provider;
         public DbContextSettings Settings { get; } = settings;
@@ -261,6 +206,7 @@ public class OrderingOrderItemDeletionTests
         public void Dispose()
         {
             Provider.Dispose();
+            connection.Dispose();
         }
     }
 
@@ -322,4 +268,5 @@ public class OrderingOrderItemDeletionTests
 
         public bool HasDbContextForEntity<T>() => GetDbContextTypeForEntity(typeof(T)) != null;
     }
+
 }

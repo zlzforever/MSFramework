@@ -145,6 +145,11 @@ internal sealed class EntityPropertyConventionStrategy : IModelBuildingStrategy
 
         foreach (var entityType in context.ModelBuilder.Model.GetEntityTypes())
         {
+            if (entityType.IsOwned() || entityType.IsKeyless)
+            {
+                continue;
+            }
+
             var hasOptimisticLock = Defaults.Types.OptimisticLock.IsAssignableFrom(entityType.ClrType);
             var hasCreation = typeof(ICreation).IsAssignableFrom(entityType.ClrType);
             var hasModification = typeof(IModification).IsAssignableFrom(entityType.ClrType);

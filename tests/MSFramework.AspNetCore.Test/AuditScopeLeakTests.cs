@@ -3,10 +3,10 @@ using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
 using MicroserviceFramework.Application;
+using MicroserviceFramework.AspNetCore.Filters;
 using MicroserviceFramework.Auditing;
 using MicroserviceFramework.Auditing.Model;
 using MicroserviceFramework.Domain;
-using MicroserviceFramework.AspNetCore.Filters;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
@@ -190,7 +190,10 @@ public class AuditLeakStartup
 public sealed class FakeUnitOfWork : IUnitOfWork
 {
     /// <summary>保存完成事件，测试场景不使用</summary>
-    public event Func<CancellationToken, ValueTask> SavedChanges;
+    public event Action SavedChanges;
+
+    /// <summary>保存完成后的异步事件，测试场景不使用</summary>
+    public event Func<CancellationToken, ValueTask> SavedChangesAsync;
 
     /// <summary>空实现：测试场景无需真实保存</summary>
     /// <param name="cancellationToken">取消令牌</param>

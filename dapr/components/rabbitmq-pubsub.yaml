@@ -7,11 +7,11 @@ spec:
   version: v1
   metadata:
     - name: hostname
-      value: "192.168.100.254"
+      value: "{env:RABBITMQ_HOST}"
     - name: username
-      value: "admin"
+      value: "{env:RABBITMQ_USERNAME}"
     - name: password
-      value: "w7qcFfxKYSfn"
+      value: "{env:RABBITMQ_PASSWORD}"
     - name: durable
       value: "true"
     - name: deletedWhenUnused

@@ -29,7 +29,8 @@ public class EfRepository<TAggregateRoot> : IRepository<TAggregateRoot>, IEfRepo
     protected readonly DbContextBase DBContext;
 
     /// <summary>
-    /// 获取可查询的实体集合，默认包含第一级导航属性
+    /// 获取可查询的实体集合。默认不加载导航属性；派生仓储可重写
+    /// <see cref="BuildQueryable"/> 显式声明聚合加载边界。
     /// </summary>
     // ReSharper disable once VirtualMemberNeverOverridden.Global
     protected virtual IQueryable<TAggregateRoot> Store
@@ -49,18 +50,6 @@ public class EfRepository<TAggregateRoot> : IRepository<TAggregateRoot>, IEfRepo
     }
 
     /// <summary>
-    /// 一级导航数量超过该阈值时自动启用 SplitQuery，
-    /// 避免多集合导航 JOIN 产生的笛卡尔积爆炸
-    /// </summary>
-    private const int SplitQueryNavigationThreshold = 3;
-
-    /// <summary>
-    /// 获取或设置是否启用查询拆分行为，null 时按一级导航数量自动选择：
-    /// 不超过 <see cref="SplitQueryNavigationThreshold"/> 个一级导航使用 SingleQuery，否则强制 SplitQuery
-    /// </summary>
-    public bool? UseQuerySplittingBehavior { get; set; }
-
-    /// <summary>
     /// 初始化 EfRepository 实例
     /// </summary>
     /// <param name="dbContextFactory">数据库上下文工厂</param>
@@ -71,22 +60,13 @@ public class EfRepository<TAggregateRoot> : IRepository<TAggregateRoot>, IEfRepo
     }
 
     /// <summary>
-    /// 构建包含全部一级导航属性的查询。
-    /// 查询拆分策略优先级：显式配置 <see cref="UseQuerySplittingBehavior"/> &gt; 一级导航数量启发式（见
-    /// <see cref="SplitQueryNavigationThreshold"/>）。默认会 include 第一级导航属性
+    /// 构建仓储查询。默认只查询聚合根本身，不隐式 Include 导航属性。
     /// </summary>
     /// <param name="dbSet">实体集合</param>
-    /// <returns>包含一级导航与查询拆分策略的查询</returns>
+    /// <returns>未附加隐式导航加载的查询</returns>
     protected virtual IQueryable<TAggregateRoot> BuildQueryable(DbSet<TAggregateRoot> dbSet)
     {
-        var queryable = dbSet.AsQueryable();
-        var navigations = dbSet.EntityType.GetNavigations().ToList();
-        queryable = navigations.Aggregate(queryable, (current, navigation) => current.Include(navigation.Name));
-
-        // 超过 3 个一级导航（含多个集合导航）时强制 SplitQuery 避免笛卡尔积爆炸；
-        // 未显式配置时以此启发式决定，不再依赖全局默认
-        var useSplitQuery = UseQuerySplittingBehavior ?? navigations.Count > SplitQueryNavigationThreshold;
-        return useSplitQuery ? queryable.AsSplitQuery() : queryable.AsSingleQuery();
+        return dbSet.AsQueryable();
     }
 
     /// <summary>
@@ -179,7 +159,7 @@ public class EfRepository<TEntity, TKey> : EfRepository<TEntity>, IRepository<TE
 
     /// <summary>
     /// 根据主键查找实体。
-    /// 经 <c>Store</c>（默认包含第一级导航属性）以主键等值谓词查询，仅支持单键语义；
+    /// 经 <c>Store</c> 以主键等值谓词查询，仅支持单键语义；
     /// 对实现 <see cref="IDeletion"/> 的实体，已软删除的记录视为不存在（返回 null），与既有全局查询过滤器行为保持一致。
     /// </summary>
     /// <param name="id">实体主键（标量键，如 string/int/long/ObjectId/Guid）；传 null 时返回 null 不抛异常</param>
@@ -191,7 +171,7 @@ public class EfRepository<TEntity, TKey> : EfRepository<TEntity>, IRepository<TE
 
     /// <summary>
     /// 异步根据主键查找实体。
-    /// 经 <c>Store</c>（默认包含第一级导航属性）以主键等值谓词查询，仅支持单键语义；
+    /// 经 <c>Store</c> 以主键等值谓词查询，仅支持单键语义；
     /// 对实现 <see cref="IDeletion"/> 的实体，已软删除的记录视为不存在（返回 null），与既有全局查询过滤器行为保持一致。
     /// </summary>
     /// <param name="id">实体主键（标量键，如 string/int/long/ObjectId/Guid）；传 null 时返回 null 不抛异常</param>

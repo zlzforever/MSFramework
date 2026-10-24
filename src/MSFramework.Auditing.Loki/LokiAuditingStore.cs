@@ -1,7 +1,8 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Threading;
 using System.Threading.Tasks;
 using MicroserviceFramework.Auditing.Model;
 using Serilog;
@@ -14,17 +15,22 @@ namespace MicroserviceFramework.Auditing.Loki;
 /// <summary>
 ///     基于 Loki 的审计日志存储，通过 Serilog 将审计信息发送到 Grafana Loki
 /// </summary>
-public class LokiAuditingStore : IAuditingStore
+public class LokiAuditingStore : IAuditingStore, IDisposable
 {
     private readonly ILogger _logger;
+    private readonly AuditLogSanitizer _sanitizer;
     private readonly MessageTemplate _template;
     private readonly MessageTemplate _operationTemplate;
 
-    private LokiAuditingStore(ILogger logger, MessageTemplate template, MessageTemplate operationTemplate)
+    private int _disposed;
+
+    private LokiAuditingStore(ILogger logger, MessageTemplate template, MessageTemplate operationTemplate,
+        AuditLogSanitizer sanitizer)
     {
         this._logger = logger;
         this._template = template;
         this._operationTemplate = operationTemplate;
+        _sanitizer = sanitizer;
     }
 
     internal static IAuditingStore Create(LokiOptions options, string application)
@@ -55,9 +61,19 @@ public class LokiAuditingStore : IAuditingStore
                 options.PropertiesAsLabels, credentials: options.Credentials)
             .WriteTo.Async(x => x.File($"{directory}/log.txt", rollingInterval: RollingInterval.Day))
             .CreateLogger();
-        var store = new LokiAuditingStore(logger, template, operationTemplate);
+        var store = new LokiAuditingStore(logger, template, operationTemplate, new AuditLogSanitizer(options));
 
         return store;
+    }
+
+    internal static LokiAuditingStore Create(ILogger logger, LokiOptions options)
+    {
+        ArgumentNullException.ThrowIfNull(logger);
+        var parser = new MessageTemplateParser();
+        return new LokiAuditingStore(logger,
+            parser.Parse("{IP:l} - {UserId:l} {Url:l} {Type:l} {EntityId:l} {OperationType:l}"),
+            parser.Parse("{IP:l} - {UserId:l} {Url:l} [{StartTime:l}] {Elapsed}"),
+            new AuditLogSanitizer(options));
     }
 
     /// <summary>
@@ -67,6 +83,7 @@ public class LokiAuditingStore : IAuditingStore
     /// <returns>异步任务</returns>
     public Task AddAsync(AuditOperation auditOperation)
     {
+        ObjectDisposedException.ThrowIf(Volatile.Read(ref _disposed) != 0, this);
         if (_logger == null)
         {
             return Task.CompletedTask;
@@ -76,7 +93,8 @@ public class LokiAuditingStore : IAuditingStore
 
         var auditOperationProperties = new List<LogEventProperty>
         {
-            new("Url", new ScalarValue(auditOperation.Path ?? string.Empty)),
+            new("Url", new ScalarValue(_sanitizer.SanitizeUrl(
+                (auditOperation.Path ?? string.Empty) + (auditOperation.QueryString ?? string.Empty)))),
             new("IP", new ScalarValue(auditOperation.IP ?? string.Empty)),
             new("DeviceId", new ScalarValue(auditOperation.DeviceId ?? string.Empty)),
             new("DeviceModel", new ScalarValue(auditOperation.DeviceModel ?? string.Empty)),
@@ -112,8 +130,9 @@ public class LokiAuditingStore : IAuditingStore
             {
                 properties.Add(new LogEventProperty($"{property.Name}_Type", new ScalarValue(property.Type)));
                 properties.Add(new LogEventProperty($"{property.Name}_OriginalValue",
-                    new ScalarValue(property.OriginalValue)));
-                properties.Add(new LogEventProperty($"{property.Name}_NewValue", new ScalarValue(property.NewValue)));
+                    new ScalarValue(_sanitizer.SanitizeValue(property.Name, property.OriginalValue))));
+                properties.Add(new LogEventProperty($"{property.Name}_NewValue",
+                    new ScalarValue(_sanitizer.SanitizeValue(property.Name, property.NewValue))));
             }
 
             var logEvent = new LogEvent(DateTimeOffset.Now, LogEventLevel.Information, null, _template, properties);
@@ -130,5 +149,16 @@ public class LokiAuditingStore : IAuditingStore
     public Task CommitAsync()
     {
         return Task.CompletedTask;
+    }
+
+    /// <summary>
+    ///     Flushes and disposes the owned Serilog pipeline, including async sinks.
+    /// </summary>
+    public void Dispose()
+    {
+        if (Interlocked.Exchange(ref _disposed, 1) == 0)
+        {
+            (_logger as IDisposable)?.Dispose();
+        }
     }
 }

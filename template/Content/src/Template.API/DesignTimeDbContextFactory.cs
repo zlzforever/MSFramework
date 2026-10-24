@@ -11,12 +11,12 @@ public class DesignTimeDbContextFactory
 {
     protected override IServiceProvider GetServiceProvider()
     {
-            return Program.CreateWebApplicationBuilder(Array.Empty<string>()).Build().Services;
-        }
+        return Program.CreateWebApplicationBuilder(Array.Empty<string>()).Build().Services;
+    }
 
     public override void ConfigureDesignTimeServices(IServiceCollection serviceCollection)
     {
-            serviceCollection.AddLogging(x => { x.AddConsole(); });
-            serviceCollection.ClearForeignKeys();
-        }
+        serviceCollection.AddLogging(x => { x.AddConsole(); });
+        serviceCollection.ClearForeignKeys();
+    }
 }

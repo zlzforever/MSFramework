@@ -28,6 +28,19 @@ public class Dto
 public class ObjectAssembler
 {
     [Fact]
+    public void UseAutoMapperObjectAssembler_AcceptsAssemblyOnlyOverload()
+    {
+        var services = new ServiceCollection();
+        services.AddLogging();
+        services.AddMicroserviceFramework(builder =>
+            builder.UseAutoMapperObjectAssembler(typeof(AutoMapperProfile).Assembly));
+
+        using var provider = services.BuildServiceProvider();
+
+        Assert.NotNull(provider.GetRequiredService<IObjectAssembler>());
+    }
+
+    [Fact]
     public void NullTo()
     {
         var service = new ServiceCollection();

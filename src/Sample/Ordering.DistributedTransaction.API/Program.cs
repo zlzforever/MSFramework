@@ -55,7 +55,7 @@ webApplicationBuilder.Services.AddCap(x =>
     // var password = Environment.GetEnvironmentVariable("RABBITMQ_PASSWORD");
     // x.UseRabbitMQ(configure =>
     // {
-    //     configure.HostName = "192.168.100.254";
+    //     configure.HostName = "localhost";
     //     configure.Password = password;
     //     configure.UserName = "admin";
     //     // configure.ExchangeName = "ordering";

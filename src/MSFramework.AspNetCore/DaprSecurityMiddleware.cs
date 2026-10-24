@@ -1,9 +1,12 @@
 using System.Linq;
 using System.Net;
+using System.Security.Cryptography;
+using System.Text;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.Extensions;
 using Microsoft.AspNetCore.Http.Features;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 
 namespace MicroserviceFramework.AspNetCore;
@@ -15,8 +18,13 @@ namespace MicroserviceFramework.AspNetCore;
 /// 404： 错误被记录下来，信息被删除
 /// other: 警告被记录并重试消息
 /// </summary>
-public class DaprSecurityMiddleware(RequestDelegate next, ILogger<DaprSecurityMiddleware> logger)
+public class DaprSecurityMiddleware(
+    RequestDelegate next,
+    ILogger<DaprSecurityMiddleware> logger,
+    IConfiguration configuration)
 {
+    private const string TokenHeader = "dapr-app-token";
+
     /// <summary>
     /// 执行中间件，验证 Dapr topic 请求的连接来源
     /// </summary>
@@ -27,7 +35,8 @@ public class DaprSecurityMiddleware(RequestDelegate next, ILogger<DaprSecurityMi
 
         if (endpoint == null)
         {
-            await next(context);
+            await RejectAsync(context, StatusCodes.Status403Forbidden,
+                "Dapr security middleware must run after endpoint routing");
             return;
         }
 
@@ -43,6 +52,15 @@ public class DaprSecurityMiddleware(RequestDelegate next, ILogger<DaprSecurityMi
             return;
         }
 
+        var expectedToken = configuration["DAPR_APP_TOKEN"];
+        var suppliedToken = context.Request.Headers[TokenHeader].ToString();
+        if (!TokenMatches(expectedToken, suppliedToken))
+        {
+            await RejectAsync(context, StatusCodes.Status401Unauthorized,
+                "Dapr topic request has an invalid application token");
+            return;
+        }
+
         // 安全决策只信任服务器建立连接时记录的地址；未经 Forwarded Headers
         // 中间件校验的 X-Forwarded-For 可由客户端伪造。
         var remoteIpAddress = context.Connection.RemoteIpAddress;
@@ -52,9 +70,27 @@ public class DaprSecurityMiddleware(RequestDelegate next, ILogger<DaprSecurityMi
             return;
         }
 
-        context.Response.StatusCode = 403;
-        await context.Response.CompleteAsync();
+        await RejectAsync(context, StatusCodes.Status403Forbidden,
+            "Dapr topic request did not originate from the local sidecar");
+    }
 
-        logger.LogError("Executing dapr subscribe {Action} forbidden", context.Request.GetDisplayUrl());
+    private static bool TokenMatches(string expectedToken, string suppliedToken)
+    {
+        if (string.IsNullOrWhiteSpace(expectedToken) || string.IsNullOrEmpty(suppliedToken))
+        {
+            return false;
+        }
+
+        var expectedBytes = Encoding.UTF8.GetBytes(expectedToken);
+        var suppliedBytes = Encoding.UTF8.GetBytes(suppliedToken);
+        return expectedBytes.Length == suppliedBytes.Length &&
+               CryptographicOperations.FixedTimeEquals(expectedBytes, suppliedBytes);
+    }
+
+    private async Task RejectAsync(HttpContext context, int statusCode, string reason)
+    {
+        context.Response.StatusCode = statusCode;
+        await context.Response.CompleteAsync();
+        logger.LogWarning("{Reason}: {Action}", reason, context.Request.GetDisplayUrl());
     }
 }

@@ -1,4 +1,4 @@
-﻿// using System;
+// using System;
 // using System.Collections.Generic;
 // using System.Net.Http;
 // using System.Text;
@@ -20,7 +20,7 @@
 //
 //         var log =
 //             $$"""{"streams": [{ "stream": { "foo": "bar2" }, "values": [ [ "{{timestamp}}", "A=B C=E" ] ] }, { "stream": { "foo": "bar2" }, "values": [ [ "{{timestamp}}", "F=G H=J" ] ] }]}""";
-//         var response = await client.PostAsync("http://192.168.100.254:3100/loki/api/v1/push",
+//         var response = await client.PostAsync("http://localhost:3100/loki/api/v1/push",
 //             new StringContent(log, Encoding.UTF8, "application/json"));
 //         var result = await response.Content.ReadAsStringAsync();
 //     }

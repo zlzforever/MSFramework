@@ -6,8 +6,7 @@ using Microsoft.EntityFrameworkCore.ChangeTracking;
 namespace MicroserviceFramework.Ef.Internal;
 
 /// <summary>
-/// EF Core 专用JSON字节流式对比 ValueComparer
-/// 逻辑：序列化对象为JSON流，逐字节对比，不一致即判定修改；接受List顺序、字典乱序导致的误判
+/// EF Core 专用 JSON ValueComparer。对象属性按名称规范化，数组顺序保持不变。
 /// </summary>
 public class JsonStreamValueComparer<T> : ValueComparer<T>
 {
@@ -43,18 +42,7 @@ public class JsonStreamValueComparer<T> : ValueComparer<T>
     /// </summary>
     private static bool ContentEquals(T left, T right)
     {
-        if (ReferenceEquals(left, right)) return true;
-        if (left is null || right is null) return false;
-
-        using var msLeft = new MemoryStream();
-        using var msRight = new MemoryStream();
-
-        Defaults.JsonSerializer.Serialize(msLeft, left);
-        Defaults.JsonSerializer.Serialize(msRight, right);
-
-        // 全版本兼容的字节Span对比，.NET Standard 2.1+ / .NET Core 2.1+ 支持
-        return msLeft.GetBuffer().AsSpan(0, (int)msLeft.Length)
-            .SequenceEqual(msRight.GetBuffer().AsSpan(0, (int)msRight.Length));
+        return CanonicalJson.Equals(left, right);
     }
 
     /// <summary>
@@ -62,24 +50,7 @@ public class JsonStreamValueComparer<T> : ValueComparer<T>
     /// </summary>
     private static int ComputeContentHashCode(T instance)
     {
-        if (instance is null) return 0;
-
-        using var ms = new MemoryStream();
-        Defaults.JsonSerializer.Serialize(ms, instance);
-
-        var buffer = ms.GetBuffer();
-        var length = (int)ms.Length;
-
-        unchecked
-        {
-            var hash = 17;
-            for (var i = 0; i < length; i++)
-            {
-                hash = hash * 31 + buffer[i];
-            }
-
-            return hash;
-        }
+        return CanonicalJson.GetHashCode(instance);
     }
 
     /// <summary>

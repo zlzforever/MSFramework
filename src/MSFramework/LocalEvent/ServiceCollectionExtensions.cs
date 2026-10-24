@@ -19,6 +19,7 @@ public static class ServiceCollectionExtensions
     {
         services.TryAddScoped<IEventPublisher, LocalEventPublisher>();
         services.TryAddSingleton<LocalEventChannel>();
+        services.TryAddSingleton<ILocalEventDeadLetterStore, InMemoryLocalEventDeadLetterStore>();
         services.TryAddSingleton<LocalEventBackgroundService>();
         services.AddHostedService(serviceProvider =>
             serviceProvider.GetRequiredService<LocalEventBackgroundService>());

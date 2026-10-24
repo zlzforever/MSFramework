@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.IO;
 using System.Linq;
 using System.Text.Json;
@@ -9,6 +9,7 @@ using MicroserviceFramework.AspNetCore.Mvc.ModelBinding;
 // using MicroserviceFramework.AspNetCore.Swagger;
 using MicroserviceFramework.AutoMapper;
 using MicroserviceFramework.Ef;
+using MicroserviceFramework.Ef.Extensions;
 using MicroserviceFramework.Ef.MySql;
 using MicroserviceFramework.Ef.PostgreSql;
 using MicroserviceFramework.Extensions.DependencyInjection;
@@ -104,26 +105,27 @@ public static class Startup
             );
         });
 
-        services.AddDbContextPool<OrderingContext>(configuration, (settings, provider, x) =>
+        var orderingDbSettings = configuration.GetDbContextSettings<OrderingContext>();
+        services.AddPooledDbContextFactory<OrderingContext>((provider, x) =>
         {
             var loggerFactory = provider.GetRequiredService<ILoggerFactory>();
             x.UseLoggerFactory(loggerFactory);
-            if ("mysql".Equals(settings.DatabaseType, StringComparison.OrdinalIgnoreCase))
+            if ("mysql".Equals(orderingDbSettings.DatabaseType, StringComparison.OrdinalIgnoreCase))
             {
                 // if (dbContextSettings.UseCompiledModel)
                 // {
                 //     x.LoadModel("Ordering.Infrastructure.CompileModels.OrderingContextModel, Ordering.Infrastructure");
                 // }
-                x.UseMySql(ServerVersion.AutoDetect(settings.ConnectionString), y =>
+                x.UseMySql(ServerVersion.AutoDetect(orderingDbSettings.ConnectionString), y =>
                 {
-                    y.Load(settings);
+                    y.Load(orderingDbSettings);
                 });
             }
             else
             {
                 x.UseNpgsql(y =>
                 {
-                    y.Load(settings);
+                    y.Load(orderingDbSettings);
                 });
             }
         });

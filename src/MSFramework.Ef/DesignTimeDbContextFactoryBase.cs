@@ -19,18 +19,21 @@ public abstract class DesignTimeDbContextFactoryBase<TDbContext> :
     /// <param name="args">参数</param>
     /// <returns>可正常使用的数据上下文实例</returns>
     /// <remarks>
-    /// 注意：此处不能释放 scope（<c>using var scope</c>）——<typeparamref name="TDbContext"/> 通常以
-    /// Scoped 生命周期注册，释放 scope 会同步释放返回的 DbContext 实例，
-    /// 而 EF 设计时工具（<c>dotnet ef</c>）在 <see cref="CreateDbContext"/> 返回后仍会继续使用该上下文
-    /// 执行迁移，导致 <see cref="ObjectDisposedException"/>。
-    /// scope 生命周期与返回的上下文绑定，设计时命令运行在短生命周期进程中，进程退出即整体回收，
-    /// 不存在实际泄漏。
+    /// 上下文由 <see cref="IDbContextFactory{TContext}"/> 创建并由 EF 设计时工具释放，
+    /// 避免将 scoped 服务作用域泄漏到设计时命令的整个进程生命周期。
     /// </remarks>
     public virtual TDbContext CreateDbContext(string[] args)
     {
         var services = GetServiceProvider();
-        return (TDbContext)services.CreateScope()
-            .ServiceProvider.GetRequiredService(typeof(TDbContext));
+        var factory = services.GetService<IDbContextFactory<TDbContext>>();
+        if (factory == null)
+        {
+            throw new InvalidOperationException(
+                $"Register IDbContextFactory<{typeof(TDbContext).Name}> with AddDbContextFactory or " +
+                "AddPooledDbContextFactory before using the design-time factory.");
+        }
+
+        return factory.CreateDbContext();
     }
 
     /// <summary>

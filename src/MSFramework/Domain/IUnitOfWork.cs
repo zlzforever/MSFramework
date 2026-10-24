@@ -10,9 +10,14 @@ namespace MicroserviceFramework.Domain;
 public interface IUnitOfWork : IDisposable
 {
     /// <summary>
-    /// 注册保存事件
+    /// 注册保存完成后的同步事件
     /// </summary>
-    event Func<CancellationToken, ValueTask> SavedChanges;
+    event Action SavedChanges;
+
+    /// <summary>
+    /// 注册保存完成后的异步事件
+    /// </summary>
+    event Func<CancellationToken, ValueTask> SavedChangesAsync;
 
     /// <summary>
     /// 保存工作单元

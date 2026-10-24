@@ -44,9 +44,14 @@ public static class Defaults
     public static readonly bool IsInTests;
 
     /// <summary>
-    /// 本地 OSS 文件存储根目录
+    /// 本地文件存储根目录。默认位于 Web 根目录之外，文件只能通过受控下载接口访问。
     /// </summary>
-    public static readonly string LocalOSSDirectory = Path.Combine(AppContext.BaseDirectory, "wwwroot", "oss");
+    public static readonly string LocalStorageDirectory = Path.Combine(AppContext.BaseDirectory, "App_Data", "uploads");
+
+    /// <summary>
+    /// 本地 OSS 内容去重目录
+    /// </summary>
+    public static readonly string LocalOSSDirectory = Path.Combine(LocalStorageDirectory, ".dedupe");
 
     /// <summary>
     /// 全局服务提供程序，仅框架内部可覆写

@@ -36,11 +36,11 @@ public class PagedQueryTests
     }
 
     [Fact]
-    async Task PagedQueryAsync_ReturnsCorrectPaginationResult()
+    async Task PagedQueryAsyncReturnsCorrectPaginationResult()
     {
         // Arrange
         var data = Enumerable.Range(1, 50)
-            .Select(i => new TestEntity { Id = i }).AsQueryable();
+            .Select(i => new TestEntity { Id = i }).AsQueryable().OrderBy(x => x.Id);
         var page = 2;
         var limit = 10;
 
@@ -56,10 +56,10 @@ public class PagedQueryTests
     }
 
     [Fact]
-    async Task PagedQueryAsync_ReturnsEmptyResult_WhenNoData()
+    async Task PagedQueryAsyncReturnsEmptyResultWhenNoData()
     {
         // Arrange
-        var data = Enumerable.Empty<TestEntity>().AsQueryable();
+        var data = Enumerable.Empty<TestEntity>().AsQueryable().OrderBy(x => x.Id);
         var page = 1;
         var limit = 10;
 
@@ -74,10 +74,11 @@ public class PagedQueryTests
     }
 
     [Fact]
-    async Task PagedQueryAsync_Mapper_ReturnsCorrectPaginationResult()
+    async Task PagedQueryAsyncMapperReturnsCorrectPaginationResult()
     {
         // Arrange
-        var data = Enumerable.Range(1, 50).Select(i => new TestEntity { Id = i }).AsQueryable();
+        var data = Enumerable.Range(1, 50).Select(i => new TestEntity { Id = i }).AsQueryable()
+            .OrderBy(x => x.Id);
         var page = 2;
         var limit = 10;
 
@@ -93,10 +94,10 @@ public class PagedQueryTests
     }
 
     [Fact]
-    async Task PagedQueryAsync_Mapper_ReturnsEmptyResult_WhenNoData()
+    async Task PagedQueryAsyncMapperReturnsEmptyResultWhenNoData()
     {
         // Arrange
-        var data = Enumerable.Empty<TestEntity>().AsQueryable();
+        var data = Enumerable.Empty<TestEntity>().AsQueryable().OrderBy(x => x.Id);
         var page = 1;
         var limit = 10;
 
@@ -111,10 +112,11 @@ public class PagedQueryTests
     }
 
     [Fact]
-    async Task PagedQueryAsync_Mapper_ThrowsArgumentNullException_WhenMapperIsNull()
+    async Task PagedQueryAsyncMapperThrowsArgumentNullExceptionWhenMapperIsNull()
     {
         // Arrange
-        var data = Enumerable.Range(1, 50).Select(i => new TestEntity { Id = i }).AsQueryable();
+        var data = Enumerable.Range(1, 50).Select(i => new TestEntity { Id = i }).AsQueryable()
+            .OrderBy(x => x.Id);
         var page = 1;
         var limit = 10;
 
@@ -124,7 +126,7 @@ public class PagedQueryTests
     }
 
     [Fact]
-    async Task PagedQueryAsync_WithEfCore_UsesAsyncProvider()
+    async Task PagedQueryAsyncWithEfCoreUsesAsyncProvider()
     {
         // 旧实现同步 Count/ToList 会阻塞数据库线程；新实现走 CountAsync/ToListAsync 异步路径
         var options = new DbContextOptionsBuilder<PagingDbContext>()
@@ -134,7 +136,7 @@ public class PagedQueryTests
         db.Entities.AddRange(Enumerable.Range(1, 50).Select(i => new PagingEntity { Id = i }));
         await db.SaveChangesAsync();
 
-        var result = await db.Entities.PagedQueryAsync(2, 10);
+        var result = await db.Entities.OrderBy(x => x.Id).PagedQueryAsync(2, 10);
 
         Assert.Equal(50, result.Total);
         Assert.Equal(10, result.Data.Count());
@@ -142,7 +144,7 @@ public class PagedQueryTests
     }
 
     [Fact]
-    async Task PagedQueryAsync_WithEfCore_Mapper_UsesAsyncProvider()
+    async Task PagedQueryAsyncWithEfCoreMapperUsesAsyncProvider()
     {
         var options = new DbContextOptionsBuilder<PagingDbContext>()
             .UseInMemoryDatabase(Guid.NewGuid().ToString())
@@ -151,7 +153,8 @@ public class PagedQueryTests
         db.Entities.AddRange(Enumerable.Range(1, 50).Select(i => new PagingEntity { Id = i }));
         await db.SaveChangesAsync();
 
-        var result = await db.Entities.PagedQueryAsync(2, 10, e => new TestDto { Id = e.Id });
+        var result = await db.Entities.OrderBy(x => x.Id)
+            .PagedQueryAsync(2, 10, e => new TestDto { Id = e.Id });
 
         Assert.Equal(50, result.Total);
         Assert.Equal(10, result.Data.Count());
@@ -159,9 +162,10 @@ public class PagedQueryTests
     }
 
     [Fact]
-    async Task PagedQueryAsync_ReturnsEmptyResult_WhenOffsetExceedsIntRange()
+    async Task PagedQueryAsyncReturnsEmptyResultWhenOffsetExceedsIntRange()
     {
-        var data = Enumerable.Range(1, 50).Select(i => new TestEntity { Id = i }).AsQueryable();
+        var data = Enumerable.Range(1, 50).Select(i => new TestEntity { Id = i }).AsQueryable()
+            .OrderBy(x => x.Id);
 
         var result = await data.PagedQueryAsync(int.MaxValue, 2);
 
@@ -172,9 +176,10 @@ public class PagedQueryTests
     }
 
     [Fact]
-    async Task PagedQueryAsync_Mapper_ReturnsEmptyResult_WhenOffsetExceedsIntRange()
+    async Task PagedQueryAsyncMapperReturnsEmptyResultWhenOffsetExceedsIntRange()
     {
-        var data = Enumerable.Range(1, 50).Select(i => new TestEntity { Id = i }).AsQueryable();
+        var data = Enumerable.Range(1, 50).Select(i => new TestEntity { Id = i }).AsQueryable()
+            .OrderBy(x => x.Id);
 
         var result = await data.PagedQueryAsync(int.MaxValue, 2,
             entity => new TestDto { Id = entity.Id });
@@ -183,5 +188,27 @@ public class PagedQueryTests
         Assert.Equal(2, result.Limit);
         Assert.Equal(50, result.Total);
         Assert.Empty(result.Data);
+    }
+
+    [Fact]
+    async Task PagedQueryAsyncRejectsPageSizesAboveMaximum()
+    {
+        var data = Enumerable.Empty<TestEntity>().AsQueryable().OrderBy(x => x.Id);
+
+        var exception = await Assert.ThrowsAsync<ArgumentOutOfRangeException>(() =>
+            data.PagedQueryAsync(1, PagedQueryExtensions.MaxPageSize + 1));
+
+        Assert.Equal("limit", exception.ParamName);
+    }
+
+    [Fact]
+    async Task PagedQueryAsyncRequiresExplicitOrdering()
+    {
+        var data = Enumerable.Range(1, 5).Select(i => new TestEntity { Id = i }).AsQueryable();
+
+        var exception = await Assert.ThrowsAsync<InvalidOperationException>(() =>
+            data.PagedQueryAsync(1, 10));
+
+        Assert.Contains("OrderBy", exception.Message, StringComparison.Ordinal);
     }
 }

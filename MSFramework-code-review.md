@@ -1,89 +1,58 @@
-# MSFramework 全仓深度审查与修复报告
+# MSFramework 代码审计缺陷台账
 
-审查日期：2026-10-25
-基准 SHA：`65eb5f1407645236eb244f6a4232b5ccd04687fb`（`origin/master`）
+审计基线：`837b78f8a674ceaa9c668d8518bcfcb775b4b62c`。本文件保留首轮审计的 33 个稳定编号；状态仅表示本轮代码证据，不把需要人工操作或架构决策的事项标记为已关闭。
 
-## 范围与方法
+状态定义：
 
-本轮覆盖解决方案中的 20 个项目，以及 `src/`、`tests/`、`template/`、构建与包配置。审查方法包括：
+- **已关闭**：已有生产代码修复和针对性回归测试。
+- **部分缓解**：主要风险已降低，但原问题仍有明确的剩余边界。
+- **未处理**：本轮没有足以关闭该项的实现或验证。
+- **人工动作**：代码无法替代的凭据轮换、数据库迁移或发布流程。
 
-- 对 `NotImplementedException`、空异常处理、同步阻塞异步、可变静态状态、转发头、安全配置和迁移生成器做全仓模式扫描；
-- 沿 Dapr、EF Core、序列化和 NuGet 依赖链做源码级调用分析；
-- 为能稳定复现的问题先补失败测试，再实施最小修复；
-- 执行 Release 全量测试和 NuGet 直接/传递依赖漏洞扫描。
+## 33 项稳定台账
 
-结论：本轮关闭 4 类可验证缺陷，其中包括 2 类高风险安全问题；仍有 3 项 P0 架构风险和 2 项 P1 可靠性风险，需要独立设计和迁移计划，不能用局部补丁伪装为已解决。
+| ID | 级别 | 缺陷 | 主要位置 | 状态 | 证据、影响与剩余工作 |
+|---:|---|---|---|---|---|
+| 1 | 严重 | Dapr Topic 鉴权 fail-open | `src/MSFramework.AspNetCore/DaprSecurityMiddleware.cs` | 已关闭 | 缺失、空白或错误 token 返回 401；无 endpoint 或非回环访问返回 403；固定时间比较。`DaprSecurityMiddlewareTests` 与 `DaprSecurityPipelineTests` 覆盖 TestServer 管道、伪造远端、正确回环和各失败分支。 |
+| 2 | 严重 | 领域事件在发布前清空，失败会丢失 | `src/MSFramework.Ef/DbContextBase.cs` | 已关闭 | 数据持久化成功后才分发；发布失败保留事件供重试，全部成功后清除。`DomainEventPersistenceTests` 覆盖失败重试。 |
+| 3 | 严重 | 多 DbContext 工作单元非原子提交 | `src/MSFramework.Ef/EfUnitOfWork.cs` | 已关闭 | 仅允许共享同一物理连接的上下文进入同一事务；不同连接或已有外部事务在写入前明确拒绝，并提示 outbox/saga。`UnitOfWorkAtomicityTests` 覆盖共享提交和跨库拒绝。 |
+| 4 | 严重 | MySQL 迁移无条件清除所有建表外键 | `src/MSFramework.Ef.MySql/` | 已关闭 | 移除静态待清理集合和生成器全局清除逻辑，遗留扩展改为无副作用兼容入口。`MySqlMigrationSqlTests` 验证多个迁移不会串扰。 |
+| 5 | 严重 | Newtonsoft 流接口未实现且关闭调用方流 | `src/MSFramework.Serialization.Newtonsoft/NewtonsoftJsonSerializer.cs` | 已关闭 | 流式序列化/反序列化已实现并保持输入输出流打开；`SerializationTests` 覆盖 UTF-8 与流所有权。 |
+| 6 | 高 | 领域事件快照丢序、去重独立事件且发布早于提交 | `src/MSFramework.Ef/DbContextBase.cs` | 已关闭 | 使用有序列表保留登记顺序和重复事件；工作单元期间延迟发布到提交后。回归测试验证顺序、重复项与提交时机。 |
+| 7 | 高 | 本地事件失败即丢失且停机不能排空 | `src/MSFramework/LocalEvent/LocalEventBackgroundService.cs` | 部分缓解 | 增加有限重试、逐次新 scope、死信存储和有界停机排空。关键事件因缺少持久 outbox 被明确拒绝，尚未提供框架内建的 durable outbox 实现。`LocalEventReliabilityTests` 覆盖重试、死信、排空和关键事件契约。 |
+| 8 | 高 | `SavedChanges` 接口变更破坏模板和消费者 | `src/MSFramework/Domain/IUnitOfWork.cs` | 已关闭 | 恢复兼容的同步 `event Action SavedChanges`，新增 `SavedChangesAsync`；提交后按同步、异步顺序调用。样例和模板迁移到异步事件，兼容测试覆盖两种消费者。 |
+| 9 | 高 | 外部实体缓存命中仍执行工厂 | `src/MSFramework.Ef/Repositories/ExternalEntityRepository.cs` | 未处理 | `Load(Func<TEntity>)` 仍先执行工厂再查缓存，昂贵工厂和副作用无法避免；应改为延迟创建并补充命中测试。 |
+| 10 | 高 | Owned/Keyless 实体仍被属性级约定处理 | `src/MSFramework.Ef/Internal/ModelBuildingStrategies.cs` | 已关闭 | 约定策略入口跳过 owned 与 keyless 类型；`EfQueryAndConventionTests` 验证聚合实体的 varchar/长度规则不会污染这些模型。 |
+| 11 | 高 | DateTime/DateTimeOffset 非法或未指定时区语义不一致 | `src/MSFramework/Text/Json/Converters/`、`src/MSFramework.Ef/Internal/` | 未处理 | JSON 与 EF 转换仍存在本地时区、UTC 和 `Unspecified` 语义差异；需要先确定跨时区契约，再修改以免造成存量数据漂移。 |
+| 12 | 中 | EF 仓储默认 Include 所有一级导航 | `src/MSFramework.Ef/Repositories/EfRepository.cs` | 已关闭 | 默认查询不再隐式 Include 导航；由调用方显式选择加载范围。`EfQueryAndConventionTests` 验证导航未自动加载。 |
+| 13 | 中 | 分页缺少最大 limit、稳定排序和一致性读取 | `src/MSFramework.Ef/Extensions/PagedQueryExtensions.cs` | 部分缓解 | 新增 `MaxPageSize=1000` 并拒绝无 `OrderBy` 的分页；测试覆盖上限与排序。Count 和页面查询仍不是统一快照，强一致场景应由调用方事务隔离保证。 |
+| 14 | 中 | JSON `ValueComparer` 每次比较、Hash、快照都序列化 | `src/MSFramework.Ef/Internal/CanonicalJson.cs` | 部分缓解 | 对象键规范化、稳定哈希和数组顺序语义已统一，避免字典顺序误更新；比较与快照仍需序列化，且仍依赖可变的全局 serializer，热路径性能风险保留。 |
+| 15 | 高 | 上传采用预检查和共享写入导致同目标竞争 | `src/MSFramework.AspNetCore/Extensions/FormFileExtensions.cs` | 已关闭 | 单次流式写入唯一 staging 文件，校验后原子移动到内容寻址目标；失败和取消清理 staging。`FormFileTests` 覆盖并发、重复和清理路径。 |
+| 16 | 高 | `Defaults` 与 `Runtime` 全局状态被多宿主覆盖 | `src/MSFramework/Defaults.cs`、`src/MSFramework/Utils/Runtime.cs` | 未处理 | 仍有进程级可变状态；多宿主和并行测试可互相污染。应迁移到 DI options/实例级上下文。 |
+| 17 | 中 | `ExistingDirCache` 无界增长 | `src/MSFramework.AspNetCore/Extensions/FormFileExtensions.cs` | 未处理 | 静态目录缓存仍不会淘汰，动态租户/日期路径会持续增长；应移除缓存或引入容量和淘汰策略。 |
+| 18 | 高 | 上传写入 wwwroot 且危险扩展黑名单不足 | `src/MSFramework.AspNetCore/Extensions/FormFileExtensions.cs` | 已关闭 | 默认存储移到 Web 根目录外，改为扩展名与 MIME 的正向允许列表，并允许注入隔离的存储根。 |
+| 19 | 高 | 使用 MD5 作为文件身份 | `src/MSFramework.AspNetCore/Extensions/FormFileExtensions.cs` | 已关闭 | 内容寻址升级为 SHA-256；同内容复用、扩展名与 MIME 校验由上传回归测试覆盖。 |
+| 20 | 高 | AES-ECB 无认证且字符串直接作为 Key | `src/MSFramework/Utils/Cryptography.cs` | 已关闭 | 新密文采用版本化 AES-GCM，随机 salt/nonce、PBKDF2-SHA256 和认证标签；保留旧 ECB 解密兼容。`CryptographyTests` 覆盖篡改、错误口令、随机 nonce 和旧密文。 |
+| 21 | 高 | 审计/异常日志记录完整 URL、QueryString 和实体原值 | `src/MSFramework.Auditing.Loki/AuditLogSanitizer.cs` | 已关闭 | URL/query/实体值统一脱敏与截断，默认敏感键覆盖 token、password、secret 等。`AuditLogSanitizerTests` 验证泄漏阻断。 |
+| 22 | 中 | Loki logger 未释放且异步 sink 尾日志无确认语义 | `src/MSFramework.Auditing.Loki/LokiAuditingStore.cs` | 部分缓解 | store 实现 `IDisposable` 并释放 logger 生命周期；异步 sink 仍没有可等待的持久确认/flush 契约，强审计场景需外部可靠通道。 |
+| 23 | 中 | DesignTime 工厂创建的 Scope 未释放 | `src/MSFramework.Ef/DesignTimeDbContextFactoryBase.cs` | 已关闭 | 改为依赖 `IDbContextFactory<TContext>`，不再泄漏 scope；缺失注册给出可操作异常。样例和模板注册相应 factory，测试覆盖成功和缺失路径。 |
+| 24 | 中 | 请求体读取没有函数级大小上限 | `src/MSFramework.AspNetCore/Extensions/HttpContextAccessorExtensions.cs` | 已关闭 | 默认 1 MiB 上限，可显式配置并传递取消令牌；已知/未知长度超限均失败且恢复可寻址流位置。`HttpContextTests` 覆盖边界。 |
+| 25 | 中 | AutoMapper 删除程序集参数重载 | `src/MSFramework.AutoMapper/ServiceCollectionExtensions.cs` | 已关闭 | 恢复 builder/service collection 的参数为空、仅配置、仅程序集、配置加程序集四类入口；兼容测试编译并解析旧的程序集调用。 |
+| 26 | 中 | 编译模型 API 已注释但文档仍宣传 | `README.md`、`src/MSFramework.Ef/Internal/ModelBuildingStrategies.cs` | 未处理 | README 仍包含 `UseCompiledModel`/`LoadModel` 示例，而实现路径已注释；需决定恢复功能或删除文档后才能关闭。 |
+| 27 | 中 | 审计字段长度变更缺少 migration/schema 兼容检查 | `src/MSFramework.Auditing/Model/` | 人工动作 | 模型变更不能代替已有数据库迁移；发布前需为每个数据库生成并审阅 migration，验证截断、索引和回滚策略。 |
+| 28 | 中 | 默认构建隐式打包放大并行构建竞争 | 项目构建属性 | 未处理 | 常规 build 仍可能触发 pack/共享输出竞争；应将打包从默认构建移到显式 CI 发布步骤。 |
+| 29 | 中 | 版本字符串不符合程序集版本格式 | `version.props` | 未处理 | `0.15.5-beta02` 仍写入 `FileVersion` 并产生警告；应拆分 SemVer 包版本与纯数字 Assembly/FileVersion。 |
+| 30 | 中 | ResponseWrapper 测试契约未随生产修复同步 | `tests/MSFramework.Tests/ResponseWrapperFilterTests.cs` | 已关闭 | 测试已按当前 DeclaredType/运行时类型包装语义同步；全量测试作为交付门禁。 |
+| 31 | 边界 | SessionSnapshot 丢失设备 Header 字段 | `src/MSFramework/LocalEvent/SessionSnapshot.cs` | 已关闭 | 快照物化全部 16 个会话字段、空值默认和 Refresh；`SessionSnapshotTests` 覆盖字段完整性。 |
+| 32 | 边界 | 上传参数、大小及非可寻址流边界不完整 | `src/MSFramework.AspNetCore/Extensions/FormFileExtensions.cs` | 已关闭 | 校验 interval、空文件、声明长度和真实流字节数，支持取消和不可寻址输入；边界测试覆盖恰好上限、超限与异常清理。 |
+| 33 | 边界 | JSON fieldType 强转和字典顺序导致异常/误更新 | `src/MSFramework.Ef/Extensions/JsonPropertyBuilderExtensions.cs` | 已关闭 | 配置时验证 `fieldType` 可赋值性，反序列化/快照异常给出上下文；规范 JSON 对象键顺序并保留数组顺序。`JsonValueComparerTests` 覆盖类型和等价顺序。 |
 
-## 已修复问题
+## 本轮安全配置
 
-### FIX-01 P0：Dapr Topic 可通过伪造 X-Forwarded-For 绕过来源限制
+样例、模板和测试配置中的数据库、RabbitMQ、Loki 固定凭据或私网地址已改为空值/占位方式；README 给出环境变量注入键。仓库文件移除秘密并不使 Git 历史中的值失效，发布前必须轮换所有曾提交的数据库、消息队列、Loki 及其他外部服务凭据，并按需清理历史。
 
-- 位置：`src/MSFramework.AspNetCore/DaprSecurityMiddleware.cs:25-58`、`src/MSFramework.AspNetCore/Extensions/HttpContextExtensions.cs:30-53`
-- 证据：基准实现优先采用客户端可控的 `X-Forwarded-For`。外部连接 `203.0.113.10` 携带 `X-Forwarded-For: 127.0.0.1` 时会进入下游处理器。
-- 修复：安全判定只读取服务器连接信息 `HttpContext.Connection.RemoteIpAddress`；只有非空回环地址可进入 Dapr topic action。通用 IP 辅助方法保持不变，避免改变审计等非安全调用方的代理语义。
-- 回归：`DaprSecurityMiddlewareTests` 在修复前 1 失败/1 通过；修复后 2/2 通过，覆盖伪造头拒绝和真实回环放行。
+## 验证索引
 
-### FIX-02 P0：解决方案包含已知高危传递依赖
+针对性测试集中在：`DaprSecurityMiddlewareTests`、`DomainEventPersistenceTests`、`UnitOfWorkAtomicityTests`、`MySqlMigrationSqlTests`、`LocalEventReliabilityTests`、`CryptographyTests`、`AuditLogSanitizerTests`、`FormFileTests`、`HttpContextTests`、`SessionSnapshotTests`、`PagedQueryTests`、`EfQueryAndConventionTests`、`JsonValueComparerTests`、`DesignTimeDbContextFactoryTests`、`ObjectAssembler`。
 
-- 位置：`tests/MSFramework.Tests/MSFramework.Tests.csproj`、`tests/MSFramework.AspNetCore.Test/MSFramework.AspNetCore.Test.csproj`、`src/MSFramework.Ef.SqlServer/MSFramework.Ef.SqlServer.csproj`
-- 证据：基准依赖审计报告 `SQLitePCLRaw.lib.e_sqlite3 2.1.11` 的 `GHSA-2m69-gcr7-jv3q`，以及 `System.Security.Cryptography.Pkcs 9.0.4` 的 `GHSA-846f-f764-76mx` 和 `GHSA-2fmv-rv2c-59x7`。
-- 修复：测试项目显式提升 `SQLitePCLRaw.bundle_e_sqlite3` 至 `3.0.5`，SQL Server provider 显式提升 `System.Security.Cryptography.Pkcs` 至 `10.0.13`。
-- 验证：`dotnet list MSFramework.sln package --vulnerable --include-transitive` 对全部 20 个项目报告无已知易受攻击包。
-
-### FIX-03 P1：CAP Dapr 异步契约运行时抛 NotImplementedException
-
-- 位置：`src/DotNetCore.CAP.Dapr/DaprConsumerClient.cs:31-166`、`src/DotNetCore.CAP.Dapr/DaprConsumerClientFactory.cs:49-61`
-- 证据：CAP 当前 `IConsumerClient`/`IConsumerClientFactory` 契约会调用这些异步成员；基准实现的订阅、监听、提交、拒绝、释放和工厂创建全部抛出占位异常。
-- 修复：异步成员复用已有同步行为并返回已完成任务；异步工厂复用 `Create`。
-- 回归：`DaprConsumerClientTests` 修复前 3/3 失败，修复后 3/3 通过，覆盖 topic 路由注册、拒绝响应和创建/生命周期。
-
-### FIX-04 P1：Newtonsoft 流序列化未实现且反序列化关闭调用方流
-
-- 位置：`src/MSFramework.Serialization.Newtonsoft/NewtonsoftJsonSerializer.cs:57-93`
-- 证据：基准 `Serialize(Stream, ...)` 直接抛占位异常；`Deserialize(Stream)` 使用默认 `StreamReader` 所有权，返回时关闭输入流。
-- 修复：使用 UTF-8 `StreamWriter`/`StreamReader` 与 Newtonsoft 流式 reader/writer，并统一 `leaveOpen: true`。
-- 回归：`SerializationTests` 修复前分别出现占位异常和流已关闭，修复后 2/2 通过。
-
-## 未解决风险
-
-### RISK-01 P0：领域事件在数据库提交前发布并提前清除
-
-- 位置：`src/MSFramework.Ef/DbContextBase.cs:177-229`、`src/MSFramework.Ef/DbContextBase.cs:413-437`
-- 证据：`SaveChangesAsync` 先调用 mediator，再执行 `ApplyConcepts` 和数据库保存；`GetDomainEvents` 使用 `HashSet` 聚合事件并立即清空聚合根中的事件。Handler 或数据库失败时，事件既可能产生先行外部副作用，也无法重试；值相同的独立事件还可能被去重。
-- 建议：采用事务 Outbox；若短期无法引入 Outbox，至少将事件改为有序实例队列，并在确认成功后 ack，失败时保留待处理状态。
-
-### RISK-02 P0：多 DbContext 工作单元存在部分提交
-
-- 位置：`src/MSFramework.Ef/EfUnitOfWork.cs:29-46`
-- 证据：`SaveChangesAsync` 顺序保存每个 DbContext，没有共享事务。第二个上下文失败时，第一个上下文已经提交。
-- 建议：同库同连接共享事务；跨库显式采用 Saga/Outbox 和幂等补偿，不应继续宣称原子工作单元。
-
-### RISK-03 P0：MySQL 迁移全局清空所有建表外键
-
-- 位置：`src/MSFramework.Ef.MySql/ServiceCollectionExtensions.cs:34-68`、`src/MSFramework.Ef.MySql/MigrationsSqlGenerator.cs:29-78`
-- 证据：`Load` 无条件设置进程级静态 `RemoveForeignKey = true`；生成器随后对每个 `CreateTableOperation` 执行 `ForeignKeys.Clear()`。与此同时，`EntityTypeConfigurationBase` 已通过 `SetIsTableExcludedFromMigrations(true)` 排除外部实体，因此该全局行为既冗余又会移除普通业务表外键。
-- 建议：先补真实迁移 SQL 的兼容性测试，再删除静态开关和全局清理逻辑。此项会改变既有迁移输出，应作为独立变更审查。
-
-### RISK-04 P1：Dapr 仍缺少独立身份凭证与中间件顺序保护
-
-- 位置：`src/MSFramework.AspNetCore/DaprSecurityMiddleware.cs:25-58`
-- 证据：本轮关闭了转发头伪造，但当前契约仍只依赖回环连接；中间件位于路由匹配前时 `Endpoint == null` 会直接放行，也没有配置应用 token 的稳定公共契约。
-- 建议：定义显式、默认拒绝的 app token 配置，并在启动扩展中强制或验证 `UseRouting` 后的顺序；增加 TestServer 级端到端测试。
-
-### RISK-05 P1：本地事件处理是 best-effort，失败和停机可丢事件
-
-- 位置：`src/MSFramework/LocalEvent/LocalEventBackgroundService.cs:41-161`、`src/MSFramework/LocalEvent/LocalEventChannel.cs:8-17`
-- 证据：事件从内存 Channel 读出后没有 ack、重试或死信；Handler 异常仅记录日志，进程退出时积压也无法恢复。
-- 建议：关键事件迁移到持久化 Outbox/队列；非关键事件至少增加有限重试、死信记录、停机排空期限，并在 API 契约中声明 best-effort。
-
-## 验证结果
-
-- `dotnet test MSFramework.sln --configuration Release --no-restore --verbosity minimal`：299 通过、0 失败、1 跳过；其中 `MSFramework.Tests` 244 通过/1 跳过，`MSFramework.AspNetCore.Test` 55 通过。
-- `dotnet list MSFramework.sln package --vulnerable --include-transitive`：20 个项目均无已知易受攻击包。
-- `git diff --check`：通过。
-- `dotnet format MSFramework.sln --verify-no-changes --no-restore --verbosity minimal --include <本轮改动的 C# 文件>`：通过。
-- 基准构建与测试：292 通过、0 失败、1 跳过；本轮新增 7 个回归测试。
-
-全仓 `dotnet format MSFramework.sln --verify-no-changes --no-restore` 仍会因基准中大量未触及文件的空白、字符集和 using 排序问题失败；本轮没有用大范围格式化掩盖功能修复。验证还保留以下非阻断警告：`0.15.5-beta02` 不符合四段式程序集版本格式，部分生成的 NuGet 包缺 README，ASP.NET Core 测试仍使用已弃用的 `WebHostBuilder`/旧 `TestServer` 构造方式，另有 1 个既有 xUnit analyzer 警告。这些警告未被删除或抑制。
-
-`ocr` 自动复审因当前环境的 DeepSeek provider 未配置 API key 而无法运行；本报告结论来自源码调用链、红绿回归测试、全量测试和依赖审计，未声称获得外部模型复核。
+完整解决方案、模板构建、依赖漏洞和秘密扫描结果以修复轮次 2 的交付记录为准。
