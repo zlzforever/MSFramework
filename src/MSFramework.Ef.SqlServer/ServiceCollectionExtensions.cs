@@ -1,5 +1,7 @@
+using System;
 using MicroserviceFramework.Ef.Extensions;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.SqlServer.Infrastructure.Internal;
 
 namespace MicroserviceFramework.Ef.SqlServer;
@@ -12,29 +14,25 @@ public static class ServiceCollectionExtensions
     /// <param name="options"></param>
     extension(SqlServerDbContextOptionsBuilder options)
     {
-        // /// <summary>
-        // ///
-        // /// </summary>
-        // /// <returns></returns>
-        // public SqlServerDbContextOptionsBuilder UseRemoveForeignKeyService()
-        // {
-        //     MigrationsSqlGenerator.RemoveForeignKey = true;
-        //     var ops = (IRelationalDbContextOptionsBuilderInfrastructure)options;
-        //     ops.OptionsBuilder.ReplaceService<IMigrationsSqlGenerator, MigrationsSqlGenerator>();
-        //     return options;
-        // }
-
-        // /// <summary>
-        // ///
-        // /// </summary>
-        // /// <returns></returns>
-        // public SqlServerDbContextOptionsBuilder UseRemoveExternalEntityService()
-        // {
-        //     MigrationsSqlGenerator.RemoveExternalEntity = true;
-        //     var ops = (IRelationalDbContextOptionsBuilderInfrastructure)options;
-        //     ops.OptionsBuilder.ReplaceService<IMigrationsSqlGenerator, MigrationsSqlGenerator>();
-        //     return options;
-        // }
+        /// <summary>
+        /// SQL Server 迁移不生成数据库外键：本框架统一约定不使用数据库外键，
+        /// 引用完整性由业务代码保证（配合软删除 ClientCascade 约定，禁止数据库级联删除）。
+        /// 设置按上下文隔离的迁移生成器开关并替换为框架定制生成器，跳过建表/新增关系操作的外键生成；
+        /// 开关仅对当前 OptionsBuilder 所属的 DbContext 生效，不影响同进程其他上下文
+        /// </summary>
+        /// <returns>原 SQL Server 选项构建器，支持链式调用</returns>
+        public SqlServerDbContextOptionsBuilder UseNoForeignKeyMigration()
+        {
+            var ops = (IRelationalDbContextOptionsBuilderInfrastructure)options;
+            // 以当前 OptionsBuilder 所属上下文类型为键写入开关，避免跨上下文泄漏
+            var contextType = ops.OptionsBuilder.Options.ContextType
+                              ?? throw new InvalidOperationException(
+                                  "UseNoForeignKeyMigration 需要在 AddDbContext/AddDbContextPool 的 optionsAction 中调用，" +
+                                  "以便获取当前 DbContext 类型");
+            MigrationsSqlGenerator.SetRemoveForeignKey(contextType);
+            ops.OptionsBuilder.ReplaceService<IMigrationsSqlGenerator, MigrationsSqlGenerator>();
+            return options;
+        }
     }
 
     /// <summary>
@@ -50,6 +48,7 @@ public static class ServiceCollectionExtensions
         var dbContextOptionsBuilder = ((IRelationalDbContextOptionsBuilderInfrastructure)builder).OptionsBuilder;
         dbContextOptionsBuilder.SetConnectionString<SqlServerOptionsExtension>(settings.ConnectionString);
 #pragma warning restore EF1001
+        builder.UseNoForeignKeyMigration();
     }
 
     // public static EntityFrameworkBuilder AddSqlServer<TDbContext>(

@@ -1,3 +1,4 @@
+using System;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Mvc.Filters;
 
@@ -27,7 +28,7 @@ public static class ServiceCollectionExtensions
         /// <returns>过滤器集合</returns>
         public FilterCollection AddAudit()
         {
-            filters.Add<Audit>(Constants.Audit);
+            filters.Add<AuditAttribute>(Constants.Audit);
             return filters;
         }
 
@@ -53,13 +54,23 @@ public static class ServiceCollectionExtensions
     }
 
     /// <summary>
-    ///     启用 Dapr API 令牌安全中间件，验证请求中的 Dapr API 令牌
+    ///     <b>已废弃</b>：启用 Dapr Topic 网络层安全中间件（仅放行 loopback 来源的 Topic 回调）。
+    ///     鉴权请改用 Dapr 官方 App API Token 方案：
+    ///     <c>AddAuthentication().AddDapr()</c> + <c>AddAuthorization(o => o.AddDapr())</c>
+    ///     + Topic 端点 <c>[Authorize(Policy = "Dapr")]</c>；
+    ///     同时在网关上禁止访问 <c>/dapr/subscribe</c>。
+    ///     存量宿主在迁移到官方方案前，可继续调用本方法保留网络层防御
     /// </summary>
     /// <param name="app">Web 应用</param>
     /// <returns>Web 应用</returns>
+    [Obsolete("启用 Dapr Topic 网络层安全中间件已废弃，请改用 Dapr 官方 App API Token 方案。")]
     public static WebApplication UseDaprSecurity(this WebApplication app)
     {
+        // 存量宿主迁移到官方 App API Token 方案前，保留网络层纵深防御；
+        // 类已标注 [Obsolete]，此处有意压制编译告警
+#pragma warning disable CS0618
         app.UseMiddleware<DaprSecurityMiddleware>();
+#pragma warning restore CS0618
         return app;
     }
 }

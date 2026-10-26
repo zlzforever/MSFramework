@@ -39,7 +39,7 @@ public static class DatabaseUtils
             "oceanbase" => Database.OceanBase,
             "cassandra" => Database.Cassandra,
             "hbase" => Database.HBase,
-            "kingbase" => Database.kingbase,
+            "kingbase" => Database.Kingbase,
             "dameng" => Database.Dameng,
             _ => throw new KeyNotFoundException($"Database '{name}' is not supported.")
         };

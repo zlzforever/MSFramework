@@ -61,10 +61,8 @@ public static class Extensions
     }
 
     public static (ITypeSymbol Type, bool IsAggregateRoot, string Key) GetAggregateRootInfo(
-        this Compilation compilation,
-        string name)
+        this ITypeSymbol typeSymbol)
     {
-        var typeSymbol = compilation.GetTypeByMetadataName(name);
         if (typeSymbol == null)
         {
             return (null, false, null);

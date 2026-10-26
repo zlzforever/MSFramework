@@ -74,7 +74,7 @@ public class ResponseWrapperFilterTests
         var apiResult = Assert.IsType<ApiResult>(result.Value);
         Assert.Equal(1, nextCalls);
         Assert.False(apiResult.Success);
-        Assert.Equal(500, apiResult.Code);
+        Assert.Equal(StatusCodes.Status200OK, apiResult.Code);
         Assert.Equal("问题响应", apiResult.Msg);
         Assert.Same(problemDetails, apiResult.Data);
         Assert.Empty(result.ContentTypes);
@@ -93,7 +93,7 @@ public class ResponseWrapperFilterTests
         Assert.Equal(1, nextCalls);
         Assert.Equal(StatusCodes.Status400BadRequest, result.StatusCode);
         Assert.False(apiResult.Success);
-        Assert.Equal(500, apiResult.Code);
+        Assert.Equal(StatusCodes.Status400BadRequest, apiResult.Code);
         Assert.Equal("错误", apiResult.Msg);
         Assert.Same(problemDetails, apiResult.Data);
         Assert.Empty(result.ContentTypes);
@@ -112,7 +112,7 @@ public class ResponseWrapperFilterTests
         Assert.Equal(1, nextCalls);
         Assert.Equal(StatusCodes.Status400BadRequest, result.StatusCode);
         Assert.False(apiResult.Success);
-        Assert.Equal(500, apiResult.Code);
+        Assert.Equal(StatusCodes.Status400BadRequest, apiResult.Code);
         Assert.Equal("请求无效", apiResult.Msg);
         Assert.Same(problemDetails, apiResult.Data);
         Assert.Empty(result.ContentTypes);
@@ -131,7 +131,7 @@ public class ResponseWrapperFilterTests
         Assert.Equal(1, nextCalls);
         Assert.Equal(StatusCodes.Status200OK, result.StatusCode);
         Assert.False(apiResult.Success);
-        Assert.Equal(500, apiResult.Code);
+        Assert.Equal(StatusCodes.Status200OK, apiResult.Code);
         Assert.Equal("成功", apiResult.Msg);
         Assert.Same(problemDetails, apiResult.Data);
         Assert.Null(result.DeclaredType);
@@ -151,7 +151,7 @@ public class ResponseWrapperFilterTests
         Assert.Equal(1, nextCalls);
         Assert.Equal(StatusCodes.Status200OK, result.StatusCode);
         Assert.False(apiResult.Success);
-        Assert.Equal(500, apiResult.Code);
+        Assert.Equal(StatusCodes.Status200OK, apiResult.Code);
         Assert.Equal(string.Empty, apiResult.Msg);
         Assert.Same(problemDetails, apiResult.Data);
         Assert.Null(result.DeclaredType);
@@ -171,7 +171,7 @@ public class ResponseWrapperFilterTests
         Assert.Equal(1, nextCalls);
         Assert.Equal(StatusCodes.Status422UnprocessableEntity, result.StatusCode);
         Assert.False(apiResult.Success);
-        Assert.Equal(500, apiResult.Code);
+        Assert.Equal(StatusCodes.Status422UnprocessableEntity, apiResult.Code);
         Assert.Equal("实体校验失败", apiResult.Msg);
         Assert.Same(problemDetails, apiResult.Data);
         Assert.Null(result.DeclaredType);
@@ -333,7 +333,8 @@ public class ResponseWrapperFilterTests
         Assert.Equal(1, nextCalls);
         Assert.Equal(statusCode, result.StatusCode);
         Assert.False(apiResult.Success);
-        Assert.Equal(1, apiResult.Code);
+        // 业务码统一契约：失败时 code 为 HTTP 状态码（与 ProblemDetails 包装、异常过滤器同一口径）
+        Assert.Equal(statusCode, apiResult.Code);
         Assert.Equal(string.Empty, apiResult.Msg);
         Assert.Same(originalValue, apiResult.Data);
         // 包装后声明类型被清空（以运行时值为准），原因同 WrapsOrdinaryObjectWhenDeclaredTypeIsApiResultAsync
@@ -430,6 +431,209 @@ public class ResponseWrapperFilterTests
         Assert.Equal(
             """{"success":true,"code":0,"msg":"\u81EA\u5B9A\u4E49\u7ED3\u679C","data":7}""",
             JsonSerializer.Serialize((CustomApiResult<int>)result.Value));
+    }
+
+    /// <summary>
+    /// 统一包装回归：return Ok(x) 的 OkObjectResult 子类必须与隐式 return 一致地包装
+    /// （旧实现按精确类型跳过子类，导致"隐式 return 带壳、return Ok(x) 不带壳"的契约不一致）
+    /// </summary>
+    [Fact]
+    public async Task WrapsOkObjectResultSubclassConsistentlyAsync()
+    {
+        var originalValue = new object();
+        var httpContext = new DefaultHttpContext();
+        var actionContext = new ActionContext(httpContext, new RouteData(), new ActionDescriptor());
+        var result = new OkObjectResult(originalValue) { DeclaredType = typeof(object) };
+        var context = new ResultExecutingContext(actionContext, new List<IFilterMetadata>(), result, null);
+
+        var nextCalls = await InvokeFilterAsync(context);
+
+        var objectResult = Assert.IsType<OkObjectResult>(context.Result);
+        var apiResult = Assert.IsType<ApiResult>(objectResult.Value);
+        Assert.Equal(1, nextCalls);
+        Assert.True(apiResult.Success);
+        Assert.Equal(0, apiResult.Code);
+        Assert.Same(originalValue, apiResult.Data);
+        Assert.Null(objectResult.DeclaredType);
+        Assert.Equal(StatusCodes.Status200OK, objectResult.StatusCode);
+    }
+
+    /// <summary>
+    /// 统一包装回归：return BadRequest(x) 的 BadRequestObjectResult 子类包装为失败壳，保留 400
+    /// </summary>
+    [Fact]
+    public async Task WrapsBadRequestObjectResultAsFailureAsync()
+    {
+        var httpContext = new DefaultHttpContext();
+        var actionContext = new ActionContext(httpContext, new RouteData(), new ActionDescriptor());
+        var result = new BadRequestObjectResult("参数错误");
+        var context = new ResultExecutingContext(actionContext, new List<IFilterMetadata>(), result, null);
+
+        await InvokeFilterAsync(context);
+
+        var objectResult = Assert.IsType<BadRequestObjectResult>(context.Result);
+        var apiResult = Assert.IsType<ApiResult>(objectResult.Value);
+        Assert.False(apiResult.Success);
+        // 业务码统一契约：失败时 code 为 HTTP 状态码（400），不再使用业务码 1
+        Assert.Equal(StatusCodes.Status400BadRequest, apiResult.Code);
+        Assert.Equal("参数错误", apiResult.Data);
+        Assert.Equal(StatusCodes.Status400BadRequest, objectResult.StatusCode);
+    }
+
+    /// <summary>
+    /// 统一包装回归：各类型化 ObjectResult 子类与裸 ObjectResult 同契约——
+    /// 全部包装为 ApiResult 壳（success 按 2xx 推导、Data 保留原值、DeclaredType 清空），
+    /// 且结果实例类型与 HTTP 状态码原样保留
+    /// </summary>
+    /// <param name="kind">结果类型标识</param>
+    /// <param name="expectedStatusCode">期望保留的 HTTP 状态码</param>
+    /// <param name="expectedSuccess">期望的 success 推导结果（2xx 为 true）</param>
+    [Theory]
+    [InlineData("created", StatusCodes.Status201Created, true)]
+    [InlineData("createdAtAction", StatusCodes.Status201Created, true)]
+    [InlineData("accepted", StatusCodes.Status202Accepted, true)]
+    [InlineData("notFound", StatusCodes.Status404NotFound, false)]
+    [InlineData("conflict", StatusCodes.Status409Conflict, false)]
+    [InlineData("unprocessable", StatusCodes.Status422UnprocessableEntity, false)]
+    [InlineData("unauthorized", StatusCodes.Status401Unauthorized, false)]
+    public async Task WrapsTypedObjectResultSubclassesConsistentlyAsync(
+        string kind, int expectedStatusCode, bool expectedSuccess)
+    {
+        var originalValue = new object();
+        var httpContext = new DefaultHttpContext();
+        var actionContext = new ActionContext(httpContext, new RouteData(), new ActionDescriptor());
+        ObjectResult result = kind switch
+        {
+            "created" => new CreatedResult("/orders/1", originalValue),
+            "createdAtAction" => new CreatedAtActionResult("Get", "Order", null, originalValue),
+            "accepted" => new AcceptedResult("/orders/1/status", originalValue),
+            "notFound" => new NotFoundObjectResult(originalValue),
+            "conflict" => new ConflictObjectResult(originalValue),
+            "unprocessable" => new UnprocessableEntityObjectResult(originalValue),
+            "unauthorized" => new UnauthorizedObjectResult(originalValue),
+            _ => throw new ArgumentOutOfRangeException(nameof(kind))
+        };
+        result.DeclaredType = typeof(object);
+        var context = new ResultExecutingContext(actionContext, new List<IFilterMetadata>(), result, null);
+
+        var nextCalls = await InvokeFilterAsync(context);
+
+        // 实例原样保留（同一引用、类型为原始子类，仅 Value 被包装）
+        Assert.Same(result, context.Result);
+        var objectResult = Assert.IsAssignableFrom<ObjectResult>(context.Result);
+        var apiResult = Assert.IsType<ApiResult>(objectResult.Value);
+        Assert.Equal(1, nextCalls);
+        Assert.Equal(expectedStatusCode, objectResult.StatusCode);
+        Assert.Equal(expectedSuccess, apiResult.Success);
+        // 非 ProblemDetails 子类：业务码按统一契约（成功 0 / 失败为 HTTP 状态码）
+        Assert.Equal(expectedSuccess ? 0 : expectedStatusCode, apiResult.Code);
+        Assert.Equal(string.Empty, apiResult.Msg);
+        Assert.Same(originalValue, apiResult.Data);
+        Assert.Null(objectResult.DeclaredType);
+    }
+
+    /// <summary>
+    /// 非数据响应保持原始：Content/File/Redirect 不包装、不修改实例与状态
+    /// </summary>
+    /// <param name="kind">结果类型标识</param>
+    [Theory]
+    [InlineData("content")]
+    [InlineData("file")]
+    [InlineData("redirect")]
+    public async Task PassesThroughNonDataResultsWithoutWrappingAsync(string kind)
+    {
+        var httpContext = new DefaultHttpContext();
+        var actionContext = new ActionContext(httpContext, new RouteData(), new ActionDescriptor());
+        IActionResult result = kind switch
+        {
+            "content" => new ContentResult { Content = "plain text", ContentType = "text/plain" },
+            "file" => new FileContentResult([1, 2, 3], "application/octet-stream"),
+            "redirect" => new RedirectResult("/orders/1"),
+            _ => throw new ArgumentOutOfRangeException(nameof(kind))
+        };
+        var context = new ResultExecutingContext(actionContext, new List<IFilterMetadata>(), result, null);
+
+        var nextCalls = await InvokeFilterAsync(context);
+
+        Assert.Equal(1, nextCalls);
+        // 实例原样保留（同一引用），未被包装或替换
+        Assert.Same(result, context.Result);
+    }
+
+    /// <summary>
+    /// 统一包装回归：纯 return Ok()（无值 StatusCodeResult）统一为成功壳（与 void Action 行为一致）
+    /// </summary>
+    [Fact]
+    public async Task WrapsPureOkStatusCodeResultAsync()
+    {
+        var httpContext = new DefaultHttpContext();
+        var actionContext = new ActionContext(httpContext, new RouteData(), new ActionDescriptor());
+        var context = new ResultExecutingContext(actionContext, new List<IFilterMetadata>(), new OkResult(), null);
+
+        await InvokeFilterAsync(context);
+
+        var objectResult = Assert.IsType<ObjectResult>(context.Result);
+        var apiResult = Assert.IsType<ApiResult>(objectResult.Value);
+        Assert.True(apiResult.Success);
+        Assert.Equal(0, apiResult.Code);
+        Assert.Null(apiResult.Data);
+        Assert.Equal(StatusCodes.Status200OK, objectResult.StatusCode);
+    }
+
+    /// <summary>
+    /// 统一包装回归：纯 return BadRequest()（无值）包装为失败壳，保留 400
+    /// </summary>
+    [Fact]
+    public async Task WrapsPureBadRequestStatusCodeResultAsFailureAsync()
+    {
+        var httpContext = new DefaultHttpContext();
+        var actionContext = new ActionContext(httpContext, new RouteData(), new ActionDescriptor());
+        var context = new ResultExecutingContext(actionContext, new List<IFilterMetadata>(), new BadRequestResult(), null);
+
+        await InvokeFilterAsync(context);
+
+        var objectResult = Assert.IsType<ObjectResult>(context.Result);
+        var apiResult = Assert.IsType<ApiResult>(objectResult.Value);
+        Assert.False(apiResult.Success);
+        // 业务码统一契约：失败时 code 为 HTTP 状态码（400），不再使用业务码 1
+        Assert.Equal(StatusCodes.Status400BadRequest, apiResult.Code);
+        Assert.Equal(StatusCodes.Status400BadRequest, objectResult.StatusCode);
+    }
+
+    /// <summary>
+    /// NoContent（204）例外：HTTP 204 语义禁止响应体，保持原始结果不包装
+    /// </summary>
+    [Fact]
+    public async Task PassesThroughNoContentStatusCodeResultAsync()
+    {
+        var httpContext = new DefaultHttpContext();
+        var actionContext = new ActionContext(httpContext, new RouteData(), new ActionDescriptor());
+        var context = new ResultExecutingContext(actionContext, new List<IFilterMetadata>(), new NoContentResult(), null);
+
+        await InvokeFilterAsync(context);
+
+        Assert.IsType<NoContentResult>(context.Result);
+    }
+
+    /// <summary>
+    /// NoContent（204）例外回归：带 StatusCode=204 的 ObjectResult 同样禁止响应体，
+    /// 必须与 NoContentResult 分支保持同一例外（旧实现会把 204 包装出 JSON 壳）
+    /// </summary>
+    [Fact]
+    public async Task PassesThroughObjectResultWithNoContentStatusCodeAsync()
+    {
+        var httpContext = new DefaultHttpContext();
+        var actionContext = new ActionContext(httpContext, new RouteData(), new ActionDescriptor());
+        var result = new ObjectResult(new object()) { StatusCode = StatusCodes.Status204NoContent };
+        var context = new ResultExecutingContext(actionContext, new List<IFilterMetadata>(), result, null);
+
+        var nextCalls = await InvokeFilterAsync(context);
+
+        Assert.Equal(1, nextCalls);
+        Assert.Same(result, context.Result);
+        var objectResult = Assert.IsType<ObjectResult>(context.Result);
+        Assert.NotSame(typeof(ApiResult), objectResult.Value?.GetType());
+        Assert.Equal(StatusCodes.Status204NoContent, objectResult.StatusCode);
     }
 
     private static ResultExecutingContext CreateContext(object value, int? statusCode, Type declaredType = null)

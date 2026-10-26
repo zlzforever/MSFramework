@@ -12,14 +12,21 @@ namespace MicroserviceFramework.Auditing.Model;
 public class AuditOperation : CreationAggregateRoot<string>, IAuditObject
 {
     /// <summary>
+    /// 审计来源（<see cref="AuditSource.Http"/> / <see cref="AuditSource.LocalEvent"/>）。
+    /// 独立字段承载来源，避免复用 <see cref="Method"/>（其本义是 HTTP 方法）污染查询语义：
+    /// 旧实现把本地事件来源塞进 Method，按 HTTP 方法统计/筛选审计数据时结果不可信
+    /// </summary>
+    public AuditSource Source { get; init; }
+
+    /// <summary>
     /// 操作路径
     /// </summary>
-    public string Path { get; private set; }
+    public string Path { get; init; }
 
     /// <summary>
     /// 操作方法
     /// </summary>
-    public string Method { get; private set; }
+    public string Method { get; init; }
 
     /// <summary>请求 QueryString</summary>
     public string QueryString { get; init; }
@@ -33,17 +40,17 @@ public class AuditOperation : CreationAggregateRoot<string>, IAuditObject
     /// <summary>
     /// 操作的 IP 地址
     /// </summary>
-    public string IP { get; private set; }
+    public string IP { get; init; }
 
     /// <summary>
     /// 设备 ID
     /// </summary>
-    public string DeviceId { get; private set; }
+    public string DeviceId { get; init; }
 
     /// <summary>
     /// 设备型号
     /// </summary>
-    public string DeviceModel { get; private set; }
+    public string DeviceModel { get; init; }
 
     /// <summary>海拔</summary>
     public float? Altitude { get; init; }
@@ -96,17 +103,17 @@ public class AuditOperation : CreationAggregateRoot<string>, IAuditObject
     /// <summary>
     /// 纬度（Latitude）
     /// </summary>
-    public decimal? Lat { get; private set; }
+    public decimal? Lat { get; init; }
 
     /// <summary>
     /// 经度（Longitude）
     /// </summary>
-    public decimal? Lng { get; private set; }
+    public decimal? Lng { get; init; }
 
     /// <summary>
     /// 访问的 UserAgent
     /// </summary>
-    public string UserAgent { get; private set; }
+    public string UserAgent { get; init; }
 
     /// <summary>
     /// 获取或设置审计数据信息集合
@@ -126,7 +133,7 @@ public class AuditOperation : CreationAggregateRoot<string>, IAuditObject
     /// <summary>
     /// 跟踪标识
     /// </summary>
-    public string TraceId { get; private set; }
+    public string TraceId { get; init; }
 
     private AuditOperation(string id) : base(id)
     {
@@ -145,6 +152,11 @@ public class AuditOperation : CreationAggregateRoot<string>, IAuditObject
     /// <param name="longitude">经度</param>
     /// <param name="traceId">跟踪标识</param>
     /// <param name="method">HTTP 方法</param>
+    /// <remarks>
+    /// 本地事件（无 HTTP 请求上下文）请勿调用本构造并以 method 传入来源标记——
+    /// 那会把来源信息混入 HTTP 方法字段、污染审计查询语义；
+    /// 应使用 <see cref="CreateForLocalEvent"/>，来源经 <see cref="Source"/> 字段承载
+    /// </remarks>
     public AuditOperation(string url, string userAgent, string ip, string deviceModel, string deviceId, decimal? latitude,
         decimal? longitude, string traceId, string method) : this(ObjectId.GenerateNewId().ToString())
     {
@@ -157,6 +169,22 @@ public class AuditOperation : CreationAggregateRoot<string>, IAuditObject
         Lng = longitude;
         TraceId = traceId;
         Method = method;
+        Source = AuditSource.Http;
+    }
+
+    /// <summary>
+    /// 创建本地事件处理器的审计操作：
+    /// 无 HTTP 请求上下文（无 IP/UA/QueryString/Method），来源标记为 <see cref="AuditSource.LocalEvent"/>
+    /// </summary>
+    /// <param name="handlerType">事件处理器类型名（记录在操作路径字段，便于按处理器筛选审计数据）</param>
+    /// <param name="traceId">跟踪标识（会话快照中的 TraceIdentifier，可为 null）</param>
+    /// <returns>审计操作实例</returns>
+    public static AuditOperation CreateForLocalEvent(string handlerType, string traceId)
+    {
+        return new AuditOperation(handlerType, null, null, null, null, null, null, traceId, null)
+        {
+            Source = AuditSource.LocalEvent
+        };
     }
 
     /// <summary>

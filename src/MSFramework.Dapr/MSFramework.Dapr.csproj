@@ -1,0 +1,21 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <PackageId>MSFramework.Dapr</PackageId>
+    <AssemblyName>MSFramework.Dapr</AssemblyName>
+    <RootNamespace>MicroserviceFramework.Dapr</RootNamespace>
+    <Description>MSFramework 的 Dapr 集成（分布式锁等），引用 Dapr.Client</Description>
+    <!-- Dapr 分布式锁 API 被官方标记为实验性（DAPR_DISTRIBUTEDLOCK），
+         本包即基于该 API 提供 IDistributedLock 实现，属有意使用 -->
+    <NoWarn>$(NoWarn);DAPR_DISTRIBUTEDLOCK</NoWarn>
+  </PropertyGroup>
+  <Import Project="../../package.props"/>
+  <Import Project="../../version.props"/>
+  <ItemGroup>
+    <ProjectReference Include="..\MSFramework\MSFramework.csproj"/>
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Dapr.Client" Version="1.18.4" />
+  </ItemGroup>
+
+</Project>

@@ -20,7 +20,7 @@ internal class ApiResultWithErrors : ApiResult
     public object Errors { get; set; }
 
     /// <summary>
-    /// 默认构造，设置 <see cref="ApiResult.Success"/> = false, <see cref="ApiResult.Code"/> = 1。
+    /// 默认构造，设置 <see cref="ApiResult{T}.Success"/> = false, <see cref="ApiResult{T}.Code"/> = 1。
     /// </summary>
     public ApiResultWithErrors()
     {

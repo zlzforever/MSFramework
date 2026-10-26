@@ -1,51 +1,30 @@
-using System;
-using System.Text;
-using System.Threading.Tasks;
-using Dapper;
-using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Hosting;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Hosting;
-
 namespace Template.API;
 
-public static class Program
+/// <summary>API 组合根，使用单一 WebApplicationBuilder 注册框架与业务依赖。</summary>
+public partial class Program
 {
-    public static Task Main(string[] args)
+    /// <summary>启动 HTTP 宿主，配置由默认 JSON、User Secrets 和环境变量提供。</summary>
+    /// <param name="args">标准 ASP.NET Core 命令行配置参数。</param>
+    /// <returns>宿主停止时完成的任务。</returns>
+    /// <exception cref="InvalidOperationException">数据库或认证配置缺失时抛出。</exception>
+    public static async Task Main(string[] args)
     {
-        AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
-        AppContext.SetSwitch("Npgsql.DisableDateTimeInfinityConversions", true);
-        // AppContext.SetSwitch("System.Net.Http.SocketsHttpHandler.Http2UnencryptedSupport", true);
-
-        Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
-        DefaultTypeMap.MatchNamesWithUnderscores = true;
-
-        var webApplicationBuilder = CreateWebApplicationBuilder(args);
-        var web = webApplicationBuilder.Build();
-        web.Configure();
-        return web.RunAsync();
+        var builder = CreateWebApplicationBuilder(args);
+        await using var app = builder.Build();
+        app.Configure();
+        await app.RunAsync();
     }
 
+    /// <summary>构建运行时与 EF 设计时共享的服务注册，不连接数据库或自动探测服务器版本。</summary>
+    /// <param name="args">命令行参数，不允许为空。</param>
+    /// <returns>已注册所有应用服务的构建器。</returns>
+    /// <exception cref="ArgumentNullException">参数数组为空。</exception>
+    /// <exception cref="InvalidOperationException">所需配置缺失。</exception>
     public static WebApplicationBuilder CreateWebApplicationBuilder(string[] args)
     {
-        Host.CreateDefaultBuilder(args)
-            .ConfigureHostConfiguration(x =>
-            {
-                x.AddEnvironmentVariables();
-                x.AddCommandLine(args);
-            })
-            .ConfigureAppConfiguration()
-            .ConfigureServices();
-        var webApplicationBuilder = WebApplication.CreateBuilder(args);
-
-
-        webApplicationBuilder.WebHost.ConfigureKestrel((_, options) =>
-        {
-            // Handle requests up to 500 MB
-            options.Limits.MaxRequestBodySize = 1024288000;
-            options.Limits.KeepAliveTimeout = TimeSpan.FromMinutes(10);
-            options.Limits.RequestHeadersTimeout = TimeSpan.FromMinutes(20);
-        });
-        return webApplicationBuilder;
+        ArgumentNullException.ThrowIfNull(args);
+        var builder = WebApplication.CreateBuilder(args);
+        builder.Services.ConfigureApplication(builder.Configuration);
+        return builder;
     }
 }

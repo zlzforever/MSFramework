@@ -1,22 +1,21 @@
-using System;
-using MicroserviceFramework.Ef.Design;
+using MicroserviceFramework.Ef;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
 using Template.Infrastructure;
 
 namespace Template.API;
 
-public class DesignTimeDbContextFactory
-    : DesignTimeDbContextFactoryBase<TemplateDbContext>
+/// <summary>复用运行时配置创建迁移上下文，依赖 User Secrets 或环境变量，不执行 HTTP 启动管道。</summary>
+public class DesignTimeDbContextFactory : DesignTimeDbContextFactoryBase<TemplateDbContext>
 {
-    protected override IServiceProvider GetServiceProvider()
-    {
-            return Program.CreateWebApplicationBuilder(Array.Empty<string>()).Build().Services;
-        }
+    /// <summary>构建设计时容器，生命周期交给 EF 工具进程。</summary>
+    /// <returns>包含数据库设置和实体配置发现器的服务提供程序。</returns>
+    /// <exception cref="InvalidOperationException">运行时必需配置缺失。</exception>
+    protected override IServiceProvider GetServiceProvider() =>
+        Program.CreateWebApplicationBuilder([]).Build().Services;
 
-    public override void ConfigureDesignTimeServices(IServiceCollection serviceCollection)
-    {
-            serviceCollection.AddLogging(x => { x.AddConsole(); });
-            serviceCollection.ClearForeignKeys();
-        }
+    /// <summary>保持 Provider 默认设计时服务，不额外替换迁移生成器。</summary>
+    /// <param name="serviceCollection">EF 设计时服务集合，不允许为空。</param>
+    /// <exception cref="ArgumentNullException">服务集合为空。</exception>
+    public override void ConfigureDesignTimeServices(IServiceCollection serviceCollection) =>
+        ArgumentNullException.ThrowIfNull(serviceCollection);
 }

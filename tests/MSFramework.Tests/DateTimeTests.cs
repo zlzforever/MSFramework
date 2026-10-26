@@ -99,4 +99,57 @@ public class DateTimeTests
             converter.Read(ref reader, typeof(DateTimeOffset), null);
         });
     }
+
+    /// <summary>
+    /// 无时区输入（如 "2026-10-26T12:00:00"）：保留墙钟时间——
+    /// .ToLocalTime() 会把 Unspecified 当作 UTC 凭空偏移（Asia/Shanghai 下 12:00 被错转成 20:00），
+    /// 与写出端（ToUnixTimeSeconds 把 Unspecified 按本地墙钟处理）的约定不一致
+    /// </summary>
+    [Fact]
+    public void DateTimeJsonConverter_UnspecifiedInput_KeepsWallClock()
+    {
+        var converter = new DateTimeJsonConverter();
+        var reader = new Utf8JsonReader(Encoding.UTF8.GetBytes("\"2026-10-26T12:00:00\""));
+        Assert.True(reader.Read());
+
+        var result = converter.Read(ref reader, typeof(DateTime), null);
+
+        Assert.Equal(new DateTime(2026, 10, 26, 12, 0, 0), result);
+        Assert.Equal(DateTimeKind.Unspecified, result.Kind);
+    }
+
+    /// <summary>
+    /// Z 结尾输入（UTC 语义）：转换为本地时间，绝对时刻与写出端 Unix 秒一致
+    /// </summary>
+    [Fact]
+    public void DateTimeJsonConverter_UtcInput_ConvertsToLocal()
+    {
+        var converter = new DateTimeJsonConverter();
+        var reader = new Utf8JsonReader(Encoding.UTF8.GetBytes("\"2026-10-26T12:00:00Z\""));
+        Assert.True(reader.Read());
+
+        var result = converter.Read(ref reader, typeof(DateTime), null);
+
+        Assert.Equal(DateTimeKind.Local, result.Kind);
+        // 与写出端同一时刻的 Unix 秒（表达式随测试机时区自适应，不硬编码偏移）
+        Assert.Equal(DateTimeOffset.Parse("2026-10-26T12:00:00Z").LocalDateTime, result);
+    }
+
+    /// <summary>
+    /// 显式偏移输入（如 "+05:00"）：RoundtripKind 保留墙钟并标记 Local，
+    /// 不再被 ToLocalTime 二次偏移
+    /// </summary>
+    [Fact]
+    public void DateTimeJsonConverter_ExplicitOffsetInput_KeepsWallClockAsLocal()
+    {
+        var converter = new DateTimeJsonConverter();
+        var reader = new Utf8JsonReader(Encoding.UTF8.GetBytes("\"2026-10-26T12:00:00+05:00\""));
+        Assert.True(reader.Read());
+
+        var result = converter.Read(ref reader, typeof(DateTime), null);
+
+        // RoundtripKind 语义：偏移字符串解析为 Local Kind 且墙钟保持不变
+        Assert.Equal(DateTimeKind.Local, result.Kind);
+        Assert.Equal(DateTimeOffset.Parse("2026-10-26T12:00:00+05:00").LocalDateTime, result);
+    }
 }

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Globalization;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
@@ -12,16 +13,34 @@ public class DateTimeOffsetJsonConverter : JsonConverter<DateTimeOffset>
     /// <summary>
     /// 从 JSON 反序列化，支持字符串和数字两种格式。
     /// </summary>
+    /// <remarks>
+    /// 字符串分支使用 <see cref="CultureInfo.InvariantCulture"/> + RoundtripKind 解析：
+    /// 避免服务器文化（非公历/不同数字格式）导致解析漂移，与 <see cref="DateTimeJsonConverter"/>
+    /// 保持同一解析语义；空字符串不再静默返回 MinValue，按解析失败约定抛 <see cref="JsonException"/>
+    /// </remarks>
     /// <param name="reader">JSON 读取器</param>
     /// <param name="typeToConvert">目标类型</param>
     /// <param name="options">序列化选项</param>
     /// <returns>反序列化后的 DateTimeOffset</returns>
+    /// <exception cref="JsonException">字符串为空或格式非法、数值超出可表示范围时抛出</exception>
     public override DateTimeOffset Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
     {
         if (reader.TokenType == JsonTokenType.String)
         {
             var value = reader.GetString();
-            return string.IsNullOrEmpty(value) ? DateTimeOffset.MinValue : DateTimeOffset.Parse(value);
+            if (string.IsNullOrEmpty(value))
+            {
+                throw new JsonException("DateTimeOffset 字符串为空，无法解析");
+            }
+
+            try
+            {
+                return DateTimeOffset.Parse(value, CultureInfo.InvariantCulture, DateTimeStyles.RoundtripKind);
+            }
+            catch (FormatException ex)
+            {
+                throw new JsonException($"DateTimeOffset 字符串 '{value}' 格式非法", ex);
+            }
         }
 
         if (reader.TokenType == JsonTokenType.Number)

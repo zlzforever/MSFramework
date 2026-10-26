@@ -488,8 +488,8 @@ public class LocalEventBackgroundServiceAuditTests
     public async Task EnableAuditing_MissingHandler_ContextValueClearedBeforeNextEvent()
     {
         LocalEventAuditEventHandler.ObservedValueAtConstruction = null;
-        AuditOperationContext.Value = new AuditOperation(
-            "seed", null, null, null, null, null, null, "seed-trace", "Local");
+        // 本地事件审计操作经专用工厂创建（来源走 Source 字段，Method 不再承载 "Local"）
+        AuditOperationContext.Value = AuditOperation.CreateForLocalEvent("seed", "seed-trace");
         await using var host = await CreateHostAsync(enableAuditing: true, startService: false);
         var publisher = host.Provider.GetRequiredService<IEventPublisher>();
 

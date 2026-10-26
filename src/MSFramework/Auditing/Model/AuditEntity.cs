@@ -59,11 +59,22 @@ public class AuditEntity : EntityBase<string>, IAuditObject
     /// <summary>
     /// 批量添加属性变更记录。
     /// </summary>
-    /// <param name="properties">属性变更集合</param>
+    /// <param name="properties">属性变更集合，为 null 时直接返回（审计链路处于后台静默执行流，
+    /// 集合为 null 属可忽略的空输入，不应 NRE 导致整段审计丢失）；集合内元素为 null 时跳过</param>
     public void AddProperties(IEnumerable<AuditProperty> properties)
     {
+        if (properties == null)
+        {
+            return;
+        }
+
         foreach (var property in properties)
         {
+            if (property == null)
+            {
+                continue;
+            }
+
             property.Entity = this;
             Properties.Add(property);
         }

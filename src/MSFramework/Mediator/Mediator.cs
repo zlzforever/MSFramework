@@ -1,9 +1,9 @@
 using System;
 using System.Collections.Concurrent;
-using System.Linq.Expressions;
 using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
+using MicroserviceFramework.Utils;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace MicroserviceFramework.Mediator;
@@ -23,12 +23,14 @@ internal sealed class Mediator(IServiceProvider serviceProvider) : IMediator
     /// <summary>
     /// 请求无响应模型 — 只有一个 Handler 响应
     /// </summary>
+    /// <param name="request">待发送的请求</param>
+    /// <param name="cancellationToken">取消令牌</param>
+    /// <returns>表示异步操作的任务</returns>
+    /// <exception cref="ArgumentNullException">request 为 null 时抛出——静默返回成功会把
+    /// 调用方"忘记构造请求对象"的 bug 掩盖成"业务成功但什么都没发生"的静默失败</exception>
     public Task SendAsync(Request request, CancellationToken cancellationToken = default)
     {
-        if (request is null)
-        {
-            return Task.CompletedTask;
-        }
+        Check.NotNull(request, nameof(request));
 
         var entry = RequestCache.GetOrAdd(request.GetType(),
             static t => CreateEntry(typeof(IRequestHandler<>), t));
@@ -46,13 +48,15 @@ internal sealed class Mediator(IServiceProvider serviceProvider) : IMediator
     /// <summary>
     /// 请求/响应模型 — 只有一个 Handler 响应
     /// </summary>
+    /// <param name="request">待发送的请求</param>
+    /// <param name="cancellationToken">取消令牌</param>
+    /// <typeparam name="TResponse">响应类型</typeparam>
+    /// <returns>表示异步操作的任务，结果为 Handler 返回的响应</returns>
+    /// <exception cref="ArgumentNullException">request 为 null 时抛出（与无响应重载一致，拒绝静默成功）</exception>
     public Task<TResponse> SendAsync<TResponse>(Request<TResponse> request,
         CancellationToken cancellationToken = default)
     {
-        if (request is null)
-        {
-            return Task.FromResult<TResponse>(default);
-        }
+        Check.NotNull(request, nameof(request));
 
         var entry = RequestResponseCache.GetOrAdd(request.GetType(),
             static (t, responseType) => CreateEntry(typeof(IRequestHandler<,>), t, responseType),
@@ -73,14 +77,21 @@ internal sealed class Mediator(IServiceProvider serviceProvider) : IMediator
 
     /// <summary>
     /// 发布模型 — 所有注册的 Handler 都会响应。
-    /// Handler 之间应相互独立，不应有顺序或依赖关系。
+    /// <para>
+    /// 执行语义：<b>按注册顺序逐个执行，失败即中断</b>——第一个抛出异常的 Handler 终止后续
+    /// Handler 并向调用方传播。本框架中 Publish 仅用于领域事件派发场景（DbContextBase 在数据库
+    /// 提交前派发、与业务同事务）：任一 Handler 失败即放弃本次保存（整体不提交），
+    /// "失败即中断"正是期望语义。未注册任何 Handler 时静默完成（事件可选订阅）。
+    /// Handler 之间仍应相互独立、幂等，不应有顺序或依赖关系。
+    /// </para>
     /// </summary>
+    /// <param name="request">待发布的请求</param>
+    /// <param name="cancellationToken">取消令牌</param>
+    /// <returns>表示异步操作的任务</returns>
+    /// <exception cref="ArgumentNullException">request 为 null 时抛出（与 SendAsync 语义一致）</exception>
     public async Task PublishAsync(Request request, CancellationToken cancellationToken = default)
     {
-        if (request is null)
-        {
-            return;
-        }
+        Check.NotNull(request, nameof(request));
 
         var entry = RequestCache.GetOrAdd(request.GetType(),
             static t => CreateEntry(typeof(IRequestHandler<>), t));
@@ -107,31 +118,8 @@ internal sealed class Mediator(IServiceProvider serviceProvider) : IMediator
 
         var handlerType = genericHandlerType.MakeGenericType(typeArgs);
         var method = handlerType.GetMethod("HandleAsync", BindingFlags.Public | BindingFlags.Instance)!;
-        var func = BuildDelegate(handlerType, method, requestType);
+        var func = HandlerDelegateBuilder.Build(handlerType, method, requestType);
 
         return new HandlerEntry(handlerType, func);
-    }
-
-    private static Func<object, object, CancellationToken, Task> BuildDelegate(
-        Type handlerType, MethodInfo method, Type requestType)
-    {
-        var handlerParam = Expression.Parameter(typeof(object), "handler");
-        var requestParam = Expression.Parameter(typeof(object), "request");
-        var ctParam = Expression.Parameter(typeof(CancellationToken), "ct");
-
-        Expression body = Expression.Call(
-            Expression.Convert(handlerParam, handlerType),
-            method,
-            Expression.Convert(requestParam, requestType),
-            ctParam);
-
-        // 返回值若是 Task<TResponse> 则上溯到 Task，以匹配委托签名
-        if (method.ReturnType != typeof(Task))
-        {
-            body = Expression.Convert(body, typeof(Task));
-        }
-
-        return Expression.Lambda<Func<object, object, CancellationToken, Task>>(
-            body, handlerParam, requestParam, ctParam).Compile();
     }
 }

@@ -5,13 +5,14 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using MicroserviceFramework.Application;
+using MicroserviceFramework.Auditing;
+using MicroserviceFramework.Auditing.Model;
 using MicroserviceFramework.Domain;
 using MicroserviceFramework.Ef;
 using MicroserviceFramework.Extensions.DependencyInjection;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
-using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.Extensions.DependencyInjection;
 using Xunit;
 
@@ -495,10 +496,11 @@ public class SoftDeleteAuditingTests
     }
 
     /// <summary>
-    /// 乐观锁实体软删除：ConcurrencyStamp 不进 SET、以原值参与 WHERE 并发判断，且不重写令牌
+    /// 乐观锁实体软删除：ConcurrencyStamp 在软删除时被轮换——
+    /// SET 写入新令牌、WHERE 以原值参与并发判断，软删除同样具备乐观并发保护
     /// </summary>
     [Fact]
-    public async Task SoftDelete_OptimisticLock_StampOnlyInWhere_AndUnchanged()
+    public async Task SoftDelete_OptimisticLock_RotatesStamp_AndDetectsConcurrentUpdate()
     {
         using var host = CreateHost();
 
@@ -520,14 +522,17 @@ public class SoftDeleteAuditingTests
         await scope.Context.SaveChangesAsync();
 
         var update = Assert.Single(host.Interceptor.UpdateCommands).ToLowerInvariant();
-        // 乐观锁列仅出现一次：只在 WHERE 中按原值参与判断，不出现在 SET 中
-        Assert.Equal(1, CountOccurrences(update, "concurrency_stamp"));
+        // 乐观锁列出现两次：SET 新令牌（已轮换）与 WHERE 原令牌（并发判断）
+        Assert.Equal(2, CountOccurrences(update, "concurrency_stamp"));
 
         using var verifyScope = CreateContext(host);
         var persisted = verifyScope.Context.VersionedCategories.IgnoreQueryFilters().Single(x => x.Id == "V-1");
         Assert.True(persisted.IsDeleted);
-        // 软删除不重写乐观锁令牌，令牌保持原值
-        Assert.Equal(stamp, persisted.ConcurrencyStamp);
+        // 软删除轮换乐观锁令牌：持久化令牌与原值不同，保证并发修改+软删除同样可检测冲突
+        Assert.NotEqual(stamp, persisted.ConcurrencyStamp);
+        Assert.Equal(32, persisted.ConcurrencyStamp.Length);
+        Assert.True(Guid.TryParseExact(persisted.ConcurrencyStamp, "N", out var rotatedStamp));
+        Assert.Equal(7, rotatedStamp.Version);
     }
 
     /// <summary>
@@ -642,5 +647,61 @@ public class SoftDeleteAuditingTests
         }
 
         return count;
+    }
+
+    /// <summary>
+    /// 审计批次"提交后追加"回归：保存失败（乐观锁冲突）的尝试不得写入审计，
+    /// 重试成功后审计只包含提交批次——旧实现先追加后保存，失败尝试会被伪装成已提交变更历史
+    /// </summary>
+    [Fact]
+    public async Task AuditBatch_AppendedOnlyAfterSuccessfulCommit()
+    {
+        using var host = CreateHost();
+
+        string persistedStamp;
+        using (var seedScope = CreateContext(host))
+        {
+            var seeded = new VersionedCategory("V-1", "apple");
+            persistedStamp = seeded.ConcurrencyStamp;
+            seedScope.Context.VersionedCategories.Add(seeded);
+            await seedScope.Context.SaveChangesAsync();
+        }
+
+        using var scope = CreateContext(host);
+        var entity = scope.Context.VersionedCategories.Single(x => x.Id == "V-1");
+        Assert.Equal(persistedStamp, entity.ConcurrencyStamp);
+        entity.Name = "banana";
+
+        var operation = new AuditOperation("/orders", "ua", "1.2.3.4", "iPhone", "device-1",
+            null, null, "trace-1", "POST");
+        AuditOperationContext.Value = operation;
+        try
+        {
+            // 注入并发冲突：跟踪条目的原始令牌改为与数据库不一致的陈旧值
+            var stampProperty = scope.Context.Entry(entity)
+                .Property<string>(nameof(IOptimisticLock.ConcurrencyStamp));
+            stampProperty.OriginalValue = "stale-stamp";
+
+            await Assert.ThrowsAsync<DbUpdateConcurrencyException>(
+                () => scope.Context.SaveChangesAsync());
+
+            // 失败批次已丢弃：审计不含本次失败尝试
+            Assert.Empty(operation.Entities);
+
+            // 恢复原始令牌为数据库真实值后重试成功
+            stampProperty.OriginalValue = persistedStamp;
+            await scope.Context.SaveChangesAsync();
+
+            // 审计只包含提交批次（一次 Modify，含 Name 变更）
+            var auditEntity = Assert.Single(operation.Entities);
+            Assert.Equal(OperationType.Modify, auditEntity.OperationType);
+            Assert.Contains(auditEntity.Properties,
+                p => p.Name == nameof(VersionedCategory.Name));
+        }
+        finally
+        {
+            // AsyncLocal 清理，避免污染后续测试
+            AuditOperationContext.Value = null;
+        }
     }
 }

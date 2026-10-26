@@ -1,1 +1,6 @@
 **/wwwroot/data
+.env*
+**/storage
+**/TestResults
+build
+dist

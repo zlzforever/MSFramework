@@ -12,8 +12,12 @@ using Serilog.Sinks.Grafana.Loki;
 namespace MicroserviceFramework.Auditing.Loki;
 
 /// <summary>
-///     基于 Loki 的审计日志存储，通过 Serilog 将审计信息发送到 Grafana Loki
+///     基于 Loki 的审计日志存储，通过 Serilog 将审计信息发送到 Grafana Loki。
+///     <b>本包已废弃</b>：Loki 不便创建索引，审计存储请改用关系数据库
+///     （如 <c>MSFramework.Ef</c> 的 <c>EfAuditingStore&lt;TDbContext&gt;</c>，推荐 PostgreSQL）
+///     或自定义 <c>IAuditingStore</c> 实现
 /// </summary>
+[Obsolete("MSFramework.Auditing.Loki 已废弃：审计存储请改用关系数据库（如 EfAuditingStore<TDbContext>，推荐 PostgreSQL）或自定义 IAuditingStore")]
 public class LokiAuditingStore : IAuditingStore
 {
     private readonly ILogger _logger;

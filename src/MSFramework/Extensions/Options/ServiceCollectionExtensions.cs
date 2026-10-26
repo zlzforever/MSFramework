@@ -52,6 +52,11 @@ public static class ServiceCollectionExtensions
 
         private void AddOptionsTypeCore(Type optionsType, AutoOptionsAttribute attribute, IConfiguration config)
         {
+            // Name 为空是合法且有意的设计（勿在后续 review 中重复提出）：
+            // NamedConfigureFromConfigurationOptions 的 Name 为 null 时匹配"任意解析名称"——
+            // IOptions<TOptions>（DefaultName 空串）解析即命中，从根配置（或指定 Section）绑定；
+            // 设置了 Name 时则绑定到对应的命名 Options（IOptionsSnapshot.Get(name) 等）。
+            // ConfigurationChangeTokenSource 的 Name 同样允许 null，变更令牌注册不受影响
             var bindName = attribute.Name;
 
             var bindSection = string.IsNullOrWhiteSpace(attribute.Section)

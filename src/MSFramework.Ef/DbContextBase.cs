@@ -16,6 +16,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.Extensions.Logging;
 
 namespace MicroserviceFramework.Ef;
 
@@ -94,7 +95,12 @@ public abstract class DbContextBase : DbContext
         var settings = this.GetService<DbContextSettings>();
         if (settings == null)
         {
-            throw new ArgumentNullException(nameof(DbContextSettings));
+            // 状态类错误用 InvalidOperationException：DbContextSettings 未注册不是方法参数问题，
+            // 误用 ArgumentNullException 会被全局异常过滤器按"参数错误"分类、误导排障
+            throw new InvalidOperationException(
+                "未在服务容器中找到 DbContextSettings。" +
+                "请确认已通过 options.Load(settings)（或 AddEntityFrameworkExtension 的配置注册）" +
+                "将 DbContextSettings 挂载到当前 DbContext");
         }
 
         var entityConfigurationTypeFinder = this.GetService<IEntityConfigurationTypeFinder>();
@@ -174,6 +180,30 @@ public abstract class DbContextBase : DbContext
     }
 
     /// <summary>
+    /// 直接提交当前上下文的全部待提交变更，<b>绕过完整保存管道</b>（领域事件派发、
+    /// 审计字段应用 <see cref="ApplyConcepts"/>、审计收集）。
+    /// <para>
+    /// 专用入口，适用于"保存的数据本身不会产生领域事件、也不应被审计"的场景——
+    /// 典型是审计存储（<see cref="Auditing.EfAuditingStore{TDbContext}"/>，经独立 scope 解析上下文，
+    /// ChangeTracker 只含审计实体）。
+    /// </para>
+    /// <para>
+    /// 使用约束：调用方须自行保证——上下文中没有待派发的领域事件（不会被派发）、
+    /// 没有待提交的业务变更（本方法会提交整个 ChangeTracker 且不做审计字段应用）。
+    /// 与业务共享上下文实例时<b>禁止</b>使用本方法（会顺带提交业务变更并绕过业务管道）；
+    /// 常规业务保存请继续使用 <see cref="SaveChangesAsync(bool, CancellationToken)"/>
+    /// </para>
+    /// </summary>
+    /// <param name="acceptAllChangesOnSuccess">成功后是否接受所有更改</param>
+    /// <param name="cancellationToken">取消令牌</param>
+    /// <returns>受影响的行数</returns>
+    public Task<int> SaveChangesWithoutPipelineAsync(bool acceptAllChangesOnSuccess = true,
+        CancellationToken cancellationToken = default)
+    {
+        return base.SaveChangesAsync(acceptAllChangesOnSuccess, cancellationToken);
+    }
+
+    /// <summary>
     /// 保存所有更改，并在提交前分发领域事件
     /// </summary>
     /// <param name="acceptAllChangesOnSuccess">成功后是否接受所有更改</param>
@@ -187,24 +217,44 @@ public abstract class DbContextBase : DbContext
         if (mediator != null)
         {
             // 若是有领域事件则分发出去
-            // 领域事件可能导致别聚合调用当前 DbContext 并改变状态，或者添加新的事件
-            var domainEvents = GetDomainEvents();
-            foreach (var @event in domainEvents)
-            {
-                await mediator.PublishAsync(@event, cancellationToken);
-            }
+            // 领域事件与业务数据同事务：Handler 抛异常会中断整个保存，不产生提交；
+            // Handler 可能修改当前 DbContext 跟踪的实体，或向聚合添加新事件，
+            // 因此派发后重新收集，直到没有新事件（见 DispatchDomainEventsAsync）
+            //
+            // 设计决策（勿在后续 review 中重复提出）：领域事件在提交前派发、与业务数据同库同事务，
+            // 不采用"先提交再派发/提交失败恢复事件"模型。理由：
+            // 1) 进程内领域事件 Handler 与当前 DbContext 共享同一 scoped 实例，
+            //    其对同库的变更天然落入同一事务，原子性已由事务保证；
+            // 2) 若先提交再派发，提交后 Handler 失败将产生"数据已落库、事件未送达"且
+            //    无法回滚的状态，语义更差；
+            // 3) 事务边界之外的副作用（跨库写、外部系统调用、发消息）不属于领域事件职责，
+            //    应使用集成事件（发布到队列，CAP/Dapr pubsub）承载，其可靠性由消息中间件/Outbox 保证。
+            await DispatchDomainEventsAsync(mediator, cancellationToken);
         }
 
-        var effected = 0;
-        var changed = ApplyConcepts();
-        if (!changed)
+        // "是否需要保存"与"审计字段是否应用"解耦：审计字段应用（ApplyConcepts）只承担副作用，
+        // 是否保存由 EF 变更追踪判定。旧版以 ApplyConcepts 返回值作为保存门禁，
+        // 审计策略未命中的变更（如未实现任何审计接口的 Deleted 实体，即物理删除）
+        // 不会翻转 changed 标记，导致该类变更被静默丢弃。
+        ApplyConcepts();
+        if (!ChangeTracker.HasChanges())
         {
-            return effected;
+            return 0;
         }
 
-        CollectAuditEntities();
-        effected = await base.SaveChangesAsync(acceptAllChangesOnSuccess, cancellationToken);
-        return effected;
+        // 审计批次"提交后追加"语义：提交前只生成局部批次快照，保存成功后才追加到审计操作——
+        // 保存失败（异常/乐观锁冲突等）时批次随局部变量丢弃，重试成功的批次才是提交历史。
+        // 旧实现先追加后保存，失败尝试会混入审计变更历史，请求最终成功时被伪装成已提交变更
+        var auditBatch = CollectAuditBatch();
+
+        var saved = await base.SaveChangesAsync(acceptAllChangesOnSuccess, cancellationToken);
+
+        if (auditBatch != null)
+        {
+            auditBatch.Value.Operation.AddEntities(auditBatch.Value.Batch);
+        }
+
+        return saved;
     }
 
     /// <summary>
@@ -218,49 +268,63 @@ public abstract class DbContextBase : DbContext
         var mediator = scopeServiceProvider?.GetService<IMediator>();
         if (mediator != null)
         {
-            // 若是有领域事件则分发出去
-            // 领域事件可能导致别聚合调用当前 DbContext 并改变状态，或者添加新的事件
-            var domainEvents = GetDomainEvents();
-            foreach (var @event in domainEvents)
-            {
-                // 不会死锁：它等同于 await 的底层机制，不会捕获 SynchronizationContext。ASP.NET Core 内部的 HostingApplication 在处理非 async 中间件时正是这么做的。
-                mediator.PublishAsync(@event).GetAwaiter().GetResult();
-            }
+            // 同步路径遗留分支：派发语义与异步版一致（含新增事件多轮收集）
+            DispatchDomainEvents(mediator);
         }
 
-        var effected = 0;
-        var changed = ApplyConcepts();
-        if (!changed)
+        // "是否需要保存"与"审计字段是否应用"解耦（同 SaveChangesAsync，见其注释）
+        ApplyConcepts();
+        if (!ChangeTracker.HasChanges())
         {
-            return effected;
+            return 0;
         }
 
-        CollectAuditEntities();
-        effected = base.SaveChanges(acceptAllChangesOnSuccess);
-        return effected;
+        // 审计批次"提交后追加"语义（同 SaveChangesAsync）
+        var auditBatch = CollectAuditBatch();
+
+        var saved = base.SaveChanges(acceptAllChangesOnSuccess);
+
+        if (auditBatch != null)
+        {
+            auditBatch.Value.Operation.AddEntities(auditBatch.Value.Batch);
+        }
+
+        return saved;
     }
 
     /// <summary>
-    /// 审计收集挂钩：在实体状态定型（<see cref="ApplyConcepts"/>）之后、提交数据库之前，
-    /// 若当前执行流承载审计操作（<see cref="AuditOperationContext.Value"/> 非空），
-    /// 则收集变更实体到该操作中。
+    /// 生成当前保存的审计批次快照（<b>不追加</b>到审计操作，追加动作由调用方在提交成功后执行）。
+    /// <para>
+    /// "提交后追加"设计：保存失败（异常/乐观锁冲突）时批次随本方法返回的局部值被丢弃，
+    /// 不得把失败尝试写入审计变更历史（否则请求最终成功时，失败尝试会被伪装成已提交变更）；
+    /// 也不以全局去重修复该问题——同一实体的多次合法变更历史必须完整保留。
+    /// </para>
+    /// <para>
     /// 审计请求由 <see cref="AuditOperationContext"/>（AsyncLocal）随执行流承载，
     /// 与工作单元实现解耦：只要在执行流内调用保存（含绕过工作单元直接调用
     /// <see cref="SaveChangesAsync(bool, CancellationToken)"/> 的路径），且未越过
     /// 审计链路终点，即可被收集。
-    /// Value 为 null（无审计请求）时本方法立即返回，仅一次 AsyncLocal 读取开销；
-    /// 每次保存先物化一个收集批次，再由 <see cref="AuditOperation.AddEntities"/> 按输入顺序直接追加非空实体；
+    /// Value 为 null（无审计请求）时立即返回，仅一次 AsyncLocal 读取开销；
+    /// 每次保存先物化一个收集批次（实体值在此刻快照，不受后续提交状态变化影响），
     /// 批次之间不共享收集状态，保证同一实体恢复旧值后再次变更仍完整保留。
+    /// </para>
+    /// <para>
+    /// 已知限制（勿在后续 review 中重复提出）：显式事务（<c>Database.BeginTransaction</c>/
+    /// 环境事务）的<b>最终回滚</b>无法在此感知——SaveChanges 成功即追加审计，之后的事务回滚
+    /// 不会撤销审计记录；使用显式事务且可能回滚的场景请自行处理（如回滚时清空审计操作）。
+    /// </para>
     /// </summary>
-    private void CollectAuditEntities()
+    /// <returns>审计操作与其批次；无审计请求或批次为空时返回 null</returns>
+    private (AuditOperation Operation, AuditEntity[] Batch)? CollectAuditBatch()
     {
         var auditOperation = AuditOperationContext.Value;
         if (auditOperation == null)
         {
-            return;
+            return null;
         }
 
-        auditOperation.AddEntities(GetAuditEntities().ToArray());
+        var batch = GetAuditEntities().ToArray();
+        return batch.Length == 0 ? null : (auditOperation, batch);
     }
 
     /// <summary>
@@ -379,6 +443,14 @@ public abstract class DbContextBase : DbContext
     /// </summary>
     /// <param name="entry">实体跟踪条目</param>
     /// <returns>拼接后的实体标识；实体无主键时返回 null</returns>
+    /// <remarks>
+    /// 收集时机与主键生成策略（已知约定，勿在后续 review 中重复提出）：
+    /// 审计收集发生在 <c>base.SaveChangesAsync</c> 提交<b>之前</b>——
+    /// 本项目全部使用<b>离线 ID</b>（如 ObjectId、客户端生成的 Guid/字符串），
+    /// 主键在进入 ChangeTracker 前已生成，提交前收集即可拿到完整 EntityId；
+    /// 数据库端生成的主键（identity/自增、HiLo 等）不支持——提交前 CurrentValue 为空，
+    /// 审计的 EntityId 会记录为 null
+    /// </remarks>
     private static string BuildEntityId(EntityEntry entry)
     {
         var primaryKey = entry.Metadata.FindPrimaryKey();
@@ -410,29 +482,132 @@ public abstract class DbContextBase : DbContext
         return isJson ? Defaults.JsonSerializer.Serialize(value) : value.ToString();
     }
 
-    private HashSet<DomainEvent> GetDomainEvents()
-    {
-        // Dispatch Domain Events collection.
-        // Choices:
-        // A) Right BEFORE committing data (EF SaveChanges) into the DB will make a single transaction including
-        // side effects from the domain event handlers which are using the same DbContext with "InstancePerLifetimeScope" or "scoped" lifetime
-        // B) Right AFTER committing data (EF SaveChanges) into the DB will make multiple transactions.
-        // You will need to handle eventual consistency and compensatory actions in case of failures in any of the Handlers.
+    /// <summary>
+    /// 领域事件最大派发轮数的默认值（可通过 <see cref="DbContextSettings.MaxDomainEventDispatchRounds"/> 配置）。
+    /// 正常业务不应超过 3 轮，业务代码也应避免 Handler 相互触发产生事件
+    /// </summary>
+    private const int DefaultMaxDomainEventDispatchRounds = 3;
 
-        // 此处不能改为迭代器， 事件在迭代过程中会触发 ChangeTracker.Entries 的变化
-        var domainEvents = new HashSet<DomainEvent>();
+    /// <summary>
+    /// 读取当前上下文的领域事件最大派发轮数配置；
+    /// 未注册 <see cref="DbContextSettings"/>（如设计时工厂构建模型）时回退默认值
+    /// </summary>
+    /// <returns>最大派发轮数（配置值小于 1 时按 1 处理，保证至少派发一轮）</returns>
+    private int GetMaxDomainEventDispatchRounds()
+    {
+        var settings = this.GetService<DbContextSettings>();
+        var configured = settings?.MaxDomainEventDispatchRounds ?? DefaultMaxDomainEventDispatchRounds;
+        return configured < 1 ? DefaultMaxDomainEventDispatchRounds : configured;
+    }
+
+    /// <summary>
+    /// 分发当前所有待处理领域事件，并循环收集派发过程中新增的事件。
+    /// <para>
+    /// 事务模型：领域事件与本业务同事务（收集 A——在提交数据库之前派发，使用同一 scoped
+    /// DbContext 的 Handler 变更由本次保存统一提交，任一 Handler 异常则整体不提交）；
+    /// 集成事件（跨进程）应由领域事件 Handler 通过 CAP 本地消息表（Outbox）发出，
+    /// 与业务变更同事务落库、提交后投递，避免数据库回滚而外部消息已发出的不一致。
+    /// </para>
+    /// <para>
+    /// 轮次与中止语义：每轮"先只读收集、校验轮次上限、再清空、再派发"。
+    /// 达到上限时事件<b>保留在聚合上</b>（不已被清空），业务整体回滚且事件痕迹可诊断/人工补发——
+    /// 旧实现收集时立即清空，中止后事件完全消失，造成"回滚 + 事件丢失"且不可观测。
+    /// </para>
+    /// </summary>
+    /// <param name="mediator">中介者</param>
+    /// <param name="cancellationToken">取消令牌</param>
+    private async Task DispatchDomainEventsAsync(IMediator mediator, CancellationToken cancellationToken)
+    {
+        var maxRounds = GetMaxDomainEventDispatchRounds();
+        for (var round = 1; ; round++)
+        {
+            var domainEvents = CollectDomainEvents();
+            if (domainEvents.Count == 0)
+            {
+                return;
+            }
+
+            if (round > maxRounds)
+            {
+                // 中止前记录保留在聚合上的事件（未清空），供诊断与人工补发
+                this.GetService<ILoggerFactory>().CreateLogger(GetType()).LogError(
+                    "领域事件已派发 {MaxRounds} 轮仍有新事件产生，已中止保存；事件 {Events} 保留在聚合上待人工处置",
+                    maxRounds, string.Join(", ", domainEvents.Select(e => e.GetType().Name)));
+                throw new MicroserviceFrameworkException(
+                    $"领域事件已派发 {maxRounds} 轮仍有新事件产生，" +
+                    "疑似领域事件 Handler 相互触发形成循环（正常业务不应超过 3 轮，请检查 Handler 是否在处理事件时又引发同类事件），已中止保存");
+            }
+
+            // 收集完成后再清空聚合事件，保证每个事件在本次保存中仅派发一次
+            ClearCollectedDomainEvents();
+
+            foreach (var @event in domainEvents)
+            {
+                await mediator.PublishAsync(@event, cancellationToken);
+            }
+        }
+    }
+
+    /// <summary>
+    /// 阻塞等待异步派发完成，供遗留的同步 <see cref="SaveChanges(bool)"/> 路径使用；
+    /// 轮次与中止语义由异步实现统一维护，达到上限时事件保留在聚合上。
+    /// </summary>
+    /// <remarks>
+    /// 此桥接会阻塞当前线程；异步处理器捕获同步上下文时存在死锁风险。
+    /// 业务调用应优先使用 SaveChangesAsync，避免同步等待异步处理器。
+    /// </remarks>
+    /// <param name="mediator">当前作用域的中介者，不允许为空。</param>
+    /// <exception cref="MicroserviceFrameworkException">领域事件派发超过配置的轮次上限。</exception>
+    private void DispatchDomainEvents(IMediator mediator)
+    {
+        DispatchDomainEventsAsync(mediator, CancellationToken.None).GetAwaiter().GetResult();
+    }
+
+    /// <summary>
+    /// 只读收集当前 ChangeTracker 中所有聚合的待派发领域事件（<b>不清空</b>聚合事件列表）。
+    /// <para>
+    /// 使用 List 按发生顺序收集，不做按值去重：两个值相同的 record 事件代表两次独立的业务发生，
+    /// 每次都应派发（旧版 HashSet 按值合并会吞掉重复事件并丢失发生顺序）。
+    /// </para>
+    /// <para>
+    /// 收集必须一次性物化完成（不能改为迭代器）：收集完成后须清空聚合事件再派发
+    /// （见 <see cref="ClearCollectedDomainEvents"/>），若在枚举过程中派发，
+    /// Handler 对 ChangeTracker 的修改会触发集合变化异常。
+    /// </para>
+    /// <para>
+    /// 只读收集的设计目的：达到派发轮次上限中止保存时，事件仍保留在聚合上可诊断；
+    /// 确认本轮未超限后才统一清空再派发
+    /// </para>
+    /// </summary>
+    /// <returns>待派发领域事件列表（可能为空）</returns>
+    private List<DomainEvent> CollectDomainEvents()
+    {
+        var domainEvents = new List<DomainEvent>();
 
         foreach (var aggregateRoot in ChangeTracker
                      .Entries<EntityBase>())
         {
             var events = aggregateRoot.Entity.GetDomainEvents();
-            if (events != null && events.Any())
+            if (events is { Count: > 0 })
             {
-                domainEvents.UnionWith(events);
-                aggregateRoot.Entity.ClearDomainEvents();
+                domainEvents.AddRange(events);
             }
         }
 
         return domainEvents;
+    }
+
+    /// <summary>
+    /// 清空 ChangeTracker 中所有聚合的待派发领域事件。
+    /// 在"只读收集 + 轮次校验"通过后调用，与 <see cref="CollectDomainEvents"/> 配对，
+    /// 保证每个事件在本次保存中仅派发一次
+    /// </summary>
+    private void ClearCollectedDomainEvents()
+    {
+        foreach (var aggregateRoot in ChangeTracker
+                     .Entries<EntityBase>())
+        {
+            aggregateRoot.Entity.ClearDomainEvents();
+        }
     }
 }

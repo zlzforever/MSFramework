@@ -3,6 +3,9 @@ common: # optional section for variables shared across apps
   resourcesPath: ./dapr/components # any dapr resources to be shared across apps
   env: # any environment variable shared across apps
     DEBUG: true
+    # Dapr App API Token（本地开发示例值）：sidecar 回调应用时必带 dapr-api-token 头，
+    # 应用侧认证方案默认读取 APP_API_TOKEN 校验；生产必须通过 secret 注入并定期轮换
+    APP_API_TOKEN: local-dev-token
 apps:
   - appID: ordering-api
     appPort: 5001

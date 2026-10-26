@@ -14,6 +14,9 @@ using MicroserviceFramework.Ef.PostgreSql;
 using MicroserviceFramework.Extensions.DependencyInjection;
 using MicroserviceFramework.LocalEvent;
 using MicroserviceFramework.Text.Json;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -96,16 +99,20 @@ public static class Startup
         services.AddCors(option =>
         {
             option.AddPolicy("___my_cors", policy =>
-                policy.AllowAnyMethod()
-                    .SetIsOriginAllowed(_ => true)
+                policy.WithOrigins(configuration.GetSection("Cors:AllowedOrigins").Get<string[]>() ?? [])
+                    .AllowAnyMethod()
                     .AllowAnyHeader()
-                    // .WithExposedHeaders("x-suggested-filename")
-                    .AllowCredentials().SetPreflightMaxAge(TimeSpan.FromDays(30))
             );
         });
 
         services.AddDbContextPool<OrderingContext>(configuration, (settings, provider, x) =>
         {
+            if (string.IsNullOrWhiteSpace(settings.ConnectionString))
+            {
+                throw new InvalidOperationException(
+                    "请通过 User Secrets 或 DbContexts__0__ConnectionString 环境变量配置数据库连接。不要提交数据库密码。");
+            }
+
             var loggerFactory = provider.GetRequiredService<ILoggerFactory>();
             x.UseLoggerFactory(loggerFactory);
             if ("mysql".Equals(settings.DatabaseType, StringComparison.OrdinalIgnoreCase))
@@ -144,6 +151,28 @@ public static class Startup
         }, "Ordering");
 
         services.AddScoped<IDbContextFactory, EfDbContextFactory>();
+
+        // Dapr Topic 端点保护（官方 App API Token 方案）：daprd 与应用容器均需配置
+        // APP_API_TOKEN 环境变量（本地开发 dapr run 前 export APP_API_TOKEN=<token>）；
+        // sidecar 回调必带 dapr-api-token 头，认证方案默认读取该变量进行校验
+        services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+            .AddJwtBearer(options =>
+            {
+                options.Authority = configuration["Authentication:Authority"];
+                options.Audience = configuration["Authentication:Audience"];
+                options.RequireHttpsMetadata = true;
+                options.MapInboundClaims = false;
+                options.TokenValidationParameters.ValidateAudience = true;
+            })
+            .AddDapr();
+        services.AddAuthorization(options =>
+        {
+            options.AddDapr();
+            options.AddPolicy("Ordering", policy => policy
+                .AddAuthenticationSchemes(JwtBearerDefaults.AuthenticationScheme)
+                .RequireAuthenticatedUser()
+                .RequireClaim("sub"));
+        });
     });
 
     public static void Configure(this WebApplication app)
@@ -154,18 +183,19 @@ public static class Startup
             app.UseDeveloperExceptionPage();
         }
 
-        SeedData.Initialize(app.Services);
         app.UseRouting();
+        app.UseCors("___my_cors");
         app.UseHealthChecks("/healthcheck");
         app.UseAuthentication();
         app.UseAuthorization();
 
-        // dapr
-        app.UseDaprSecurity();
+        // dapr：Topic 端点安全由官方 App API Token 认证承担（见 ConfigureServices），
+        // UseDaprSecurity 已废弃，不再使用
         app.UseCloudEvents();
         app.MapSubscribeHandler();
         app.MapDefaultControllerRoute().RequireCors("___my_cors");
         app.UseMicroserviceFramework();
+        SeedData.Initialize(app.Services);
 
         var configuration = app.Configuration;
         var exit = configuration["exit"] == "true";

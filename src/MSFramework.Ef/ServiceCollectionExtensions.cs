@@ -1,6 +1,4 @@
 using System;
-using System.Linq;
-using System.Text.RegularExpressions;
 using MicroserviceFramework.Auditing;
 using MicroserviceFramework.Domain;
 using MicroserviceFramework.Ef.Auditing;
@@ -18,7 +16,7 @@ namespace MicroserviceFramework.Ef;
 /// <summary>
 /// EF 服务集合扩展方法，提供 DbContext 注册与框架集成
 /// </summary>
-public static partial class ServiceCollectionExtensions
+public static class ServiceCollectionExtensions
 {
     /// <summary>
     /// 注册 <typeparamref name="TContext"/> 的 DbContext 连接池，
@@ -52,10 +50,11 @@ public static partial class ServiceCollectionExtensions
         /// <summary>
         /// 启用 EF 审计存储，将审计日志写入指定 DbContext
         /// </summary>
-        /// <typeparam name="TDbContext">审计存储使用的 DbContext 类型</typeparam>
+        /// <typeparam name="TDbContext">审计存储使用的 DbContext 类型（须继承 <see cref="DbContextBase"/>，
+        /// 审计保存走其直通入口）</typeparam>
         /// <returns>框架构建器</returns>
         public MicroserviceFrameworkBuilder UseEfAuditing<TDbContext>()
-            where TDbContext : DbContext
+            where TDbContext : DbContextBase
         {
             // EfUtilities.AuditingDbContextType = typeof(TDbContext);
             builder.Services.AddScoped<IAuditingStore, EfAuditingStore<TDbContext>>();
@@ -92,55 +91,55 @@ public static partial class ServiceCollectionExtensions
 
         // var repoMethodsCount = repoInterface.GetMethods().Length;
 
-        var types = Utils.Runtime.GetAllTypes();
-        foreach (var type in types)
-        {
-            if (type == null || type == typeof(IEfRepository))
-            {
-                continue;
-            }
-
-            var match = RepositoryRegex().Match(type.Name);
-
-            if (type.IsInterface && Defaults.Types.Repository.IsAssignableFrom(type) && match.Success)
-            {
-                // 必须是默认的仓储接口， 如果有自定义接口， 需要自己实现仓储
-                if (type.GetMethods().Length != 0)
-                {
-                    continue;
-                }
-
-                var repoInterfaceType = type.GetInterfaces().FirstOrDefault(x =>
-                    x.IsInterface && x.IsGenericType && x.GetGenericTypeDefinition() == typeof(IRepository<,>));
-                if (repoInterfaceType != null)
-                {
-                    // TODO:
-
-                    // // 若有自定义实现， 则已经自动注入
-                    // if (services.Any(x => x.ServiceType == type))
-                    // {
-                    //     continue;
-                    // }
-
-                    // var entityType = repoInterfaceType.GetGenericArguments()[0].FullName;
-                    // var entityKeyType = repoInterfaceType.GetGenericArguments()[1].FullName;
-                    // var name = ObjectId.GenerateNewId().ToString();
-//                     var script = $$"""
-//                                    public class R_{{name}}_Repo
-//                                        : MicroserviceFramework.Ef.Repositories.EfRepository<{{entityType}},
-//                                         {{entityKeyType}}>, {{type.FullName}}
-//                                    {
-//                                        public R_{{name}}_Repo(MicroserviceFramework.Ef.DbContextFactory context) : base(context)
-//                                        {
-//                                            UseQuerySplittingBehavior = true;
-//                                        }
-//                                    }
-//                                    """;
-                    // var repoType = DynamicCompileUtil.CreateType(script);
-                    // services.AddScoped(type, repoType);
-                }
-            }
-        }
+//         var types = Utils.Runtime.GetAllTypes();
+//         foreach (var type in types)
+//         {
+//             if (type == null || type == typeof(IEfRepository))
+//             {
+//                 continue;
+//             }
+//
+//             var match = RepositoryRegex().Match(type.Name);
+//
+//             if (type.IsInterface && Defaults.Types.Repository.IsAssignableFrom(type) && match.Success)
+//             {
+//                 // 必须是默认的仓储接口， 如果有自定义接口， 需要自己实现仓储
+//                 if (type.GetMethods().Length != 0)
+//                 {
+//                     continue;
+//                 }
+//
+//                 var repoInterfaceType = type.GetInterfaces().FirstOrDefault(x =>
+//                     x.IsInterface && x.IsGenericType && x.GetGenericTypeDefinition() == typeof(IRepository<,>));
+//                 if (repoInterfaceType != null)
+//                 {
+//                     // TODO:
+//
+//                     // // 若有自定义实现， 则已经自动注入
+//                     // if (services.Any(x => x.ServiceType == type))
+//                     // {
+//                     //     continue;
+//                     // }
+//
+//                     // var entityType = repoInterfaceType.GetGenericArguments()[0].FullName;
+//                     // var entityKeyType = repoInterfaceType.GetGenericArguments()[1].FullName;
+//                     // var name = ObjectId.GenerateNewId().ToString();
+// //                     var script = $$"""
+// //                                    public class R_{{name}}_Repo
+// //                                        : MicroserviceFramework.Ef.Repositories.EfRepository<{{entityType}},
+// //                                         {{entityKeyType}}>, {{type.FullName}}
+// //                                    {
+// //                                        public R_{{name}}_Repo(MicroserviceFramework.Ef.DbContextFactory context) : base(context)
+// //                                        {
+// //                                            UseQuerySplittingBehavior = true;
+// //                                        }
+// //                                    }
+// //                                    """;
+//                     // var repoType = DynamicCompileUtil.CreateType(script);
+//                     // services.AddScoped(type, repoType);
+//                 }
+//             }
+//         }
 
         return services;
     }
@@ -167,7 +166,4 @@ public static partial class ServiceCollectionExtensions
 #pragma warning restore EF1001
         ((IDbContextOptionsBuilderInfrastructure)builder).AddOrUpdateExtension(b);
     }
-
-    [GeneratedRegex("^I[A-Za-z0-9_]+(Repository)$")]
-    private static partial Regex RepositoryRegex();
 }

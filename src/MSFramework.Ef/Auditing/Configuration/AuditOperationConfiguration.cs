@@ -13,6 +13,8 @@ internal static class AuditOperationConfiguration
         builder.Property(x => x.Id).ValueGeneratedNever().HasMaxLength(36);
         builder.Property(x => x.IP).HasMaxLength(255);
         builder.Property(x => x.Method).HasMaxLength(12);
+        // AuditSource 由框架枚举约定转换为 Id（Http/Local），保留原列长度与存量数据。
+        builder.Property(x => x.Source).HasMaxLength(16);
         builder.Property(x => x.UserAgent);
         builder.Property(x => x.Path);
         builder.Property(x => x.Elapsed);

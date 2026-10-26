@@ -179,6 +179,11 @@ namespace Ordering.Infrastructure.Migrations
                         .HasColumnType("int")
                         .HasColumnName("signal");
 
+                    b.Property<string>("Source")
+                        .HasMaxLength(16)
+                        .HasColumnType("varchar")
+                        .HasColumnName("source");
+
                     b.Property<string>("TraceId")
                         .HasMaxLength(64)
                         .HasColumnType("varchar(64)")

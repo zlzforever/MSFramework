@@ -1,15 +1,9 @@
 <Project Sdk="Microsoft.NET.Sdk">
-
-    <PropertyGroup>
-        <TargetFramework>net8.0</TargetFramework>
-    </PropertyGroup>
-
-    <ItemGroup>
-      <ProjectReference Include="..\Template.Domain\Template.Domain.csproj" />
-    </ItemGroup>
-
-    <ItemGroup>
-        <PackageReference Include="MSFramework.Ef" Version="0.15.2" />
-        <PackageReference Include="MSFramework.Ef.MySql" Version="0.15.2" />
-    </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="MSFramework.Ef.MySql" />
+    <PackageReference Include="MSFramework.Ef.Analyzers" PrivateAssets="all" />
+    <PackageReference Include="Dapr.Client" />
+    <ProjectReference Include="../Template.Domain/Template.Domain.csproj" />
+    <ProjectReference Include="../Template.Application/Template.Application.csproj" />
+  </ItemGroup>
 </Project>

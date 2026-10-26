@@ -29,14 +29,18 @@ public static class PagedQueryExtensions
         /// 内存查询（LINQ to Objects）回退为同步执行。
         /// </summary>
         /// <param name="page">页码，小于 1 时按 1 处理</param>
-        /// <param name="limit">每页数量，小于 1 时按 10 处理</param>
+        /// <param name="limit">每页数量，小于 1 时回退为 10，最终不超过 Defaults.MaxLimit（默认 500）。</param>
         /// <param name="cancellationToken">取消令牌</param>
         /// <returns>分页结果</returns>
+        /// <remarks>
+        /// total 与 data 为两次独立查询，极端并发下可能不一致；
+        /// 未显式 <c>OrderBy</c> 提供稳定排序键时，并发写入下可能跨页重复/遗漏，分页前应由调用方排序。
+        /// </remarks>
         public async Task<PaginationResult<TEntity>> PagedQueryAsync(int page, int limit,
             CancellationToken cancellationToken = default)
         {
             page = page < 1 ? 1 : page;
-            limit = limit < 1 ? 10 : limit;
+            limit = Math.Min(limit < 1 ? 10 : limit, Defaults.MaxLimit);
 
             var total = await CountAsync(queryable, cancellationToken);
             var data = TryGetOffset(page, limit, total, out var offset)
@@ -51,7 +55,7 @@ public static class PagedQueryExtensions
         /// 内存查询（LINQ to Objects）回退为同步执行。
         /// </summary>
         /// <param name="page">页码，小于 1 时按 1 处理</param>
-        /// <param name="limit">每页数量，小于 1 时按 10 处理</param>
+        /// <param name="limit">每页数量，小于 1 时回退为 10，最终不超过 Defaults.MaxLimit（默认 500）。</param>
         /// <param name="mapper">实体到 DTO 的映射函数，不允许为 null</param>
         /// <param name="cancellationToken">取消令牌</param>
         /// <typeparam name="TDto">DTO 类型</typeparam>
@@ -63,7 +67,7 @@ public static class PagedQueryExtensions
             Check.NotNull(mapper, nameof(mapper));
 
             page = page < 1 ? 1 : page;
-            limit = limit < 1 ? 10 : limit;
+            limit = Math.Min(limit < 1 ? 10 : limit, Defaults.MaxLimit);
 
             var total = await CountAsync(queryable, cancellationToken);
             List<TDto> data;

@@ -9,7 +9,7 @@ namespace MicroserviceFramework;
 /// <param name="message">错误消息</param>
 /// <param name="innerException">内部异常</param>
 public class MicroserviceFrameworkException(int code, string message, Exception innerException = null)
-    : ApplicationException(message,
+    : Exception(message,
         innerException)
 {
     /// <summary>
@@ -17,6 +17,16 @@ public class MicroserviceFrameworkException(int code, string message, Exception 
     /// </summary>
     /// <param name="message">错误消息</param>
     public MicroserviceFrameworkException(string message) : this(1, message)
+    {
+    }
+
+    /// <summary>
+    /// 使用错误消息与内部异常创建异常，默认错误码为 1。
+    /// </summary>
+    /// <param name="message">错误消息</param>
+    /// <param name="innerException">内部异常（保留原始根因，便于排障）</param>
+    public MicroserviceFrameworkException(string message, Exception innerException) : this(1, message,
+        innerException)
     {
     }
 

@@ -19,7 +19,7 @@ public interface ISession
     string UserId { get; }
 
     /// <summary>
-    /// 用户名
+    /// 登录用户名；HTTP 会话取 preferred_username，不使用姓名替代，缺失时为 null。
     /// </summary>
     string UserName { get; }
 
@@ -34,7 +34,7 @@ public interface ISession
     string PhoneNumber { get; }
 
     /// <summary>
-    /// 用户的显示名称
+    /// 用户显示名称；HTTP 会话依次取 name（兼容 ClaimTypes.Name）、按当前文化拼接的姓名、preferred_username。
     /// </summary>
     string UserDisplayName { get; }
 

@@ -218,4 +218,28 @@ public class MediatorTests
         });
         Assert.Equal("test", argumentException.Message);
     }
+
+    [Fact]
+    public async Task SendAsync_NullRequest_ThrowsInsteadOfSilentSuccessAsync()
+    {
+        var serviceCollection = new ServiceCollection();
+
+        serviceCollection.AddMicroserviceFramework(x => x.UseDependencyInjectionLoader());
+        // UseMicroserviceFramework 会解析 EF 迁移初始化器，需要 ILogger<T> 注册
+        serviceCollection.AddLogging();
+
+        var serviceProvider = serviceCollection.BuildServiceProvider();
+        serviceProvider.UseMicroserviceFramework();
+
+        var mediator = serviceProvider.GetRequiredService<IMediator>();
+
+        // null 请求必须显式拒绝：静默返回成功会把"忘记构造请求对象"的 bug
+        // 掩盖成"业务成功但什么都没发生"的静默失败
+        await Assert.ThrowsAsync<ArgumentNullException>(
+            () => mediator.SendAsync((Request)null));
+        await Assert.ThrowsAsync<ArgumentNullException>(
+            () => mediator.SendAsync<int>(null));
+        await Assert.ThrowsAsync<ArgumentNullException>(
+            () => mediator.PublishAsync(null));
+    }
 }

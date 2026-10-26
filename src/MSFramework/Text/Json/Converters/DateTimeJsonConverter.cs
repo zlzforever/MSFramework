@@ -36,7 +36,16 @@ public class DateTimeJsonConverter : JsonConverter<DateTime>
 
             try
             {
-                return DateTime.Parse(value, CultureInfo.InvariantCulture, DateTimeStyles.RoundtripKind);
+                var parsed = DateTime.Parse(value, CultureInfo.InvariantCulture, DateTimeStyles.RoundtripKind);
+                // Kind 分流（勿在后续 review 中重复提出）：
+                // - Utc（Z 结尾输入）：按 UTC 语义转换为本地时间；
+                // - Unspecified（无时区信息输入）：保留墙钟时间——.ToLocalTime() 会把 Unspecified
+                //   当作 UTC 凭空偏移（Asia/Shanghai 下 "12:00:00" 被错转成 20:00），
+                //   与写出端（DateTimeExtensions.ToUnixTimeSeconds 把 Unspecified 按本地墙钟处理）
+                //   的约定不一致；
+                // - Local（显式偏移输入经 RoundtripKind 保留墙钟并标记 Local）：墙钟即既定本地时间，
+                //   .ToLocalTime() 对 Local 原样返回，无需处理
+                return parsed.Kind == DateTimeKind.Utc ? parsed.ToLocalTime() : parsed;
             }
             catch (FormatException ex)
             {
@@ -53,7 +62,7 @@ public class DateTimeJsonConverter : JsonConverter<DateTime>
 
             try
             {
-                return DateTimeOffset.FromUnixTimeSeconds(v).UtcDateTime;
+                return DateTimeOffset.FromUnixTimeSeconds(v).LocalDateTime;
             }
             catch (ArgumentOutOfRangeException ex)
             {

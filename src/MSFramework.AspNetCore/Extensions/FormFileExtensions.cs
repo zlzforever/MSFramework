@@ -20,25 +20,29 @@ public static class FormFileExtensions
     /// </summary>
     private static readonly ConcurrentDictionary<string, byte> ExistingDirCache = new ConcurrentDictionary<string, byte>();
 
-    // 禁止的危险后缀（补充拦截，双重保险）
+    /// <summary>
+    ///     单文件大小上限（100MB）：网关/Kestrel/Dapr 层已限制请求体大小，此处为存储层兜底
+    /// </summary>
+    public const long MaxFileLength = 100 * 1024 * 1024;
+
+    // 禁止的危险后缀（补充拦截，双重保险）。
+    // 注意：黑名单不是安全边界——只是降低误配置风险的兜底，存储目录应位于 webroot 之外或
+    // 由静态文件中间件限制可解释的 Content-Type
     private static readonly HashSet<string> DangerousExtensions = new(StringComparer.OrdinalIgnoreCase)
     {
-        ".html",
-        ".htm",
-        ".js",
-        ".php",
-        ".php3",
-        ".phtml",
-        ".aspx",
-        ".ashx",
-        ".cshtml",
-        ".asp",
-        ".jsp",
-        ".svg",
-        ".exe",
-        ".bat",
-        ".cmd",
-        ".sh"
+        ".html", ".htm", ".xhtml", ".shtml", ".js", ".mjs", ".json",
+        ".php", ".php3", ".php4", ".php5", ".php7", ".php8", ".phtml", ".phps", ".phar",
+        ".aspx", ".ashx", ".cshtml", ".asmx", ".ascx", ".master", ".config", ".webconfig", ".svc",
+        ".asp", ".jsp", ".jspx", ".jspf",
+        ".cfm", ".cfml", ".pl", ".cgi", ".perl", ".py", ".pyc", ".pyw", ".rb", ".rhtml", ".lua", ".go",
+        ".svg", ".wasm",
+        ".exe", ".com", ".scr", ".msi", ".bat", ".cmd", ".ps1", ".psm1", ".ps1xml",
+        ".sh", ".ksh", ".zsh", ".csh", ".bash", ".elf", ".so", ".o", ".bin", ".dll", ".sys",
+        ".htaccess", ".user.ini",
+        ".jar", ".war", ".ear",
+        ".sql", ".bak", ".dump", ".mdb", ".accdb", ".sqlite", ".db",
+        ".rar", ".7z", ".tar", ".gz", ".bz2", ".xz", ".iso",
+        ".xml"
     };
 
     /// <summary>
@@ -61,23 +65,39 @@ public static class FormFileExtensions
 
     /// <summary>
     /// 存储结构（用户确认的新方案）：
-    /// 真实文件存于 /wwwroot/upload/{date}/{md5前2位}/{md5次2位}/{md5}.{extension}（数据只写这里）
-    /// 判重链接存于 /wwwroot/oss/{md5前2位}/{md5次2位}/{md5}.{extension}（符号链接指向真实文件，仅用于判重）
-    /// 判重键为 oss 链接（内容指纹恒定、与日期无关），跨日期重复上传零数据写（仅新增 upload 链接）
+    /// 真实文件存于 {storage根}/upload/{date}/{md5前2位}/{md5次2位}/{md5}.{extension}（数据只写这里）
+    /// 判重链接存于 {storage根}/oss/{md5前2位}/{md5次2位}/{md5}.{extension}（符号链接指向真实文件，仅用于判重）
+    /// 判重键为 oss 链接（内容指纹恒定、与日期无关），跨日期重复上传零数据写（仅新增 upload 链接）。
+    /// 存储根为 <see cref="Defaults.LocalStorageRoot"/>（webroot 之外），防止静态文件中间件未经授权外发上传内容
     /// </summary>
     /// <param name="formFile">上传的文件</param>
     /// <param name="interval">业务目录间隔名（默认 upload）</param>
-    /// <returns>保存结果：Path 为 upload 相对真实文件路径，PhysicalPath 为 oss 判重链接路径</returns>
+    /// <returns>保存结果：Path 为 upload 相对真实文件路径，PhysicalPath 为 oss 判重链接相对路径（相对存储根）</returns>
     /// <exception cref="ArgumentNullException">formFile 为 null 时抛出</exception>
-    /// <exception cref="ArgumentException">interval 包含非法路径字符时抛出</exception>
+    /// <exception cref="ArgumentException">interval 为空白、包含非法路径字符时抛出；
+    /// 扩展名命中危险后缀黑名单时抛出</exception>
+    /// <exception cref="InvalidDataException">文件为空或超过 <see cref="MaxFileLength"/> 时抛出</exception>
     public static async Task<SaveResult> SaveAsync(this IFormFile formFile,
         string interval = "upload")
     {
         ArgumentNullException.ThrowIfNull(formFile);
+        ArgumentException.ThrowIfNullOrWhiteSpace(interval);
 
+        // 已知限制（勿在后续 review 中重复提出）：本校验只拦截 ../、/、\\，
+        // 未覆盖 Windows 盘符相对路径（如 "C:upload" 经 Path.Combine 会脱离存储根）与
+        // 保留设备名（CON/NUL 等）——本项目不面向 Windows Server 部署（Linux 容器），
+        // 该限制可接受；若未来需要面向 Windows 宿主，请改为白名单校验
+        // （仅允许 ASCII 字母/数字/'-'/'_'）
         if (interval.Contains("..") || interval.Contains('/') || interval.Contains('\\'))
         {
-            throw new ArgumentException("Invalid interval path");
+            throw new ArgumentException("Invalid interval path", nameof(interval));
+        }
+
+        // 空文件与大小上限：上游（网关/Kestrel/Dapr）已限制请求体大小，此处为存储层兜底
+        if (formFile.Length is <= 0 or > MaxFileLength)
+        {
+            throw new InvalidDataException(
+                $"文件大小 {formFile.Length} 超出允许范围 (0, {MaxFileLength}]");
         }
 
         var extension = Path.GetExtension(formFile.FileName);
@@ -95,9 +115,10 @@ public static class FormFileExtensions
         var level1 = md5.Substring(0, 2);
         var level2 = md5.Substring(2, 2);
         var fileName = $"{md5}{extension}";
-        // 真实文件目标（md5 二级分层防单日目录爆炸）：upload/{date}/{l1}/{l2}/{md5}{ext}
+        // 真实文件目标（md5 二级分层防单日目录爆炸）：storage/upload/{date}/{l1}/{l2}/{md5}{ext}；
+        // 存储根位于 webroot 之外（Defaults.LocalStorageRoot），避免静态文件中间件直接外发上传内容
         var intervalDirectory = Path.Combine(interval, date, level1, level2);
-        var businessDirectory = Path.Combine(AppContext.BaseDirectory, "wwwroot", intervalDirectory);
+        var businessDirectory = Path.Combine(Defaults.LocalStorageRoot, intervalDirectory);
         // upload/20251225/AB/CD/C4CA4238A0B923820DCC509A6F75849B.txt
         var intervalPath = Path.Combine(intervalDirectory, fileName);
         // Path.Combine 存在可空参数重载（返回 string?），此处入参均为非空字符串，
@@ -111,24 +132,39 @@ public static class FormFileExtensions
 
         if (!File.Exists(dedupeLinkPath))
         {
-            // 首次上传（或并发竞态下链接尚未建立）：写入真实文件，FileMode.Create 截断写保证幂等，
-            // FileShare.ReadWrite 允许并发写者同时打开，同内容并发写最终内容一致
+            // 首次上传（或并发竞态下链接尚未建立）：
+            // 先写唯一临时文件（FileMode.CreateNew + FileShare.None 独占，杜绝并发读到未完成内容），
+            // 再以同卷 Move 原子落到目标位置——目标已存在（并发竞态）时复用既有文件
             EnsureDirectoryExistsCached(dedupeLinkDirectory);
-            await using (var outStream = new FileStream(businessPath, FileMode.Create, FileAccess.Write,
-                             FileShare.ReadWrite))
+            var tempPath = Path.Combine(businessDirectory, $".{Guid.NewGuid():N}.tmp");
+            try
             {
-                if (stream.CanSeek)
+                await using (var outStream = new FileStream(tempPath, FileMode.CreateNew, FileAccess.Write,
+                                 FileShare.None))
                 {
-                    // MD5 计算已消费流内容，回到起始位置以便重新写入
-                    stream.Seek(0, SeekOrigin.Begin);
-                    await stream.CopyToAsync(outStream);
+                    if (stream.CanSeek)
+                    {
+                        // MD5 计算已消费流内容，回到起始位置以便重新写入
+                        stream.Seek(0, SeekOrigin.Begin);
+                        await stream.CopyToAsync(outStream);
+                    }
+                    else
+                    {
+                        // 非可寻址流无法回退位置，重新打开读取流（IFormFile 每次调用可重新打开）
+                        // 以保证写出完整内容，而非 0 字节空文件
+                        await using var reopenedStream = formFile.OpenReadStream();
+                        await reopenedStream.CopyToAsync(outStream);
+                    }
                 }
-                else
+
+                MoveOrReuse(tempPath, businessPath);
+            }
+            finally
+            {
+                // Move 成功或复用既有文件时 temp 已不存在；仅写失败时清理临时文件
+                if (File.Exists(tempPath))
                 {
-                    // 非可寻址流无法回退位置，重新打开读取流（IFormFile 每次调用可重新打开）
-                    // 以保证写出完整内容，而非 0 字节空文件
-                    await using var reopenedStream = formFile.OpenReadStream();
-                    await reopenedStream.CopyToAsync(outStream);
+                    File.Delete(tempPath);
                 }
             }
 
@@ -144,7 +180,11 @@ public static class FormFileExtensions
             CreateLinkOrCopy(businessPath, existingPath);
         }
 
-        return new SaveResult { Name = formFile.FileName, Path = intervalPath, PhysicalPath = dedupeLinkPath };
+        // 返回相对路径：判重链接相对存储根 oss/{l1}/{l2}/{md5}{ext}，
+        // 不回传服务器物理绝对路径，避免向客户端泄露部署根目录与目录布局
+        var dedupeLinkRelativePath = Path.Combine("oss", level1, level2, fileName);
+
+        return new SaveResult { Name = formFile.FileName, Path = intervalPath, PhysicalPath = dedupeLinkRelativePath };
     }
 
     /// <summary>
@@ -222,14 +262,53 @@ public static class FormFileExtensions
 
             Defaults.Logger?.LogWarning(ex,
                 "创建符号链接失败，降级为文件复制: {LinkPath} -> {TargetPath}", linkPath, targetPath);
-            // 覆盖写保证幂等
-            File.Copy(targetPath, linkPath, overwrite: true);
+            // 覆盖写保证幂等：先写唯一临时副本再原子替换（Move overwrite），
+            // 避免进程中断/并发时在目标位置留下半成品
+            var copyTempPath = Path.Combine(Path.GetDirectoryName(linkPath)!, $".{Guid.NewGuid():N}.tmp");
+            try
+            {
+                File.Copy(targetPath, copyTempPath, overwrite: false);
+                File.Move(copyTempPath, linkPath, overwrite: true);
+            }
+            finally
+            {
+                // Move 成功时临时文件已不存在；仅复制失败时清理
+                if (File.Exists(copyTempPath))
+                {
+                    File.Delete(copyTempPath);
+                }
+            }
+        }
+    }
+
+    /// <summary>
+    ///     将临时文件原子移动到目标位置（同卷 Move 原子可见）；
+    ///     目标已存在（并发竞态下另一进程先完成，同 MD5 内容一致）时复用既有文件，临时文件由调用方清理
+    /// </summary>
+    /// <param name="tempPath">已写入完成的临时文件路径</param>
+    /// <param name="targetPath">目标位置</param>
+    /// <exception cref="IOException">目标不存在且 Move 失败时抛出</exception>
+    private static void MoveOrReuse(string tempPath, string targetPath)
+    {
+        try
+        {
+            File.Move(tempPath, targetPath);
+        }
+        catch (IOException)
+        {
+            if (File.Exists(targetPath))
+            {
+                // 并发竞态：目标已被其它进程先写入（同 MD5 内容一致），复用之
+                return;
+            }
+
+            throw;
         }
     }
 }
 
 /// <summary>
-///     文件保存结果，包含原始名称、upload 业务路径和 oss 判重链接路径
+///     文件保存结果，包含原始名称、upload 业务相对路径和 oss 判重链接相对路径
 /// </summary>
 [SuppressMessage("ReSharper", "UnusedAutoPropertyAccessor.Global")]
 public class SaveResult
@@ -240,14 +319,17 @@ public class SaveResult
     public string Name { get; set; }
 
     /// <summary>
-    ///     文件业务路径（相对路径）：真实文件所在路径 upload/{date}/{l1}/{l2}/{md5}{ext}；
+    ///     文件业务路径（相对路径，相对本地存储根 <see cref="Defaults.LocalStorageRoot"/>）：
+    ///     真实文件所在路径 upload/{date}/{l1}/{l2}/{md5}{ext}；
     ///     重复上传时为指向既有真实文件的符号链接路径，语义上均为可访问文件内容的路径
     /// </summary>
     public string Path { get; set; }
 
     /// <summary>
-    ///     判重链接路径：oss/{l1}/{l2}/{md5}{ext}，为指向 upload 真实文件的符号链接（判重键，与日期无关）；
-    ///     文件系统不支持符号链接时降级为真实文件的内容副本
+    ///     判重链接路径（相对路径，相对本地存储根 <see cref="Defaults.LocalStorageRoot"/>）：
+    ///     oss/{l1}/{l2}/{md5}{ext}，为指向 upload 真实文件的符号链接（判重键，与日期无关）；
+    ///     文件系统不支持符号链接时降级为真实文件的内容副本。
+    ///     仅回传相对路径，不包含服务器物理绝对路径，避免向客户端泄露部署目录结构
     /// </summary>
     public string PhysicalPath { get; set; }
 }

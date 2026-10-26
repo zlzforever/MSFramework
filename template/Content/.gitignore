@@ -336,3 +336,8 @@ ASALocalRun/
 
 # MFractors (Xamarin productivity tool) working folder 
 .mfractor/
+# 本地 Secret 与运行时产物不得进入模板或镜像。
+.env*
+**/storage/
+build/
+dist/

@@ -2,7 +2,7 @@
 Microsoft Visual Studio Solution File, Format Version 12.00
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{3C9CAAEF-4286-4B88-95C3-CFBECF1BD373}"
 ProjectSection(SolutionItems) = preProject
-	README.MD = README.MD
+	README.md = README.md
 	.editorconfig = .editorconfig
 	.gitignore = .gitignore
 	nuget.config = nuget.config
@@ -20,6 +20,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Template.Application", "src
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Template.API", "src\Template.API\Template.API.csproj", "{902DEBED-9FD3-4DD3-8093-C396DB107D20}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Template.Tests", "tests\Template.Tests\Template.Tests.csproj", "{742154F8-53DB-4DC5-BA1B-054C94FF8277}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -32,6 +34,10 @@ Global
 		{902DEBED-9FD3-4DD3-8093-C396DB107D20} = {9F5F19C8-AEBA-4078-AA74-18253FECC3A5}
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{742154F8-53DB-4DC5-BA1B-054C94FF8277}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{742154F8-53DB-4DC5-BA1B-054C94FF8277}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{742154F8-53DB-4DC5-BA1B-054C94FF8277}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{742154F8-53DB-4DC5-BA1B-054C94FF8277}.Release|Any CPU.Build.0 = Release|Any CPU
 		{17ECFCC2-4D5B-4341-A61E-194E26E39F14}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{17ECFCC2-4D5B-4341-A61E-194E26E39F14}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{17ECFCC2-4D5B-4341-A61E-194E26E39F14}.Release|Any CPU.ActiveCfg = Release|Any CPU

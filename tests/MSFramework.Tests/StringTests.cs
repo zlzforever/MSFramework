@@ -145,4 +145,16 @@ public class StringTests
         Assert.Equal("hello", result);
         Assert.Equal("Hello", shared);
     }
+
+    [Fact]
+    public void ToCamelCase_HandlesVeryLongString_WithoutStackOverflow()
+    {
+        // 长度客户端可控（如模型绑定错误键）时不得使用无界 stackalloc，
+        // 否则超过线程栈上限触发不可捕获的 StackOverflowException 直接终止进程
+        var value = new string('A', 1_000_000);
+        var result = value.ToCamelCase();
+        Assert.Equal('a', result[0]);
+        Assert.Equal(1_000_000, result.Length);
+        Assert.Equal('A', value[0]);
+    }
 }

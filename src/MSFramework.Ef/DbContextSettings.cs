@@ -22,6 +22,7 @@ public class DbContextSettings : IDbContextOptionsExtension
         AutoTransactionBehavior = AutoTransactionBehavior.WhenNeeded;
         EnableSensitiveDataLogging = false;
         UseUnderScoreCase = true;
+        MaxDomainEventDispatchRounds = 3;
         Info = new ExtensionInfo(this);
     }
 
@@ -112,6 +113,30 @@ public class DbContextSettings : IDbContextOptionsExtension
     /// 获取或设置 查询拆分行为（SingleQuery/SplitQuery）
     /// </summary>
     public string QuerySplittingBehavior { get; set; }
+
+    /// <summary>
+    /// 获取或设置 领域事件最大派发轮数（默认 3）。
+    /// 每轮收集当前所有待派发事件并全部派发；Handler 在派发过程中向聚合新增的事件会在下一轮收集，
+    /// 直到某一轮没有新事件为止。设上限用于防止 Handler 相互触发同一事件形成无限派发循环；
+    /// 正常业务不应超过 3 轮，仅当业务确有更深的合法链式事件场景时才调大该值。
+    /// 配置值小于 1 时按默认值 3 处理（保证至少完成一轮派发）。
+    /// </summary>
+    public int MaxDomainEventDispatchRounds { get; set; }
+
+    /// <summary>
+    /// 是否为主（可写）上下文，默认 false。
+    /// <para>
+    /// 多 DbContext 应用中，主上下文承接业务写入、领域事件派发与自动迁移，
+    /// 其余上下文按约定只读。未显式配置时，按实体配置发现顺序的第一个上下文为主上下文（兼容旧行为）。
+    /// </para>
+    /// <para>
+    /// 该标志是"主上下文"的单一事实来源：<see cref="EfUnitOfWork"/>（提交目标）与
+    /// <see cref="Initializer.EntityFrameworkInitializerBase"/>（迁移目标）均以它判定——
+    /// 二者各自按扫描顺序/DI 注册顺序推导"第一个上下文"时，多上下文应用可能推导出不同的结果，
+    /// 造成迁移落到 A 库、业务提交写到 B 库的 schema 错位
+    /// </para>
+    /// </summary>
+    public bool IsPrimary { get; set; }
 
     /// <summary>
     /// 获取或设置 迁移历史表名

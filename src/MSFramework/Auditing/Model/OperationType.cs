@@ -5,7 +5,12 @@ namespace MicroserviceFramework.Auditing.Model;
 /// <summary>
 /// 表示实体审计操作类型
 /// </summary>
-public class OperationType : Enumeration
+/// <remarks>
+/// <see cref="Enumeration"/> 的子类约定要求具体枚举类型 sealed 且只包含只读成员：
+/// FromValue/Parse 与 EF 物化转换器返回的都是静态字段上的共享实例，
+/// 未 sealed 时可在共享实例上追加派生可变状态，一处修改会污染所有持有该枚举值的实体
+/// </remarks>
+public sealed class OperationType : Enumeration
 {
     /// <summary>
     /// 查询

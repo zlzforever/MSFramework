@@ -7,6 +7,7 @@ using Dapr;
 using MicroserviceFramework.AspNetCore;
 using MicroserviceFramework.Common;
 using MicroserviceFramework.Domain;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using MongoDB.Bson;
 using Ordering.Application.Dto;
@@ -81,6 +82,7 @@ public class ValueController(IObjectAssembler objectAssembler) : ApiControllerBa
 
 
     [Topic("rabbitmq-pubsub", "test")]
+    [Authorize(Policy = "Dapr")]
     [HttpGet("string")]
     public string GetString()
     {

@@ -1,3 +1,4 @@
+using System;
 using MicroserviceFramework.Ef.Extensions;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Migrations;
@@ -15,28 +16,34 @@ public static class ServiceCollectionExtensions
     extension(NpgsqlDbContextOptionsBuilder options)
     {
         /// <summary>
-        ///
+        /// PostgreSQL 迁移不生成数据库外键：本框架统一约定不使用数据库外键，
+        /// 引用完整性由业务代码保证（配合软删除 ClientCascade 约定，禁止数据库级联删除）。
+        /// 设置按上下文隔离的迁移生成器开关并替换为框架定制生成器，跳过建表/新增关系操作的外键生成；
+        /// 开关仅对当前 OptionsBuilder 所属的 DbContext 生效，不影响同进程其他上下文
         /// </summary>
-        /// <returns></returns>
-        public NpgsqlDbContextOptionsBuilder UseRemoveForeignKeyService()
+        /// <returns>原 PostgreSQL 选项构建器，支持链式调用</returns>
+        public NpgsqlDbContextOptionsBuilder UseNoForeignKeyMigration()
         {
-            // MigrationsSqlGenerator.RemoveForeignKey = true;
             var ops = (IRelationalDbContextOptionsBuilderInfrastructure)options;
+            // 以当前 OptionsBuilder 所属上下文类型为键写入开关，避免跨上下文泄漏
+            var contextType = ops.OptionsBuilder.Options.ContextType
+                              ?? throw new InvalidOperationException(
+                                  "UseNoForeignKeyMigration 需要在 AddDbContext/AddDbContextPool 的 optionsAction 中调用，" +
+                                  "以便获取当前 DbContext 类型");
+            MigrationsSqlGenerator.SetRemoveForeignKey(contextType);
             ops.OptionsBuilder.ReplaceService<IMigrationsSqlGenerator, MigrationsSqlGenerator>();
             return options;
         }
 
-        // /// <summary>
-        // ///
-        // /// </summary>
-        // /// <returns></returns>
-        // public NpgsqlDbContextOptionsBuilder UseRemoveExternalEntityService()
-        // {
-        //     MigrationsSqlGenerator.RemoveExternalEntity = true;
-        //     var ops = (IRelationalDbContextOptionsBuilderInfrastructure)options;
-        //     ops.OptionsBuilder.ReplaceService<IMigrationsSqlGenerator, MigrationsSqlGenerator>();
-        //     return options;
-        // }
+        /// <summary>
+        /// 旧名称，保留转发以兼容既有调用；转发后统一启用无外键迁移（旧行为未设置开关，PostgreSQL 仍生成外键）。
+        /// </summary>
+        /// <returns>原 PostgreSQL 选项构建器，支持链式调用</returns>
+        [Obsolete("改为 UseNoForeignKeyMigration：统一启用无外键迁移")]
+        public NpgsqlDbContextOptionsBuilder UseRemoveForeignKeyService()
+        {
+            return options.UseNoForeignKeyMigration();
+        }
     }
 
     /// <summary>
@@ -52,7 +59,7 @@ public static class ServiceCollectionExtensions
         var dbContextOptionsBuilder = ((IRelationalDbContextOptionsBuilderInfrastructure)builder).OptionsBuilder;
         dbContextOptionsBuilder.SetConnectionString<NpgsqlOptionsExtension>(settings.ConnectionString);
 #pragma warning restore EF1001
-        builder.UseRemoveForeignKeyService();
+        builder.UseNoForeignKeyMigration();
     }
 
     // public static IServiceCollection AddNpgsql<TDbContext>(

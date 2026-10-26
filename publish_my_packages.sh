@@ -1,4 +1,6 @@
 #!/bin/bash
+# 任一步骤失败立即退出
+set -euo pipefail
 
 export NUGET_SERVER=https://zlzforever-nuget.pkg.coding.net/repository/main/v3/index.json
 function push_to_nuget {
@@ -20,7 +22,7 @@ rm -rf src/MSFramework.Ef.Design/bin/Release
 rm -rf src/MSFramework.AspNetCore.Swagger/bin/Release
 rm -rf src/MSFramework.Serialization.Newtonsoft/bin/Release
 rm -rf src/DotNetCore.CAP.Dapr/bin/Release
-rm -rf src/MSFramework.Auditing.Loki/bin/Release
+rm -rf src/MSFramework.Dapr/bin/Release
 rm -rf src/MSFramework.Analyzers/bin/Release
 rm -rf src/MSFramework.Ef.Analyzers/bin/Release
 dotnet build -c Release
@@ -37,7 +39,7 @@ push_to_nuget "src/MSFramework.Ef.Design/bin/Release/"
 push_to_nuget "src/MSFramework.AspNetCore.Swagger/bin/Release/"
 push_to_nuget "src/MSFramework.Serialization.Newtonsoft/bin/Release/"
 push_to_nuget "src/DotNetCore.CAP.Dapr/bin/Release/"
-push_to_nuget "src/MSFramework.Auditing.Loki/bin/Release/"
+push_to_nuget "src/MSFramework.Dapr/bin/Release/"
 push_to_nuget "src/MSFramework.Analyzers/bin/Release/"
 push_to_nuget "src/MSFramework.Ef.Analyzers/bin/Release/"
 

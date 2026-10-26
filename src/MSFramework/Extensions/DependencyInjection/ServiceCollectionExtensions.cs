@@ -69,9 +69,6 @@ public static class ServiceCollectionExtensions
             return;
         }
 
-        interfaceTypes = interfaceTypes.Where(interfaceType => !(interfaceType.IsGenericType &&
-                                                                 interfaceType.GetGenericTypeDefinition() ==
-                                                                 typeof(IDomainEventHandler<>))).ToArray();
         for (var i = 0; i < interfaceTypes.Length; i++)
         {
             var interfaceType = interfaceTypes[i];
@@ -83,7 +80,7 @@ public static class ServiceCollectionExtensions
                 continue;
             }
 
-            // 瞬时生命周期每次获取对象都是新的，因此实现的接口每个注册一次即可
+            // 瞬时生命周期每次获取对象都是新的，因此实现的接口每个直接注册一次即可
             if (lifetime == ServiceLifetime.Transient)
             {
                 services.Add(
@@ -91,16 +88,14 @@ public static class ServiceCollectionExtensions
             }
             else
             {
-                if (i == 0)
-                {
-                    services.Add(
-                        new ServiceDescriptor(interfaceType, implementationType, lifetime));
-                }
-                else
-                {
-                    services.Add(new ServiceDescriptor(interfaceType,
-                        provider => provider.GetService(interfaceTypes[0]), lifetime));
-                }
+                // Scoped/Singleton 的接口统一转发到"实现类型本身的注册"（第 56 行注册的类型自身），
+                // 由 DI 按实现类型缓存实例，保证同一实例通过它实现的全部接口解析时共享同一实例。
+                // 禁止转发到"第一个接口"（provider.GetService(interfaceTypes[0])）：
+                // GetService 命中该接口最后注册的实现——当 A、B 都实现接口 I1 且 A 还实现 I2 时，
+                // 解析 I2 会经 I1 拿到 B 的实例（类型错乱），B 未实现 I2 时直接 InvalidCastException，
+                // 故障形态取决于注册顺序，极难排查。
+                services.Add(new ServiceDescriptor(interfaceType,
+                    provider => provider.GetRequiredService(implementationType), lifetime));
             }
         }
     }

@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using MicroserviceFramework.Domain;
 using MicroserviceFramework.Utils;
 using Microsoft.EntityFrameworkCore;
@@ -15,7 +17,7 @@ public class ExternalEntityRepository<TEntity, TKey>
     where TEntity : ExternalEntity<TKey>
     where TKey : IEquatable<TKey>
 {
-    private readonly ConcurrentDictionary<object, dynamic> _cache = new();
+    private readonly ConcurrentDictionary<object, Lazy<TEntity>> _cache = new();
 
     /// <summary>
     /// 获取只读查询集合（AsNoTracking）
@@ -33,7 +35,9 @@ public class ExternalEntityRepository<TEntity, TKey>
     }
 
     /// <summary>
-    /// 加载外部实体，通过工厂方法创建并缓存
+    /// 使用工厂方法加载外部实体。
+    /// 工厂会先执行一次（缓存键在产物中才可知），缓存命中时产物被丢弃；
+    /// 按主键惰性加载请使用 <see cref="Load(TKey,Func{TEntity})"/>
     /// </summary>
     /// <param name="factory">实体工厂委托</param>
     /// <returns>缓存的实体</returns>
@@ -45,6 +49,37 @@ public class ExternalEntityRepository<TEntity, TKey>
     }
 
     /// <summary>
+    /// 按主键惰性加载：缓存命中直接返回，未命中才执行工厂创建并缓存。
+    /// 并发下同一键的工厂由 <see cref="Lazy{T}"/> 保证最多执行一次（ExecutionAndPublication）；
+    /// 工厂抛异常时会移除该缓存项，下次调用可重新尝试，不会永久缓存失败结果。
+    /// </summary>
+    /// <param name="key">外部实体主键（缓存键）</param>
+    /// <param name="factory">实体工厂委托，仅在缓存未命中时调用</param>
+    /// <returns>缓存的实体</returns>
+    public TEntity Load(TKey key, Func<TEntity> factory)
+    {
+        Check.NotNull(factory, nameof(factory));
+
+        var lazy = _cache.GetOrAdd(key,
+            _ => new Lazy<TEntity>(factory, LazyThreadSafetyMode.ExecutionAndPublication));
+        try
+        {
+            return lazy.Value;
+        }
+        catch
+        {
+            // 工厂失败（如数据库瞬时不可用）不缓存异常，允许下次重试。
+            // 必须按"键＋原 Lazy 实例"原子条件删除（ConcurrentDictionary 的
+            // ICollection<KeyValuePair<K,V>>.Remove 比较 Key+Value）：并发下本线程等待失败期间，
+            // 另一线程可能已用新工厂替换了该键的缓存项，按 key 无条件 TryRemove 会误删
+            // 刚替换成功的条目，破坏"同一键的工厂最多执行一次"的保证
+            ((ICollection<KeyValuePair<object, Lazy<TEntity>>>)_cache).Remove(
+                new KeyValuePair<object, Lazy<TEntity>>(key, lazy));
+            throw;
+        }
+    }
+
+    /// <summary>
     /// 加载并缓存外部实体
     /// </summary>
     /// <param name="entity">要缓存的外部实体</param>
@@ -53,7 +88,7 @@ public class ExternalEntityRepository<TEntity, TKey>
     {
         Check.NotNull(entity, nameof(entity));
         var key = entity.Id;
-        return _cache.GetOrAdd(key, _ => entity);
+        return _cache.GetOrAdd(key, _ => new Lazy<TEntity>(entity)).Value;
     }
 
     /// <summary>

@@ -107,22 +107,55 @@ public class Order : DeletionAggregateRoot<string>, IOptimisticLock
         return order;
     }
 
+    /// <summary>添加或合并商品行，在修改聚合前验证数量与整行折扣。</summary>
+    /// <param name="productId">服务端商品标识，不能为空白。</param>
+    /// <param name="productName">服务端商品名称，不能为空白。</param>
+    /// <param name="pictureUrl">商品图片，可为空。</param>
+    /// <param name="unitPrice">服务端单价，不能为负。</param>
+    /// <param name="units">追加数量，必须为正且合并后不能溢出。</param>
+    /// <param name="discount">整行折扣，非负且不超过合并后的行金额。</param>
+    /// <returns>新增或合并后的订单项。</returns>
+    /// <exception cref="ArgumentException">商品标识或名称为空白。</exception>
+    /// <exception cref="OrderingDomainException">价格、数量或折扣无效。</exception>
     public OrderItem AddItem(string productId, string productName, string pictureUrl, decimal unitPrice,
         int units = 1, decimal discount = 0)
     {
+        ArgumentException.ThrowIfNullOrWhiteSpace(productId);
+        ArgumentException.ThrowIfNullOrWhiteSpace(productName);
+        if (unitPrice < 0 || units <= 0 || discount < 0)
+        {
+            throw new OrderingDomainException("Invalid price, units or discount");
+        }
+
         var existingOrderForProduct = Items
             .SingleOrDefault(o => o.Product.ProductId == productId);
 
         if (existingOrderForProduct != null)
         {
-            //if previous line exist modify it with higher discount  and units..
+            // 合并前完成全部校验，防止数量修改成功而后续折扣失败留下半更新的聚合。
+            if (units > int.MaxValue - existingOrderForProduct.Units)
+            {
+                throw new OrderingDomainException("Invalid merged units or discount");
+            }
 
+            try
+            {
+                if (discount > existingOrderForProduct.Price * (existingOrderForProduct.Units + units))
+                {
+                    throw new OrderingDomainException("Invalid merged discount");
+                }
+            }
+            catch (OverflowException exception)
+            {
+                throw new OrderingDomainException("Merged order item amount is too large", exception);
+            }
+
+            existingOrderForProduct.AddUnits(units);
             if (discount > existingOrderForProduct.Discount)
             {
                 existingOrderForProduct.SetDiscount(discount);
             }
 
-            existingOrderForProduct.AddUnits(units);
             return existingOrderForProduct;
         }
         else

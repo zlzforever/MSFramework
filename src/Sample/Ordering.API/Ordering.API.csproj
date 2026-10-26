@@ -3,9 +3,11 @@
   <PropertyGroup>
     <TargetFramework>net10.0</TargetFramework>
     <EmitCompilerGeneratedFiles>true</EmitCompilerGeneratedFiles>
+    <UserSecretsId>MSFramework.Ordering.API</UserSecretsId>
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="10.0.10" />
     <PackageReference Include="Dapper" Version="2.1.86" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="10.0.10">
       <PrivateAssets>all</PrivateAssets>
@@ -19,7 +21,6 @@
     <PackageReference Include="Serilog.Enrichers.Thread" Version="4.0.0"/>
     <PackageReference Include="Serilog.Expressions" Version="5.0.0"/>
     <PackageReference Include="Serilog.Sinks.Async" Version="2.1.0" />
-    <PackageReference Include="xunit.assert" Version="2.9.3" />
     <!--    <PackageReference Include="DotNetCore.Natasha.CSharp.Compiler.Domain" Version="8.0.0" />-->
     <!--    <PackageReference Include="DotNetCore.Natasha.CSharp.Template.Core" Version="8.0.0" />-->
     <!--    <PackageReference Include="DotNetCore.Compile.Environment" Version="3.2.0"/>-->
@@ -27,7 +28,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\MSFramework.AspNetCore\MSFramework.AspNetCore.csproj"/>
-    <ProjectReference Include="..\..\MSFramework.Auditing.Loki\MSFramework.Auditing.Loki.csproj"/>
     <ProjectReference Include="..\..\MSFramework.AutoMapper\MSFramework.AutoMapper.csproj"/>
     <ProjectReference Include="..\..\MSFramework.Ef.PostgreSql\MSFramework.Ef.PostgreSql.csproj"/>
     <ProjectReference Include="..\..\MSFramework.Ef.SqlServer\MSFramework.Ef.SqlServer.csproj"/>

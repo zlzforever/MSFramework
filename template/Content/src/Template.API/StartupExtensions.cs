@@ -1,240 +1,86 @@
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text.Json;
 using MicroserviceFramework;
 using MicroserviceFramework.AspNetCore;
 using MicroserviceFramework.AspNetCore.Filters;
 using MicroserviceFramework.AspNetCore.Mvc.ModelBinding;
-using MicroserviceFramework.AspNetCore.Swagger;
-using MicroserviceFramework.Auditing.Loki;
-using MicroserviceFramework.AutoMapper;
 using MicroserviceFramework.Ef;
+using MicroserviceFramework.Ef.Extensions;
 using MicroserviceFramework.Ef.MySql;
 using MicroserviceFramework.Extensions.DependencyInjection;
 using MicroserviceFramework.Text.Json;
-using Microsoft.AspNetCore.Builder;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
-using Microsoft.OpenApi.Models;
-using RemoteConfiguration.Json.Aliyun;
-using Serilog;
-using Serilog.Events;
-using Template.Domain;
 using Template.Infrastructure;
 
 namespace Template.API;
 
+/// <summary>注册 MVC、MySQL、框架服务并配置中间件顺序，依赖配置提供连接与认证信息。</summary>
 public static class StartupExtensions
 {
-    public static IHostBuilder ConfigureServices(this IHostBuilder builder)
+    private const string CORS_POLICY = "Frontend";
+
+    /// <summary>注册应用服务，框架按 Template 程序集前缀发现仓储和处理器。</summary>
+    /// <param name="services">宿主服务集合，不允许为空。</param>
+    /// <param name="configuration">应用配置，不允许为空；必须包含数据库及认证配置。</param>
+    /// <exception cref="ArgumentNullException">服务集合或配置为空。</exception>
+    /// <exception cref="InvalidOperationException">连接字符串或认证配置缺失。</exception>
+    public static void ConfigureApplication(this IServiceCollection services, IConfiguration configuration)
     {
-        builder.ConfigureServices((context, services) =>
+        ArgumentNullException.ThrowIfNull(services);
+        ArgumentNullException.ThrowIfNull(configuration);
+        var settings = configuration.GetDbContextSettings<TemplateDbContext>();
+        if (string.IsNullOrWhiteSpace(settings.ConnectionString))
         {
-            ConfigureLogger(context);
+            throw new InvalidOperationException("请通过 User Secrets 或 DbContexts__0__ConnectionString 配置数据库连接。");
+        }
 
-            var configuration = context.Configuration;
-            services.AddHttpContextAccessor();
-
-            services.AddControllers(x =>
-                {
-                    x.Filters.AddUnitOfWork();
-                    x.Filters.AddAudit();
-                    x.Filters.AddGlobalException();
-                    x.Filters.AddResponseWrapper();
-                    x.ModelBinderProviders.Insert(0, new ObjectIdModelBinderProvider());
-                    x.ModelBinderProviders.Insert(0, new EnumerationModelBinderProvider());
-                })
-                .ConfigureInvalidModelStateResponse()
-                .AddJsonOptions(options =>
-                {
-                    options.JsonSerializerOptions.AddDefaultConverters();
-                    options.JsonSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
-                })
-                // .AddNewtonsoftJson(x =>
-                // {
-                // 	x.SerializerSettings.Converters.Add(new ObjectIdConverter());
-                // 	x.SerializerSettings.Converters.Add(new EnumerationConverter());
-                // 	x.SerializerSettings.ContractResolver = new CompositeContractResolver
-                // 	{
-                // 		new EnumerationContractResolver(),
-                // 		new CamelCasePropertyNamesContractResolver()
-                // 	};
-                // })
-                .AddDapr(x =>
-                {
-                    // x.UseJsonSerializationOptions();
-                    // 部署由命令控制
-#if DEBUG
-                    x.UseGrpcEndpoint("http://localhost:51001");
-                    x.UseHttpEndpoint("http://localhost:51002");
-#endif
-                });
-
-            services.AddSwaggerGen(x =>
+        services.AddHttpContextAccessor();
+        services.AddControllers(options =>
             {
-                x.SwaggerDoc("v1.0", new OpenApiInfo { Version = "v1.0", Description = "Template API V1.0" });
-                x.CustomSchemaIds(type => type.FullName?.Replace("+", "."));
-                x.MapEnumerationType(typeof(TemplateOptions).Assembly);
-                x.SupportObjectId();
-            });
+                options.Filters.AddGlobalException().AddAudit().AddUnitOfWork().AddResponseWrapper();
+                options.ModelBinderProviders.Insert(0, new ObjectIdModelBinderProvider());
+                options.ModelBinderProviders.Insert(0, new EnumerationModelBinderProvider());
+            })
+            .ConfigureInvalidModelStateResponse()
+            .AddJsonOptions(options => options.JsonSerializerOptions.AddDefaultConverters())
+            .AddDapr();
 
-            services.AddHealthChecks();
-
-            services.AddCors(option =>
-            {
-                option.AddPolicy("___my_cors", policy =>
-                    policy.AllowAnyMethod()
-                        .SetIsOriginAllowed(_ => true)
-                        .AllowAnyHeader()
-                        // 建议文件名应该在各 API 处理
-                        // .WithExposedHeaders("x-suggested-filename")
-                        .AllowCredentials().SetPreflightMaxAge(TimeSpan.FromDays(30))
-                );
-            });
-
-            var dbContextSettingsList = configuration.GetSection("DbContexts").Get<List<DbContextSettings>>();
-            var dbContextSettings = dbContextSettingsList[0];
-
-            services.AddDbContext<TemplateDbContext>((provider, x) =>
-            {
-                var loggerFactory = provider.GetRequiredService<ILoggerFactory>();
-                x.UseLoggerFactory(loggerFactory);
-                x.UseMySql(ServerVersion.AutoDetect(dbContextSettings.ConnectionString), y =>
-                {
-                    y.Load(dbContextSettings);
-                    y.UseRemoveForeignKeyService();
-                    y.UseRemoveExternalEntityService();
-                });
-            });
-
-            services.AddMicroserviceFramework(x =>
-            {
-                x.UseAssemblyScanPrefix("Template");
-                x.UseDependencyInjectionLoader();
-                x.UseOptionsType(configuration);
-                x.UseAutoMapperObjectAssembler();
-                x.UseAspNetCore();
-                x.UseEfAuditing<TemplateDbContext>();
-                x.UseLokiAuditing();
-                // builder.UseNewtonsoftSerializer();
-                x.UseEntityFramework();
-            });
-        });
-        builder.UseSerilog();
-
-        return builder;
+        // 固定服务器兼容版本，禁止启动期 AutoDetect 访问数据库；部署时按实际 MySQL 版本调整。
+        services.AddDbContextPool<TemplateDbContext>(configuration, (dbSettings, _, options) =>
+            options.UseMySql(new MySqlServerVersion(new Version(8, 0, 36)), mysql => mysql.Load(dbSettings)));
+        services.AddMicroserviceFramework(builder =>
+        {
+            builder.UseDependencyInjectionLoader();
+            builder.UseAspNetCoreExtension();
+            builder.UseScopeServiceProvider();
+            builder.UseEntityFramework();
+            builder.UseEfAuditing<TemplateDbContext>();
+        }, "Template");
+        services.ConfigureIdentityServer(configuration);
+        services.AddCors(options => options.AddPolicy(CORS_POLICY, policy => policy
+            .WithOrigins(configuration.GetSection("Cors:AllowedOrigins").Get<string[]>() ?? [])
+            .AllowAnyHeader().AllowAnyMethod()));
+        services.AddHealthChecks();
     }
 
-    public static IHostBuilder ConfigureAppConfiguration(this IHostBuilder builder)
-    {
-        builder.ConfigureAppConfiguration(((context, configurationBuilder) =>
-        {
-            var configuration = context.Configuration;
-            // comments by lewis 20230806
-            // 不得再使用 nacos
-            // var section = configuration.GetSection("Nacos");
-            // if (section.GetChildren().Any())
-            // {
-            // 	builder.AddNacosV2Configuration(section);
-            // }
-
-            var section = configuration.GetSection("RemoteConfiguration");
-            if (section.GetChildren().Any() &&
-                !string.IsNullOrEmpty(configuration["RemoteConfiguration:Endpoint"]))
-            {
-                configurationBuilder.AddAliyunJsonFile(source =>
-                {
-                    source.Endpoint = configuration["RemoteConfiguration:Endpoint"];
-                    source.BucketName = configuration["RemoteConfiguration:BucketName"];
-                    source.AccessKeyId = configuration["RemoteConfiguration:AccessKeyId"];
-                    source.AccessKeySecret = configuration["RemoteConfiguration:AccessKeySecret"];
-                    source.Key = configuration["RemoteConfiguration:Key"];
-                });
-            }
-        }));
-
-        return builder;
-    }
-
+    /// <summary>初始化框架并配置路由、CORS、认证和 Dapr 回调；不在启动时播种业务数据。</summary>
+    /// <param name="app">已构建的应用，不允许为空。</param>
+    /// <exception cref="ArgumentNullException">应用为空。</exception>
     public static void Configure(this WebApplication app)
     {
-        var env = app.Services.GetRequiredService<IHostEnvironment>();
-        if (env.IsDevelopment())
+        ArgumentNullException.ThrowIfNull(app);
+        if (app.Environment.IsDevelopment())
         {
             app.UseDeveloperExceptionPage();
-            //启用中间件服务生成Swagger作为JSON终结点
-            app.UseSwagger();
-            //启用中间件服务对swagger-ui，指定Swagger JSON终结点
-            app.UseSwaggerUI(c => { c.SwaggerEndpoint("/swagger/v1.0/swagger.json", "Template API V1.0"); });
         }
-        // else
-        // {
-        //     // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
-        //     app.UseHsts();
-        // }
 
         app.UseRouting();
-        app.UseHealthChecks("/healthcheck");
+        app.UseCors(CORS_POLICY);
         app.UseAuthentication();
         app.UseAuthorization();
-
-        // dapr
-        app.UseDaprSecurity();
         app.UseCloudEvents();
+        app.MapHealthChecks("/healthcheck").AllowAnonymous();
+        // 发现端点供 sidecar 本机访问，部署网关必须禁止外部访问 /dapr/subscribe。
         app.MapSubscribeHandler();
-
-        app.MapDefaultControllerRoute().RequireCors("___my_cors");
-
+        app.MapControllers();
         app.UseMicroserviceFramework();
-
-        if ("true".Equals(app.Configuration["exit"], StringComparison.OrdinalIgnoreCase))
-        {
-            app.Services.GetRequiredService<IHostApplicationLifetime>().StopApplication();
-        }
-    }
-
-    private static void ConfigureLogger(HostBuilderContext context)
-    {
-        var serilogSection = context.Configuration.GetSection("Serilog");
-        if (serilogSection.GetChildren().Any())
-        {
-            Log.Logger = new LoggerConfiguration().ReadFrom
-                .Configuration(context.Configuration)
-                .CreateLogger();
-        }
-        else
-        {
-            var logFile = Environment.GetEnvironmentVariable("LOG_PATH");
-            if (string.IsNullOrEmpty(logFile))
-            {
-                logFile = Environment.GetEnvironmentVariable("LOG");
-            }
-
-            if (string.IsNullOrEmpty(logFile))
-            {
-                logFile = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "logs/Template.log".ToLowerInvariant());
-            }
-
-            Log.Logger = new LoggerConfiguration()
-#if DEBUG
-                .MinimumLevel.Debug()
-#else
-                .MinimumLevel.Information()
-#endif
-                .MinimumLevel.Override("Microsoft.Hosting.Lifetime", LogEventLevel.Information)
-                .MinimumLevel.Override("Microsoft.EntityFrameworkCore", LogEventLevel.Information)
-                .MinimumLevel.Override("Microsoft", LogEventLevel.Warning)
-                .MinimumLevel.Override("System", LogEventLevel.Warning)
-                .MinimumLevel.Override("Microsoft.AspNetCore.Authentication", LogEventLevel.Warning)
-                .Enrich.FromLogContext()
-                .WriteTo.Console()
-                .WriteTo.Async(x => x.File(logFile, rollingInterval: RollingInterval.Day))
-                .CreateLogger();
-        }
     }
 }

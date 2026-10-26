@@ -62,6 +62,21 @@ public class EntityBaseScalarKeyTests
         Assert.Equal(entity1.GetHashCode(), entity2.GetHashCode());
     }
 
+    /// <summary>
+    /// 历史兼容重载 <see cref="EntityBase{TKey}.Equals(TKey)"/> 仍按主键比较，
+    /// 避免旧代码升级后静默落到 <see cref="object.Equals(object)"/> 返回 false。
+    /// </summary>
+    [Fact]
+    public void StringKey_ObsoleteEqualsKey_StillComparesById()
+    {
+        var entity = new StringIdEntity("A1");
+
+#pragma warning disable CS0618
+        Assert.True(entity.Equals("A1"));
+        Assert.False(entity.Equals("A2"));
+#pragma warning restore CS0618
+    }
+
     [Fact]
     public void StringKey_NotEqual_WhenValueDiffers()
     {

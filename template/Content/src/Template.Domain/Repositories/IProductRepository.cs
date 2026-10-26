@@ -1,12 +1,4 @@
-using System.Threading.Tasks;
-using MicroserviceFramework.Domain;
-using MicroserviceFramework.Extensions.DependencyInjection;
-using MongoDB.Bson;
-using Template.Domain.Aggregates.Project;
-
 namespace Template.Domain.Repositories;
 
-public interface IProductRepository : IRepository<Product, ObjectId>, IScopeDependency
-{
-    Task<Product> GetByNameAsync(string name);
-}
+/// <summary>商品仓储扩展入口，基础契约由 MSFramework.Analyzers 生成，供应用层写操作使用。</summary>
+public partial interface IProductRepository;

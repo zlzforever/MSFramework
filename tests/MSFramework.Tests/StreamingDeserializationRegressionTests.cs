@@ -126,14 +126,14 @@ public class StreamingDeserializationRegressionTests
     }
 
     /// <summary>
-    /// 回归：枚举匹配失败时抛出 InvalidOperationException，行为与修复前一致
+    /// 枚举匹配失败属于 JSON 输入错误，应交由 MVC 转换为 400 而非内部异常。
     /// </summary>
     [Fact]
-    public void Deserialize_UnknownEnumerationValue_ThrowsInvalidOperationException()
+    public void Deserialize_UnknownEnumerationValue_ThrowsJsonException()
     {
         var options = TextJsonSerializer.CreateDefaultOptions();
 
-        Assert.Throws<InvalidOperationException>(
+        Assert.Throws<JsonException>(
             () => JsonSerializer.Deserialize<Obj>("{\"enum\":\"NotFound\"}", options));
     }
 

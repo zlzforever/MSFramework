@@ -197,6 +197,96 @@ public class ApiResultController(IOptions<JsonSerializerSettings> options) : Api
         return BadRequest("普通请求错误");
     }
 
+    /// <summary>
+    /// 返回 Created(...)（CreatedResult，201），验证统一包装为成功壳
+    /// </summary>
+    [HttpGet("created")]
+    public IActionResult GetCreated()
+    {
+        return Created("/apiResult/created", "created data");
+    }
+
+    /// <summary>
+    /// 返回 CreatedAtAction(...)（CreatedAtActionResult，201），验证统一包装为成功壳
+    /// </summary>
+    [HttpGet("createdAtAction")]
+    public IActionResult GetCreatedAtAction()
+    {
+        return CreatedAtAction(nameof(GetApiResult), new { }, "createdAtAction data");
+    }
+
+    /// <summary>
+    /// 返回 Accepted(...)（AcceptedResult，202），验证统一包装为成功壳
+    /// </summary>
+    [HttpGet("accepted")]
+    public IActionResult GetAccepted()
+    {
+        return Accepted("/apiResult/accepted", "accepted data");
+    }
+
+    /// <summary>
+    /// 返回 NotFound(...)（NotFoundObjectResult，404），验证统一包装为失败壳
+    /// </summary>
+    [HttpGet("notFoundObject")]
+    public IActionResult GetNotFoundObject()
+    {
+        return NotFound("未找到资源");
+    }
+
+    /// <summary>
+    /// 返回 Conflict(...)（ConflictObjectResult，409），验证统一包装为失败壳
+    /// </summary>
+    [HttpGet("conflictObject")]
+    public IActionResult GetConflictObject()
+    {
+        return Conflict("资源状态冲突");
+    }
+
+    /// <summary>
+    /// 返回 UnprocessableEntity(...)（UnprocessableEntityObjectResult，422），验证统一包装为失败壳
+    /// </summary>
+    [HttpGet("unprocessableObject")]
+    public IActionResult GetUnprocessableObject()
+    {
+        return UnprocessableEntity("实体校验失败");
+    }
+
+    /// <summary>
+    /// 返回 Unauthorized(...)（UnauthorizedObjectResult，401），验证统一包装为失败壳
+    /// </summary>
+    [HttpGet("unauthorizedObject")]
+    public IActionResult GetUnauthorizedObject()
+    {
+        return Unauthorized("未授权");
+    }
+
+    /// <summary>
+    /// 返回纯 Ok()（OkResult，无值），验证统一为成功壳（与 void Action 行为一致）
+    /// </summary>
+    [HttpGet("pureOk")]
+    public IActionResult GetPureOk()
+    {
+        return Ok();
+    }
+
+    /// <summary>
+    /// 返回纯 NotFound()（NotFoundResult，无值 404），验证统一为失败壳
+    /// </summary>
+    [HttpGet("pureNotFound")]
+    public IActionResult GetPureNotFound()
+    {
+        return NotFound();
+    }
+
+    /// <summary>
+    /// 返回纯 Conflict()（ConflictResult，无值 409），验证统一为失败壳
+    /// </summary>
+    [HttpGet("pureConflict")]
+    public IActionResult GetPureConflict()
+    {
+        return Conflict();
+    }
+
     [HttpGet("ordinaryServerError")]
     public IActionResult GetOrdinaryServerError()
     {

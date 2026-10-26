@@ -43,7 +43,7 @@ public class ApiResultTests(ITestOutputHelper output) : BaseTest
         var text = await result.Content.ReadAsStringAsync();
         Assert.Equal(400, (int)result.StatusCode);
         Assert.Equal("""
-                     {"errors":[{"name":"id","messages":["The id field is required."]}],"success":false,"code":1,"msg":"数据校验不通过","data":null}
+                     {"errors":[{"name":"id","messages":["The id field is required."]}],"success":false,"code":400,"msg":"数据校验不通过","data":null}
                      """, text);
     }
 
@@ -68,7 +68,8 @@ public class ApiResultTests(ITestOutputHelper output) : BaseTest
         using var document = JsonDocument.Parse(text);
         var root = document.RootElement;
         Assert.False(root.GetProperty("success").GetBoolean());
-        Assert.Equal(500, root.GetProperty("code").GetInt32());
+        // 业务码与 HTTP 状态码保持一致（不再恒为 500）
+        Assert.Equal(452, root.GetProperty("code").GetInt32());
         Assert.Equal(string.Empty, root.GetProperty("msg").GetString());
         Assert.Equal(452, root.GetProperty("data").GetProperty("status").GetInt32());
     }
@@ -222,9 +223,56 @@ public class ApiResultTests(ITestOutputHelper output) : BaseTest
                      """, result1);
     }
 
+    /// <summary>
+    /// 纯 return NotFound()：真实 MVC 管道下 [ApiController] 的 ClientErrorResultFilter（Order -2000，
+    /// 先于统一包装过滤器运行）会把 4xx 无值状态结果转换为标准 ProblemDetails（含 traceId），
+    /// 随后统一包装过滤器按 ProblemDetails 分支包装——code 与 HTTP 状态码一致、msg 为 ProblemDetails 标题
+    /// </summary>
     [Fact]
-    public async Task ReturnProblemDetailsAsApiResultWithJsonContentTypeAsync()
+    public async Task PureNotFoundIsConvertedToProblemDetailsAndWrappedAsync()
     {
+        var result = await Client.GetAsync("/apiResult/pureNotFound");
+        var text = await result.Content.ReadAsStringAsync();
+
+        Assert.Equal(404, (int)result.StatusCode);
+        using var document = JsonDocument.Parse(text);
+        var root = document.RootElement;
+        Assert.False(root.GetProperty("success").GetBoolean());
+        // 业务码与 HTTP 状态码保持一致
+        Assert.Equal(404, root.GetProperty("code").GetInt32());
+        Assert.Equal("Not Found", root.GetProperty("msg").GetString());
+        var data = root.GetProperty("data");
+        Assert.Equal("https://tools.ietf.org/html/rfc9110#section-15.5.5", data.GetProperty("type").GetString());
+        Assert.Equal("Not Found", data.GetProperty("title").GetString());
+        Assert.Equal(404, data.GetProperty("status").GetInt32());
+        Assert.True(data.TryGetProperty("traceId", out _));
+    }
+
+    /// <summary>
+    /// 纯 return Conflict()：同 NotFound——ClientErrorResultFilter 转换为 ProblemDetails 后统一包装，
+    /// code=409、msg="Conflict"
+    /// </summary>
+    [Fact]
+    public async Task PureConflictIsConvertedToProblemDetailsAndWrappedAsync()
+    {
+        var result = await Client.GetAsync("/apiResult/pureConflict");
+        var text = await result.Content.ReadAsStringAsync();
+
+        Assert.Equal(409, (int)result.StatusCode);
+        using var document = JsonDocument.Parse(text);
+        var root = document.RootElement;
+        Assert.False(root.GetProperty("success").GetBoolean());
+        Assert.Equal(409, root.GetProperty("code").GetInt32());
+        Assert.Equal("Conflict", root.GetProperty("msg").GetString());
+        var data = root.GetProperty("data");
+        Assert.Equal("https://tools.ietf.org/html/rfc9110#section-15.5.10", data.GetProperty("type").GetString());
+        Assert.Equal("Conflict", data.GetProperty("title").GetString());
+        Assert.Equal(409, data.GetProperty("status").GetInt32());
+        Assert.True(data.TryGetProperty("traceId", out _));
+    }
+
+    [Fact]
+    public async Task ReturnProblemDetailsAsApiResultWithJsonContentTypeAsync()    {
         var result = await Client.GetAsync("/apiResult/problemDetails");
         var text = await result.Content.ReadAsStringAsync();
 
@@ -233,7 +281,8 @@ public class ApiResultTests(ITestOutputHelper output) : BaseTest
         using var document = JsonDocument.Parse(text);
         var root = document.RootElement;
         Assert.False(root.GetProperty("success").GetBoolean());
-        Assert.Equal(500, root.GetProperty("code").GetInt32());
+        // 业务码与 HTTP 状态码保持一致（不再恒为 500）
+        Assert.Equal(400, root.GetProperty("code").GetInt32());
         Assert.Equal("请求无效", root.GetProperty("msg").GetString());
         var data = root.GetProperty("data");
         Assert.Equal("请求无效", data.GetProperty("title").GetString());
@@ -274,8 +323,17 @@ public class ApiResultTests(ITestOutputHelper output) : BaseTest
     }
 
     [Theory]
-    [InlineData("ordinaryBadRequest", 400, "普通请求错误")]
-    [InlineData("ordinaryServerError", 500, "{\"success\":false,\"code\":1,\"msg\":\"\",\"data\":\"普通服务器错误\"}")]
+    [InlineData("ordinaryBadRequest", 400, "{\"success\":false,\"code\":400,\"msg\":\"\",\"data\":\"普通请求错误\"}")]
+    [InlineData("ordinaryServerError", 500, "{\"success\":false,\"code\":500,\"msg\":\"\",\"data\":\"普通服务器错误\"}")]
+    // 类型化 ObjectResult 子类：success 按 2xx 推导，Code=0（成功）/HTTP 状态码（失败）——统一口径
+    [InlineData("created", 201, "{\"success\":true,\"code\":0,\"msg\":\"\",\"data\":\"created data\"}")]
+    [InlineData("createdAtAction", 201, "{\"success\":true,\"code\":0,\"msg\":\"\",\"data\":\"createdAtAction data\"}")]
+    [InlineData("accepted", 202, "{\"success\":true,\"code\":0,\"msg\":\"\",\"data\":\"accepted data\"}")]
+    [InlineData("notFoundObject", 404, "{\"success\":false,\"code\":404,\"msg\":\"\",\"data\":\"未找到资源\"}")]
+    [InlineData("conflictObject", 409, "{\"success\":false,\"code\":409,\"msg\":\"\",\"data\":\"资源状态冲突\"}")]
+    [InlineData("unprocessableObject", 422, "{\"success\":false,\"code\":422,\"msg\":\"\",\"data\":\"实体校验失败\"}")]
+    [InlineData("unauthorizedObject", 401, "{\"success\":false,\"code\":401,\"msg\":\"\",\"data\":\"未授权\"}")]
+    [InlineData("pureOk", 200, "{\"success\":true,\"code\":0,\"msg\":\"\",\"data\":null}")]
     public async Task ReturnOrdinaryErrorAsApiResultWithHttpContractAsync(
         string route, int expectedStatusCode, string expectedData)
     {

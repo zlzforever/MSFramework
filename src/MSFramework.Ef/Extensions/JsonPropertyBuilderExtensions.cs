@@ -20,6 +20,13 @@ public static class JsonPropertyBuilderExtensions
         /// <summary>
         /// 将属性配置为 JSON 列存储，按属性声明类型序列化/反序列化。
         /// </summary>
+        /// <remarks>
+        /// 设计决策（勿在后续 review 中重复提出）：默认值 <see cref="JsonDataType.JSONB"/>
+        /// 是有意保持的——SQL Server / MySQL 不存在 JSONB 列类型，使用默认值生成迁移时
+        /// 会直接在建表阶段报列类型非法。这是可接受的失败形态：用户主动创建迁移即可看到错误，
+        /// 按数据库显式传入 <see cref="JsonDataType.JSON"/>（样例实体配置均如此）即可修正，
+        /// 框架不为各 provider 做隐式默认值推断（隐式推断反而让列类型决策不可见）。
+        /// </remarks>
         /// <param name="databaseType">数据库 JSON 类型，默认 JSONB</param>
         /// <returns>属性构建器</returns>
         public PropertyBuilder<TProperty> UseJson(JsonDataType databaseType = JsonDataType.JSONB)
@@ -30,14 +37,29 @@ public static class JsonPropertyBuilderExtensions
         /// <summary>
         /// 将属性配置为 JSON 列存储，支持指定运行时类型以处理接口/抽象类型属性。
         /// </summary>
-        /// <param name="fieldType">JSON 字段的数据类型。比如属性是 IReadOnlyList，其 field 可能定义为 HashSet，
-        /// 因此反序列化成 fieldType 后强制转换回 TProperty，肯定能转换成功</param>
+        /// <param name="fieldType">JSON 字段的数据类型。比如属性是 IReadOnlyList，其 field 可能定义为 HashSet——
+        /// 反序列化成 fieldType 后强制转换回 TProperty；<b>必须</b>可赋值给属性类型，否则抛出</param>
         /// <param name="databaseType">数据库 JSON 类型，默认 JSONB</param>
         /// <returns>属性构建器</returns>
+        /// <exception cref="ArgumentException">fieldType 不可赋值给属性类型
+        /// （反序列化后的实例无法强转回 TProperty）时抛出</exception>
+        /// <remarks>
+        /// 变更追踪成本提示（TODO 待调整，见 CreateValueComparer）：ValueComparer 的相等比较与
+        /// 快照均基于全量 JSON 序列化——大 JSON 属性 + 长会话实体会放大 DetectChanges 成本，
+        /// 建议对结构明确的类型改用结构化相等（原生 Equals/GetHashCode）。
+        /// </remarks>
         public PropertyBuilder<TProperty> UseJson(Type fieldType,
             JsonDataType databaseType = JsonDataType.JSONB)
         {
             Check.NotNull(fieldType, nameof(fieldType));
+
+            if (!typeof(TProperty).IsAssignableFrom(fieldType))
+            {
+                throw new ArgumentException(
+                    $"fieldType {fieldType} 不可赋值给属性类型 {typeof(TProperty)}——" +
+                    "UseJson(fieldType) 用于接口/抽象属性指定运行时具体类型，" +
+                    "反序列化后的实例必须能强转回属性类型", nameof(fieldType));
+            }
 
             builder
                 .UsePropertyAccessMode(PropertyAccessMode.PreferField)
@@ -62,6 +84,10 @@ public static class JsonPropertyBuilderExtensions
         return result == null ? default : (TProperty)result;
     }
 
+    // TODO(性能): comparer 全量序列化成本待调整——equals 每次比较序列化 2 次、hash 1 次、
+    // 快照 1 次序列化 + 1 次反序列化，且按 JSON 文本比较对字典顺序/格式敏感；
+    // 可选方案：结构化相等（原生 Equals/GetHashCode）或规范化比较（JsonNode.DeepEquals）。
+    // 见 UseJson 的 remarks。
     /// <summary>
     /// equalsExpression：数据库存的是 JSON，最终都是要新、旧数据对比（即会有两份 JSON），无法优化的。除非永远认为是新数据。
     /// hashCodeExpression：在相同序列化条件下，如果数据没有变，hashCode 相同，不需要走 equalsExpression

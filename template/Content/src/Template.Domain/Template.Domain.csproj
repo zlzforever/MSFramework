@@ -1,10 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk">
-
-    <PropertyGroup>
-        <TargetFramework>net8.0</TargetFramework>
-    </PropertyGroup>
-
-    <ItemGroup>
-        <PackageReference Include="MSFramework" Version="0.15.2" />
-    </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="MSFramework" />
+    <PackageReference Include="MSFramework.Analyzers" PrivateAssets="all" />
+  </ItemGroup>
 </Project>

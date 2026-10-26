@@ -11,7 +11,9 @@ public abstract class InitializerBase : IInitializer
     public abstract void Start();
 
     /// <summary>
-    /// 初始化执行顺序，值越小越先执行
+    /// 初始化执行顺序，值越大越先执行。
+    /// 框架的 EF 迁移初始化器使用 <see cref="int.MaxValue"/>，确保数据库迁移先于
+    /// 依赖表结构的业务初始化器（如数据播种）执行；相同 Order 按注册顺序稳定执行。
     /// </summary>
     public int Order { get; protected set; }
 }

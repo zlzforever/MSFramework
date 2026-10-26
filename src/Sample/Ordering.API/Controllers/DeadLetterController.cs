@@ -2,6 +2,7 @@ using System.IO;
 using System.Threading.Tasks;
 using Dapr;
 using MicroserviceFramework.AspNetCore;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 
@@ -12,6 +13,7 @@ namespace Ordering.API.Controllers;
 public class DeadLetterController() : ApiControllerBase
 {
     [Topic("rabbitmq-pubsub", "biz.ordering.dead-letter")]
+    [Authorize(Policy = "Dapr")]
     [HttpPost]
     public async Task OnOrderCreatedAsync()
     {

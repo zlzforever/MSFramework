@@ -40,7 +40,7 @@ public class FormFileTests : BaseTest, IDisposable
     }
 
     /// <summary>
-    ///     计算新方案下真实文件应落盘的完整路径：wwwroot/upload/{date}/{l1}/{l2}/{md5}{ext}
+    ///     计算新方案下真实文件应落盘的完整路径：storage/upload/{date}/{l1}/{l2}/{md5}{ext}
     /// </summary>
     /// <param name="content">文件内容字节</param>
     /// <param name="name">文件名（含扩展名）</param>
@@ -49,9 +49,16 @@ public class FormFileTests : BaseTest, IDisposable
     {
         var md5 = ComputeMd5(content);
         var fileName = $"{md5}{Path.GetExtension(name)}";
-        return Path.Combine(AppContext.BaseDirectory, "wwwroot", "upload",
+        return Path.Combine(Defaults.LocalStorageRoot, "upload",
             DateTimeOffset.Now.ToString("yyyyMMdd"), md5.Substring(0, 2), md5.Substring(2, 2), fileName);
     }
+
+    /// <summary>
+    ///     将返回结果中的相对路径解析为本地存储根下的完整路径
+    /// </summary>
+    /// <param name="relativePath">SaveResult 返回的相对路径</param>
+    /// <returns>完整路径</returns>
+    private static string ToAbsolute(string relativePath) => Path.Combine(Defaults.LocalStorageRoot, relativePath);
 
     /// <summary>
     ///     计算新方案下 oss 判重链接的完整路径：wwwroot/oss/{l1}/{l2}/{md5}{ext}
@@ -96,10 +103,12 @@ public class FormFileTests : BaseTest, IDisposable
         Assert.True(File.Exists(ossPath));
         Assert.True(File.GetAttributes(ossPath).HasFlag(FileAttributes.ReparsePoint));
         Assert.Equal(realPath, File.ResolveLinkTarget(ossPath, returnFinalTarget: true)?.FullName);
-        // 返回语义：Path 为 upload 相对真实路径，PhysicalPath 为 oss 链接路径
+        // 返回语义：Path 为 upload 相对真实路径，PhysicalPath 为 oss 判重链接相对路径（相对存储根），
+        // 不再回传服务器物理绝对路径
         Assert.Equal(Path.Combine("upload", today, md5.Substring(0, 2), md5.Substring(2, 2), $"{md5}.csv"),
             result.Path);
-        Assert.Equal(ossPath, result.PhysicalPath);
+        Assert.Equal(Path.Combine("oss", md5.Substring(0, 2), md5.Substring(2, 2), $"{md5}.csv"),
+            result.PhysicalPath);
     }
 
     /// <summary>
@@ -110,7 +119,7 @@ public class FormFileTests : BaseTest, IDisposable
     {
         var content = Encoding.UTF8.GetBytes($"duplicate-{Guid.NewGuid()}");
         var first = await CreateFormFile(content).SaveAsync();
-        var ossPath = first.PhysicalPath;
+        var ossPath = ToAbsolute(first.PhysicalPath);
         var realPath = File.ResolveLinkTarget(ossPath, returnFinalTarget: true)?.FullName;
         Assert.NotNull(realPath);
         var beforeBytes = await File.ReadAllBytesAsync(realPath);
@@ -142,7 +151,7 @@ public class FormFileTests : BaseTest, IDisposable
         var level2 = md5.Substring(2, 2);
         // 预置更早日期的真实文件与 oss 判重链接（模拟历史上传，今日路径尚不存在）
         const string oldDate = "20200101";
-        var oldRealDir = Path.Combine(AppContext.BaseDirectory, "wwwroot", "upload", oldDate, level1, level2);
+        var oldRealDir = Path.Combine(Defaults.LocalStorageRoot, "upload", oldDate, level1, level2);
         var oldRealPath = Path.Combine(oldRealDir, fileName);
         Directory.CreateDirectory(oldRealDir);
         await File.WriteAllBytesAsync(oldRealPath, content);
@@ -155,15 +164,15 @@ public class FormFileTests : BaseTest, IDisposable
 
         // 今日 upload 路径仅创建符号链接指向旧真实文件，不写入任何数据
         var today = DateTimeOffset.Now.ToString("yyyyMMdd");
-        var newLinkPath = Path.Combine(AppContext.BaseDirectory, "wwwroot", "upload", today, level1, level2, fileName);
+        var newLinkPath = Path.Combine(Defaults.LocalStorageRoot, "upload", today, level1, level2, fileName);
         Assert.True(File.Exists(newLinkPath));
         Assert.True(File.GetAttributes(newLinkPath).HasFlag(FileAttributes.ReparsePoint));
         Assert.Equal(oldRealPath, File.ResolveLinkTarget(newLinkPath, returnFinalTarget: true)?.FullName);
         // 旧真实文件零数据写
         Assert.Equal(content, await File.ReadAllBytesAsync(oldRealPath));
-        // 返回路径为今日真实路径（保持真实文件语义）
+        // 返回路径为今日真实路径（保持真实文件语义）；PhysicalPath 为 oss 判重链接相对路径
         Assert.Equal(Path.Combine("upload", today, level1, level2, fileName), result.Path);
-        Assert.Equal(ossPath, result.PhysicalPath);
+        Assert.Equal(Path.Combine("oss", level1, level2, fileName), result.PhysicalPath);
     }
 
     /// <summary>
@@ -183,7 +192,7 @@ public class FormFileTests : BaseTest, IDisposable
 
         Assert.Equal(count, results.Length);
         Assert.All(results, r => Assert.Equal(results[0].PhysicalPath, r.PhysicalPath));
-        var ossPath = results[0].PhysicalPath;
+        var ossPath = ToAbsolute(results[0].PhysicalPath);
         var realPath = File.ResolveLinkTarget(ossPath, returnFinalTarget: true)?.FullName;
         Assert.NotNull(realPath);
         Assert.Equal(content, await File.ReadAllBytesAsync(realPath));
@@ -203,7 +212,7 @@ public class FormFileTests : BaseTest, IDisposable
             var result = await CreateFormFile(content).SaveAsync();
 
             // 降级为文件复制：oss 路径为普通文件（非符号链接），内容与真实文件一致
-            var ossPath = result.PhysicalPath;
+            var ossPath = ToAbsolute(result.PhysicalPath);
             Assert.True(File.Exists(ossPath));
             Assert.False(File.GetAttributes(ossPath).HasFlag(FileAttributes.ReparsePoint));
             Assert.Equal(content, await File.ReadAllBytesAsync(ossPath));

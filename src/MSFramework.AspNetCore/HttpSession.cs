@@ -49,15 +49,18 @@ public class HttpSession : ISession
             }
         }
 
-        var userName = GetFirstClaim(ClaimTypes.Name, JwtClaimTypes.Name);
+        var userName = GetFirstClaim(JwtClaimTypes.PreferredUserName);
         var givenName = GetFirstClaim(ClaimTypes.GivenName, JwtClaimTypes.GivenName);
         var familyName = GetFirstClaim(ClaimTypes.Surname, JwtClaimTypes.FamilyName);
 
-        // 中文环境下，姓在前，名在后
-        var name = CultureInfo.CurrentCulture.Name.StartsWith("zh", StringComparison.OrdinalIgnoreCase)
-            ? $"{familyName}{givenName}"
-            : $"{givenName}{familyName}";
-        name = string.IsNullOrEmpty(name) ? GetFirstClaim(JwtClaimTypes.PreferredUserName) : name;
+        // 完整姓名优先；缺失时中文文化按姓加名，其余文化按名加姓拼接。
+        var name = GetFirstClaim(JwtClaimTypes.Name, ClaimTypes.Name);
+        if (string.IsNullOrEmpty(name))
+        {
+            name = CultureInfo.CurrentCulture.Name.StartsWith("zh", StringComparison.OrdinalIgnoreCase)
+                ? $"{familyName}{givenName}"
+                : $"{givenName}{familyName}";
+        }
         name = string.IsNullOrEmpty(name) ? userName : name;
 
         var traceId = Activity.Current == null
@@ -76,7 +79,14 @@ public class HttpSession : ISession
             UserDisplayName = name
         };
 
-        var subjects = new HashSet<string> { session.UserId };
+        // 空值安全：匿名请求（无 NameIdentifier/Subject claim）的 UserId 为 null，
+        // 直接塞入集合会让权限判定（Subjects.Contains）与集合语义不可预期——过滤掉
+        var subjects = new HashSet<string>();
+        if (!string.IsNullOrEmpty(session.UserId))
+        {
+            subjects.Add(session.UserId);
+        }
+
         foreach (var role in session.Roles)
         {
             subjects.Add(role);
@@ -156,7 +166,7 @@ public class HttpSession : ISession
     public string UserId { get; private set; }
 
     /// <summary>
-    /// 用户名
+    /// 登录用户名，来自 preferred_username；不存在时为 null，不使用姓名替代。
     /// </summary>
     public string UserName { get; private set; }
 
@@ -171,7 +181,7 @@ public class HttpSession : ISession
     public string PhoneNumber { get; private set; }
 
     /// <summary>
-    /// 用户的显示名称
+    /// 用户显示名称：name（兼容 ClaimTypes.Name）、按当前文化拼接的姓名、preferred_username 依次回退。
     /// </summary>
     public string UserDisplayName { get; private set; }
 

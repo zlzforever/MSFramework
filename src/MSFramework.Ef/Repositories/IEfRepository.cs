@@ -1,5 +1,3 @@
-using Microsoft.EntityFrameworkCore;
-
 namespace MicroserviceFramework.Ef.Repositories;
 
 /// <summary>

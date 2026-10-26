@@ -6,16 +6,18 @@ using Microsoft.Extensions.Options;
 namespace MicroserviceFramework.Auditing.Loki;
 
 /// <summary>
-///     Loki 审计的依赖注入扩展方法
+///     Loki 审计的依赖注入扩展方法（<b>本包已废弃</b>）
 /// </summary>
 public static class ServiceCollectionExtensions
 {
     /// <summary>
-    ///     添加 Loki 审计日志存储到服务集合（已弃用，推荐使用 PostgreSQL JSONB 存储）
+    ///     添加 Loki 审计日志存储到服务集合。
+    ///     <b>本包已废弃</b>：Loki 不便创建索引，审计存储请改用关系数据库
+    ///     （如 MSFramework.Ef 的 EfAuditingStore&lt;TDbContext&gt;，推荐 PostgreSQL）或自定义 IAuditingStore
     /// </summary>
     /// <param name="services">服务集合</param>
     /// <returns>服务集合</returns>
-    [Obsolete("不方便创建索引， 因此考虑使用 PG 存 JSONB 为好")]
+    [Obsolete("MSFramework.Auditing.Loki 已废弃：审计存储请改用关系数据库（如 EfAuditingStore<TDbContext>，推荐 PostgreSQL）或自定义 IAuditingStore")]
     public static IServiceCollection AddLokiAuditing(this IServiceCollection services)
     {
         services.AddSingleton(provider =>
@@ -24,33 +26,6 @@ public static class ServiceCollectionExtensions
             var app = provider.GetRequiredService<ApplicationInfo>();
             return LokiAuditingStore.Create(options, app.Name);
         });
-        // builder.Services.AddSingleton(provider =>
-        // {
-        //     var serilogOptions = provider.GetRequiredService<IOptions<SerilogOptions>>().Value;
-        //     var options = serilogOptions.WriteTo.FirstOrDefault(x => x.Name.Contains("Loki"));
-        //     if (options == null)
-        //     {
-        //         throw new MicroserviceFrameworkException("未找到 Serilog 中 Loki 的配置项");
-        //     }
-        //
-        //     var lokiOptions = new LokiOptions
-        //     {
-        //         Uri = options.Args.Uri, Labels = options.Args.Labels.ToDictionary(x => x.Key, x => x.Value)
-        //     };
-        //     lokiOptions.Labels.Add("Classification", "Auditing");
-        //     return lokiOptions;
-        // });
         return services;
     }
-
-    // /// <summary>
-    // /// 使用 Loki 存储审计日志
-    // /// </summary>
-    // /// <param name="builder"></param>
-    // /// <returns></returns>
-    // public static MicroserviceFrameworkBuilder UseLokiAuditing(this MicroserviceFrameworkBuilder builder)
-    // {
-    //     builder.Services.AddLokiAuditing();
-    //     return builder;
-    // }
 }

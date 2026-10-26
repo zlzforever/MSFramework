@@ -4,6 +4,7 @@
     <PackageId>MSFramework.CAP.Dapr</PackageId>
     <RootNamespace>DotNetCore.CAP.Dapr</RootNamespace>
     <AssemblyName>MSFramework.CAP.Dapr</AssemblyName>
+    <Description>不维护期：实际生产未使用，已知问题不再修复，仅跟随依赖版本被动更新</Description>
   </PropertyGroup>
   <Import Project="../../package.props" />
   <Import Project="../../version.props"/>

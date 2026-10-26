@@ -1,6 +1,6 @@
 # MSFramework - Agent Guidelines
 
-A lightweight DDD microservice framework for .NET 8/10. This document guides AI coding agents working in this repository.
+A lightweight DDD microservice framework for .NET 10, shipped as multiple NuGet packages plus a sample app. This document guides AI coding agents working in this repository.
 
 ## Build, Lint, and Test Commands
 
@@ -8,7 +8,7 @@ A lightweight DDD microservice framework for .NET 8/10. This document guides AI 
 # Build the entire solution
 dotnet build
 
-# Build in Release mode
+# Build in Release mode (also produces NuGet packages via GeneratePackageOnBuild)
 dotnet build --configuration Release
 
 # Run all tests
@@ -16,6 +16,7 @@ dotnet test
 
 # Run a specific test project
 dotnet test tests/MSFramework.Tests/MSFramework.Tests.csproj
+dotnet test tests/MSFramework.AspNetCore.Test/MSFramework.AspNetCore.Test.csproj   # ASP.NET Core integration tests
 
 # Run a single test class
 dotnet test tests/MSFramework.Tests/MSFramework.Tests.csproj --filter "FullyQualifiedName~DomainEventTests"
@@ -23,355 +24,160 @@ dotnet test tests/MSFramework.Tests/MSFramework.Tests.csproj --filter "FullyQual
 # Run a single test method
 dotnet test tests/MSFramework.Tests/MSFramework.Tests.csproj --filter "FullyQualifiedName~DomainEventTests.DispatchTo1HandlerTests"
 
-# Run tests with verbose output
-dotnet test tests/MSFramework.Tests/MSFramework.Tests.csproj -v n
-
-# EF Core migrations (from project root)
+# EF Core migrations for the sample app (from project root)
 dotnet ef migrations add Init -s src/Sample/Ordering.API -c OrderingContext -p src/Sample/Ordering.Infrastructure
-
-# Generate SQL migration script
 dotnet ef migrations script -s src/Sample/Ordering.API -c OrderingContext -p src/Sample/Ordering.Infrastructure
-
-# Optimize EF Core compiled models
-dotnet ef dbcontext optimize -s src/Sample/Ordering.API -c OrderingContext -p src/Sample/Ordering.Infrastructure -o CompileModels -n Ordering.Infrastructure.CompileModels
 
 # Pack NuGet packages
 dotnet pack --configuration Release
 ```
 
+There is no separate lint/format step — `.editorconfig` is the style contract. CI (`.github/workflows/dotnet.yml`, on push/PR to `master`) only builds and runs the two test projects.
+
+## Critical Facts (easy to get wrong)
+
+- **Package names ≠ namespaces.** Assemblies/packages are `MSFramework.*` but root namespaces are `MicroserviceFramework.*` (e.g. package `MSFramework.Ef` → namespace `MicroserviceFramework.Ef`). Always write `using MicroserviceFramework...`.
+- **One version for all packages**: defined centrally in `version.props`; every csproj imports it plus `package.props`. Never set versions per project.
+- **Target frameworks**: `net10.0` everywhere, except the two source-generator projects (`MSFramework.Analyzers`, `MSFramework.Ef.Analyzers`) which target `netstandard2.0`. `LangVersion` is `latest`.
+- **Own mediator, not MediatR**: commands derive from `MicroserviceFramework.Mediator`'s `Request`/`Request<TResponse>`; handlers implement `IRequestHandler<TRequest, TResponse>` with `HandleAsync` (not `Handle`).
+- **Compiled models are disabled**: the `LoadModel` options extension in `MSFramework.Ef` is fully commented out and `DbContextSettings.UseCompiledModel` has no wired-up effect — do not follow the README's compiled-model/`dbcontext optimize` instructions.
+- **Paging extension lives in the `MSFramework.Ef` package** but keeps the `MicroserviceFramework.Linq.Expression` namespace (Core must not depend on EF). Referencing Core alone does not provide EF paging.
+- **Commit style**: Conventional Commits with Chinese subjects, e.g. `feat(框架): ...`, `fix(响应包装): ...`.
+- **Publishing** uses `publish.sh` / `publish_my_packages.sh` (`dotnet build -c Release` + `dotnet pack` + `dotnet nuget push`) and requires `NUGET_SERVER`/`NUGET_KEY` env vars. `publish_template.sh` packs the `template/` project template.
+
 ## Project Structure
 
-The solution follows DDD (Domain-Driven Design) layered architecture.
-Framework projects (NuGet packages) under `src/`, sample code under `src/Sample/`.
+Framework packages under `src/`, sample code under `src/Sample/`, tests under `tests/` (unit/integration + `Benchmark`).
 
 ```
 src/
-├── MSFramework/                    # Core framework (domain primitives, utilities, mediator)
+├── MSFramework/                    # Core: domain primitives, mediator, local event bus, DI, utilities
 │   ├── Common/                     # ApiResult, ApiResultWithErrors (moved from AspNetCore)
 │   ├── Domain/                     # Aggregate roots, entities, value objects, events
 │   ├── Mediator/                   # CQRS mediator (Request, IMediator, IRequestHandler)
-│   ├── LocalEvent/                 # In-process event bus
-│   ├── Extensions/                 # DI markers (ITransientDependency, etc.)
-│   └── ...
-├── MSFramework.AspNetCore/         # ASP.NET Core integration (filters, response wrapping)
-├── MSFramework.Ef/                 # EF Core (DbContextBase, EfRepository, extension methods)
-│                                   #   also now contains DesignTimeDbContextFactoryBase
-├── MSFramework.Ef.SqlServer/       # SQL Server provider
-├── MSFramework.Ef.MySql/           # MySQL provider
-├── MSFramework.Ef.PostgreSql/      # PostgreSQL provider
-├── MSFramework.Ef.Design/          # EF design-time utilities (mostly moved to MSFramework.Ef)
-├── MSFramework.Analyzers/          # Source Generator: auto-generate repository interfaces
-├── MSFramework.Ef.Analyzers/       # Source Generator: auto-generate repository implementations
-├── MSFramework.AutoMapper/         # AutoMapper integration
-├── MSFramework.Serialization.Newtonsoft/  # JSON serialization
-├── MSFramework.Auditing.Loki/      # Loki audit log sink
-├── DotNetCore.CAP.Dapr/            # CAP + Dapr integration
-└── Sample/                         # Sample projects (moved from src/Ordering.*)
-    └── Ordering.{Domain,Application,Infrastructure,API}/
-
-tests/
-├── MSFramework.Tests/              # Unit tests (32 test files)
-├── MSFramework.AspNetCore.Test/    # Integration tests
-└── Benchmark/                      # Performance benchmarks
+│   └── LocalEvent/                 # In-process event bus
+├── MSFramework.AspNetCore/         # Filters: response wrapping, global exceptions, UoW; Dapr security
+├── MSFramework.Ef/                 # DbContextBase, EfRepository, DesignTimeDbContextFactoryBase, model conventions
+├── MSFramework.Ef.SqlServer/ MySql/ PostgreSql/   # EF provider integrations
+├── MSFramework.Analyzers/          # Source Generator: repo interfaces (from domain layer)
+├── MSFramework.Ef.Analyzers/       # Source Generator: repo implementations (from infrastructure layer)
+├── MSFramework.Ef.Design/          # Empty shell (no source); kept only for NuGet continuity
+├── MSFramework.AutoMapper/         # IObjectAssembler via AutoMapper
+├── MSFramework.Serialization.Newtonsoft/
+├── MSFramework.Dapr/               # Dapr integration: distributed lock (IDistributedLock impl, UseDaprLock)
+├── MSFramework.Auditing.Loki/      # DEPRECATED (marked [Obsolete], kept for legacy consumers)
+├── DotNetCore.CAP.Dapr/            # UNMAINTAINED (not used in production; bugs not fixed)
+└── Sample/
+    └── Ordering.{Domain,Application,Infrastructure,API}/       # main DDD sample
+    # 注：Dapr 分布式事务样例（Ordering.DistributedTransaction.API）已删除，commit 8505696
 ```
 
-## Code Style Guidelines
+Per-package guides with module maps exist at `src/MSFramework/AGENTS.md`, `src/MSFramework.AspNetCore/AGENTS.md`, and `src/MSFramework.Ef/AGENTS.md` — read the relevant one before editing those projects.
 
-### Formatting (from .editorconfig)
+Sample dependency flow: API → Application → Domain ← Infrastructure. The Domain layer must never reference infrastructure packages.
 
-- **Indentation**: Spaces, 4 spaces for C# code, 2 spaces for XML/JSON
-- **Line endings**: UTF-8, insert final newline, trim trailing whitespace
-- **Braces**: Allman style (new line before open brace for all constructs)
-- **var**: Prefer `var` for all variable declarations
-- **System imports**: Sort System.* directives first
-- **PascalCase**: For constant fields and all public members
+## Code Style Guidelines (from .editorconfig)
 
-### Naming Conventions
+- 4-space indent for C#, 2 for XML/JSON; UTF-8, final newline, trimmed trailing whitespace.
+- Allman braces; prefer `var`; `System.*` usings sorted first; constants in PascalCase.
+- Primary constructors are the preferred DI style: `public class Handler(IOrderRepository orderRepository)`.
+- Records for DTOs, commands, queries, and events.
+- Private fields use an underscore prefix when using traditional constructors.
 
-```csharp
-// Interfaces: Prefix with 'I'
-public interface IRepository { }
-public interface IOrderRepository { }
-
-// Classes: PascalCase
-public class OrderController { }
-public class CreateOrderCommandHandler { }
-
-// Records for DTOs/Commands/Events
-public record CreateOrderCommand(string UserId, string City) : Request<string>;
-public record OrderStartedDomainEvent : DomainEvent;
-
-// Private fields: Underscore prefix in constructors, or use primary constructors
-private readonly IOrderRepository _orderRepository;  // Traditional
-public class Handler(IOrderRepository orderRepository)  // Primary constructor (preferred)
-
-// Properties: PascalCase
-public string Name { get; private set; }
-public IReadOnlyCollection<OrderItem> Items => _items;
-
-// Methods: PascalCase, async suffix for async methods
-public async Task<string> HandleAsync(CreateOrderCommand command, CancellationToken cancellationToken)
-```
-
-### Import Organization
-
-```csharp
-// Order: System.* first, then third-party, then project namespaces
-using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
-using MicroserviceFramework.Domain;
-using Microsoft.EntityFrameworkCore;
-using Ordering.Domain.AggregateRoots;
-```
-
-## Architecture Patterns
+## Framework Patterns
 
 ### Aggregate Roots
 
-Inherit from framework base classes based on auditing needs:
+Pick the base class by auditing needs; keep constructors private for EF and expose `Create`/`New` factory methods that also raise domain events:
 
 ```csharp
-// With creation audit only
-public class Entity1(int id) : CreationAggregateRoot<int>(id);
-
-// With creation and modification audit
-public class Product : ModificationAggregateRoot
-{
-    private Product(ObjectId id) : base(id) { }
-    
-    public static Product New(string name, int price)
-    {
-        var product = new Product(ObjectId.GenerateNewId())
-        {
-            Name = name,
-            Price = price
-        };
-        product.AddDomainEvent(new ProjectCreatedEvent { Id = product.Id });
-        return product;
-    }
-    
-    public string Name { get; private set; }
-}
-
-// With full audit (creation, modification, deletion)
-public class Order : DeletionAggregateRoot<string>, IOptimisticLock
-{
-    // Private constructor for EF Core
-    private Order(string id) : base(id) { }
-    
-    // Factory method for domain creation
-    public static Order Create(UserInfo buyer, Address address, string description)
-    {
-        var order = new Order(ObjectId.GenerateNewId().ToString()) { ... };
-        order.AddDomainEvent(new OrderStartedDomainEvent(order, buyer.Id));
-        return order;
-    }
-}
+public class Entity1(int id) : CreationAggregateRoot<int>(id);           // creation audit only
+public class Product : ModificationAggregateRoot { ... }                  // + modification audit (ObjectId key)
+public class Order : DeletionAggregateRoot<string>, IOptimisticLock { ... } // + soft delete
 ```
 
-### Value Objects
-
-Use records for value objects:
+### Domain Events & CQRS
 
 ```csharp
-public abstract record ValueObject
-{
-    public ValueObject Copy() => this with { };
-}
-
-public record Address
-{
-    public string Street { get; init; }
-    public string City { get; init; }
-}
-```
-
-### Domain Events
-
-```csharp
-// Define domain events as records
 public record OrderStartedDomainEvent : DomainEvent;
+order.AddDomainEvent(new OrderCancelledDomainEvent(this));   // inside the aggregate, dispatched on SaveChanges
 
-// Raise events from aggregate roots
-public void SetCancelledStatus()
-{
-    Status = OrderStatus.Cancelled;
-    AddDomainEvent(new OrderCancelledDomainEvent(this));
-}
-```
+public record CreateOrderCommand(List<OrderItemDTO> OrderItems, string UserId) : Request<string>;
 
-### Commands and Handlers (CQRS)
-
-```csharp
-// Command definition
-public record CreateOrderCommand(
-    List<OrderItemDTO> OrderItems,
-    string UserId) : Request<string>;
-
-// Command handler using primary constructor
 public class CreateOrderCommandHandler(IOrderRepository orderRepository)
     : IRequestHandler<CreateOrderCommand, string>
 {
-    public async Task<string> HandleAsync(CreateOrderCommand command, CancellationToken cancellationToken)
-    {
-        var order = Order.Create(...);
-        await orderRepository.AddAsync(order);
-        return order.Id.ToString();
-    }
+    public async Task<string> HandleAsync(CreateOrderCommand command, CancellationToken cancellationToken) { ... }
 }
 ```
 
-### Repositories
+### Source Generators (repository boilerplate)
+
+- `MSFramework.Analyzers` generates repository **interfaces** into the domain layer when the aggregate root's namespace contains an `AggregateRoots` (or `Aggregates`) segment: `*.Domain.AggregateRoots` → `*.Domain.Repositories`.
+- `MSFramework.Ef.Analyzers` generates the EF **implementations**: `*.Domain.AggregateRoots` → `*.Infrastructure` (Domain replaced by Infrastructure).
+- Custom repository methods go in your own `partial` declarations of the generated interface/class (see README Q6).
+- Non-generic `IAggregateRoot` with multi-column `HasKey` entities generate keyless repositories (`IRepository<T>` queried by predicate). `TKey` is restricted to `string`/`int`/`long`/`Guid`/`ObjectId` (soft convention, not compiler-enforced).
+
+### Repositories & DbContext
 
 ```csharp
-// Domain layer: Define interface
-public interface IProductRepository
-{
-    Task<Product> GetByNameAsync(string name);
-}
-
-// Infrastructure layer: Implement using EF
 public class ProductRepository(DbContextFactory dbContextFactory)
     : EfRepository<Product, ObjectId>(dbContextFactory), IProductRepository
 {
-    public Task<Product> GetByNameAsync(string name)
-    {
-        return Store.FirstOrDefaultAsync(x => x.Name == name);
-    }
+    public Task<Product> GetByNameAsync(string name) => Store.FirstOrDefaultAsync(x => x.Name == name);
 }
 ```
 
-### API Controllers
+`DbContextFactory` resolves the scoped context; `Store` is the `DbSet`. Entity configurations derive from `EntityTypeConfigurationBase<TEntity, TContext>` and use `builder.ConfigureAuditProperties()`, `.UseJson()`, `.UseUnixTime()`, `.HasQueryFilterSoftDelete()` (soft delete auto-filters `IDeletion` entities). DbContext settings come from the `DbContexts` section of `appsettings.json` (`DatabaseType`, `TablePrefix`, `UseUnderScoreCase`, `QuerySplittingBehavior`, ...).
+
+### API Controllers & Error Handling
 
 ```csharp
 [Route("api/v1.0/orders")]
-[ApiController]
-public class OrderController(
-    IOrderRepository orderRepository,
-    IMediator mediator,
-    ILogger<OrderController> logger) : ApiControllerBase
+public class OrderController(IOrderRepository orderRepository, IMediator mediator) : ApiControllerBase
 {
     [HttpPost]
-    public async Task<string> Create([FromBody] CreateOrderCommand command)
-    {
-        return await mediator.SendAsync(command);
-    }
-
-    [HttpGet("{orderId}")]
-    public async Task<OrderDto> GetAsync([FromRoute, Required, StringLength(36)] string orderId)
-    {
-        var order = await orderingQuery.GetAsync(orderId);
-        return objectAssembler.To<OrderDto>(order);
-    }
+    public async Task<string> Create([FromBody] CreateOrderCommand command) => await mediator.SendAsync(command);
 }
 ```
 
-## Error Handling
+Responses are auto-wrapped as `ApiResult` (`success`/`code`/`msg`/`data`) unless they already are one. `MicroserviceFrameworkFriendlyException` → business code + 200; `UnauthorizedAccessException` → 403; anything else → generic 500. Validate arguments with `Check.NotNull` / `Check.NotNullOrEmpty` (`MicroserviceFramework.Utils`).
 
-### Custom Exceptions
+### DI Bootstrap
 
 ```csharp
-// Framework exception with error code
-public class MicroserviceFrameworkException(int code, string message, Exception innerException = null)
-    : ApplicationException(message, innerException)
+builder.Services.AddMicroserviceFramework(x =>
 {
-    public int Code { get; } = code;
-}
-
-// User-friendly exception (for API responses)
-public class MicroserviceFrameworkFriendlyException : MicroserviceFrameworkException;
-
-// Domain-specific exceptions
-public class OrderingDomainException : Exception
-{
-    public OrderingDomainException(string msg) : base(msg) { }
-}
-```
-
-### Argument Validation
-
-```csharp
-using MicroserviceFramework.Utils;
-
-Check.NotNull(value, nameof(value));
-Check.NotNullOrEmpty(value, nameof(value));
-```
-
-## Dependency Injection
-
-### Auto-Registration via Marker Interfaces
-
-```csharp
-// Transient lifetime
-public interface ITransientDependency;
-
-// Scoped lifetime
-public interface IScopeDependency;
-
-// Singleton lifetime
-public interface ISingletonDependency;
-
-// Usage: Implement marker interface for auto-registration
-public class MyService : ITransientDependency { }
-```
-
-### Manual Registration
-
-```csharp
-services.AddMicroserviceFramework(x =>
-{
-    x.UseDependencyInjectionLoader();
+    x.UseDependencyInjectionLoader();   // marker interfaces: ITransient/IScope/ISingletonDependency
     x.UseAspNetCoreExtension();
-});
+}, "Your.Application");                // assembly-prefix filter for scanning
+...
+app.UseMicroserviceFramework();         // required at startup
 ```
 
 ## Testing
 
-- Framework: xUnit
-- Patterns: Arrange-Act-Assert
+- xUnit, Arrange-Act-Assert. No external services required — tests bootstrap the framework in-process:
 
 ```csharp
-public class DomainEventTests
-{
-    [Fact]
-    public async Task DispatchTo1HandlerTests()
-    {
-        // Arrange
-        var serviceCollection = new ServiceCollection();
-        serviceCollection.AddMicroserviceFramework(x =>
-        {
-            x.UseDependencyInjectionLoader();
-            x.UseAspNetCoreExtension();
-        });
-        var serviceProvider = serviceCollection.BuildServiceProvider();
-        serviceProvider.UseMicroserviceFramework();
-        var mediator = serviceProvider.GetRequiredService<IMediator>();
-
-        // Act
-        await mediator.PublishAsync(new DomainEvent4());
-
-        // Assert
-        Assert.Equal(1, DomainEvent4.Count);
-    }
-}
+var serviceCollection = new ServiceCollection();
+serviceCollection.AddMicroserviceFramework(x => { x.UseDependencyInjectionLoader(); ... });
+var serviceProvider = serviceCollection.BuildServiceProvider();
+serviceProvider.UseMicroserviceFramework();   // required before resolving framework services
 ```
+
+- Test projects access framework internals via `InternalsVisibleTo` (`MSFramework` → `MSFramework.Ef`; `MSFramework.Ef` → the three provider projects; `MSFramework.AspNetCore` → `MSFramework.AspNetCore.Test`).
 
 ## Key Dependencies
 
-- **.NET**: 8.0 (stable), 10.0 (in testing)
-- **EF Core**: 9.x
-- **MongoDB.Bson**: For ObjectId support
-- **AutoMapper**: Object mapping
-- **xUnit**: Testing framework
-- **Dapr**: Distributed application runtime
+- .NET 10, EF Core 10.x, `Microsoft.Extensions.*` 10.x
+- `MongoDB.Bson` (provides `ObjectId`, the default aggregate key)
+- `Microsoft.CodeAnalysis` 5.x (both source generators)
+- AutoMapper, xUnit, Dapr / DotNetCore.CAP
 
-## Common Patterns
+## References
 
-- Use **primary constructors** (C# 12) for dependency injection
-- Use **records** for DTOs, commands, queries, and events
-- Use **factory methods** (`Create`, `New`) for domain object construction
-- Keep **domain logic** inside aggregate roots (rich domain model)
-- Use **IObjectAssembler** for DTO mapping, not manual mapping
-- Always use **CancellationToken** in async methods
-- Use **[Required]** and **[StringLength]** attributes for API validation
+- `README.md` — extensive Chinese user documentation; keep it in sync when changing public behavior (it contains some stale spots, e.g. compiled models).
+- Known review register: the old `MSFramework-code-review.md` has been deleted; known P0/P1 topics (domain-event clearing semantics, non-atomic multi-DbContext UoW, Dapr auth fail-open, MySQL migration FK removal) are now documented in the comments of the relevant sources (e.g. `EfUnitOfWork.SaveChangesAsync`, `DaprSecurityMiddleware`, `MigrationsSqlGenerator`) — check those comments before assuming a suspicious behavior is a bug.
+- Nested guides: `src/MSFramework/AGENTS.md`, `src/MSFramework.AspNetCore/AGENTS.md`, `src/MSFramework.Ef/AGENTS.md`.
+- `dapr/` — local Dapr config/components for the Ordering.API sample (the distributed-transaction sample has been removed).

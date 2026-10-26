@@ -5,13 +5,14 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using MicroserviceFramework.Application;
-using MicroserviceFramework.Domain;
 using MicroserviceFramework.Ef;
 using MicroserviceFramework.Ef.Extensions;
 using MicroserviceFramework.Ef.MySql;
 using MicroserviceFramework.Ef.PostgreSql;
 using MicroserviceFramework.Extensions.DependencyInjection;
+using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Ordering.Application.Commands;
@@ -108,12 +109,28 @@ public class OrderingOrderItemDeletionTests
     private static TestHost CreateHost()
     {
         var settings = LoadApiDatabaseSettings();
+        // 默认测试不读取仓库凭据、不连接外部服务；显式注入连接时保留 Provider 集成验证。
+        var connection = settings.DatabaseType == "SQLite"
+            ? new SqliteConnection("Data Source=:memory:;Foreign Keys=False")
+            : null;
+        connection?.Open();
 
         var services = new ServiceCollection();
         services.AddSingleton(settings);
         services.AddSingleton<IEntityConfigurationTypeFinder>(new OrderingEntityConfigurationTypeFinder());
         services.AddScoped<ISession, TestSession>();
-        services.AddDbContext<OrderingContext>(options => ConfigureDatabase(options, settings));
+        services.AddDbContext<OrderingContext>(options =>
+        {
+            if (connection != null)
+            {
+                options.UseSqlite(connection);
+                ((IDbContextOptionsBuilderInfrastructure)options).AddOrUpdateExtension(settings);
+            }
+            else
+            {
+                ConfigureDatabase(options, settings);
+            }
+        });
         services.AddEntityFrameworkExtension();
         services.AddScoped<IOrderRepository, OrderRepository>();
         services.AddScoped<DeleteOrderItemCommandHandler>();
@@ -121,7 +138,16 @@ public class OrderingOrderItemDeletionTests
 
         var provider = services.BuildServiceProvider();
 
-        return new TestHost(provider, settings);
+        if (connection != null)
+        {
+            using var scope = provider.CreateScope();
+            var context = scope.ServiceProvider.GetRequiredService<OrderingContext>();
+            context.Database.EnsureCreated();
+            // 外部用户表被框架排除迁移，由测试模拟其拥有服务创建。
+            context.Database.ExecuteSqlRaw("CREATE TABLE user (id TEXT PRIMARY KEY, name TEXT NOT NULL)");
+        }
+
+        return new TestHost(provider, settings, connection);
     }
 
     private static async Task<(string OrderId, string OrderItemId)> SeedOrderAsync(
@@ -132,6 +158,11 @@ public class OrderingOrderItemDeletionTests
 
         using var scope = host.Provider.CreateScope();
         var context = scope.ServiceProvider.GetRequiredService<OrderingContext>();
+
+        if (host.Settings.DatabaseType == "SQLite")
+        {
+            await context.Database.ExecuteSqlInterpolatedAsync($"INSERT INTO user (id, name) VALUES ({userId}, {"Test User"})");
+        }
 
         var order = Order.Create(
             UserInfo.Create(userId, "Test User"),
@@ -183,8 +214,8 @@ public class OrderingOrderItemDeletionTests
         var settings = configuration.GetDbContextSettings<OrderingContext>();
         if (string.IsNullOrWhiteSpace(settings.ConnectionString))
         {
-            throw new InvalidOperationException(
-                $"Ordering.API 数据库配置缺少 {nameof(DbContextSettings.ConnectionString)}。");
+            settings.DatabaseType = "SQLite";
+            settings.ConnectionString = "Data Source=:memory:";
         }
 
         return settings;
@@ -253,7 +284,7 @@ public class OrderingOrderItemDeletionTests
             $"SQL: SELECT id, order_id, is_deleted, deletion_time FROM {settings.TablePrefix}order_item WHERE id = '{orderItemId}';");
     }
 
-    private sealed class TestHost(ServiceProvider provider, DbContextSettings settings) : IDisposable
+    private sealed class TestHost(ServiceProvider provider, DbContextSettings settings, SqliteConnection connection) : IDisposable
     {
         public ServiceProvider Provider { get; } = provider;
         public DbContextSettings Settings { get; } = settings;
@@ -261,6 +292,7 @@ public class OrderingOrderItemDeletionTests
         public void Dispose()
         {
             Provider.Dispose();
+            connection?.Dispose();
         }
     }
 

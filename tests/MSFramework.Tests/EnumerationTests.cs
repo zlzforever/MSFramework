@@ -54,4 +54,16 @@ public class EnumerationTests
         var r = e1 != e2;
         Assert.True(r);
     }
+
+    [Fact]
+    public void Equals_NullId_DoesNotThrow()
+    {
+        // Id 为 null 的实例参与比较必须空安全（与 GetHashCode 的 HashCode.Combine 空安全语义对称）
+        var broken = new BrokenEnumeration(null, "broken");
+        Assert.False(broken.Equals(OrderStatus.Cancelled));
+        Assert.False(OrderStatus.Cancelled.Equals(broken));
+        Assert.False(broken == OrderStatus.Cancelled);
+    }
+
+    private sealed class BrokenEnumeration(string id, string name) : Enumeration(id, name);
 }

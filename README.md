@@ -263,6 +263,11 @@ public async Task<string> Create([FromBody] CreateOrderCommand command)
 }
 ```
 
+> 发布语义：`mediator.PublishAsync(event)` 按 Handler 注册顺序**逐个执行且失败即中断**——
+> 任一 Handler 抛出异常即终止后续 Handler 并向调用方传播。本框架中 Publish 仅用于
+> 领域事件派发（与业务同事务），任一 Handler 失败即放弃本次保存（整体不提交），
+> 这正是期望语义；Handler 应相互独立、幂等。
+
 ---
 
 ### 3.4 仓储模式 (Repository)
@@ -666,6 +671,20 @@ builder.Services.AddControllers(options =>
 }
 ```
 
+统一包装范围（`ResponseWrapperFilter` 契约）：
+
+| Action 写法 | 处理 |
+| --- | --- |
+| `return value;`（隐式）、`return Ok(value)`、`BadRequest(value)`、`NotFound(value)`、`Created(...)` | 一律包装，`success` 按 HTTP 状态码推导 |
+| 纯 `Ok()` / `BadRequest()` / `NotFound()`（无值） | 统一为壳（保留各自状态码），与 void Action 行为一致 |
+| `NoContent()`（204） | 保持原始（HTTP 204 语义禁止响应体） |
+| `File(...)` / `Redirect(...)` / `Content(...)` | 保持原始（非 JSON 契约） |
+| 返回值本身是 `ApiResult` | 不二次包装 |
+
+业务码（`code`）统一口径（与 ProblemDetails 包装、模型校验失败、全局异常过滤器同一判定）：
+`success=true` 时 `code=0`；`success=false`（非 2xx）时 `code=HTTP 状态码`（400/404/409/500…），
+客户端可凭 `code` 统一分流，不会出现同一 HTTP 400 下 `code=1` 与 `code=400` 并存的两套值。
+
 ### 5.2 全局异常处理
 
 ```csharp
@@ -692,6 +711,10 @@ builder.Services.AddControllers(options =>
 客户端无需依赖异常过滤器生成的 correlation id 响应头。
 
 ### 5.3 分页扩展包迁移
+
+单页数量上限由 `Defaults.MaxLimit` 控制，默认为 500，可在应用启动阶段设置，例如
+`MicroserviceFramework.Defaults.MaxLimit = 1000;`。该值必须大于零，实体和 DTO 分页重载均遵守此上限；
+无效的 `limit` 先回退为 10，再按上限截断。
 
 `PagedQueryAsync` 的公共命名空间仍为 `MicroserviceFramework.Linq.Expression`，
 但实现已迁移到 `MSFramework.Ef` 包，以保证 `MSFramework` Core 不直接依赖 EF Core。
@@ -855,6 +878,22 @@ dapr run --app-id ordering-api \
     --components-path ./dapr/components
 ```
 
+> ⚠️ **Topic 端点安全（必做）**
+>
+> 1. **用官方 App API Token 保护 Topic 端点**：daprd 与应用容器均配置 `APP_API_TOKEN`
+>    环境变量（K8s：secret `app-api-token` + 注解 `dapr.io/app-token-secret`），应用侧
+>    `AddAuthentication().AddDapr()` + `AddAuthorization(o => o.AddDapr())`，
+>    Topic 端点标注 `[Authorize(Policy = "Dapr")]`。sidecar 回调必带 `dapr-api-token` 头，
+>    外部探测出路由后直接调用会因缺少令牌被拒绝（详见
+>    https://docs.dapr.io/operations/security/app-api-token/ ）。
+> 2. **网关禁止访问 `/dapr/subscribe`**：该端点会列出所有 Topic 路由路径（攻击面地图），
+>    不能暴露给外部。APISIX 示例——不为该路径创建 Route，或在该路由上配置
+>    `proxy-rewrite` 拒绝；sidecar 从本机/内网访问即可。
+> 3. 框架的 `UseDaprSecurity()`（网络层 loopback 检查）已废弃，仅作为迁移期纵深防御保留。
+> 4. **本地开发**：`dapr run` 前先 `export APP_API_TOKEN=<token>`（sidecar 与应用同源继承），
+>    否则带 `[Authorize(Policy = "Dapr")]` 的 Topic 端点在本地也无法被 sidecar 触达；
+>    仓库根 `dapr.yaml` 已提供开发示例值。
+
 ### Q5: 如何处理并发冲突？
 
 ```csharp
@@ -959,7 +998,60 @@ builder.Property(x => x.Address).UseJson();
 
 ---
 
-## 八、注意事项
+## 八、网关层推荐安全措施
+
+网关（如 APISIX）是暴露面收敛的第一道防线，以下措施供参考（按优先级排列）。
+
+### 8.1 禁止转发框架内部路径
+
+| 路径                          | 原因                                                                         |
+| ----------------------------- | ---------------------------------------------------------------------------- |
+| `/dapr/subscribe`             | Dapr 订阅发现端点，响应会列出全部 Topic 路由路径（攻击面地图）；仅 sidecar 需要访问 |
+| `/dapr/config`                | Dapr 运行时配置                                                               |
+| `/swagger`、`/debug`、`/actuator`（生产） | 框架/诊断信息泄露                                                    |
+
+APISIX 做法：不为上述路径创建 Route（未配置即 404），或创建显式拒绝路由。
+
+### 8.2 过滤源码地图（js.map）
+
+前端资源经网关发布时，`.js.map`、`.css.map`、`.ts.map` 等会把原始源码、目录结构、注释全部
+暴露给任何访问者。构建期移除 sourcemap 是首选（`vite`/`webpack` 生产配置），网关过滤作为兜底：
+创建一条匹配 `**.js.map` 等模式、返回 404 的拒绝路由。
+
+### 8.3 限流与防扫描
+
+- `limit-req` / `limit-count`：全局默认 + 关键端点（登录、验证码、下单）单独收紧
+- `api-breaker`：上游连续错误时熔断，避免雪崩
+- 404 比例、异常 User-Agent 等扫描特征接入 WAF 或用 `fault-injection` 显式拒绝
+
+### 8.4 管理面隔离
+
+- Admin API（9180）与数据面（9080）网络隔离：Admin 只绑内网/本机
+- 内部服务间调用走 mTLS 或 K8s NetworkPolicy；公网入口只暴露业务路由
+
+### 8.5 请求体与超时
+
+- 全局默认收紧 `client_max_body_size`（如 1m），上传端点单独放宽
+- `proxy_read_timeout` / `proxy_connect_timeout` 按业务设定，避免长阻塞
+
+### 8.6 X-Forwarded-For 处理
+
+- APISIX 默认对 XFF **保留客户端值并追加连接 IP**（并非刷掉）；`X-Forwarded-Proto/Host/Port`
+  会被覆盖、`Forwarded` 头被清空（详见 `apisix.trusted_addresses` 文档）
+- 需要应用侧获得可信真实客户端 IP 时：配置 `apisix.trusted_addresses`
+  （来自非可信地址的 XFF 会被重置为连接 IP）或使用 `real-ip` 插件
+- **应用侧鉴权不要读取任何转发头**：以 `Connection.RemoteIpAddress` + 网段白名单/
+  官方 App API Token 判定（见 Q4），对网关策略变化免疫
+
+### 8.7 其它基线
+
+- 全站 HTTPS：`redirect` 插件开启 `http_to_https`，注入 HSTS
+- 安全响应头（`X-Frame-Options`、`X-Content-Type-Options`、CSP）经上游或 `response-rewrite` 注入
+- 敏感信息不入 URL（token 走 Header），避免进入网关访问日志
+
+---
+
+## 九、注意事项
 
 ### ⚠️ 重要提醒
 
@@ -996,7 +1088,7 @@ builder.Property(x => x.Address).UseJson();
 
 ---
 
-## 九、版本信息
+## 十、版本信息
 
 | 组件    | 版本       |
 | ------- | ---------- |
@@ -1006,7 +1098,26 @@ builder.Property(x => x.Address).UseJson();
 
 ---
 
-## 十、扩展阅读
+## 十一、扩展阅读
 
 - [EF Core 文档](https://docs.microsoft.com/en-us/ef/core/)
 - [DDD 模式](https://docs.microsoft.com/en-us/dotnet/architecture/microservices/microservice-ddd-cqrs-patterns/)
+# 安全配置与下单样例更新
+
+Ordering.API 不再携带可用数据库凭据。开发请使用 User Secrets，部署使用环境变量：
+
+```bash
+dotnet user-secrets set "DbContexts:0:ConnectionString" "<开发库连接>" --project src/Sample/Ordering.API
+dotnet user-secrets set "Authentication:Authority" "https://identity.example.com" --project src/Sample/Ordering.API
+dotnet user-secrets set "Authentication:Audience" "ordering-api" --project src/Sample/Ordering.API
+dotnet user-secrets set "Cors:AllowedOrigins:0" "https://frontend.example.com" --project src/Sample/Ordering.API
+```
+
+对应部署键为 `DbContexts__0__ConnectionString`、`Authentication__Authority`、`Authentication__Audience`。
+若仓库历史密码曾有效，必须在数据库侧轮换；删除配置不能撤销历史泄露。
+下单端点要求 JWT，购买人取认证会话；请求明细只接受 `productId` 和正数 `units`，
+商品名称与价格一次批量读取服务端目录，当前无促销引擎，折扣固定为零。
+客户端原有 `UserId`、`UnitPrice`、`Discount`、`ProductName` 不再是下单输入契约。
+价格沿用商品目录的货币单位，不在 Handler 内隐式换算。
+本地事件满队列发布等待默认 30 秒，可通过 `UseLocalEventPublisher` 的 `PublishTimeout` 配置；单次发布的 `timeout` 为 `null` 时使用该配置。
+全新 .NET 10 模板的配置、依赖方向及迁移说明见 `template/Content/README.md`。

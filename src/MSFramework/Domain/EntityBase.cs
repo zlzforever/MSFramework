@@ -99,13 +99,32 @@ public abstract class EntityBase<TKey> : EntityBase, IEntity<TKey> where TKey : 
     }
 
     /// <summary>
-    /// 判断主键是否等于指定值
+    /// 判断实体主键是否等于指定值。
     /// </summary>
+    /// <remarks>
+    /// 按主键比较请使用本方法；实体相等语义保留在 <see cref="Equals(object)"/> 与
+    /// <see cref="operator =="/> 中。
+    /// </remarks>
     /// <param name="other">要比较的主键值</param>
-    /// <returns>如果相等返回 true</returns>
-    public bool Equals(TKey other)
+    /// <returns>主键非默认且与实体主键相等时返回 true</returns>
+    public bool HasId(TKey other)
     {
         return !Equals(null, other) && Equals(Id, other);
+    }
+
+    /// <summary>
+    /// 判断实体主键是否等于指定值（历史重载）。
+    /// </summary>
+    /// <remarks>
+    /// 保留该重载仅为源码兼容：旧代码中的 <c>entity.Equals(id)</c> 会绑定到本方法。
+    /// 新代码请统一使用 <see cref="HasId(TKey)"/>；实体相等请使用 <see cref="Equals(object)"/>。
+    /// </remarks>
+    /// <param name="other">要比较的主键值</param>
+    /// <returns>主键非默认且与实体主键相等时返回 true</returns>
+    [Obsolete("请使用 HasId(TKey) 进行主键比较；实体相等请使用 Equals(object)。")]
+    public bool Equals(TKey other)
+    {
+        return HasId(other);
     }
 
     /// <summary>
@@ -147,16 +166,18 @@ public abstract class EntityBase<TKey> : EntityBase, IEntity<TKey> where TKey : 
         // 	return false;
         // }
 
-        return Id.Equals(other.Id);
+        return EqualityComparer<TKey>.Default.Equals(Id, other.Id);
     }
 
     /// <summary>
-    /// 获取实体的哈希码（基于主键）
+    /// 获取实体的哈希码（基于主键）。
+    /// 经 <see cref="EqualityComparer{T}.Default"/> 计算以避免对值类型主键
+    /// （int/long/Guid/ObjectId）的装箱分配：接口虚方法分派在 Comparer 类上完成，无装箱
     /// </summary>
-    /// <returns>哈希码</returns>
+    /// <returns>哈希码（主键为 null/默认值时返回 0）</returns>
     public override int GetHashCode()
     {
-        return Id == null ? 0 : Id.GetHashCode();
+        return EqualityComparer<TKey>.Default.GetHashCode(Id);
     }
 
     /// <inheritdoc/>

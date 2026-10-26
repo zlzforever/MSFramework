@@ -1,17 +1,14 @@
-# First stage: restore
-FROM mcr.microsoft.com/dotnet/aspnet:7.0 AS base
-WORKDIR /app
-EXPOSE 80
-EXPOSE 443
+FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
+WORKDIR /source
+COPY . .
+RUN dotnet publish src/Template.API/Template.API.csproj -c Release -o /output
 
-# Second stage - Build runtime image
-FROM mcr.microsoft.com/dotnet/sdk:7.0 AS publish
-WORKDIR /src
-COPY . ./
-RUN dotnet publish "src/Template.API" -c Release -o /output
-
-# Third stage - Copy to host env
-FROM base as final
+FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS final
 WORKDIR /app
-COPY --from=publish /output .
-ENTRYPOINT ["dotnet", "template.API.dll"]
+COPY --from=build /output .
+# 框架启动时创建 storage/oss；非 root 用户需要可写存储目录。
+RUN mkdir -p /app/storage/oss && chown -R app:app /app/storage
+USER app
+ENV ASPNETCORE_HTTP_PORTS=8080
+EXPOSE 8080
+ENTRYPOINT ["dotnet", "Template.API.dll"]

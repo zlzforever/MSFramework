@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using MicroserviceFramework.Domain;
@@ -21,11 +22,19 @@ public class EnumerationJsonConverter<T> : JsonConverter<T> where T : Enumeratio
     /// <param name="typeToConvert">目标类型</param>
     /// <param name="options">序列化选项</param>
     /// <returns>反序列化后的 Enumeration 实例</returns>
-    /// <exception cref="InvalidOperationException">值不是 <paramref name="typeToConvert"/> 的合法 Id 时抛出</exception>
+    /// <exception cref="JsonException">输入不是字符串，或值不是目标枚举的合法 Id 时抛出</exception>
     public override T Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
     {
+        if (reader.TokenType != JsonTokenType.String)
+        {
+            throw new JsonException("枚举值必须为字符串。");
+        }
+
         var value = reader.GetString();
-        return Enumeration.Parse(typeToConvert, value) as T;
+        return Enumeration.GetAll(typeToConvert)
+            .FirstOrDefault(item => string.Equals(item.Id, value, StringComparison.Ordinal)) is T result
+            ? result
+            : throw new JsonException($"枚举类型 {typeToConvert.Name} 不包含指定值。");
     }
 
     /// <summary>

@@ -1,6 +1,4 @@
 using System;
-using System.Collections;
-using System.Collections.Generic;
 using MicroserviceFramework.Domain;
 using MicroserviceFramework.Serialization.Newtonsoft.Converters;
 using Newtonsoft.Json.Serialization;

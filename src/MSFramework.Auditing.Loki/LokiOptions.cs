@@ -1,3 +1,4 @@
+using System;
 using System.Diagnostics.CodeAnalysis;
 using MicroserviceFramework.Extensions.Options;
 using Serilog.Sinks.Grafana.Loki;
@@ -5,9 +6,11 @@ using Serilog.Sinks.Grafana.Loki;
 namespace MicroserviceFramework.Auditing.Loki;
 
 /// <summary>
-///     Loki 审计日志存储的配置选项，从 appsettings.json 的 LokiAuditing 节读取
+///     Loki 审计日志存储的配置选项，从 appsettings.json 的 LokiAuditing 节读取。
+///     <b>本包已废弃</b>：审计存储请改用关系数据库（推荐 PostgreSQL）或自定义 IAuditingStore
 /// </summary>
 [AutoOptions(Section = "LokiAuditing")]
+[Obsolete("MSFramework.Auditing.Loki 已废弃：审计存储请改用关系数据库（推荐 PostgreSQL）或自定义 IAuditingStore")]
 [SuppressMessage("ReSharper", "CollectionNeverUpdated.Global")]
 [SuppressMessage("ReSharper", "UnusedAutoPropertyAccessor.Global")]
 public class LokiOptions

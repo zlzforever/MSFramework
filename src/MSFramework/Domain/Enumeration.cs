@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
@@ -8,6 +9,16 @@ namespace MicroserviceFramework.Domain;
 /// <summary>
 /// 枚举基类
 /// </summary>
+/// <remarks>
+/// 子类型约定（勿在后续 review 中重复提出）：
+/// 1) <see cref="Enumeration"/> 本身是供继承的抽象基类，不能 sealed；
+/// 2) 由 <c>Enumeration.FromValue/Parse</c> 及 EF 物化转换器返回的都是静态字段上的
+///    <b>共享实例</b>——同一枚举值的所有实体属性指向同一对象。因此每个具体枚举子类型
+///    <b>必须声明为 sealed 且只包含只读成员</b>：
+///    - 不 sealed 时，可在共享实例上追加派生可变状态，一处修改会污染所有持有该枚举值的实体；
+///    - sealed + 只读成员后，共享实例语义等价于"天然单例"，安全且免除转换器克隆成本。
+///    Id/Name 为 get-only，已满足只读要求；子类新增成员须同样只读。
+/// </remarks>
 public abstract class Enumeration(string id, string name)
 {
     /// <summary>
@@ -38,15 +49,28 @@ public abstract class Enumeration(string id, string name)
     }
 
     /// <summary>
-    /// 获取枚举类型下的所有类型
+    /// 静态字段反射结果的按类型缓存：
+    /// <see cref="FromValue{T}"/>/<see cref="Parse(Type,string)"/>、EF 物化转换器与 JSON 反序列化
+    /// 都是高频路径，旧实现每次调用都走全量反射与字段枚举，开销显著
+    /// </summary>
+    private static readonly ConcurrentDictionary<Type, Enumeration[]> AllValuesCache = new();
+
+    /// <summary>
+    /// 获取枚举类型下的所有类型（首次访问后缓存，线程安全）
     /// </summary>
     /// <param name="type">枚举类型</param>
-    /// <returns></returns>
+    /// <returns>该枚举类型下的全部静态实例</returns>
+    /// <remarks>
+    /// 首次调用 <c>GetValue</c> 会触发枚举类型的静态构造/字段初始化，缓存的是初始化完成后的实例集合；
+    /// 枚举子类型须为 sealed + 只读成员（见类型 remarks 的子类型约定），共享实例不可变，缓存安全
+    /// </remarks>
     public static IEnumerable<Enumeration> GetAll(Type type)
     {
-        return type
-            .GetFields(BindingFlags.Public | BindingFlags.Static | BindingFlags.DeclaredOnly)
-            .Where(i => i.FieldType.IsSubclassOf(typeof(Enumeration))).Select(f => (Enumeration)f.GetValue(null));
+        return AllValuesCache.GetOrAdd(type, static t =>
+            t.GetFields(BindingFlags.Public | BindingFlags.Static | BindingFlags.DeclaredOnly)
+                .Where(i => i.FieldType.IsSubclassOf(typeof(Enumeration)))
+                .Select(f => (Enumeration)f.GetValue(null))
+                .ToArray());
     }
 
     /// <summary>
@@ -62,7 +86,9 @@ public abstract class Enumeration(string id, string name)
             return false;
 
         var typeMatches = GetType() == obj.GetType();
-        var valueMatches = Id.Equals(otherValue.Id);
+        // string.Equals 的静态重载对 null 安全（instance.Equals 会 NRE），与 GetHashCode
+        // 中 HashCode.Combine 的空安全语义保持对称
+        var valueMatches = string.Equals(Id, otherValue.Id, StringComparison.Ordinal);
 
         return typeMatches && valueMatches;
     }

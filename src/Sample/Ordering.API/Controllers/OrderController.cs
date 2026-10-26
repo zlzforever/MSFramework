@@ -8,6 +8,7 @@ using MicroserviceFramework.AspNetCore;
 using MicroserviceFramework.Domain;
 using MicroserviceFramework.Mediator;
 using MicroserviceFramework.Serialization;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -70,6 +71,7 @@ public class OrderController(
     }
 
     [Topic("rabbitmq-pubsub", Names.OrderCreatedEvent, "biz.ordering.dead-letter", false)]
+    [Authorize(Policy = "Dapr")]
     [HttpPost("OnOrderCreated")]
     public Task<bool> OnOrderCreatedAsync([FromBody] E e)
     {
@@ -93,6 +95,7 @@ public class OrderController(
     /// </summary>
     /// <returns></returns>
     [HttpPost]
+    [Authorize(Policy = "Ordering")]
     public async Task<string> Create([FromBody] CreateOrderCommand command)
     {
         return await mediator.SendAsync(command);

@@ -83,8 +83,10 @@ public class EfRepository<TAggregateRoot> : IRepository<TAggregateRoot>, IEfRepo
         var navigations = dbSet.EntityType.GetNavigations().ToList();
         queryable = navigations.Aggregate(queryable, (current, navigation) => current.Include(navigation.Name));
 
-        // 超过 3 个一级导航（含多个集合导航）时强制 SplitQuery 避免笛卡尔积爆炸；
-        // 未显式配置时以此启发式决定，不再依赖全局默认
+        // 拆分策略设计意图（勿在后续 review 中重复提出）：
+        // 超过 3 个一级导航（含多个集合导航）时强制 SplitQuery——笛卡尔积爆炸是确定性的，
+        // 不留给用户选择；2 个及以下时风险可控（行数放大有限），交给用户自行决定
+        // （可经 UseQuerySplittingBehavior 显式配置覆盖）
         var useSplitQuery = UseQuerySplittingBehavior ?? navigations.Count > SplitQueryNavigationThreshold;
         return useSplitQuery ? queryable.AsSplitQuery() : queryable.AsSingleQuery();
     }
@@ -203,11 +205,14 @@ public class EfRepository<TEntity, TKey> : EfRepository<TEntity>, IRepository<TE
 
     /// <summary>
     /// 根据主键删除实体。
-    /// 仅按主键点查定位实体（不 Include 任何导航属性），避免为删除全量加载聚合；
-    /// 对实现 <see cref="IDeletion"/> 的实体，已软删除的记录视为不存在（不重复软删），
-    /// 与既有全局查询过滤器行为保持一致。
-    /// 注意：依赖数据库外键级联删除子集合；若配置为客户端级联（<c>DeleteBehavior.ClientCascade</c>）
-    /// 且子集合未加载，删除父实体将触发外键冲突，此种场景应先加载子集合再删除。
+    /// 直接以裸 <c>DbSet</c> 最小点查定位实体：不经过 <c>Store</c>（不 Include 任何导航属性），
+    /// 避免为删除全量加载聚合；查询遵循全局查询过滤器（软删除行会被隐藏，视为不存在），
+    /// 不绕过租户隔离等其他业务过滤器。
+    /// 对实现 <see cref="IDeletion"/> 的实体，若宿主自定义过滤器未隐藏软删除行，
+    /// 下方的状态判断仍会跳过，避免重复软删。
+    /// 注意：框架约定不使用数据库外键，父子级联完全依赖 EF 客户端级联（ClientCascade）
+    /// 且仅对已加载跟踪的子集合生效；子集合未加载时删除父实体后将产生悬挂引用，
+    /// 应由业务代码先处理子集合再删除。
     /// </summary>
     /// <param name="id">要删除的实体主键；传 null 时静默返回</param>
     public virtual void Delete(TKey id)
@@ -217,8 +222,8 @@ public class EfRepository<TEntity, TKey> : EfRepository<TEntity>, IRepository<TE
             return;
         }
 
-
-        var entity = Find(id);
+        var entity = DBContext.Set<TEntity>()
+            .FirstOrDefault(x => x.Id.Equals(id));
         if (entity != null && entity is not IDeletion { IsDeleted: true })
         {
             Delete(entity);
@@ -227,11 +232,14 @@ public class EfRepository<TEntity, TKey> : EfRepository<TEntity>, IRepository<TE
 
     /// <summary>
     /// 异步根据主键删除实体。
-    /// 仅按主键点查定位实体（不 Include 任何导航属性），避免为删除全量加载聚合；
-    /// 对实现 <see cref="IDeletion"/> 的实体，已软删除的记录视为不存在（不重复软删），
-    /// 与既有全局查询过滤器行为保持一致。
-    /// 注意：依赖数据库外键级联删除子集合；若配置为客户端级联（<c>DeleteBehavior.ClientCascade</c>）
-    /// 且子集合未加载，删除父实体将触发外键冲突，此种场景应先加载子集合再删除。
+    /// 直接以裸 <c>DbSet</c> 最小点查定位实体：不经过 <c>Store</c>（不 Include 任何导航属性），
+    /// 避免为删除全量加载聚合；查询遵循全局查询过滤器（软删除行会被隐藏，视为不存在），
+    /// 不绕过租户隔离等其他业务过滤器。
+    /// 对实现 <see cref="IDeletion"/> 的实体，若宿主自定义过滤器未隐藏软删除行，
+    /// 下方的状态判断仍会跳过，避免重复软删。
+    /// 注意：框架约定不使用数据库外键，父子级联完全依赖 EF 客户端级联（ClientCascade）
+    /// 且仅对已加载跟踪的子集合生效；子集合未加载时删除父实体后将产生悬挂引用，
+    /// 应由业务代码先处理子集合再删除。
     /// </summary>
     /// <param name="id">要删除的实体主键；传 null 时静默返回</param>
     /// <returns>表示异步操作的任务</returns>
@@ -242,7 +250,8 @@ public class EfRepository<TEntity, TKey> : EfRepository<TEntity>, IRepository<TE
             return;
         }
 
-        var entity = await FindAsync(id);
+        var entity = await DBContext.Set<TEntity>()
+            .FirstOrDefaultAsync(x => x.Id.Equals(id));
         if (entity != null && entity is not IDeletion { IsDeleted: true })
         {
             await DeleteAsync(entity);

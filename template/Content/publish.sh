@@ -1,3 +1,5 @@
-app=registry.cn-shanghai.aliyuncs.com/zlzforever/Template
-docker build --target build -t $app .
-docker push $app
+#!/usr/bin/env bash
+set -euo pipefail
+: "${IMAGE_NAME:?请设置含标签的目标镜像名称}"
+docker build -t "$IMAGE_NAME" .
+docker push "$IMAGE_NAME"

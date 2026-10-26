@@ -13,7 +13,7 @@ internal interface IInitializer : ISingletonDependency
     void Start();
 
     /// <summary>
-    /// 初始化执行顺序，值越小越先执行
+    /// 初始化执行顺序，值越大越先执行（相同 Order 按注册顺序稳定执行）
     /// </summary>
     public int Order { get; }
 }

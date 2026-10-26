@@ -1,5 +1,4 @@
 using System;
-using System.Linq;
 using MicroserviceFramework.Domain;
 using MicroserviceFramework.Ef.Extensions;
 using MicroserviceFramework.Runtime;
@@ -76,6 +75,7 @@ internal sealed class EntityTableConventionStrategy : IModelBuildingStrategy
 
             ApplyTableName(entityType, context.Settings);
             ApplySoftDeleteFilter(entityType);
+            ApplyExternalEntityExclusion(entityType);
         }
     }
 
@@ -123,6 +123,25 @@ internal sealed class EntityTableConventionStrategy : IModelBuildingStrategy
 
         entityType.AddSoftDeleteQueryFilter();
     }
+
+    /// <summary>
+    /// 外部实体（<see cref="IExternalEntity"/>）不参与迁移：外部表由拥有它的服务创建与管理，
+    /// 本服务只读，因此设置"表从迁移中排除"，迁移不会生成该表的建表/改表/删表脚本。
+    /// <para>
+    /// 按类型统一判定，不依赖业务是否编写了实体配置——
+    /// <see cref="EntityTypeConfigurationBase{TEntity,TDbContext}"/> 在配置路径上做了同样的设置，
+    /// 此处保证未编写配置的外部实体同样被排除（否则迁移会生成其建表脚本，导致
+    /// "表已存在"迁移失败，见 <see cref="ExternalEntity{TKey}"/> 的历史说明）。
+    /// </para>
+    /// </summary>
+    /// <param name="entityType">实体类型元数据</param>
+    private static void ApplyExternalEntityExclusion(IMutableEntityType entityType)
+    {
+        if (typeof(IExternalEntity).IsAssignableFrom(entityType.ClrType))
+        {
+            entityType.SetIsTableExcludedFromMigrations(true);
+        }
+    }
 }
 
 // ============================================================================
@@ -130,12 +149,14 @@ internal sealed class EntityTableConventionStrategy : IModelBuildingStrategy
 // ============================================================================
 
 /// <summary>
-/// 遍历所有非 Owned、非 Keyless 实体类型的所有属性，应用：
+/// 遍历所有实体类型的所有属性，应用：
 ///   1. 乐观锁（ConcurrencyStamp 配置为 ConcurrencyToken）
 ///   2. 列名转换（SnakeCase）
 ///   3. 列类型自动设置（ObjectId / Guid / Enumeration 的 ValueConverter 和 ColumnType）
-/// Keyless 实体（<c>HasNoKey</c>/<c>ToQuery</c> 只读查询模型）无表名映射，
-/// 其列名/列类型由查询定义自身决定，跳过属性级约定。
+/// Owned 类型<b>有意参与</b>约定（commit 89fc401 起，使 owned 属性同样获得列名、列类型与审计默认值；
+/// 原"跳过 Owned/Keyless"的 guard 因该设计变更移除）；
+/// Keyless 实体（<c>HasNoKey</c>/<c>ToQuery</c>）无表名映射：列名约定按表名缺失自动跳过，
+/// 列类型与审计默认值仍会应用。
 /// </summary>
 internal sealed class EntityPropertyConventionStrategy : IModelBuildingStrategy
 {
@@ -175,6 +196,17 @@ internal sealed class EntityPropertyConventionStrategy : IModelBuildingStrategy
         }
     }
 
+    /// <summary>
+    /// 乐观锁令牌列的长度约定与校验。
+    /// 令牌写入值为 <c>Guid.CreateVersion7().ToString("N")</c>（固定 32 字符）：
+    /// 未显式配置时默认 36（兼容 Guid "D" 格式 36 字符的存量数据）；
+    /// 显式配置必须在 [32, 36] 区间——
+    /// 小于 32 时令牌落库触发 SQL 截断异常，且发生在业务 UPDATE 中途（甚至伴随软删除 UPDATE），排查成本极高；
+    /// 大于 36 无意义（超出的长度纯属浪费），同样显式拒绝
+    /// </summary>
+    /// <param name="property">并发令牌属性</param>
+    /// <param name="hasOptimisticLock"></param>
+    /// <exception cref="ArgumentException">显式配置的 MaxLength 不在 [32, 36] 区间时抛出</exception>
     private static void ApplyOptimisticLock(IMutableProperty property, bool hasOptimisticLock)
     {
         if (!hasOptimisticLock || property.Name != nameof(IOptimisticLock.ConcurrencyStamp))
@@ -182,9 +214,19 @@ internal sealed class EntityPropertyConventionStrategy : IModelBuildingStrategy
             return;
         }
 
-        if (property.GetMaxLength() == null)
+        switch (property.GetMaxLength())
         {
-            property.SetMaxLength(36);
+            case null:
+                property.SetMaxLength(36);
+                break;
+            case < 32:
+                // 令牌写入 Guid "N" 格式固定 32 字符：过短长度在运行期 UPDATE 才爆截断
+                throw new ArgumentException(
+                    $"并发令牌列 {property.Name} 的 MaxLength 不能小于 32（令牌为 Guid \"N\" 格式固定 32 字符），" +
+                    $"当前为 {property.GetMaxLength()}");
+            case > 36:
+                throw new ArgumentException(
+                    $"并发令牌列 {property.Name} 的 MaxLength 不能大于 36，当前为 {property.GetMaxLength()}");
         }
 
         property.IsConcurrencyToken = true;

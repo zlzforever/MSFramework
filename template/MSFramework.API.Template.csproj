@@ -1,0 +1,22 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <Import Project="../version.props" />
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <PackageId>MSFramework.API.Template</PackageId>
+    <PackageType>Template</PackageType>
+    <Title>MSFramework .NET 10 DDD API Template</Title>
+    <Authors>Lewis Zou</Authors>
+    <Description>.NET 10 DDD API with MSFramework, MySQL, JWT and Dapr.</Description>
+    <IncludeBuildOutput>false</IncludeBuildOutput>
+    <IncludeContentInPack>true</IncludeContentInPack>
+    <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
+    <EnableDefaultContentItems>false</EnableDefaultContentItems>
+    <EnableDefaultNoneItems>false</EnableDefaultNoneItems>
+    <NoDefaultExcludes>true</NoDefaultExcludes>
+    <NoWarn>$(NoWarn);NU5128</NoWarn>
+  </PropertyGroup>
+  <ItemGroup>
+    <Content Include="Content/**/*" Pack="true" PackagePath="content/"
+             Exclude="Content/**/bin/**;Content/**/obj/**;Content/**/storage/**;Content/**/TestResults/**;Content/**/.env*;Content/**/.DS_Store;Content/**/.idea/**;Content/**/.vs/**" />
+  </ItemGroup>
+</Project>

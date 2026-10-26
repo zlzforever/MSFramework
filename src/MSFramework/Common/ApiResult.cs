@@ -43,12 +43,29 @@ public class ApiResult<T>(T data)
     }
 
     /// <summary>
-    /// 返回响应结果的字符串表示，包含状态码、消息和数据
+    /// 返回响应结果的字符串表示，包含状态码、消息和数据。
     /// </summary>
+    /// <remarks>
+    /// Data 序列化使用框架默认序列化器（<see cref="Defaults.JsonSerializer"/>，CamelCase，与
+    /// 接口响应一致），不再使用裸 <see cref="JsonSerializer.Serialize{T}(T, JsonSerializerOptions)"/>（PascalCase，
+    /// 与接口响应字段名对不上，排查困难）；Data 无法序列化（如循环引用）时 ToString 不能抛
+    /// 异常导致二次故障，降级为显示数据类型名。
+    /// </remarks>
     /// <returns>格式化后的字符串</returns>
     public override string ToString()
     {
-        return $"Code: {Code}, Success: {Success}, Msg: {Msg}, Data: {JsonSerializer.Serialize(Data)}";
+        string dataText;
+        try
+        {
+            dataText = Defaults.JsonSerializer.Serialize(Data);
+        }
+        catch (Exception ex)
+        {
+            // ToString 常被日志/调试器调用，序列化失败不抛出，避免把调试本身变成二次异常源
+            dataText = $"<序列化失败: {ex.GetType().Name}，数据类型 {Data?.GetType().FullName ?? "null"}>";
+        }
+
+        return $"code: {Code}, success: {Success}, msg: {Msg}, data: {dataText}";
     }
 
     /// <summary>
@@ -115,14 +132,5 @@ public class ApiResult : ApiResult<object>
         }
 
         return false;
-    }
-
-    /// <summary>
-    /// 返回响应结果的字符串表示，包含状态码、消息和数据
-    /// </summary>
-    /// <returns>格式化后的字符串</returns>
-    public override string ToString()
-    {
-        return $"Code: {Code}, Success: {Success}, Msg: {Msg}, Data: {JsonSerializer.Serialize(Data)}";
     }
 }

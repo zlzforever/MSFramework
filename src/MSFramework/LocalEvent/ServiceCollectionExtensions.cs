@@ -56,9 +56,16 @@ public static class ServiceCollectionExtensions
     /// <param name="builder">框架构建器</param>
     /// <param name="configure">本地事件配置委托</param>
     /// <returns>框架构建器</returns>
+    /// <exception cref="ArgumentNullException">框架构建器为空时抛出。</exception>
     public static MicroserviceFrameworkBuilder UseLocalEventPublisher(this MicroserviceFrameworkBuilder builder,
         Action<LocalEventOptions> configure = null)
     {
+        ArgumentNullException.ThrowIfNull(builder);
+        builder.Services.AddOptions<LocalEventOptions>()
+            .Validate(options => options.PublishTimeout > TimeSpan.Zero &&
+                                 options.PublishTimeout.TotalMilliseconds <= uint.MaxValue - 1,
+                "LocalEventOptions.PublishTimeout 必须大于零且不超过 4294967294 毫秒。")
+            .ValidateOnStart();
         if (configure != null)
         {
             builder.Services.Configure(configure);

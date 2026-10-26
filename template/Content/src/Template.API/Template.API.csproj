@@ -1,30 +1,13 @@
 <Project Sdk="Microsoft.NET.Sdk.Web">
-
   <PropertyGroup>
-    <TargetFramework>net8.0</TargetFramework>
+    <UserSecretsId>Template.API</UserSecretsId>
   </PropertyGroup>
-
   <ItemGroup>
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="8.0.7">
-      <PrivateAssets>all</PrivateAssets>
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-    </PackageReference>
-    <PackageReference Include="MSFramework.AspNetCore.Swagger" Version="0.15.2"/>
-    <PackageReference Include="MSFramework.Auditing.Loki" Version="0.15.2"/>
-    <PackageReference Include="MSFramework.Ef.Design" Version="0.15.2"/>
-    <PackageReference Include="RemoteConfiguration.Json.Aliyun" Version="0.1.2"/>
-    <PackageReference Include="Serilog.AspNetCore" Version="8.0.2"/>
-    <PackageReference Include="Serilog.Enrichers.Environment" Version="3.0.1"/>
-    <PackageReference Include="Serilog.Enrichers.HttpHeader" Version="1.0.0"/>
-    <PackageReference Include="Serilog.Enrichers.Thread" Version="4.0.0"/>
-    <PackageReference Include="Serilog.Expressions" Version="5.0.0"/>
-    <PackageReference Include="Serilog.Sinks.Async" Version="2.0.0"/>
-    <PackageReference Include="Serilog.Sinks.Grafana.Loki" Version="8.3.0"/>
-    <PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="8.0.7"/>
-    <PackageReference Include="IdentityServer4.AccessTokenValidation" Version="3.0.1"/>
-  </ItemGroup>
-
-  <ItemGroup>
-    <ProjectReference Include="..\Template.Application\Template.Application.csproj"/>
+    <PackageReference Include="MSFramework.AspNetCore" />
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" />
+    <PackageReference Include="Dapr.AspNetCore" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" PrivateAssets="all" />
+    <ProjectReference Include="../Template.Application/Template.Application.csproj" />
+    <ProjectReference Include="../Template.Infrastructure/Template.Infrastructure.csproj" />
   </ItemGroup>
 </Project>

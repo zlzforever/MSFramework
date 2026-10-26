@@ -1,26 +1,10 @@
-rm -rf MSFramework.API.Template.*.nupkg
-rm -rf template/.DS_Store
-rm -rf template/Content/.DS_Store
-rm -rf template/Content/.idea
-
-rm -rf template/Content/src/.DS_Store
-
-rm -rf template/Content/src/Template.Domain/.DS_Store
-rm -rf template/Content/src/Template.Domain/bin
-rm -rf template/Content/src/Template.Domain/obj
-
-rm -rf template/Content/src/Template.Infrastructure/.DS_Store
-rm -rf template/Content/src/Template.Infrastructure/bin
-rm -rf template/Content/src/Template.Infrastructure/obj
-rm -rf template/Content/src/Template.Infrastructure/Migrations
-
-rm -rf template/Content/src/Template.Application/.DS_Store
-rm -rf template/Content/src/Template.Application/bin
-rm -rf template/Content/src/Template.Application/obj
-
-rm -rf template/Content/src/Template.API/.DS_Store
-rm -rf template/Content/src/Template.API/bin
-rm -rf template/Content/src/Template.API/obj
-
-nuget pack template/MSFramework.API.Template.nuspec -NoDefaultExcludes
-dotnet nuget push MSFramework.API.Template.*.nupkg -s https://api.nuget.org/v3/index.json -k $NUGET_KEY --skip-duplicate
+#!/usr/bin/env bash
+set -euo pipefail
+ROOT="$(cd "$(dirname "$0")" && pwd)"
+: "${NUGET_KEY:?请通过安全环境变量设置 NUGET_KEY}"
+OUTPUT="$(mktemp -d)"
+# 发布前验证实际生成物；版本必须与 version.props 保持一致。
+bash "$ROOT/tests/verify-template.sh"
+dotnet pack "$ROOT/template/MSFramework.API.Template.csproj" -c Release -o "$OUTPUT"
+dotnet nuget push "$OUTPUT"/MSFramework.API.Template.*.nupkg \
+    -s "${NUGET_SERVER:-https://api.nuget.org/v3/index.json}" -k "$NUGET_KEY" --skip-duplicate

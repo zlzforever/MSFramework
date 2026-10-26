@@ -48,7 +48,7 @@ public enum Database
     /// <summary>
     /// 人大金仓数据库
     /// </summary>
-    kingbase,
+    Kingbase,
 
     /// <summary>
     /// 达梦数据库

@@ -1,5 +1,3 @@
-using MicroserviceFramework.Serialization;
-
 namespace MicroserviceFramework.Mediator;
 
 /// <summary>

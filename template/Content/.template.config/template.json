@@ -11,5 +11,14 @@
     "type": "project" 
   },
   "sourceName": "Template",
-  "preferNameDirectory": true
+  "preferNameDirectory": true,
+  "sources": [
+    {
+      "exclude": [
+        "**/bin/**", "**/obj/**", "**/.vs/**", "**/.idea/**",
+        "**/.DS_Store", "**/storage/**", "**/TestResults/**", "**/.env*",
+        ".template.config/**"
+      ]
+    }
+  ]
 }
